@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SYZC - 存货形态转换</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="https://unpkg.com/@element-plus/icons-vue"></script>
+  <style>
+    :root {
+      --primary: #14866d;
+      --primary-dark: #0f6b58;
+      --primary-soft: #eaf6f2;
+      --sidebar: #253238;
+      --sidebar-hover: #314148;
+      --page: #f4f6f7;
+      --surface: #ffffff;
+      --line: #e2e7e9;
+      --line-strong: #cfd7da;
+      --text: #263238;
+      --text-2: #59666c;
+      --muted: #8a969b;
+      --warning: #c87a18;
+      --warning-soft: #fff7e8;
+      --danger: #c74747;
+      --danger-soft: #fff1f1;
+      --success: #23835d;
+      --info: #3a6f9f;
+      --el-color-primary: #14866d;
+      --el-color-primary-light-3: #52a893;
+      --el-color-primary-light-5: #89c3b4;
+      --el-color-primary-light-7: #b9ddd4;
+      --el-color-primary-light-8: #d3ebe5;
+      --el-color-primary-light-9: #eaf6f2;
+      --el-color-primary-dark-2: #0f6b58;
+      --el-border-radius-base: 6px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body, #app { margin: 0; width: 100%; height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background: var(--page);
+      letter-spacing: 0;
+    }
+    [v-cloak] { display: none; }
+    button, input, textarea, select { letter-spacing: 0; }
+
+    .app-shell { display: flex; min-height: 100vh; }
+    .side-nav {
+      width: 216px;
+      flex: 0 0 216px;
+      background: var(--sidebar);
+      color: #dce5e7;
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+    }
+    .brand {
+      height: 58px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: #202b30;
+    }
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .brand-copy strong { display: block; font-size: 14px; color: #fff; }
+    .brand-copy span { display: block; margin-top: 2px; font-size: 10px; color: #8fa1a8; }
+    .menu-label { padding: 18px 18px 8px; color: #71858d; font-size: 11px; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 42px;
+      margin: 2px 8px;
+      padding: 0 12px;
+      border-radius: 5px;
+      color: #bac7cb;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background .15s, color .15s;
+    }
+    .nav-item:hover { background: var(--sidebar-hover); color: #fff; }
+    .nav-item.active { background: rgba(20,134,109,.24); color: #7ad0b8; }
+    .nav-item .el-icon { font-size: 17px; }
+    .side-footer { margin-top: auto; padding: 14px; border-top: 1px solid rgba(255,255,255,.08); }
+    .side-user { display: flex; gap: 9px; align-items: center; font-size: 12px; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: #53666e; color: #fff; }
+    .side-user small { display: block; color: #81949b; margin-top: 2px; }
+
+    .main-shell { margin-left: 216px; min-width: 0; flex: 1; display: flex; flex-direction: column; }
+    .topbar {
+      height: 58px;
+      flex: 0 0 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .mobile-menu { display: none; }
+    .top-title { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; }
+    .crumb { color: var(--muted); font-weight: 400; }
+    .top-actions { display: flex; align-items: center; gap: 8px; }
+    .env-tag { font-size: 11px; color: var(--warning); background: var(--warning-soft); padding: 4px 8px; border-radius: 4px; }
+
+    .page-tabs {
+      height: 36px;
+      flex: 0 0 36px;
+      display: flex;
+      gap: 4px;
+      align-items: flex-end;
+      padding: 0 16px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+    }
+    .page-tab {
+      height: 29px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-bottom: none;
+      border-radius: 5px 5px 0 0;
+      background: #f8f9f9;
+      color: var(--text-2);
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .page-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .workspace { padding: 16px; min-width: 0; }
+    .content-wrap { max-width: 1520px; margin: 0 auto; }
+    .page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .page-heading h1 { font-size: 19px; margin: 0 0 4px; }
+    .page-heading p { margin: 0; color: var(--muted); font-size: 12px; }
+    .heading-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .panel-header {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 650; }
+    .section-index { width: 22px; height: 22px; border-radius: 4px; display: grid; place-items: center; color: #fff; background: var(--primary); font-size: 11px; }
+    .panel-body { padding: 16px; }
+    .filter-grid { display: grid; grid-template-columns: repeat(4, minmax(180px, 1fr)); gap: 12px 14px; }
+    .filter-item label, .field-label { display: block; margin-bottom: 5px; color: var(--text-2); font-size: 12px; }
+    .filter-actions { display: flex; align-items: flex-end; justify-content: flex-end; gap: 8px; }
+    .w-full { width: 100%; }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+    .toolbar-left, .toolbar-right { display: flex; gap: 8px; align-items: center; }
+    .total-note { font-size: 12px; color: var(--muted); }
+
+    .desktop-table { display: block; overflow-x: auto; }
+    .list-table .el-table { min-width: 1900px; }
+    .mobile-list { display: none; }
+    .order-no { color: var(--primary); font-weight: 650; cursor: pointer; }
+    .two-line { line-height: 1.45; }
+    .two-line small { display: block; color: var(--muted); }
+    .cargo-cell { line-height: 1.55; font-size: 12px; }
+    .cargo-cell span { display: block; white-space: nowrap; }
+    .status-dot { display: inline-flex; align-items: center; gap: 5px; }
+    .status-dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .status-pending { color: var(--warning); }
+    .status-ready { color: var(--info); }
+    .status-done { color: var(--success); }
+    .status-end { color: var(--muted); }
+    .pagination-row { display: flex; align-items: center; justify-content: flex-end; padding: 12px 16px; }
+
+    .form-grid { display: grid; grid-template-columns: repeat(4, minmax(180px, 1fr)); gap: 14px 18px; }
+    .span-2 { grid-column: span 2; }
+    .span-4 { grid-column: 1 / -1; }
+    .readonly-field {
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      padding: 0 11px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #f7f9f9;
+      color: var(--text-2);
+      font-size: 13px;
+    }
+
+    .product-group { border-bottom: 1px solid var(--line); }
+    .product-group:last-child { border-bottom: none; }
+    .product-head {
+      display: grid;
+      grid-template-columns: 48px minmax(180px, 1fr) 180px 110px;
+      align-items: center;
+      min-height: 46px;
+      padding: 0 14px;
+      background: #f7f9f9;
+      font-size: 13px;
+    }
+    .product-head strong { color: var(--text); }
+    .sub-stock { padding: 8px 14px 14px 46px; overflow-x: auto; }
+    .money-summary { display: flex; justify-content: flex-end; gap: 10px; align-items: baseline; padding: 14px 16px; background: #fbfcfc; border-top: 1px solid var(--line); }
+    .money-summary strong { color: var(--warning); font-size: 19px; }
+    .loss-strip { display: grid; grid-template-columns: 220px 1fr; gap: 16px; padding: 16px; border-top: 1px solid var(--line); background: #fbfcfc; }
+    .loss-title { grid-column: 1 / -1; display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 650; color: var(--text); }
+    .hint { color: var(--muted); font-size: 11px; line-height: 1.6; margin-top: 5px; }
+
+    .risk-panel { border-left: 3px solid var(--warning); background: var(--warning-soft); padding: 14px 16px; }
+    .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .metric { border-right: 1px solid #ead6b7; }
+    .metric:last-child { border-right: none; }
+    .metric label { display: block; color: #8c704a; font-size: 11px; margin-bottom: 5px; }
+    .metric strong { font-size: 18px; color: #4f4230; }
+    .risk-alert { margin-top: 12px; color: #9a5a0d; font-size: 12px; display: flex; gap: 7px; align-items: center; }
+    .form-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 16px; background: #fff; border-top: 1px solid var(--line); position: sticky; bottom: 0; z-index: 8; }
+
+    .summary-head { position: relative; padding: 18px; }
+    .summary-top { display: flex; justify-content: space-between; gap: 16px; padding-right: 110px; }
+    .summary-title { font-size: 18px; font-weight: 700; }
+    .summary-title small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; font-weight: 400; }
+    .summary-actions { display: flex; gap: 8px; }
+    .status-stamp { position: absolute; right: 20px; top: 62px; width: 90px; text-align: center; color: var(--info); font-size: 24px; font-weight: 800; opacity: .8; transform: rotate(-5deg); border: 3px double currentColor; padding: 8px 4px; }
+    .kv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 22px; margin-top: 20px; padding-right: 110px; }
+    .kv-item { min-width: 0; font-size: 13px; }
+    .kv-item label { color: var(--muted); margin-right: 8px; }
+    .kv-item span { color: var(--text); font-weight: 550; }
+
+    .media-strip { display: flex; gap: 10px; overflow-x: auto; padding: 16px 0 4px; margin-top: 16px; border-top: 1px solid var(--line); }
+    .media-item { width: 180px; flex: 0 0 180px; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; background: #fff; }
+    .media-item img { display: block; width: 100%; height: 100px; object-fit: cover; }
+    .media-meta { padding: 8px; font-size: 11px; color: var(--text-2); line-height: 1.5; }
+    .approval-node-card { padding: 14px 16px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+    .approval-node-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .approval-node-head strong { font-size: 14px; color: var(--text); }
+    .approval-node-status { margin-left: auto; font-size: 12px; color: var(--text-2); }
+    .approval-node-meta { display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--text-2); font-size: 13px; line-height: 1.7; }
+    .approval-node-result { color: var(--primary); font-weight: 600; }
+    .detail-tabs .el-tabs__header { margin: 0; padding: 0 16px; }
+    .detail-tabs .el-tabs__content { padding: 14px 16px 16px; }
+    .trace-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px; background: #f8faf9; border: 1px solid var(--line); border-radius: 5px; font-size: 12px; }
+    .trace-node { padding: 8px 10px; background: #fff; border: 1px solid var(--line); border-radius: 4px; }
+    .trace-arrow { color: var(--muted); }
+    .audit-row { display: grid; grid-template-columns: 140px 120px 1fr 160px; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+    .audit-row:last-child { border-bottom: none; }
+
+    .complete-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .release-value { color: var(--success); font-weight: 650; }
+    .pledge-note { display: flex; align-items: center; gap: 8px; padding: 12px; background: var(--primary-soft); color: var(--primary-dark); border: 1px solid #c9e5dd; border-radius: 5px; font-size: 12px; }
+
+    .mobile-card { background: #fff; border: 1px solid var(--line); border-radius: 7px; padding: 13px; margin-bottom: 10px; }
+    .mobile-card-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .mobile-card-title { display: flex; align-items: center; gap: 7px; font-weight: 650; font-size: 13px; }
+    .biz-icon { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 5px; background: var(--primary-soft); color: var(--primary); font-weight: 800; }
+    .mobile-card-inner { background: #f6f8f8; border-radius: 5px; padding: 10px; }
+    .mobile-kv { display: grid; grid-template-columns: 88px 1fr; gap: 7px; font-size: 12px; line-height: 1.45; }
+    .mobile-kv label { color: var(--muted); }
+    .mobile-kv div { text-align: right; color: var(--text); overflow-wrap: anywhere; }
+    .mobile-meta { margin-top: 10px; color: var(--text-2); font-size: 11px; line-height: 1.7; }
+    .mobile-actions { display: flex; justify-content: flex-end; gap: 14px; margin-top: 10px; font-size: 12px; color: var(--primary); }
+
+    .dialog-hint { display: flex; gap: 9px; padding: 10px 12px; margin-bottom: 12px; background: var(--warning-soft); color: #80531d; border: 1px solid #eed7b4; border-radius: 5px; font-size: 12px; line-height: 1.6; }
+    .dialog-summary { background: #f6f8f8; padding: 12px; border-radius: 5px; font-size: 12px; line-height: 1.8; }
+    .confirm-list { margin: 0; padding-left: 18px; color: var(--text-2); }
+
+    @media (max-width: 1100px) {
+      .filter-grid, .form-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
+      .span-4 { grid-column: 1 / -1; }
+      .kv-grid { grid-template-columns: repeat(2, 1fr); }
+      .metric-grid { grid-template-columns: repeat(2, 1fr); }
+      .metric:nth-child(2) { border-right: none; }
+    }
+
+    @media (max-width: 720px) {
+      .side-nav { display: none; }
+      .main-shell { margin-left: 0; }
+      .topbar { height: 52px; padding: 0 12px; }
+      .mobile-menu { display: inline-flex; }
+      .top-title .crumb, .env-tag, .top-actions .desktop-only { display: none; }
+      .page-tabs { padding: 0 8px; }
+      .workspace { padding: 10px; }
+      .page-heading { align-items: center; }
+      .page-heading h1 { font-size: 16px; }
+      .page-heading p { display: none; }
+      .heading-actions .secondary-mobile-hide { display: none; }
+      .filter-grid, .form-grid { grid-template-columns: 1fr; gap: 10px; }
+      .filter-grid > *, .form-grid > * { min-width: 0; }
+      .filter-grid .el-date-editor, .filter-grid .el-input, .filter-grid .el-select,
+      .filter-grid .el-cascader, .form-grid .el-date-editor, .form-grid .el-input,
+      .form-grid .el-select, .form-grid .el-cascader { width: 100% !important; min-width: 0 !important; }
+      .span-2, .span-4 { grid-column: auto; }
+      .filter-actions { justify-content: flex-end; }
+      .panel-body { padding: 12px; }
+      .panel-header { padding: 0 12px; }
+      .desktop-table { display: none; }
+      .mobile-list { display: block; padding: 10px; }
+      .toolbar { padding: 10px 12px; }
+      .toolbar-right { display: none; }
+      .pagination-row { justify-content: center; overflow-x: auto; }
+      .product-head { grid-template-columns: 34px 1fr; padding: 8px 10px; gap: 4px; }
+      .product-head > :nth-child(3), .product-head > :nth-child(4) { grid-column: 2; }
+      .sub-stock { padding: 8px 0 12px; }
+      .loss-strip { grid-template-columns: 1fr; }
+      .metric-grid { grid-template-columns: 1fr 1fr; }
+      .metric { border-right: none; border-bottom: 1px solid #ead6b7; padding-bottom: 8px; }
+      .metric strong { font-size: 15px; }
+      .form-footer { position: static; }
+      .summary-head { padding: 14px; }
+      .summary-top { padding-right: 0; display: block; }
+      .summary-actions { margin-top: 10px; }
+      .status-stamp { position: static; width: 80px; margin: 12px 0 0 auto; font-size: 18px; }
+      .kv-grid { grid-template-columns: 1fr; padding-right: 0; gap: 9px; }
+      .audit-row { grid-template-columns: 1fr 1fr; }
+      .audit-row > :nth-child(3), .audit-row > :nth-child(4) { grid-column: 1 / -1; }
+      .media-item { width: 150px; flex-basis: 150px; }
+      .el-dialog { width: calc(100vw - 24px) !important; margin-top: 8vh !important; }
+      .el-message-box { width: calc(100vw - 24px) !important; }
+    }
+  </style>
+</head>
+<body>
+<div id="app" v-cloak>
+  <div class="app-shell">
+    <aside class="side-nav">
+      <div class="brand">
+        <div class="brand-mark">SY</div>
+        <div class="brand-copy"><strong>SYZC监管系统</strong><span>森云科技 · 供应链金融</span></div>
+      </div>
+      <div class="menu-label">仓储业务</div>
+      <div class="nav-item"><el-icon><Download /></el-icon>入库管理</div>
+      <div class="nav-item"><el-icon><Upload /></el-icon>出库管理</div>
+      <div class="nav-item"><el-icon><Switch /></el-icon>移库管理</div>
+      <div class="nav-item active" @click="go('list')"><el-icon><Connection /></el-icon>形态转换</div>
+      <div class="nav-item"><el-icon><Box /></el-icon>库存查询</div>
+      <div class="menu-label">风控协同</div>
+      <div class="nav-item"><el-icon><Warning /></el-icon>押品预警</div>
+      <div class="nav-item"><el-icon><document-checked /></el-icon>审批中心</div>
+      <div class="nav-item"><el-icon><set-up /></el-icon>流程配置</div>
+      <div class="side-footer">
+        <div class="side-user"><div class="avatar">张</div><div>张强<small>宁波监管仓 · 主管</small></div></div>
+      </div>
+    </aside>
+
+    <main class="main-shell">
+      <header class="topbar">
+        <div class="top-title">
+          <el-button class="mobile-menu" text circle :icon="Menu" ></el-button>
+          <span class="crumb">仓储管理 /</span>
+          <span>{{ pageTitle }}</span>
+        </div>
+        <div class="top-actions">
+          <span class="env-tag">PRD V1.0 演示数据</span>
+          <el-button class="desktop-only" text circle :icon="Bell" title="消息" ></el-button>
+          <el-button text circle :icon="QuestionFilled" title="帮助" ></el-button>
+        </div>
+      </header>
+
+      <div class="page-tabs">
+        <div class="page-tab" @click="go('list')"><el-icon><home-filled /></el-icon>首页</div>
+        <div :class="['page-tab', page === 'list' && 'active']" @click="go('list')">形态转换</div>
+        <div v-if="page !== 'list'" class="page-tab active">{{ pageTitle }} <span @click.stop="go('list')">×</span></div>
+      </div>
+
+      <div class="workspace">
+        <div class="content-wrap">
+          <!-- 列表页 -->
+          <template v-if="page === 'list'">
+            <div class="page-heading">
+              <div><h1>形态转换</h1><p>管理普通货与抵质押货的1:N、N:1、N:N加工转换</p></div>
+              <div class="heading-actions"><el-button type="primary" :icon="Plus" @click="go('create')">新增形态转换</el-button></div>
+            </div>
+
+            <section class="panel">
+              <div class="panel-header"><div class="panel-title"><el-icon><Search /></el-icon>筛选条件</div><el-button text :icon="ArrowUp">收起</el-button></div>
+              <div class="panel-body">
+                <div class="filter-grid">
+                  <div class="filter-item"><label>单据号</label><el-input v-model="filters.no" placeholder="输入单据号模糊查询" clearable ></el-input></div>
+                  <div class="filter-item"><label>业务日期范围</label><el-date-picker v-model="filters.bizDate" type="daterange" start-placeholder="开始日期" end-placeholder="结束日期" class="w-full" ></el-date-picker></div>
+                  <div class="filter-item"><label>货主名称/标识</label><el-input v-model="filters.owner" placeholder="输入名称或主体标识" clearable ></el-input></div>
+                  <div class="filter-item"><label>仓库名称</label><el-cascader v-model="filters.warehouse" :options="warehouseOptions" placeholder="企业 / 区域 / 仓库" class="w-full" clearable ></el-cascader></div>
+                  <div class="filter-item"><label>货品名称</label><el-cascader v-model="filters.sku" :options="skuOptions" placeholder="品类 / 货品" class="w-full" clearable ></el-cascader></div>
+                  <div class="filter-item"><label>制单人</label><el-select v-model="filters.creator" placeholder="请选择" class="w-full" clearable><el-option label="张强" value="张强"></el-option><el-option label="李敏" value="李敏"></el-option></el-select></div>
+                  <div class="filter-item"><label>制单时间</label><el-date-picker v-model="filters.createdAt" type="datetimerange" start-placeholder="开始时间" end-placeholder="结束时间" class="w-full" ></el-date-picker></div>
+                  <div class="filter-item"><label>单据状态</label><el-select v-model="filters.status" placeholder="全部状态" multiple collapse-tags class="w-full"><el-option v-for="s in statusOptions" :key="s.value" :label="s.label" :value="s.value" ></el-option></el-select></div>
+                  <div class="filter-actions span-4"><el-button @click="resetFilters">重置</el-button><el-button type="primary" :icon="Search" @click="queryList">查询</el-button></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="toolbar">
+                <div class="toolbar-left"><el-button type="primary" :icon="Plus" @click="go('create')">新增</el-button><span class="total-note">共 {{ visibleOrders.length }} 条</span></div>
+                <div class="toolbar-right"><el-button :icon="Download">导出</el-button><el-button circle :icon="Refresh" title="刷新" @click="queryList" ></el-button></div>
+              </div>
+              <div class="desktop-table list-table">
+                <el-table :data="visibleOrders" border stripe style="width:100%" @row-dblclick="openDetail">
+                  <el-table-column type="selection" width="44" ></el-table-column>
+                  <el-table-column type="index" label="序号" width="54" align="center" ></el-table-column>
+                  <el-table-column label="单据号" width="160"><template #default="s"><el-button link type="primary" class="order-no" @click="openDetail(s.row)">{{s.row.no}}</el-button></template></el-table-column>
+                  <el-table-column label="货主名称/标识" min-width="180"><template #default="s"><div class="two-line">{{s.row.owner}}<small>{{s.row.ownerId}}</small></div></template></el-table-column>
+                  <el-table-column prop="businessType" label="业务类型" width="90" ></el-table-column>
+                  <el-table-column prop="bizTime" label="业务时间" width="150" ></el-table-column>
+                  <el-table-column prop="warehouse" label="仓库名称" min-width="130" ></el-table-column>
+                  <el-table-column label="关联单号" width="150"><template #default="s"><el-link v-if="s.row.pledgeNo !== '--'" type="primary">{{s.row.pledgeNo}}</el-link><span v-else>--</span></template></el-table-column>
+                  <el-table-column label="投入货物" min-width="170"><template #default="s"><div class="cargo-cell"><span v-for="x in s.row.inputs" :key="x">{{x}}</span></div></template></el-table-column>
+                  <el-table-column label="产出货物" min-width="180"><template #default="s"><div class="cargo-cell"><span v-for="x in s.row.outputs" :key="x">{{x}}</span></div></template></el-table-column>
+                  <el-table-column label="制单人/时间" width="140"><template #default="s"><div class="two-line">{{s.row.creator}}<small>{{s.row.createdAt}}</small></div></template></el-table-column>
+                  <el-table-column label="状态" width="90"><template #default="s"><span :class="['status-dot', statusClass(s.row.status)]">{{statusLabel(s.row.status)}}</span></template></el-table-column>
+                  <el-table-column label="操作" fixed="right" width="150"><template #default="s"><el-button link type="primary" @click="openDetail(s.row)">查看</el-button><el-button v-if="s.row.status==='PENDING_APPROVAL'" link type="primary" @click="withdrawOrder(s.row)">撤回</el-button><el-button v-if="s.row.status==='PENDING_COMPLETION'" link type="primary" @click="openComplete(s.row)">完成</el-button><el-button v-if="s.row.status==='PENDING_COMPLETION'" link type="danger" @click="voidOrder(s.row)">作废</el-button></template></el-table-column>
+                </el-table>
+              </div>
+              <div class="mobile-list">
+                <div v-for="row in visibleOrders" :key="row.no" class="mobile-card">
+                  <div class="mobile-card-head"><div class="mobile-card-title"><span class="biz-icon">转</span>{{row.no}}</div><span :class="['status-dot',statusClass(row.status)]">{{statusLabel(row.status)}}</span></div>
+                  <div class="mobile-card-inner"><div class="mobile-kv"><label>货主</label><div>{{row.owner}}<br>{{row.ownerId}}</div><label>业务</label><div>{{row.businessType}}</div><label>投入货物</label><div>{{row.inputs.join('；')}}</div><label>产出货物</label><div>{{row.outputs.join('；')}}</div><label>仓库</label><div>{{row.warehouse}}</div><label v-if="row.pledgeNo!=='--'">关联单号</label><div v-if="row.pledgeNo!=='--'" class="order-no">{{row.pledgeNo}}</div></div></div>
+                  <div class="mobile-meta">制单人：{{row.creator}}<br>制单时间：{{row.createdAt}}</div>
+                  <div class="mobile-actions"><span @click="openDetail(row)">查看详情 ›</span><span v-if="row.status==='PENDING_COMPLETION'" @click="openComplete(row)">完成加工 ›</span></div>
+                </div>
+              </div>
+              <div class="pagination-row"><el-pagination background layout="total, sizes, prev, pager, next" :total="visibleOrders.length" :page-size="20" ></el-pagination></div>
+            </section>
+          </template>
+
+          <!-- 新增页 -->
+          <template v-else-if="page === 'create'">
+            <div class="page-heading"><div><h1>新增形态转换</h1><p>提交成功后生成正式单据并立即锁定投入库存</p></div><div class="heading-actions"><el-button :icon="Back" @click="go('list')">返回</el-button></div></div>
+            <section class="panel">
+              <div class="panel-header"><div class="panel-title"><span class="section-index">1</span>基础信息</div></div>
+              <div class="panel-body"><div class="form-grid">
+                <div><span class="field-label">业务时间 *</span><el-date-picker v-model="form.bizTime" type="datetime" class="w-full" ></el-date-picker></div>
+                <div><span class="field-label">货主主体类型 *</span><el-radio-group v-model="form.ownerType" @change="form.owner=''" size="default"><el-radio-button label="ENTERPRISE">企业</el-radio-button><el-radio-button label="PERSONAL">个人</el-radio-button></el-radio-group></div>
+                <div><span class="field-label">货主名称 *</span><el-select v-model="form.owner" filterable placeholder="输入货主名称模糊查询" class="w-full"><el-option v-for="o in ownerOptions" :key="o.value" :label="o.label" :value="o.value" ></el-option></el-select></div>
+                <div><span class="field-label">货主标识</span><div class="readonly-field">{{ ownerIdentifier }}</div></div>
+                <div><span class="field-label">业务类型</span><div class="readonly-field">形态转换</div></div>
+                <div><span class="field-label">存货类型 *</span><el-select v-model="form.stockType" class="w-full"><el-option label="抵押货" value="MORTGAGE"></el-option><el-option label="质押货" value="PLEDGE"></el-option><el-option label="普通存货" value="ORDINARY"></el-option></el-select></div>
+                <div><span class="field-label">仓库 *</span><el-cascader v-model="form.warehouse" :options="warehouseOptions" class="w-full" ></el-cascader></div>
+                <div v-if="isCollateralStock"><span class="field-label">关联{{form.stockType==='MORTGAGE'?'抵押':'质押'}}单 *</span><el-select v-model="form.pledgeNo" filterable class="w-full"><el-option :label="(form.stockType==='MORTGAGE'?'DY':'ZY')+'202607270018 · 华东铝业'" :value="(form.stockType==='MORTGAGE'?'DY':'ZY')+'202607270018'"></el-option></el-select></div>
+                <div class="span-2"><span class="field-label">转换原因</span><el-input v-model="form.reason" placeholder="填写本次形态转换的业务原因" ></el-input></div>
+                <div class="span-2"><span class="field-label">备注</span><el-input v-model="form.remark" placeholder="补充说明（选填）" ></el-input></div>
+              </div></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header"><div class="panel-title"><span class="section-index">2</span>投入货品明细</div><el-button type="primary" plain :icon="Plus" @click="stockDialog=true">添加投入货品</el-button></div>
+              <div>
+                <div v-for="(group,gidx) in inputGroups" :key="group.sku" class="product-group">
+                  <div class="product-head"><span>{{gidx+1}}</span><strong>{{group.name}} <el-tag size="small" :type="stockStatusTagType">{{stockStatusText}}</el-tag></strong><span>计划投入：{{group.details.reduce((s,d)=>s+d.qty,0).toFixed(4)}} {{group.unit}}</span><el-button link type="danger" @click="removeInputGroup(gidx)">移除</el-button></div>
+                  <div class="sub-stock"><el-table :data="group.details" border size="small"><el-table-column type="index" label="序号" width="55"></el-table-column><el-table-column prop="location" label="货物位置" width="100"></el-table-column><el-table-column prop="bin" label="具体位置" width="120"></el-table-column><el-table-column prop="inboundAt" label="入库时间" width="145"></el-table-column><el-table-column prop="info" label="其他信息" min-width="150" show-overflow-tooltip></el-table-column><el-table-column prop="barcode" label="存货条码" width="150"></el-table-column><el-table-column label="状态" width="85"><template #default><el-tag size="small" :type="stockStatusTagType">{{stockStatusText}}</el-tag></template></el-table-column><el-table-column label="计划投入数量" width="160"><template #default="s"><el-input-number v-model="s.row.qty" :min="0.0001" :max="s.row.available" :precision="4" size="small" controls-position="right" ></el-input-number></template></el-table-column><el-table-column label="操作" width="70"><template #default="s"><el-button link type="danger" @click="group.details.splice(s.$index,1)">移除</el-button></template></el-table-column></el-table></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header"><div class="panel-title"><span class="section-index">3</span>预计产出明细</div><el-button type="primary" plain :icon="Plus" @click="addOutput">添加产出货品</el-button></div>
+              <div class="desktop-table"><el-table :data="outputs" border><el-table-column type="index" label="序号" width="55"></el-table-column><el-table-column label="产出货物" min-width="180"><template #default="s"><el-select v-model="s.row.name" class="w-full"><el-option label="ADC12铝合金锭" value="ADC12铝合金锭"></el-option><el-option label="再生铝锭" value="再生铝锭"></el-option><el-option label="金属废料" value="金属废料"></el-option></el-select></template></el-table-column><el-table-column prop="spec" label="规格型号" width="120"></el-table-column><el-table-column prop="unit" label="计量单位" width="90"></el-table-column><el-table-column label="预计产出数量" width="170"><template #default="s"><el-input-number v-model="s.row.qty" :min="0.0001" :precision="4" controls-position="right" ></el-input-number></template></el-table-column><el-table-column label="行业参考单价" width="150"><template #default="s"><span v-if="s.row.price">¥ {{money(s.row.price)}}</span><el-tag v-else type="warning" size="small">暂无价格</el-tag></template></el-table-column><el-table-column label="预计产出行金额" width="160"><template #default="s"><strong v-if="s.row.price">¥ {{money(s.row.qty*s.row.price)}}</strong><span v-else>--</span></template></el-table-column><el-table-column label="操作" width="70"><template #default="s"><el-button link type="danger" @click="removeOutput(s.$index)">移除</el-button></template></el-table-column></el-table></div>
+              <div class="mobile-list"><div v-for="(out,i) in outputs" :key="out.id" class="mobile-card"><div class="mobile-card-head"><strong>产出 {{i+1}}</strong><el-button link type="danger" @click="removeOutput(i)">移除</el-button></div><el-select v-model="out.name" class="w-full"><el-option label="ADC12铝合金锭" value="ADC12铝合金锭"></el-option><el-option label="金属废料" value="金属废料"></el-option></el-select><div style="height:8px"></div><el-input-number v-model="out.qty" :min="0.0001" :precision="4" class="w-full"></el-input-number><div class="mobile-meta">{{out.spec}} · {{out.unit}}<br>行业参考单价：{{out.price?'¥ '+money(out.price):'暂无价格'}}</div></div></div>
+              <div class="money-summary"><span>预计产出总金额</span><strong v-if="!hasMissingPrice">¥ {{money(estimatedTotal)}}</strong><el-tag v-else type="warning">无法完整试算</el-tag></div>
+            </section>
+            <div class="form-footer"><el-button @click="go('list')">取消</el-button><el-button type="primary" :loading="submitting" :icon="Promotion" @click="submitCreate">提交形态转换申请</el-button></div>
+          </template>
+
+          <!-- 详情页 -->
+          <template v-else-if="page === 'detail'">
+            <section class="panel summary-head">
+              <div class="summary-top"><div class="summary-title">形态转换单：{{selectedOrder.no}}<small>提交后库存已锁定 · 双击列表行可进入本页</small></div><div class="summary-actions"><el-button :icon="Back" @click="go('list')">返回</el-button><el-button :icon="CopyDocument" @click="copyNo">复制单号</el-button><el-button v-if="selectedOrder.status==='PENDING_APPROVAL'" @click="withdrawOrder(selectedOrder)">撤回</el-button><el-button v-if="selectedOrder.status==='PENDING_COMPLETION'" type="primary" @click="openComplete(selectedOrder)">完成加工</el-button><el-button v-if="selectedOrder.status==='PENDING_COMPLETION'" type="danger" plain @click="voidOrder(selectedOrder)">作废</el-button></div></div>
+              <div :class="['status-stamp',statusClass(selectedOrder.status)]">{{statusLabel(selectedOrder.status)}}</div>
+              <div class="kv-grid"><div class="kv-item"><label>制单人/时间</label><span>{{selectedOrder.creator}} / {{selectedOrder.createdAt}}</span></div><div class="kv-item"><label>货主</label><span>{{selectedOrder.owner}}</span></div><div class="kv-item"><label>货主标识</label><span>{{selectedOrder.ownerId}}</span></div><div class="kv-item"><label>业务时间</label><span>{{selectedOrder.bizTime}}</span></div><div class="kv-item"><label>业务类型</label><span>形态转换</span></div><div class="kv-item"><label>存货类型</label><span>{{selectedOrder.stockTypeLabel}}</span></div><div class="kv-item"><label>仓库</label><span>{{selectedOrder.warehouse}}</span></div><div class="kv-item"><label>关联单号</label><span class="order-no">{{selectedOrder.pledgeNo}}</span></div><div v-if="selectedOrder.status==='COMPLETED'" class="kv-item"><label>加工损耗</label><span>{{completion.lossRate.toFixed(2)}}% / {{completion.lossDescription}}</span></div><div class="kv-item span-2"><label>转换原因</label><span>生产加工需要，转换后作为新形态押品继续监管</span></div></div>
+              <div class="media-strip"><div v-for="m in media" :key="m.title" class="media-item"><img :src="m.url" :alt="m.title"><div class="media-meta"><strong>{{m.title}}</strong><br>{{m.meta}}</div></div></div>
+            </section>
+            <section class="panel detail-tabs"><el-tabs v-model="detailTab"><el-tab-pane label="投入货物" name="inputs"><div v-for="(group,gidx) in detailInputGroups" :key="group.name" class="product-group"><div class="product-head"><span>{{gidx+1}}</span><strong>{{group.name}} <el-tag type="danger" size="small">转换锁定</el-tag></strong><span>计划投入：{{group.plannedTotal.toFixed(4)}} {{group.unit}}</span></div><div class="sub-stock"><el-table :data="group.details" border size="small"><el-table-column type="index" label="序号" width="55"></el-table-column><el-table-column prop="location" label="货物位置" width="90"></el-table-column><el-table-column prop="bin" label="具体位置" width="110"></el-table-column><el-table-column prop="inboundAt" label="入库时间" width="145"></el-table-column><el-table-column prop="info" label="其他信息" min-width="150" show-overflow-tooltip></el-table-column><el-table-column prop="barcode" label="存货条码" width="170"></el-table-column><el-table-column label="状态" width="100"><template #default><el-tag type="danger" size="small">转换锁定</el-tag></template></el-table-column><el-table-column prop="planned" label="计划投入" width="110"></el-table-column><el-table-column prop="actual" label="实际消耗" width="110"></el-table-column><el-table-column prop="released" label="释放数量" width="100"></el-table-column></el-table></div></div></el-tab-pane><el-tab-pane label="产出货物" name="outputs"><el-table :data="detailOutputs" border><el-table-column prop="name" label="产出货物" min-width="170"></el-table-column><el-table-column prop="planned" label="预计数量" width="110"></el-table-column><el-table-column prop="actual" label="实际数量" width="110"></el-table-column><el-table-column prop="price" label="行业参考单价" width="130"></el-table-column><el-table-column prop="location" label="入库位置" min-width="150"></el-table-column><el-table-column prop="barcode" label="新存货条码" width="160"></el-table-column></el-table><div class="trace-line" style="margin-top:12px"><strong>整单血缘</strong><span class="trace-node">1060铝板 + 铝边料 + 铝合金废料 + 镁锭</span><span class="trace-arrow">→</span><span class="trace-node">ADC12铝合金锭 + 再生铝锭 + 金属废料 + 铝渣</span></div></el-tab-pane><el-tab-pane label="审核记录" name="approval"><el-timeline><el-timeline-item v-for="node in approvalNodes" :key="node.id" :timestamp="node.time" :type="node.timelineType" :hollow="node.status==='PENDING'"><div class="approval-node-card"><div class="approval-node-head"><el-tag size="small" :type="node.tagType">{{node.typeLabel}}</el-tag><strong>{{node.name}}</strong><span class="approval-node-status">{{node.statusLabel}}</span></div><div class="approval-node-meta"><span>处理人：{{node.operator}}</span><span v-if="node.participants">参与人：{{node.participants}}</span><span class="approval-node-result">结果：{{node.result}}</span><span v-if="node.remark">说明：{{node.remark}}</span></div></div></el-timeline-item></el-timeline></el-tab-pane></el-tabs></section>
+          </template>
+
+          <!-- 完成页 -->
+          <template v-else-if="page === 'complete'">
+            <div class="page-heading"><div><h1>完成形态转换</h1><p>{{selectedOrder.no}} · 实际结果确认后不支持业务冲正</p></div><div class="heading-actions"><el-button :icon="Back" @click="go('detail')">返回详情</el-button></div></div>
+            <div class="pledge-note"><el-icon><Lock /></el-icon>当前投入库存保持锁定。完成后全部产出自动继承原质押单 {{selectedOrder.pledgeNo}}。</div><div style="height:12px"></div>
+            <section class="panel"><div class="panel-header"><div class="panel-title"><span class="section-index">1</span>实际投入</div></div><div class="desktop-table"><el-table :data="completionInputs" border><el-table-column type="index" label="序号" width="55"></el-table-column><el-table-column prop="name" label="投入货物" min-width="160"></el-table-column><el-table-column prop="barcode" label="存货条码" width="160"></el-table-column><el-table-column prop="locked" label="锁定数量" width="120"></el-table-column><el-table-column label="实际消耗数量" width="190"><template #default="s"><el-input-number v-model="s.row.actual" :min="0.0001" :max="s.row.lockedNum" :precision="4" controls-position="right" ></el-input-number></template></el-table-column><el-table-column label="自动释放数量" width="150"><template #default="s"><span class="release-value">{{(s.row.lockedNum-s.row.actual).toFixed(4)}} 吨</span></template></el-table-column></el-table></div><div class="mobile-list"><div v-for="x in completionInputs" :key="x.barcode" class="mobile-card"><strong>{{x.name}}</strong><div class="mobile-meta">{{x.barcode}} · 锁定 {{x.locked}}</div><div style="height:8px"></div><el-input-number v-model="x.actual" :min="0.0001" :max="x.lockedNum" :precision="4" class="w-full"></el-input-number><div class="hint">自动释放 {{(x.lockedNum-x.actual).toFixed(4)}} 吨</div></div></div><div class="panel-body hint">每条实际消耗必须大于0且不得超过锁定数量；某条完全未使用时需作废后重新发起。</div></section>
+            <section class="panel"><div class="panel-header"><div class="panel-title"><span class="section-index">2</span>实际产出及入库位置</div></div><div class="desktop-table"><el-table :data="completionOutputs" border><el-table-column type="index" label="序号" width="55"></el-table-column><el-table-column prop="name" label="产出货物" min-width="170"></el-table-column><el-table-column prop="planned" label="预计数量" width="110"></el-table-column><el-table-column label="实际产出数量" width="180"><template #default="s"><el-input-number v-model="s.row.actual" :min="0.0001" :precision="4" controls-position="right" ></el-input-number></template></el-table-column><el-table-column label="货物位置" width="150"><template #default="s"><el-select v-model="s.row.location" placeholder="请选择"><el-option label="成品区" value="成品区"></el-option><el-option label="加工暂存区" value="加工暂存区"></el-option></el-select></template></el-table-column><el-table-column label="具体位置" width="170"><template #default="s"><el-select v-model="s.row.bin" placeholder="请选择"><el-option label="C区01排02位" value="C区01排02位"></el-option><el-option label="C区01排03位" value="C区01排03位"></el-option></el-select></template></el-table-column><el-table-column label="行业参考单价" width="140"><template #default="s">¥ {{money(s.row.price)}}</template></el-table-column><el-table-column label="实际产出行金额" width="150"><template #default="s"><strong>¥ {{money(s.row.actual*s.row.price)}}</strong></template></el-table-column><el-table-column label="存货条码" width="140"><template #default><span class="hint">完成后生成</span></template></el-table-column></el-table></div><div class="mobile-list"><div v-for="x in completionOutputs" :key="x.name" class="mobile-card"><strong>{{x.name}}</strong><div class="mobile-meta">预计 {{x.planned}} · 行业参考单价 ¥{{money(x.price)}}</div><div style="height:8px"></div><el-input-number v-model="x.actual" :min="0.0001" :precision="4" class="w-full"></el-input-number><div style="height:8px"></div><el-select v-model="x.location" placeholder="货物位置" class="w-full"><el-option label="成品区" value="成品区"></el-option></el-select><div style="height:8px"></div><el-select v-model="x.bin" placeholder="具体位置" class="w-full"><el-option label="C区01排02位" value="C区01排02位"></el-option></el-select></div></div><div class="money-summary"><span>实际产出总金额</span><strong>¥ {{money(actualOutputTotal)}}</strong></div><div class="loss-strip"><div class="loss-title"><el-icon><info-filled /></el-icon>加工损耗信息 <span class="hint">完成时记录，不参与库存、金额或质押率计算</span></div><div><span class="field-label">损耗比例 *</span><el-input-number v-model="completion.lossRate" :min="0" :max="100" :precision="2"></el-input-number><span style="margin-left:6px">%</span></div><div><span class="field-label">损耗说明 *</span><el-input v-model="completion.lossDescription" placeholder="请填写本次实际加工损耗说明"></el-input></div></div></section>
+            <div class="form-footer"><el-button @click="go('detail')">取消</el-button><el-button type="primary" :icon="CircleCheck" @click="openCompletionConfirm">完成加工并入库</el-button></div>
+          </template>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 添加投入货品弹窗 -->
+  <el-dialog v-model="stockDialog" title="添加投入货品" width="860px" destroy-on-close>
+    <div class="dialog-hint"><el-icon><info-filled /></el-icon><span>仅展示当前货主、宁波监管仓及所选存货类型下状态为“{{stockStatusText}}”的可用库存。一级数量与二级库存数量双向联动。</span></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px"><el-input v-model="stockKeyword" placeholder="输入货品名称" :prefix-icon="Search"></el-input><el-button type="primary">查询</el-button></div>
+    <el-table :data="candidateGroups" border default-expand-all row-key="sku">
+      <el-table-column type="expand"><template #default="p"><el-table :data="p.row.details" border size="small"><el-table-column type="selection" width="42"></el-table-column><el-table-column prop="location" label="货物位置"></el-table-column><el-table-column prop="bin" label="具体位置"></el-table-column><el-table-column prop="inboundAt" label="入库时间"></el-table-column><el-table-column prop="barcode" label="存货条码"></el-table-column><el-table-column prop="available" label="可用数量"></el-table-column><el-table-column label="计划投入"><template #default="s"><el-input-number v-model="s.row.qty" :min="0" :max="s.row.available" :precision="4" size="small"></el-input-number></template></el-table-column></el-table></template></el-table-column>
+      <el-table-column type="selection" width="44"></el-table-column><el-table-column prop="name" label="货物名称"></el-table-column><el-table-column prop="availableText" label="可用数量"></el-table-column><el-table-column label="计划投入数量"><template #default="s">{{s.row.details.reduce((n,d)=>n+d.qty,0).toFixed(4)}} {{s.row.unit}}</template></el-table-column>
+    </el-table>
+    <template #footer><el-button @click="stockDialog=false">取消</el-button><el-button type="primary" @click="confirmStocks">确认添加</el-button></template>
+  </el-dialog>
+
+  <!-- 风险提示 -->
+  <el-dialog v-model="riskDialog" title="抵质押货值安全线预警" width="580px">
+    <div class="dialog-hint"><el-icon><warning-filled /></el-icon><span>预计转换后的抵质押单货值低于货值安全线，建议补充保证金或增加押品后再提交。</span></div>
+    <div class="dialog-summary">原抵质押单货品总价值：<strong>¥ {{money(pledgeTotalValue)}}</strong><br>本次投入货品价值：<strong>- ¥ {{money(inputGoodsValue)}}</strong><br>投入后单据剩余价值：¥ {{money(remainingGoodsValue)}}<br>预计产出货品价值：<strong>+ ¥ {{money(estimatedTotal)}}</strong><br><br>转换后预计货值：<strong style="color:var(--danger)">¥ {{money(estimatedPledgeValue)}}</strong><br>货值安全线：<strong>¥ {{money(goodsSafetyLine)}}</strong><br>货值缺口：<strong style="color:var(--danger)">¥ {{money(goodsSafetyLine-estimatedPledgeValue)}}</strong><br><br>计算公式：原货品总价值 - 投入货品价值 + 预计产出货品价值。继续提交将触发 HIGH 级提示，但不阻断库存转换流程。</div>
+    <template #footer><el-button @click="riskDialog=false">返回调整</el-button><el-button type="danger" @click="confirmRiskSubmit">确认风险并继续提交</el-button></template>
+  </el-dialog>
+
+  <!-- 完成确认 -->
+  <el-dialog v-model="completeDialog" title="确认完成形态转换" width="600px">
+    <div class="dialog-hint"><el-icon><warning-filled /></el-icon><span>请核对实际投入、释放数量、实际产出和入库位置。完成后不支持业务冲正。</span></div>
+    <div class="dialog-summary"><strong>实际投入</strong><ul class="confirm-list"><li v-for="x in completionInputs" :key="x.barcode">{{x.name}} {{x.actual.toFixed(4)}}吨，释放{{(x.lockedNum-x.actual).toFixed(4)}}吨</li></ul><strong>实际产出</strong><ul class="confirm-list"><li v-for="x in completionOutputs" :key="x.name">{{x.name}} {{x.actual.toFixed(4)}}吨，{{x.location}} / {{x.bin}}</li></ul><br>加工损耗：<strong>{{completion.lossRate.toFixed(2)}}%</strong>，{{completion.lossDescription}}<br>实际产出总金额：<strong>¥ {{money(actualOutputTotal)}}</strong><br>抵质押关系：全部产出继承 {{selectedOrder.pledgeNo}}</div>
+    <template #footer><el-button @click="completeDialog=false">返回检查</el-button><el-button type="primary" :loading="completing" @click="confirmComplete">确认完成并入库</el-button></template>
+  </el-dialog>
+</div>
+
+<script>
+  const { createApp, ref, reactive, computed, nextTick } = Vue;
+  const App = {
+    setup() {
+      const page = ref('list');
+      const detailTab = ref('inputs');
+      const stockDialog = ref(false);
+      const riskDialog = ref(false);
+      const completeDialog = ref(false);
+      const submitting = ref(false);
+      const completing = ref(false);
+      const stockKeyword = ref('');
+
+      const filters = reactive({ no:'', bizDate:[], owner:'', warehouse:[], sku:[], creator:'', createdAt:[], status:[] });
+      const statusOptions = [
+        {label:'审批中',value:'PENDING_APPROVAL'},{label:'待完成',value:'PENDING_COMPLETION'},
+        {label:'已完成',value:'COMPLETED'},{label:'已撤回',value:'WITHDRAWN'},
+        {label:'已驳回',value:'REJECTED'},{label:'已作废',value:'VOIDED'}
+      ];
+      const warehouseOptions = [{label:'森云监管体系',value:'sy',children:[{label:'华东区域',value:'east',children:[{label:'宁波监管仓',value:'nb'},{label:'上海临港一号仓',value:'sh'}]}]}];
+      const skuOptions = [{label:'有色金属',value:'metal',children:[{label:'1060铝板',value:'alplate'},{label:'铝边料',value:'alscrap'},{label:'ADC12铝合金锭',value:'ingot'}]}];
+      const ownerOptions = [{label:'华东铝业有限公司',value:'华东铝业有限公司'},{label:'上海森泰金属有限公司',value:'上海森泰金属有限公司'}];
+
+      const orders = ref([
+        { no:'CVT-20260727-001', owner:'华东铝业有限公司', ownerId:'91330200MA2EXAMPLE', businessType:'形态转换', stockTypeLabel:'质押货', bizTime:'2026-07-27 09:15', warehouse:'宁波监管仓', pledgeNo:'ZY202607270018', inputs:['1060铝板 × 40吨','铝边料 × 20吨'], outputs:['ADC12铝合金锭 × 55吨'], creator:'张强', createdAt:'07-27 09:20', status:'PENDING_COMPLETION' },
+        { no:'CVT-20260727-002', owner:'上海森泰金属有限公司', ownerId:'91310115MA1EXAMPLE', businessType:'形态转换', stockTypeLabel:'普通存货', bizTime:'2026-07-27 10:28', warehouse:'上海临港一号仓', pledgeNo:'--', inputs:['热轧钢卷 × 60吨'], outputs:['钢板 × 55吨','边角料 × 4吨'], creator:'李敏', createdAt:'07-27 10:31', status:'PENDING_APPROVAL' },
+        { no:'CVT-20260726-009', owner:'浙江精工制造有限公司', ownerId:'91330600MA3EXAMPLE', businessType:'形态转换', stockTypeLabel:'抵押货', bizTime:'2026-07-26 14:10', warehouse:'宁波监管仓', pledgeNo:'DY202606180009', inputs:['不锈钢板 × 10吨','标准轴承 × 200件'], outputs:['传动组件 × 80套','金属废料 × 0.5吨'], creator:'张强', createdAt:'07-26 14:15', status:'COMPLETED' },
+        { no:'CVT-20260726-008', owner:'宁波海越铜业有限公司', ownerId:'91330206MA4EXAMPLE', businessType:'形态转换', stockTypeLabel:'质押货', bizTime:'2026-07-26 11:05', warehouse:'宁波监管仓', pledgeNo:'ZY202607120026', inputs:['电解铜 × 18吨'], outputs:['铜杆 × 17.4吨'], creator:'王磊', createdAt:'07-26 11:12', status:'PENDING_APPROVAL' },
+        { no:'CVT-20260725-016', owner:'江苏华联粮油有限公司', ownerId:'91320500MA5EXAMPLE', businessType:'形态转换', stockTypeLabel:'普通存货', bizTime:'2026-07-25 16:40', warehouse:'上海临港一号仓', pledgeNo:'--', inputs:['一级大豆 × 120吨'], outputs:['豆粕 × 92吨','豆油 × 20吨'], creator:'李敏', createdAt:'07-25 16:46', status:'REJECTED' },
+        { no:'CVT-20260725-011', owner:'浙江恒泰钢铁有限公司', ownerId:'91330100MA6EXAMPLE', businessType:'形态转换', stockTypeLabel:'抵押货', bizTime:'2026-07-25 13:18', warehouse:'宁波监管仓', pledgeNo:'DY202607030015', inputs:['钢坯 × 80吨'], outputs:['螺纹钢 × 76吨'], creator:'陈涛', createdAt:'07-25 13:25', status:'PENDING_COMPLETION' },
+        { no:'CVT-20260724-021', owner:'上海森泰金属有限公司', ownerId:'91310115MA1EXAMPLE', businessType:'形态转换', stockTypeLabel:'普通存货', bizTime:'2026-07-24 15:30', warehouse:'上海临港一号仓', pledgeNo:'--', inputs:['铝卷 × 30吨'], outputs:['铝板 × 28吨','铝边料 × 1.5吨'], creator:'周敏', createdAt:'07-24 15:37', status:'WITHDRAWN' },
+        { no:'CVT-20260724-014', owner:'华东铝业有限公司', ownerId:'91330200MA2EXAMPLE', businessType:'形态转换', stockTypeLabel:'质押货', bizTime:'2026-07-24 10:22', warehouse:'宁波监管仓', pledgeNo:'ZY202607010006', inputs:['A00铝锭 × 50吨'], outputs:['6061铝棒 × 47吨'], creator:'张强', createdAt:'07-24 10:29', status:'VOIDED' },
+        { no:'CVT-20260723-007', owner:'杭州新材科技有限公司', ownerId:'91330108MA7EXAMPLE', businessType:'形态转换', stockTypeLabel:'质押货', bizTime:'2026-07-23 09:36', warehouse:'宁波监管仓', pledgeNo:'ZY202606280011', inputs:['聚乙烯原料 × 35吨','色母粒 × 1吨'], outputs:['PE薄膜 × 33吨','塑料边料 × 2吨'], creator:'王磊', createdAt:'07-23 09:43', status:'COMPLETED' },
+        { no:'CVT-20260722-019', owner:'苏州精密制造有限公司', ownerId:'91320594MA8EXAMPLE', businessType:'形态转换', stockTypeLabel:'普通存货', bizTime:'2026-07-22 14:50', warehouse:'上海临港一号仓', pledgeNo:'--', inputs:['轴承钢 × 22吨'], outputs:['轴承套圈 × 4200件','金属废料 × 3吨'], creator:'李敏', createdAt:'07-22 14:58', status:'COMPLETED' }
+      ]);
+      const visibleOrders = computed(() => orders.value.filter(o => (!filters.no || o.no.includes(filters.no)) && (!filters.owner || o.owner.includes(filters.owner) || o.ownerId.includes(filters.owner)) && (!filters.status.length || filters.status.includes(o.status))));
+      const selectedOrder = ref(orders.value[0]);
+
+      const form = reactive({ bizTime:new Date(2026,6,27,9,15), ownerType:'ENTERPRISE', owner:'华东铝业有限公司', stockType:'PLEDGE', warehouse:['sy','east','nb'], pledgeNo:'ZY202607270018', reason:'生产加工需要', remark:'' });
+      const completion = reactive({ lossRate:8, lossDescription:'熔炼、除渣及转运过程产生的实际损耗' });
+      const ownerIdentifier = computed(() => form.owner === '华东铝业有限公司' ? '91330200MA2EXAMPLE' : form.owner ? '91310115MA1EXAMPLE' : '--');
+      const isCollateralStock = computed(() => ['MORTGAGE','PLEDGE'].includes(form.stockType));
+      const stockStatusText = computed(() => ({MORTGAGE:'抵押中',PLEDGE:'质押中',ORDINARY:'存货中'})[form.stockType]);
+      const stockStatusTagType = computed(() => ({MORTGAGE:'warning',PLEDGE:'danger',ORDINARY:'success'})[form.stockType]);
+
+      const inputGroups = ref([
+        { sku:'AL-PLATE', name:'1060铝板', unit:'吨', details:[
+          {location:'A区',bin:'01排03位',inboundAt:'2026-07-01 10:20',info:'生产日期 2026-06-20',barcode:'STK-NB-20260701-0001',available:25,qty:25},
+          {location:'A区',bin:'01排04位',inboundAt:'2026-07-02 09:10',info:'生产日期 2026-06-22',barcode:'STK-NB-20260702-0002',available:40,qty:15}
+        ]},
+        { sku:'AL-SCRAP', name:'铝边料', unit:'吨', details:[
+          {location:'A区',bin:'02排01位',inboundAt:'2026-07-02 14:10',info:'批次 AL-S-0702',barcode:'STK-NB-20260702-0008',available:32,qty:20}
+        ]}
+      ]);
+      const candidateGroups = ref(JSON.parse(JSON.stringify(inputGroups.value)).map(x => ({...x,availableText:x.details.reduce((s,d)=>s+d.available,0).toFixed(4)+' '+x.unit})));
+      const outputs = ref([{id:1,name:'ADC12铝合金锭',spec:'ADC12',unit:'吨',qty:20,price:10000}]);
+      const hasMissingPrice = computed(() => outputs.value.some(x=>!x.price));
+      const estimatedTotal = computed(() => outputs.value.reduce((s,x)=>s+x.qty*(x.price||0),0));
+      const pledgeTotalValue = 1000000;
+      const inputGoodsValue = 600000;
+      const goodsSafetyLine = 800000;
+      const remainingGoodsValue = computed(() => pledgeTotalValue-inputGoodsValue);
+      const estimatedPledgeValue = computed(() => remainingGoodsValue.value+estimatedTotal.value);
+
+      const detailInputs = ref([
+        {name:'1060铝板',unit:'吨',location:'A区',bin:'01排03位',inboundAt:'2026-07-01 10:20',info:'生产日期 2026-06-20',barcode:'STK-NB-20260701-0001',planned:'25.0000吨',plannedNum:25,actual:'--',released:'--'},
+        {name:'1060铝板',unit:'吨',location:'A区',bin:'01排04位',inboundAt:'2026-07-02 09:10',info:'生产日期 2026-06-22',barcode:'STK-NB-20260702-0002',planned:'15.0000吨',plannedNum:15,actual:'--',released:'--'},
+        {name:'铝边料',unit:'吨',location:'A区',bin:'02排01位',inboundAt:'2026-07-02 14:10',info:'批次 AL-S-0702',barcode:'STK-NB-20260702-0008',planned:'20.0000吨',plannedNum:20,actual:'--',released:'--'},
+        {name:'铝合金废料',unit:'吨',location:'B区',bin:'03排02位',inboundAt:'2026-07-05 11:35',info:'回收等级 一级',barcode:'STK-NB-20260705-0012',planned:'8.0000吨',plannedNum:8,actual:'--',released:'--'},
+        {name:'镁锭',unit:'吨',location:'B区',bin:'04排01位',inboundAt:'2026-07-08 08:50',info:'纯度 99.90%',barcode:'STK-NB-20260708-0017',planned:'2.5000吨',plannedNum:2.5,actual:'--',released:'--'},
+        {name:'硅锭',unit:'吨',location:'B区',bin:'04排03位',inboundAt:'2026-07-09 15:20',info:'牌号 Si553',barcode:'STK-NB-20260709-0021',planned:'1.2000吨',plannedNum:1.2,actual:'--',released:'--'}
+      ]);
+      const detailInputGroups = computed(() => Object.values(detailInputs.value.reduce((groups,row) => {
+        if(!groups[row.name]) groups[row.name]={name:row.name,unit:row.unit,plannedTotal:0,details:[]};
+        groups[row.name].plannedTotal+=row.plannedNum;
+        groups[row.name].details.push(row);
+        return groups;
+      },{})));
+      const detailOutputs = ref([
+        {name:'ADC12铝合金锭',planned:'20.0000吨',actual:'--',price:'¥10,000.00',location:'--',barcode:'完成后生成'},
+        {name:'再生铝锭',planned:'18.0000吨',actual:'--',price:'¥9,600.00',location:'--',barcode:'完成后生成'},
+        {name:'金属废料',planned:'3.5000吨',actual:'--',price:'¥1,800.00',location:'--',barcode:'完成后生成'},
+        {name:'铝渣',planned:'1.8000吨',actual:'--',price:'¥850.00',location:'--',barcode:'完成后生成'}
+      ]);
+      const approvalNodes = ref([
+        {id:1,typeLabel:'发起节点',name:'提交形态转换申请',status:'COMPLETED',statusLabel:'已完成',operator:'张强 / 仓库主管',result:'已提交',remark:'正式单据生成，投入库存锁定成功',time:'2026-07-27 09:20:15',timelineType:'primary',tagType:''},
+        {id:2,typeLabel:'自动节点',name:'库存可用性与单据一致性校验',status:'COMPLETED',statusLabel:'已完成',operator:'系统',result:'校验通过',remark:'同货主、同仓库、同质押单校验通过',time:'2026-07-27 09:20:16',timelineType:'success',tagType:'success'},
+        {id:3,typeLabel:'审批节点',name:'业务主管审批',status:'COMPLETED',statusLabel:'已完成',operator:'李敏 / 业务主管',result:'同意',time:'2026-07-27 09:36:28',timelineType:'success',tagType:'success'},
+        {id:4,typeLabel:'会签节点',name:'资金方与监管方联合审核',status:'COMPLETED',statusLabel:'2/2 已完成',operator:'王晨、赵峰',participants:'王晨 / 资金方风控；赵峰 / 监管公司主管',result:'全部同意',time:'2026-07-27 09:52:11',timelineType:'success',tagType:'warning'},
+        {id:5,typeLabel:'或签节点',name:'区域负责人确认',status:'COMPLETED',statusLabel:'1/2 已完成',operator:'陈涛 / 华东区域负责人',participants:'陈涛；周敏',result:'陈涛已同意，节点通过',time:'2026-07-27 10:01:40',timelineType:'success',tagType:'warning'},
+        {id:6,typeLabel:'抄送节点',name:'抄送资金方客户经理',status:'COMPLETED',statusLabel:'已送达',operator:'系统',participants:'刘洋 / 客户经理',result:'消息已送达',time:'2026-07-27 10:05:43',timelineType:'info',tagType:'info'},
+        {id:7,typeLabel:'审批节点',name:'仓库完成确认',status:'PENDING',statusLabel:'待处理',operator:'张强 / 仓库主管',result:'等待完成加工并入库',time:'待处理',timelineType:'primary',tagType:''}
+      ]);
+      const media = [
+        {title:'现场照片',meta:'宁波监管仓 · A区',url:'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=500&q=80'},
+        {title:'设备抓拍图 CAM-A01',meta:'A区主通道 · 09:20:09',url:'https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=500&q=80'},
+        {title:'设备抓拍图 CAM-A02',meta:'加工暂存区 · 09:20:10',url:'https://images.unsplash.com/photo-1565793298595-6a879b1d9492?auto=format&fit=crop&w=500&q=80'}
+      ];
+
+      const completionInputs = ref([{name:'1060铝板',barcode:'STK-NB-20260701-0001',locked:'25.0000吨',lockedNum:25,actual:24},{name:'1060铝板',barcode:'STK-NB-20260702-0002',locked:'15.0000吨',lockedNum:15,actual:15},{name:'铝边料',barcode:'STK-NB-20260702-0008',locked:'20.0000吨',lockedNum:20,actual:18}]);
+      const completionOutputs = ref([{name:'ADC12铝合金锭',planned:'55.0000吨',actual:56,location:'成品区',bin:'C区01排02位',price:15800}]);
+      const actualOutputTotal = computed(() => completionOutputs.value.reduce((s,x)=>s+x.actual*x.price,0));
+
+      const pageTitle = computed(() => ({list:'形态转换',create:'新增形态转换',detail:'形态转换详情',complete:'完成形态转换'})[page.value]);
+      const go = p => { page.value=p; window.scrollTo(0,0); nextTick(()=>window.ElementPlusIconsVue); };
+      const money = n => Number(n||0).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+      const statusLabel = s => ({PENDING_APPROVAL:'审批中',PENDING_COMPLETION:'待完成',COMPLETED:'已完成',WITHDRAWN:'已撤回',REJECTED:'已驳回',VOIDED:'已作废',COMPLETING:'处理中'})[s]||s;
+      const statusClass = s => s==='PENDING_APPROVAL'?'status-pending':s==='PENDING_COMPLETION'?'status-ready':s==='COMPLETED'?'status-done':'status-end';
+      const resetFilters = () => Object.assign(filters,{no:'',bizDate:[],owner:'',warehouse:[],sku:[],creator:'',createdAt:[],status:[]});
+      const queryList = () => ElementPlus.ElMessage.success(`查询完成，共${visibleOrders.value.length}条记录`);
+      const openDetail = row => { selectedOrder.value=row; detailTab.value='inputs'; go('detail'); };
+      const openComplete = row => { selectedOrder.value=row; go('complete'); };
+      const copyNo = async () => { try { await navigator.clipboard.writeText(selectedOrder.value.no); ElementPlus.ElMessage.success('单据号已复制'); } catch { ElementPlus.ElMessage.success('已模拟复制单据号'); } };
+      const withdrawOrder = row => ElementPlus.ElMessageBox.confirm('撤回后进入终态并释放全部锁定库存，确定撤回？','撤回确认',{type:'warning'}).then(()=>{row.status='WITHDRAWN';ElementPlus.ElMessage.success('已撤回并释放库存');go('list');}).catch(()=>{});
+      const voidOrder = row => ElementPlus.ElMessageBox.prompt('作废后释放全部锁定库存，请填写作废原因','作废确认',{inputPlaceholder:'请输入作废原因',inputValidator:v=>!!v||'作废原因不能为空',type:'warning'}).then(()=>{row.status='VOIDED';ElementPlus.ElMessage.success('已作废并释放库存');go('list');}).catch(()=>{});
+      const removeInputGroup = i => inputGroups.value.splice(i,1);
+      const confirmStocks = () => { stockDialog.value=false; ElementPlus.ElMessage.success('投入货品已更新'); };
+      const addOutput = () => outputs.value.push({id:Date.now(),name:'金属废料',spec:'回收级',unit:'吨',qty:.5,price:1800});
+      const removeOutput = i => { if(outputs.value.length===1) return ElementPlus.ElMessage.warning('至少保留一条产出货物'); outputs.value.splice(i,1); };
+      const submitCreate = () => {
+        if(!form.owner || !inputGroups.value.length || !outputs.value.length) return ElementPlus.ElMessage.error('请完整填写必填信息');
+        if(isCollateralStock.value && !hasMissingPrice.value && estimatedPledgeValue.value<goodsSafetyLine) riskDialog.value=true;
+        else doSubmit();
+      };
+      const doSubmit = () => { submitting.value=true; setTimeout(()=>{submitting.value=false; selectedOrder.value=orders.value[0]; selectedOrder.value.status='PENDING_APPROVAL'; ElementPlus.ElMessage.success('提交成功，投入库存已锁定'); go('detail');},700); };
+      const confirmRiskSubmit = () => { riskDialog.value=false; doSubmit(); };
+      const openCompletionConfirm = () => {
+        if(completionInputs.value.some(x=>x.actual<=0||x.actual>x.lockedNum)) return ElementPlus.ElMessage.error('实际消耗必须大于0且不超过锁定数量');
+        if(completionOutputs.value.some(x=>x.actual<=0||!x.location||!x.bin)) return ElementPlus.ElMessage.error('请填写实际产出数量及完整入库位置');
+        if(completion.lossRate<0 || completion.lossRate>100 || !completion.lossDescription.trim()) return ElementPlus.ElMessage.error('请填写0%至100%的加工损耗比例和损耗说明');
+        completeDialog.value=true;
+      };
+      const confirmComplete = () => { completing.value=true; setTimeout(()=>{completing.value=false;completeDialog.value=false;selectedOrder.value.status='COMPLETED';completionInputs.value.forEach((x,i)=>{detailInputs.value[i].actual=x.actual.toFixed(4)+'吨';detailInputs.value[i].released=(x.lockedNum-x.actual).toFixed(4)+'吨';});detailOutputs.value[0]={name:'ADC12铝合金锭',planned:'20.0000吨',actual:'20.5000吨',price:'¥10,000.00',location:'成品区 / C区01排02位',barcode:'STK-NB-20260727-0099'};approvalNodes.value[approvalNodes.value.length-1]={id:7,typeLabel:'审批节点',name:'仓库完成确认',status:'COMPLETED',statusLabel:'已完成',operator:'张强 / 仓库主管',result:'加工完成并入库',remark:'库存原子转换成功，产出继承原质押单',time:'2026-07-27 16:32:08',timelineType:'success',tagType:'success'};ElementPlus.ElMessage.success('加工完成，库存转换及抵质押继承成功');detailTab.value='outputs';go('detail');},900); };
+
+      return { page,pageTitle,detailTab,stockDialog,riskDialog,completeDialog,submitting,completing,stockKeyword,filters,statusOptions,warehouseOptions,skuOptions,ownerOptions,orders,visibleOrders,selectedOrder,form,completion,ownerIdentifier,isCollateralStock,stockStatusText,stockStatusTagType,inputGroups,candidateGroups,outputs,hasMissingPrice,estimatedTotal,pledgeTotalValue,inputGoodsValue,goodsSafetyLine,remainingGoodsValue,estimatedPledgeValue,detailInputs,detailInputGroups,detailOutputs,approvalNodes,media,completionInputs,completionOutputs,actualOutputTotal,go,money,statusLabel,statusClass,resetFilters,queryList,openDetail,openComplete,copyNo,withdrawOrder,voidOrder,removeInputGroup,confirmStocks,addOutput,removeOutput,submitCreate,confirmRiskSubmit,openCompletionConfirm,confirmComplete,
+        Menu:ElementPlusIconsVue.Menu,Bell:ElementPlusIconsVue.Bell,QuestionFilled:ElementPlusIconsVue.QuestionFilled,HomeFilled:ElementPlusIconsVue.HomeFilled,Plus:ElementPlusIconsVue.Plus,Search:ElementPlusIconsVue.Search,ArrowUp:ElementPlusIconsVue.ArrowUp,Download:ElementPlusIconsVue.Download,Refresh:ElementPlusIconsVue.Refresh,Back:ElementPlusIconsVue.Back,Promotion:ElementPlusIconsVue.Promotion,CopyDocument:ElementPlusIconsVue.CopyDocument,CircleCheck:ElementPlusIconsVue.CircleCheck
+      };
+    }
+  };
+  const app = createApp(App);
+  app.use(ElementPlus);
+  for (const [key, component] of Object.entries(ElementPlusIconsVue)) app.component(key, component);
+  app.mount('#app');
+</script>
+</body>
+</html>

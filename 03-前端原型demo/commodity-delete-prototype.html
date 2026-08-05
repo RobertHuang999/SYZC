@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智仓系统 - 货品管理（停用与安全删除交互示范）</title>
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --bg-base: #0f172a;
+      --bg-surface: #1e293b;
+      --bg-surface-hover: #334155;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --accent-blue: #3b82f6;
+      --accent-red: #ef4444;
+      --accent-red-hover: #dc2626;
+
+      --status-active-bg: rgba(52, 211, 153, 0.12);
+      --status-active-text: #34d399;
+      --status-active-border: rgba(52, 211, 153, 0.3);
+
+      --status-deactive-bg: rgba(148, 163, 184, 0.12);
+      --status-deactive-text: #94a3b8;
+      --status-deactive-border: rgba(148, 163, 184, 0.3);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+
+    .brand-icon {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      width: 36px; height: 36px;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .page-header {
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .filter-bar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .tabs { display: flex; gap: 0.5rem; }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    /* Table */
+    .table-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem; }
+    th {
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+    td { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); }
+
+    .code-tag { font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--text-primary); }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 0.375rem;
+      padding: 0.25rem 0.625rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+      border: 1px solid transparent;
+    }
+    .status-badge.active { background: var(--status-active-bg); color: var(--status-active-text); border-color: var(--status-active-border); }
+    .status-badge.deactive { background: var(--status-deactive-bg); color: var(--status-deactive-text); border-color: var(--status-deactive-border); }
+
+    .btn {
+      padding: 0.4rem 0.85rem; border-radius: var(--radius-md); font-size: 0.8125rem; font-weight: 600;
+      cursor: pointer; border: 1px solid transparent; transition: all 0.2s ease;
+      display: inline-flex; align-items: center; gap: 0.375rem;
+    }
+    .btn-secondary { background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); border-color: var(--border-color); }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); color: var(--text-primary); }
+    
+    .btn-danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.3); color: white; }
+
+    .btn-disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+    .modal {
+      background: var(--bg-surface); border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg); width: 560px; max-width: 90vw; padding: 1.5rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title { font-size: 1.125rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+
+    .ref-card-list {
+      display: flex; flex-direction: column; gap: 0.625rem; margin: 1rem 0;
+    }
+
+    .ref-card {
+      background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border-color);
+      border-radius: var(--radius-md); padding: 0.75rem 1rem;
+      display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem;
+    }
+
+    .ref-count { font-weight: 700; color: #fb7185; }
+
+    /* Toast */
+    .toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 200; }
+    .toast {
+      background: #1e293b; border: 1px solid var(--accent-blue); color: var(--text-primary);
+      padding: 0.875rem 1.25rem; border-radius: var(--radius-md); font-size: 0.875rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon"><i data-lucide="package"></i></div>
+      <span>智仓 SCF-Inventory</span>
+    </div>
+    <div style="color:var(--text-secondary); font-size:0.875rem;">主数据配置中心 · 货品(SKU)管理</div>
+  </header>
+
+  <main>
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">货品(SKU)主数据管理</h1>
+        <p style="color:var(--text-secondary); font-size:0.875rem; margin-top:4px;">管控库内所有物料品类；支持货品启用、停用及安全校验删除。</p>
+      </div>
+      <button class="btn" style="background:var(--accent-blue); color:white;">
+        <i data-lucide="plus"></i> 新增货品
+      </button>
+    </div>
+
+    <div class="filter-bar">
+      <div class="tabs">
+        <button class="tab-btn active">全部货品 (4)</button>
+        <button class="tab-btn">启用中 (2)</button>
+        <button class="tab-btn">已停用 (2)</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>货品编码</th>
+            <th>货品名称</th>
+            <th>规格型号</th>
+            <th>计量单位</th>
+            <th>当前状态</th>
+            <th>业务数据关联情况</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Row 1: Active SKU with Business Data -->
+          <tr>
+            <td class="code-tag">SKU20260301-01</td>
+            <td><strong style="color:var(--text-primary);">热轧卷板 Q235</strong></td>
+            <td>1.5mm * 1250mm * C</td>
+            <td>吨 (TON)</td>
+            <td><span class="status-badge active"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i> 启用</span></td>
+            <td><span style="color:#60a5fa; font-size:0.8125rem;">已关联仓单/质押单 12 笔</span></td>
+            <td>
+              <div style="display:flex; gap:0.5rem;">
+                <button class="btn btn-secondary" onclick="toggleStatus(this, 'SKU20260301-01', '停用')">停用</button>
+                <button class="btn btn-danger btn-disabled" onclick="alert('启用状态下的货品不可直接删除，请先执行【停用】操作！')">删除</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 2: Deactivated SKU WITH Business Data (Deletion Intercepted) -->
+          <tr id="row-sku-02">
+            <td class="code-tag">SKU20260301-02</td>
+            <td><strong style="color:var(--text-primary);">冷轧薄板 SPCC</strong></td>
+            <td>0.8mm * 1000mm</td>
+            <td>吨 (TON)</td>
+            <td><span class="status-badge deactive"><i data-lucide="minus-circle" style="width:12px;height:12px;"></i> 已停用</span></td>
+            <td><span style="color:#fb7185; font-size:0.8125rem;">关联出入库单 4 笔、仓单 2 笔</span></td>
+            <td>
+              <div style="display:flex; gap:0.5rem;">
+                <button class="btn btn-secondary" onclick="toggleStatus(this, 'SKU20260301-02', '启用')">启用</button>
+                <button class="btn btn-danger" onclick="openInterceptModal('SKU20260301-02', '冷轧薄板 SPCC')">删除</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 3: Deactivated SKU WITHOUT Business Data (Allowed to Delete) -->
+          <tr id="row-sku-03">
+            <td class="code-tag">SKU20260720-99</td>
+            <td><strong style="color:var(--text-primary);">测试误建不锈钢管 (无业务)</strong></td>
+            <td>DN50 * 3.0mm</td>
+            <td>根 (PCS)</td>
+            <td><span class="status-badge deactive"><i data-lucide="minus-circle" style="width:12px;height:12px;"></i> 已停用</span></td>
+            <td><span style="color:var(--text-muted); font-size:0.8125rem;">未产生任何关联单据</span></td>
+            <td>
+              <div style="display:flex; gap:0.5rem;">
+                <button class="btn btn-secondary" onclick="toggleStatus(this, 'SKU20260720-99', '启用')">启用</button>
+                <button class="btn btn-danger" onclick="openConfirmDeleteModal('row-sku-03', 'SKU20260720-99', '测试误建不锈钢管')">删除</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 4: Active SKU -->
+          <tr>
+            <td class="code-tag">SKU20260405-08</td>
+            <td><strong style="color:var(--text-primary);">螺纹钢 HRB400E</strong></td>
+            <td>Φ20mm * 12m</td>
+            <td>吨 (TON)</td>
+            <td><span class="status-badge active"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i> 启用</span></td>
+            <td><span style="color:#60a5fa; font-size:0.8125rem;">已关联出入库单 8 笔</span></td>
+            <td>
+              <div style="display:flex; gap:0.5rem;">
+                <button class="btn btn-secondary" onclick="toggleStatus(this, 'SKU20260405-08', '停用')">停用</button>
+                <button class="btn btn-danger btn-disabled" onclick="alert('启用状态下的货品不可直接删除，请先执行【停用】操作！')">删除</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Modal 1: Interception Modal (Has Business Data) -->
+  <div class="modal-overlay" id="intercept-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" style="color:#fb7185;">
+          <i data-lucide="alert-triangle"></i>
+          <span>无法删除该货品</span>
+        </div>
+        <button class="btn btn-secondary" onclick="closeModal('intercept-modal')"><i data-lucide="x"></i></button>
+      </div>
+
+      <div style="font-size:0.875rem; color:var(--text-secondary); line-height:1.6;">
+        货品 <strong id="intercept-sku-name" style="color:var(--text-primary);">[SKU20260301-02 冷轧薄板 SPCC]</strong> 已在系统内产生过历史业务或金融确权流水。为确保供应链金融资产合规审计闭环，<strong>禁止执行删除操作</strong>。
+      </div>
+
+      <div style="font-size:0.8125rem; font-weight:600; color:var(--text-muted); margin-top:1rem;">以下是该货品已关联的底层业务单据明细：</div>
+      <div class="ref-card-list">
+        <div class="ref-card">
+          <span>📦 仓储出入库与移库记录</span>
+          <span class="ref-count">4 笔单据</span>
+        </div>
+        <div class="ref-card">
+          <span>📄 数字仓单确权凭证 (WR20260301099)</span>
+          <span class="ref-count">2 笔仓单</span>
+        </div>
+        <div class="ref-card">
+          <span>🔒 抵质押监管单据 (PL20260510002)</span>
+          <span class="ref-count">1 笔合同</span>
+        </div>
+      </div>
+
+      <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); padding:0.75rem; border-radius:var(--radius-md); font-size:0.8125rem; color:#fcd34d;">
+        💡 <strong>建议操作：</strong>保持该货品为“已停用”状态即可，既不影响历史数据审计追溯，亦可防止新建业务误勾选。
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; margin-top:1.25rem;">
+        <button class="btn btn-secondary" onclick="closeModal('intercept-modal')">我知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Confirm Delete Modal (No Business Data) -->
+  <div class="modal-overlay" id="confirm-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" style="color:#ef4444;">
+          <i data-lucide="trash-2"></i>
+          <span>确认删除货品</span>
+        </div>
+        <button class="btn btn-secondary" onclick="closeModal('confirm-modal')"><i data-lucide="x"></i></button>
+      </div>
+
+      <div style="font-size:0.875rem; color:var(--text-secondary); line-height:1.6;">
+        经后台穿透扫描，货品 <strong id="delete-sku-name" style="color:var(--text-primary);">[SKU20260720-99]</strong> 确认未产生任何业务数据流水。
+        <br><br>
+        <span style="color:#fca5a5;">确认删除该货品？删除后该主数据记录将被安全移除，不可恢复。</span>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem;">
+        <button class="btn btn-secondary" onclick="closeModal('confirm-modal')">取消</button>
+        <button class="btn btn-danger" style="background:#ef4444; color:white;" onclick="executeDelete()">确认安全删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    lucide.createIcons();
+
+    let targetRowId = null;
+
+    function toggleStatus(btn, code, action) {
+      if (action === '停用') {
+        btn.innerText = '启用';
+        btn.setAttribute('onclick', `toggleStatus(this, '${code}', '启用')`);
+        const tr = btn.closest('tr');
+        const badge = tr.querySelector('.status-badge');
+        badge.className = 'status-badge deactive';
+        badge.innerHTML = '<i data-lucide="minus-circle" style="width:12px;height:12px;"></i> 已停用';
+        
+        const delBtn = tr.querySelectorAll('.btn')[1];
+        delBtn.classList.remove('btn-disabled');
+        delBtn.setAttribute('onclick', `openInterceptModal('${code}', '热轧卷板 Q235')`);
+        showToast(`✅ 货品 [${code}] 已停用，无法发起新业务`);
+      } else {
+        btn.innerText = '停用';
+        btn.setAttribute('onclick', `toggleStatus(this, '${code}', '停用')`);
+        const tr = btn.closest('tr');
+        const badge = tr.querySelector('.status-badge');
+        badge.className = 'status-badge active';
+        badge.innerHTML = '<i data-lucide="check-circle-2" style="width:12px;height:12px;"></i> 启用';
+
+        const delBtn = tr.querySelectorAll('.btn')[1];
+        delBtn.classList.add('btn-disabled');
+        delBtn.setAttribute('onclick', "alert('启用状态下的货品不可直接删除，请先执行【停用】操作！')");
+        showToast(`✅ 货品 [${code}] 已恢复启用`);
+      }
+      lucide.createIcons();
+    }
+
+    function openInterceptModal(code, name) {
+      document.getElementById('intercept-sku-name').innerText = `[${code} ${name}]`;
+      document.getElementById('intercept-modal').classList.add('active');
+    }
+
+    function openConfirmDeleteModal(rowId, code, name) {
+      targetRowId = rowId;
+      document.getElementById('delete-sku-name').innerText = `[${code} ${name}]`;
+      document.getElementById('confirm-modal').classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    function executeDelete() {
+      closeModal('confirm-modal');
+      if (targetRowId) {
+        document.getElementById(targetRowId).remove();
+        showToast('✅ 货品主数据已成功安全删除！');
+      }
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<i data-lucide="info" style="color:#3b82f6;"></i> <span>${msg}</span>`;
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+  </script>
+</body>
+</html>

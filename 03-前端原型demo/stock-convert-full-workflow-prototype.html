@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SYZC 森云科技 - 存货形态转换全生命周期闭环流程原型</title>
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <!-- Element Plus CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+  <script src="https://unpkg.com/element-plus"></script>
+  <style>
+    :root {
+      --bg-base: #0b1329;
+      --bg-surface: #142042;
+      --bg-surface-hover: #1e2d5a;
+      --bg-card: rgba(20, 32, 66, 0.85);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --border-accent: rgba(24, 144, 255, 0.4);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --accent-blue: #1890ff;
+      --accent-cyan: #06b6d4;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-danger: #f43f5e;
+      
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --shadow-glow: 0 0 25px rgba(24, 144, 255, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(24, 144, 255, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
+    }
+
+    /* App Wrapper */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Top Navigation Header */
+    .nav-header {
+      height: 64px;
+      background: rgba(11, 19, 41, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-cyan) 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 0 15px rgba(24, 144, 255, 0.4);
+    }
+
+    /* Workflow Progress Step Bar */
+    .workflow-bar {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .step-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.3s ease;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+    }
+
+    .step-item.active {
+      opacity: 1;
+      background: rgba(24, 144, 255, 0.12);
+      border: 1px solid var(--border-accent);
+    }
+
+    .step-item.completed {
+      opacity: 0.9;
+    }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-surface-hover);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .step-item.active .step-num {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(24, 144, 255, 0.5);
+    }
+
+    .step-item.completed .step-num {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: #fff;
+    }
+
+    .step-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .step-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .step-line {
+      width: 24px;
+      height: 2px;
+      background: var(--border-color);
+      flex-shrink: 0;
+      margin: 0 4px;
+    }
+
+    /* Main Body Area */
+    .content-area {
+      flex: 1;
+      padding: 24px 28px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+    }
+
+    /* Card Panels */
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+    }
+
+    /* High Risk Badge Flash */
+    .risk-banner {
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.2) 0%, rgba(244, 63, 94, 0.05) 100%);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: pulse-border 2s infinite;
+    }
+
+    @keyframes pulse-border {
+      0% { border-color: rgba(244, 63, 94, 0.3); }
+      50% { border-color: rgba(244, 63, 94, 0.8); }
+      100% { border-color: rgba(244, 63, 94, 0.3); }
+    }
+
+    /* Custom Input / Output Tables in Dark Theme */
+    .dark-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    .dark-table th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-secondary);
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .dark-table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .badge-blue { background: rgba(24, 144, 255, 0.15); color: #60a5fa; border: 1px solid rgba(24, 144, 255, 0.3); }
+    .badge-green { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-danger { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
+
+    /* Button Styling */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+      box-shadow: 0 0 12px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-success { background: var(--accent-green); color: #fff; }
+    .btn-danger { background: var(--accent-danger); color: #fff; }
+    .btn-secondary { background: var(--bg-surface-hover); color: var(--text-primary); border: 1px solid var(--border-color); }
+
+    /* Sidebar Traceability Panel */
+    .trace-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+    }
+
+    .trace-node {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 16px;
+      border-left: 2px solid var(--border-color);
+    }
+
+    .trace-node::before {
+      content: '';
+      position: absolute;
+      left: -6px;
+      top: 2px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+    }
+
+    .trace-node.active::before {
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    /* Modal Overlay (Dark Theme) */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-box {
+      width: 600px;
+      background: #142042;
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app-container">
+    <!-- Top Header -->
+    <header class="nav-header">
+      <div class="brand-title">
+        <div class="brand-logo">SY</div>
+        <span>森云科技 SYZC 供应链金融存货监管系统</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <span class="badge badge-warning">测试模式：同源校验 + 仓单隔离 + 实时行情重估</span>
+        <button class="btn btn-secondary" @click="resetFullWorkflow">
+          <i data-lucide="rotate-ccw"></i> 重置全流程演练
+        </button>
+      </div>
+    </header>
+
+    <!-- Workflow Progress Step Bar -->
+    <div class="workflow-bar">
+      <div 
+        v-for="(st, idx) in steps" 
+        :key="st.id" 
+        :class="['step-item', currentStep === st.id ? 'active' : '', currentStep > st.id ? 'completed' : '']"
+        @click="currentStep = st.id"
+      >
+        <div class="step-num">
+          <i v-if="currentStep > st.id" data-lucide="check" style="width:16px; height:16px;"></i>
+          <span v-else>{{ st.id }}</span>
+        </div>
+        <div>
+          <div class="step-title">{{ st.title }}</div>
+          <div class="step-sub">{{ st.sub }}</div>
+        </div>
+        <div v-if="idx < steps.length - 1" class="step-line"></div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="content-area">
+      <!-- Left Active Step Panel -->
+      <div class="glass-card">
+        <!-- High Risk Flash Banner (If Triggered) -->
+        <div v-if="orderData.isHighRisk" class="risk-banner">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <i data-lucide="alert-triangle" style="color: var(--accent-danger); width: 22px;"></i>
+            <div>
+              <div style="font-weight: 700; color: #fb7185;">⚠️ 高风险告警触发 (High Risk Warning)</div>
+              <div style="font-size: 12px; color: var(--text-secondary);">{{ orderData.riskWarningReason }}</div>
+            </div>
+          </div>
+          <span class="badge badge-danger">强行提交已留痕</span>
+        </div>
+
+        <!-- STEP 1: 形态转换发起与同源投料 -->
+        <div v-if="currentStep === 1">
+          <div class="card-header">
+            <div class="card-title">
+              <i data-lucide="file-plus" style="color: var(--accent-blue);"></i>
+              步骤 1: 存货形态转换申请 (选择库存类别与同源投料)
+            </div>
+            <span class="badge badge-blue">单号: {{ orderData.convertOrderNo }}</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+            <div>
+              <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px;">存货类别 (Stock Category)</label>
+              <select v-model="orderData.stockCategory" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); color: #fff; border-radius: 6px;">
+                <option value="PLEDGED">抵质押存货 (受监管质押单锁定)</option>
+                <option value="FREE">普通存货 (自由库存)</option>
+              </select>
+            </div>
+            <div v-if="orderData.stockCategory === 'PLEDGED'">
+              <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px;">关联质押单号 (Pledge Order)</label>
+              <input type="text" v-model="orderData.sourcePledgeNo" readonly style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; border-radius: 6px;" />
+            </div>
+          </div>
+
+          <!-- Raw Material Selection Section -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="font-size: 14px; font-weight: 600; color: var(--accent-blue);">1. 投入原料 (必须满足同源约束)</div>
+            <button class="btn btn-secondary" @click="showStockSelectModal = true">
+              <i data-lucide="plus-circle"></i> 添加原料 (支持阻断规则测试)
+            </button>
+          </div>
+
+          <table class="dark-table">
+            <thead>
+              <tr>
+                <th>SKU编码</th>
+                <th>物料名称</th>
+                <th>规格</th>
+                <th>状态</th>
+                <th>投入数量</th>
+                <th>账面单价</th>
+                <th>小计</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="inp in orderData.inputs" :key="inp.itemId">
+                <td><code>{{ inp.skuCode }}</code></td>
+                <td>{{ inp.skuName }}</td>
+                <td>{{ inp.specification }}</td>
+                <td><span class="badge badge-warning">质押中</span></td>
+                <td>
+                  <input type="number" v-model.number="inp.quantity" min="1" style="width: 70px; padding: 4px; background: var(--bg-surface); border: 1px solid var(--border-color); color: #fff; border-radius: 4px;" /> {{ inp.unit }}
+                </td>
+                <td>￥{{ inp.unitPrice.toLocaleString() }}</td>
+                <td style="color: var(--accent-blue); font-weight: 600;">￥{{ (inp.quantity * inp.unitPrice).toLocaleString() }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Action Navigation -->
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+            <button class="btn btn-primary" @click="currentStep = 2">
+              保存并进入步骤2：行情计价与风控试算 <i data-lucide="arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: 行情自动联动与风控试算 -->
+        <div v-if="currentStep === 2">
+          <div class="card-header">
+            <div class="card-title">
+              <i data-lucide="calculator" style="color: var(--accent-cyan);"></i>
+              步骤 2: 大宗行情自动联动计价与风控跌价试算
+            </div>
+            <span class="badge badge-green">实时行情API: 上海大宗交易中心已联动</span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="font-size: 14px; font-weight: 600; color: var(--accent-cyan);">2. 预告产出物形态 (单价调取大宗行情，禁止篡改)</div>
+            <button class="btn btn-secondary" @click="addOutputItem">
+              <i data-lucide="plus"></i> 增加产出形态 (1:N / N:N)
+            </button>
+          </div>
+
+          <table class="dark-table">
+            <thead>
+              <tr>
+                <th>产出物料名称</th>
+                <th>规格型号</th>
+                <th>预估产出量</th>
+                <th>大宗行情基准单价</th>
+                <th>预估货值小计</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="out in orderData.outputs" :key="out.itemId">
+                <td>{{ out.skuName }}</td>
+                <td>{{ out.specification }}</td>
+                <td>
+                  <input type="number" v-model.number="out.expectedQuantity" min="0.1" step="0.5" style="width: 70px; padding: 4px; background: var(--bg-surface); border: 1px solid var(--border-color); color: #fff; border-radius: 4px;" /> {{ out.unit }}
+                </td>
+                <td>
+                  <span style="font-weight: 700; color: var(--accent-cyan);">￥{{ out.marketPrice.toLocaleString() }}</span>
+                  <span class="badge badge-blue" style="margin-left: 6px;">行情只读</span>
+                </td>
+                <td style="color: var(--accent-cyan); font-weight: 600;">￥{{ (out.expectedQuantity * out.marketPrice).toLocaleString() }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Live Risk Trial Panel -->
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; margin-top: 16px;">
+            <div style="font-weight: 600; margin-bottom: 10px; color: var(--accent-blue);">📊 质押总货值与覆盖率实时试算面板</div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; font-size: 13px;">
+              <div>投入总货值: <br><strong style="font-size: 16px;">￥{{ calcTotalInput.toLocaleString() }}</strong></div>
+              <div>预估产出总货值: <br><strong style="font-size: 16px;" :style="{ color: isRiskAlert ? 'var(--accent-danger)' : 'var(--accent-green)' }">￥{{ calcTotalOutput.toLocaleString() }}</strong></div>
+              <div>货值差额 (损耗): <br><strong style="font-size: 16px;" :style="{ color: calcDiff < 0 ? 'var(--accent-danger)' : 'var(--accent-green)' }">{{ calcDiff >= 0 ? '+' : '' }}￥{{ calcDiff.toLocaleString() }}</strong></div>
+              <div>预计质押覆盖率: <br><strong style="font-size: 16px;">{{ calcCoverage }}%</strong></div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+            <button class="btn btn-secondary" @click="currentStep = 1"><i data-lucide="arrow-left"></i> 上一步</button>
+            <button class="btn btn-primary" @click="handleStep2Submit">
+              提交转换申请进入审批流 <i data-lucide="send"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3: 自定义流程审批 -->
+        <div v-if="currentStep === 3">
+          <div class="card-header">
+            <div class="card-title">
+              <i data-lucide="users" style="color: var(--accent-purple);"></i>
+              步骤 3: 自定义工作流审批 (Workflow Approval)
+            </div>
+            <span class="badge badge-warning">单据状态: 待审批 (PENDING_APPROVAL)</span>
+          </div>
+
+          <div style="margin-bottom: 20px;">
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">当前转换单已触发流程配置的 3 级自定义联合审批节点：</div>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="background: var(--bg-surface); padding: 12px 16px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--accent-green);">
+                <div>
+                  <div style="font-weight: 600; font-size: 14px;">节点 1: 仓库监管主管审核</div>
+                  <div style="font-size: 12px; color: var(--text-muted);">审核物料物理存放位置与加工可行性 (李华 - 仓库主管)</div>
+                </div>
+                <span class="badge badge-green">已通过 (PASS)</span>
+              </div>
+
+              <div style="background: var(--bg-surface); padding: 12px 16px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--accent-warning);">
+                <div>
+                  <div style="font-weight: 600; font-size: 14px;">节点 2: 资方风控官审核 (银行/保理公司)</div>
+                  <div style="font-size: 12px; color: var(--text-muted);">针对【高风险告警】进行质押覆盖率核算与补质评估 (王风控)</div>
+                </div>
+                <span class="badge badge-warning" v-if="!wfApproved">待审核 (PENDING)</span>
+                <span class="badge badge-green" v-else>已通过 (PASS)</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+            <button class="btn btn-secondary" @click="currentStep = 2"><i data-lucide="arrow-left"></i> 上一步</button>
+            <div style="display: flex; gap: 12px;">
+              <button class="btn btn-danger" @click="rejectWorkflow">驳回单据</button>
+              <button class="btn btn-success" @click="approveWorkflow">
+                模拟审批通过：进入原料扣减锁库 <i data-lucide="check-circle"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4: 原料出库扣减与在产锁库 -->
+        <div v-if="currentStep === 4">
+          <div class="card-header">
+            <div class="card-title">
+              <i data-lucide="lock" style="color: var(--accent-warning);"></i>
+              步骤 4: 原料可用库存扣减与【在产锁库 (PROCESSING)】
+            </div>
+            <span class="badge badge-warning">单据状态: 在产/加工中 (PROCESSING)</span>
+          </div>
+
+          <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; padding: 16px; margin-bottom: 20px;">
+            <div style="font-weight: 600; color: #fbbf24; margin-bottom: 6px;">🔒 并发排他锁控制生效说明</div>
+            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+              • 原料存货 <code>SKU-LOG-A (10.0吨)</code> 物理可用量已成功扣减；<br>
+              • 系统已开启数据库行级排他锁 <code>is_locked = 1</code>，该批存货已被锁定为【PROCESSING 在产加工中】状态；<br>
+              • 此时任何其他人员发起针对该批存货的解押、提货申请均将被系统硬性拒绝，杜绝并发冲突。
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+            <button class="btn btn-secondary" @click="currentStep = 3"><i data-lucide="arrow-left"></i> 上一步</button>
+            <button class="btn btn-primary" @click="currentStep = 5">
+              线下物理加工完成，进入步骤5：成品确认入库 <i data-lucide="arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 5: 成品入库与质押重估挂载 -->
+        <div v-if="currentStep === 5">
+          <div class="card-header">
+            <div class="card-title">
+              <i data-lucide="check-square" style="color: var(--accent-green);"></i>
+              步骤 5: 现场成品确认入库与质押物写回挂载
+            </div>
+            <span class="badge badge-green">单据状态: 已完成 (COMPLETED)</span>
+          </div>
+
+          <div style="font-weight: 600; margin-bottom: 10px;">到货到仓核验录入</div>
+          <table class="dark-table">
+            <thead>
+              <tr>
+                <th>产出物料名称</th>
+                <th>预估产出量</th>
+                <th>实收入库量</th>
+                <th>行情基准单价</th>
+                <th>实入库总金额</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="out in orderData.outputs" :key="out.itemId">
+                <td>{{ out.skuName }}</td>
+                <td>{{ out.expectedQuantity }} {{ out.unit }}</td>
+                <td>
+                  <input type="number" v-model.number="out.actualQuantity" style="width: 70px; padding: 4px; background: var(--bg-surface); border: 1px solid var(--border-color); color: #fff; border-radius: 4px;" /> {{ out.unit }}
+                </td>
+                <td>￥{{ out.marketPrice.toLocaleString() }}</td>
+                <td style="color: var(--accent-green); font-weight: 600;">￥{{ (out.actualQuantity * out.marketPrice).toLocaleString() }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px; padding: 16px; margin-top: 16px;">
+            <div style="font-weight: 600; color: #34d399; margin-bottom: 6px;">✅ 质押单写回更新成功 (Pledge Auto-Sync)</div>
+            <div style="font-size: 12px; color: var(--text-secondary);">
+              原质押单 <code>PLG-20260510-888</code> 已剔除旧原料，并自动挂载上述 3 项成品。质押总货值已重估更新为 ￥{{ (orderData.outputs.reduce((s,o)=>s+o.actualQuantity*o.marketPrice, 0)).toLocaleString() }}！
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+            <button class="btn btn-success" @click="finishFullWorkflow">
+              全流程完成并归档 <i data-lucide="archive"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Traceability & Risk Dashboard -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="trace-card">
+          <div style="font-weight: 600; font-size: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="git-commit" style="color: var(--accent-blue);"></i> 全路径货权穿透链 (Traceability)
+          </div>
+          
+          <div :class="['trace-node', currentStep >= 1 ? 'active' : '']">
+            <div style="font-weight: 600; font-size: 12px;">原始质押单</div>
+            <div style="font-size: 11px; color: var(--text-muted);">{{ orderData.sourcePledgeNo }} (可抵质额 ￥90,000)</div>
+          </div>
+
+          <div :class="['trace-node', currentStep >= 2 ? 'active' : '']">
+            <div style="font-weight: 600; font-size: 12px;">投入物料锁定</div>
+            <div style="font-size: 11px; color: var(--text-muted);">SKU-LOG-A (10.0吨 原木)</div>
+          </div>
+
+          <div :class="['trace-node', currentStep >= 3 ? 'active' : '']">
+            <div style="font-weight: 600; font-size: 12px;">形态转换单</div>
+            <div style="font-size: 11px; color: var(--text-muted);">{{ orderData.convertOrderNo }} (行情基准重估)</div>
+          </div>
+
+          <div :class="['trace-node', currentStep >= 5 ? 'active' : '']">
+            <div style="font-weight: 600; font-size: 12px;">新产物自动挂载</div>
+            <div style="font-size: 11px; color: var(--text-muted);">3 项成品挂载回原质押单</div>
+          </div>
+        </div>
+
+        <!-- Audit Snapshot Panel -->
+        <div class="trace-card">
+          <div style="font-weight: 600; font-size: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="shield-check" style="color: var(--accent-green);"></i> 防篡改审计日志快照
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; line-height: 1.6; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px;">
+            OPERATOR: 张强(SUPERVISOR)<br>
+            IP: 192.168.1.105<br>
+            HIGH_RISK_FLAG: {{ orderData.isHighRisk ? 'TRUE' : 'FALSE' }}<br>
+            TIMESTAMP: 2026-07-24 16:55:02
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stock Selection Modal (Testing Anti-Warrant Rules & Anti-Mix Rules) -->
+    <div v-if="showStockSelectModal" class="modal-overlay">
+      <div class="modal-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div style="font-weight: 700; font-size: 16px; color: #fff;">选择投入原料 (规则拦截卡扣测试)</div>
+          <button style="background:none; border:none; color:#fff; cursor:pointer;" @click="showStockSelectModal = false">✕</button>
+        </div>
+
+        <div style="font-size: 12px; color: var(--accent-warning); margin-bottom: 12px; background: rgba(245, 158, 11, 0.1); padding: 8px; border-radius: 4px;">
+          规则提醒：点击勾选【仓单中】货物将触发硬阻断；勾选不同质押单存货触发同源阻断。
+        </div>
+
+        <table class="dark-table">
+          <thead>
+            <tr>
+              <th>选择</th>
+              <th>SKU编码</th>
+              <th>物料名称</th>
+              <th>所属质押单</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="cand in candidateStocks" :key="cand.stockId">
+              <td>
+                <input type="checkbox" :disabled="cand.stockStatus === 'IN_WARRANT'" @change="e => selectCandidate(cand, e.target.checked)" />
+              </td>
+              <td><code>{{ cand.skuCode }}</code></td>
+              <td>{{ cand.skuName }}</td>
+              <td>{{ cand.pledgeNo }}</td>
+              <td>
+                <span v-if="cand.stockStatus === 'IN_WARRANT'" class="badge badge-danger">🚫 仓单中 (硬阻断)</span>
+                <span v-else-if="cand.stockStatus === 'PLEDGED'" class="badge badge-warning">质押中</span>
+                <span v-else class="badge badge-blue">普通自由</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+          <button class="btn btn-secondary" @click="showStockSelectModal = false">取消</button>
+          <button class="btn btn-primary" @click="showStockSelectModal = false">确认选择</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- High Risk Dialog Modal -->
+    <div v-if="showRiskModal" class="modal-overlay">
+      <div class="modal-box" style="border-color: var(--accent-danger);">
+        <div style="text-align: center;">
+          <i data-lucide="alert-triangle" style="width: 48px; height: 48px; color: var(--accent-danger); margin-bottom: 10px;"></i>
+          <h3 style="color: var(--accent-danger); margin-bottom: 8px;">⚠️ 质押货值跌价风险预警与加质追缴</h3>
+          <p style="font-size: 13px; color: var(--text-secondary); text-align: left; background: rgba(244, 63, 94, 0.1); padding: 12px; border-radius: 6px; line-height: 1.6; margin-bottom: 16px;">
+            转换后预计质押总货值 (<strong>￥{{ calcTotalOutput.toLocaleString() }}</strong>) 已跌破融资本金警戒线 (<strong>￥90,000.00</strong>)！<br>
+            • 预计货值缺口：<strong style="color:var(--accent-danger);">￥{{ (90000 - calcTotalOutput).toLocaleString() }}</strong><br>
+            • 建议先线上补质或缴纳保证金后再行生产加工。
+          </p>
+          <div style="display: flex; justify-content: flex-end; gap: 12px;">
+            <button class="btn btn-secondary" @click="showRiskModal = false">取消转换 (返回修改)</button>
+            <button class="btn btn-danger" @click="confirmForceSubmit">
+              执意提交 (标记高风险告警)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, onMounted, nextTick } = Vue;
+
+    createApp({
+      setup() {
+        const currentStep = ref(1);
+
+        const steps = ref([
+          { id: 1, title: '申请与同源投料', sub: '规则校验' },
+          { id: 2, title: '行情自动试算', sub: '跌价预警' },
+          { id: 3, title: '自定义流程审批', sub: '多方协同' },
+          { id: 4, title: '在产锁库扣减', sub: '排他锁生效' },
+          { id: 5, title: '成品到货入库', sub: '质押物写回' }
+        ]);
+
+        const orderData = ref({
+          convertOrderNo: 'CVT-20260724-001',
+          stockCategory: 'PLEDGED',
+          sourcePledgeNo: 'PLG-20260510-888',
+          isHighRisk: false,
+          riskWarningReason: '',
+          inputs: [
+            { itemId: 'inp-01', skuCode: 'RAW-LOG-A', skuName: '进口松木原木(A级)', specification: 'Ø30cm*4m', unit: '吨', unitPrice: 10000, quantity: 10 }
+          ],
+          outputs: [
+            { itemId: 'out-01', skuName: '通用胶合板A级', specification: '1220*2440*15mm', unit: '吨', expectedQuantity: 10, actualQuantity: 10, marketPrice: 6000 },
+            { itemId: 'out-02', skuName: '建筑通用板材B级', specification: '1220*2440*12mm', unit: '吨', expectedQuantity: 4, actualQuantity: 4, marketPrice: 5000 },
+            { itemId: 'out-03', skuName: '工业颗粒锯末木屑', specification: '标准散装', unit: '吨', expectedQuantity: 2, actualQuantity: 2, marketPrice: 500 }
+          ]
+        });
+
+        const showStockSelectModal = ref(false);
+        const showRiskModal = ref(false);
+        const wfApproved = ref(false);
+
+        const candidateStocks = ref([
+          { stockId: 'c-1', skuCode: 'RAW-LOG-A', skuName: '进口松木原木(A级)', pledgeNo: 'PLG-20260510-888', stockStatus: 'PLEDGED' },
+          { stockId: 'c-2', skuCode: 'WARRANT-STEEL', skuName: '冷轧钢卷(交易所交割仓单)', pledgeNo: 'PLG-20260510-888', stockStatus: 'IN_WARRANT' },
+          { stockId: 'c-3', skuCode: 'FREE-WOOD', skuName: '自由樟子松原木', pledgeNo: '自由库存', stockStatus: 'NORMAL' }
+        ]);
+
+        const calcTotalInput = computed(() => {
+          return orderData.value.inputs.reduce((s, item) => s + item.quantity * item.unitPrice, 0);
+        });
+
+        const calcTotalOutput = computed(() => {
+          return orderData.value.outputs.reduce((s, item) => s + item.expectedQuantity * item.marketPrice, 0);
+        });
+
+        const calcDiff = computed(() => calcTotalOutput.value - calcTotalInput.value);
+
+        const calcCoverage = computed(() => {
+          return ((calcTotalOutput.value * 0.8) / 90000 * 100).toFixed(1);
+        });
+
+        const isRiskAlert = computed(() => {
+          return orderData.value.stockCategory === 'PLEDGED' && (calcTotalOutput.value * 0.8 < 90000);
+        });
+
+        const addOutputItem = () => {
+          orderData.value.outputs.push({
+            itemId: 'out-' + Date.now(),
+            skuName: '新规格衍生板材',
+            specification: '1220*2440*9mm',
+            unit: '吨',
+            expectedQuantity: 1,
+            actualQuantity: 1,
+            marketPrice: 4800
+          });
+          refreshIcons();
+        };
+
+        const selectCandidate = (cand, checked) => {
+          if (cand.stockStatus === 'IN_WARRANT') {
+            alert('🚫 规约硬卡扣阻断：处于【仓单中】状态的存货已被仓单锁定，严禁加工转换！');
+            return;
+          }
+          if (checked && cand.stockStatus === 'NORMAL' && orderData.value.stockCategory === 'PLEDGED') {
+            alert('❌ 规约硬卡扣阻断：抵质押存货转换严禁勾选普通存货（禁止混合加工）！');
+          }
+        };
+
+        const handleStep2Submit = () => {
+          if (isRiskAlert.value) {
+            showRiskModal.value = true;
+          } else {
+            currentStep.value = 3;
+          }
+        };
+
+        const confirmForceSubmit = () => {
+          showRiskModal.value = false;
+          orderData.value.isHighRisk = true;
+          orderData.value.riskWarningReason = `预计产出货值(￥${calcTotalOutput.value.toLocaleString()})低于融资本金警戒线(￥90,000.00)，缺口￥${(90000 - calcTotalOutput.value).toLocaleString()}`;
+          currentStep.value = 3;
+          refreshIcons();
+        };
+
+        const approveWorkflow = () => {
+          wfApproved.value = true;
+          setTimeout(() => {
+            currentStep.value = 4;
+            refreshIcons();
+          }, 400);
+        };
+
+        const rejectWorkflow = () => {
+          alert('单据已被资方风控官驳回至草稿！');
+          currentStep.value = 1;
+        };
+
+        const finishFullWorkflow = () => {
+          alert('🎉 全流程演绎完成！单据 CVT-20260724-001 已顺利归档，质押重估价值与风控日志已持久化。');
+        };
+
+        const resetFullWorkflow = () => {
+          currentStep.value = 1;
+          orderData.value.isHighRisk = false;
+          wfApproved.value = false;
+          refreshIcons();
+        };
+
+        const refreshIcons = () => {
+          nextTick(() => {
+            if (window.lucide) {
+              window.lucide.createIcons();
+            }
+          });
+        };
+
+        onMounted(() => {
+          refreshIcons();
+        });
+
+        return {
+          currentStep,
+          steps,
+          orderData,
+          showStockSelectModal,
+          showRiskModal,
+          wfApproved,
+          candidateStocks,
+          calcTotalInput,
+          calcTotalOutput,
+          calcDiff,
+          calcCoverage,
+          isRiskAlert,
+          addOutputItem,
+          selectCandidate,
+          handleStep2Submit,
+          confirmForceSubmit,
+          approveWorkflow,
+          rejectWorkflow,
+          finishFullWorkflow,
+          resetFullWorkflow
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

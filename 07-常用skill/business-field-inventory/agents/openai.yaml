@@ -1,0 +1,6 @@
+interface:
+  display_name: "业务系统基准资料梳理"
+  short_description: "将后台采集结果拆成字段、页面和规则三份基准文档"
+  default_prompt: "使用 $business-field-inventory 梳理已登录业务后台，并生成字段清单、页面说明和业务规则三份 Markdown 文档。"
+policy:
+  allow_implicit_invocation: true

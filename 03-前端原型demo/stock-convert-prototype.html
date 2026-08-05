@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SYZC 森云科技 - 抵质押与普通存货形态转换原型 Demo</title>
+  <!-- Element Plus CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+  <!-- Element Plus Icons -->
+  <script src="https://unpkg.com/@element-plus/icons-vue"></script>
+  <!-- Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <!-- Element Plus JS -->
+  <script src="https://unpkg.com/element-plus"></script>
+  <style>
+    :root {
+      --sy-primary: #1890ff;
+      --sy-success: #52c41a;
+      --sy-warning: #faad14;
+      --sy-danger: #f5222d;
+      --sy-bg-dark: #001529;
+      --sy-card-bg: #ffffff;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f0f2f5;
+      color: #333;
+    }
+    
+    /* Layout styling */
+    .app-wrapper {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+    
+    .sidebar {
+      width: 220px;
+      background-color: var(--sy-bg-dark);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    
+    .logo-box {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      background: linear-gradient(90deg, #1890ff 0%, #001529 100%);
+    }
+    
+    .logo-box img {
+      width: 28px;
+      height: 28px;
+      margin-right: 10px;
+    }
+    
+    .sidebar-menu {
+      border-right: none !important;
+      background-color: transparent !important;
+    }
+    
+    .main-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .top-header {
+      height: 60px;
+      background-color: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-shadow: 0 1px 4px rgba(0,21,41,0.08);
+    }
+
+    .content-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    /* Cards & Stats */
+    .stat-card {
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .stat-val {
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    /* Risk Tag */
+    .high-risk-badge {
+      animation: pulse-red 1.5s infinite;
+    }
+    
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(245, 34, 45, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(245, 34, 45, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(245, 34, 45, 0); }
+    }
+
+    .form-section-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #1890ff;
+      border-left: 4px solid #1890ff;
+      padding-left: 8px;
+      margin: 16px 0 12px 0;
+    }
+
+    .calc-panel {
+      background: #f6ffed;
+      border: 1px solid #b7eb8f;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-top: 16px;
+    }
+    
+    .calc-panel.danger {
+      background: #fff2f0;
+      border-color: #ffccc7;
+    }
+
+    .price-tag {
+      font-size: 12px;
+      background: #e6f7ff;
+      color: #1890ff;
+      border: 1px solid #91d5ff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app-wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo-box">
+        <div style="background: #fff; border-radius: 4px; width: 26px; height: 26px; display:flex; align-items:center; justify-content:center; margin-right:8px; color:#1890ff; font-weight:bold; font-size:14px;">SY</div>
+        <span>森云科技 SYZC 监管</span>
+      </div>
+      <el-menu active-text-color="#409EFF" background-color="#001529" text-color="#fff" default-active="convert" class="sidebar-menu">
+        <el-menu-item index="dashboard">
+          <el-icon><i-ep-data-board /></el-icon>
+          <span>数字仓库大屏</span>
+        </el-menu-item>
+        <el-menu-item index="stock">
+          <el-icon><i-ep-box /></el-icon>
+          <span>存货明细管理</span>
+        </el-menu-item>
+        <el-menu-item index="convert">
+          <el-icon><i-ep-refresh /></el-icon>
+          <span>存货形态转换 (1:N/N:N)</span>
+        </el-menu-item>
+        <el-menu-item index="pledge">
+          <el-icon><i-ep-tickets /></el-icon>
+          <span>数字质押单管理</span>
+        </el-menu-item>
+        <el-menu-item index="risk">
+          <el-icon><i-ep-warning /></el-icon>
+          <span>风控预警引擎</span>
+        </el-menu-item>
+      </el-menu>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+      <!-- Top Header -->
+      <div class="top-header">
+        <div style="font-size: 16px; font-weight: 500;">存货形态转换管理 (1:N / N:1 / N:N 动态质押)</div>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <el-badge :value="highRiskCount" class="item" type="danger">
+            <el-button icon="Bell" circle />
+          </el-badge>
+          <el-avatar size="small" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
+          <span style="font-size: 14px;">张强 (仓库监管员)</span>
+        </div>
+      </div>
+
+      <!-- Body Content -->
+      <div class="content-body">
+        <!-- Stat Cards -->
+        <el-row :gutter="16" style="margin-bottom: 20px;">
+          <el-col :span="6">
+            <el-card shadow="hover" class="stat-card">
+              <div style="color: #8c8c8c; font-size: 13px;">转换单总数</div>
+              <div class="stat-val" style="color: #1890ff;">{{ orderList.length }} 单</div>
+            </el-card>
+          </el-col>
+          <el-col :span="6">
+            <el-card shadow="hover" class="stat-card">
+              <div style="color: #8c8c8c; font-size: 13px;">在产加工锁定中</div>
+              <div class="stat-val" style="color: #faad14;">{{ orderList.filter(o => o.status === 'PROCESSING').length }} 单</div>
+            </el-card>
+          </el-col>
+          <el-col :span="6">
+            <el-card shadow="hover" class="stat-card">
+              <div style="color: #8c8c8c; font-size: 13px;">高风险跌价告警</div>
+              <div class="stat-val" style="color: #f5222d;">{{ orderList.filter(o => o.isHighRisk).length }} 单</div>
+            </el-card>
+          </el-col>
+          <el-col :span="6">
+            <el-card shadow="hover" class="stat-card">
+              <div style="color: #8c8c8c; font-size: 13px;">抵质押物重估累计额</div>
+              <div class="stat-val" style="color: #52c41a;">￥ 1,280,000</div>
+            </el-card>
+          </el-col>
+        </el-row>
+
+        <!-- Search & Actions -->
+        <el-card shadow="never" style="margin-bottom: 20px;">
+          <el-form :inline="true" :model="searchForm" size="default">
+            <el-form-item label="存货类别">
+              <el-select v-model="searchForm.stockCategory" placeholder="全部" clearable style="width: 140px;">
+                <el-option label="普通存货" value="FREE"></el-option>
+                <el-option label="抵质押存货" value="PLEDGED"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="单据状态">
+              <el-select v-model="searchForm.status" placeholder="全部状态" clearable style="width: 150px;">
+                <el-option label="草稿" value="DRAFT"></el-option>
+                <el-option label="待审批" value="PENDING_APPROVAL"></el-option>
+                <el-option label="在产/加工中" value="PROCESSING"></el-option>
+                <el-option label="已完成" value="COMPLETED"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="高风险告警">
+              <el-select v-model="searchForm.isHighRisk" placeholder="全部" clearable style="width: 120px;">
+                <el-option label="是" :value="true"></el-option>
+                <el-option label="否" :value="false"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" icon="Search" @click="handleSearch">查询</el-button>
+              <el-button icon="Refresh" @click="resetSearch">重置</el-button>
+            </el-form-item>
+            <el-form-item style="float: right;">
+              <el-button type="primary" icon="Plus" style="background: #1890ff;" @click="openCreateDialog">
+                发起形态转换申请
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </el-card>
+
+        <!-- Order List Table -->
+        <el-card shadow="never">
+          <el-table :data="filteredOrders" border style="width: 100%;">
+            <el-table-column prop="convertOrderNo" label="形态转换单号" width="160" fixed>
+              <template #default="{ row }">
+                <el-link type="primary" @click="viewOrderDetail(row)">{{ row.convertOrderNo }}</el-link>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="存货类别" width="110">
+              <template #default="{ row }">
+                <el-tag :type="row.stockCategory === 'PLEDGED' ? 'danger' : 'info'" effect="light">
+                  {{ row.stockCategory === 'PLEDGED' ? '抵质押存货' : '普通存货' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="关联质押单" width="160">
+              <template #default="{ row }">
+                <span>{{ row.sourcePledgeNo || '-' }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="投入原料" show-overflow-tooltip>
+              <template #default="{ row }">
+                <span v-for="inp in row.inputs" :key="inp.itemId">
+                  {{ inp.skuName }} ({{ inp.quantity }}{{ inp.unit }})
+                </span>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="预告产出物形态" show-overflow-tooltip>
+              <template #default="{ row }">
+                <div v-for="out in row.outputs" :key="out.itemId" style="font-size: 12px;">
+                  • {{ out.skuName }} x {{ out.expectedQuantity }}{{ out.unit }} 
+                  <span style="color:#8c8c8c;">(单价￥{{ out.marketPrice }})</span>
+                </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="投入总货值" width="120">
+              <template #default="{ row }">
+                ￥{{ row.totalInputVal.toLocaleString() }}
+              </template>
+            </el-table-column>
+
+            <el-table-column label="产出总货值 (行情)" width="140">
+              <template #default="{ row }">
+                <span :style="{ color: row.valueDiff < 0 ? '#f5222d' : '#52c41a', fontWeight: 'bold' }">
+                  ￥{{ row.totalOutputVal.toLocaleString() }}
+                </span>
+                <div style="font-size: 11px; color: #8c8c8c;">
+                  差额: {{ row.valueDiff >= 0 ? '+' : '' }}{{ row.valueDiff.toLocaleString() }}
+                </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="风险标签" width="130">
+              <template #default="{ row }">
+                <el-tag v-if="row.isHighRisk" type="danger" effect="dark" class="high-risk-badge">
+                  ⚠️ 高风险告警
+                </el-tag>
+                <el-tag v-else type="success" effect="plain">正常</el-tag>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="单据状态" width="120">
+              <template #default="{ row }">
+                <el-tag :type="getStatusTag(row.status)">
+                  {{ getStatusText(row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="操作" width="180" fixed="right">
+              <template #default="{ row }">
+                <el-button link type="primary" size="small" @click="viewOrderDetail(row)">详情</el-button>
+                <el-button v-if="row.status === 'PROCESSING'" link type="success" size="small" @click="handleStockIn(row)">
+                  到货入库
+                </el-button>
+                <el-button v-if="row.status === 'DRAFT'" link type="danger" size="small" @click="deleteOrder(row)">
+                  作废
+                </el-button>
+              </template>
+            </el-table-column>
+          </table-table>
+        </el-card>
+      </div>
+    </div>
+
+    <!-- Create/Edit Form Dialog -->
+    <el-dialog v-model="createDialogVisible" title="发起形态转换申请 (1:N / N:1 / N:N)" width="850px" destroy-on-close :close-on-click-modal="false">
+      <el-form :model="form" label-width="110px" size="default">
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="存货类别" required>
+              <el-radio-group v-model="form.stockCategory" @change="handleStockCategoryChange">
+                <el-radio label="FREE">普通存货 (自由库存)</el-radio>
+                <el-radio label="PLEDGED">抵质押存货 (质押物)</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="关联质押单" v-if="form.stockCategory === 'PLEDGED'" required>
+              <el-select v-model="form.sourcePledgeId" placeholder="请选择质押单号" style="width: 100%;" @change="handlePledgeChange">
+                <el-option label="PLG-20260510-888 (可抵质额￥90,000 / 质押率80%)" value="plg-8888"></el-option>
+                <el-option label="PLG-20260601-999 (可抵质额￥150,000 / 质押率75%)" value="plg-9999"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="监管仓库" required>
+              <el-select v-model="form.warehouseId" style="width: 100%;">
+                <el-option label="森云华南大宗商品1号仓" value="wh-01"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="备注说明">
+              <el-input v-model="form.remark" placeholder="录入加工拆分或组合的理由说明" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <!-- Inputs Section -->
+        <div class="form-section-title">
+          1. 投入原料列表 (需同源存货) 
+          <el-button type="primary" size="small" icon="Plus" style="margin-left: 12px;" @click="openSelectStockModal">
+            选择投入原料
+          </el-button>
+        </div>
+
+        <el-table :data="form.inputs" border style="width: 100%; margin-bottom: 16px;" size="small">
+          <el-table-column prop="skuCode" label="SKU编码" width="110" />
+          <el-table-column prop="skuName" label="原料名称" />
+          <el-table-column prop="specification" label="规格型号" width="120" />
+          <el-table-column label="存货状态" width="100">
+            <template #default="{ row }">
+              <el-tag size="small" :type="row.stockStatus === 'PLEDGED' ? 'danger' : 'info'">
+                {{ row.stockStatus === 'PLEDGED' ? '质押中' : '正常' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="投入数量" width="130">
+            <template #default="{ row }">
+              <el-input-number v-model="row.quantity" :min="0.1" :step="1" size="small" @change="recalc" />
+            </template>
+          </el-table-column>
+          <el-table-column prop="unit" label="单位" width="60" />
+          <el-table-column label="原单价" width="90">
+            <template #default="{ row }">￥{{ row.unitPrice }}</template>
+          </el-table-column>
+          <el-table-column label="金额小计" width="110">
+            <template #default="{ row }">
+              ￥{{ (row.quantity * row.unitPrice).toLocaleString() }}
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="60">
+            <template #default="{ $index }">
+              <el-button link type="danger" icon="Delete" @click="removeInputItem($index)" />
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <!-- Outputs Section -->
+        <div class="form-section-title">
+          2. 预告产出物形态列表 (大宗行情自动联动计价)
+          <el-button type="success" size="small" icon="Plus" style="margin-left: 12px;" @click="addOutputItem">
+            添加产出物
+          </el-button>
+        </div>
+
+        <el-table :data="form.outputs" border style="width: 100%;" size="small">
+          <el-table-column label="产出物料名称" width="180">
+            <template #default="{ row }">
+              <el-select v-model="row.skuCode" placeholder="选择物料" size="small" @change="val => handleOutputSkuChange(row, val)">
+                <el-option label="通用胶合板A级 (1220*2440*15mm)" value="BOARD-A-15"></el-option>
+                <el-option label="建筑通用板材B级 (1220*2440*12mm)" value="BOARD-B-12"></el-option>
+                <el-option label="工业颗粒锯末木屑 (标准散装)" value="WOOD-DUST-01"></el-option>
+              </el-select>
+            </template>
+          </el-table-column>
+          <el-table-column label="预估产出数量" width="140">
+            <template #default="{ row }">
+              <el-input-number v-model="row.expectedQuantity" :min="0.1" :step="1" size="small" @change="recalc" />
+            </template>
+          </el-table-column>
+          <el-table-column prop="unit" label="单位" width="60" />
+          <el-table-column label="大宗行情基准单价" width="160">
+            <template #default="{ row }">
+              <span style="font-weight: bold; color: #1890ff;">￥{{ row.marketPrice }}</span>
+              <span class="price-tag">行情只读</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="预估货值小计" width="120">
+            <template #default="{ row }">
+              ￥{{ (row.expectedQuantity * row.marketPrice).toLocaleString() }}
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="60">
+            <template #default="{ $index }">
+              <el-button link type="danger" icon="Delete" @click="removeOutputItem($index)" />
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <!-- Calculation & Risk Trial Panel -->
+        <div :class="['calc-panel', isRiskAlert ? 'danger' : '']">
+          <el-row :gutter="16" style="font-size: 14px;">
+            <el-col :span="6">
+              投入总货值：<strong>￥{{ totalInputVal.toLocaleString() }}</strong>
+            </el-col>
+            <el-col :span="6">
+              预估产出总货值：<strong :style="{ color: isRiskAlert ? '#f5222d' : '#52c41a' }">￥{{ totalOutputVal.toLocaleString() }}</strong>
+            </el-col>
+            <el-col :span="6">
+              货值差额：<strong :style="{ color: valueDiff < 0 ? '#f5222d' : '#52c41a' }">{{ valueDiff >= 0 ? '+' : '' }}￥{{ valueDiff.toLocaleString() }}</strong>
+            </el-col>
+            <el-col :span="6" v-if="form.stockCategory === 'PLEDGED'">
+              预计质押覆盖率：<strong>{{ calcCoverageRatio }}%</strong>
+            </el-col>
+          </el-row>
+          <div v-if="isRiskAlert" style="margin-top: 8px; color: #f5222d; font-size: 13px; font-weight: bold;">
+            ⚠️ 风险试算预警：转换后质押总货值(￥{{ totalOutputVal.toLocaleString() }}) 跌破警戒线(￥90,000.00)，估算货值缺口 ￥{{ (90000 - totalOutputVal).toLocaleString() }}！
+          </div>
+        </div>
+      </el-form>
+
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="createDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitOrderForm">
+            提交申请进入审批流
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- Select Input Stock Modal (With Anti-Mix & Anti-Warrant Rules Test) -->
+    <el-dialog v-model="selectStockDialogVisible" title="选择投入原料 (支持同源校验与仓单硬卡扣阻断测试)" width="700px">
+      <el-alert title="【规则说明】仓单中货物已在交易所/仓单质押锁定，系统硬性禁止选择转换；不同质押单存货严禁混合投料。" type="warning" show-icon style="margin-bottom: 12px;" />
+      
+      <el-table :data="candidateStockList" border style="width: 100%;" @selection-change="handleStockSelectionChange">
+        <el-table-column type="selection" width="45" :selectable="checkStockSelectable" />
+        <el-table-column prop="skuCode" label="SKU编码" width="110" />
+        <el-table-column prop="skuName" label="存货名称" />
+        <el-table-column prop="pledgeNo" label="所属质押单" width="140" />
+        <el-table-column label="存货状态" width="110">
+          <template #default="{ row }">
+            <el-tag v-if="row.stockStatus === 'IN_WARRANT'" type="danger" effect="dark">
+              🚫 仓单中 (禁)
+            </el-tag>
+            <el-tag v-else-if="row.stockStatus === 'PLEDGED'" type="warning">
+              质押中
+            </el-tag>
+            <el-tag v-else type="info">普通正常</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="quantity" label="可用库存" width="90" />
+      </el-table>
+
+      <template #footer>
+        <el-button @click="selectStockDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmSelectStock">确认添加所选</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Risk Warning & Force Submit Modal -->
+    <el-dialog v-model="riskDialogVisible" title="⚠️ 质押货值跌价风险警示" width="500px" :close-on-click-modal="false">
+      <div style="text-align: center; padding: 10px 0;">
+        <el-icon style="font-size: 48px; color: #f5222d;"><WarningFilled /></el-icon>
+        <h3 style="color: #f5222d; margin: 10px 0;">预计质押货值已跌破警戒线！</h3>
+        <p style="text-align: left; background: #fff2f0; padding: 12px; border-radius: 6px; color: #434343; font-size: 13px; line-height: 1.6;">
+          转换后预计质押总货值 (<strong>￥{{ totalOutputVal.toLocaleString() }}</strong>) 低于融资本金警戒线 (<strong>￥90,000.00</strong>)！<br>
+          • 预计货值缺口：<strong style="color:#f5222d;">￥{{ (90000 - totalOutputVal).toLocaleString() }}</strong><br>
+          • 缺口比例：<strong>{{ ((90000 - totalOutputVal)/90000 * 100).toFixed(1) }}%</strong>
+        </p>
+        <p style="font-size: 12px; color: #8c8c8c;">提示：若选择【执意提交】，单据及关联质押单将被打上高风险告警标记，并同步通知资方与风控日志留痕。</p>
+      </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="riskDialogVisible = false">取消转换 (返回调整)</el-button>
+          <el-button type="danger" @click="forceSubmitHighRisk">
+            执意提交 (标记高风险告警)
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- Order Detail & Traceability Modal -->
+    <el-dialog v-model="detailDialogVisible" title="形态转换单全路径溯源详情" width="750px">
+      <div v-if="currentDetail">
+        <el-descriptions title="单据基本信息" :column="2" border>
+          <el-descriptions-item label="转换单号">{{ currentDetail.convertOrderNo }}</el-descriptions-item>
+          <el-descriptions-item label="单据状态">
+            <el-tag :type="getStatusTag(currentDetail.status)">{{ getStatusText(currentDetail.status) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="存货类别">{{ currentDetail.stockCategory === 'PLEDGED' ? '抵质押存货' : '普通存货' }}</el-descriptions-item>
+          <el-descriptions-item label="关联质押单">{{ currentDetail.sourcePledgeNo || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="高风险告警">
+            <el-tag :type="currentDetail.isHighRisk ? 'danger' : 'success'">
+              {{ currentDetail.isHighRisk ? '⚠️ 高风险告警生效' : '无风险' }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="告警原因">{{ currentDetail.riskWarningReason || '无' }}</el-descriptions-item>
+        </el-descriptions>
+
+        <div style="margin-top: 16px; font-weight: bold; font-size: 14px;">货权与质押链条穿透图</div>
+        <div style="background: #fafafa; border: 1px solid #f0f0f0; padding: 12px; border-radius: 6px; margin-top: 8px; font-size: 12px; line-height: 1.8;">
+          <div>📦 <strong>原始质押单</strong>：{{ currentDetail.sourcePledgeNo || '无质押' }}</div>
+          <div style="padding-left: 20px;">└─ ⬇️ <strong>投入原料扣减锁定</strong>：
+            <span v-for="inp in currentDetail.inputs" :key="inp.itemId">
+              {{ inp.skuName }} x {{ inp.quantity }}{{ inp.unit }} (状态: IN_PROCESSING)
+            </span>
+          </div>
+          <div style="padding-left: 40px;">└─ ⚙️ <strong>形态转换核算</strong>：单号 {{ currentDetail.convertOrderNo }} (大宗行情联动计价)</div>
+          <div style="padding-left: 60px;">└─ ⬆️ <strong>产出物自动挂载原质押单</strong>：
+            <div v-for="out in currentDetail.outputs" :key="out.itemId" style="padding-left: 20px; color: #1890ff;">
+              • {{ out.skuName }} x {{ out.expectedQuantity }}{{ out.unit }} (基准价 ￥{{ out.marketPrice }}) ➜ 已继承挂载
+            </div>
+          </div>
+        </div>
+      </div>
+    </dialog>
+  </div>
+
+  <script>
+    const { createApp, ref, computed } = Vue;
+
+    const app = createApp({
+      setup() {
+        // Search Form
+        const searchForm = ref({
+          stockCategory: '',
+          status: '',
+          isHighRisk: ''
+        });
+
+        // Mock Order List
+        const orderList = ref([
+          {
+            id: 'ord-cvt-001',
+            convertOrderNo: 'CVT-20260724-001',
+            stockCategory: 'PLEDGED',
+            sourcePledgeId: 'plg-8888',
+            sourcePledgeNo: 'PLG-20260510-888',
+            warehouseId: 'wh-01',
+            warehouseName: '森云华南大宗商品1号仓',
+            status: 'PENDING_APPROVAL',
+            totalInputVal: 100000.00,
+            totalOutputVal: 81000.00,
+            valueDiff: -19000.00,
+            isHighRisk: true,
+            riskWarningReason: '转换后预计总货值(￥81,000.00)低于融资本金警戒线(￥90,000.00)，缺口￥9,000.00',
+            inputs: [
+              { itemId: 'i-1', skuCode: 'RAW-LOG-A', skuName: '进口松木原木(A级)', quantity: 10, unit: '吨', unitPrice: 10000 }
+            ],
+            outputs: [
+              { itemId: 'o-1', skuName: '通用胶合板A级', expectedQuantity: 10, unit: '吨', marketPrice: 6000 },
+              { itemId: 'o-2', skuName: '建筑通用板材B级', expectedQuantity: 4, unit: '吨', marketPrice: 5000 },
+              { itemId: 'o-3', skuName: '工业颗粒锯末木屑', expectedQuantity: 2, unit: '吨', marketPrice: 500 }
+            ]
+          },
+          {
+            id: 'ord-cvt-002',
+            convertOrderNo: 'CVT-20260723-009',
+            stockCategory: 'FREE',
+            sourcePledgeId: '',
+            sourcePledgeNo: '',
+            warehouseId: 'wh-01',
+            warehouseName: '森云华南大宗商品1号仓',
+            status: 'PROCESSING',
+            totalInputVal: 50000.00,
+            totalOutputVal: 52000.00,
+            valueDiff: 2000.00,
+            isHighRisk: false,
+            riskWarningReason: '',
+            inputs: [
+              { itemId: 'i-2', skuCode: 'STEEL-COIL-01', skuName: '热轧钢卷(Q235)', quantity: 10, unit: '吨', unitPrice: 5000 }
+            ],
+            outputs: [
+              { itemId: 'o-4', skuName: '定尺切割钢板', expectedQuantity: 9.8, unit: '吨', marketPrice: 5300 }
+            ]
+          }
+        ]);
+
+        // High Risk Count
+        const highRiskCount = computed(() => orderList.value.filter(o => o.isHighRisk).length);
+
+        // Filtered Orders
+        const filteredOrders = computed(() => {
+          return orderList.value.filter(item => {
+            if (searchForm.value.stockCategory && item.stockCategory !== searchForm.value.stockCategory) return false;
+            if (searchForm.value.status && item.status !== searchForm.value.status) return false;
+            if (searchForm.value.isHighRisk !== '' && searchForm.value.isHighRisk !== null && item.isHighRisk !== searchForm.value.isHighRisk) return false;
+            return true;
+          });
+        });
+
+        // Dialog Visibilities
+        const createDialogVisible = ref(false);
+        const selectStockDialogVisible = ref(false);
+        const riskDialogVisible = ref(false);
+        const detailDialogVisible = ref(false);
+        const currentDetail = ref(null);
+
+        // Form Object
+        const form = ref({
+          stockCategory: 'PLEDGED',
+          sourcePledgeId: 'plg-8888',
+          warehouseId: 'wh-01',
+          remark: '',
+          inputs: [
+            { itemId: 'i-10', skuCode: 'RAW-LOG-A', skuName: '进口松木原木(A级)', specification: 'Ø30cm*4m', unit: '吨', stockStatus: 'PLEDGED', quantity: 10, unitPrice: 10000 }
+          ],
+          outputs: [
+            { itemId: 'o-10', skuCode: 'BOARD-A-15', skuName: '通用胶合板A级', specification: '1220*2440*15mm', unit: '吨', expectedQuantity: 10, marketPrice: 6000 },
+            { itemId: 'o-11', skuCode: 'BOARD-B-12', skuName: '建筑通用板材B级', specification: '1220*2440*12mm', unit: '吨', expectedQuantity: 4, marketPrice: 5000 },
+            { itemId: 'o-12', skuCode: 'WOOD-DUST-01', skuName: '工业颗粒锯末木屑', specification: '标准散装', unit: '吨', expectedQuantity: 2, marketPrice: 500 }
+          ]
+        });
+
+        // Candidate Stock List for Selection (Testing rules)
+        const candidateStockList = ref([
+          { stockId: 'stk-01', skuCode: 'RAW-LOG-A', skuName: '进口松木原木(A级)', pledgeNo: 'PLG-20260510-888', stockStatus: 'PLEDGED', quantity: 50, unitPrice: 10000, unit: '吨' },
+          { stockId: 'stk-02', skuCode: 'RAW-LOG-B', skuName: '进口松木原木(B级)', pledgeNo: 'PLG-20260510-888', stockStatus: 'PLEDGED', quantity: 30, unitPrice: 8500, unit: '吨' },
+          { stockId: 'stk-03', skuCode: 'WARRANT-STEEL-01', skuName: '冷轧钢卷(交易所交割件)', pledgeNo: 'PLG-20260510-888', stockStatus: 'IN_WARRANT', quantity: 100, unitPrice: 6500, unit: '吨' },
+          { stockId: 'stk-04', skuCode: 'FREE-WOOD-01', skuName: '自由樟子松原木', pledgeNo: '自由库存', stockStatus: 'NORMAL', quantity: 80, unitPrice: 7000, unit: '吨' }
+        ]);
+
+        const selectedStockItems = ref([]);
+
+        // Calculations
+        const totalInputVal = computed(() => {
+          return form.value.inputs.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+        });
+
+        const totalOutputVal = computed(() => {
+          return form.value.outputs.reduce((sum, item) => sum + (item.expectedQuantity * item.marketPrice), 0);
+        });
+
+        const valueDiff = computed(() => totalOutputVal.value - totalInputVal.value);
+
+        const calcCoverageRatio = computed(() => {
+          if (!totalOutputVal.value) return 0;
+          return ((totalOutputVal.value * 0.8) / 90000 * 100).toFixed(1);
+        });
+
+        const isRiskAlert = computed(() => {
+          if (form.value.stockCategory !== 'PLEDGED') return false;
+          return totalOutputVal.value * 0.8 < 90000;
+        });
+
+        // Form Handlers
+        const openCreateDialog = () => {
+          createDialogVisible.value = true;
+        };
+
+        const handleStockCategoryChange = () => {
+          form.value.inputs = [];
+          if (form.value.stockCategory === 'FREE') {
+            form.value.sourcePledgeId = '';
+          } else {
+            form.value.sourcePledgeId = 'plg-8888';
+          }
+        };
+
+        const handlePledgeChange = () => {
+          form.value.inputs = [];
+        };
+
+        const openSelectStockModal = () => {
+          selectStockDialogVisible.value = true;
+        };
+
+        // Anti-Warrant Rule Check
+        const checkStockSelectable = (row) => {
+          return row.stockStatus !== 'IN_WARRANT';
+        };
+
+        const handleStockSelectionChange = (val) => {
+          selectedStockItems.value = val;
+        };
+
+        const confirmSelectStock = () => {
+          // Anti-Mix Check
+          if (form.value.stockCategory === 'PLEDGED') {
+            const hasFree = selectedStockItems.value.some(s => s.stockStatus === 'NORMAL');
+            if (hasFree) {
+              ElementPlus.ElMessage.error('❌ 规约拦截：抵质押存货转换严禁勾选普通自由库存（不允许混合加工）！');
+              return;
+            }
+          }
+          
+          selectedStockItems.value.forEach(item => {
+            if (!form.value.inputs.some(i => i.skuCode === item.skuCode)) {
+              form.value.inputs.push({
+                itemId: 'i-' + Date.now(),
+                skuCode: item.skuCode,
+                skuName: item.skuName,
+                specification: '标准',
+                unit: item.unit,
+                stockStatus: item.stockStatus,
+                quantity: 1,
+                unitPrice: item.unitPrice
+              });
+            }
+          });
+          selectStockDialogVisible.value = false;
+        };
+
+        const removeInputItem = (index) => {
+          form.value.inputs.splice(index, 1);
+        };
+
+        const addOutputItem = () => {
+          form.value.outputs.push({
+            itemId: 'o-' + Date.now(),
+            skuCode: 'BOARD-A-15',
+            skuName: '通用胶合板A级',
+            specification: '1220*2440*15mm',
+            unit: '吨',
+            expectedQuantity: 1,
+            marketPrice: 6000
+          });
+        };
+
+        const removeOutputItem = (index) => {
+          form.value.outputs.splice(index, 1);
+        };
+
+        const handleOutputSkuChange = (row, val) => {
+          if (val === 'BOARD-A-15') {
+            row.skuName = '通用胶合板A级';
+            row.marketPrice = 6000;
+          } else if (val === 'BOARD-B-12') {
+            row.skuName = '建筑通用板材B级';
+            row.marketPrice = 5000;
+          } else if (val === 'WOOD-DUST-01') {
+            row.skuName = '工业颗粒锯末木屑';
+            row.marketPrice = 500;
+          }
+        };
+
+        const submitOrderForm = () => {
+          if (form.value.inputs.length === 0) {
+            ElementPlus.ElMessage.warning('请至少添加一种投入原料');
+            return;
+          }
+          if (form.value.outputs.length === 0) {
+            ElementPlus.ElMessage.warning('请至少添加一种产出物形态');
+            return;
+          }
+
+          if (isRiskAlert.value) {
+            riskDialogVisible.value = true;
+          } else {
+            doSubmit(false);
+          }
+        };
+
+        const forceSubmitHighRisk = () => {
+          riskDialogVisible.value = false;
+          doSubmit(true);
+        };
+
+        const doSubmit = (isHighRisk) => {
+          const newOrder = {
+            id: 'ord-' + Date.now(),
+            convertOrderNo: 'CVT-20260724-0' + (orderList.value.length + 1),
+            stockCategory: form.value.stockCategory,
+            sourcePledgeId: form.value.sourcePledgeId,
+            sourcePledgeNo: form.value.stockCategory === 'PLEDGED' ? 'PLG-20260510-888' : '',
+            warehouseId: 'wh-01',
+            warehouseName: '森云华南大宗商品1号仓',
+            status: 'PENDING_APPROVAL',
+            totalInputVal: totalInputVal.value,
+            totalOutputVal: totalOutputVal.value,
+            valueDiff: valueDiff.value,
+            isHighRisk: isHighRisk,
+            riskWarningReason: isHighRisk ? `转换后预计总货值(￥${totalOutputVal.value.toLocaleString()})低于融资本金警戒线(￥90,000.00)，缺口￥${(90000 - totalOutputVal.value).toLocaleString()}` : '',
+            inputs: JSON.parse(JSON.stringify(form.value.inputs)),
+            outputs: JSON.parse(JSON.stringify(form.value.outputs))
+          };
+
+          orderList.value.unshift(newOrder);
+          createDialogVisible.value = false;
+          ElementPlus.ElNotification({
+            title: isHighRisk ? '⚠️ 已提交 (带高风险告警)' : '提交成功',
+            message: `形态转换单 ${newOrder.convertOrderNo} 已进入流程配置自定义审批节点`,
+            type: isHighRisk ? 'warning' : 'success'
+          });
+        };
+
+        const handleStockIn = (row) => {
+          row.status = 'COMPLETED';
+          ElementPlus.ElMessage.success(`单据 ${row.convertOrderNo} 成品已确认到货入库，产出物已自动继承挂载至质押单！`);
+        };
+
+        const deleteOrder = (row) => {
+          const idx = orderList.value.findIndex(o => o.id === row.id);
+          if (idx !== -1) {
+            orderList.value.splice(idx, 1);
+            ElementPlus.ElMessage.info('转换单已作废');
+          }
+        };
+
+        const viewOrderDetail = (row) => {
+          currentDetail.value = row;
+          detailDialogVisible.value = true;
+        };
+
+        const getStatusTag = (status) => {
+          switch(status) {
+            case 'DRAFT': return 'info';
+            case 'PENDING_APPROVAL': return 'warning';
+            case 'PROCESSING': return 'primary';
+            case 'COMPLETED': return 'success';
+            default: return 'info';
+          }
+        };
+
+        const getStatusText = (status) => {
+          switch(status) {
+            case 'DRAFT': return '草稿';
+            case 'PENDING_APPROVAL': return '待审批';
+            case 'PROCESSING': return '在产/加工中';
+            case 'COMPLETED': return '已完成';
+            default: return status;
+          }
+        };
+
+        return {
+          searchForm,
+          orderList,
+          filteredOrders,
+          highRiskCount,
+          createDialogVisible,
+          selectStockDialogVisible,
+          riskDialogVisible,
+          detailDialogVisible,
+          currentDetail,
+          form,
+          candidateStockList,
+          totalInputVal,
+          totalOutputVal,
+          valueDiff,
+          calcCoverageRatio,
+          isRiskAlert,
+          openCreateDialog,
+          handleStockCategoryChange,
+          handlePledgeChange,
+          openSelectStockModal,
+          checkStockSelectable,
+          handleStockSelectionChange,
+          confirmSelectStock,
+          removeInputItem,
+          addOutputItem,
+          removeOutputItem,
+          handleOutputSkuChange,
+          submitOrderForm,
+          forceSubmitHighRisk,
+          handleStockIn,
+          deleteOrder,
+          viewOrderDetail,
+          getStatusTag,
+          getStatusText
+        };
+      }
+    });
+
+    for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+      app.component(key, component);
+    }
+
+    app.use(ElementPlus);
+    app.mount('#app');
+  </script>
+</body>
+</html>

@@ -1,0 +1,3055 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>货物加工管理 - Element UI 风格</title>
+    <style>
+        /* CSS reset and Element UI design system */
+        :root {
+            --primary-color: #d4a04c; /* Customized theme gold/orange */
+            --primary-light: #fdf6ec; /* Light background for warnings/hover */
+            --bg-color: #f5f7fa;      /* Element main background */
+            --sidebar-bg: #304156;    /* Element dark sidebar */
+            --menu-text: #bfcbd9;
+            --menu-active-text: #d4a04c;
+            --text-main: #303133;
+            --text-regular: #606266;
+            --text-secondary: #909399;
+            --border-base: #dcdfe6;
+            --border-light: #ebeef5;
+            --success-color: #67c23a;
+            --danger-color: #f56c6c;
+            --warning-color: #e6a23c;
+            --info-color: #409eff;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Layout */
+        .sidebar {
+            width: 240px;
+            background-color: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            transition: width 0.28s;
+            z-index: 1001;
+            box-shadow: 2px 0 6px rgba(0,21,41,0.35);
+        }
+        
+        .logo-area {
+            height: 60px;
+            line-height: 60px;
+            background: #2b2f3a;
+            color: #fff;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #1f2d3d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .menu-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 0;
+        }
+        
+        .menu-group-title {
+            padding: 10px 20px;
+            font-size: 12px;
+            color: #5a5e66;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .menu-item {
+            height: 50px;
+            line-height: 50px;
+            padding: 0 20px 0 35px;
+            cursor: pointer;
+            color: var(--menu-text);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color .3s, color .3s;
+        }
+        
+        .menu-item:hover {
+            background-color: #263445;
+            color: #fff;
+        }
+        
+        .menu-item.active {
+            color: var(--menu-active-text) !important;
+            background-color: #263445;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* Top Header */
+        .header {
+            height: 50px;
+            background-color: #fff;
+            box-shadow: 0 1px 4px rgba(0,21,41,0.08);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+            z-index: 9;
+        }
+        
+        .top-nav {
+            display: flex;
+            height: 100%;
+        }
+        
+        .top-nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            cursor: pointer;
+            color: var(--text-regular);
+            font-size: 14px;
+            position: relative;
+            transition: color .3s;
+        }
+        
+        .top-nav-item:hover {
+            color: var(--primary-color);
+        }
+        
+        .top-nav-item.active {
+            color: var(--primary-color);
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .top-nav-item.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+        
+        /* Tabs Card Style */
+        .tabs {
+            height: 34px;
+            background-color: #fff;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: flex-end;
+            padding: 0 15px;
+            gap: 4px;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.05);
+        }
+        
+        .tab-item {
+            height: 26px;
+            line-height: 26px;
+            padding: 0 15px;
+            font-size: 12px;
+            color: #495060;
+            border: 1px solid #d8dce5;
+            background-color: #fff;
+            border-radius: 3px 3px 0 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all .3s;
+        }
+        
+        .tab-item.active {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+        
+        .tab-close {
+            font-size: 12px;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color .3s;
+        }
+        
+        .tab-close:hover {
+            background-color: rgba(0,0,0,0.15);
+        }
+        
+        .tab-item.active .tab-close:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        
+        /* Page Frame */
+        .page-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        
+        /* Element Card Container */
+        .el-card {
+            border: 1px solid var(--border-light);
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            transition: .3s;
+            overflow: hidden;
+        }
+        
+        .el-card__header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-light);
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-title::before {
+            content: "";
+            width: 4px;
+            height: 16px;
+            background-color: var(--primary-color);
+            display: inline-block;
+            border-radius: 2px;
+        }
+        
+        .el-card__body {
+            padding: 20px;
+        }
+        
+        /* Element Tabs for Status Filter */
+        .el-tabs-header {
+            display: flex;
+            border-bottom: 2px solid var(--border-light);
+            margin-bottom: 15px;
+            gap: 30px;
+            padding: 0 5px;
+        }
+        
+        .el-tab-pane {
+            padding: 12px 0;
+            font-size: 14px;
+            color: var(--text-regular);
+            cursor: pointer;
+            font-weight: 500;
+            position: relative;
+            transition: color .3s;
+        }
+        
+        .el-tab-pane:hover {
+            color: var(--primary-color);
+        }
+        
+        .el-tab-pane.active {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .el-tab-pane.active::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+        
+        /* Element Form Fields */
+        .el-form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px 30px;
+            margin-bottom: 10px;
+        }
+        
+        .el-form-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+        }
+        
+        .el-form-item.full-width {
+            grid-column: span 3;
+        }
+        
+        .el-form-label {
+            font-size: 14px;
+            color: var(--text-regular);
+            font-weight: 500;
+        }
+        
+        .el-form-label.required::before {
+            content: '*';
+            color: var(--danger-color);
+            margin-right: 4px;
+        }
+        
+        .el-input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .el-input__inner {
+            width: 100%;
+            height: 36px;
+            line-height: 36px;
+            border: 1px solid var(--border-base);
+            border-radius: 4px;
+            padding: 0 15px;
+            font-size: 14px;
+            color: var(--text-main);
+            outline: none;
+            background-color: #fff;
+            box-sizing: border-box;
+            transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+        }
+        
+        .el-input__inner:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .el-input__inner[disabled], .el-input__inner[readonly] {
+            background-color: #f5f7fa;
+            color: var(--text-secondary);
+            border-color: #e4e7ed;
+            cursor: not-allowed;
+        }
+        
+        select.el-input__inner {
+            height: 36px;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23c0c4cc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+            padding-right: 30px;
+        }
+        
+        textarea.el-input__inner {
+            height: auto;
+            padding: 10px 15px;
+            min-height: 80px;
+            font-family: inherit;
+        }
+        
+        /* Element Table Styling */
+        .el-table {
+            width: 100%;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 14px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .el-table th, .el-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-light);
+            text-align: left;
+        }
+        
+        .el-table th {
+            background-color: #f5f7fa;
+            color: var(--text-regular);
+            font-weight: 600;
+            border-bottom: 2px solid #e4e7ed;
+        }
+        
+        .el-table td {
+            color: var(--text-regular);
+        }
+        
+        .el-table tbody tr:hover td {
+            background-color: #f5f7fa;
+        }
+        
+        /* Tag Status Style */
+        .el-tag {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            height: 24px;
+            padding: 0 8px;
+            font-size: 12px;
+            line-height: 1;
+            border-radius: 4px;
+            box-sizing: border-box;
+            border: 1px solid var(--border-light);
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        
+        .el-tag--info {
+            background-color: #f4f4f5;
+            border-color: #e9e9eb;
+            color: #909399;
+        }
+        
+        .el-tag--success {
+            background-color: #f0f9eb;
+            border-color: #e1f3d8;
+            color: #67c23a;
+        }
+        
+        .el-tag--warning {
+            background-color: #fdf6ec;
+            border-color: #faecd8;
+            color: #e6a23c;
+        }
+        
+        .el-tag--danger {
+            background-color: #fef0f0;
+            border-color: #fde2e2;
+            color: #f56c6c;
+        }
+        
+        /* Element Buttons */
+        .el-button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+            white-space: nowrap;
+            cursor: pointer;
+            background: #fff;
+            border: 1px solid var(--border-base);
+            color: var(--text-regular);
+            text-align: center;
+            box-sizing: border-box;
+            outline: none;
+            margin: 0;
+            transition: .1s;
+            font-weight: 500;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 4px;
+            user-select: none;
+        }
+        
+        .el-button:hover {
+            color: var(--primary-color);
+            border-color: rgba(212,160,76,0.5);
+            background-color: var(--primary-light);
+        }
+        
+        .el-button--primary {
+            color: #fff;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .el-button--primary:hover {
+            background-color: #c49140;
+            border-color: #c49140;
+            color: #fff;
+        }
+        
+        .el-button--success {
+            color: #fff;
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        
+        .el-button--success:hover {
+            background-color: #5daf34;
+            border-color: #5daf34;
+            color: #fff;
+        }
+        
+        .el-button--danger {
+            color: #fff;
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+        
+        .el-button--danger:hover {
+            background-color: #f78989;
+            border-color: #f78989;
+            color: #fff;
+        }
+
+        .el-button--warning {
+            color: #fff;
+            background-color: var(--warning-color);
+            border-color: var(--warning-color);
+        }
+
+        .el-button--warning:hover {
+            background-color: #c9882f;
+            border-color: #c9882f;
+            color: #fff;
+        }
+        
+        .el-button--text {
+            border-color: transparent;
+            color: var(--primary-color);
+            background: transparent;
+            padding-left: 0;
+            padding-right: 0;
+        }
+        
+        .el-button--text:hover {
+            color: #c49140;
+            background-color: transparent;
+        }
+        
+        .el-button--text.el-button--danger {
+            color: var(--danger-color);
+        }
+        
+        .el-button--text.el-button--danger:hover {
+            color: #f78989;
+        }
+        
+        .el-button--small {
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+        
+        .el-button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* Upload Component Style */
+        .el-upload {
+            border: 1px dashed var(--border-base);
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            width: 120px;
+            height: 120px;
+            box-sizing: border-box;
+            background-color: #fbfdff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: border-color .3s;
+        }
+        
+        .el-upload:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .el-upload-icon {
+            font-size: 28px;
+            color: #8c939d;
+            margin-bottom: 8px;
+        }
+        
+        .el-upload-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 0 8px;
+        }
+        
+        /* Read-only details style */
+        .el-descriptions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            overflow: hidden;
+            font-size: 14px;
+        }
+        
+        .el-descriptions-item {
+            display: flex;
+            border-bottom: 1px solid var(--border-light);
+            border-right: 1px solid var(--border-light);
+        }
+        
+        .el-descriptions-label {
+            width: 130px;
+            padding: 12px 15px;
+            background-color: #fafafa;
+            color: var(--text-regular);
+            font-weight: 500;
+            border-right: 1px solid var(--border-light);
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        
+        .el-descriptions-value {
+            padding: 12px 15px;
+            color: var(--text-main);
+            flex: 1;
+            box-sizing: border-box;
+        }
+        
+        /* Action Bar alignment */
+        .el-action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        /* Stamp style */
+        .el-stamp {
+            position: absolute;
+            right: 50px;
+            top: 25px;
+            width: 80px;
+            height: 80px;
+            border: 4px double var(--success-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 18px;
+            text-transform: uppercase;
+            transform: rotate(-20deg);
+            background-color: rgba(103,194,58,0.06);
+            z-index: 10;
+        }
+        
+        /* Lineage Tree Styling */
+        .el-tree-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            padding: 40px 20px;
+            background-color: #fafafa;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        
+        .el-tree-node {
+            background-color: #fff;
+            border: 1px solid var(--border-base);
+            border-radius: 4px;
+            width: 210px;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,0.06);
+            overflow: hidden;
+            transition: all .3s;
+            box-sizing: border-box;
+        }
+        
+        .el-tree-node.is-active {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 12px 0 rgba(212,160,76,0.15);
+        }
+
+        .el-tree-node.is-highlighted {
+            border-color: var(--success-color) !important;
+            box-shadow: 0 4px 18px rgba(103,194,58,0.3) !important;
+            transform: scale(1.06);
+        }
+        
+        .el-tree-node__header {
+            padding: 8px 12px;
+            background-color: #f5f7fa;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .el-tree-node.is-active .el-tree-node__header {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        .el-tree-node__body {
+            padding: 12px;
+        }
+        
+        .el-tree-node__title {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .el-tree-node__meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .el-tree-arrow {
+            font-size: 28px;
+            color: #c0c4cc;
+            user-select: none;
+        }
+        
+        /* Element Steps Component for Detail Views */
+        .el-steps-horizontal {
+            display: flex;
+            background: #fff;
+            padding: 15px 20px;
+            border-radius: 4px;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            justify-content: space-between;
+        }
+        
+        .el-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            position: relative;
+        }
+        .el-step:not(:last-child)::after {
+            content: "";
+            height: 2px;
+            background: var(--border-light);
+            flex: 1;
+            margin: 0 15px;
+        }
+        .el-step.is-active .el-step__icon {
+            background: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+        .el-step.is-completed .el-step__icon {
+            background: #fff;
+            color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        .el-step__icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--border-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+        .el-step__title {
+            font-size: 14px;
+            color: var(--text-regular);
+            font-weight: 500;
+        }
+        .el-step.is-active .el-step__title {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        .el-step.is-completed .el-step__title {
+            color: var(--success-color);
+        }
+
+        /* Interactive Dialog Overlays */
+        .el-dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease-out;
+        }
+        
+        .el-dialog {
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            animation: slideDown 0.25s ease-out;
+        }
+        
+        .el-dialog__header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .el-dialog__title {
+            line-height: 24px;
+            font-size: 16px;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        
+        .el-dialog__close {
+            background: transparent;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            font-size: 22px;
+            color: var(--text-secondary);
+            line-height: 1;
+            padding: 0;
+        }
+        
+        .el-dialog__close:hover {
+            color: var(--danger-color);
+        }
+        
+        .el-dialog__body {
+            padding: 20px;
+            color: var(--text-regular);
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .el-dialog__footer {
+            padding: 15px 20px 20px;
+            text-align: right;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .views-container {
+            display: none;
+        }
+        .views-container.active {
+            display: block;
+        }
+
+        /* PRD 标注系统样式 */
+        .prd-marker-target { position: relative; outline: 2px dashed #4F46E5 !important; outline-offset: 2px; }
+        .prd-marker {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 22px; height: 22px; border-radius: 50%;
+            background: #4F46E5; color: #fff; font-size: 11px; font-weight: 700;
+            cursor: pointer; position: absolute; z-index: 9999;
+            box-shadow: 0 2px 6px rgba(79,70,229,.4);
+            transition: transform .15s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        /* 预设静态标注定位在右上角 */
+        .prd-marker:not([style*="left"]) { top: -10px; right: -10px; }
+        .prd-marker:not([style*="left"]):hover { transform: scale(1.2) !important; }
+        
+        /* 自由打钉标注定位在中心点 */
+        .prd-marker[style*="left"] { transform: translate(-50%, -50%) !important; }
+        .prd-marker[style*="left"]:hover { transform: translate(-50%, -50%) scale(1.2) !important; }
+
+        .prd-tooltip {
+            display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+            background: #1E1B4B; color: #fff; padding: 6px 12px; border-radius: 6px;
+            font-size: 12px; white-space: nowrap; z-index: 10000; pointer-events: none;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .prd-tooltip::after {
+            content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+            border: 5px solid transparent; border-top-color: #1E1B4B;
+        }
+        .prd-marker:hover .prd-tooltip { display: block; }
+
+        .prd-popover {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #fff; border-radius: 12px; padding: 24px; z-index: 10001;
+            box-shadow: 0 20px 60px rgba(0,0,0,.15); max-width: 480px; width: 90%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .prd-popover.active { display: block; }
+        .prd-popover-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 10000;
+        }
+        .prd-popover-overlay.active { display: block; }
+        .prd-popover-id { font-size: 12px; color: #6366F1; font-weight: 600; margin-bottom: 4px; }
+        .prd-popover-title { font-size: 18px; font-weight: 700; color: #1E1B4B; margin-bottom: 12px; }
+        .prd-popover-desc { font-size: 14px; line-height: 1.6; color: #475569; }
+        .prd-popover-close {
+            position: absolute; top: 12px; right: 16px; background: none; border: none;
+            font-size: 20px; cursor: pointer; color: #94A3B8; line-height: 1;
+        }
+        .prd-popover-close:hover { color: #1E1B4B; }
+
+        /* 可视化标注编辑器及工具栏样式 */
+        .prd-toolbar {
+            position: fixed; top: 16px; right: 16px; z-index: 10002;
+            display: flex; gap: 8px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .prd-toggle-btn {
+            background: #4F46E5; color: #fff; border: none; border-radius: 8px;
+            padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+            box-shadow: 0 2px 8px rgba(79,70,229,.3); transition: all 0.2s ease;
+        }
+        .prd-toggle-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .prd-toggle-btn:active { transform: translateY(0); }
+        
+        .prd-edit-active .page-content { cursor: crosshair !important; position: relative !important; }
+        
+        .prd-editor-dialog-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 20000;
+            align-items: center; justify-content: center; backdrop-filter: blur(4px);
+        }
+        .prd-editor-dialog {
+            background: #fff; border-radius: 12px; width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            display: flex; flex-direction: column; overflow: hidden; animation: prdScaleIn 0.2s ease-out;
+        }
+        @keyframes prdScaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .prd-editor-dialog-header {
+            padding: 16px 20px; border-bottom: 1px solid #F1F5F9; display: flex; justify-content: space-between; align-items: center;
+            font-weight: 700; font-size: 16px; color: #1E293B;
+        }
+        .prd-editor-dialog-close { background: none; border: none; font-size: 22px; cursor: pointer; color: #94A3B8; line-height: 1; }
+        .prd-editor-dialog-close:hover { color: #1E293B; }
+        .prd-editor-dialog-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+        .prd-editor-field { display: flex; flex-direction: column; gap: 6px; }
+        .prd-editor-field label { font-size: 13px; font-weight: 600; color: #475569; }
+        .prd-editor-field input, .prd-editor-field textarea {
+            padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 14px; outline: none;
+            font-family: inherit; color: #1E293B;
+        }
+        .prd-editor-field input:focus, .prd-editor-field textarea:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+        .prd-editor-field textarea { min-height: 80px; resize: vertical; }
+        .prd-editor-dialog-footer {
+            padding: 16px 20px; border-top: 1px solid #F1F5F9; display: flex; justify-content: space-between; align-items: center;
+            background: #F8FAFC;
+        }
+        .prd-editor-btn {
+            padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
+            border: 1px solid #CBD5E1; background: #fff; color: #475569; transition: all 0.15s ease;
+        }
+        .prd-editor-btn:hover { background: #F1F5F9; color: #1E293B; }
+        .prd-editor-btn-primary { background: #3B82F6; border-color: #3B82F6; color: #fff; }
+        .prd-editor-btn-primary:hover { background: #2563EB; color: #fff; }
+        .prd-editor-btn-delete { background: #EF4444; border-color: #EF4444; color: #fff; }
+        .prd-editor-btn-delete:hover { background: #DC2626; color: #fff; }
+
+        .prd-unmapped-section {
+            margin-top: 40px; padding: 24px; border: 1px dashed #E2E8F0; border-radius: 8px;
+            background: #F8FAFC; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .prd-unmapped-section h3 { font-size: 16px; font-weight: 700; color: #475569; margin-bottom: 12px; }
+        .prd-unmapped-section ul { padding-left: 20px; }
+        .prd-unmapped-section li { font-size: 14px; line-height: 1.8; color: #64748B; }
+        .prd-markers-hidden .prd-marker { display: none !important; }
+        .prd-markers-hidden .prd-marker-target { outline: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar">
+        <div class="logo-area">
+            <span style="color:var(--primary-color); font-size:24px;">♚</span>
+            物联仓管风控系统
+        </div>
+        <div class="menu-list">
+            <div class="menu-group-title">仓储核心板块</div>
+            <div class="menu-item"><span style="font-size:12px;">▶</span> 库存查询</div>
+            <div class="menu-item"><span style="font-size:12px;">▶</span> 仓单管理</div>
+            <div class="menu-item"><span style="font-size:12px;">▶</span> 货权管理</div>
+            <div class="menu-group-title">仓储增值/加工</div>
+            <div class="menu-item active"><span style="font-size:12px;">▼</span> 货物加工管理</div>
+            <div class="menu-item" style="padding-left: 50px; color: var(--primary-color); font-weight: bold;"><span style="font-size:12px;">•</span> 加工申请</div>
+            <div class="menu-item" style="padding-left: 50px;"><span style="font-size:12px;">•</span> 流水血缘追溯</div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-content">
+        <!-- Top Nav bar -->
+        <div class="header">
+            <div class="top-nav">
+                <div class="top-nav-item">首页</div>
+                <div class="top-nav-item active">仓储管理</div>
+                <div class="top-nav-item">质押/监管</div>
+                <div class="top-nav-item">风控预警</div>
+                <div class="top-nav-item">驾驶舱</div>
+            </div>
+            <div style="font-size:14px; color:var(--text-regular);">
+                <span style="background-color: var(--primary-light); color: var(--primary-color); padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-right: 8px;">演示系统</span>
+                平台运营方 ▼
+            </div>
+        </div>
+        
+        <!-- Tab Bar -->
+        <div class="tabs">
+            <div class="tab-item">首页 <span class="tab-close">×</span></div>
+            <div class="tab-item active" id="tabTitle">加工转变单据列表 <span class="tab-close">×</span></div>
+        </div>
+
+        <!-- Render Content -->
+        <div class="page-content">
+
+            <!-- ================= VIEW 0: 单据列表页 (入口页) ================= -->
+            <div id="view0" class="views-container active">
+                <!-- Search filters -->
+                <div class="el-card" style="margin-bottom: 15px;">
+                    <div class="el-card__body" style="padding: 15px 20px;">
+                        <div class="el-form-grid">
+                            <div class="el-form-item">
+                                <span class="el-form-label">申请单号</span>
+                                <input type="text" class="el-input__inner" placeholder="请输入申请单号查询" id="filter_no">
+                            </div>
+                            <div class="el-form-item">
+                                <span class="el-form-label">货主</span>
+                                <select class="el-input__inner" id="filter_customer">
+                                    <option value="">全部货主</option>
+                                    <option value="富博流油公司">富博流油公司</option>
+                                    <option value="克格勃物流有限公司">克格勃物流有限公司</option>
+                                    <option value="泰拉能源公司">泰拉能源公司</option>
+                                </select>
+                            </div>
+                            <div class="el-form-item" style="display: flex; flex-direction: row; align-items: flex-end; gap: 10px;">
+                                <button class="el-button el-button--primary el-button--small" onclick="filterList()">查询</button>
+                                <button class="el-button el-button--small" onclick="resetFilters()">重置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status tabs -->
+                <div class="el-tabs-header">
+                    <div class="el-tab-pane active" onclick="switchTab('all', this)">全部 (5)</div>
+                    <div class="el-tab-pane" onclick="switchTab('待审批', this)">待审批 (1)</div>
+                    <div class="el-tab-pane" onclick="switchTab('待加工', this)">待加工 (1)</div>
+                    <div class="el-tab-pane" onclick="switchTab('已完成', this)">已完成 (2)</div>
+                    <div class="el-tab-pane" onclick="switchTab('已驳回', this)">已驳回 (1)</div>
+                </div>
+
+                <!-- Action button to initiate new bill -->
+                <div style="margin-bottom: 15px; display: flex; justify-content: flex-end;">
+                    <button class="el-button el-button--primary el-button--small" onclick="openNewApplication()">+ 发起加工申请</button>
+                </div>
+
+                <!-- Main Grid Table -->
+                <table class="el-table">
+                    <thead>
+                        <tr>
+                            <th>申请单号</th>
+                            <th>货主</th>
+                            <th>发生仓库</th>
+                            <th>货品类型</th>
+                            <th>关联单号</th>
+                            <th>申请日期</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listTableBody">
+                        <!-- Loaded Dynamically with Mock Data -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ================= VIEW 1: 发起加工申请 ================= -->
+            <div id="view1" class="views-container">
+                <!-- Steps Progress Bar -->
+                <div class="el-steps-horizontal">
+                    <div class="el-step is-active"><div class="el-step__icon">1</div><div class="el-step__title">运营发起加工</div></div>
+                    <div class="el-step"><div class="el-step__icon">2</div><div class="el-step__title">风控/主管审核</div></div>
+                    <div class="el-step"><div class="el-step__icon">3</div><div class="el-step__title">仓库结果登记</div></div>
+                    <div class="el-step"><div class="el-step__icon">4</div><div class="el-step__title">流水入账与溯源</div></div>
+                </div>
+
+                <div class="el-action-bar">
+                    <span class="prd-marker-target" style="font-size: 14px; color: var(--text-secondary);">注：提交后将锁扣原货物明细对应拟加工数量防并发。<span class="prd-marker" data-req-id="REQ-001" data-req-title="并发防死锁（库存锁定）" data-req-desc="运营发起加工申请的瞬间，系统必须按【提报的拟加工数量】冻结底层库存。在加工单处于【已驳回】、【已作废】或【已完成】之前，该部分数量禁止被用于出库、移库或解押转让。">1<span class="prd-tooltip">并发防死锁（库存锁定）</span></span></span>
+                    <div class="el-button-group">
+                        <button class="el-button el-button--small" onclick="backToList()">返回列表</button>
+                        <button class="el-button el-button--primary el-button--small" onclick="submitView1()">提交审批</button>
+                    </div>
+                </div>
+
+                <div class="el-card">
+                    <div class="el-card__header"><div class="card-title">基础信息</div></div>
+                    <div class="el-card__body">
+                        <div class="el-form-grid">
+                            <div class="el-form-item">
+                                <span class="el-form-label required">货主</span>
+                                <select class="el-input__inner" id="v1_customer" onchange="v1_handleGoodsTypeChange()">
+                                    <option value="">请选择货主公司</option>
+                                    <option value="富博流油公司" selected>富博流油公司</option>
+                                    <option value="克格勃物流有限公司">克格勃物流有限公司</option>
+                                    <option value="泰拉能源公司">泰拉能源公司</option>
+                                </select>
+                            </div>
+                            <div class="el-form-item">
+                                <span class="el-form-label required">仓库</span>
+                                <select class="el-input__inner" id="v1_warehouse" onchange="v1_handleGoodsTypeChange()">
+                                    <option value="">请选择仓库</option>
+                                    <option value="跑霸王仓库" selected>跑霸王仓库</option>
+                                    <option value="大米仓库">大米仓库</option>
+                                    <option value="钢材仓库">钢材仓库</option>
+                                </select>
+                            </div>
+                            <div class="el-form-item prd-marker-target">
+                                <span class="el-form-label required">货品类型</span>
+                                <select class="el-input__inner" id="v1_goodsType" onchange="v1_handleGoodsTypeChange()">
+                                    <option value="normal">存货</option>
+                                    <option value="pledge" selected>抵质押货</option>
+                                </select>
+                                <span class="prd-marker" data-req-id="REQ-003" data-req-title="货品类型与选货逻辑强控" data-req-desc="选择“抵质押货”时，必须关联具体“单号”，强控【附件】必填；且系统自动反显并锁定该单据下固定的货物列表，原货物明细不支持手动增加或删除。选择“存货”时，隐藏“关联单号”，系统显示“选择库存明细”按钮，允许运营自定义勾选添加多笔存货。">3<span class="prd-tooltip">货品类型与选货逻辑强控</span></span>
+                            </div>
+                            <div class="el-form-item" id="v1_pledgeWrapper">
+                                <span class="el-form-label required">关联单号</span>
+                                <select class="el-input__inner" id="v1_pledgeSelect" onchange="v1_handlePledgeOrderChange()">
+                                    <option value="">请选择关联抵质押单号</option>
+                                    <option value="PLD-2026-9912" selected>PLD-2026-9912 (包含2项货品)</option>
+                                    <option value="PLD-2026-8840">PLD-2026-8840 (包含1项货品)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="el-form-grid" style="margin-top: 15px;">
+                            <div class="el-form-item full-width">
+                                <span class="el-form-label">加工原因/备注</span>
+                                <textarea class="el-input__inner" id="v1_remark" placeholder="请输入加工原因说明...">本批次物资出库切割包装，产生正常物料消耗与转换。</textarea>
+                            </div>
+                        </div>
+                        <div class="el-form-grid" style="margin-top: 15px;">
+                            <!-- File upload interactively simulating Element UI -->
+                            <div class="el-form-item" id="v1_uploadWrapper">
+                                <span class="el-form-label required" id="v1_attachmentLabel">证明附件</span>
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div class="el-upload" id="v1_uploader" onclick="triggerFileUpload()" style="border-style: dashed; border-color: var(--border-base); display:none;">
+                                        <div class="el-upload-icon">+</div>
+                                        <div class="el-upload-text">点击上传同意函</div>
+                                    </div>
+                                    <input type="file" id="v1_fileInput" style="display:none;" onchange="handleFileChange(event)">
+                                    <div id="v1_fileInfo" style="display:flex; align-items:center; gap:12px;">
+                                        <div class="el-upload" style="border-color:var(--success-color); background-color:#f0f9eb;">
+                                            <div class="el-upload-icon" style="color:var(--success-color)">✓</div>
+                                            <div class="el-upload-text" style="color:var(--success-color)">已就绪</div>
+                                        </div>
+                                        <div>
+                                            <div id="v1_fileName" style="font-size:14px; font-weight:bold; color:var(--info-color); text-decoration:underline; cursor:pointer;" onclick="alert('模拟预览：资金方同意函PDF文档')">资金方核准同意函.pdf</div>
+                                            <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">加工质押品变更必需文件</div>
+                                            <button class="el-button el-button--text el-button--danger el-button--small" onclick="removeUploadedFile()" style="margin-top:4px; padding:0;">删除</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="form-error" id="v1_attachmentError" style="color:var(--danger-color); font-size:12px; display:none; margin-top:4px;">请上传证明附件！货品类型为抵质押货时附件必填。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="el-card">
+                    <div class="el-card__header">
+                        <div class="card-title">原货物明细 (拟耗用)</div>
+                        <button class="el-button el-button--primary el-button--small" id="v1_selectGoodsBtn" onclick="openInventoryDialog()" style="display:none;">+ 选择库存明细</button>
+                    </div>
+                    <div class="el-card__body" style="padding: 0 20px 20px 20px;">
+                        <table class="el-table">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>原商品 (SKU)</th>
+                                    <th>库位</th>
+                                    <th>原溯源码</th>
+                                    <th>质押单号</th>
+                                    <th>可用库存</th>
+                                    <th class="prd-marker-target">拟加工数量<span class="prd-marker" data-req-id="REQ-002" data-req-title="部分数量加工" data-req-desc="支持“切香肠”式加工。在选择原货物明细时，不必整单消耗，运营可修改【拟加工数量】。">2<span class="prd-tooltip">部分数量加工</span></span></th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="v1_originalGoodsTable">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="el-card">
+                    <div class="el-card__header">
+                        <div class="card-title">预期产出明细</div>
+                        <button class="el-button el-button--primary el-button--small" onclick="v1_addExpectedGoods()">+ 新增预期产出</button>
+                    </div>
+                    <div class="el-card__body" style="padding: 0 20px 20px 20px;">
+                        <table class="el-table">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>预期产出商品 (SKU)</th>
+                                    <th>预期产出数量</th>
+                                    <th>单位</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="v1_expectedGoodsTable">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 2: 运营/风控审批 ================= -->
+            <div id="view2" class="views-container">
+                <div class="el-steps-horizontal">
+                    <div class="el-step is-completed"><div class="el-step__icon">✓</div><div class="el-step__title">运营发起加工</div></div>
+                    <div class="el-step is-active"><div class="el-step__icon">2</div><div class="el-step__title">风控/主管审核</div></div>
+                    <div class="el-step"><div class="el-step__icon">3</div><div class="el-step__title">仓库结果登记</div></div>
+                    <div class="el-step"><div class="el-step__icon">4</div><div class="el-step__title">流水入账与溯源</div></div>
+                </div>
+
+                <div class="el-action-bar">
+                    <button class="el-button el-button--small" onclick="backToList()">返回列表</button>
+                    <div class="el-button-group">
+                        <button class="el-button el-button--danger el-button--small" onclick="rejectApproval()">审批驳回</button>
+                        <button class="el-button el-button--success el-button--small" onclick="approveApproval()">审批通过</button>
+                    </div>
+                </div>
+
+                <div class="el-card">
+                    <div class="el-card__header"><div class="card-title">申请单详情</div></div>
+                    <div class="el-card__body">
+                        <div class="el-descriptions">
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">货主</div><div class="el-descriptions-value" id="v2_customer"></div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">仓库</div><div class="el-descriptions-value" id="v2_warehouse"></div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">货品类型</div><div class="el-descriptions-value" id="v2_goodsType"></div></div>
+                            <div class="el-descriptions-item" id="v2_pledgeWrapper"><div class="el-descriptions-label">关联单号</div><div class="el-descriptions-value" id="v2_pledge"></div></div>
+                            <div class="el-descriptions-item" style="grid-column: span 3;"><div class="el-descriptions-label">原因备注</div><div class="el-descriptions-value" id="v2_remark"></div></div>
+                            <div class="el-descriptions-item" style="grid-column: span 3;" id="v2_fileWrapper">
+                                <div class="el-descriptions-label">审批证明文件</div>
+                                <div class="el-descriptions-value">
+                                    <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 12px; background:#f5f7fa; border:1px solid var(--border-light); border-radius:4px;">
+                                        <span style="font-size:18px;">📄</span>
+                                        <a href="#" style="color:var(--info-color); text-decoration:none; font-size:13px; font-weight:bold;" onclick="alert('模拟下载: 资金方同意函PDF文档')">资金方核准同意函.pdf</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="el-card">
+                    <div class="el-card__header"><div class="card-title">待锁定的原货物清单</div></div>
+                    <div class="el-card__body" style="padding: 0 20px 20px 20px;">
+                        <table class="el-table">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>原商品 (SKU)</th>
+                                    <th>原溯源码</th>
+                                    <th>质押单号</th>
+                                    <th>拟锁定扣减数量</th>
+                                </tr>
+                            </thead>
+                            <tbody id="v2_originalGoodsTable">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 3: 仓库结果确认 ================= -->
+            <div id="view3" class="views-container">
+                <div class="el-steps-horizontal">
+                    <div class="el-step is-completed"><div class="el-step__icon">✓</div><div class="el-step__title">运营发起加工</div></div>
+                    <div class="el-step is-completed"><div class="el-step__icon">✓</div><div class="el-step__title">风控/主管审核</div></div>
+                    <div class="el-step is-active"><div class="el-step__icon">3</div><div class="el-step__title">仓库结果登记</div></div>
+                    <div class="el-step"><div class="el-step__icon">4</div><div class="el-step__title">流水入账与溯源</div></div>
+                </div>
+
+                <div class="el-action-bar">
+                    <button class="el-button el-button--small" onclick="backToList()">返回列表</button>
+                    <button class="el-button el-button--primary el-button--small prd-marker-target" id="v3_submitBtn" onclick="submitView3()">登记完成并入账<span class="prd-marker" data-req-id="REQ-008" data-req-title="暂无逆向纠错" data-req-desc="V2.0 暂不开发冲销回退功能。理货员提交加工结果属于强确认行为，若发生人为录入错误（错写产出或损耗），需提交特殊工单由 IT 技术团队从底层处理。">8<span class="prd-tooltip">暂无逆向纠错</span></span></button>
+                </div>
+
+                <!-- Margin security review panel (PM requirement) -->
+                <div class="el-card" id="v3_valuationCard" style="display:none;">
+                    <div class="el-card__header">
+                        <div class="card-title" style="color: var(--primary-color);">抵质押物总价值与水位评估</div>
+                    </div>
+                    <div class="el-card__body">
+                        <div class="el-descriptions">
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">加工前核定价值</div><div class="el-descriptions-value" id="v3_valBefore" style="font-weight:bold; color:var(--text-main);">100,000 元</div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">加工后当前货值</div><div class="el-descriptions-value" id="v3_valAfter" style="font-weight:bold; color:var(--text-main);">92,000 元</div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">价值变动变差</div><div class="el-descriptions-value" id="v3_valDiff" style="font-weight:bold; color:var(--danger-color);">-8,000 元</div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">融资敞口占用</div><div class="el-descriptions-value" style="font-family:monospace;">75,000.00 元</div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">安全水位限制</div><div class="el-descriptions-value">质押率不超过 80% (最低货值需 93,750 元)</div></div>
+                            <div class="el-descriptions-item" style="grid-column: span 3;"><div class="el-descriptions-label">当前评估状态</div><div class="el-descriptions-value" id="v3_valStatus" style="font-weight:bold;">评估计算中...</div></div>
+                        </div>
+                        <div class="warning-banner prd-marker-target" id="v3_valWarning" style="margin-top: 15px; background: #fef0f0; border: 1px solid #fde2e2; padding: 12px; border-radius: 4px; display: none; align-items: center; gap: 10px;">
+                            <span class="prd-marker" data-req-id="REQ-006" data-req-title="质押物加工后估值下跌预警" data-req-desc="对于【抵质押货】，当加工结果登记完成后，系统触发盯市估值重算。若新产出货物的重估评估价值低于原原货物的 95%，系统需在自动记账完成的同时，向风控人员推送“质押物加工评估值下跌预警”通知，防范金融虚胖及过度损耗带来的敞口风险。">6<span class="prd-tooltip">质押物加工后估值下跌预警</span></span>
+                            <span style="font-size: 20px; color: var(--danger-color);">⚠️</span>
+                            <span style="color: var(--danger-color); font-size: 13px; font-weight: 500;">
+                                价值折损警告：实际损耗与商品形态转变导致抵质押物价值缩水，折算后质押率高于 80.00% 警戒水位，系统已自动拦截结单！请尽快补仓或申请风控免除。
+                            </span>
+                        </div>
+                        <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;" id="v3_valActions">
+                            <button class="el-button el-button--warning el-button--small" onclick="simulateBucang()">模拟补充补充质押 (货值 +20,000)</button>
+                            <button class="el-button el-button--success el-button--small" onclick="simulateBypassVal()">模拟风控审批特批豁免通过</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="el-card">
+                    <div class="el-card__header"><div class="card-title">1. 原物料消耗确认</div></div>
+                    <div class="el-card__body" style="padding: 0 20px 20px 20px;">
+                        <table class="el-table">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>原料商品 SKU</th>
+                                    <th>系统锁定额</th>
+                                    <th class="prd-marker-target">实际消耗数量<span class="prd-marker" data-req-id="REQ-009" data-req-title="理货数量逻辑校验" data-req-desc="实际消耗量校验：【实际消耗量】必须大于 0 且小于等于锁定预扣数量，防止越权消耗未锁定的库存。实际产出量校验：【实际产出数量】必须大于 0。">9<span class="prd-tooltip">理货数量逻辑校验</span></span></th>
+                                    <th>绑定原溯源码</th>
+                                </tr>
+                            </thead>
+                            <tbody id="v3_originalGoodsTable">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="el-card">
+                    <div class="el-card__header"><div class="card-title">2. 实产商品与损耗登记</div></div>
+                    <div class="el-card__body" style="padding: 0 20px 20px 20px;">
+                        <table class="el-table">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>预期产出商品</th>
+                                    <th>预期数量</th>
+                                    <th>实际产出商品 SKU</th>
+                                    <th>实际产出数量</th>
+                                    <th class="prd-marker-target">实际损耗比<span class="prd-marker" data-req-id="REQ-010" data-req-title="库存与状态流转原子事务" data-req-desc="当理货员修改并确认最终的【实际产出商品】与【实际产出数量】并提交后，系统在单个数据库事务内执行以下原子操作：解冻锁定库存并正式生成「加工领料出库」流水，扣减原物料；算得实际账面损耗并生成「加工损耗核销」流水；生成新货品物理入库流水并生成「新溯源码」；若是抵质押货，新库存继承抵质押状态并触发盯市估值重算与安全水位校验。">10<span class="prd-tooltip">库存与状态流转原子事务</span></span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="v3_expectedGoodsTable">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 4: 完成与溯源 (详情页) ================= -->
+            <div id="view4" class="views-container">
+                <div class="el-action-bar">
+                    <button class="el-button el-button--small" onclick="backToList()">返回列表</button>
+                </div>
+
+                <div class="el-card" style="position: relative;">
+                    <div class="el-stamp" id="v4_stamp">已完成</div>
+                    <div class="el-card__header"><div class="card-title">加工单入账详情</div></div>
+                    <div class="el-card__body">
+                        <div class="el-descriptions">
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">申请单号</div><div class="el-descriptions-value" id="v4_applyNo" style="font-family:monospace; font-weight:bold;"></div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">货主</div><div class="el-descriptions-value" id="v4_customer"></div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">仓库</div><div class="el-descriptions-value" id="v4_warehouse"></div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">状态</div><div class="el-descriptions-value" id="v4_status" style="font-weight:bold;"></div></div>
+                            <div class="el-descriptions-item" style="grid-column: span 2;"><div class="el-descriptions-label">货权继承状态</div><div class="el-descriptions-value" id="v4_inheritance"></div></div>
+                            <div class="el-descriptions-item" style="grid-column: span 3;"><div class="el-descriptions-label">损耗合规说明</div><div class="el-descriptions-value" id="v4_lossReasonVal" style="color: var(--warning-color); font-weight: 500;">正常损耗区间。</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lineage Tree with positioning search (PM requirement) -->
+                <div class="el-card" id="v4_treeCard">
+                    <div class="el-card__header">
+                        <div class="card-title">货品物理加工血缘关系链 (一键溯源定位)</div>
+                        <div class="prd-marker-target" style="display: flex; gap: 8px;">
+                            <input type="text" class="el-input__inner" id="v4_searchTrace" placeholder="输入溯源码定位节点 (例: TRC-)" style="width: 250px; height: 32px; font-size: 13px;">
+                            <button class="el-button el-button--primary el-button--small" onclick="searchLineageNode()">定位溯源</button>
+                            <span class="prd-marker" data-req-id="REQ-007" data-req-title="物理加工血缘关系链" data-req-desc="新加工产生的货物入库时，继承原货物的【溯源码】前缀或生成关联表。用户可通过搜索溯源码，一键查看这批新货是由最初的哪个原货物演变而来的。">7<span class="prd-tooltip">物理加工血缘关系链</span></span>
+                        </div>
+                    </div>
+                    <div class="el-card__body">
+                        <div class="el-tree-container" id="v4_treeContainer">
+                            <!-- Dynamic Tree -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ledger flow -->
+                <div class="el-card" id="v4_flowCard">
+                    <div class="el-card__header prd-marker-target"><div class="card-title">底层变动库存与质押锁定流水明细<span class="prd-marker" data-req-id="REQ-004" data-req-title="部分加工底层库存拆分规则" data-req-desc="当拟加工数量小于可用库存时，系统需在发起申请通过后，在底层物理库存表将原库存明细拆分为两行：行A（拟加工锁定数量，进入加工流程）与行B（剩余数量，保留原状态释放可用），以防止加工锁定影响剩余货物的出库和流转。行B需自动生成原溯源码的关联子编码。">4<span class="prd-tooltip">部分加工底层库存拆分规则</span></span></div></div>
+                    <div class="el-card__body" style="padding: 0 20px 20px 20px;">
+                        <table class="el-table">
+                            <thead>
+                                <tr>
+                                    <th>流水ID</th>
+                                    <th>明细货品 SKU</th>
+                                    <th>交易变动类型</th>
+                                    <th>变化数量</th>
+                                    <th>锁定/绑定溯源码</th>
+                                    <th>关联业务单号</th>
+                                </tr>
+                            </thead>
+                            <tbody id="v4_flowTable">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <div class="prd-unmapped-section">
+                <h3>未映射需求（无法在当前原型中体现的非可视/后台需求）</h3>
+                <ul>
+                    <li>
+                        <strong>[REQ-005] 单据作废与库存释放</strong>
+                        <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748B;">对于处于【待加工】或【加工中】的单据，若中途因故终止，系统提供【作废】操作（若为抵质押货需加签风控审批）。作废成功后，系统需立即原路解除底层库存的冻结锁定，恢复为可用库存。</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= INTERACTIVE DIALOGS & OVERLAYS ================= -->
+    <!-- 1. Ordinary Stock Batch Picker (Element Dialog UI) -->
+    <div class="el-dialog-overlay" id="inventoryDialog" style="display:none;">
+        <div class="el-dialog" style="width: 720px;">
+            <div class="el-dialog__header">
+                <span class="el-dialog__title">选择普通存货库存批次</span>
+                <button class="el-dialog__close" onclick="closeInventoryDialog()">×</button>
+            </div>
+            <div class="el-dialog__body" style="padding: 15px 20px;">
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" class="el-input__inner" id="dlg_search_sku" placeholder="输入 SKU 商品型号名称关键字搜索" style="height:34px; font-size:13px; flex:1;">
+                    <button class="el-button el-button--primary el-button--small" onclick="searchDlgInventory()">查询批次</button>
+                </div>
+                <table class="el-table" style="margin-top:0;">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center;"><input type="checkbox" id="dlg_check_all" onchange="toggleDlgCheckAll(this)"></th>
+                            <th>商品 SKU 名称</th>
+                            <th>存储库位</th>
+                            <th>物理可用数量</th>
+                            <th>原入库溯源码</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dlg_inventoryTableBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="el-dialog__footer">
+                <button class="el-button el-button--small" onclick="closeInventoryDialog()">取消</button>
+                <button class="el-button el-button--primary el-button--small" onclick="confirmSelectedInventory()">确认添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2.MessageBox Risk Warnings (Element MessageBox style) -->
+    <div class="el-dialog-overlay" id="messageBoxOverlay" style="display:none; z-index: 3000;">
+        <div class="el-dialog" style="width: 440px;">
+            <div class="el-dialog__header">
+                <span class="el-dialog__title">系统提交确认</span>
+                <button class="el-dialog__close" onclick="closeMessageBox(false)">×</button>
+            </div>
+            <div class="el-dialog__body" style="padding: 20px; display: flex; gap: 14px; align-items: flex-start;">
+                <span style="font-size: 28px; color: #e6a23c; line-height: 1; user-select:none;">⚠️</span>
+                <div>
+                    <p id="messageBoxText" style="margin: 0; font-size: 14px; color: var(--text-main); font-weight: bold; line-height: 1.4;">
+                        提交后数据不可逆转且不支持撤回，确认提交加工结果？
+                    </p>
+                    <div id="messageBoxExtra" style="margin-top: 10px; font-size: 12px; color: var(--text-secondary); line-height: 1.4;"></div>
+                </div>
+            </div>
+            <div class="el-dialog__footer" style="padding-top: 12px;">
+                <button class="el-button el-button--small" onclick="closeMessageBox(false)">取消</button>
+                <button class="el-button el-button--primary el-button--small" id="messageBoxConfirmBtn" onclick="closeMessageBox(true)">确认提交</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Dynamic Message/Notification Toast -->
+    <div id="messageToast" style="display:none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #edf2fc; border: 1px solid #ebeef5; color: #409eff; padding: 10px 20px; border-radius: 4px; box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1); z-index: 4000; font-size: 14px; font-weight: 500; align-items: center; gap: 8px;">
+        <span id="toastIcon">ℹ️</span>
+        <span id="toastText">提示内容</span>
+    </div>
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        // In-memory mock database
+        let mockOrders = [
+            {
+                applyNo: 'PR2026071600882',
+                customer: '富博流油公司',
+                warehouse: '跑霸王仓库',
+                goodsType: '抵质押货',
+                pledgeOrder: 'PLD-2026-9912',
+                date: '2026-07-16 12:00',
+                status: '已完成',
+                remark: '冷冻牛肉切割分袋加工。',
+                inputs: [
+                    { sku: '冷冻猪肉 - 牛肉丸子 - 36m (SKU:202613)', trace: 'TRC-20260716-0001', pledge: 'PLD-2026-9912', planQty: 20.0, actualQty: 20.0 },
+                    { sku: '冷冻牛肉 - 特级肥牛卷 - 12m (SKU:202620)', trace: 'TRC-20260716-0005', pledge: 'PLD-2026-9912', planQty: 10.0, actualQty: 10.0 }
+                ],
+                outputs: [
+                    { sku: '切片牛肉小包装 - 500g (SKU:202614)', expectedQty: 28.5, actualQty: 28.5, lossQty: 1.5 }
+                ],
+                lossReason: '正常分割损耗'
+            },
+            {
+                applyNo: 'PR2026071600883',
+                customer: '克格勃物流有限公司',
+                warehouse: '大米仓库',
+                goodsType: '抵质押货',
+                pledgeOrder: 'PLD-2026-8840',
+                date: '2026-07-16 14:20',
+                status: '待审批',
+                remark: '大米筛选除杂后精装分切。',
+                inputs: [
+                    { sku: '黑龙江大米 - 五常香米 - 10kg (SKU:207142)', trace: 'TRC-20260716-0120', pledge: 'PLD-2026-8840', planQty: 50.0 }
+                ],
+                outputs: [
+                    { sku: '五常精装米 - 5kg (SKU:209842)', expectedQty: 48.0 }
+                ]
+            },
+            {
+                applyNo: 'PR2026071600884',
+                customer: '泰拉能源公司',
+                warehouse: '钢材仓库',
+                goodsType: '普通存货',
+                pledgeOrder: '无',
+                date: '2026-07-15 10:15',
+                status: '待加工',
+                remark: '普通型材钢管定长切割。',
+                inputs: [
+                    { sku: '热轧钢卷 - 标号Q235A (SKU:10042)', trace: 'TRC-STOCK-9921', pledge: '-', planQty: 30.0 }
+                ],
+                outputs: [
+                    { sku: '切分热轧精装钢板 - Q235A (SKU:10992)', expectedQty: 28.5 }
+                ]
+            },
+            {
+                applyNo: 'PR2026071500741',
+                customer: '富博流油公司',
+                warehouse: '跑霸王仓库',
+                goodsType: '普通存货',
+                pledgeOrder: '无',
+                date: '2026-07-15 16:30',
+                status: '已完成',
+                remark: '普通货品分拆包装。',
+                inputs: [
+                    { sku: '常规普通钢卷 - Q235 (SKU:10042)', trace: 'TRC-STOCK-9921', pledge: '-', planQty: 30.0, actualQty: 30.0 }
+                ],
+                outputs: [
+                    { sku: '切分热轧精装钢板 - Q235A (SKU:10992)', expectedQty: 29.8, actualQty: 29.8, lossQty: 0.2 }
+                ],
+                lossReason: '卷端废料常规切割损耗'
+            },
+            {
+                applyNo: 'PR2026071400612',
+                customer: '克格勃物流有限公司',
+                warehouse: '大米仓库',
+                goodsType: '抵质押货',
+                pledgeOrder: 'PLD-2026-8840',
+                date: '2026-07-14 09:12',
+                status: '已驳回',
+                remark: '加工方案缺失，驳回重新提供。',
+                inputs: [
+                    { sku: '黑龙江大米 - 五常香米 - 10kg (SKU:207142)', trace: 'TRC-20260716-0120', pledge: 'PLD-2026-8840', planQty: 50.0 }
+                ],
+                outputs: [
+                    { sku: '五常精装米 - 5kg (SKU:209842)', expectedQty: 48.0 }
+                ]
+            }
+        ];
+
+        // Pledge data source (Resolved Bug 1: fixed mock data definition)
+        let mockPledgedGoods = {
+            'PLD-2026-9912': [
+                { sku: '冷冻猪肉 - 牛肉丸子 - 36m (SKU:202613)', loc: '冷链库-C02', trace: 'TRC-20260716-0001', pledge: 'PLD-2026-9912', qty: '40.0000 吨', qtyNum: 40.0, defaultVal: 20.0 },
+                { sku: '冷冻牛肉 - 特级肥牛卷 - 12m (SKU:202620)', loc: '冷链库-C04', trace: 'TRC-20260716-0005', pledge: 'PLD-2026-9912', qty: '30.0000 吨', qtyNum: 30.0, defaultVal: 10.0 }
+            ],
+            'PLD-2026-8840': [
+                { sku: '黑龙江大米 - 五常香米 - 10kg (SKU:207142)', loc: '常温库-A10', trace: 'TRC-20260716-0120', pledge: 'PLD-2026-8840', qty: '100.0000 吨', qtyNum: 100.0, defaultVal: 50.0 }
+            ]
+        };
+
+        // Available Ordinary inventory for Picker Dialog (PM requirement 2)
+        let mockNormalInventory = [
+            { sku: '热轧钢卷 - 标号Q235A (SKU:10042)', loc: '钢板堆场-A01', trace: 'TRC-STOCK-9921', qty: 80.0, unit: '吨' },
+            { sku: '冷轧板卷 - SPCC-SD (SKU:10055)', loc: '板材货架-B03', trace: 'TRC-STOCK-9932', qty: 50.0, unit: '吨' },
+            { sku: '黑龙江大米 - 五常香米 - 10kg (SKU:207142)', loc: '常温库-A08', trace: 'TRC-STOCK-1024', qty: 120.0, unit: '吨' },
+            { sku: '冷冻猪肉 - 牛肉丸子 - 36m (SKU:202613)', loc: '冷链库-C01', trace: 'TRC-STOCK-4050', qty: 60.0, unit: '吨' }
+        ];
+
+        // Standard Prices for valuation calculations
+        const mockSKUPrices = {
+            '冷冻猪肉 - 牛肉丸子 - 36m (SKU:202613)': 2000,
+            '冷冻牛肉 - 特级肥牛卷 - 12m (SKU:202620)': 6000,
+            '切片牛肉小包装 - 500g (SKU:202614)': 8000,
+            '黑龙江大米 - 五常香米 - 10kg (SKU:207142)': 1500,
+            '五常精装米 - 5kg (SKU:209842)': 3000,
+            '热轧钢卷 - 标号Q235A (SKU:10042)': 4000,
+            '切分热轧精装钢板 - Q235A (SKU:10992)': 4500,
+            '常规普通钢卷 - Q235 (SKU:10042)': 4000
+        };
+
+        // Active Order being processed in views
+        let activeOrderIndex = -1;
+        let currentTabFilter = 'all';
+
+        // Toast alert system
+        function showToast(text, type = 'info') {
+            const toast = document.getElementById('messageToast');
+            const textSpan = document.getElementById('toastText');
+            const iconSpan = document.getElementById('toastIcon');
+            
+            textSpan.textContent = text;
+            if (type === 'success') {
+                toast.style.backgroundColor = '#f0f9eb';
+                toast.style.borderColor = '#e1f3d8';
+                toast.style.color = '#67c23a';
+                iconSpan.textContent = '✓';
+            } else if (type === 'error') {
+                toast.style.backgroundColor = '#fef0f0';
+                toast.style.borderColor = '#fde2e2';
+                toast.style.color = '#f56c6c';
+                iconSpan.textContent = '✖';
+            } else if (type === 'warning') {
+                toast.style.backgroundColor = '#fdf6ec';
+                toast.style.borderColor = '#faecd8';
+                toast.style.color = '#e6a23c';
+                iconSpan.textContent = '⚠️';
+            } else {
+                toast.style.backgroundColor = '#edf2fc';
+                toast.style.borderColor = '#ebeef5';
+                toast.style.color = '#409eff';
+                iconSpan.textContent = 'ℹ️';
+            }
+            
+            toast.style.display = 'flex';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // MessageBox simulation
+        let messageBoxCallback = null;
+        function showMessageBox(text, extra = '', callback) {
+            document.getElementById('messageBoxText').textContent = text;
+            const extraDiv = document.getElementById('messageBoxExtra');
+            if (extra) {
+                extraDiv.textContent = extra;
+                extraDiv.style.display = 'block';
+            } else {
+                extraDiv.style.display = 'none';
+            }
+            document.getElementById('messageBoxOverlay').style.display = 'flex';
+            messageBoxCallback = callback;
+        }
+
+        function closeMessageBox(confirm) {
+            document.getElementById('messageBoxOverlay').style.display = 'none';
+            if (messageBoxCallback) {
+                messageBoxCallback(confirm);
+                messageBoxCallback = null;
+            }
+        }
+
+        // File upload simulation (PM requirement 3)
+        let uploadedFile = null;
+        function triggerFileUpload() {
+            document.getElementById('v1_fileInput').click();
+        }
+
+        function handleFileChange(event) {
+            const file = event.target.files[0];
+            if (file) {
+                uploadedFile = file;
+                document.getElementById('v1_uploader').style.display = 'none';
+                document.getElementById('v1_fileInfo').style.display = 'flex';
+                document.getElementById('v1_fileName').textContent = file.name;
+                document.getElementById('v1_attachmentError').style.display = 'none';
+                showToast("文件上传成功: " + file.name, "success");
+            }
+        }
+
+        function removeUploadedFile() {
+            uploadedFile = null;
+            document.getElementById('v1_uploader').style.display = 'flex';
+            document.getElementById('v1_fileInfo').style.display = 'none';
+            document.getElementById('v1_fileInput').value = '';
+            showToast("文件已删除", "info");
+        }
+
+        // Load list body
+        function loadListTable() {
+            const tbody = document.getElementById('listTableBody');
+            tbody.innerHTML = '';
+
+            const noFilter = document.getElementById('filter_no').value.toLowerCase().trim();
+            const customerFilter = document.getElementById('filter_customer').value;
+
+            const filtered = mockOrders.filter(order => {
+                if (noFilter && !order.applyNo.toLowerCase().includes(noFilter)) return false;
+                if (customerFilter && order.customer !== customerFilter) return false;
+                if (currentTabFilter !== 'all' && order.status !== currentTabFilter) return false;
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-secondary); padding: 30px;">无匹配数据</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(order => {
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+
+                let tagClass = 'el-tag--info';
+                if(order.status === '待审批') tagClass = 'el-tag--warning';
+                else if(order.status === '待加工') tagClass = 'el-tag--info';
+                else if(order.status === '已完成') tagClass = 'el-tag--success';
+                else if(order.status === '已驳回') tagClass = 'el-tag--danger';
+
+                // Action buttons based on status
+                let actionBtns = '';
+                const idx = mockOrders.indexOf(order);
+                if (order.status === '待审批') {
+                    actionBtns = `<button class="el-button el-button--text el-button--small" onclick="openApproval(${idx})">审核审批</button>`;
+                } else if (order.status === '待加工') {
+                    actionBtns = `<button class="el-button el-button--text el-button--small" onclick="openWarehouseConfirm(${idx})">仓库登记</button>`;
+                } else {
+                    actionBtns = `<button class="el-button el-button--text el-button--small" onclick="openDetails(${idx})">查看详情</button>`;
+                }
+
+                tr.innerHTML = `
+                    <td style="font-family:monospace; font-weight:bold; color:var(--text-main);">${order.applyNo}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.warehouse}</td>
+                    <td>${order.goodsType}</td>
+                    <td>${order.pledgeOrder}</td>
+                    <td>${order.date}</td>
+                    <td><span class="el-tag ${tagClass}">${order.status}</span></td>
+                    <td>${actionBtns}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Tab selection change
+        function switchTab(status, tabElem) {
+            currentTabFilter = status;
+            const tabs = document.querySelectorAll('.el-tab-pane');
+            tabs.forEach(t => t.classList.remove('active'));
+            tabElem.classList.add('active');
+            loadListTable();
+        }
+
+        function filterList() {
+            loadListTable();
+        }
+
+        function resetFilters() {
+            document.getElementById('filter_no').value = '';
+            document.getElementById('filter_customer').value = '';
+            loadListTable();
+        }
+
+        // Flow View Controller
+        function switchView(viewNum, tabText) {
+            const views = document.querySelectorAll('.views-container');
+            views.forEach((v, idx) => {
+                if (idx === viewNum) v.classList.add('active');
+                else v.classList.remove('active');
+            });
+            document.getElementById('tabTitle').innerHTML = `${tabText} <span class="tab-close">×</span>`;
+        }
+
+        function backToList() {
+            switchView(0, '加工转变单据列表');
+            loadListTable();
+        }
+
+        // ================= VIEW 1: 新增申请 =================
+        function openNewApplication() {
+            switchView(1, '发起加工申请');
+            
+            // Clean view 1 forms
+            document.getElementById('v1_customer').value = '富博流油公司';
+            document.getElementById('v1_warehouse').value = '跑霸王仓库';
+            document.getElementById('v1_goodsType').value = 'pledge';
+            document.getElementById('v1_remark').value = '本批次物资出库切割包装，产生正常物料消耗与转换。';
+            
+            // Reset upload file state
+            uploadedFile = { name: "资金方核准同意函.pdf" }; // default mock
+            document.getElementById('v1_uploader').style.display = 'none';
+            document.getElementById('v1_fileInfo').style.display = 'flex';
+            document.getElementById('v1_fileName').textContent = "资金方核准同意函.pdf";
+            document.getElementById('v1_attachmentError').style.display = 'none';
+
+            v1_handleGoodsTypeChange();
+            
+            // Expected output
+            document.getElementById('v1_expectedGoodsTable').innerHTML = '';
+            v1_addExpectedGoods();
+        }
+
+        function v1_handleGoodsTypeChange() {
+            const goodsType = document.getElementById('v1_goodsType').value;
+            const pledgeWrapper = document.getElementById('v1_pledgeWrapper');
+            const selectBtn = document.getElementById('v1_selectGoodsBtn');
+            const attachmentLabel = document.getElementById('v1_attachmentLabel');
+            const uploadWrapper = document.getElementById('v1_uploadWrapper');
+
+            v1_clearOriginalGoods();
+
+            if (goodsType === 'pledge') {
+                pledgeWrapper.style.display = 'flex';
+                selectBtn.style.display = 'none';
+                attachmentLabel.classList.add('required');
+                uploadWrapper.style.display = 'block';
+                v1_handlePledgeOrderChange();
+            } else {
+                pledgeWrapper.style.display = 'none';
+                selectBtn.style.display = 'inline-block';
+                attachmentLabel.classList.remove('required');
+                // ordinary stock doesn't require upload
+                v1_addGoods(); 
+            }
+        }
+
+        function v1_handlePledgeOrderChange() {
+            const pledgeOrder = document.getElementById('v1_pledgeSelect').value;
+            v1_clearOriginalGoods();
+            if (!pledgeOrder) return;
+
+            const list = mockPledgedGoods[pledgeOrder];
+            const tbody = document.getElementById('v1_originalGoodsTable');
+            list.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td class="sku">${item.sku}</td>
+                    <td>${item.loc}</td>
+                    <td class="trace">${item.trace}</td>
+                    <td class="pledge">${item.pledge}</td>
+                    <td>${item.qty}</td>
+                    <td><input type="number" class="el-input__inner plan-qty" style="width:110px; height:28px;" value="${item.defaultVal.toFixed(4)}" step="0.0001"></td>
+                    <td><span style="color:var(--text-secondary); font-size:12px;">固定项不可删除</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function v1_clearOriginalGoods() {
+            document.getElementById('v1_originalGoodsTable').innerHTML = '';
+        }
+
+        // Fallback row addition
+        function v1_addGoods() {
+            openInventoryDialog();
+        }
+
+        function renameV1Rows() {
+            const rows = document.getElementById('v1_originalGoodsTable').children;
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].firstElementChild.textContent = i + 1;
+            }
+        }
+
+        function v1_addExpectedGoods() {
+            const tbody = document.getElementById('v1_expectedGoodsTable');
+            const count = tbody.children.length + 1;
+            const tr = document.createElement('tr');
+            tr.className = 'el-table__row';
+            tr.innerHTML = `
+                <td>${count}</td>
+                <td>
+                    <select class="el-input__inner exp-sku" style="width:300px; height:28px; padding:0 5px;">
+                        <option value="切片牛肉小包装 - 500g (SKU:202614)">切片牛肉小包装 - 500g (SKU:202614)</option>
+                        <option value="五常精装米 - 5kg (SKU:209842)">五常精装米 - 5kg (SKU:209842)</option>
+                        <option value="切分热轧精装钢板 - Q235A (SKU:10992)" selected>切分热轧精装钢板 - Q235A (SKU:10992)</option>
+                    </select>
+                </td>
+                <td><input type="number" class="el-input__inner exp-qty" style="width:110px; height:28px;" value="28.5000" step="0.0001"></td>
+                <td>吨</td>
+                <td><button class="el-button el-button--text el-button--danger el-button--small" onclick="this.closest('tr').remove(); renameV1ExpRows()">删除</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function renameV1ExpRows() {
+            const rows = document.getElementById('v1_expectedGoodsTable').children;
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].firstElementChild.textContent = i + 1;
+            }
+        }
+
+        // View 1 Save
+        function submitView1() {
+            const goodsType = document.getElementById('v1_goodsType').value;
+            const customer = document.getElementById('v1_customer').value;
+            const warehouse = document.getElementById('v1_warehouse').value;
+            const pledge = document.getElementById('v1_pledgeSelect').value;
+
+            if(!customer || !warehouse) {
+                showToast("请完整选择货主及发生仓库！", "warning");
+                return;
+            }
+
+            // Verify attachment
+            if(goodsType === 'pledge') {
+                if(!pledge) {
+                    showToast("【抵质押货】必须关联抵质押单！", "warning");
+                    return;
+                }
+                if (!uploadedFile) {
+                    document.getElementById('v1_attachmentError').style.display = 'block';
+                    showToast("校验失败：抵质押货物必须提供资金方证明附件！", "error");
+                    return;
+                }
+            }
+            document.getElementById('v1_attachmentError').style.display = 'none';
+
+            // Capture rows
+            const rows = document.getElementById('v1_originalGoodsTable').children;
+            if (rows.length === 0) {
+                showToast("原货物明细不能为空！", "warning");
+                return;
+            }
+            let inputs = [];
+            for (let i = 0; i < rows.length; i++) {
+                const planQtyInput = rows[i].querySelector('.plan-qty');
+                const planQty = parseFloat(planQtyInput.value) || 0;
+                
+                // Fetch available limit text
+                const textCell = rows[i].children[5].textContent; // e.g. "80.0000 吨" or similar
+                const availQty = parseFloat(textCell) || 9999.0;
+                
+                if (planQty <= 0) {
+                    showToast("拟加工数量必须大于 0！", "warning");
+                    planQtyInput.focus();
+                    return;
+                }
+                if (planQty > availQty) {
+                    showToast(`超过可用库存！第 ${i+1} 行最大可用为 ${availQty.toFixed(4)}`, "error");
+                    planQtyInput.focus();
+                    return;
+                }
+
+                inputs.push({
+                    sku: rows[i].querySelector('.sku').textContent,
+                    trace: rows[i].querySelector('.trace').textContent,
+                    pledge: rows[i].querySelector('.pledge').textContent,
+                    planQty: planQty
+                });
+            }
+
+            const expRows = document.getElementById('v1_expectedGoodsTable').children;
+            if (expRows.length === 0) {
+                showToast("预期产出商品明细不能为空！", "warning");
+                return;
+            }
+            let outputs = [];
+            for (let i = 0; i < expRows.length; i++) {
+                outputs.push({
+                    sku: expRows[i].querySelector('.exp-sku').value,
+                    expectedQty: parseFloat(expRows[i].querySelector('.exp-qty').value) || 0
+                });
+            }
+
+            // Create new order
+            const newOrderNo = 'PR2026' + Math.floor(Math.random() * 900000 + 100000);
+            const dateStr = new Date().toISOString().replace('T', ' ').substring(0, 16);
+            
+            const newObj = {
+                applyNo: newOrderNo,
+                customer: customer,
+                warehouse: warehouse,
+                goodsType: goodsType === 'pledge' ? '抵质押货' : '普通存货',
+                pledgeOrder: goodsType === 'pledge' ? pledge : '无',
+                date: dateStr,
+                status: '待审批',
+                remark: document.getElementById('v1_remark').value,
+                inputs: inputs,
+                outputs: outputs
+            };
+
+            mockOrders.unshift(newObj); // Add to head
+            showToast(`已发起加工申请单：${newOrderNo}。系统已锁扣原料可用库存。`, "success");
+            
+            backToList();
+        }
+
+        // ================= VIEW 2: 审核审批 =================
+        function openApproval(index) {
+            activeOrderIndex = index;
+            const order = mockOrders[index];
+
+            document.getElementById('v2_customer').textContent = order.customer;
+            document.getElementById('v2_warehouse').textContent = order.warehouse;
+            document.getElementById('v2_goodsType').textContent = order.goodsType;
+            document.getElementById('v2_pledge').textContent = order.pledgeOrder;
+            document.getElementById('v2_remark').textContent = order.remark;
+
+            if (order.goodsType === '抵质押货') {
+                document.getElementById('v2_pledgeWrapper').style.display = 'flex';
+                document.getElementById('v2_fileWrapper').style.display = 'flex';
+            } else {
+                document.getElementById('v2_pledgeWrapper').style.display = 'none';
+                document.getElementById('v2_fileWrapper').style.display = 'none';
+            }
+
+            // Fill inputs table
+            const tbody = document.getElementById('v2_originalGoodsTable');
+            tbody.innerHTML = '';
+            order.inputs.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td>${item.sku}</td>
+                    <td>${item.trace}</td>
+                    <td>${item.pledge}</td>
+                    <td><strong style="color:var(--primary-color);">${item.planQty.toFixed(4)} 吨</strong></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            switchView(2, `审批加工单 - ${order.applyNo}`);
+        }
+
+        function rejectApproval() {
+            mockOrders[activeOrderIndex].status = '已驳回';
+            showToast("单据已驳回，系统自动退回并解除锁定的库存额。", "warning");
+            backToList();
+        }
+
+        function approveApproval() {
+            mockOrders[activeOrderIndex].status = '待加工';
+            showToast("审批通过！状态已流转为【待加工】，下发仓库理货登记。", "success");
+            backToList();
+        }
+
+        // ================= VIEW 3: 仓库登记 =================
+        let currentValuationBypassed = false;
+        let valuationPreAddValue = 0;
+
+        function openWarehouseConfirm(index) {
+            activeOrderIndex = index;
+            const order = mockOrders[index];
+
+            // Reset dynamic states
+            currentValuationBypassed = false;
+            valuationPreAddValue = 0;
+
+            // Remove any old warnings or reasons
+            const oldWarn = document.getElementById('v3_lossWarning');
+            if(oldWarn) oldWarn.remove();
+            const oldExplain = document.getElementById('v3_explainItem');
+            if(oldExplain) oldExplain.remove();
+
+            // Build original input rows
+            const tbodyIn = document.getElementById('v3_originalGoodsTable');
+            tbodyIn.innerHTML = '';
+            order.inputs.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td>${item.sku}</td>
+                    <td>${item.planQty.toFixed(4)} 吨</td>
+                    <td><input type="number" class="el-input__inner act-consume-qty" value="${item.planQty.toFixed(4)}" step="0.0001" style="width:130px; height:28px;" oninput="calculateLosses()"></td>
+                    <td style="font-family:monospace;">${item.trace}</td>
+                `;
+                tbodyIn.appendChild(tr);
+            });
+
+            // Build outputs
+            const tbodyOut = document.getElementById('v3_expectedGoodsTable');
+            tbodyOut.innerHTML = '';
+            order.outputs.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td>${item.sku}</td>
+                    <td>${item.expectedQty.toFixed(4)} 吨</td>
+                    <td>
+                        <select class="el-input__inner act-sku" style="width:240px; height:28px; padding:0 5px;" onchange="calculateLosses()">
+                            <option value="${item.sku}" selected>${item.sku}</option>
+                        </select>
+                    </td>
+                    <td><input type="number" class="el-input__inner act-output-qty" value="${item.expectedQty.toFixed(4)}" step="0.0001" style="width:130px; height:28px;" oninput="calculateLosses()"></td>
+                    <td class="loss-display" style="font-weight:bold;">0.0000 吨</td>
+                `;
+                tbodyOut.appendChild(tr);
+            });
+
+            switchView(3, `仓库加工确认 - ${order.applyNo}`);
+            calculateLosses();
+        }
+
+        // Dynamic losses & valuation margin waterlines (PM requirements 1 & 2)
+        function calculateLosses() {
+            let totalConsume = 0;
+            const consumeInputs = document.querySelectorAll('.act-consume-qty');
+            consumeInputs.forEach(input => {
+                totalConsume += parseFloat(input.value) || 0;
+            });
+
+            let totalOutput = 0;
+            const outputInputs = document.querySelectorAll('.act-output-qty');
+            outputInputs.forEach(input => {
+                totalOutput += parseFloat(input.value) || 0;
+            });
+
+            const totalLoss = totalConsume - totalOutput;
+            const lossRate = totalConsume > 0 ? (totalLoss / totalConsume) : 0;
+            const lossCells = document.querySelectorAll('.loss-display');
+            
+            // Check Loss Rate limit (3%)
+            let warnBlock = document.getElementById('v3_lossWarning');
+            let explainItem = document.getElementById('v3_explainItem');
+            
+            if (lossRate > 0.03) {
+                if (!warnBlock) {
+                    const parent = document.getElementById('v3_expectedGoodsTable').closest('.el-card__body');
+                    warnBlock = document.createElement('div');
+                    warnBlock.id = 'v3_lossWarning';
+                    warnBlock.style.margin = '15px 0';
+                    warnBlock.style.background = '#fdf6ec';
+                    warnBlock.style.border = '1px solid #faecd8';
+                    warnBlock.style.padding = '10px 15px';
+                    warnBlock.style.borderRadius = '4px';
+                    warnBlock.style.display = 'flex';
+                    warnBlock.style.alignItems = 'center';
+                    warnBlock.style.gap = '10px';
+                    warnBlock.innerHTML = `
+                        <span style="font-size: 18px; color: var(--warning-color);">⚠️</span>
+                        <span style="color: var(--warning-color); font-size: 13px; font-weight: bold;" id="v3_lossWarningText"></span>
+                    `;
+                    parent.insertBefore(warnBlock, parent.firstElementChild);
+                }
+                document.getElementById('v3_lossWarningText').textContent = `损耗超标：当前加工损耗率已达 ${(lossRate * 100).toFixed(2)}%（超标阈值 3.00%）。系统需要您填写异常损耗合理说明。`;
+                warnBlock.style.display = 'flex';
+                
+                if (!explainItem) {
+                    explainItem = document.createElement('div');
+                    explainItem.id = 'v3_explainItem';
+                    explainItem.className = 'el-form-item';
+                    explainItem.style.marginTop = '15px';
+                    explainItem.innerHTML = `
+                        <span class="el-form-label required" style="color:var(--warning-color);">异常损耗成因说明 (实际损耗已超标)</span>
+                        <input type="text" class="el-input__inner" id="v3_lossReason" placeholder="如：剪切损耗加卷皮锈蚀严重 / 大米筛分水分杂质超标，请阐述合理原因..." style="border-color:var(--warning-color);">
+                        <span class="form-error" id="v3_lossReasonError" style="color:var(--danger-color); font-size:12px; display:none; margin-top:4px;">请填写超标损耗的具体合理成因，以便风控审计归档！</span>
+                    `;
+                    const parent = document.getElementById('v3_expectedGoodsTable').closest('.el-card__body');
+                    parent.appendChild(explainItem);
+                }
+            } else {
+                if (warnBlock) warnBlock.style.display = 'none';
+                if (explainItem) explainItem.remove();
+            }
+
+            if (lossCells.length > 0) {
+                lossCells.forEach((cell, idx) => {
+                    if (idx === 0) {
+                        cell.textContent = `${totalLoss.toFixed(4)} 吨 (${(lossRate * 100).toFixed(2)}%)`;
+                        if (totalLoss < 0) {
+                            cell.style.color = 'var(--success-color)';
+                        } else if (lossRate > 0.03) {
+                            cell.style.color = 'var(--danger-color)';
+                        } else {
+                            cell.style.color = 'var(--warning-color)';
+                        }
+                    } else {
+                        cell.textContent = '0.0000 吨 (0.00%)';
+                        cell.style.color = 'var(--text-secondary)';
+                    }
+                });
+            }
+            
+            // Recalculate margins safety
+            calculateValuationChange();
+        }
+
+        // Valuation check for pledged cargo (PM requirement 2)
+        function calculateValuationChange() {
+            const order = mockOrders[activeOrderIndex];
+            if (order.goodsType !== '抵质押货') {
+                document.getElementById('v3_valuationCard').style.display = 'none';
+                return;
+            }
+            document.getElementById('v3_valuationCard').style.display = 'block';
+            
+            // Valuation before processing
+            let valBefore = 0;
+            order.inputs.forEach(item => {
+                const price = mockSKUPrices[item.sku] || 3000;
+                valBefore += item.planQty * price;
+            });
+            
+            // Valuation after processing (actual outputs)
+            const outputRows = document.getElementById('v3_expectedGoodsTable').children;
+            let actOutputVal = 0;
+            for (let i = 0; i < outputRows.length; i++) {
+                const actQty = parseFloat(outputRows[i].querySelector('.act-output-qty').value) || 0;
+                const sku = outputRows[i].querySelector('.act-sku').value;
+                const price = mockSKUPrices[sku] || 4000;
+                actOutputVal += actQty * price;
+            }
+            
+            let valAfter = actOutputVal + valuationPreAddValue; 
+            let valDiff = valAfter - valBefore;
+            
+            document.getElementById('v3_valBefore').innerHTML = `<span style="font-family:monospace;">${valBefore.toFixed(2)}</span> 元`;
+            document.getElementById('v3_valAfter').innerHTML = `<span style="font-family:monospace;">${valAfter.toFixed(2)}</span> 元`;
+            
+            const diffCell = document.getElementById('v3_valDiff');
+            if (valDiff >= 0) {
+                diffCell.innerHTML = `<span style="font-family:monospace;">+${valDiff.toFixed(2)}</span> 元`;
+                diffCell.style.color = 'var(--success-color)';
+            } else {
+                diffCell.innerHTML = `<span style="font-family:monospace;">${valDiff.toFixed(2)}</span> 元`;
+                diffCell.style.color = 'var(--danger-color)';
+            }
+            
+            // Margin check
+            const loanAmt = 75000; // Mock loan allocation
+            const pledgeRate = (loanAmt / valAfter) * 100;
+            const statusCell = document.getElementById('v3_valStatus');
+            const valWarning = document.getElementById('v3_valWarning');
+            const submitBtn = document.getElementById('v3_submitBtn');
+            
+            if (pledgeRate > 80.0) {
+                statusCell.innerHTML = `⚠️ 预警：当前质押率升至 <strong style="color:var(--danger-color); font-family:monospace;">${pledgeRate.toFixed(1)}%</strong>（已跌破 80% 安全水位警戒线！）`;
+                statusCell.style.color = 'var(--danger-color)';
+                
+                if (!currentValuationBypassed) {
+                    valWarning.style.display = 'flex';
+                    submitBtn.disabled = true;
+                    submitBtn.style.backgroundColor = '#c8c9cc';
+                    submitBtn.style.borderColor = '#c8c9cc';
+                    submitBtn.style.cursor = 'not-allowed';
+                    submitBtn.title = '抵质押品价值不足，系统已拦截结单，请补仓或风控特批！';
+                } else {
+                    valWarning.style.display = 'none';
+                    submitBtn.disabled = false;
+                    submitBtn.style.backgroundColor = 'var(--primary-color)';
+                    submitBtn.style.borderColor = 'var(--primary-color)';
+                    submitBtn.style.cursor = 'pointer';
+                    submitBtn.title = '';
+                    statusCell.innerHTML += ` [已通过风控部授权特批豁免]`;
+                }
+            } else {
+                statusCell.innerHTML = `✓ 正常：当前质押率 <strong style="color:var(--success-color); font-family:monospace;">${pledgeRate.toFixed(1)}%</strong>（处于安全区间）`;
+                statusCell.style.color = 'var(--success-color)';
+                valWarning.style.display = 'none';
+                
+                submitBtn.disabled = false;
+                submitBtn.style.backgroundColor = 'var(--primary-color)';
+                submitBtn.style.borderColor = 'var(--primary-color)';
+                submitBtn.style.cursor = 'pointer';
+                submitBtn.title = '';
+            }
+        }
+
+        function simulateBucang() {
+            valuationPreAddValue += 20000;
+            showToast("成功划转划入其他普通存货作抵押，质押物货值增加 20,000 元！", "success");
+            calculateValuationChange();
+        }
+
+        function simulateBypassVal() {
+            currentValuationBypassed = true;
+            showToast("风控部主管已签署单期授权令，豁免此货值损耗放行！", "success");
+            calculateValuationChange();
+        }
+
+        // Submit checkout confirm (PM requirement 7)
+        function submitView3() {
+            const order = mockOrders[activeOrderIndex];
+            
+            // Check if loss reason is required and empty
+            const reasonInput = document.getElementById('v3_lossReason');
+            if (reasonInput) {
+                const val = reasonInput.value.trim();
+                const err = document.getElementById('v3_lossReasonError');
+                if (!val) {
+                    err.style.display = 'block';
+                    reasonInput.focus();
+                    showToast("请填写超标损耗的具体原因说明！", "error");
+                    return;
+                }
+                err.style.display = 'none';
+                order.lossReason = val; // Store it
+            } else {
+                order.lossReason = "正常范围内损耗";
+            }
+
+            // Trigger risk warnings
+            const text = "提交后数据不可逆转且不支持撤回，确认提交加工结果？";
+            const extra = order.goodsType === '抵质押货' 
+                ? "系统将自动解冻锁定原货物并进行出库扣减，新货物入库继承原抵质押状态，并实时提报盯市测算系统重新计价。"
+                : "系统将冲销扣减锁定的原料库存，核销加工损耗，新产物绑定溯源码上架入库物理台账。";
+                
+            showMessageBox(text, extra, function(confirm) {
+                if (confirm) {
+                    // Save actual values
+                    const consumeInputs = document.querySelectorAll('.act-consume-qty');
+                    consumeInputs.forEach((input, index) => {
+                        order.inputs[index].actualQty = parseFloat(input.value) || 0;
+                    });
+
+                    const outputRows = document.getElementById('v3_expectedGoodsTable').children;
+                    let totalActualConsume = order.inputs.reduce((sum, i) => sum + i.actualQty, 0);
+                    let totalActualOutput = 0;
+
+                    order.outputs = [];
+                    for (let i = 0; i < outputRows.length; i++) {
+                        const actQty = parseFloat(outputRows[i].querySelector('.act-output-qty').value) || 0;
+                        totalActualOutput += actQty;
+                        order.outputs.push({
+                            sku: outputRows[i].querySelector('.act-sku').value,
+                            expectedQty: order.outputs[i] ? order.outputs[i].expectedQty : actQty,
+                            actualQty: actQty,
+                            lossQty: 0
+                        });
+                    }
+
+                    let totalLoss = totalActualConsume - totalActualOutput;
+                    if (order.outputs.length > 0) {
+                        order.outputs[0].lossQty = totalLoss;
+                    }
+
+                    order.status = '已完成';
+                    showToast("理货记录已正式提交并执行出入库记账！", "success");
+                    
+                    openDetails(activeOrderIndex);
+                } else {
+                    showToast("操作已取消", "info");
+                }
+            });
+        }
+
+        // ================= VIEW 4: 详情与血缘溯源 =================
+        function openDetails(index) {
+            const order = mockOrders[index];
+
+            document.getElementById('v4_applyNo').textContent = order.applyNo;
+            document.getElementById('v4_customer').textContent = order.customer;
+            document.getElementById('v4_warehouse').textContent = order.warehouse;
+            document.getElementById('v4_status').innerHTML = order.status;
+            document.getElementById('v4_lossReasonVal').textContent = order.lossReason || "无";
+            
+            const stamp = document.getElementById('v4_stamp');
+            if (order.status === '已完成') {
+                stamp.style.display = 'flex';
+                stamp.textContent = '已完成';
+                stamp.style.color = 'var(--success-color)';
+                stamp.style.borderColor = 'var(--success-color)';
+                stamp.style.backgroundColor = 'rgba(103,194,58,0.06)';
+                document.getElementById('v4_treeCard').style.display = 'block';
+                document.getElementById('v4_flowCard').style.display = 'block';
+                
+                document.getElementById('v4_inheritance').innerHTML = order.goodsType === '抵质押货'
+                    ? `新货品继续继承并锁定至原抵质押单 <span style="font-weight:bold; color:var(--primary-color);">${order.pledgeOrder}</span> 下`
+                    : '普通存货已直接入账至货主可用名下';
+
+                // Render tree and ledger flows
+                renderLineageTree(order);
+                renderFlowLedger(order);
+            } else {
+                stamp.style.display = 'flex';
+                stamp.textContent = order.status;
+                stamp.style.color = order.status === '已驳回' ? 'var(--danger-color)' : 'var(--text-secondary)';
+                stamp.style.borderColor = order.status === '已驳回' ? 'var(--danger-color)' : 'var(--border-base)';
+                stamp.style.backgroundColor = order.status === '已驳回' ? 'rgba(245,108,108,0.06)' : '#fafafa';
+                
+                document.getElementById('v4_treeCard').style.display = 'none';
+                document.getElementById('v4_flowCard').style.display = 'none';
+                document.getElementById('v4_inheritance').textContent = '申请未结算，无物权变更继承记录';
+            }
+
+            switchView(4, `单据详情 - ${order.applyNo}`);
+        }
+
+        // Lineage Graph in Detail View
+        function renderLineageTree(order) {
+            const container = document.getElementById('v4_treeContainer');
+            container.innerHTML = '';
+
+            // Inputs nodes
+            const leftContainer = document.createElement('div');
+            leftContainer.style.display = 'flex';
+            leftContainer.style.flexDirection = 'column';
+            leftContainer.style.gap = '15px';
+            
+            order.inputs.forEach(item => {
+                const node = document.createElement('div');
+                node.className = 'el-tree-node';
+                node.innerHTML = `
+                    <div class="el-tree-node__header">原物料(物理消耗)</div>
+                    <div class="el-tree-node__body">
+                        <div class="el-tree-node__title" title="${item.sku}">${item.sku.split('(')[0]}</div>
+                        <div class="el-tree-node__meta">
+                            <span>系统锁额: ${item.planQty.toFixed(2)}</span>
+                            <strong>实际消耗: ${(item.actualQty || item.planQty).toFixed(2)}</strong>
+                        </div>
+                        <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">源溯源码: <span style="font-family:monospace; font-weight:bold;">${item.trace}</span></div>
+                    </div>
+                `;
+                leftContainer.appendChild(node);
+            });
+
+            // Arrow
+            const arrow1 = document.createElement('div');
+            arrow1.className = 'el-tree-arrow';
+            arrow1.textContent = '➔';
+
+            // Center process node
+            const centerNode = document.createElement('div');
+            centerNode.className = 'el-tree-node is-active';
+            centerNode.innerHTML = `
+                <div class="el-tree-node__header">形态物理加工变更</div>
+                <div class="el-tree-node__body" style="text-align: center;">
+                    <div class="el-tree-node__title" style="color:var(--primary-color); font-family:monospace;">${order.applyNo}</div>
+                    <div style="font-size:11px; color:var(--text-secondary); margin-top:5px;">加工结案入账记录</div>
+                    <div style="font-size:11px; color:var(--success-color); font-weight:bold; margin-top:5px;">[库存核销平账已达成]</div>
+                </div>
+            `;
+
+            // Arrow
+            const arrow2 = document.createElement('div');
+            arrow2.className = 'el-tree-arrow';
+            arrow2.textContent = '➔';
+
+            // Outputs nodes
+            const rightContainer = document.createElement('div');
+            rightContainer.style.display = 'flex';
+            rightContainer.style.flexDirection = 'column';
+            rightContainer.style.gap = '15px';
+
+            order.outputs.forEach((item, index) => {
+                const node = document.createElement('div');
+                node.className = 'el-tree-node';
+                const newTrace = `TRC-GEN-${order.applyNo.slice(-4)}-00${index + 1}`;
+                node.innerHTML = `
+                    <div class="el-tree-node__header" style="background:#f0f9eb; color:var(--success-color)">产成品(物理入库)</div>
+                    <div class="el-tree-node__body">
+                        <div class="el-tree-node__title" title="${item.sku}">${item.sku.split('(')[0]}</div>
+                        <div class="el-tree-node__meta">
+                            <span>预期产能: ${item.expectedQty.toFixed(2)}</span>
+                            <strong style="color:var(--success-color)">实际产出: ${(item.actualQty || item.expectedQty).toFixed(2)}</strong>
+                        </div>
+                        <div class="el-tree-node__meta" style="margin-top:5px; border-top:1px dashed var(--border-light); padding-top:5px;">
+                            <span style="color:var(--danger-color)">理算实际损耗: ${(item.lossQty || 0.0).toFixed(2)} 吨</span>
+                        </div>
+                        <div style="font-size:11px; color:var(--success-color); margin-top:5px;">物理新溯源码: <span style="font-family:monospace; font-weight:bold;">${newTrace}</span></div>
+                    </div>
+                `;
+                rightContainer.appendChild(node);
+            });
+
+            container.appendChild(leftContainer);
+            container.appendChild(arrow1);
+            container.appendChild(centerNode);
+            container.appendChild(arrow2);
+            container.appendChild(rightContainer);
+        }
+
+        // Render flows
+        function renderFlowLedger(order) {
+            const tbody = document.getElementById('v4_flowTable');
+            tbody.innerHTML = '';
+
+            let flowId = 1048820;
+
+            // Outflow
+            order.inputs.forEach(item => {
+                flowId++;
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+                tr.innerHTML = `
+                    <td style="font-family:monospace;">FLW-${flowId}</td>
+                    <td>${item.sku}</td>
+                    <td><span style="background-color:#fef0f0; color:var(--danger-color); padding: 2px 6px; border-radius: 3px; font-size:12px;">加工领料出库</span></td>
+                    <td style="font-weight:bold; color:var(--danger-color)">-${(item.actualQty || item.planQty).toFixed(4)} 吨</td>
+                    <td style="font-family:monospace;">${item.trace}</td>
+                    <td style="font-family:monospace; color:var(--info-color)">${order.applyNo}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Loss
+            order.outputs.forEach(item => {
+                const loss = item.lossQty || 0.0;
+                if (loss !== 0) {
+                    flowId++;
+                    const tr = document.createElement('tr');
+                    tr.className = 'el-table__row';
+                    const isGain = loss < 0;
+                    tr.innerHTML = `
+                        <td style="font-family:monospace;">FLW-${flowId}</td>
+                        <td>${item.sku}</td>
+                        <td><span style="background-color:#faf1d6; color:var(--warning-color); padding: 2px 6px; border-radius: 3px; font-size:12px;">加工损耗核销</span></td>
+                        <td style="font-weight:bold; color:${isGain ? 'var(--success-color)' : 'var(--danger-color)'}">
+                            ${isGain ? '+' : '-'}${Math.abs(loss).toFixed(4)} 吨
+                        </td>
+                        <td>-</td>
+                        <td style="font-family:monospace; color:var(--info-color)">${order.applyNo}</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+
+            // Inflow
+            order.outputs.forEach((item, index) => {
+                flowId++;
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+                tr.innerHTML = `
+                    <td style="font-family:monospace;">FLW-${flowId}</td>
+                    <td>${item.sku}</td>
+                    <td><span style="background-color:#f0f9eb; color:var(--success-color); padding: 2px 6px; border-radius: 3px; font-size:12px;">加工产成品入库</span></td>
+                    <td style="font-weight:bold; color:var(--success-color)">+${(item.actualQty || item.expectedQty).toFixed(4)} 吨</td>
+                    <td style="font-family:monospace;">TRC-GEN-${order.applyNo.slice(-4)}-00${index + 1}</td>
+                    <td style="font-family:monospace; color:var(--info-color)">${order.applyNo}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Trace code search & highlight (PM requirement 6)
+        function searchLineageNode() {
+            const query = document.getElementById('v4_searchTrace').value.trim().toLowerCase();
+            if (!query) {
+                showToast("请输入需要搜索定位的物理溯源码！", "warning");
+                return;
+            }
+            
+            const nodes = document.querySelectorAll('.el-tree-node');
+            let found = false;
+            
+            // Clean previous highlights
+            nodes.forEach(node => node.classList.remove('is-highlighted'));
+            
+            nodes.forEach(node => {
+                const text = node.textContent.toLowerCase();
+                if (text.includes(query)) {
+                    node.classList.add('is-highlighted');
+                    node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    found = true;
+                }
+            });
+            
+            if (found) {
+                showToast(`已成功为您定位并高亮溯源码 "${query}" 关联物理节点`, "success");
+            } else {
+                showToast(`系统溯源网中未检索到与 "${query}" 匹配的代码批次`, "error");
+            }
+        }
+
+        // ================= DIALOG PICKER FOR ORDINARY STOCK (PM requirement 2) =================
+        function openInventoryDialog() {
+            const customer = document.getElementById('v1_customer').value;
+            const warehouse = document.getElementById('v1_warehouse').value;
+            if (!customer || !warehouse) {
+                showToast("请先选择货主和仓库！", "warning");
+                return;
+            }
+            
+            document.getElementById('dlg_check_all').checked = false;
+            document.getElementById('dlg_search_sku').value = '';
+            
+            renderDlgInventoryTable(mockNormalInventory);
+            document.getElementById('inventoryDialog').style.display = 'flex';
+        }
+
+        function closeInventoryDialog() {
+            document.getElementById('inventoryDialog').style.display = 'none';
+        }
+
+        function renderDlgInventoryTable(list) {
+            const tbody = document.getElementById('dlg_inventoryTableBody');
+            tbody.innerHTML = '';
+            
+            const existingTraces = Array.from(document.querySelectorAll('#v1_originalGoodsTable .trace')).map(el => el.textContent);
+            
+            list.forEach((item, index) => {
+                const isAlreadyAdded = existingTraces.includes(item.trace);
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+                tr.style.opacity = isAlreadyAdded ? '0.5' : '1';
+                tr.innerHTML = `
+                    <td style="text-align: center;">
+                        <input type="checkbox" class="dlg-item-check" data-index="${index}" ${isAlreadyAdded ? 'disabled checked' : ''}>
+                    </td>
+                    <td class="dlg-sku" style="font-weight:bold; color:var(--text-main);">${item.sku}</td>
+                    <td>${item.loc}</td>
+                    <td>${item.qty.toFixed(4)} ${item.unit}</td>
+                    <td class="dlg-trace" style="font-family:monospace; font-size:12px;">${item.trace}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function searchDlgInventory() {
+            const keyword = document.getElementById('dlg_search_sku').value.trim().toLowerCase();
+            const filtered = mockNormalInventory.filter(item => item.sku.toLowerCase().includes(keyword));
+            renderDlgInventoryTable(filtered);
+        }
+
+        function toggleDlgCheckAll(cb) {
+            const checks = document.querySelectorAll('.dlg-item-check:not([disabled])');
+            checks.forEach(c => c.checked = cb.checked);
+        }
+
+        function confirmSelectedInventory() {
+            const checks = document.querySelectorAll('.dlg-item-check:checked:not([disabled])');
+            if (checks.length === 0) {
+                closeInventoryDialog();
+                return;
+            }
+            
+            const tbody = document.getElementById('v1_originalGoodsTable');
+            
+            checks.forEach(check => {
+                const idx = parseInt(check.getAttribute('data-index'));
+                const item = mockNormalInventory[idx];
+                const count = tbody.children.length + 1;
+                
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+                tr.innerHTML = `
+                    <td>${count}</td>
+                    <td class="sku">${item.sku}</td>
+                    <td>${item.loc}</td>
+                    <td class="trace">${item.trace}</td>
+                    <td class="pledge">-</td>
+                    <td>${item.qty.toFixed(4)} ${item.unit}</td>
+                    <td><input type="number" class="el-input__inner plan-qty" style="width:110px; height:28px;" value="${(item.qty * 0.5).toFixed(4)}" step="0.0001"></td>
+                    <td><button class="el-button el-button--text el-button--danger el-button--small" onclick="this.closest('tr').remove(); renameV1Rows()">删除</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            closeInventoryDialog();
+            showToast(`成功导入 ${checks.length} 笔存货批次，请设定拟加工数额。`, "success");
+        }
+
+        window.onload = function () {
+            loadListTable();
+        }
+    </script>
+    <script>
+    (function() {
+      // 1. 注入弹窗与遮罩层
+      const overlay = document.createElement('div');
+      overlay.className = 'prd-popover-overlay';
+      const popover = document.createElement('div');
+      popover.className = 'prd-popover';
+      document.body.appendChild(overlay);
+      document.body.appendChild(popover);
+
+      // 2. 注入标注编辑器骨架
+      const editorOverlay = document.createElement('div');
+      editorOverlay.className = 'prd-editor-dialog-overlay';
+      editorOverlay.innerHTML = `
+        <div class="prd-editor-dialog">
+            <div class="prd-editor-dialog-header">
+                <span id="prdEditorTitle">编辑备注</span>
+                <button class="prd-editor-dialog-close">&times;</button>
+            </div>
+            <div class="prd-editor-dialog-body">
+                <div class="prd-editor-field">
+                    <label>备注编号</label>
+                    <input type="text" id="prdEditId" placeholder="例如: REQ-001">
+                </div>
+                <div class="prd-editor-field">
+                    <label>备注名称 (Tooltip 显示)</label>
+                    <input type="text" id="prdEditTitle" placeholder="请输入简短名称">
+                </div>
+                <div class="prd-editor-field">
+                    <label>详细描述 (Popover 显示)</label>
+                    <textarea id="prdEditDesc" placeholder="请输入详细业务规则描述..."></textarea>
+                </div>
+            </div>
+            <div class="prd-editor-dialog-footer">
+                <button class="prd-editor-btn prd-editor-btn-delete" id="prdEditDeleteBtn">删除标注</button>
+                <div style="display:flex; gap: 8px;">
+                    <button class="prd-editor-btn" id="prdEditCancelBtn">取消</button>
+                    <button class="prd-editor-btn prd-editor-btn-primary" id="prdEditSaveBtn">保存</button>
+                </div>
+            </div>
+        </div>
+      `;
+      document.body.appendChild(editorOverlay);
+
+      // 核心变量
+      let isEditMode = false;
+      let isVisible = true;
+      let currentTargetElement = null;
+      let currentEditingMarker = null;
+      let clickX = 0;
+      let clickY = 0;
+
+      // 编辑器 DOM 引用
+      const editorTitle = editorOverlay.querySelector('#prdEditorTitle');
+      const editId = editorOverlay.querySelector('#prdEditId');
+      const editTitle = editorOverlay.querySelector('#prdEditTitle');
+      const editDesc = editorOverlay.querySelector('#prdEditDesc');
+      const deleteBtn = editorOverlay.querySelector('#prdEditDeleteBtn');
+      const cancelBtn = editorOverlay.querySelector('#prdEditCancelBtn');
+      const saveBtn = editorOverlay.querySelector('#prdEditSaveBtn');
+      const closeBtn = editorOverlay.querySelector('.prd-editor-dialog-close');
+
+      // 3. 注入工具栏
+      const toolbar = document.createElement('div');
+      toolbar.className = 'prd-toolbar';
+      
+      const editModeBtn = document.createElement('button');
+      editModeBtn.className = 'prd-toggle-btn';
+      editModeBtn.style.backgroundColor = '#10B981';
+      editModeBtn.textContent = '进入编辑模式';
+      
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'prd-toggle-btn';
+      toggleBtn.textContent = '隐藏标注';
+
+      const exportBtn = document.createElement('button');
+      exportBtn.className = 'prd-toggle-btn';
+      exportBtn.style.backgroundColor = '#F59E0B';
+      exportBtn.textContent = '导出 HTML';
+
+      toolbar.appendChild(editModeBtn);
+      toolbar.appendChild(toggleBtn);
+      toolbar.appendChild(exportBtn);
+      document.body.appendChild(toolbar);
+
+      // 确保滚动容器为 relative 定位以作为绝对坐标的参照物
+      const pageContent = document.querySelector('.page-content');
+      if (pageContent) {
+        pageContent.style.position = 'relative';
+      }
+
+      // 绑定已有标注点击事件
+      function setupMarkerListeners(marker) {
+        const clone = marker.cloneNode(true);
+        marker.parentNode.replaceChild(clone, marker);
+        
+        clone.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (isEditMode) {
+            openEditor(this.parentNode, this);
+          } else {
+            showPopover(this);
+          }
+        });
+      }
+
+      function initMarkers() {
+        document.querySelectorAll('.prd-marker').forEach(setupMarkerListeners);
+      }
+      initMarkers();
+
+      // 查看弹窗逻辑
+      function showPopover(marker) {
+        const id = marker.getAttribute('data-req-id');
+        const title = marker.getAttribute('data-req-title');
+        const desc = marker.getAttribute('data-req-desc');
+        popover.innerHTML = '';
+        
+        const popoverClose = document.createElement('button');
+        popoverClose.className = 'prd-popover-close';
+        popoverClose.innerHTML = '&times;';
+        popoverClose.addEventListener('click', closePopover);
+        
+        const idDiv = document.createElement('div');
+        idDiv.className = 'prd-popover-id';
+        idDiv.textContent = id;
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'prd-popover-title';
+        titleDiv.textContent = title;
+        
+        const descDiv = document.createElement('div');
+        descDiv.className = 'prd-popover-desc';
+        descDiv.textContent = desc;
+        
+        popover.appendChild(popoverClose);
+        popover.appendChild(idDiv);
+        popover.appendChild(titleDiv);
+        popover.appendChild(descDiv);
+        popover.classList.add('active');
+        overlay.classList.add('active');
+      }
+
+      function closePopover() {
+        popover.classList.remove('active');
+        overlay.classList.remove('active');
+      }
+
+      overlay.addEventListener('click', closePopover);
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closePopover();
+          closeEditor();
+        }
+      });
+
+      // 工具栏事件：显示/隐藏
+      toggleBtn.addEventListener('click', function() {
+        isVisible = !isVisible;
+        document.body.classList.toggle('prd-markers-hidden', !isVisible);
+        toggleBtn.textContent = isVisible ? '隐藏标注' : '显示标注';
+      });
+
+      // 工具栏事件：进入/退出编辑模式
+      editModeBtn.addEventListener('click', function() {
+        isEditMode = !isEditMode;
+        document.body.classList.toggle('prd-edit-active', isEditMode);
+        editModeBtn.textContent = isEditMode ? '退出编辑模式' : '进入编辑模式';
+        editModeBtn.style.backgroundColor = isEditMode ? '#EF4444' : '#10B981';
+        
+        if (isEditMode) {
+          if (!isVisible) {
+            isVisible = true;
+            document.body.classList.remove('prd-markers-hidden');
+            toggleBtn.textContent = '隐藏标注';
+          }
+          showToast('已进入打钉编辑模式。单击页面任意位置打钉添加产品标注，点击已有标注可修改/删除。');
+        } else {
+          closeEditor();
+        }
+      });
+
+      // 提示信息
+      function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1E293B;color:#fff;padding:8px 16px;border-radius:6px;font-size:13px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);pointer-events:none;font-family:sans-serif;';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      }
+
+      // 编辑模式捕获页面容器点击
+      document.addEventListener('click', function(e) {
+        if (!isEditMode) return;
+        
+        // 忽略工具栏、编辑器弹窗、Popover、标注徽章自身的点击
+        if (e.target.closest('.prd-toolbar') || 
+            e.target.closest('.prd-editor-dialog') || 
+            e.target.closest('.prd-popover') || 
+            e.target.classList.contains('prd-marker') || 
+            e.target.classList.contains('prd-tooltip')) {
+          return;
+        }
+        
+        const pContent = document.querySelector('.page-content');
+        if (!pContent || !pContent.contains(e.target)) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        // 动态计算相对滚动容器的绝对定位坐标
+        const rect = pContent.getBoundingClientRect();
+        const x = e.clientX - rect.left + pContent.scrollLeft;
+        const y = e.clientY - rect.top + pContent.scrollTop;
+
+        openEditor(pContent, null, x, y);
+      }, true);
+
+      // 编辑器操作
+      function openEditor(element, marker = null, x = 0, y = 0) {
+        currentTargetElement = element;
+        currentEditingMarker = marker;
+        clickX = x;
+        clickY = y;
+        
+        if (marker) {
+          editorTitle.textContent = '修改备注信息';
+          editId.value = marker.getAttribute('data-req-id') || '';
+          editTitle.value = marker.getAttribute('data-req-title') || '';
+          editDesc.value = marker.getAttribute('data-req-desc') || '';
+          deleteBtn.style.display = 'block';
+        } else {
+          editorTitle.textContent = '新建产品备注';
+          const count = document.querySelectorAll('.prd-marker').length + 1;
+          editId.value = 'REQ-' + String(count).padStart(3, '0');
+          editTitle.value = '';
+          editDesc.value = '';
+          deleteBtn.style.display = 'none';
+        }
+        editorOverlay.style.display = 'flex';
+      }
+
+      function closeEditor() {
+        editorOverlay.style.display = 'none';
+        currentTargetElement = null;
+        currentEditingMarker = null;
+      }
+
+      cancelBtn.addEventListener('click', closeEditor);
+      closeBtn.addEventListener('click', closeEditor);
+
+      // 保存标注逻辑
+      saveBtn.addEventListener('click', function() {
+        const idVal = editId.value.trim();
+        const titleVal = editTitle.value.trim();
+        const descVal = editDesc.value.trim();
+        
+        if (!idVal || !titleVal || !descVal) {
+          alert('所有字段均为必填项！');
+          return;
+        }
+
+        if (currentEditingMarker) {
+          currentEditingMarker.setAttribute('data-req-id', idVal);
+          currentEditingMarker.setAttribute('data-req-title', titleVal);
+          currentEditingMarker.setAttribute('data-req-desc', descVal);
+          
+          const numMatch = idVal.match(/\d+/);
+          const displayNum = numMatch ? parseInt(numMatch[0]) : idVal;
+          currentEditingMarker.innerHTML = displayNum + `<span class="prd-tooltip">${titleVal}</span>`;
+          setupMarkerListeners(currentEditingMarker);
+        } else {
+          const newMarker = document.createElement('span');
+          newMarker.className = 'prd-marker';
+          newMarker.setAttribute('data-req-id', idVal);
+          newMarker.setAttribute('data-req-title', titleVal);
+          newMarker.setAttribute('data-req-desc', descVal);
+          
+          // 设置绝对定位坐标
+          newMarker.style.left = `${clickX}px`;
+          newMarker.style.top = `${clickY}px`;
+          
+          const numMatch = idVal.match(/\d+/);
+          const displayNum = numMatch ? parseInt(numMatch[0]) : idVal;
+          newMarker.innerHTML = displayNum + `<span class="prd-tooltip">${titleVal}</span>`;
+          
+          currentTargetElement.appendChild(newMarker);
+          setupMarkerListeners(newMarker);
+        }
+        
+        closeEditor();
+        showToast('备注标注保存成功！');
+      });
+
+      // 删除标注逻辑
+      deleteBtn.addEventListener('click', function() {
+        if (!currentEditingMarker) return;
+        if (confirm('确定要移除此项标注吗？')) {
+          const parent = currentEditingMarker.parentNode;
+          currentEditingMarker.remove();
+          
+          if (parent && parent.classList.contains('prd-marker-target') && !parent.querySelector('.prd-marker')) {
+            parent.classList.remove('prd-marker-target');
+          }
+          
+          closeEditor();
+          showToast('标注已成功移除。');
+        }
+      });
+
+      // 导出 HTML
+      exportBtn.addEventListener('click', function() {
+        isEditMode = false;
+        document.body.classList.remove('prd-edit-active');
+        editModeBtn.textContent = '进入编辑模式';
+        editModeBtn.style.backgroundColor = '#10B981';
+        closeEditor();
+        closePopover();
+
+        const clone = document.documentElement.cloneNode(true);
+        
+        const clToolbar = clone.querySelector('.prd-toolbar');
+        if (clToolbar) clToolbar.remove();
+        const clOverlay = clone.querySelector('.prd-popover-overlay');
+        if (clOverlay) clOverlay.remove();
+        const clPopover = clone.querySelector('.prd-popover');
+        if (clPopover) clPopover.remove();
+        const clEditor = clone.querySelector('.prd-editor-dialog-overlay');
+        if (clEditor) clEditor.remove();
+        
+        clone.classList.remove('prd-markers-hidden', 'prd-edit-active');
+        const clBody = clone.querySelector('body');
+        if (clBody) {
+          clBody.classList.remove('prd-markers-hidden', 'prd-edit-active');
+        }
+
+        const htmlContent = '<!DOCTYPE html>\n' + clone.outerHTML;
+        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        
+        let filename = window.location.pathname.split('/').pop() || 'index_annotated.html';
+        if (!filename.includes('_annotated')) {
+          filename = filename.replace('.html', '_annotated.html');
+        }
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showToast('带标注的原型文件已下载导出！');
+      });
+    })();
+    </script>
+</body>
+</html>

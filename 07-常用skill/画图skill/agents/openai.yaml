@@ -1,0 +1,5 @@
+version: 1
+interface:
+  display_name: Visualization Lab
+  short_description: 选择前置分析或最终出图 skill 的可视化路由器
+  default_prompt: 为当前可视化需求选择最合适的分析或图表 skill；若内容范围未定，先找出值得可视化的点，再说明选择原因。

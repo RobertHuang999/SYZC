@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智仓系统 - 任务管理与重新发起原型演示</title>
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --bg-base: #0f172a;
+      --bg-surface: #1e293b;
+      --bg-surface-hover: #334155;
+      --bg-glass: rgba(30, 41, 59, 0.75);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(59, 130, 246, 0.3);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --accent-blue: #3b82f6;
+      --accent-blue-hover: #2563eb;
+      --accent-purple: #8b5cf6;
+      
+      --status-rejected-bg: rgba(244, 63, 94, 0.12);
+      --status-rejected-text: #fb7185;
+      --status-rejected-border: rgba(244, 63, 94, 0.3);
+
+      --status-revoked-bg: rgba(245, 158, 11, 0.12);
+      --status-revoked-text: #fbbf24;
+      --status-revoked-border: rgba(245, 158, 11, 0.3);
+
+      --status-pending-bg: rgba(56, 189, 248, 0.12);
+      --status-pending-text: #38bdf8;
+      --status-pending-border: rgba(56, 189, 248, 0.3);
+
+      --status-approved-bg: rgba(52, 211, 153, 0.12);
+      --status-approved-text: #34d399;
+      --status-approved-border: rgba(52, 211, 153, 0.3);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Navigation Header */
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text-primary);
+      letter-spacing: -0.025em;
+    }
+
+    .brand-icon {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #94a3b8;
+      border: 1px solid var(--border-color);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.8125rem;
+    }
+    .user-name { font-weight: 600; color: var(--text-primary); }
+    .user-role { color: var(--text-muted); }
+
+    /* Layout Main */
+    main {
+      flex: 1;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(to right, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .page-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+    }
+
+    /* Filter Controls */
+    .filter-bar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tab-btn:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .tab-count {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+    }
+
+    .search-box {
+      position: relative;
+      width: 280px;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: var(--bg-base);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Data Table */
+    .table-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+
+    th {
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 1.125rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .code-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.625rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+
+    .status-badge.rejected {
+      background: var(--status-rejected-bg);
+      color: var(--status-rejected-text);
+      border-color: var(--status-rejected-border);
+    }
+
+    .status-badge.revoked {
+      background: var(--status-revoked-bg);
+      color: var(--status-revoked-text);
+      border-color: var(--status-revoked-border);
+    }
+
+    .status-badge.pending {
+      background: var(--status-pending-bg);
+      color: var(--status-pending-text);
+      border-color: var(--status-pending-border);
+    }
+
+    .status-badge.approved {
+      background: var(--status-approved-bg);
+      color: var(--status-approved-text);
+      border-color: var(--status-approved-border);
+    }
+
+    .action-btn-group {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 0.4rem 0.85rem;
+      border-radius: var(--radius-md);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      text-decoration: none;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+    }
+
+    .btn-reinitiate {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-reinitiate:hover {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    }
+
+    .reinitiate-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      color: #60a5fa;
+      background: rgba(59, 130, 246, 0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 4px;
+      border: 1px dashed rgba(59, 130, 246, 0.3);
+      cursor: pointer;
+    }
+    .reinitiate-badge:hover {
+      background: rgba(59, 130, 246, 0.2);
+    }
+
+    /* Modal / Drawer Overlay */
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .drawer-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drawer {
+      width: 680px;
+      max-width: 90vw;
+      background: var(--bg-surface);
+      height: 100%;
+      border-left: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .drawer-overlay.active .drawer {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.4);
+    }
+
+    .drawer-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.375rem;
+      border-radius: var(--radius-sm);
+      transition: color 0.2s;
+    }
+    .close-btn:hover { color: var(--text-primary); background: var(--bg-surface-hover); }
+
+    .drawer-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Banner / Alerts inside Form */
+    .alert {
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      line-height: 1.5;
+    }
+
+    .alert-info {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      color: #93c5fd;
+    }
+
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fcd34d;
+    }
+
+    .alert-icon {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Form Fields */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .form-control {
+      background: var(--bg-base);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 0.625rem 0.875rem;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .form-control[readonly] {
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .item-card {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .item-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      padding: 0.375rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    .drawer-footer {
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      background: rgba(15, 23, 42, 0.6);
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .toast {
+      background: #1e293b;
+      border: 1px solid var(--accent-blue);
+      color: var(--text-primary);
+      padding: 0.875rem 1.25rem;
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Source Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 150;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 580px;
+      max-width: 90vw;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1rem;
+      padding-left: 0.5rem;
+      position: relative;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--border-color);
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .timeline-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 2px solid var(--accent-blue);
+      z-index: 2;
+      margin-top: 2px;
+    }
+
+    .timeline-dot.danger { border-color: var(--status-rejected-text); background: var(--status-rejected-bg); }
+
+    .timeline-content {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.4);
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      font-size: 0.8125rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Navigation -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">
+        <i data-lucide="boxes"></i>
+      </div>
+      <span>智仓 SCF-Inventory</span>
+    </div>
+    <div class="user-profile">
+      <div class="avatar">李</div>
+      <div class="user-info">
+        <span class="user-name">李明 (平台运营)</span>
+        <span class="user-role">华东监管仓区</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main>
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">任务审批与申请中心</h1>
+        <p class="page-subtitle">管理全系统入出库、加工转变、抵质押及监管报告申请任务</p>
+      </div>
+      <div style="display:flex; gap:0.5rem;">
+        <button class="btn btn-secondary" style="border:1px solid rgba(244,63,94,0.4); color:#fb7185;" onclick="openPledgeExpiredModal('PL20260510002')">
+          <i data-lucide="alert-octagon" style="width:14px;height:14px;"></i> 演示: 抵质押单已失效拦截
+        </button>
+        <button class="btn btn-reinitiate" onclick="openReinitiateDrawer('PR20260716001')">
+          <i data-lucide="plus-circle" style="width:16px;height:16px;"></i> 新增加工申请
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="filterTasks('all')">
+          全部任务 <span class="tab-count">4</span>
+        </button>
+        <button class="tab-btn" onclick="filterTasks('rejected')">
+          未通过 <span class="tab-count" style="color:var(--status-rejected-text);">2</span>
+        </button>
+        <button class="tab-btn" onclick="filterTasks('revoked')">
+          已撤销 <span class="tab-count" style="color:var(--status-revoked-text);">1</span>
+        </button>
+        <button class="tab-btn" onclick="filterTasks('pending')">
+          待审批 <span class="tab-count">1</span>
+        </button>
+      </div>
+      <div class="search-box">
+        <i data-lucide="search"></i>
+        <input type="text" placeholder="搜索单号、货主或仓库...">
+      </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>申请单号</th>
+            <th>业务板块</th>
+            <th>货主与仓库</th>
+            <th>提交时间</th>
+            <th>当前状态</th>
+            <th>处理意见 / 提示</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="task-table-body">
+          <!-- Row 1: Rejected Processing Task -->
+          <tr data-status="rejected">
+            <td>
+              <div class="code-tag">PR20260716001</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">加工转变申请</div>
+            </td>
+            <td>货物加工 (抵质押)</td>
+            <td>
+              <div style="color:var(--text-primary); font-weight:500;">宝钢股份</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">宝山1号监管仓</div>
+            </td>
+            <td>2026-07-16 14:20</td>
+            <td>
+              <span class="status-badge rejected">
+                <i data-lucide="x-circle" style="width:12px;height:12px;"></i> 未通过
+              </span>
+            </td>
+            <td>
+              <span style="color:#fb7185; font-size:0.8125rem;">风控驳回：缺少质押物解押加工协议附件</span>
+            </td>
+            <td>
+              <div class="action-btn-group">
+                <button class="btn btn-reinitiate" onclick="openReinitiateDrawer('PR20260716001', '未通过')">
+                  <i data-lucide="rotate-ccw" style="width:14px;height:14px;"></i> 重新发起
+                </button>
+                <button class="btn btn-secondary" onclick="viewHistoryModal('PR20260716001')">详情</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 2: Revoked Transfer Task -->
+          <tr data-status="revoked">
+            <td>
+              <div class="code-tag">TR20260715003</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">库内移库申请</div>
+            </td>
+            <td>移库管理 (普通存货)</td>
+            <td>
+              <div style="color:var(--text-primary); font-weight:500;">沙钢集团</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">临港综合仓</div>
+            </td>
+            <td>2026-07-15 09:45</td>
+            <td>
+              <span class="status-badge revoked">
+                <i data-lucide="undo-2" style="width:12px;height:12px;"></i> 已撤销
+              </span>
+            </td>
+            <td>
+              <span style="color:var(--text-muted); font-size:0.8125rem;">发起人主动撤销申请</span>
+            </td>
+            <td>
+              <div class="action-btn-group">
+                <button class="btn btn-reinitiate" onclick="openReinitiateDrawer('TR20260715003', '已撤销')">
+                  <i data-lucide="rotate-ccw" style="width:14px;height:14px;"></i> 重新发起
+                </button>
+                <button class="btn btn-secondary" onclick="viewHistoryModal('TR20260715003')">详情</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 3: Re-initiated Task (Pending Approval) -->
+          <tr data-status="pending">
+            <td>
+              <div class="code-tag">PR20260720008</div>
+              <div class="reinitiate-badge" onclick="viewHistoryModal('PR20260716001')">
+                <i data-lucide="link" style="width:10px;height:10px;"></i> 源自: PR20260716001
+              </div>
+            </td>
+            <td>货物加工 (抵质押)</td>
+            <td>
+              <div style="color:var(--text-primary); font-weight:500;">宝钢股份</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">宝山1号监管仓</div>
+            </td>
+            <td>2026-07-20 10:15</td>
+            <td>
+              <span class="status-badge pending">
+                <i data-lucide="clock" style="width:12px;height:12px;"></i> 待审批
+              </span>
+            </td>
+            <td>
+              <span style="color:var(--text-muted); font-size:0.8125rem;">已补全风控同意函，待风控主管审核</span>
+            </td>
+            <td>
+              <div class="action-btn-group">
+                <button class="btn btn-secondary" onclick="viewHistoryModal('PR20260720008')">查看详情</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 4: Approved Outbound Task -->
+          <tr data-status="approved">
+            <td>
+              <div class="code-tag">OUT20260712009</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">出库发货申请</div>
+            </td>
+            <td>出库管理 (解押发货)</td>
+            <td>
+              <div style="color:var(--text-primary); font-weight:500;">鞍钢联营</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">外高桥保税仓</div>
+            </td>
+            <td>2026-07-12 16:00</td>
+            <td>
+              <span class="status-badge approved">
+                <i data-lucide="check-circle-2" style="width:12px;height:12px;"></i> 已通过
+              </span>
+            </td>
+            <td>
+              <span style="color:var(--text-muted); font-size:0.8125rem;">解押指令匹配成功，准予发货</span>
+            </td>
+            <td>
+              <div class="action-btn-group">
+                <button class="btn btn-secondary" onclick="viewHistoryModal('OUT20260712009')">查看详情</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Drawer: Re-initiate Form Drawer -->
+  <div class="drawer-overlay" id="reinitiate-drawer">
+    <div class="drawer">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <i data-lucide="rotate-ccw" style="color:var(--accent-blue);"></i>
+          <span>重新发起申请</span>
+          <span style="font-size:0.8125rem; font-weight:normal; color:var(--text-muted);" id="drawer-source-tag">(源自单据: PR20260716001)</span>
+        </div>
+        <button class="close-btn" onclick="closeReinitiateDrawer()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="drawer-body">
+        <!-- Rejection Reason Banner -->
+        <div class="alert alert-warning" id="rejection-alert">
+          <i data-lucide="alert-triangle" class="alert-icon"></i>
+          <div>
+            <strong style="display:block; margin-bottom:2px;">原单据驳回意见 (风控审核)</strong>
+            <span>“经比对，该笔货物属于抵质押监管资产，加工申请未附资金方出具的《同意加工及放行声明》。请补充上传附件后再重新提交。”</span>
+          </div>
+        </div>
+
+        <!-- Inventory Availability Auto-Check Banner -->
+        <div class="alert alert-info">
+          <i data-lucide="shield-check" class="alert-icon"></i>
+          <div>
+            <strong>底层库存资源自动校验结果</strong>
+            <div style="font-size:0.8125rem; margin-top:2px;">原锁定库存（提报 100.00 吨）已在驳回时解除锁定。经实时校验，当前可用库存：<strong>100.00 吨</strong>（满足提报需求）。</div>
+          </div>
+        </div>
+
+        <!-- Form Section -->
+        <form id="reinitiate-form">
+          <div class="form-row" style="margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>货品类型</label>
+              <input type="text" class="form-control" value="抵质押货" readonly>
+            </div>
+            <div class="form-group">
+              <label>关联抵质押单号</label>
+              <input type="text" class="form-control" value="PL20260510002" readonly>
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>归属货主</label>
+              <input type="text" class="form-control" value="宝钢股份" readonly>
+            </div>
+            <div class="form-group">
+              <label>物理仓库</label>
+              <input type="text" class="form-control" value="宝山1号监管仓" readonly>
+            </div>
+          </div>
+
+          <!-- Cargo Detail Card -->
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label>原货物耗用明细</label>
+            <div class="item-card">
+              <div class="item-card-header">
+                <span>SKU: 热轧卷板 Q235 (1.5mm * 1250mm)</span>
+                <span class="code-tag" style="font-size:0.75rem;">溯源码: BS20260301099</span>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>可用库存量</label>
+                  <input type="text" class="form-control" value="100.00 吨" readonly style="color:#34d399;">
+                </div>
+                <div class="form-group">
+                  <label>本次拟加工耗用量 <span style="color:#ef4444;">*</span></label>
+                  <input type="number" class="form-control" value="100.00" step="0.01">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attachment Section -->
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label>附件凭证 (需包含风控同意函)</label>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:4px;">
+              <div class="file-tag">
+                <i data-lucide="file-text" style="width:14px;height:14px;color:#3b82f6;"></i>
+                <span>加工申请提报表_已盖章.pdf</span>
+                <i data-lucide="x" style="width:12px;height:12px;cursor:pointer;color:var(--text-muted);"></i>
+              </div>
+              <div class="file-tag" style="border: 1px dashed var(--accent-blue); background: rgba(59,130,246,0.1); color:#60a5fa; cursor:pointer;">
+                <i data-lucide="upload" style="width:14px;height:14px;"></i>
+                <span>上传补充同意函 (PDF/图片)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reason / Modification Note -->
+          <div class="form-group">
+            <label>重新发起说明 / 修改备注</label>
+            <textarea class="form-control" placeholder="请输入本次重新发起的修改调整说明...">针对风控提出的意见，已补充上传资金方盖章同意函，请复核审批。</textarea>
+          </div>
+        </form>
+      </div>
+
+      <div class="drawer-footer">
+        <button class="btn btn-secondary" onclick="closeReinitiateDrawer()">取消</button>
+        <button class="btn btn-reinitiate" onclick="submitReinitiateForm()">
+          <i data-lucide="send" style="width:14px;height:14px;"></i> 确认重新提交
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: History Lineage Modal -->
+  <div class="modal-overlay" id="history-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div style="font-weight:700; font-size:1.125rem; display:flex; align-items:center; gap:0.5rem;">
+          <i data-lucide="git-branch" style="color:var(--accent-blue);"></i>
+          <span>单据血缘与审批追踪</span>
+        </div>
+        <button class="close-btn" onclick="closeHistoryModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div>
+        <div style="font-size:0.875rem; color:var(--text-secondary); margin-bottom:0.75rem;">
+          当前单号：<strong class="code-tag" style="color:var(--text-primary);">PR20260720008</strong>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div style="font-weight:600; color:var(--text-primary);">重新发起提交 (单号: PR20260720008)</div>
+              <div style="color:var(--text-muted); font-size:0.75rem; margin-top:2px;">2026-07-20 10:15 · 操作人: 李明 (平台运营)</div>
+              <div style="margin-top:4px; color:#93c5fd;">补充资方同意函凭证，重新推入审批流。</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot danger"></div>
+            <div class="timeline-content">
+              <div style="font-weight:600; color:#fb7185;">审批驳回 (源单号: PR20260716001)</div>
+              <div style="color:var(--text-muted); font-size:0.75rem; margin-top:2px;">2026-07-16 16:30 · 审核人: 张伟 (风控专员)</div>
+              <div style="margin-top:4px; color:var(--text-secondary);">意见: 缺少质押物解押加工协议附件，予以驳回，解锁库存。</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div style="font-weight:600; color:var(--text-primary);">初始提交申请 (单号: PR20260716001)</div>
+              <div style="color:var(--text-muted); font-size:0.75rem; margin-top:2px;">2026-07-16 14:20 · 发起人: 李明 (平台运营)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Pledge Order Expired Interception Modal -->
+  <div class="modal-overlay" id="pledge-expired-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div style="font-weight:700; font-size:1.125rem; display:flex; align-items:center; gap:0.5rem; color:#fb7185;">
+          <i data-lucide="alert-octagon"></i>
+          <span>无法重新发起申请（关联单据已失效）</span>
+        </div>
+        <button class="close-btn" onclick="closeModal('pledge-expired-modal')">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div style="font-size:0.875rem; color:var(--text-secondary); line-height:1.6;">
+        原申请关联合同/单号：<strong class="code-tag" style="color:var(--text-primary);">PL20260510002</strong>
+        <br><br>
+        <div style="background:rgba(244,63,94,0.1); border:1px solid rgba(244,63,94,0.3); padding:0.875rem; border-radius:var(--radius-md); color:#fca5a5;">
+          ⚠️ <strong>金融风控拦截：</strong>该笔抵质押单目前处于 <strong>[已结清 / 已解押]</strong> 状态，履约效力已终止。对应质押资产已解除管控，系统禁止继续基于该失效单号发起变更申请。
+        </div>
+        <div style="margin-top:1rem; font-size:0.8125rem; color:var(--text-muted);">
+          💡 <strong>业务解决引导：</strong>若该批货物已解押归还为普通存货，请直接前往“仓储管理 -> 普通存货”模块发起常规出库或加工。
+        </div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem;">
+        <button class="btn btn-secondary" onclick="alert('即将跳转至抵质押单 PL20260510002 详情页查看解押记录...')">查看抵质押单流水</button>
+        <button class="btn btn-secondary" style="background:var(--accent-blue); color:white;" onclick="closeModal('pledge-expired-modal')">我知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Filter Tasks
+    function filterTasks(status) {
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(b => b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+
+      const rows = document.querySelectorAll('#task-table-body tr');
+      rows.forEach(row => {
+        if (status === 'all' || row.dataset.status === status) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    // Open Re-initiate Drawer
+    function openReinitiateDrawer(sourceCode, status) {
+      const drawer = document.getElementById('reinitiate-drawer');
+      document.getElementById('drawer-source-tag').innerText = `(源自单据: ${sourceCode})`;
+      
+      const alertBox = document.getElementById('rejection-alert');
+      if (status === '已撤销') {
+        alertBox.className = 'alert alert-info';
+        alertBox.innerHTML = `
+          <i data-lucide="info" class="alert-icon"></i>
+          <div>
+            <strong style="display:block; margin-bottom:2px;">原单据撤销记录</strong>
+            <span>该单据由您于 2026-07-15 撤销。本次重新发起将带出原填写参数，请核对无误后重新提交。</span>
+          </div>
+        `;
+        lucide.createIcons();
+      }
+      
+      drawer.classList.add('active');
+    }
+
+    function closeReinitiateDrawer() {
+      document.getElementById('reinitiate-drawer').classList.remove('active');
+    }
+
+    // Submit Re-initiate Form
+    function submitReinitiateForm() {
+      closeReinitiateDrawer();
+      showToast('✅ 重新发起成功！已生成新单号 PR20260720009 并推入审批流');
+    }
+
+    // History Modal
+    function viewHistoryModal(code) {
+      document.getElementById('history-modal').classList.add('active');
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('history-modal').classList.remove('active');
+    }
+
+    function openPledgeExpiredModal(code) {
+      document.getElementById('pledge-expired-modal').classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    // Show Toast Message
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<i data-lucide="check-circle" style="color:#34d399;"></i> <span>${msg}</span>`;
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+  </script>
+</body>
+</html>

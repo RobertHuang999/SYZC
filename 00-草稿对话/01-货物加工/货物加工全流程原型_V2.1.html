@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>货物加工全流程原型演示 V2.1.0 - Element UI 风格</title>
+    <style>
+        /* CSS reset and Element UI design system */
+        :root {
+            --primary-color: #d4a04c; /* Customized theme gold/orange */
+            --primary-light: #fdf6ec; /* Light background for warnings/hover */
+            --bg-color: #f5f7fa;      /* Element main background */
+            --sidebar-bg: #304156;    /* Element dark sidebar */
+            --menu-text: #bfcbd9;
+            --menu-active-text: #d4a04c;
+            --text-main: #303133;
+            --text-regular: #606266;
+            --text-secondary: #909399;
+            --border-base: #dcdfe6;
+            --border-light: #ebeef5;
+            --success-color: #67c23a;
+            --danger-color: #f56c6c;
+            --warning-color: #e6a23c;
+            --info-color: #409eff;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Layout */
+        .sidebar {
+            width: 240px;
+            background-color: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            transition: width 0.28s;
+            z-index: 1001;
+            box-shadow: 2px 0 6px rgba(0,21,41,0.35);
+        }
+        
+        .logo-area {
+            height: 60px;
+            line-height: 60px;
+            background: #2b2f3a;
+            color: #fff;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #1f2d3d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .menu-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 0;
+        }
+
+        .menu-group-title {
+            padding: 10px 20px;
+            font-size: 12px;
+            color: #5a5e66;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-item {
+            height: 50px;
+            line-height: 50px;
+            padding: 0 20px 0 35px;
+            cursor: pointer;
+            color: var(--menu-text);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color .3s, color .3s;
+        }
+
+        .menu-item:hover {
+            background-color: #263445;
+            color: #fff;
+        }
+
+        .menu-item.active {
+            color: var(--menu-active-text) !important;
+            background-color: #263445;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Header */
+        .header {
+            height: 50px;
+            background-color: #fff;
+            box-shadow: 0 1px 4px rgba(0,21,41,0.08);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+            z-index: 9;
+        }
+
+        .top-nav {
+            display: flex;
+            height: 100%;
+        }
+
+        .top-nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            cursor: pointer;
+            color: var(--text-regular);
+            font-size: 14px;
+            position: relative;
+            transition: color .3s;
+        }
+
+        .top-nav-item:hover {
+            color: var(--primary-color);
+        }
+
+        .top-nav-item.active {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .top-nav-item.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        /* Tabs Card Style */
+        .tabs {
+            height: 34px;
+            background-color: #fff;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: flex-end;
+            padding: 0 15px;
+            gap: 4px;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.05);
+        }
+
+        .tab-item {
+            height: 26px;
+            line-height: 26px;
+            padding: 0 15px;
+            font-size: 12px;
+            color: #495060;
+            border: 1px solid #d8dce5;
+            background-color: #fff;
+            border-radius: 3px 3px 0 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all .3s;
+        }
+
+        .tab-item.active {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+
+        .tab-close {
+            font-size: 12px;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color .3s;
+        }
+
+        .tab-close:hover {
+            background-color: rgba(0,0,0,0.15);
+        }
+        
+        .tab-item.active .tab-close:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+
+        /* Page Frame */
+        .page-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        /* Element Card Container */
+        .el-card {
+            border: 1px solid var(--border-light);
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            transition: .3s;
+            overflow: hidden;
+        }
+
+        .el-card__header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-light);
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title::before {
+            content: "";
+            width: 4px;
+            height: 16px;
+            background-color: var(--primary-color);
+            display: inline-block;
+            border-radius: 2px;
+        }
+
+        .el-card__body {
+            padding: 20px;
+        }
+
+        /* Element Tabs for Status Filter */
+        .el-tabs-header {
+            display: flex;
+            border-bottom: 2px solid var(--border-light);
+            margin-bottom: 15px;
+            gap: 30px;
+            padding: 0 5px;
+        }
+
+        .el-tab-pane {
+            padding: 12px 0;
+            font-size: 14px;
+            color: var(--text-regular);
+            cursor: pointer;
+            font-weight: 500;
+            position: relative;
+            transition: color .3s;
+        }
+
+        .el-tab-pane:hover {
+            color: var(--primary-color);
+        }
+
+        .el-tab-pane.active {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .el-tab-pane.active::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        /* Element Form Fields */
+        .el-form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px 30px;
+            margin-bottom: 10px;
+        }
+
+        .el-form-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .el-form-item.full-width {
+            grid-column: span 3;
+        }
+
+        .el-form-label {
+            font-size: 14px;
+            color: var(--text-regular);
+            font-weight: 500;
+        }
+
+        .el-form-label.required::before {
+            content: '*';
+            color: var(--danger-color);
+            margin-right: 4px;
+        }
+
+        .el-input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .el-input__inner {
+            width: 100%;
+            height: 36px;
+            line-height: 36px;
+            border: 1px solid var(--border-base);
+            border-radius: 4px;
+            padding: 0 15px;
+            font-size: 14px;
+            color: var(--text-main);
+            outline: none;
+            background-color: #fff;
+            box-sizing: border-box;
+            transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+        }
+
+        .el-input__inner:focus {
+            border-color: var(--primary-color);
+        }
+
+        .el-input__inner[disabled], .el-input__inner[readonly] {
+            background-color: #f5f7fa;
+            color: var(--text-secondary);
+            border-color: #e4e7ed;
+            cursor: not-allowed;
+        }
+
+        select.el-input__inner {
+            height: 36px;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23c0c4cc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+            padding-right: 30px;
+        }
+
+        textarea.el-input__inner {
+            height: auto;
+            padding: 10px 15px;
+            min-height: 80px;
+            font-family: inherit;
+        }
+
+        /* Element Table Styling */
+        .el-table {
+            width: 100%;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 14px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .el-table th, .el-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-light);
+            text-align: left;
+        }
+
+        .el-table th {
+            background-color: #f5f7fa;
+            color: var(--text-regular);
+            font-weight: 600;
+            border-bottom: 2px solid #e4e7ed;
+        }
+
+        .el-table td {
+            color: var(--text-regular);
+        }
+
+        .el-table tbody tr:hover td {
+            background-color: #f5f7fa;
+        }
+
+        /* Tag Status Style */
+        .el-tag {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            height: 24px;
+            padding: 0 8px;
+            font-size: 12px;
+            line-height: 1;
+            border-radius: 4px;
+            box-sizing: border-box;
+            border: 1px solid var(--border-light);
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        
+        .el-tag--info {
+            background-color: #f4f4f5;
+            border-color: #e9e9eb;
+            color: #909399;
+        }
+        
+        .el-tag--success {
+            background-color: #f0f9eb;
+            border-color: #e1f3d8;
+            color: #67c23a;
+        }
+        
+        .el-tag--warning {
+            background-color: #fdf6ec;
+            border-color: #faecd8;
+            color: #e6a23c;
+        }
+
+        .el-tag--danger {
+            background-color: #fef0f0;
+            border-color: #fde2e2;
+            color: #f56c6c;
+        }
+
+        /* Element Alert Widget */
+        .el-alert {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 10px 0 20px 0;
+            box-sizing: border-box;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            background-color: #fff;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 2px 8px 0 rgba(245, 108, 108, 0.08);
+        }
+
+        .el-alert--danger {
+            background-color: #fef0f0;
+            border: 1px solid #fde2e2;
+            color: #f56c6c;
+        }
+
+        .el-alert__content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-left: 10px;
+        }
+
+        .el-alert__title {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .el-alert__description {
+            font-size: 12px;
+            color: #f56c6c;
+            opacity: 0.9;
+        }
+
+        /* Element Buttons */
+        .el-button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+            white-space: nowrap;
+            cursor: pointer;
+            background: #fff;
+            border: 1px solid var(--border-base);
+            color: var(--text-regular);
+            text-align: center;
+            box-sizing: border-box;
+            outline: none;
+            margin: 0;
+            transition: .1s;
+            font-weight: 500;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 4px;
+            user-select: none;
+        }
+
+        .el-button:hover {
+            color: var(--primary-color);
+            border-color: rgba(212,160,76,0.5);
+            background-color: var(--primary-light);
+        }
+
+        .el-button--primary {
+            color: #fff;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .el-button--primary:hover {
+            background-color: #c49140;
+            border-color: #c49140;
+            color: #fff;
+        }
+
+        .el-button--success {
+            color: #fff;
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .el-button--success:hover {
+            background-color: #5daf34;
+            border-color: #5daf34;
+            color: #fff;
+        }
+
+        .el-button--danger {
+            color: #fff;
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .el-button--danger:hover {
+            background-color: #f78989;
+            border-color: #f78989;
+            color: #fff;
+        }
+
+        .el-button--text {
+            border-color: transparent;
+            color: var(--primary-color);
+            background: transparent;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .el-button--text:hover {
+            color: #c49140;
+            background-color: transparent;
+        }
+
+        .el-button--text.el-button--danger {
+            color: var(--danger-color);
+        }
+
+        .el-button--text.el-button--danger:hover {
+            color: #f78989;
+        }
+
+        .el-button--small {
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+
+        .el-button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Upload Component Style */
+        .el-upload {
+            border: 1px dashed var(--border-base);
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            width: 120px;
+            height: 120px;
+            box-sizing: border-box;
+            background-color: #fbfdff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: border-color .3s;
+        }
+
+        .el-upload:hover {
+            border-color: var(--primary-color);
+        }
+
+        .el-upload-icon {
+            font-size: 28px;
+            color: #8c939d;
+            margin-bottom: 8px;
+        }
+
+        .el-upload-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Read-only details style */
+        .el-descriptions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            overflow: hidden;
+            font-size: 14px;
+        }
+
+        .el-descriptions-item {
+            display: flex;
+            border-bottom: 1px solid var(--border-light);
+            border-right: 1px solid var(--border-light);
+        }
+
+        .el-descriptions-label {
+            width: 120px;
+            padding: 12px 15px;
+            background-color: #fafafa;
+            color: var(--text-regular);
+            font-weight: 500;
+            border-right: 1px solid var(--border-light);
+            flex-shrink: 0;
+        }
+
+        .el-descriptions-value {
+            padding: 12px 15px;
+            color: var(--text-main);
+            flex: 1;
+        }
+
+        /* Action Bar alignment */
+        .el-action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* Stamp style */
+        .el-stamp {
+            position: absolute;
+            right: 50px;
+            top: 25px;
+            width: 80px;
+            height: 80px;
+            border: 4px double var(--success-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 18px;
+            text-transform: uppercase;
+            transform: rotate(-20deg);
+            background-color: rgba(103,194,58,0.06);
+            z-index: 10;
+        }
+
+        /* Lineage Tree Styling */
+        .el-tree-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            padding: 40px 20px;
+            background-color: #fafafa;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+        }
+
+        .el-tree-node {
+            background-color: #fff;
+            border: 1px solid var(--border-base);
+            border-radius: 4px;
+            width: 210px;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,0.06);
+            overflow: hidden;
+            transition: .3s;
+        }
+
+        .el-tree-node.is-active {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 12px 0 rgba(212,160,76,0.15);
+        }
+
+        .el-tree-node__header {
+            padding: 8px 12px;
+            background-color: #f5f7fa;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .el-tree-node.is-active .el-tree-node__header {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .el-tree-node__body {
+            padding: 12px;
+        }
+
+        .el-tree-node__title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .el-tree-node__meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .el-tree-arrow {
+            font-size: 28px;
+            color: #c0c4cc;
+            user-select: none;
+        }
+
+        /* Element Steps Component for Detail Views */
+        .el-steps-horizontal {
+            display: flex;
+            background: #fff;
+            padding: 15px 20px;
+            border-radius: 4px;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        
+        .views-container {
+            display: none;
+        }
+        .views-container.active {
+            display: block;
+        }
+        
+        /* Modal Window Style (For Void validation check) */
+        .el-dialog__wrapper {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .el-dialog {
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            width: 480px;
+            box-sizing: border-box;
+        }
+        .el-dialog__header {
+            padding: 20px 20px 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+        }
+        .el-dialog__body {
+            padding: 30px 20px;
+            color: var(--text-regular);
+            font-size: 14px;
+        }
+        .el-dialog__footer {
+            padding: 10px 20px 20px;
+            text-align: right;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar">
+        <div class="logo-area">
+            <span style="color:var(--primary-color); font-size:24px;">♚</span>
+            四川享宇科技
+        </div>
+        <div class="menu-list">
+            <div class="menu-group-title">仓储核心板块</div>
+            <div class="menu-item"><span style="font-size:12px;">▶</span> 库存查询</div>
+            <div class="menu-item"><span style="font-size:12px;">▶</span> 仓单管理</div>
+            <div class="menu-item"><span style="font-size:12px;">▶</span> 货权管理</div>
+            <div class="menu-group-title">仓储增值/加工</div>
+            <div class="menu-item active"><span style="font-size:12px;">▼</span> 货物加工管理</div>
+            <div class="menu-item" style="padding-left: 50px;"><span style="font-size:12px;">•</span> 加工申请 V2.1</div>
+            <div class="menu-item" style="padding-left: 50px;"><span style="font-size:12px;">•</span> 流水与血缘追踪</div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-content">
+        <!-- Top Nav bar -->
+        <div class="header">
+            <div class="top-nav">
+                <div class="top-nav-item">首页</div>
+                <div class="top-nav-item active">仓储管理</div>
+                <div class="top-nav-item">质押/监管</div>
+                <div class="top-nav-item">风控预警</div>
+                <div class="top-nav-item">驾驶舱</div>
+            </div>
+            <div style="font-size:14px; color:var(--text-regular);">
+                <span style="background-color: var(--primary-light); color: var(--primary-color); padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-right: 8px;">V2.1.0 演示版</span>
+                平台运营方 ▼
+            </div>
+        </div>
+        
+        <!-- Tab Bar -->
+        <div class="tabs">
+            <div class="tab-item">首页 <span class="tab-close">×</span></div>
+            <div class="tab-item active" id="tabTitle">加工单据管理 <span class="tab-close">×</span></div>
+        </div>
+
+        <!-- Render Content -->
+        <div class="page-content">
+
+            <!-- ================= VIEW 0: 单据列表页 ================= -->
+            <div id="view0" class="views-container active">
+                <div class="el-card" style="margin-bottom: 15px;">
+                    <div class="el-card__body" style="padding: 15px 20px;">
+                        <div class="el-form-grid">
+                            <div class="el-form-item">
+                                <span class="el-form-label">申请单号</span>
+                                <input type="text" class="el-input__inner" placeholder="搜索单据号" id="filter_no">
+                            </div>
+                            <div class="el-form-item">
+                                <span class="el-form-label">货主</span>
+                                <select class="el-input__inner" id="filter_customer">
+                                    <option value="">全部货主</option>
+                                    <option value="富博流油公司">富博流油公司</option>
+                                    <option value="克格勃物流有限公司">克格勃物流有限公司</option>
+                                    <option value="泰拉能源公司">泰拉能源公司</option>
+                                </select>
+                            </div>
+                            <div class="el-form-item" style="display: flex; flex-direction: row; align-items: flex-end; gap: 10px;">
+                                <button class="el-button el-button--primary el-button--small" onclick="filterList()">查询</button>
+                                <button class="el-button el-button--small" onclick="resetFilters()">重置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs header -->
+                <div class="el-tabs-header">
+                    <div class="el-tab-pane active" onclick="switchTab('all', this)" id="tab_all">全部 (5)</div>
+                    <div class="el-tab-pane" onclick="switchTab('待审批', this)" id="tab_pending">待审批 (1)</div>
+                    <div class="el-tab-pane" onclick="switchTab('待加工', this)" id="tab_processing">待加工 (1)</div>
+                    <div class="el-tab-pane" onclick="switchTab('已完成', this)" id="tab_completed">已完成 (2)</div>
+                    <div class="el-tab-pane" onclick="switchTab('已驳回', this)" id="tab_rejected">已驳回 (1)</div>
+                    <div class="el-tab-pane" onclick="switchTab('已作废', this)" id="tab_voided">已作废 (0)</div>
+                </div>
+
+                <div style="margin-bottom: 15px; display: flex; justify-content: flex-end;">
+                    <button class="el-button el-button--primary el-button--small" onclick="openNewApplication()">+ 发起加工申请</button>
+                </div>
+
+                <table class="el-table">
+                    <thead>
+                        <tr>
+                            <th>申请单号</th>
+                            <th>货主</th>
+                            <th>发生仓库</th>
+                            <th>货品类型</th>
+                            <th>关联单号</th>
+                            <th>提报日期</th>
+                            <th>单据状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listTableBody">
+                        <!-- Loaded Dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ================= VIEW 1: 发起加工申请 ================= -->
+            <div id="view1" class="views-container">
+                <div class="el-steps-horizontal">
+                    <div class="el-step is-active"><div class="el-step__icon">1</div><div class="el-step__title">运营发起加工</div></div>
+                    <div class="el-step"><div class="el-step__icon">2</div><div class="el-step__title">风控/主管审核</div></div>
+                    <div class="el-step"><div class="el-step__icon">3</div><div class="el-step__title">仓库结果登记</div></div>
+                    <div class="el-step"><div class="el-step__icon">4</div><div class="el-step__title">流水入账与溯源</div></div>
+                </div>
+
+                <div class="el-action-bar">
+                    <span style="font-size: 14px; color: var(--text-secondary);">注：提交后将锁扣可用库存防并发。</span>
+                    <div class="el-button-group">
+                        <button class="el-button el-button--small" onclick="backToList()">返回列表</button>
+                        <button class="el-button el-button--primary el-button--small" onclick="submitView1()">提交审批</button>
+                    </div>
+                </div>
+
+                <div class="el-card">
+                    <div class="el-card__header"><div class="card-title">基础信息</div></div>
+                    <div class="el-card__body">
+                        <div class="el-form-grid">
+                            <div class="el-form-item">
+                                <span class="el-form-label required">货主</span>
+                                <select class="el-input__inner" id="v1_customer" onchange="v1_handleGoodsTypeChange()">
+                                    <option value="富博流油公司" selected>富博流油公司</option>
+                                    <option value="克格勃物流有限公司">克格勃物流有限公司</option>
+                                    <option value="泰拉能源公司">泰拉能源公司</option>
+                                </select>
+                            </div>
+                            <div class="el-form-item">
+                                <span class="el-form-label required">仓库</span>
+                                <select class="el-input__inner" id="v1_warehouse">
+                                    <option value="跑霸王仓库" selected>跑霸王仓库</option>
+                                    <option value="大米仓库">大米仓库</option>
+                                    <option value="钢材仓库">钢材仓库</option>
+                                </select>
+                            </div>
+                            <div class="el-form-item">
+                                <span class="el-form-label required">货品类型</span>
+                                <select class="el-input__inner" id="v1_goodsType" onchange="v1_handleGoodsTypeChange()">
+                                    <option value="normal">存货</option>
+                                    <option value="pledge" selected>抵质押货</option>
+                                </select>
+                            </div>
+                            <div class="el-form-item" id="v1_pledgeWrapper">
+                                <span class="el-form-label required">关联单号</span>
+                                <select class="el-input__inner" id="v1_pledgeSelect" onchange="v1_handlePledgeOrderChange()">
+                                    <option value="PLD-2026-9912" selected>PLD-2026-9912 (包含2项货品)</option>
+                                    <option value="PLD-2026-8840">PLD-2026-8840 (包含1项货品)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="el-form-grid" style="margin-top: 15px;">
+                            <div class="el-form-item full-width">
+                                <span class="el-form-label">加工原因/备注</span>
+                                <textarea class="el-input__inner" id="v1_remark" placeholder="请输入加工原因...">牛肉丸分割为肉粒，拟定耗用20吨，产生部分正常物料损耗。</textarea>
+                            </div>
+                        </div>
+                        <div class="el-form-grid" style="margin-top: 15px;">
+                            <div class="el-form-item" id="v1_uploadWrapper">
+                                <span class="el-form-label required" id="v1_attachmentLabel">证明附件</span>
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div class="el-upload" style="border-color:var(--success-color);">
+                                        <div class="el-upload-icon" style="color:var(--success-color)">✓</div>
+                                        <div class="el-upload-text" style="color:var(--success-color)">已上传</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:14px; font-weight:bold; color:var(--info-color); text-decoration:underline; cursor:pointer;">资金方核准同意函.pdf</div>
+                                        <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">加工质押品变更必需文件</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="el-card">
+                    <div class="el-card__header">
+                        <div class="card-title">原货物明细 (拟耗用)</div>
+                        <button class="el-button el-button--primary el-button--small" id="v1_selectGoodsBtn" onclick="v1_addGoods()" style="display:none;">+ 选择库存明细</button>
+                    </div>
+                    <div class="el-card__body" style="padding: 0 20px 20px 20px;">
+                        <table class="el-table">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>原商品 (SKU)</th>
+                                    <th>库位</th>
+                                    <th>原溯源码</th>
+                                    <th>质押单号</th>
+                                    <th>可用库存</th>
+                                    <th>拟加工数量</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="v1_originalGoodsTable">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="el-card">
+                    <div class="el-card__header">
+                        <div class="card-title">预期产出明细</div>
+                        <button class="el-button el-button--primary el-button--small" onclick="v1_addExpectedGoods()">+ 新增预期产出</button>
+                    </div>
+                    <div class="el-card__body" style="padding: 0 20px 20px 20px;">
+                        <table class="el-table">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>预期产出商品 (SKU)</th>
+                                    <th>预期产出数量</th>
+                                    <th>单位</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="v1_expectedGoodsTable">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 2: 运营/风控审批 ================= -->
+            <div id="view2" class="views-container">
+                <div class="el-steps-horizontal">
+                    <div class="el-step is-completed"><div class="el-step__icon">✓</div><div class="el-step__title">运营发起加工</div></div>
+                    <div class="el-step is-active"><div class="el-step__icon">2</div><div class="el-step__title">风控/主管审核</div></div>
+                    <div class="el-step"><div class="el-step__icon">3</div><div class="el-step__title">仓库结果登记</div></div>
+                    <div class="el-step"><div class="el-step__icon">4</div><div class="el-step__title">流水入账与溯源</div></div>
+                </div>
+
+                <div class="el-action-bar">
+                    <button class="el-button el-button--small" onclick="backToList()">返回列表</button>
+                    <div class="el-button-group">
+                        <button class="el-button el-button--danger el-button--small" onclick="rejectApproval()">审批驳回</button>
+                        <button class="el-button el-button--success el-button--small" onclick="approveApproval()">审批通过</button>
+                    </div>
+                </div>
+
+                <div class="el-card">
+                    <div class="el-card__header"><div class="card-title">申请单详情</div></div>
+                    <div class="el-card__body">
+                        <div class="el-descriptions">
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">货主</div><div class="el-descriptions-value" id="v2_customer"></div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">仓库</div><div class="el-descriptions-value" id="v2_warehouse"></div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">货品类型</div><div class="el-descriptions-value" id="v2_goodsType"></div></div>
+                            <div class="el-descriptions-item" id="v2_pledgeWrapper"><div class="el-descriptions-label">关联单号</div><div class="el-descriptions-value" id="v2_pledge"></div></div>
+                            <div class="el-descriptions-item" style="grid-column: span 3;"><div class="el-descriptions-label">原因备注</div><div class="el-descriptions-value" id="v2_remark"></div></div>
+                            <div class="el-descriptions-item" style="grid-column: span 3;" id="v2_fileWrapper">
+                                <div class="el-descriptions-label">审批证明文件</div>
+                                <div class="el-descriptions-value">
+                                    <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 12px; background:#f5f7fa; border:1px solid var(--border-light); border-radius:4px;">
+                                        <span style="font-size:18px;">📄</span>
+                                        <a href="#" style="color:var(--info-color); text-decoration:none; font-size:13px; font-weight:bold;">资金方核准同意函.pdf</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="el-card">
+                    <div class="el-card__header"><div class="card-title">待锁定的原货物清单</div></div>
+                    <div class="el-card__body" style="padding: 0 20px 20px 20px;">
+                        <table class="el-table">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>原商品 (SKU)</th>
+                                    <th>原溯源码</th>
+                                    <th>质押单号</th>
+                                    <th>拟锁定扣减数量</th>
+                                </tr>
+                            </thead>
+                            <tbody id="v2_originalGoodsTable">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 3: 仓库结果确认 ================= -->
+            <div id="view3" class="views-container">
+                <div class="el-steps-horizontal">
+                    <div class="el-step is-completed"><div class="el-step__icon">✓</div><div class="el-step__title">运营发起加工</div></div>
+                    <div class="el-step is-completed"><div class="el-step__icon">✓</div><div class="el-step__title">风控/主管审核</div></div>
+                    <div class="el-step is-active"><div class="el-step__icon">3</div><div class="el-step__title">仓库结果登记</div></div>
+                    <div class="el-step"><div class="el-step__icon">4</div><div class="el-step__title">流水入账与溯源</div></div>
+                </div>
+
+                <div class="el-action-bar">
+                    <button class="el-button el-button--small" onclick="backToList()">返回列表</button>
+                    <button class="el-button el-button--primary el-button--small" onclick="submitView3()">登记完成并入账</button>
+                </div>
+
+                <div class="el-card">
+                    <div class="el-card__header"><div class="card-title">1. 原物料消耗确认</div></div>
+                    <div class="el-card__body" style="padding: 0 20px 20px 20px;">
+                        <table class="el-table">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>原料商品 SKU</th>
+                                    <th>系统锁定额</th>
+                                    <th>实际消耗数量</th>
+                                    <th>绑定溯源码</th>
+                                </tr>
+                            </thead>
+                            <tbody id="v3_originalGoodsTable">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="el-card">
+                    <div class="el-card__header">
+                        <div class="card-title">2. 实产商品与损耗登记</div>
+                        <span style="font-size: 13px; color: var(--danger-color); font-weight: 500;">
+                            提示：试着把实际产出改得极小（如 5.0 吨），提交时可体验金融风控跌值预警。
+                        </span>
+                    </div>
+                    <div class="el-card__body" style="padding: 0 20px 20px 20px;">
+                        <table class="el-table">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>预期产出商品</th>
+                                    <th>预期数量</th>
+                                    <th>实际产出商品 SKU</th>
+                                    <th>实际产出数量</th>
+                                    <th>账面损耗</th>
+                                </tr>
+                            </thead>
+                            <tbody id="v3_expectedGoodsTable">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 4: 完成与详情页 ================= -->
+            <div id="view4" class="views-container">
+                <div class="el-action-bar">
+                    <button class="el-button el-button--small" onclick="backToList()">返回列表</button>
+                </div>
+
+                <!-- Wind Control Warning widget under condition -->
+                <div class="el-alert el-alert--danger" id="v4_valuationWarning" style="display: none;">
+                    <div class="el-alert__content">
+                        <span class="el-alert__title">⚠️ 金融风控跌值警告 (V2.1.0 强控)</span>
+                        <span class="el-alert__description" id="v4_warningDescription">
+                            检测到本笔抵质押品加工实产评估总价值较原质押品跌幅超过 5% (实评估值跌幅 75.0%)。系统在入库记账的同时，已自动向风控监管总控中心发出异常跌值警报！
+                        </span>
+                    </div>
+                </div>
+
+                <div class="el-card" style="position: relative;">
+                    <div class="el-stamp" id="v4_stamp">已完成</div>
+                    <div class="el-card__header"><div class="card-title">加工单入账详情</div></div>
+                    <div class="el-card__body">
+                        <div class="el-descriptions">
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">申请单号</div><div class="el-descriptions-value" id="v4_applyNo" style="font-family:monospace; font-weight:bold;"></div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">货主</div><div class="el-descriptions-value" id="v4_customer"></div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">仓库</div><div class="el-descriptions-value" id="v4_warehouse"></div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">状态</div><div class="el-descriptions-value" id="v4_status" style="font-weight:bold;"></div></div>
+                            <div class="el-descriptions-item"><div class="el-descriptions-label">货权继承状态</div><div class="el-descriptions-value" id="v4_inheritance"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lineage Tree -->
+                <div class="el-card" id="v4_treeCard">
+                    <div class="el-card__header">
+                        <div class="card-title">货品物理加工与部分扣减拆单血缘追踪链</div>
+                    </div>
+                    <div class="el-card__body">
+                        <div class="el-tree-container" id="v4_treeContainer">
+                            <!-- Dynamic Tree -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ledger flow -->
+                <div class="el-card" id="v4_flowCard">
+                    <div class="el-card__header"><div class="card-title">底层库存与质押冻结拆单流水明细</div></div>
+                    <div class="el-card__body" style="padding: 0 20px 20px 20px;">
+                        <table class="el-table">
+                            <thead>
+                                <tr>
+                                    <th>流水ID</th>
+                                    <th>明细货品 SKU</th>
+                                    <th>交易变动类型</th>
+                                    <th>变化数量</th>
+                                    <th>锁定/绑定溯源码</th>
+                                    <th>关联业务单号</th>
+                                </tr>
+                            </thead>
+                            <tbody id="v4_flowTable">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= DIALOGS: 作废确认弹窗 ================= -->
+            <div class="el-dialog__wrapper" id="voidDialog" style="display: none;">
+                <div class="el-dialog">
+                    <div class="el-dialog__header">
+                        <span>抵质押货作废合规风控确认</span>
+                        <span style="cursor: pointer;" onclick="closeVoidDialog()">×</span>
+                    </div>
+                    <div class="el-dialog__body">
+                        <div style="color: var(--danger-color); font-weight: bold; margin-bottom: 15px;">
+                            警告：该单据包含处于质押锁定状态的货品。作废后，被冻结的库存额度将原路退回解冻。
+                        </div>
+                        <div class="el-form-item" style="margin-top: 15px;">
+                            <span class="el-form-label required">上传终止/作废书面声明</span>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                                <div class="upload-box" style="width: 70px; height: 70px;">
+                                    <div style="font-size: 20px;">+</div>
+                                    <div style="font-size: 11px;">上传PDF</div>
+                                </div>
+                                <span style="font-size: 13px; color: var(--text-secondary);">请上传盖有双方公章的作废终止声明协议书</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="el-dialog__footer">
+                        <button class="el-button el-button--small" onclick="closeVoidDialog()">取消</button>
+                        <button class="el-button el-button--danger el-button--small" onclick="confirmVoidPledgeOrder()">确认作废并解锁库存</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Database
+        let mockOrders = [
+            {
+                applyNo: 'PR2026071600882',
+                customer: '富博流油公司',
+                warehouse: '跑霸王仓库',
+                goodsType: '抵质押货',
+                pledgeOrder: 'PLD-2026-9912',
+                date: '2026-07-16 12:00',
+                status: '已完成',
+                remark: '冷冻丸子切分牛肉粒加工完成。',
+                inputs: [
+                    { sku: '冷冻猪肉 - 牛肉丸子 - 36m (SKU:202613)', trace: 'TRC-20260716-0001', pledge: 'PLD-2026-9912', planQty: 20.0, actualQty: 20.0, totalAvailable: 100.0 }
+                ],
+                outputs: [
+                    { sku: '切片牛肉小包装 - 500g (SKU:202614)', expectedQty: 18.5, actualQty: 18.5, lossQty: 1.5 }
+                ]
+            },
+            {
+                applyNo: 'PR2026071600883',
+                customer: '克格勃物流有限公司',
+                warehouse: '大米仓库',
+                goodsType: '抵质押货',
+                pledgeOrder: 'PLD-2026-8840',
+                date: '2026-07-16 14:20',
+                status: '待审批',
+                remark: '大米去壳分装。',
+                inputs: [
+                    { sku: '黑龙江大米 - 五常香米 - 10kg (SKU:207142)', trace: 'TRC-20260716-0120', pledge: 'PLD-2026-8840', planQty: 50.0, actualQty: 50.0, totalAvailable: 200.0 }
+                ],
+                outputs: [
+                    { sku: '五常精装米 - 5kg (SKU:209842)', expectedQty: 48.0 }
+                ]
+            },
+            {
+                applyNo: 'PR2026071600884',
+                customer: '泰拉能源公司',
+                warehouse: '钢材仓库',
+                goodsType: '普通存货',
+                pledgeOrder: '无',
+                date: '2026-07-15 10:15',
+                status: '待加工',
+                inputs: [
+                    { sku: '热轧钢卷 - 标号Q235A (SKU:10042)', trace: 'TRC-STOCK-9921', pledge: '-', planQty: 30.0, actualQty: 30.0, totalAvailable: 80.0 }
+                ],
+                outputs: [
+                    { sku: '切分热轧精装钢板 - Q235A (SKU:10992)', expectedQty: 28.5 }
+                ]
+            },
+            {
+                applyNo: 'PR2026071500741',
+                customer: '富博流油公司',
+                warehouse: '跑霸王仓库',
+                goodsType: '普通存货',
+                pledgeOrder: '无',
+                date: '2026-07-15 16:30',
+                status: '已完成',
+                inputs: [
+                    { sku: '常规普通钢卷 - Q235 (SKU:10042)', trace: 'TRC-STOCK-9921', pledge: '-', planQty: 30.0, actualQty: 30.0, totalAvailable: 80.0 }
+                ],
+                outputs: [
+                    { sku: '切分热轧精装钢板 - Q235A (SKU:10992)', expectedQty: 29.8, actualQty: 29.8, lossQty: 0.2 }
+                ]
+            },
+            {
+                applyNo: 'PR2026071400612',
+                customer: '克格勃物流有限公司',
+                warehouse: '大米仓库',
+                goodsType: '抵质押货',
+                pledgeOrder: 'PLD-2026-8840',
+                date: '2026-07-14 09:12',
+                status: '已驳回',
+                inputs: [
+                    { sku: '黑龙江大米 - 五常香米 - 10kg (SKU:207142)', trace: 'TRC-20260716-0120', pledge: 'PLD-2026-8840', planQty: 50.0, actualQty: 50.0, totalAvailable: 200.0 }
+                ],
+                outputs: [
+                    { sku: '五常精装米 - 5kg (SKU:209842)', expectedQty: 48.0 }
+                ]
+            }
+        ];
+
+        let activeOrderIndex = -1;
+        let currentTabFilter = 'all';
+
+        // Load list
+        function loadListTable() {
+            const tbody = document.getElementById('listTableBody');
+            tbody.innerHTML = '';
+
+            const noFilter = document.getElementById('filter_no').value.toLowerCase();
+            const customerFilter = document.getElementById('filter_customer').value;
+
+            const filtered = mockOrders.filter(order => {
+                if (noFilter && !order.applyNo.toLowerCase().includes(noFilter)) return false;
+                if (customerFilter && order.customer !== customerFilter) return false;
+                if (currentTabFilter !== 'all' && order.status !== currentTabFilter) return false;
+                return true;
+            });
+
+            // Update tab badges
+            updateTabBadges();
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-secondary); padding: 30px;">无匹配数据</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(order => {
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+
+                let tagClass = 'el-tag--info';
+                if(order.status === '待审批') tagClass = 'el-tag--warning';
+                else if(order.status === '待加工') tagClass = 'el-tag--info';
+                else if(order.status === '已完成') tagClass = 'el-tag--success';
+                else if(order.status === '已驳回' || order.status === '已作废') tagClass = 'el-tag--danger';
+
+                // Action buttons based on status
+                let actionBtns = '';
+                const idx = mockOrders.indexOf(order);
+                if (order.status === '待审批') {
+                    actionBtns = `<button class="el-button el-button--text el-button--small" onclick="openApproval(${idx})">审核审批</button>`;
+                } else if (order.status === '待加工') {
+                    actionBtns = `
+                        <button class="el-button el-button--text el-button--small" onclick="openWarehouseConfirm(${idx})">仓库登记</button>
+                        <button class="el-button el-button--text el-button--danger el-button--small" style="margin-left: 10px;" onclick="triggerVoidOrder(${idx})">作废</button>
+                    `;
+                } else {
+                    actionBtns = `<button class="el-button el-button--text el-button--small" onclick="openDetails(${idx})">查看详情</button>`;
+                }
+
+                tr.innerHTML = `
+                    <td style="font-family:monospace; font-weight:bold; color:var(--text-main);">${order.applyNo}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.warehouse}</td>
+                    <td>${order.goodsType}</td>
+                    <td>${order.pledgeOrder}</td>
+                    <td>${order.date}</td>
+                    <td><span class="el-tag ${tagClass}">${order.status}</span></td>
+                    <td>${actionBtns}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateTabBadges() {
+            const counts = { all: mockOrders.length, pending: 0, processing: 0, completed: 0, rejected: 0, voided: 0 };
+            mockOrders.forEach(o => {
+                if (o.status === '待审批') counts.pending++;
+                else if (o.status === '待加工') counts.processing++;
+                else if (o.status === '已完成') counts.completed++;
+                else if (o.status === '已驳回') counts.rejected++;
+                else if (o.status === '已作废') counts.voided++;
+            });
+
+            document.getElementById('tab_all').textContent = `全部 (${counts.all})`;
+            document.getElementById('tab_pending').textContent = `待审批 (${counts.pending})`;
+            document.getElementById('tab_processing').textContent = `待加工 (${counts.processing})`;
+            document.getElementById('tab_completed').textContent = `已完成 (${counts.completed})`;
+            document.getElementById('tab_rejected').textContent = `已驳回 (${counts.rejected})`;
+            document.getElementById('tab_voided').textContent = `已作废 (${counts.voided})`;
+        }
+
+        // Tab selection change
+        function switchTab(status, tabElem) {
+            currentTabFilter = status;
+            const tabs = document.querySelectorAll('.el-tab-pane');
+            tabs.forEach(t => t.classList.remove('active'));
+            tabElem.classList.add('active');
+            loadListTable();
+        }
+
+        function filterList() {
+            loadListTable();
+        }
+
+        function resetFilters() {
+            document.getElementById('filter_no').value = '';
+            document.getElementById('filter_customer').value = '';
+            loadListTable();
+        }
+
+        // View switcher
+        function switchView(viewNum, tabText) {
+            const views = document.querySelectorAll('.views-container');
+            views.forEach((v, idx) => {
+                if (idx === viewNum) v.classList.add('active');
+                else v.classList.remove('active');
+            });
+            document.getElementById('tabTitle').innerHTML = `${tabText} <span class="tab-close">×</span>`;
+        }
+
+        function backToList() {
+            switchView(0, '加工单据管理');
+            loadListTable();
+        }
+
+        // ================= VIEW 1: 发起加工申请 =================
+        function openNewApplication() {
+            switchView(1, '发起加工申请');
+            
+            document.getElementById('v1_customer').value = '富博流油公司';
+            document.getElementById('v1_warehouse').value = '跑霸王仓库';
+            document.getElementById('v1_goodsType').value = 'pledge';
+            document.getElementById('v1_remark').value = '牛肉丸加工分割为牛肉粒。';
+            v1_handleGoodsTypeChange();
+            
+            document.getElementById('v1_expectedGoodsTable').innerHTML = '';
+            v1_addExpectedGoods();
+        }
+
+        function v1_handleGoodsTypeChange() {
+            const goodsType = document.getElementById('v1_goodsType').value;
+            const pledgeWrapper = document.getElementById('v1_pledgeWrapper');
+            const selectBtn = document.getElementById('v1_selectGoodsBtn');
+            const attachmentLabel = document.getElementById('v1_attachmentLabel');
+            const uploadWrapper = document.getElementById('v1_uploadWrapper');
+
+            v1_clearOriginalGoods();
+
+            if (goodsType === 'pledge') {
+                pledgeWrapper.style.display = 'flex';
+                selectBtn.style.display = 'none';
+                attachmentLabel.classList.add('required');
+                uploadWrapper.style.display = 'block';
+                v1_handlePledgeOrderChange();
+            } else {
+                pledgeWrapper.style.display = 'none';
+                selectBtn.style.display = 'inline-block';
+                attachmentLabel.classList.remove('required');
+                uploadWrapper.style.display = 'none';
+                v1_addGoods(); 
+            }
+        }
+
+        function v1_handlePledgeOrderChange() {
+            const pledgeOrder = document.getElementById('v1_pledgeSelect').value;
+            v1_clearOriginalGoods();
+            if (!pledgeOrder) return;
+
+            const list = mockPledgedGoods[pledgeOrder];
+            const tbody = document.getElementById('v1_originalGoodsTable');
+            list.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td class="sku">${item.sku}</td>
+                    <td>${item.loc}</td>
+                    <td class="trace">${item.trace}</td>
+                    <td class="pledge">${item.pledge}</td>
+                    <td class="avail-qty">${item.qty}</td>
+                    <td><input type="number" class="el-input__inner plan-qty" style="width:110px; height:28px;" value="${item.defaultVal}" step="0.0001"></td>
+                    <td><span style="color:var(--text-secondary)">固定项不可删除</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function v1_clearOriginalGoods() {
+            document.getElementById('v1_originalGoodsTable').innerHTML = '';
+        }
+
+        function v1_addGoods() {
+            const tbody = document.getElementById('v1_originalGoodsTable');
+            const count = tbody.children.length + 1;
+            const tr = document.createElement('tr');
+            tr.className = 'el-table__row';
+            tr.innerHTML = `
+                <td>${count}</td>
+                <td class="sku">热轧钢卷 - 标号Q235A (SKU:10042)</td>
+                <td>钢板堆场 - A01</td>
+                <td class="trace">TRC-STOCK-9921</td>
+                <td class="pledge">-</td>
+                <td class="avail-qty">80.0000 吨</td>
+                <td><input type="number" class="el-input__inner plan-qty" style="width:110px; height:28px;" value="30.0000" step="0.0001"></td>
+                <td><button class="el-button el-button--text el-button--danger el-button--small" onclick="this.closest('tr').remove(); renameV1Rows()">删除</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function renameV1Rows() {
+            const rows = document.getElementById('v1_originalGoodsTable').children;
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].firstElementChild.textContent = i + 1;
+            }
+        }
+
+        function v1_addExpectedGoods() {
+            const tbody = document.getElementById('v1_expectedGoodsTable');
+            const count = tbody.children.length + 1;
+            const tr = document.createElement('tr');
+            tr.className = 'el-table__row';
+            tr.innerHTML = `
+                <td>${count}</td>
+                <td>
+                    <select class="el-input__inner exp-sku" style="width:300px; height:28px; padding:0 5px;">
+                        <option value="切片牛肉小包装 - 500g (SKU:202614)" selected>切片牛肉小包装 - 500g (SKU:202614)</option>
+                        <option value="切分热轧精装钢板 - Q235A (SKU:10992)">切分热轧精装钢板 - Q235A (SKU:10992)</option>
+                    </select>
+                </td>
+                <td><input type="number" class="el-input__inner exp-qty" style="width:110px; height:28px;" value="18.5000" step="0.0001"></td>
+                <td>吨</td>
+                <td><button class="el-button el-button--text el-button--danger el-button--small" onclick="this.closest('tr').remove(); renameV1ExpRows()">删除</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function renameV1ExpRows() {
+            const rows = document.getElementById('v1_expectedGoodsTable').children;
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].firstElementChild.textContent = i + 1;
+            }
+        }
+
+        function submitView1() {
+            const goodsType = document.getElementById('v1_goodsType').value;
+            const customer = document.getElementById('v1_customer').value;
+            const warehouse = document.getElementById('v1_warehouse').value;
+            const pledge = document.getElementById('v1_pledgeSelect').value;
+
+            if(!customer || !warehouse) {
+                alert("请完整选择货主及发生仓库！");
+                return;
+            }
+
+            if(goodsType === 'pledge' && !pledge) {
+                alert("【抵质押货】必须关联抵质押单！");
+                return;
+            }
+
+            const rows = document.getElementById('v1_originalGoodsTable').children;
+            if (rows.length === 0) {
+                alert("原货物明细不能为空！");
+                return;
+            }
+            let inputs = [];
+            for (let i = 0; i < rows.length; i++) {
+                inputs.push({
+                    sku: rows[i].querySelector('.sku').textContent,
+                    trace: rows[i].querySelector('.trace').textContent,
+                    pledge: rows[i].querySelector('.pledge').textContent,
+                    planQty: parseFloat(rows[i].querySelector('.plan-qty').value) || 0,
+                    totalAvailable: parseFloat(rows[i].querySelector('.avail-qty').textContent) || 100.0
+                });
+            }
+
+            const expRows = document.getElementById('v1_expectedGoodsTable').children;
+            if (expRows.length === 0) {
+                alert("预期产出商品明细不能为空！");
+                return;
+            }
+            let outputs = [];
+            for (let i = 0; i < expRows.length; i++) {
+                outputs.push({
+                    sku: expRows[i].querySelector('.exp-sku').value,
+                    expectedQty: parseFloat(expRows[i].querySelector('.exp-qty').value) || 0
+                });
+            }
+
+            const newOrderNo = 'PR2026' + Math.floor(Math.random() * 900000 + 100000);
+            const dateStr = new Date().toISOString().replace('T', ' ').substring(0, 16);
+            
+            const newObj = {
+                applyNo: newOrderNo,
+                customer: customer,
+                warehouse: warehouse,
+                goodsType: goodsType === 'pledge' ? '抵质押货' : '普通存货',
+                pledgeOrder: goodsType === 'pledge' ? pledge : '无',
+                date: dateStr,
+                status: '待审批',
+                remark: document.getElementById('v1_remark').value,
+                inputs: inputs,
+                outputs: outputs
+            };
+
+            mockOrders.unshift(newObj);
+            alert(`已发起加工申请单：${newOrderNo}。系统已按计划消耗数量锁定底层可用库存防并发，等待审核。`);
+            backToList();
+        }
+
+        // ================= VIEW 2: 审批 =================
+        function openApproval(index) {
+            activeOrderIndex = index;
+            const order = mockOrders[index];
+
+            document.getElementById('v2_customer').textContent = order.customer;
+            document.getElementById('v2_warehouse').textContent = order.warehouse;
+            document.getElementById('v2_goodsType').textContent = order.goodsType;
+            document.getElementById('v2_pledge').textContent = order.pledgeOrder;
+            document.getElementById('v2_remark').textContent = order.remark;
+
+            if (order.goodsType === '抵质押货') {
+                document.getElementById('v2_pledgeWrapper').style.display = 'flex';
+                document.getElementById('v2_fileWrapper').style.display = 'flex';
+            } else {
+                document.getElementById('v2_pledgeWrapper').style.display = 'none';
+                document.getElementById('v2_fileWrapper').style.display = 'none';
+            }
+
+            const tbody = document.getElementById('v2_originalGoodsTable');
+            tbody.innerHTML = '';
+            order.inputs.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td>${item.sku}</td>
+                    <td>${item.trace}</td>
+                    <td>${item.pledge}</td>
+                    <td><strong style="color:var(--primary-color);">${item.planQty.toFixed(4)} 吨</strong></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            switchView(2, `审批加工单 - ${order.applyNo}`);
+        }
+
+        function rejectApproval() {
+            mockOrders[activeOrderIndex].status = '已驳回';
+            alert("单据已驳回，系统底层解锁其锁定的原货可用数量额度。");
+            backToList();
+        }
+
+        function approveApproval() {
+            mockOrders[activeOrderIndex].status = '待加工';
+            alert("审批通过！当前处于“待加工”，原库存分拆锁定锁定已生效。");
+            backToList();
+        }
+
+        // ================= VIEW 3: 仓库登记 =================
+        function openWarehouseConfirm(index) {
+            activeOrderIndex = index;
+            const order = mockOrders[index];
+
+            const tbodyIn = document.getElementById('v3_originalGoodsTable');
+            tbodyIn.innerHTML = '';
+            order.inputs.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td>${item.sku}</td>
+                    <td>${item.planQty.toFixed(4)} 吨 (锁定额)</td>
+                    <td><input type="number" class="el-input__inner act-consume-qty" value="${item.planQty.toFixed(4)}" step="0.0001" style="width:130px; height:28px;" oninput="calculateLosses()"></td>
+                    <td>${item.trace}</td>
+                `;
+                tbodyIn.appendChild(tr);
+            });
+
+            const tbodyOut = document.getElementById('v3_expectedGoodsTable');
+            tbodyOut.innerHTML = '';
+            order.outputs.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td>${item.sku}</td>
+                    <td>${item.expectedQty.toFixed(4)} 吨</td>
+                    <td>
+                        <select class="el-input__inner act-sku" style="width:240px; height:28px; padding:0 5px;">
+                            <option value="${item.sku}" selected>${item.sku}</option>
+                        </select>
+                    </td>
+                    <td><input type="number" class="el-input__inner act-output-qty" value="${item.expectedQty.toFixed(4)}" step="0.0001" style="width:130px; height:28px;" oninput="calculateLosses()"></td>
+                    <td class="loss-display" style="font-weight:bold;">0.0000 吨</td>
+                `;
+                tbodyOut.appendChild(tr);
+            });
+
+            switchView(3, `仓库加工确认 - ${order.applyNo}`);
+            calculateLosses();
+        }
+
+        function submitView3() {
+            const order = mockOrders[activeOrderIndex];
+
+            // 1. Read quantities & check validation rules (V2.1.0)
+            const consumeInputs = document.querySelectorAll('.act-consume-qty');
+            for(let i=0; i<consumeInputs.length; i++) {
+                const actC = parseFloat(consumeInputs[i].value) || 0;
+                const lockQ = order.inputs[i].planQty;
+                if(actC <= 0) {
+                    alert(`实际消耗量必须大于 0！`);
+                    return;
+                }
+                if(actC > lockQ) {
+                    alert(`实际消耗量不能大于系统锁定的预扣限额（${lockQ}吨）！`);
+                    return;
+                }
+                order.inputs[i].actualQty = actC;
+            }
+
+            const outputRows = document.getElementById('v3_expectedGoodsTable').children;
+            let totalActualConsume = order.inputs.reduce((sum, i) => sum + i.actualQty, 0);
+            let totalActualOutput = 0;
+
+            order.outputs = [];
+            for (let i = 0; i < outputRows.length; i++) {
+                const actQty = parseFloat(outputRows[i].querySelector('.act-output-qty').value) || 0;
+                if(actQty <= 0) {
+                    alert(`实际产出数量必须大于 0！`);
+                    return;
+                }
+                totalActualOutput += actQty;
+                order.outputs.push({
+                    sku: outputRows[i].querySelector('.act-sku').value,
+                    expectedQty: order.outputs[i] ? order.outputs[i].expectedQty : actQty,
+                    actualQty: actQty,
+                    lossQty: 0
+                });
+            }
+
+            let totalLoss = totalActualConsume - totalActualOutput;
+            if (order.outputs.length > 0) {
+                order.outputs[0].lossQty = totalLoss;
+            }
+
+            // 2. Financial valuation check (V2.1.0: if value drops > 5% trigger warning)
+            // Let's assume 1 ton value = $10,000. 
+            // Valuation change percentage is based on quantity ratio in this prototype
+            const originalValuationQty = order.inputs.reduce((sum, i) => sum + i.actualQty, 0);
+            const newValuationQty = totalActualOutput;
+            const dropRatio = (originalValuationQty - newValuationQty) / originalValuationQty;
+            
+            order.valuationDropped = false;
+            order.dropRatioText = (dropRatio * 100).toFixed(1);
+            if(order.goodsType === '抵质押货' && dropRatio >= 0.05) {
+                order.valuationDropped = true;
+            }
+
+            order.status = '已完成';
+            
+            // Render view 4
+            openDetails(activeOrderIndex);
+        }
+
+        // ================= VIEW 4: 详情与血缘溯源 =================
+        function openDetails(index) {
+            const order = mockOrders[index];
+
+            document.getElementById('v4_applyNo').textContent = order.applyNo;
+            document.getElementById('v4_customer').textContent = order.customer;
+            document.getElementById('v4_warehouse').textContent = order.warehouse;
+            document.getElementById('v4_status').innerHTML = order.status;
+            
+            // Show wind control alert based on condition (V2.1.0)
+            const warningAlert = document.getElementById('v4_valuationWarning');
+            if (order.status === '已完成' && order.valuationDropped) {
+                warningAlert.style.display = 'block';
+                document.getElementById('v4_warningDescription').textContent = `
+                    检测到本单抵质押货物加工完成重估评估总价值跌幅达 ${order.dropRatioText}%（跌破 95% 风控安全水位）。系统在入库记账的同时已向风控预警中心发出下跌异常警报！
+                `;
+            } else {
+                warningAlert.style.display = 'none';
+            }
+
+            const stamp = document.getElementById('v4_stamp');
+            if (order.status === '已完成') {
+                stamp.style.display = 'flex';
+                stamp.textContent = '已入账';
+                stamp.style.color = 'var(--success-color)';
+                stamp.style.borderColor = 'var(--success-color)';
+                stamp.style.backgroundColor = 'rgba(103,194,58,0.06)';
+                
+                document.getElementById('v4_treeCard').style.display = 'block';
+                document.getElementById('v4_flowCard').style.display = 'block';
+                
+                document.getElementById('v4_inheritance').innerHTML = order.goodsType === '抵质押货'
+                    ? `继续锁定并继承抵质押单 <span style="font-weight:bold; color:var(--primary-color);">${order.pledgeOrder}</span> 锁仓状态`
+                    : '普通存货已直接上架释放入库';
+
+                renderLineageTree(order);
+                renderFlowLedger(order);
+            } else {
+                stamp.style.display = 'flex';
+                stamp.textContent = order.status;
+                stamp.style.color = order.status === '已作废' || order.status === '已驳回' ? 'var(--danger-color)' : 'var(--text-secondary)';
+                stamp.style.borderColor = order.status === '已作废' || order.status === '已驳回' ? 'var(--danger-color)' : 'var(--border-base)';
+                stamp.style.backgroundColor = order.status === '已作废' || order.status === '已驳回' ? 'rgba(245,108,108,0.06)' : '#fafafa';
+                
+                document.getElementById('v4_treeCard').style.display = 'none';
+                document.getElementById('v4_flowCard').style.display = 'none';
+                document.getElementById('v4_inheritance').textContent = order.status === '已作废' ? '单据已作废，冻结库存已全部原路释放可用' : '单据未结账，不进行物权继承';
+            }
+
+            switchView(4, `单据详情 - ${order.applyNo}`);
+        }
+
+        // Lineage Tree including Row A (Locked portion) & Row B (Released portion) split visualizer (V2.1.0)
+        function renderLineageTree(order) {
+            const container = document.getElementById('v4_treeContainer');
+            container.innerHTML = '';
+
+            // Left Node: Original raw items
+            const leftContainer = document.createElement('div');
+            leftContainer.style.display = 'flex';
+            leftContainer.style.flexDirection = 'column';
+            leftContainer.style.gap = '20px';
+            
+            order.inputs.forEach(item => {
+                // Split visualization logic
+                const leftQty = item.totalAvailable;
+                const actQty = item.actualQty || item.planQty;
+                const remainQty = leftQty - actQty;
+
+                const node = document.createElement('div');
+                node.className = 'el-tree-node';
+                node.innerHTML = `
+                    <div class="el-tree-node__header">原始物理批次</div>
+                    <div class="el-tree-node__body">
+                        <div class="el-tree-node__title" title="${item.sku}">${item.sku.split('(')[0]}</div>
+                        <div class="el-tree-node__meta">
+                            <span>原始总吨数:</span>
+                            <strong>${leftQty.toFixed(2)} 吨</strong>
+                        </div>
+                        <div style="font-size:11px; color:var(--text-secondary); margin-top:5px; border-top:1px dashed #eee; padding-top:5px;">
+                            <div>锁扣加工分包 A: <strong style="color:var(--primary-color)">${actQty.toFixed(2)} 吨</strong></div>
+                            <div>分裂剩余分包 B: <strong style="color:var(--success-color)">${remainQty.toFixed(2)} 吨</strong></div>
+                        </div>
+                        <div style="font-size:10px; color:var(--text-secondary); margin-top:5px;">原溯源码: ${item.trace}</div>
+                    </div>
+                `;
+                leftContainer.appendChild(node);
+            });
+
+            // Arrow
+            const arrow1 = document.createElement('div');
+            arrow1.className = 'el-tree-arrow';
+            arrow1.textContent = '➔';
+
+            // Center Node: The Processing action splitting and converting
+            const centerNode = document.createElement('div');
+            centerNode.className = 'el-tree-node is-active';
+            centerNode.innerHTML = `
+                <div class="el-tree-node__header">分拆加工逻辑单元</div>
+                <div class="el-tree-node__body" style="text-align: center;">
+                    <div class="el-tree-node__title" style="color:var(--primary-color);">${order.applyNo}</div>
+                    <div style="font-size:11px; color:var(--text-secondary); margin-top:5px;">
+                        [Row A] 锁定加工扣减<br>
+                        [Row B] 剩余${(order.inputs[0].totalAvailable - (order.inputs[0].actualQty || order.inputs[0].planQty)).toFixed(1)}吨原路释放回库
+                    </div>
+                    <div style="font-size:12px; color:var(--success-color); font-weight:bold; margin-top:10px;">[自动拆单出库入账]</div>
+                </div>
+            `;
+
+            // Arrow
+            const arrow2 = document.createElement('div');
+            arrow2.className = 'el-tree-arrow';
+            arrow2.textContent = '➔';
+
+            // Right Node: Output products
+            const rightContainer = document.createElement('div');
+            rightContainer.style.display = 'flex';
+            rightContainer.style.flexDirection = 'column';
+            rightContainer.style.gap = '15px';
+
+            order.outputs.forEach((item, index) => {
+                const node = document.createElement('div');
+                node.className = 'el-tree-node';
+                const newTrace = `TRC-GEN-${order.applyNo.slice(-4)}-00${index + 1}`;
+                node.innerHTML = `
+                    <div class="el-tree-node__header" style="background:#f0f9eb; color:var(--success-color)">新商品 (领料加工产出)</div>
+                    <div class="el-tree-node__body">
+                        <div class="el-tree-node__title" title="${item.sku}">${item.sku.split('(')[0]}</div>
+                        <div class="el-tree-node__meta">
+                            <span>预期产出: ${item.expectedQty.toFixed(2)}</span>
+                            <strong style="color:var(--success-color)">实入库: ${(item.actualQty || item.expectedQty).toFixed(2)}</strong>
+                        </div>
+                        <div class="el-tree-node__meta" style="margin-top:5px; border-top:1px dashed var(--border-light); padding-top:5px;">
+                            <span style="color:var(--danger-color)">账面加工损耗: ${(item.lossQty || 0.0).toFixed(2)} 吨</span>
+                        </div>
+                        <div style="font-size:11px; color:var(--success-color); margin-top:5px;">分配新溯源码: ${newTrace}</div>
+                    </div>
+                `;
+                rightContainer.appendChild(node);
+            });
+
+            container.appendChild(leftContainer);
+            container.appendChild(arrow1);
+            container.appendChild(centerNode);
+            container.appendChild(arrow2);
+            container.appendChild(rightContainer);
+        }
+
+        // Ledger list
+        function renderFlowLedger(order) {
+            const tbody = document.getElementById('v4_flowTable');
+            tbody.innerHTML = '';
+
+            let flowId = 1048820;
+
+            // Split Outflow for Row A
+            order.inputs.forEach(item => {
+                flowId++;
+                const actualConsume = item.actualQty || item.planQty;
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+                tr.innerHTML = `
+                    <td style="font-family:monospace;">FLW-${flowId}</td>
+                    <td>${item.sku}</td>
+                    <td><span style="background-color:#fef0f0; color:var(--danger-color); padding: 2px 6px; border-radius: 3px; font-size:12px;">加工分拆领料出库 [Row A]</span></td>
+                    <td style="font-weight:bold; color:var(--danger-color)">-${actualConsume.toFixed(4)} 吨</td>
+                    <td style="font-family:monospace;">${item.trace}</td>
+                    <td style="font-family:monospace; color:var(--info-color)">${order.applyNo}</td>
+                `;
+                tbody.appendChild(tr);
+
+                // Row B unlocked flow detail
+                flowId++;
+                const remain = item.totalAvailable - actualConsume;
+                const trRemain = document.createElement('tr');
+                trRemain.className = 'el-table__row';
+                trRemain.innerHTML = `
+                    <td style="font-family:monospace;">FLW-${flowId}</td>
+                    <td>${item.sku}</td>
+                    <td><span style="background-color:#f0f9eb; color:var(--success-color); padding: 2px 6px; border-radius: 3px; font-size:12px;">分拆解锁原路回仓 [Row B]</span></td>
+                    <td style="font-weight:bold; color:var(--success-color)">+0.0000 吨 (解冻锁定额 ${remain.toFixed(2)} 吨)</td>
+                    <td style="font-family:monospace;">${item.trace}-SUB</td>
+                    <td style="font-family:monospace; color:var(--info-color)">${order.applyNo}</td>
+                `;
+                tbody.appendChild(trRemain);
+            });
+
+            // Loss
+            order.outputs.forEach(item => {
+                const loss = item.lossQty || 0.0;
+                if (loss !== 0) {
+                    flowId++;
+                    const tr = document.createElement('tr');
+                    tr.className = 'el-table__row';
+                    const isGain = loss < 0;
+                    tr.innerHTML = `
+                        <td style="font-family:monospace;">FLW-${flowId}</td>
+                        <td>${item.sku}</td>
+                        <td><span style="background-color:#faf1d6; color:var(--warning-color); padding: 2px 6px; border-radius: 3px; font-size:12px;">加工损耗平账</span></td>
+                        <td style="font-weight:bold; color:${isGain ? 'var(--success-color)' : 'var(--danger-color)'}">
+                            ${isGain ? '+' : '-'}${Math.abs(loss).toFixed(4)} 吨
+                        </td>
+                        <td>-</td>
+                        <td style="font-family:monospace; color:var(--info-color)">${order.applyNo}</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+
+            // Inflow
+            order.outputs.forEach((item, index) => {
+                flowId++;
+                const tr = document.createElement('tr');
+                tr.className = 'el-table__row';
+                tr.innerHTML = `
+                    <td style="font-family:monospace;">FLW-${flowId}</td>
+                    <td>${item.sku}</td>
+                    <td><span style="background-color:#f0f9eb; color:var(--success-color); padding: 2px 6px; border-radius: 3px; font-size:12px;">加工产成品入库</span></td>
+                    <td style="font-weight:bold; color:var(--success-color)">+${(item.actualQty || item.expectedQty).toFixed(4)} 吨</td>
+                    <td style="font-family:monospace;">TRC-GEN-${order.applyNo.slice(-4)}-00${index + 1}</td>
+                    <td style="font-family:monospace; color:var(--info-color)">${order.applyNo}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ================= VOID ORDER ACTIONS (V2.1.0) =================
+        function triggerVoidOrder(index) {
+            activeOrderIndex = index;
+            const order = mockOrders[index];
+
+            if (order.goodsType === '抵质押货') {
+                // Pledged order voiding requires wind-control supervisor check
+                document.getElementById('voidDialog').style.display = 'flex';
+            } else {
+                // Non pledged can be voided directly
+                const confirmVoid = confirm(`确定作废该普通存货加工申请单（${order.applyNo}）吗？作废后被锁定的可用库存将全额退回释放。`);
+                if (confirmVoid) {
+                    order.status = '已作废';
+                    alert("单据已作废，库存可用锁定额已原路释放！");
+                    loadListTable();
+                }
+            }
+        }
+
+        function closeVoidDialog() {
+            document.getElementById('voidDialog').style.display = 'none';
+        }
+
+        function confirmVoidPledgeOrder() {
+            // Mock upload confirmation
+            mockOrders[activeOrderIndex].status = '已作废';
+            document.getElementById('voidDialog').style.display = 'none';
+            alert("风控审批通过：书面终止声明协议已上传建档，质押锁定库存额度已原路解锁恢复！");
+            loadListTable();
+        }
+
+        // Static mapping
+        const mockPledgedGoods = {
+            'PLD-2026-9912': [
+                { sku: '冷冻猪肉 - 牛肉丸子 - 36m (SKU:202613)', loc: '冷链库 - A区 - 01', trace: 'TRC-20260716-0001', pledge: 'PLD-2026-9912', qty: '100.0000 吨', defaultVal: '20.0000' },
+                { sku: '冷冻牛肉 - 特级肥牛卷 - 12m (SKU:202620)', loc: '冷链库 - B区 - 03', trace: 'TRC-20260716-0005', pledge: 'PLD-2026-9912', qty: '50.0000 吨', defaultVal: '10.0000' }
+            ],
+            'PLD-2026-8840': [
+                { sku: '黑龙江大米 - 五常香米 - 10kg (SKU:207142)', loc: '大米常温库 - C02', trace: 'TRC-20260716-0120', pledge: 'PLD-2026-8840', qty: '200.0000 吨', defaultVal: '50.0000' }
+            ]
+        };
+
+        function resetFlow() {
+            backToList();
+        }
+
+        window.onload = function () {
+            loadListTable();
+        }
+    </script>
+</body>
+</html>
