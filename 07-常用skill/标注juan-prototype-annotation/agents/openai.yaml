@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prototype Annotation"
+  short_description: "Add reusable, detailed annotations to static prototypes"
+  default_prompt: "Use $prototype-annotation to add detailed, interactive annotations to this static prototype page."

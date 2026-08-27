@@ -1,3 +1,33 @@
 .env
 .venv/
 .DS_Store
+Thumbs.db
+
+# Dependencies & Build
+node_modules
+node_modules/
+dist
+dist/
+dist-ssr
+dist-ssr/
+.vite
+.vite/
+*.local
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# IDE & Editor
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

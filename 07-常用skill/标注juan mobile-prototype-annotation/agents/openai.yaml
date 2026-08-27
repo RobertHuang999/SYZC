@@ -1,0 +1,7 @@
+interface:
+  display_name: "Mobile Prototype Annotation"
+  short_description: "Build linked mobile PRD prototypes"
+  default_prompt: "Use $mobile-prototype-annotation to build or refine this mobile prototype annotation workspace from the provided requirements and reference screenshots."
+
+policy:
+  allow_implicit_invocation: true
