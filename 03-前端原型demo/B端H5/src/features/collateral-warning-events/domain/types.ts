@@ -56,6 +56,8 @@ export type CollateralWarningEvent = {
   processedBy: string | null // 处理人
   warningStatus: WarningStatus // 预警状态
   deviceEventId: string | null // 来源事件唯一标识 (若关联设备)
+  invalidReason?: string | null
+  disposalInfo?: CollateralDisposalInfo | null
 }
 
 export type WarningStatusFilter =

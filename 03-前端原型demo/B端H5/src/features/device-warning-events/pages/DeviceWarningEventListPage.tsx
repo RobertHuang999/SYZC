@@ -1,29 +1,19 @@
 import { useState, useMemo } from "react"
 import {
-  Camera,
   Cpu,
-  FileSpreadsheet,
   Filter,
-  MoreHorizontal,
   Search,
-  ShieldAlert,
   X,
-  Zap,
 } from "lucide-react"
-import { useNavigate } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
-import { ActionSheet, type ActionSheetItem } from "@/components/ui/ActionSheet"
 import {
   DropdownFilterPill,
   type DropdownOption,
 } from "@/components/ui/DropdownFilterPill"
 import { DrawerField, FilterDrawer } from "@/components/ui/FilterDrawer"
-import { ImagePreviewModal } from "@/components/ui/ImagePreviewModal"
-import { formatDateTime } from "@/shared/lib/date-utils"
 import { ENABLED_SEVERITY_LEVELS } from "@/shared/mock/severity-levels"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
-import { canManualRelease } from "../domain/actions"
 import {
   DEFAULT_DEVICE_WARNING_FILTERS,
   DEVICE_WARNING_STATUS_FILTER_OPTIONS,
@@ -38,21 +28,31 @@ import type {
   DeviceWarningStatusFilter,
   DeviceWarningType,
 } from "../domain/types"
+import { DeviceWarningCard } from "../components/DeviceWarningCard"
 import { filterDeviceWarningEvents } from "../lib/event-utils"
 import { deviceWarningEventsMock } from "../mock/device-warning-events.mock"
 
+const DEVICE_WARNING_FILTER_STORAGE_KEY = "SYZC_H5_DEVICE_WARNING_FILTERS"
+
+function loadCachedDeviceFilters(): DeviceWarningFilters {
+  try {
+    const raw = sessionStorage.getItem(DEVICE_WARNING_FILTER_STORAGE_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch {}
+  return DEFAULT_DEVICE_WARNING_FILTERS
+}
+
+function saveCachedDeviceFilters(filters: DeviceWarningFilters) {
+  try {
+    sessionStorage.setItem(DEVICE_WARNING_FILTER_STORAGE_KEY, JSON.stringify(filters))
+  } catch {}
+}
+
 export function DeviceWarningEventListPage() {
-  const navigate = useNavigate()
-  const [draftFilters, setDraftFilters] = useState<DeviceWarningFilters>(
-    DEFAULT_DEVICE_WARNING_FILTERS
-  )
-  const [appliedFilters, setAppliedFilters] = useState<DeviceWarningFilters>(
-    DEFAULT_DEVICE_WARNING_FILTERS
-  )
+  const [draftFilters, setDraftFilters] = useState<DeviceWarningFilters>(loadCachedDeviceFilters)
+  const [appliedFilters, setAppliedFilters] = useState<DeviceWarningFilters>(loadCachedDeviceFilters)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [frequencyTarget, setFrequencyTarget] = useState<DeviceWarningEvent | null>(null)
-  const [activeActionTarget, setActiveActionTarget] = useState<DeviceWarningEvent | null>(null)
-  const [previewImageTarget, setPreviewImageTarget] = useState<DeviceWarningEvent | null>(null)
 
   const events = useMemo(
     () => filterDeviceWarningEvents(deviceWarningEventsMock, appliedFilters),
@@ -65,12 +65,14 @@ export function DeviceWarningEventListPage() {
 
   const applyFilters = () => {
     setAppliedFilters(draftFilters)
+    saveCachedDeviceFilters(draftFilters)
     setDrawerOpen(false)
   }
 
   const resetFilters = () => {
     setDraftFilters(DEFAULT_DEVICE_WARNING_FILTERS)
     setAppliedFilters(DEFAULT_DEVICE_WARNING_FILTERS)
+    saveCachedDeviceFilters(DEFAULT_DEVICE_WARNING_FILTERS)
   }
 
   // 1. 预警状态下拉选项
@@ -108,6 +110,7 @@ export function DeviceWarningEventListPage() {
     const next = { ...appliedFilters, warningStatus: val as DeviceWarningStatusFilter }
     setDraftFilters(next)
     setAppliedFilters(next)
+    saveCachedDeviceFilters(next)
   }
 
   const handleTypeChange = (val: string) => {
@@ -116,18 +119,21 @@ export function DeviceWarningEventListPage() {
     const next = { ...appliedFilters, warningTypes: nextTypes }
     setDraftFilters(next)
     setAppliedFilters(next)
+    saveCachedDeviceFilters(next)
   }
 
   const handleWarehouseChange = (val: string) => {
     const next = { ...appliedFilters, warehouseName: val }
     setDraftFilters(next)
     setAppliedFilters(next)
+    saveCachedDeviceFilters(next)
   }
 
   const handleFrequencyChange = (val: string) => {
     const next = { ...appliedFilters, triggerFrequency: val as DeviceWarningFrequency }
     setDraftFilters(next)
     setAppliedFilters(next)
+    saveCachedDeviceFilters(next)
   }
 
   const toggleSeverity = (severityLevelId: string) => {
@@ -145,32 +151,6 @@ export function DeviceWarningEventListPage() {
     appliedFilters.firstWarningTimeEnd !== DEFAULT_DEVICE_WARNING_FILTERS.firstWarningTimeEnd
       ? 1
       : 0)
-
-  // 构造 ActionSheet 操作项
-  const getActionSheetItems = (event: DeviceWarningEvent): ActionSheetItem[] => {
-    const items: ActionSheetItem[] = []
-
-    if (canManualRelease(event)) {
-      items.push({
-        key: "release",
-        label: "解除预警",
-        icon: <ShieldAlert className="size-4 text-blue-600" />,
-        description: "填写情况说明与现场照片，归档该轮次告警",
-        primary: true,
-        onClick: () => navigate(`/m/iot/device-warning-events/${event.eventId}/release`),
-      })
-    }
-
-    items.push({
-      key: "detail",
-      label: "查看预警详情",
-      icon: <FileSpreadsheet className="size-4 text-gray-600" />,
-      description: "查看设备与位置快照、触发数据快照与系统审计日志",
-      onClick: () => navigate(`/m/iot/device-warning-events/${event.eventId}`),
-    })
-
-    return items
-  }
 
   return (
     <MobileShell>
@@ -206,7 +186,11 @@ export function DeviceWarningEventListPage() {
                 onChange={(event) => {
                   const keyword = event.target.value
                   updateFilter({ keyword })
-                  setAppliedFilters((current) => ({ ...current, keyword }))
+                  setAppliedFilters((current) => {
+                    const next = { ...current, keyword }
+                    saveCachedDeviceFilters(next)
+                    return next
+                  })
                 }}
               />
               {draftFilters.keyword ? (
@@ -214,7 +198,11 @@ export function DeviceWarningEventListPage() {
                   type="button"
                   onClick={() => {
                     updateFilter({ keyword: "" })
-                    setAppliedFilters((current) => ({ ...current, keyword: "" }))
+                    setAppliedFilters((current) => {
+                      const next = { ...current, keyword: "" }
+                      saveCachedDeviceFilters(next)
+                      return next
+                    })
                   }}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 flex size-4 items-center justify-center rounded-full bg-gray-300 text-gray-600 cursor-pointer"
                 >
@@ -284,157 +272,15 @@ export function DeviceWarningEventListPage() {
             </button>
           </div>
         ) : (
-          <PrototypeAnnotationTarget annotationIds={["device-warning-table", "device-warning-row-actions", "device-warning-frequency", "device-warning-release-confirm"]}>
+          <PrototypeAnnotationTarget annotationIds={["device-warning-table"]}>
             <div className="space-y-3">
-              {events.map((event) => {
-                const releaseAllowed = canManualRelease(event)
-
-
-                return (
-                  <article
-                    key={event.eventId}
-                    onClick={() => navigate(`/m/iot/device-warning-events/${event.eventId}`)}
-                    className="group relative overflow-hidden rounded-2xl border border-gray-200/90 bg-white p-3.5 shadow-xs transition-all active:scale-[0.99] cursor-pointer hover:border-blue-200 hover:shadow-sm"
-                  >
-                    {/* 1. 卡片头部 */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                          <Cpu className="size-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-xs text-gray-900 truncate">
-                              {event.ruleName}
-                            </span>
-                            <span className="rounded bg-slate-100 px-1.5 py-0.2 text-[10px] font-mono text-slate-600">
-                              {event.deviceCode}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex shrink-0 items-center gap-1.5">
-                        <span
-                          className="rounded px-1.5 py-0.5 text-[10px] font-bold text-white shadow-2xs"
-                          style={{ backgroundColor: event.severityColor }}
-                        >
-                          {event.severityCode} {event.severityName}
-                        </span>
-                        <span
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-medium border ${
-                            event.warningStatus === "OPEN_VALID"
-                              ? "bg-amber-50 text-amber-700 border-amber-200"
-                              : event.warningStatus === "CLOSED_VALID"
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                              : "bg-slate-100 text-slate-600 border-slate-200"
-                          }`}
-                        >
-                          {DEVICE_WARNING_STATUS_LABEL_OPTIONS[event.warningStatus]}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* 2. 核心主体 */}
-                    <div className="mt-2.5 space-y-1.5 rounded-xl bg-slate-50/90 p-2.5 text-xs text-gray-700 border border-slate-100/80">
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-gray-400">预警类型：</span>
-                        <span className="font-semibold text-indigo-700">
-                          {event.warningType} · {event.warningSubType}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-gray-400">设备名称：</span>
-                        <span className="font-medium text-gray-800">
-                          {event.deviceName}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-gray-400">所属位置：</span>
-                        <span className="text-gray-700">{event.location}</span>
-                      </div>
-                      <div className="flex items-start gap-1 text-[11px] leading-relaxed">
-                        <span className="w-16 shrink-0 text-gray-400">预警内容：</span>
-                        <span className="line-clamp-2 flex-1 font-medium text-gray-800">
-                          {event.warningContent}
-                        </span>
-                      </div>
-
-                      {event.snapshotImageStatus === "available" && (
-                        <div className="flex items-center justify-between border-t border-slate-200/60 pt-1.5 text-[11px]">
-                          <span className="text-gray-400">预警抓拍图：</span>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setPreviewImageTarget(event)
-                            }}
-                            className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:text-blue-700 active:underline cursor-pointer"
-                          >
-                            <Camera className="size-3.5" />
-                            <span>查看现场抓拍图</span>
-                          </button>
-                        </div>
-                      )}
-
-                      {event.warningStatus === "OPEN_INVALID" && event.invalidReason && (
-                        <div className="border-t border-slate-200/60 pt-1 text-[10px] text-gray-500">
-                          失效原因：{event.invalidReason}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* 3. 卡片底部 */}
-                    <div className="mt-2.5 flex items-center justify-between border-t border-gray-100 pt-2 text-xs">
-                      <div className="flex items-center gap-2 text-[11px] text-gray-400">
-                        <span>🕒 {formatDateTime(event.latestWarningTime)}</span>
-                        {event.triggerCount > 1 && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setFrequencyTarget(event)
-                            }}
-                            className="inline-flex items-center gap-0.5 rounded-full bg-orange-50 px-2 py-0.2 text-[10px] font-bold text-orange-700 border border-orange-200 active:bg-orange-100 cursor-pointer"
-                          >
-                            <Zap className="size-2.5" />
-                            <span>{event.triggerCount} 次触发</span>
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                        {releaseAllowed ? (
-                          <button
-                            type="button"
-                            onClick={() => navigate(`/m/iot/device-warning-events/${event.eventId}/release`)}
-                            className="rounded-lg bg-blue-600 px-2.5 py-1 text-xs font-semibold text-white shadow-2xs active:bg-blue-700 cursor-pointer"
-                          >
-                            解除预警
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => navigate(`/m/iot/device-warning-events/${event.eventId}`)}
-                            className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700 active:bg-gray-200 cursor-pointer"
-                          >
-                            详情
-                          </button>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={() => setActiveActionTarget(event)}
-                          className="flex size-7 items-center justify-center rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 active:bg-gray-200 cursor-pointer"
-                          aria-label="更多操作"
-                        >
-                          <MoreHorizontal className="size-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                )
-              })}
+              {events.map((event) => (
+                <DeviceWarningCard
+                  key={event.eventId}
+                  event={event}
+                  onShowFrequencyHistory={(target) => setFrequencyTarget(target)}
+                />
+              ))}
             </div>
           </PrototypeAnnotationTarget>
         )}
@@ -546,28 +392,6 @@ export function DeviceWarningEventListPage() {
             </button>
           </div>
         </div>
-      )}
-
-      {/* ActionSheet 操作面板 */}
-      {activeActionTarget && (
-        <ActionSheet
-          open={Boolean(activeActionTarget)}
-          title={`${activeActionTarget.ruleName} 操作`}
-          description={`设备：${activeActionTarget.deviceName}`}
-          items={getActionSheetItems(activeActionTarget)}
-          onClose={() => setActiveActionTarget(null)}
-        />
-      )}
-
-      {/* 预警抓拍图大图预览 */}
-      {previewImageTarget && (
-        <ImagePreviewModal
-          open={Boolean(previewImageTarget)}
-          title={`${previewImageTarget.deviceName} · 预警抓拍图`}
-          subTitle={previewImageTarget.latestWarningTime}
-          imageUrl={`mock-snapshot-${previewImageTarget.eventId}`}
-          onClose={() => setPreviewImageTarget(null)}
-        />
       )}
     </MobileShell>
   )

@@ -22,12 +22,28 @@ import { collateralWarningDocuments } from "../documents/collateral-warning-docu
 import { useNavigate } from "react-router-dom"
 import { ReleasePromptDialog } from "../components/ReleasePromptDialog"
 
+const PC_COLLATERAL_WARNING_FILTER_KEY = "SYZC_PC_COLLATERAL_WARNING_FILTERS"
+
+function loadCachedPcCollateralFilters(): CollateralWarningFilters {
+  try {
+    const raw = sessionStorage.getItem(PC_COLLATERAL_WARNING_FILTER_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch {}
+  return DEFAULT_FILTERS
+}
+
+function saveCachedPcCollateralFilters(filters: CollateralWarningFilters) {
+  try {
+    sessionStorage.setItem(PC_COLLATERAL_WARNING_FILTER_KEY, JSON.stringify(filters))
+  } catch {}
+}
+
 export function CollateralWarningListPage() {
   const navigate = useNavigate()
   const [draftFilters, setDraftFilters] =
-    useState<CollateralWarningFilters>(DEFAULT_FILTERS)
+    useState<CollateralWarningFilters>(loadCachedPcCollateralFilters)
   const [appliedFilters, setAppliedFilters] =
-    useState<CollateralWarningFilters>(DEFAULT_FILTERS)
+    useState<CollateralWarningFilters>(loadCachedPcCollateralFilters)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(PAGE_SIZE)
   const [releaseTarget, setReleaseTarget] = useState<CollateralWarningEvent | null>(null)
@@ -52,12 +68,14 @@ export function CollateralWarningListPage() {
 
   const handleSearch = () => {
     setAppliedFilters(draftFilters)
+    saveCachedPcCollateralFilters(draftFilters)
     setPage(1)
   }
 
   const handleReset = () => {
     setDraftFilters(DEFAULT_FILTERS)
     setAppliedFilters(DEFAULT_FILTERS)
+    saveCachedPcCollateralFilters(DEFAULT_FILTERS)
     setPage(1)
   }
 

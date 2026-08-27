@@ -6,7 +6,6 @@ import {
   EyeOffIcon,
   FileSpreadsheetIcon,
   FileTextIcon,
-  GripVerticalIcon,
   Maximize2Icon,
   Minimize2Icon,
   PanelRightCloseIcon,
@@ -21,11 +20,8 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useRef,
   useState,
-  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react"
 import ReactMarkdown from "react-markdown"
@@ -43,16 +39,6 @@ export type { AnnotationKind, DrawerTabKey, PrototypeAnnotation, PrototypeDocume
 
 function cn(...classes: (string | boolean | undefined | null)[]) {
   return classes.filter(Boolean).join(" ")
-}
-
-type Point = {
-  x: number
-  y: number
-}
-
-type Size = {
-  width: number
-  height: number
 }
 
 type PhoneDevicePreset = {
@@ -436,14 +422,15 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        {/* 手机模拟预览居中视口（浅色高级画布底色） */}
-        <div className="flex-1 overflow-auto flex items-center justify-center p-4 bg-[#d8e2ec] relative">
+        {/* 手机模拟预览居中视口 + 画布外侧需求规则检查器（大画布联动画布） */}
+        <div className="flex-1 overflow-auto flex items-center justify-center p-6 bg-[#d8e2ec] relative gap-6">
+          {/* 1. 手机真机视口容器 */}
           <div
-            className="relative flex flex-col overflow-hidden bg-[#edf2f8] shadow-[0_20px_50px_rgba(15,23,42,0.18)] transition-all duration-300 rounded-[42px] border-[8px] border-slate-800"
+            className="relative flex flex-col shrink-0 overflow-hidden bg-[#edf2f8] shadow-[0_20px_50px_rgba(15,23,42,0.18)] transition-all duration-300 rounded-[42px] border-[8px] border-slate-800"
             style={{
               width: `${context.selectedPreset.width}px`,
               height: `${context.selectedPreset.height}px`,
-              maxHeight: "calc(100vh - 6rem)",
+              maxHeight: "calc(100vh - 5.5rem)",
             }}
           >
             {/* iOS 顶部状态栏与灵动岛 */}
@@ -471,6 +458,11 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
               <div className="h-1 w-28 rounded-full bg-slate-400/80" />
             </div>
           </div>
+
+          {/* 2. 原型屏幕外侧的大画布需求检查器面板（Canvas Inspector，极度舒适宽屏大字号） */}
+          {context.enabled && context.activePopupAnnotationId && (
+            <CanvasAnnotationInspector />
+          )}
         </div>
       </main>
     </div>
@@ -598,7 +590,7 @@ function RightEdgeFoldTab() {
 }
 
 /**
- * 页面元素原位打点与就近弹出卡片包装器
+ * 页面元素原位打点包装器（纯净无遮挡，点击触发外侧大画布检查器）
  */
 export function PrototypeAnnotationTarget({
   annotationIds,
@@ -616,14 +608,18 @@ export function PrototypeAnnotationTarget({
     .map((id) => context.annotations.find((annotation) => annotation.id === id))
     .filter((annotation): annotation is PrototypeAnnotation => Boolean(annotation))
   const targetId = annotations[0]?.targetId ?? annotations[0]?.id
-  const activeAnnotation = annotations.find(
+  const isTargetActive = annotations.some(
     (annotation) => annotation.id === context.activePopupAnnotationId
   )
 
   return (
     <div
       data-prototype-target={targetId}
-      className={cn("relative transition-all duration-300", className)}
+      className={cn(
+        "relative transition-all duration-300",
+        isTargetActive && "ring-2 ring-blue-500/80 rounded-xl bg-blue-50/10",
+        className
+      )}
     >
       {children}
 
@@ -636,18 +632,18 @@ export function PrototypeAnnotationTarget({
           )}
         >
           {annotations.map((annotation) => {
-            const isPopupOpen = annotation.id === context.activePopupAnnotationId
+            const isActive = annotation.id === context.activePopupAnnotationId
             return (
               <button
                 key={annotation.id}
                 type="button"
                 className={cn(
                   "flex size-5.5 cursor-pointer items-center justify-center rounded-full border-2 border-white text-[11px] font-bold text-white shadow-md transition-all hover:scale-125 focus-visible:outline-none active:scale-95",
-                  isPopupOpen
-                    ? "bg-rose-600 ring-4 ring-rose-400/50 scale-110"
+                  isActive
+                    ? "bg-blue-600 ring-4 ring-blue-400/60 scale-110 animate-pulse"
                     : "bg-rose-500 hover:bg-rose-600"
                 )}
-                title={`需求打点 #${annotation.number}：${annotation.title}（点击就近弹出查看）`}
+                title={`需求打点 #${annotation.number}：${annotation.title}（点击在屏幕外画布查看完整规则）`}
                 onClick={(e) => {
                   e.stopPropagation()
                   context.openInPlacePopup(annotation.id)
@@ -659,186 +655,122 @@ export function PrototypeAnnotationTarget({
           })}
         </div>
       )}
-
-      {/* 就近原位弹出卡片 */}
-      {context.enabled && context.showMarkers && activeAnnotation && (
-        <InPlaceAnnotationCard
-          annotation={activeAnnotation}
-          targetId={targetId}
-          onClose={context.closeInPlacePopup}
-        />
-      )}
     </div>
   )
 }
 
 /**
- * 就近原位弹出卡片
+ * 手机外侧大画布需求检查器面板 (Canvas Annotation Inspector)
+ * 彻底解决手机屏幕太小、看文档字太小被遮挡的痛点
  */
-function InPlaceAnnotationCard({
-  annotation,
-  targetId,
-  onClose,
-}: {
-  annotation: PrototypeAnnotation
-  targetId?: string
-  onClose: () => void
-}) {
+function CanvasAnnotationInspector() {
   const context = useAnnotationContext()
-  const cardRef = useRef<HTMLDivElement>(null)
+  const activeAnnotation = context.annotations.find(
+    (item) => item.id === context.activePopupAnnotationId
+  )
 
-  const [offset, setOffset] = useState<Point>({ x: 0, y: 0 })
-  const moveDragStart = useRef<
-    | {
-        pointerId: number
-        clientX: number
-        clientY: number
-        origin: Point
-      }
-    | undefined
-  >(undefined)
-
-  const cardSize: Size = {
-    width: 350,
-    height: 380,
+  if (!activeAnnotation) {
+    return null
   }
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose()
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [onClose])
+  // 计算当前打点在所有打点中的索引，支持上一条/下一条切换
+  const currentIndex = context.annotations.findIndex((item) => item.id === activeAnnotation.id)
+  const prevAnnotation = currentIndex > 0 ? context.annotations[currentIndex - 1] : null
+  const nextAnnotation =
+    currentIndex >= 0 && currentIndex < context.annotations.length - 1
+      ? context.annotations[currentIndex + 1]
+      : null
 
-  const onMovePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.target instanceof Element && event.target.closest("button")) {
-      return
-    }
-    event.currentTarget.setPointerCapture(event.pointerId)
-    moveDragStart.current = {
-      pointerId: event.pointerId,
-      clientX: event.clientX,
-      clientY: event.clientY,
-      origin: offset,
-    }
-  }
-
-  const onMovePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const start = moveDragStart.current
-    if (!start || start.pointerId !== event.pointerId) {
-      return
-    }
-    setOffset({
-      x: start.origin.x + event.clientX - start.clientX,
-      y: start.origin.y + event.clientY - start.clientY,
-    })
-  }
-
-  const onMovePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (moveDragStart.current?.pointerId !== event.pointerId) {
-      return
-    }
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId)
-    }
-    moveDragStart.current = undefined
-  }
+  const targetId = activeAnnotation.targetId ?? activeAnnotation.id
 
   return (
-    <div
-      ref={cardRef}
-      className="absolute top-full left-0 mt-2 z-50 flex flex-col rounded-2xl border-2 border-blue-400 bg-white text-slate-900 shadow-2xl backdrop-blur-2xl text-left select-text"
-      style={{
-        width: `${cardSize.width}px`,
-        height: `${cardSize.height}px`,
-        maxWidth: "92vw",
-        transform: `translate(${offset.x}px, ${offset.y}px)`,
-      }}
+    <aside
+      className="hidden md:flex flex-col w-[440px] lg:w-[500px] xl:w-[560px] max-h-[calc(100vh-5.5rem)] rounded-3xl border border-slate-200/90 bg-white/95 text-slate-800 shadow-[0_25px_60px_rgba(15,23,42,0.18)] backdrop-blur-2xl overflow-hidden transition-all duration-300 select-text animate-in fade-in slide-in-from-right-4"
       onClick={(e) => e.stopPropagation()}
     >
-      {/* 头部拖拽区 */}
-      <div
-        className="flex cursor-move select-none items-center justify-between border-b border-blue-100 bg-gradient-to-r from-blue-50 via-indigo-50 to-white px-3 py-2 rounded-t-2xl"
-        onPointerDown={onMovePointerDown}
-        onPointerMove={onMovePointerMove}
-        onPointerUp={onMovePointerUp}
-      >
-        <div className="flex items-center gap-1.5 min-w-0">
-          <GripVerticalIcon className="size-3.5 text-blue-500 shrink-0" />
-          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
-            {annotation.number}
+      {/* 1. 顶部标头与控制栏 */}
+      <div className="flex items-center justify-between border-b border-slate-100 bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-white px-4 py-3 shrink-0">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-xs font-black text-white shadow-sm">
+            #{activeAnnotation.number}
           </span>
-          <h3 className="font-bold text-slate-900 text-xs truncate">
-            {annotation.title}
-          </h3>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <h3 className="font-bold text-sm text-slate-900 truncate">
+                {activeAnnotation.title}
+              </h3>
+              <span
+                className={cn(
+                  "rounded-md border px-1.5 py-0.2 text-[10px] font-semibold leading-none",
+                  kindStyles[activeAnnotation.kind]
+                )}
+              >
+                {activeAnnotation.kind}
+              </span>
+            </div>
+            {targetId && (
+              <span className="text-[10px] font-mono text-slate-400">
+                绑定靶点: #{targetId}
+              </span>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
-            className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
+            className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer"
             onClick={() => context.openDrawerTab("annotations")}
-            title="在右侧抽屉展开"
+            title="在右侧全局抽屉查看"
           >
             <PanelRightOpenIcon className="size-3.5" />
+            <span className="hidden lg:inline text-[11px]">抽屉</span>
           </button>
+
           <button
             type="button"
-            className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-rose-600 cursor-pointer"
-            onClick={onClose}
-            title="关闭"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
+            onClick={context.closeInPlacePopup}
+            title="关闭画布检查器"
           >
-            <XIcon className="size-3.5" />
+            <XIcon className="size-4" />
           </button>
         </div>
       </div>
 
-      {/* 标签栏 */}
-      <div className="flex items-center justify-between px-3 pt-2 text-[10px]">
-        <div className="flex items-center gap-1">
-          <span className={cn("rounded border px-1.5 py-0.5 font-medium", kindStyles[annotation.kind])}>
-            {annotation.kind}
-          </span>
-          {targetId && (
-            <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-600">
-              #{targetId}
-            </span>
-          )}
-        </div>
-        <button
-          type="button"
-          className="text-blue-600 hover:underline font-medium cursor-pointer"
-          onClick={() => context.openDrawerTab("prd")}
-        >
-          读完整PRD &gt;
-        </button>
-      </div>
-
-      {/* 内容区域 */}
-      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2 text-xs">
-        <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-2 text-slate-700 text-[11px] leading-relaxed">
-          {annotation.content}
+      {/* 2. 核心内容区域（宽敞舒服的大字号阅读体验） */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs">
+        {/* 核心事实需求摘要 */}
+        <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-3.5 text-slate-800 text-[12px] leading-relaxed shadow-2xs">
+          <div className="text-[11px] font-bold text-blue-800 mb-1 flex items-center gap-1">
+            <span className="size-1.5 rounded-full bg-blue-600" />
+            <span>核心需求说明</span>
+          </div>
+          <p className="font-normal text-slate-700 leading-relaxed">
+            {activeAnnotation.content}
+          </p>
         </div>
 
-        {annotation.details.map((group, groupIdx) => (
-          <div key={groupIdx} className="space-y-1">
-            <h4 className="font-semibold text-[11px] text-slate-900 flex items-center gap-1 border-b border-slate-100 pb-0.5">
-              <span className="size-1.5 rounded-full bg-blue-500" />
-              {group.title}
+        {/* 业务规则分项细节 */}
+        {activeAnnotation.details.map((group, groupIdx) => (
+          <div
+            key={groupIdx}
+            className="rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-2xs space-y-2"
+          >
+            <h4 className="font-bold text-xs text-slate-900 flex items-center gap-1.5 border-b border-slate-100 pb-2">
+              <span className="size-2 rounded-full bg-blue-600" />
+              <span>{group.title}</span>
             </h4>
-            <div className="grid gap-1 pl-1">
+            <div className="grid gap-2">
               {group.items.map((item, itemIdx) => (
                 <div
                   key={itemIdx}
-                  className="rounded-lg border border-slate-100 bg-white p-1.5 text-[11px] leading-relaxed shadow-2xs"
+                  className="rounded-xl border border-slate-100 bg-slate-50/70 p-2.5 text-[11.5px] leading-relaxed"
                 >
-                  <div className="font-medium text-slate-800 mb-0.5 text-[10.5px]">
+                  <div className="font-semibold text-slate-800 mb-1 text-[11px]">
                     {item.label}
                   </div>
-                  <div className="text-slate-600 text-[10.5px]">
+                  <div className="text-slate-600 leading-relaxed">
                     <AnnotationItemContent content={item.content} />
                   </div>
                 </div>
@@ -847,7 +779,53 @@ function InPlaceAnnotationCard({
           </div>
         ))}
       </div>
-    </div>
+
+      {/* 3. 底部导航与快捷切换栏（上一条 / 下一条打点快速审查） */}
+      <div className="border-t border-slate-100 bg-slate-50/90 px-4 py-2.5 shrink-0 flex items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-2">
+          {prevAnnotation ? (
+            <button
+              type="button"
+              onClick={() => context.locateAndOpenPopup(prevAnnotation.id)}
+              className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-100 transition-all cursor-pointer"
+              title={`切换至 #${prevAnnotation.number} ${prevAnnotation.title}`}
+            >
+              <span>◀ #{prevAnnotation.number}</span>
+              <span className="max-w-[70px] truncate hidden sm:inline">
+                {prevAnnotation.title}
+              </span>
+            </button>
+          ) : (
+            <span className="text-[11px] text-slate-300">已是第一条</span>
+          )}
+
+          {nextAnnotation ? (
+            <button
+              type="button"
+              onClick={() => context.locateAndOpenPopup(nextAnnotation.id)}
+              className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-100 transition-all cursor-pointer"
+              title={`切换至 #${nextAnnotation.number} ${nextAnnotation.title}`}
+            >
+              <span className="max-w-[70px] truncate hidden sm:inline">
+                {nextAnnotation.title}
+              </span>
+              <span>#{nextAnnotation.number} ▶</span>
+            </button>
+          ) : (
+            <span className="text-[11px] text-slate-300">已是最后一条</span>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => context.locateAndOpenPopup(activeAnnotation.id)}
+          className="flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 cursor-pointer bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition-colors shrink-0"
+        >
+          <CompassIcon className="size-3" />
+          <span>手机聚焦</span>
+        </button>
+      </div>
+    </aside>
   )
 }
 

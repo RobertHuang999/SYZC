@@ -36,11 +36,27 @@ import {
 } from "../lib/event-utils"
 import { collateralWarningEventsMock } from "../mock/collateral-warning-events.mock"
 
+const COLLATERAL_WARNING_FILTER_STORAGE_KEY = "SYZC_H5_COLLATERAL_WARNING_FILTERS"
+
+function loadCachedCollateralFilters(): CollateralWarningFilters {
+  try {
+    const raw = sessionStorage.getItem(COLLATERAL_WARNING_FILTER_STORAGE_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch {}
+  return DEFAULT_FILTERS
+}
+
+function saveCachedCollateralFilters(filters: CollateralWarningFilters) {
+  try {
+    sessionStorage.setItem(COLLATERAL_WARNING_FILTER_STORAGE_KEY, JSON.stringify(filters))
+  } catch {}
+}
+
 export function CollateralWarningListPage() {
   const [draftFilters, setDraftFilters] =
-    useState<CollateralWarningFilters>(DEFAULT_FILTERS)
+    useState<CollateralWarningFilters>(loadCachedCollateralFilters)
   const [appliedFilters, setAppliedFilters] =
-    useState<CollateralWarningFilters>(DEFAULT_FILTERS)
+    useState<CollateralWarningFilters>(loadCachedCollateralFilters)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [batchMode, setBatchMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -101,6 +117,7 @@ export function CollateralWarningListPage() {
     const next = { ...appliedFilters, warningStatus: val as WarningStatusFilter }
     setDraftFilters(next)
     setAppliedFilters(next)
+    saveCachedCollateralFilters(next)
   }
 
   const handleTypeChange = (val: string) => {
@@ -109,18 +126,21 @@ export function CollateralWarningListPage() {
     const next = { ...appliedFilters, warningTypes: nextTypes }
     setDraftFilters(next)
     setAppliedFilters(next)
+    saveCachedCollateralFilters(next)
   }
 
   const handlePublicityChange = (val: string) => {
     const next = { ...appliedFilters, publicityStatus: val as PublicityStatus | "全部" }
     setDraftFilters(next)
     setAppliedFilters(next)
+    saveCachedCollateralFilters(next)
   }
 
   const handleSourceChange = (val: string) => {
     const next = { ...appliedFilters, warningSource: val as WarningSourceFilter }
     setDraftFilters(next)
     setAppliedFilters(next)
+    saveCachedCollateralFilters(next)
   }
 
   const handleDrawerConfirm = () => {
@@ -133,6 +153,7 @@ export function CollateralWarningListPage() {
     }
 
     setAppliedFilters(draftFilters)
+    saveCachedCollateralFilters(draftFilters)
     setDrawerOpen(false)
   }
 
@@ -224,6 +245,7 @@ export function CollateralWarningListPage() {
                       }
                       setDraftFilters(next)
                       setAppliedFilters(next)
+                      saveCachedCollateralFilters(next)
                     }}
                   />
                   {appliedFilters.keyword ? (
@@ -233,6 +255,7 @@ export function CollateralWarningListPage() {
                         const next = { ...appliedFilters, keyword: "" }
                         setDraftFilters(next)
                         setAppliedFilters(next)
+                        saveCachedCollateralFilters(next)
                       }}
                       className="absolute right-2.5 top-1/2 -translate-y-1/2 flex size-4 items-center justify-center rounded-full bg-gray-300 text-gray-600 cursor-pointer"
                     >
@@ -324,6 +347,7 @@ export function CollateralWarningListPage() {
                 onClick={() => {
                   setDraftFilters(DEFAULT_FILTERS)
                   setAppliedFilters(DEFAULT_FILTERS)
+                  saveCachedCollateralFilters(DEFAULT_FILTERS)
                 }}
                 className="mt-4 rounded-xl bg-gray-100 px-4 py-1.5 text-xs font-semibold text-gray-700 active:bg-gray-200 cursor-pointer"
               >
@@ -331,7 +355,7 @@ export function CollateralWarningListPage() {
               </button>
             </div>
           ) : (
-            <PrototypeAnnotationTarget annotationIds={["collateral-warning-table", "collateral-warning-row-actions"]}>
+            <PrototypeAnnotationTarget annotationIds={["collateral-warning-table"]}>
               <div className="space-y-3">
                 {filteredEvents.map((event) => (
                   <CollateralWarningCard

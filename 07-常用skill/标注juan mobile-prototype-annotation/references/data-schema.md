@@ -1,93 +1,45 @@
-# Mobile Prototype Annotation Data Schema
+# Mobile Prototype Annotation Data Schema & Target Principles
 
-Use this reference when turning requirements into the configuration that drives the page directory, phone preview, and annotation panel.
+## 1. 语义化 Target ID 原则
 
-## Page model
+Target ID 是手机原型内部组件与外部大画布检查器（Canvas Inspector）及全量抽屉之间的唯一数据契约。
 
-```js
-{
-  id: "01_home_dashboard",
-  title: "01. Home dashboard",
-  navIcon: "home",
-  phoneTitle: "Dashboard",
-  description: "Short page purpose.",
-  flow: ["Step one", "Step two"],
-  tab: "home",
-  modules: [
-    {
-      id: "metrics",
-      kind: "metric-grid",
-      label: "Today's metrics",
-      data: []
-    }
-  ],
-  rules: [],
-  apiContracts: []
+- 统一采用小写 `kebab-case`（如 `device-warning-frequency`、`collateral-warning-row-actions`）。
+- **禁止多个不同语义的打点 ID 混合包裹在整个大容器上**。必须将打点颗粒度拆分绑定至具体子模块（如将列表绑定至 table，将频次胶囊绑定至 frequency，将底部按钮绑定至 row-actions）。
+- 严禁使用 DOM 数组索引、自动生成的动态哈希作为 Contract。
+
+## 2. 需求打点模型 (PrototypeAnnotation)
+
+```ts
+export type AnnotationKind = '页面' | '交互' | '字段' | '规则' | '待确认'
+
+export type PrototypeAnnotation = {
+  id: string              // 唯一标识 (如: "device-warning-frequency")
+  targetId?: string        // 关联的目标组件 ID
+  number: number          // 页面内唯一且连续的数字编号 (1, 2, 3...)
+  kind: AnnotationKind    // 分类维度
+  title: string           // 打点标题
+  content: string         // 核心事实需求摘要 (大画布高亮展示)
+  details: Array<{        // 结构化细则分组
+    title: string
+    items: Array<{
+      label: string
+      content: string     // 支持文本、Markdown、Mermaid 图表
+    }>
+  }>
 }
 ```
 
-## Target IDs
+## 3. 文档挂载模型 (PrototypeDocument)
 
-Target IDs are the contract between the phone preview and the annotation panel.
+通过 Vite `?raw` 原生引入业务 Markdown 文档，实现直读与无缝对照：
 
-- Use lowercase kebab-case or snake_case consistently.
-- Make IDs semantic and stable across visual refactors.
-- Do not use array indexes, text labels, or generated DOM IDs as the contract.
-- One rule may target one module; several rules may target the same module.
-- A field-level target may extend a module ID, for example `order-form.customer`.
-
-Examples:
-
-```text
-metrics
-quick-actions
-warning-list
-product-list
-order-form.customer
-order-form.submit
-inventory-table
-detail-drawer
-```
-
-## Rule model
-
-```js
-{
-  id: "rule_dashboard_metrics",
-  title: "Real-time metric calculation",
-  type: "business-logic", // business-logic | interaction | field | permission | api
-  target: "metrics",
-  body: "Explain the behavior in one short paragraph.",
-  bullets: [
-    "State the formula, validation, or boundary condition."
-  ],
-  states: ["default", "loading", "error"],
-  roles: ["admin", "operator"]
+```ts
+export type PrototypeDocument = {
+  id: "prd" | "fields" | "rules" | string
+  title: string
+  content: string         // Markdown 文本
+  category: string        // "PRD需求规格" | "字段字典清单" | "业务规则规格"
+  badge?: string
 }
 ```
-
-## API contract model
-
-```js
-{
-  id: "api_dashboard_summary",
-  target: "metrics",
-  method: "GET",
-  path: "/api/v1/dashboard/summary",
-  purpose: "Fetch dashboard aggregates.",
-  auth: "Bearer token",
-  query: {
-    date: "YYYY-MM-DD"
-  },
-  response: {
-    code: 200,
-    data: {}
-  },
-  errors: [
-    { status: 401, meaning: "Unauthenticated" },
-    { status: 500, meaning: "Server error" }
-  ]
-}
-```
-
-Do not claim that a mock endpoint is connected to a real backend. Label mock responses as mock data in code or in the final summary.

@@ -1,12 +1,7 @@
 import { useState, useMemo } from "react"
 import {
-  AlertTriangle,
   Camera,
-  CheckCircle2,
-  Clock,
   Copy,
-  Info,
-  Layers,
   ShieldAlert,
 } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
@@ -14,6 +9,7 @@ import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import { ImagePreviewModal } from "@/components/ui/ImagePreviewModal"
 import { PublishConfirmDialog } from "@/components/ui/PublishConfirmDialog"
+import { SectionCard } from "@/components/ui/SectionCard"
 import { Toast } from "@/components/ui/Toast"
 import { formatDateTime } from "@/shared/lib/date-utils"
 import { getDetailHeaderActions } from "../domain/actions"
@@ -27,6 +23,8 @@ export function CollateralWarningDetailPage() {
   const [publishOpen, setPublishOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [imagePreviewOpen, setImagePreviewOpen] = useState(false)
+
+  const [allExpanded, setAllExpanded] = useState(true)
 
   const event = useMemo(() => getCollateralWarningById(id), [id])
   const headerActions = useMemo(
@@ -54,7 +52,7 @@ export function CollateralWarningDetailPage() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="mt-4 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white"
+            className="mt-4 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white cursor-pointer"
           >
             返回上一页
           </button>
@@ -69,397 +67,331 @@ export function CollateralWarningDetailPage() {
 
   return (
     <MobileShell>
-      <NavBar title={`${event.orderNo} 预警详情`} />
-
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* 可滚动内容区域 */}
-        <div className="flex-1 space-y-3.5 overflow-y-auto px-3.5 py-3">
-          {/* 1. 基础识别字段汇总卡片 (Summary Card) */}
-          <section
-            className={`relative overflow-hidden rounded-2xl border p-4 shadow-xs ${
-              event.severityCode === "L5"
-                ? "border-rose-200 bg-gradient-to-br from-rose-50/90 via-red-50/40 to-white"
-                : event.severityCode === "L4"
-                ? "border-orange-200 bg-gradient-to-br from-orange-50/90 via-amber-50/30 to-white"
-                : "border-blue-200 bg-gradient-to-br from-blue-50/90 via-slate-50 to-white"
-            }`}
+      <NavBar
+        title={`${event.orderNo} 预警详情`}
+        right={
+          <button
+            type="button"
+            onClick={() => setAllExpanded((prev) => !prev)}
+            className="text-xs font-medium text-blue-600 active:opacity-70 cursor-pointer"
           >
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <span className="font-mono text-xs font-bold text-gray-900 tracking-wider">
-                  {event.orderNo}
-                </span>
-                <h2 className="mt-0.5 text-base font-bold text-gray-900">
-                  {event.ruleName || `${event.warningType}监控`}
-                </h2>
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0">
+            {allExpanded ? "全部收起" : "全部展开"}
+          </button>
+        }
+      />
+
+      <div className="flex flex-1 flex-col overflow-hidden bg-[#f4f6f8]">
+        {/* 可滚动内容区域 */}
+        <div className="flex-1 space-y-3 overflow-y-auto px-3.5 py-3 pb-6">
+          {/* 1. 预警基本事实摘要（严格对齐字段清单第一章） */}
+          <SectionCard
+            title="预警事实摘要"
+            indicatorColor="#1875f0"
+            collapsed={!allExpanded}
+            extra={
+              <div className="flex items-center gap-1.5">
                 <span
-                  className="rounded px-2 py-0.5 text-xs font-bold text-white shadow-2xs"
+                  className="rounded px-2 py-0.5 text-[11px] font-bold text-white shadow-2xs"
                   style={{ backgroundColor: event.severityColor }}
                 >
                   {event.severityCode} {event.severityName}
                 </span>
                 <CollateralWarningStatusBadge event={event} />
               </div>
-            </div>
-
-            {/* 基础识别字段 2x2 网格（严格对齐字段清单：预警订单、预警类型、预警时间、是否公示） */}
-            <div className="mt-3.5 grid grid-cols-2 gap-2 rounded-xl bg-white/85 p-3 text-xs border border-gray-100 backdrop-blur-xs">
-              <div>
-                <span className="text-[11px] text-gray-400">预警订单</span>
-                <div className="mt-0.5 font-mono font-bold text-gray-800">
-                  {event.orderNo}
-                </div>
-              </div>
-              <div>
-                <span className="text-[11px] text-gray-400">预警类型</span>
-                <div className="mt-0.5 font-semibold text-gray-800">
-                  {event.warningType}
-                </div>
-              </div>
-              <div>
-                <span className="text-[11px] text-gray-400">预警时间</span>
-                <div className="mt-0.5 font-medium text-gray-800">
-                  {formatDateTime(event.warningTime)}
-                </div>
-              </div>
-              <div>
-                <span className="text-[11px] text-gray-400">是否公示</span>
-                <div className="mt-0.5 font-semibold text-gray-800">
-                  {event.publicityStatus}
-                </div>
-              </div>
-            </div>
-
-            {/* 预警内容（严格对齐字段清单） */}
-            <div className="mt-2.5 rounded-xl bg-white/70 p-3 text-xs text-gray-700 border border-gray-100">
-              <span className="font-semibold text-gray-900">预警内容：</span>
-              <p className="mt-1 leading-relaxed text-gray-800">
-                {event.warningContent}
-              </p>
-            </div>
-
-            {/* 预警抓拍图（严格对齐字段清单） */}
-            {event.snapshotImageStatus === "available" && (
-              <div className="mt-2.5 flex items-center justify-between rounded-xl bg-blue-50/80 p-2.5 text-xs text-blue-900 border border-blue-200/60">
-                <div className="flex items-center gap-2">
-                  <Camera className="size-4 text-blue-600" />
-                  <span>预警抓拍图：现场监控已捕获</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setImagePreviewOpen(true)}
-                  className="rounded-lg bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-2xs active:bg-blue-700"
-                >
-                  查看大图
-                </button>
-              </div>
-            )}
-          </section>
-
-          {/* 2. 订单与位置快照 / 业务链路表达 */}
-          <section className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-xs">
-            <div className="flex items-center gap-2 border-b border-gray-100 pb-2.5">
-              <div className="flex size-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                <Layers className="size-3.5" />
-              </div>
-              <h3 className="text-xs font-bold text-gray-900">
-                订单与位置快照
-              </h3>
-            </div>
-
-            {isPenetration && event.penetrationInfo ? (
-              <div className="mt-3 space-y-2 text-xs">
-                <div className="rounded-xl bg-slate-50 p-2.5 border border-slate-100 space-y-2">
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-bold text-indigo-800">
-                      关联设备
-                    </span>
-                    <span className="font-semibold text-gray-900">
-                      {event.penetrationInfo.triggerDevice}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 text-[11px] text-gray-400 pl-2">
-                    <span>↓ 触发位置</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">
-                      仓库位置
-                    </span>
-                    <span>{event.penetrationInfo.triggerLocation}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-[11px] text-gray-400 pl-2">
-                    <span>↓ 关联预警订单</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold text-blue-800">
-                      预警订单
-                    </span>
-                    <span className="font-mono font-bold text-blue-600">
-                      {event.orderNo}
-                    </span>
-                    <span className="text-[10px] text-gray-400">
-                      (来源事件: {event.penetrationInfo.relatedEventNo})
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between rounded-xl bg-amber-50/70 p-2.5 text-[11px] text-amber-900 border border-amber-200/50">
-                  <div className="flex items-center gap-1.5">
-                    <Info className="size-3.5 text-amber-600 shrink-0" />
-                    <span>该预警源于物联网硬件告警，须在设备台账核销处置</span>
-                  </div>
+            }
+          >
+            <div className="space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="w-24 shrink-0 text-gray-500">预警订单:</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono font-bold text-gray-900">
+                    {event.orderNo}
+                  </span>
                   <button
                     type="button"
-                    onClick={() =>
-                      navigate(
-                        `/m/iot/device-warning-events/${
-                          event.penetrationInfo?.relatedEventId ??
-                          event.deviceEventId
-                        }?warn_id=${event.eventId}`
-                      )
-                    }
-                    className="shrink-0 font-semibold text-blue-600 active:underline"
+                    onClick={() => copyToClipboard(event.orderNo)}
+                    className="text-gray-400 hover:text-blue-600 cursor-pointer"
+                    title="复制单号"
                   >
-                    前往核销 ▸
+                    <Copy className="size-3" />
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className="mt-3 space-y-2 text-xs">
-                <div className="rounded-xl bg-slate-50 p-2.5 border border-slate-100">
-                  <div className="text-[11px] text-gray-400">触发数据快照</div>
-                  <div className="mt-1 font-mono font-medium text-gray-800 leading-relaxed">
-                    {event.triggerSnapshot || "系统实时监控自动捕获"}
-                  </div>
-                </div>
-              </div>
-            )}
-          </section>
 
-          {/* 3. 解除预警字段（严格对齐字段清单：处理时间、处理人、情况说明、现场照片、解除预警抓拍图） */}
-          {isClosed && event.disposalInfo && (
-            <section className="rounded-2xl border border-emerald-200/80 bg-emerald-50/40 p-3.5 shadow-xs">
-              <div className="flex items-center gap-2 border-b border-emerald-100 pb-2.5">
-                <div className="flex size-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
-                  <CheckCircle2 className="size-3.5" />
-                </div>
-                <h3 className="text-xs font-bold text-gray-900">解除预警记录</h3>
+              <div className="flex items-center justify-between">
+                <span className="w-24 shrink-0 text-gray-500">规则名称:</span>
+                <span className="flex-1 text-right font-bold text-gray-900">
+                  {event.ruleName || `${event.warningType}监控`}
+                </span>
               </div>
 
-              <div className="mt-3 space-y-2 text-xs text-gray-700">
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <span className="text-[11px] text-gray-400">处理人</span>
-                    <div className="mt-0.5 font-semibold text-gray-800">
-                      {event.processedBy || "王风控（森云科技）"}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-[11px] text-gray-400">处理时间</span>
-                    <div className="mt-0.5 font-medium text-gray-800">
-                      {event.processedTime
-                        ? formatDateTime(event.processedTime)
-                        : "2026-07-30 09:15:00"}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-xl bg-white/80 p-2.5 border border-emerald-100">
-                  <span className="text-[11px] text-gray-400">情况说明：</span>
-                  <p className="mt-1 text-gray-800 leading-relaxed">
-                    {event.disposalInfo.situationDescription}
-                  </p>
-                </div>
-
-                {event.disposalInfo.sitePhotos &&
-                  event.disposalInfo.sitePhotos.length > 0 && (
-                    <div className="pt-1">
-                      <span className="text-[11px] text-gray-400">现场照片：</span>
-                      <div className="mt-1.5 flex flex-wrap gap-2">
-                        {event.disposalInfo.sitePhotos.map((photo, idx) => (
-                          <div
-                            key={idx}
-                            onClick={() => setImagePreviewOpen(true)}
-                            className="flex items-center gap-1 rounded-lg bg-white px-2.5 py-1 text-[11px] font-medium text-gray-700 border border-gray-200 shadow-2xs active:bg-gray-50 cursor-pointer"
-                          >
-                            <Camera className="size-3 text-emerald-600" />
-                            <span>{photo}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                {event.disposalInfo.releaseSnapshotImage && (
-                  <div className="pt-1 text-[11px] text-gray-600 flex items-center gap-1">
-                    <span className="text-gray-400">解除预警抓拍图：</span>
-                    <span className="font-mono">{event.disposalInfo.releaseSnapshotImage}</span>
-                  </div>
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* 4. 记录有效性/失效原因说明 */}
-          {isInvalid && (
-            <section className="rounded-2xl border border-gray-200 bg-gray-50 p-3.5 text-xs text-gray-700">
-              <div className="flex items-center gap-2 border-b border-gray-200 pb-2 font-bold text-gray-800">
-                <AlertTriangle className="size-4 text-gray-500" />
-                <span>记录有效性说明（未处理·无效）</span>
-              </div>
-              <p className="mt-2 leading-relaxed text-gray-600">
-                {event.invalidReason || "单据已完成解押/出库、配置已变更或规则删除导致失效。"}
-              </p>
-            </section>
-          )}
-
-          {/* 5. 预警时间轴 */}
-          <section className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-xs">
-            <div className="flex items-center gap-2 border-b border-gray-100 pb-2.5">
-              <div className="flex size-6 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                <Clock className="size-3.5" />
-              </div>
-              <h3 className="text-xs font-bold text-gray-900">预警流转时间轴</h3>
-            </div>
-
-            <div className="mt-3 relative pl-4 border-l-2 border-blue-100 space-y-3.5 text-xs ml-2">
-              {/* 节点 1: 预警时间 */}
-              <div className="relative">
-                <div className="absolute -left-[21px] top-1 size-2.5 rounded-full bg-rose-500 ring-4 ring-rose-100" />
-                <div className="font-semibold text-gray-900">
-                  预警触发（{event.warningType}）
-                </div>
-                <div className="text-[11px] text-gray-400 mt-0.5">
-                  预警时间：{formatDateTime(event.warningTime)}
-                </div>
+              <div className="flex items-center justify-between">
+                <span className="w-24 shrink-0 text-gray-500">预警类型:</span>
+                <span className="flex-1 text-right font-semibold text-indigo-700">
+                  {event.warningType}
+                </span>
               </div>
 
-              {/* 节点 2: 处理时间 */}
-              {isClosed ? (
-                <div className="relative">
-                  <div className="absolute -left-[21px] top-1 size-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100" />
-                  <div className="font-semibold text-gray-900">
-                    完成预警解除（已处理·有效）
+              <div className="flex items-center justify-between">
+                <span className="w-24 shrink-0 text-gray-500">来源渠道:</span>
+                <span className="flex-1 text-right text-gray-800 font-medium">
+                  {event.warningSource}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="w-24 shrink-0 text-gray-500">是否公示:</span>
+                <span
+                  className={`rounded px-1.5 py-0.2 text-[10px] font-medium ${
+                    event.publicityStatus === "已公示"
+                      ? "bg-purple-50 text-purple-700 border border-purple-200"
+                      : event.publicityStatus === "已取消"
+                      ? "bg-gray-100 text-gray-500 border border-gray-200"
+                      : "bg-amber-50 text-amber-700 border border-amber-200"
+                  }`}
+                >
+                  {event.publicityStatus}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="w-24 shrink-0 text-gray-500">预警时间:</span>
+                <span className="flex-1 text-right text-gray-800 font-mono">
+                  {formatDateTime(event.warningTime)}
+                </span>
+              </div>
+
+              <div className="border-t border-gray-100/80 pt-2">
+                <span className="text-gray-500">预警内容:</span>
+                <p className="mt-1 rounded-xl bg-slate-50 p-2.5 leading-relaxed text-gray-800 border border-slate-100/90 font-normal">
+                  {event.warningContent}
+                </p>
+              </div>
+
+              {event.snapshotImageStatus === "available" && (
+                <div className="mt-1 flex items-center justify-between rounded-xl bg-blue-50/70 p-2.5 text-xs text-blue-900 border border-blue-100">
+                  <div className="flex items-center gap-1.5">
+                    <Camera className="size-4 text-blue-600" />
+                    <span>现场监控抓拍图已留痕存证</span>
                   </div>
-                  <div className="text-[11px] text-gray-400 mt-0.5">
-                    处理时间：{event.processedTime ? formatDateTime(event.processedTime) : "2026-07-30 09:15:00"} · 处理人: {event.processedBy || "系统自动处理"}
-                  </div>
-                </div>
-              ) : isInvalid ? (
-                <div className="relative">
-                  <div className="absolute -left-[21px] top-1 size-2.5 rounded-full bg-gray-400 ring-4 ring-gray-100" />
-                  <div className="font-semibold text-gray-900">
-                    记录失效（未处理·无效）
-                  </div>
-                  <div className="text-[11px] text-gray-400 mt-0.5">
-                    关联订单规则或业务状态已变更
-                  </div>
-                </div>
-              ) : (
-                <div className="relative">
-                  <div className="absolute -left-[21px] top-1 size-2.5 rounded-full bg-amber-500 ring-4 ring-amber-100 animate-pulse" />
-                  <div className="font-semibold text-amber-800">
-                    待处理（未处理·有效）
-                  </div>
-                  <div className="text-[11px] text-amber-600 mt-0.5">
-                    等待责任人或监管行办理处置流程
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setImagePreviewOpen(true)}
+                    className="rounded-lg bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-2xs active:bg-blue-700 cursor-pointer"
+                  >
+                    查看抓拍
+                  </button>
                 </div>
               )}
             </div>
-          </section>
+          </SectionCard>
 
-          {/* 6. 系统字段与追溯字段（严格对齐字段清单：预警信息唯一标识、来源事件唯一标识、操作审计日志） */}
-          <section className="rounded-2xl border border-gray-200/80 bg-slate-50/60 p-3 text-xs text-gray-500">
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="font-mono">预警信息唯一标识: {event.eventId}</span>
-              <button
-                type="button"
-                onClick={() => copyToClipboard(event.eventId)}
-                className="inline-flex items-center gap-1 text-blue-600 active:underline"
-              >
-                <Copy className="size-3" />
-                复制
-              </button>
-            </div>
-            {event.deviceEventId && (
-              <div className="mt-1 text-[11px] text-gray-500 font-mono">
-                来源事件唯一标识: {event.deviceEventId}
+          {/* 2. 物联穿透关联字段（仅穿透类展示，严格对齐字段清单第二章） */}
+          {isPenetration && (
+            <SectionCard
+              title="物联穿透关联设备信息"
+              indicatorColor="#6366f1"
+              collapsed={!allExpanded}
+              extra={
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate(
+                      `/m/iot/device-warning-events/${event.deviceEventId ?? "dev-evt-2026082001"}?warn_id=${event.eventId}`
+                    )
+                  }
+                  className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-semibold text-indigo-700 border border-indigo-200 active:bg-indigo-100 cursor-pointer"
+                >
+                  看设备事件 ▸
+                </button>
+              }
+            >
+              <div className="space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="w-24 shrink-0 text-gray-500">触发设备名称:</span>
+                  <span className="flex-1 text-right font-medium text-gray-900">
+                    {event.penetrationInfo?.triggerDevice || "智能挂锁-A01"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="w-24 shrink-0 text-gray-500">物理事件子类型:</span>
+                  <span className="flex-1 text-right font-semibold text-rose-700">
+                    {event.penetrationInfo?.physicalSubType || "剪杆/拆壳破坏"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="w-24 shrink-0 text-gray-500">触发位置:</span>
+                  <span className="flex-1 text-right text-gray-800">
+                    {event.penetrationInfo?.triggerLocation || "一号钢材仓 / A库 / 01分区"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="w-24 shrink-0 text-gray-500">关联设备事件ID:</span>
+                  <span className="flex-1 text-right font-mono text-gray-700">
+                    {event.deviceEventId || "dev-evt-2026082001"}
+                  </span>
+                </div>
               </div>
-            )}
-            <div className="mt-1 text-[10px] text-gray-400">
-              数据账本: collateral_risk_ledger · 操作审计日志留痕有效
+            </SectionCard>
+          )}
+
+          {/* 3. 触发数据快照（严格对齐字段清单第四章：触发数据快照） */}
+          <SectionCard
+            title="触发数据快照"
+            indicatorColor="#f57c00"
+            defaultCollapsed={true}
+            collapsed={!allExpanded}
+          >
+            <div className="space-y-2 text-xs text-gray-700">
+              <div className="flex items-start justify-between">
+                <span className="w-20 shrink-0 text-gray-500">快照指标:</span>
+                <span className="flex-1 text-right font-medium text-gray-900">
+                  {event.triggerSnapshot || "抵/质押物价值下跌突破预警阈值 12.0%"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="w-20 shrink-0 text-gray-500">单据类型:</span>
+                <span className="flex-1 text-right text-gray-800">
+                  {event.orderType || "抵/质押订单"}
+                </span>
+              </div>
             </div>
-          </section>
+          </SectionCard>
+
+          {/* 4. 处置与核销信息（严格对齐字段清单第三章：解除预警表单字段） */}
+          {(isClosed || event.processedTime) && (
+            <SectionCard
+              title="处置与核销信息"
+              indicatorColor="#00a870"
+              collapsed={!allExpanded}
+            >
+              <div className="space-y-2.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="w-24 shrink-0 text-gray-500">处理人:</span>
+                  <span className="flex-1 text-right font-medium text-gray-800">
+                    {event.processedBy || "王风控 (森云科技)"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="w-24 shrink-0 text-gray-500">处理时间:</span>
+                  <span className="flex-1 text-right font-medium text-gray-800 font-mono">
+                    {event.processedTime ? formatDateTime(event.processedTime) : "—"}
+                  </span>
+                </div>
+
+                {event.disposalInfo?.situationDescription && (
+                  <div className="border-t border-gray-100 pt-2">
+                    <span className="text-gray-500">情况说明:</span>
+                    <p className="mt-1 rounded-xl bg-slate-50 p-2.5 leading-relaxed text-gray-800 border border-slate-100 font-normal">
+                      {event.disposalInfo.situationDescription}
+                    </p>
+                  </div>
+                )}
+
+                {event.disposalInfo?.sitePhotos && event.disposalInfo.sitePhotos.length > 0 && (
+                  <div className="border-t border-gray-100 pt-2">
+                    <span className="text-gray-500">现场照片:</span>
+                    <div className="mt-1.5 flex flex-wrap gap-2">
+                      {event.disposalInfo.sitePhotos.map((photo, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setImagePreviewOpen(true)}
+                          className="flex items-center gap-1 rounded-lg bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-gray-700 border border-gray-200 active:bg-gray-100 cursor-pointer"
+                        >
+                          <Camera className="size-3 text-emerald-600" />
+                          <span>{photo}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {event.disposalInfo?.releaseSnapshotImage && (
+                  <div className="flex items-center justify-between border-t border-gray-100 pt-2 text-[11px]">
+                    <span className="text-gray-500">解除预警抓拍图:</span>
+                    <span className="font-mono text-gray-700">
+                      {event.disposalInfo.releaseSnapshotImage}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </SectionCard>
+          )}
+
+          {/* 5. 记录有效性/失效说明（仅未处理无效展示） */}
+          {isInvalid && event.invalidReason && (
+            <SectionCard
+              title="记录失效说明"
+              indicatorColor="#ef4444"
+              collapsed={!allExpanded}
+            >
+              <div className="rounded-xl bg-rose-50/70 p-2.5 text-xs text-rose-900 border border-rose-200">
+                <span className="font-semibold">失效原因: </span>
+                <span>{event.invalidReason}</span>
+              </div>
+            </SectionCard>
+          )}
         </div>
 
-        {/* 底部固定吸底操作栏 */}
-        <div className="sticky bottom-0 z-20 flex items-center gap-2 border-t border-gray-200/90 bg-white/95 px-4 py-3 backdrop-blur-md shadow-lg">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="rounded-xl bg-gray-100 px-4 py-2.5 text-xs font-semibold text-gray-700 active:bg-gray-200"
-          >
-            返回
-          </button>
-
-          {/* 操作列入口严格对齐字段清单：去处理、解除预警、公示风险 */}
-          {headerActions.includes("release") && (
+        {/* 底部页内动作区（严格对齐 Demo 规格 §2.5） */}
+        <div className="border-t border-gray-200/90 bg-white px-4 py-3 shadow-lg">
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => {
-                if (event.orderNo === "PO202608-88") {
-                  showToast("您暂无相关权限，请联系相关负责人开通项目管理功能权限！")
-                  return
+              onClick={() => navigate(-1)}
+              className="rounded-xl bg-gray-100 px-4 py-2.5 text-xs font-semibold text-gray-700 active:bg-gray-200 cursor-pointer"
+            >
+              返回列表
+            </button>
+
+            {headerActions.includes("publish") && (
+              <button
+                type="button"
+                onClick={() => setPublishOpen(true)}
+                className="flex-1 rounded-xl bg-orange-600 py-2.5 text-xs font-bold text-white shadow-xs active:bg-orange-700 cursor-pointer"
+              >
+                公示风险 ▸
+              </button>
+            )}
+
+            {headerActions.includes("viewDevice") && (
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(
+                    `/m/iot/device-warning-events/${event.deviceEventId ?? "dev-evt-2026082001"}?warn_id=${event.eventId}`
+                  )
                 }
-                navigate(
-                  `/m/finance/pledge-orders?order=${event.orderNo}&warn_id=${event.eventId}`
-                )
-              }}
-              className="flex-1 rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-xs active:bg-blue-700"
-            >
-              去处理（抵质押单据）
-            </button>
-          )}
+                className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-xs font-bold text-white shadow-xs active:bg-indigo-700 cursor-pointer"
+              >
+                看设备事件 ▸
+              </button>
+            )}
 
-          {headerActions.includes("viewDevice") && (
-            <button
-              type="button"
-              onClick={() =>
-                navigate(
-                  `/m/iot/device-warning-events/${
-                    event.penetrationInfo?.relatedEventId ??
-                    event.deviceEventId ??
-                    "dev-evt-2026082001"
-                  }?warn_id=${event.eventId}`
-                )
-              }
-              className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-xs font-bold text-white shadow-xs active:bg-indigo-700"
-            >
-              查看设备预警信息
-            </button>
-          )}
+            {headerActions.includes("release") && (
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(
+                    `/m/finance/pledge-orders?order=${event.orderNo}&warn_id=${event.eventId}`
+                  )
+                }
+                className="flex-1 rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-xs active:bg-blue-700 cursor-pointer"
+              >
+                解除预警 ▸
+              </button>
+            )}
+          </div>
 
-          {headerActions.includes("publish") && (
-            <button
-              type="button"
-              onClick={() => setPublishOpen(true)}
-              className="flex-1 rounded-xl bg-orange-600 py-2.5 text-xs font-bold text-white shadow-xs active:bg-orange-700"
-            >
-              公示风险
-            </button>
-          )}
-
-          {isClosed && !headerActions.includes("publish") && (
-            <button
-              type="button"
-              onClick={() => showToast("已导出存证报告 PDF")}
-              className="flex-1 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white shadow-xs active:bg-emerald-700"
-            >
-              导出存证凭证
-            </button>
+          {isPenetration && !isClosed && (
+            <div className="mt-2 text-[10px] text-gray-400 text-center">
+              💡 须在设备预警信息现场核销后自动联动解除；本页无解除预警入口
+            </div>
           )}
         </div>
       </div>
@@ -471,14 +403,14 @@ export function CollateralWarningDetailPage() {
         onClose={() => setPublishOpen(false)}
         onConfirm={() => {
           setPublishOpen(false)
-          showToast("风险公示成功，已通知相关方")
+          showToast("公示成功，已向关联机构同步风险报告")
         }}
       />
 
       {/* 预警抓拍图预览弹窗 */}
       <ImagePreviewModal
         open={imagePreviewOpen}
-        title={`${event.orderNo} · 预警抓拍图`}
+        title={`${event.orderNo} · 现场抓拍图`}
         subTitle={formatDateTime(event.warningTime)}
         imageUrl={`mock-snapshot-${event.eventId}`}
         onClose={() => setImagePreviewOpen(false)}

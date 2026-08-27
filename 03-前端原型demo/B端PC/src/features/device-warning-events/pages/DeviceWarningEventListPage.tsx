@@ -19,11 +19,27 @@ import {
 import { deviceWarningListAnnotations } from "../annotations/device-warning-list.annotations"
 import { deviceWarningDocuments } from "../documents/device-warning-documents"
 
+const PC_DEVICE_WARNING_FILTER_KEY = "SYZC_PC_DEVICE_WARNING_FILTERS"
+
+function loadCachedPcDeviceFilters(): DeviceWarningEventFilters {
+  try {
+    const raw = sessionStorage.getItem(PC_DEVICE_WARNING_FILTER_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch {}
+  return DEFAULT_FILTERS
+}
+
+function saveCachedPcDeviceFilters(filters: DeviceWarningEventFilters) {
+  try {
+    sessionStorage.setItem(PC_DEVICE_WARNING_FILTER_KEY, JSON.stringify(filters))
+  } catch {}
+}
+
 export function DeviceWarningEventListPage() {
   const [draftFilters, setDraftFilters] =
-    useState<DeviceWarningEventFilters>(DEFAULT_FILTERS)
+    useState<DeviceWarningEventFilters>(loadCachedPcDeviceFilters)
   const [appliedFilters, setAppliedFilters] =
-    useState<DeviceWarningEventFilters>(DEFAULT_FILTERS)
+    useState<DeviceWarningEventFilters>(loadCachedPcDeviceFilters)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(PAGE_SIZE)
   const [releaseTarget, setReleaseTarget] = useState<DeviceWarningEvent | null>(
@@ -64,12 +80,14 @@ export function DeviceWarningEventListPage() {
 
   const handleSearch = () => {
     setAppliedFilters(draftFilters)
+    saveCachedPcDeviceFilters(draftFilters)
     setPage(1)
   }
 
   const handleReset = () => {
     setDraftFilters(DEFAULT_FILTERS)
     setAppliedFilters(DEFAULT_FILTERS)
+    saveCachedPcDeviceFilters(DEFAULT_FILTERS)
     setPage(1)
   }
 

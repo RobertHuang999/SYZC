@@ -1,12 +1,14 @@
 import { getSeverityLevelByCode } from "@/shared/mock/severity-levels"
 import type { CollateralWarningEvent } from "../domain/types"
 
+const l2 = getSeverityLevelByCode("L2")!
 const l3 = getSeverityLevelByCode("L3")!
 const l4 = getSeverityLevelByCode("L4")!
 const l5 = getSeverityLevelByCode("L5")!
 
-// 严格对齐《押品预警信息字段清单》11个预警大类与字段口径
+// 严格对齐《押品预警信息字段清单》11个预警大类、所有状态、所有来源渠道与抓拍场景
 const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
+  // 1. 抵/质押率异常 (L4 · 订单配置触发 · 未公示 · 有抓拍图)
   {
     orderNo: "PO202608-01",
     ruleName: "订单抵/质押率超平仓线监控",
@@ -25,6 +27,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: null,
   },
+  // 2. 智能挂锁异常 (L5 · 物联穿透 · 关联设备事件 · 有抓拍图)
   {
     orderNo: "PO202608-01",
     ruleName: "智能挂锁剪杆破坏预警",
@@ -43,24 +46,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: "dev-evt-2026082001",
   },
-  {
-    orderNo: "PO202608-88",
-    ruleName: "监管货物例行巡检盘点超时监控",
-    warningType: "巡检异常",
-    severityLevelId: l3.severityLevelId,
-    severityCode: l3.severityCode,
-    severityName: l3.severityName,
-    severityColor: l3.severityColor,
-    warningSource: "订单配置触发",
-    warningContent: "巡检异常！巡检员刘强未按时巡检盘点，计划时间 08-19 08:00 已超时 24h，请及时核查处理！",
-    snapshotImageStatus: "none",
-    warningTime: "2026-08-19 08:00:00",
-    processedTime: null,
-    publicityStatus: "未公示",
-    processedBy: null,
-    warningStatus: "OPEN_VALID",
-    deviceEventId: null,
-  },
+  // 3. 价格下跌 (L4 · 订单配置触发 · 已处理未公示 · 支持批量公示)
   {
     orderNo: "PO202607-12",
     ruleName: "大宗金属质押价格下跌预警",
@@ -78,15 +64,64 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     processedBy: "王风控（森云科技）",
     warningStatus: "CLOSED_VALID",
     deviceEventId: null,
+    disposalInfo: {
+      situationDescription: "已联系借款主体追加保证金 50 万元，价格波动风险已覆盖。",
+      sitePhotos: ["photo-recheck-01.jpg"],
+      releaseSnapshotImage: "release-snapshot-01.jpg",
+    },
   },
+  // 4. 价格下跌 (L3 · 订单配置触发 · 已公示)
   {
-    orderNo: "PO202606-99",
-    ruleName: "仓库例行盘点账实差异监控",
-    warningType: "盘点异常",
+    orderNo: "PO202608-18",
+    ruleName: "农产品菜籽油现货价格下行预警",
+    warningType: "价格下跌",
     severityLevelId: l3.severityLevelId,
     severityCode: l3.severityCode,
     severityName: l3.severityName,
     severityColor: l3.severityColor,
+    warningSource: "订单配置触发",
+    warningContent: "菜籽油现货价格下调超 6.5%，货值从 8,200,000 元跌至 7,667,000 元",
+    snapshotImageStatus: "none",
+    warningTime: "2026-08-16 11:20:00",
+    processedTime: "2026-08-16 16:40:00",
+    publicityStatus: "已公示",
+    processedBy: "李风控（风控部）",
+    warningStatus: "CLOSED_VALID",
+    deviceEventId: null,
+    disposalInfo: {
+      situationDescription: "已在资方信贷系统与全国保理信息平台完成风险公示登记。",
+      sitePhotos: [],
+      releaseSnapshotImage: null,
+    },
+  },
+  // 5. 巡检异常 (L3 · 订单配置触发 · 抓拍失败 · 未处理有效)
+  {
+    orderNo: "PO202608-88",
+    ruleName: "监管货物例行巡检盘点超时监控",
+    warningType: "巡检异常",
+    severityLevelId: l3.severityLevelId,
+    severityCode: l3.severityCode,
+    severityName: l3.severityName,
+    severityColor: l3.severityColor,
+    warningSource: "订单配置触发",
+    warningContent: "巡检异常！巡检员刘强未按时巡检盘点，计划时间 08-19 08:00 已超时 24h，请及时核查处理！",
+    snapshotImageStatus: "failed",
+    warningTime: "2026-08-19 08:00:00",
+    processedTime: null,
+    publicityStatus: "未公示",
+    processedBy: null,
+    warningStatus: "OPEN_VALID",
+    deviceEventId: null,
+  },
+  // 6. 盘点异常 (L2 · 订单配置触发 · 未处理无效 · 附带 invalidReason)
+  {
+    orderNo: "PO202606-99",
+    ruleName: "仓库例行盘点账实差异监控",
+    warningType: "盘点异常",
+    severityLevelId: l2.severityLevelId,
+    severityCode: l2.severityCode,
+    severityName: l2.severityName,
+    severityColor: l2.severityColor,
     warningSource: "订单配置触发",
     warningContent: "盘点异常！经盘点发现货物差异 2.3%，系统判定关联规则已删除置为无效（已完成复盘）",
     snapshotImageStatus: "none",
@@ -95,8 +130,10 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     publicityStatus: "未公示",
     processedBy: null,
     warningStatus: "OPEN_INVALID",
+    invalidReason: "关联预警规则已被管理员删除，系统自动置为无效记录",
     deviceEventId: null,
   },
+  // 7. 贷中风控预警 (L4 · 订单配置触发 · 大数据模型)
   {
     orderNo: "PO202608-33",
     ruleName: "贷中大数据风控决策模型",
@@ -115,6 +152,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: null,
   },
+  // 8. 解抵/质押/监管超时 (L3 · 订单配置触发 · 未公示)
   {
     orderNo: "PO202608-55",
     ruleName: "监管到期未解监管预警",
@@ -133,9 +171,108 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: null,
   },
+  // 9. 摄像头图像识别异常 (L5 · 物联穿透 · 人体入侵)
+  {
+    orderNo: "PO202608-66",
+    ruleName: "非作业时间非法入侵摄像头识别",
+    warningType: "图像识别异常",
+    severityLevelId: l5.severityLevelId,
+    severityCode: l5.severityCode,
+    severityName: l5.severityName,
+    severityColor: l5.severityColor,
+    warningSource: "物联穿透",
+    warningContent: "位置：一号钢材仓+B库；设备名称：AI高清夜视摄像头-CAM1；触发预警：夜间闭库期间检测到人员滞留闯入！",
+    snapshotImageStatus: "available",
+    warningTime: "2026-08-20 13:05:00",
+    processedTime: null,
+    publicityStatus: "未公示",
+    processedBy: null,
+    warningStatus: "OPEN_VALID",
+    deviceEventId: "evt-002",
+  },
+  // 10. 人脸门禁异常 (L4 · 物联穿透 · 门禁超时)
+  {
+    orderNo: "PO202608-77",
+    ruleName: "冷库主通道人脸门禁长时间开启",
+    warningType: "人脸门禁异常",
+    severityLevelId: l4.severityLevelId,
+    severityCode: l4.severityCode,
+    severityName: l4.severityName,
+    severityColor: l4.severityColor,
+    warningSource: "物联穿透",
+    warningContent: "位置：三号冷链仓+B库主门；设备名称：门禁控制器-B02；触发预警：门禁开启超30分钟未恢复！",
+    snapshotImageStatus: "none",
+    warningTime: "2026-08-15 09:45:00",
+    processedTime: null,
+    publicityStatus: "未公示",
+    processedBy: null,
+    warningStatus: "OPEN_VALID",
+    deviceEventId: "dev-evt-2026081502",
+  },
+  // 11. 物联传感器异常 (L3 · 物联穿透 · 库温超标 · 已处理未公示)
+  {
+    orderNo: "PO202607-88",
+    ruleName: "冷链冷库温度超上限预警",
+    warningType: "物联设备",
+    severityLevelId: l3.severityLevelId,
+    severityCode: l3.severityCode,
+    severityName: l3.severityName,
+    severityColor: l3.severityColor,
+    warningSource: "物联穿透",
+    warningContent: "位置：三号冷链仓+C库冷藏区；设备名称：温湿度传感器-C11；触发预警：库温达到 8.2℃（阈值 5.0℃）！",
+    snapshotImageStatus: "available",
+    warningTime: "2026-07-01 18:10:00",
+    processedTime: "2026-07-01 19:30:00",
+    publicityStatus: "未公示",
+    processedBy: "赵运维（冷链保障组）",
+    warningStatus: "CLOSED_VALID",
+    deviceEventId: "dev-evt-2026070101",
+    disposalInfo: {
+      situationDescription: "制冷机组备用电源切换完毕，库温已回落至 2.4℃ 正常区间。",
+      sitePhotos: ["cold-temp-check.jpg"],
+      releaseSnapshotImage: "cold-snapshot-normal.jpg",
+    },
+  },
+  // 12. 设备GPS异常 (L4 · 历史 · 电子围栏越界)
+  {
+    orderNo: "PO202606-20",
+    ruleName: "在途押品运输车载GPS偏航告警",
+    warningType: "GPS异常",
+    severityLevelId: l4.severityLevelId,
+    severityCode: l4.severityCode,
+    severityName: l4.severityName,
+    severityColor: l4.severityColor,
+    warningSource: "历史",
+    warningContent: "位置：G15沈海高速段；设备名称：车载GPS追踪器-GPS09；触发预警：偏离既定物流轨迹超 5 公里！",
+    snapshotImageStatus: "none",
+    warningTime: "2026-06-15 14:00:00",
+    processedTime: "2026-06-15 15:20:00",
+    publicityStatus: "已取消",
+    processedBy: "物流监管员（外部专员）",
+    warningStatus: "CLOSED_VALID",
+    deviceEventId: null,
+    disposalInfo: {
+      situationDescription: "因前方道路施工临时绕行，现已回归主航线，确认货物铅封完好。",
+      sitePhotos: [],
+      releaseSnapshotImage: null,
+    },
+  },
 ]
 
-const seedEventIds = ["cw-001", "cw-002", "cw-005", "cw-003", "cw-004", "cw-006", "cw-007"]
+const seedEventIds = [
+  "cw-001",
+  "cw-002",
+  "cw-003",
+  "cw-004",
+  "cw-005",
+  "cw-006",
+  "cw-007",
+  "cw-008",
+  "cw-009",
+  "cw-010",
+  "cw-011",
+  "cw-012",
+]
 
 export const collateralWarningEventsMock: CollateralWarningEvent[] =
   seedEvents.map((event, index) => ({

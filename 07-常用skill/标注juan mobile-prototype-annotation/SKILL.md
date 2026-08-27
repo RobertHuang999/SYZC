@@ -1,77 +1,167 @@
 ---
 name: mobile-prototype-annotation
-description: Build, refine, or validate an interactive mobile or H5 prototype annotation workspace from product requirements, page lists, business rules, API contracts, and reference screenshots. Use when the work needs a left page directory, center phone preview, right PRD/API annotation panel, linked highlighting, mock data, responsive phone sizing, or local browser verification.
+description: Build, refine, or validate an interactive mobile or H5 prototype annotation workspace from product requirements, page lists, business rules, API contracts, and reference screenshots. Features left page directory, center phone preview, outer canvas requirement inspector (zero screen obstruction), and right PRD/field/rule drawer with linked highlighting, mock data, responsive phone sizing, and local browser verification.
 ---
 
-# Mobile Prototype Annotation
+# 📱 Mobile Prototype Annotation & Canvas Inspector (移动端原型打点与画布检查器规范)
 
-Build a real, runnable mobile/H5 prototype and its annotation workspace. Use the user's language for visible copy and keep product-specific data configurable rather than hardcoded into the workflow.
+为移动端（H5 / 小程序 / App）静态原型提供一套企业级、无侵入式、**屏幕外大画布联动（Canvas Inspector）**的交互打点与四维需求规格看板体系。打通“手机真实操作流 - 原位打点 - 屏幕外大画布需求审查 - 字段清单 - PRD文档 - 业务规则规格”的全链路闭环。
 
-## Workflow
+---
 
-1. Inspect the current project before editing. Identify the framework, entry point, existing components, styling conventions, scripts, and run commands. Preserve unrelated user changes.
-2. Read all supplied requirements, page lists, rules, API contracts, and screenshots. Extract the page hierarchy, primary mobile modules, interaction states, and visual anchors before coding.
-3. Decide whether to extend the existing app or create the smallest local frontend that can run. Prefer existing project patterns and dependencies.
-4. Model pages as configuration data. Keep page metadata, mobile content, mock data, rules, API contracts, and annotation targets in one structured model. Do not duplicate a complete renderer for every page.
-5. Implement the workspace with three coordinated regions:
-   - left: numbered page and business-flow directory;
-   - center: interactive phone preview and board-size controls;
-   - right: current-page PRD rules, field notes, and RESTful API contracts.
-6. Mark every annotated prototype region with a stable target ID such as `metrics`, `quick-actions`, `product-list`, or `sales-form`. Use the same ID on the related rule card and any target metadata.
-7. Implement two-way linking:
-   - selecting a rule highlights and scrolls to the matching mobile region;
-   - selecting a mobile region highlights or scrolls to its matching rule;
-   - page navigation updates the directory, phone screen, rules, and page identifier together;
-   - board-size changes and mock reset do not reload the page.
-8. Render real interface states, not empty placeholders. Include the controls relevant to the product, such as cards, lists, forms, charts, empty/loading/error states, tabs, dialogs, or quick actions.
-9. Make the phone board scale as one unit. Support 375px, 390px, and 414px logical board widths by default. Preserve the selected board's aspect ratio; when the viewport is short, scale width and height together so the phone frame, content, and bottom tab bar remain coherent.
-10. Keep desktop regions independently scrollable. Long annotation content must not stretch the whole app outside the viewport. On narrow screens, hide the page directory when appropriate, stack the preview and annotations, and prevent horizontal overflow.
-11. Verify the rendered result in a browser when the app can run locally. Inspect both a desktop viewport and a narrow/mobile viewport. Check console errors, overflow, target highlighting, page switching, board sizing, and mock reset.
-12. Start the local preview server when the project supports it and report the URL, changed files, and verification results.
+## 🏗️ 1. 核心架构与布局体系 (Workbench Architecture)
 
-## Layout and visual baseline
+移动端原型工作台采用 **“左侧页面导航 + 中间真机视口 + 屏幕外大画布检查器 + 右侧四维抽屉”** 架构：
 
-- Use a restrained product-workbench visual language: light gray-blue workspace, white panels, blue primary accent, and limited green/red status colors.
-- Keep the left directory, center preview, and right annotation panel visually distinct without nesting page sections inside decorative cards.
-- Use compact headings and readable body text. Avoid marketing-style hero sections.
-- Use stable dimensions for the phone frame, toolbar, tabs, counters, and controls so text or hover states cannot shift layout.
-- Remove browser-default button styling where it conflicts with the design. Use familiar icons or icon-plus-text controls for actions.
-- Match screenshots by measuring viewport, column widths, phone bounds, toolbar bounds, and key internal sections. Treat visual comparison as an iterative verification loop.
+```
+WorkbenchLayout (桌面端工作台大画布)
+├── Aside Left (左侧页面与业务流导航)
+│   ├── 页面快速切换入口
+│   └── 当前页面打点/文档数量统计
+├── Main Canvas (中间主画布区域)
+│   ├── Top Header (机型尺寸 375/390/414px 切换、打点开关 ON/OFF、打开抽屉按钮)
+│   ├── Phone Frame (居中真机视口：带状态栏与灵动岛，纯净无遮挡)
+│   │   └── PrototypeAnnotationTarget (业务组件原位打点徽标，点击触发外侧画布检查器)
+│   └── CanvasAnnotationInspector (⭐ 手机屏幕外侧大画布需求检查器，440~560px 宽屏大字号舒适阅读)
+│       ├── 顶部打点标号 (#N) + 标题 + 维度标签 + 绑定靶点 ID
+│       ├── 核心事实需求摘要卡片 (蓝色高亮)
+│       ├── 业务规格分项细节 (结构化 Group 细则 + Mermaid 流程图直读)
+│       └── 底部切换条 (◀ 上一条打点 · 下一条打点 ▶ · 手机靶点聚焦)
+└── AnnotationSidebarDrawer (右侧全局全量需求抽屉)
+    ├── Tab 1: 需求打点清单 (支持搜索、分类过滤、一键全部折叠/展开)
+    ├── Tab 2: 字段清单 (直接渲染真实 Markdown 表格)
+    ├── Tab 3: PRD 需求文档 (直读 Markdown)
+    └── Tab 4: 业务规则规格 (直读状态机与风控规则)
+```
 
-## Annotation content
+---
 
-For each page, present:
+## 🎯 2. 交互核心原则：手机零遮挡 + 画布沉浸式阅读
 
-- page purpose and scope;
-- business flow steps;
-- module or field rules;
-- interaction and validation rules;
-- role or permission notes when supplied;
-- API method, path, purpose, authentication, parameters, response example, and important error states.
+### 2.1 痛点与解决
+* **传统问题**：移动端屏幕通常仅 375px~414px 宽，如果在手机屏幕内部弹出 tooltip 或 Modal，会严重遮挡操作流，且字号狭小、排版拥挤无法查阅复杂表格和流程图。
+* **现代解法**：
+  1. **手机内纯净无遮挡**：手机屏幕内仅渲染精致的红色数字气泡（如 `①`、`②`、`③`），不弹出内部弹窗；
+  2. **屏幕外大画布检查器 (Canvas Inspector)**：点击任意打点，立即在**手机屏幕右侧的宽敞画布空间**优雅滑出宽度为 `440px ~ 560px` 的独立检查器面板；
+  3. **手机元素联动高亮**：手机内被点击的目标 DOM 节点获得脉冲蓝光（`ring-2 ring-blue-500`），实现“左边看真实操作，右边看详尽规则”；
+  4. **连续审查流 (Next / Prev)**：检查器底部提供 `◀ 上一个打点` 和 `下一个打点 ▶`，产品经理与研发无需在手机上反复寻找打点即可像翻书一样连续审查全页规则。
 
-Use a dark code block with readable JSON highlighting for API examples. Keep the annotation panel content data-driven and independently scrollable.
+---
 
-## Input handling
+## 📋 3. 数据定义与挂载标准
 
-Use supplied information in this order when sources conflict:
+### 3.1 需求打点数据结构 (`*.annotations.ts`)
 
-1. explicit user requirements;
-2. reference screenshots and visual measurements;
-3. existing application behavior and conventions;
-4. sensible mock data clearly labeled as mock data.
+```ts
+export type AnnotationKind = '页面' | '交互' | '字段' | '规则' | '待确认'
 
-If requirements are incomplete, make conservative assumptions and record them in the final summary. Do not invent real credentials, production endpoints, or sensitive data.
+export type PrototypeAnnotation = {
+  id: string              // 唯一标识 (如: "device-warning-frequency")
+  targetId?: string        // 关联的目标组件 ID (如: "device-warning-table")
+  number: number          // 页面内唯一且连续的数字编号 (1, 2, 3...)
+  kind: AnnotationKind    // 分类维度
+  title: string           // 打点标题 (如: "预警触发频次与时间轴")
+  content: string         // 核心事实需求摘要
+  details: Array<{        // 结构化细则分组
+    title: string
+    items: Array<{
+      label: string
+      content: string     // 支持普通文本、表格 Markdown 或 Mermaid 图表代码
+    }>
+  }>
+}
+```
 
-Read [data-schema.md](references/data-schema.md) when defining page configuration, target IDs, rules, or API contracts. Read [verification.md](references/verification.md) before final browser verification.
+### 3.2 文档源文件挂载标准 (`*.documents.ts`)
 
-## Completion criteria
+```ts
+import type { PrototypeDocument } from "@/shared/annotations/PrototypeAnnotationLayer"
+import prdMarkdown from "@docs/02-预警信息/01设备预警信息/设备预警信息主PRD.md?raw"
+import fieldsMarkdown from "@docs/02-预警信息/01设备预警信息/设备预警信息字段清单.md?raw"
+import rulesMarkdown from "@docs/02-预警信息/01设备预警信息/设备预警信息业务规则规格.md?raw"
 
-Consider the task complete only when:
+export const deviceWarningDocuments: PrototypeDocument[] = [
+  {
+    id: "prd",
+    title: "PRD需求规格",
+    content: prdMarkdown,
+    category: "PRD需求规格",
+  },
+  {
+    id: "fields",
+    title: "字段字典清单",
+    content: fieldsMarkdown,
+    category: "字段字典清单",
+  },
+  {
+    id: "rules",
+    title: "业务规则规格",
+    content: rulesMarkdown,
+    category: "业务规则规格",
+  },
+]
+```
 
-- the requested mobile pages render as a usable prototype;
-- the left directory, center phone preview, and right annotations stay synchronized;
-- target IDs provide reliable two-way highlighting;
-- 375px, 390px, and 414px board modes preserve aspect ratio;
-- desktop and narrow layouts do not have unintended horizontal overflow;
-- the local preview works, or the blocking environment issue is reported clearly;
-- the final response names the files changed, preview URL, tested interactions, and remaining mock/API boundaries.
+---
+
+## 🚀 4. 组件接入使用规范
+
+### 4.1 页面根容器包裹 (`PrototypeAnnotationProvider`)
+
+```tsx
+import { PrototypeAnnotationProvider } from "@/shared/annotations/PrototypeAnnotationLayer"
+import { deviceWarningAnnotations } from "../annotations/device-warning-list.annotations"
+import { deviceWarningDocuments } from "../documents/device-warning-documents"
+
+export function DeviceWarningListPage() {
+  return (
+    <PrototypeAnnotationProvider
+      title="设备预警信息 · 移动端原型批注"
+      annotations={deviceWarningAnnotations}
+      documents={deviceWarningDocuments}
+    >
+      {/* 移动端页面主体 */}
+    </PrototypeAnnotationProvider>
+  )
+}
+```
+
+### 4.2 语义化原位打点靶点包裹 (`PrototypeAnnotationTarget`)
+
+必须将 `annotationIds` 精准包裹在对应的子元素上，**严禁将多个语义不同的打点混合包裹在整个大容器上**：
+
+```tsx
+// 1. 列表容器包裹列表打点
+<PrototypeAnnotationTarget annotationIds={["device-warning-table"]}>
+  <div className="space-y-3">
+    {events.map((event) => (
+      <DeviceWarningCard key={event.eventId} event={event} />
+    ))}
+  </div>
+</PrototypeAnnotationTarget>
+
+// 2. 卡片内部的频次胶囊单独包裹频次打点
+<PrototypeAnnotationTarget annotationIds={["device-warning-frequency"]}>
+  <button className="bg-orange-50 text-orange-700">⚡ 3 次</button>
+</PrototypeAnnotationTarget>
+
+// 3. 卡片底部的操作按钮组单独包裹行操作打点
+<PrototypeAnnotationTarget annotationIds={["device-warning-row-actions"]}>
+  <div className="flex justify-end gap-3">
+    <button>解除 ▸</button>
+    <button>详情 ▸</button>
+  </div>
+</PrototypeAnnotationTarget>
+```
+
+---
+
+## 🔍 5. 质量验收与自检清单
+
+1. ✅ **0 遮挡验证**：点击手机上任何打点，手机屏幕内不出现遮挡弹窗，规则直接在右侧大画布检查器内展示；
+2. ✅ **两向高亮联动**：
+   * 点击打点数字：手机目标元素高亮蓝光，大画布检查器呼出对应规则；
+   * 点击检查器底部的 `[手机聚焦]`：手机视口自动平滑滚动并将靶点居中；
+3. ✅ **上一条/下一条切换**：点击 `◀ 上一条` / `下一条 ▶` 可在画布上连续流转切换所有需求点；
+4. ✅ **机型尺寸自适应**：切换 375px、390px、414px 时，手机内容与外侧画布检查器保持协调无水平溢出；
+5. ✅ **编译与静态检查**：必须通过 `npm run lint` 和 `npm run build`，控制台 0 报错。
