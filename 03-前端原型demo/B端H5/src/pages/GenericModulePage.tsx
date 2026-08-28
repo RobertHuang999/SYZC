@@ -14,7 +14,7 @@ function generateMockRecords(item: MenuItemData) {
     item.name.includes("监管")
   const isApproval =
     item.secondaryCategory.includes("审批") ||
-    item.secondaryCategory === "业务概览"
+    item.secondaryCategory === "内部审批"
 
   return [
     {

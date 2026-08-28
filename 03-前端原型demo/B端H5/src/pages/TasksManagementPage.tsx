@@ -20,11 +20,15 @@ import {
   SlidersHorizontal,
   Store,
 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import { BuildingToast } from "@/components/common/BuildingToast"
 import { BottomTabBar } from "@/components/layout/BottomTabBar"
 import { MobileShell } from "@/components/layout/MobileShell"
 
+import { MOBILE_MENU_ITEMS } from "@/data/mobileMenuData"
+
 export function TasksManagementPage() {
+  const navigate = useNavigate()
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [toastFeature, setToastFeature] = useState<string | null>(null)
 
@@ -35,6 +39,15 @@ export function TasksManagementPage() {
 
   const showBuilding = (featureName: string) => {
     setToastFeature(featureName)
+  }
+
+  const openOtherApproval = (moduleId: string, fallbackName: string) => {
+    const item = MOBILE_MENU_ITEMS.find((entry) => entry.id === moduleId)
+    if (item?.customRoute) {
+      navigate(item.customRoute)
+      return
+    }
+    showBuilding(fallbackName)
   }
 
   return (
@@ -374,7 +387,7 @@ export function TasksManagementPage() {
           <div className="grid grid-cols-5 gap-y-3.5 gap-x-1 text-center">
             {/* 政策资讯审核 (红点1) */}
             <div
-              onClick={() => showBuilding("政策资讯审核")}
+              onClick={() => openOtherApproval("biz-approve-policy-news", "政策资讯审核")}
               className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="relative">
@@ -390,9 +403,22 @@ export function TasksManagementPage() {
               </span>
             </div>
 
+            {/* 开锁审批 */}
+            <div
+              onClick={() => openOtherApproval("biz-approve-unlock-apply", "开锁审批")}
+              className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
+            >
+              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#f57c00] text-white shadow-xs">
+                <Lock className="size-5 stroke-[2.2]" />
+              </div>
+              <span className="mt-1.5 text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight">
+                开锁审批
+              </span>
+            </div>
+
             {/* 贷中风控处理 */}
             <div
-              onClick={() => showBuilding("贷中风控处理")}
+              onClick={() => openOtherApproval("biz-approve-in-loan-risk-sso", "贷中风控处理")}
               className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#1875f0] text-white shadow-xs">

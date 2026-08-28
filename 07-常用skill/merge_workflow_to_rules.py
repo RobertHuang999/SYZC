@@ -47,9 +47,9 @@ def remove_workflow_refs(text: str, module_prefix: str) -> str:
     return text
 
 
-def ensure_ssot_header(rules_text: str, module_name: str) -> str:
-    """Ensure document has SSOT positioning in header."""
-    if "唯一定义来源" in rules_text or "Single Source of Truth" in rules_text:
+def ensure_rule_source_header(rules_text: str, module_name: str) -> str:
+    """Ensure document has 唯一定义来源 positioning in header."""
+    if "唯一定义来源" in rules_text or "唯一定义来源" in rules_text:
         return rules_text
     title_match = re.match(r"(# .+\n)", rules_text)
     if not title_match:
@@ -127,7 +127,7 @@ def process_pair(workflow_path: Path) -> dict:
     workflow_body = strip_duplicate_state_diagrams(workflow_body, rules_text)
 
     new_rules = rules_text
-    new_rules = ensure_ssot_header(new_rules, module_name)
+    new_rules = ensure_rule_source_header(new_rules, module_name)
     new_rules = remove_workflow_refs(new_rules, module_name)
     new_rules = insert_merge_section(new_rules, workflow_body, module_name)
     new_rules = add_revision_entry(new_rules, module_name)

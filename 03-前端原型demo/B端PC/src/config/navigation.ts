@@ -31,6 +31,16 @@ export const topModules: TopModule[] = [
   { id: "config", label: "配置管理", path: "/配置管理/门户管理/门户端配置" },
 ]
 
+export const configModuleSidebarGroups: SidebarGroup[] = [
+  {
+    id: "business-process",
+    label: "业务流程管理",
+    items: [
+      { label: "开锁审批", path: "/配置管理/业务流程管理/开锁审批" },
+    ],
+  },
+]
+
 export const configSidebarGroups: SidebarGroup[] = [
   {
     id: "device-management",
@@ -187,7 +197,7 @@ const sidebarGroupsByModule: Record<string, SidebarGroup[]> = {
     },
   ],
   "device-warning": configSidebarGroups,
-  config: [],
+  config: configModuleSidebarGroups,
 }
 
 const decodePath = (pathname: string) => {

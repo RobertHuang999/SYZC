@@ -18,6 +18,9 @@ import { DeviceWarningConfigFormPage } from "@/features/device-warning-configs/p
 import { OrderWarningConfigListPage } from "@/features/order-warning-configs/pages/OrderWarningConfigListPage"
 import { OrderWarningConfigDetailPage } from "@/features/order-warning-configs/pages/OrderWarningConfigDetailPage"
 import { OrderWarningConfigFormPage } from "@/features/order-warning-configs/pages/OrderWarningConfigFormPage"
+import { UnlockApprovalConfigListPage } from "@/features/unlock-approval-configs/pages/UnlockApprovalConfigListPage"
+import { UnlockApprovalConfigDetailPage } from "@/features/unlock-approval-configs/pages/UnlockApprovalConfigDetailPage"
+import { UnlockApprovalConfigFormPage } from "@/features/unlock-approval-configs/pages/UnlockApprovalConfigFormPage"
 import { MigrationSchemePage } from "@/features/migration-schemes/pages/MigrationSchemePage"
 import { topModules } from "@/config/navigation"
 import { Navigate, Route, Routes } from "react-router-dom"
@@ -127,6 +130,23 @@ export function AppRoutes() {
         <Route
           path="预警配置/订单预警配置/编辑/:id"
           element={<OrderWarningConfigFormPage />}
+        />
+
+        <Route
+          path="配置管理/业务流程管理/开锁审批"
+          element={<UnlockApprovalConfigListPage />}
+        />
+        <Route
+          path="配置管理/业务流程管理/开锁审批/新增"
+          element={<UnlockApprovalConfigFormPage />}
+        />
+        <Route
+          path="配置管理/业务流程管理/开锁审批/详情/:configNo"
+          element={<UnlockApprovalConfigDetailPage />}
+        />
+        <Route
+          path="配置管理/业务流程管理/开锁审批/编辑/:configNo"
+          element={<UnlockApprovalConfigFormPage />}
         />
 
         <Route

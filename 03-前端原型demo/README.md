@@ -32,9 +32,10 @@ npm run dev
 
 ## 模块对照
 
-| PRD 模块 | PC feature | H5 feature |
-| :--- | :--- | :--- |
-| 02/02 押品预警信息 | `collateral-warning-events` | `collateral-warning-events` |
-| 02/01 设备预警信息 | `device-warning-events` | `device-warning-events` |
+| PRD 模块 | PC feature | H5 feature | H5 基准 PRD |
+| :--- | :--- | :--- | :--- |
+| 02/02 押品预警信息 | `collateral-warning-events` | `collateral-warning-events` | 6.2 Demo_移动端 |
+| 02/01 设备预警信息 | `device-warning-events` | `device-warning-events` | 6.2 Demo_移动端 |
+| 07/开锁申请（其他审批） | — | `unlock-applies` | 6.2 `07-审批中心/05-子类型/01-开锁申请/` |
 
-规格文档见 `02-PRD文档/B-迭代需求/6.2版本（2026.08）/02-预警信息/` 下各模块的 `*_Demo_移动端.md`。
+H5 模块 PRD 目录按 `mobileMenuData.ts` 板块分类维护于 `🌟🌟🌟-最新基准版/B端H5/`（`01-首页/` … `03-业务办理/`）；菜单全量见 `B端H5/01-功能清单与原型路由.md`。

@@ -9,7 +9,7 @@ export const deviceWarningDocuments: PrototypeDocument[] = [
     title: "设备预警信息主PRD规格",
     content: prdMarkdown,
     category: "PRD需求规格",
-    badge: "v6.2.0 SSOT",
+    badge: "v6.2.0 唯一定义",
   },
   {
     id: "fields",

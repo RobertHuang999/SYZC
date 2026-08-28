@@ -37,7 +37,8 @@ npm run dev
 | **工作台** | `/m/workspace` | 6大业务分类、5列等宽彩色应用网格（仓储16项/融资监管4项/交易3项/风控5项/结算3项/配置4项） |
 | **业务办理** | `/m/tasks` | 待确认统计、内部审批（待处理/抄送我/已处理）、业务发起网格、客户需求审批（带红点角标）、其他审批 |
 | **机构权限** | `/m/profile` | 登录人信息、授权管辖物理仓库清单、三维权限矩阵规则说明 |
-| **通用落地页** | `/m/module/:moduleId` | 38项子功能的真实业务台账、操作指令集与权限约束高保真模拟 |
+| **开锁审批** | `/m/approval/unlock-applies` | 6.2 其他审批·挂锁开锁申请列表/审批 |
+| **通用落地页** | `/m/module/:moduleId` | 38项子功能的高保真模拟 |
 | **押品预警** | `/m/supervision/order-warnings` | 02/02 押品预警列表、批量公示、多维处置动作链 |
 | **押品预警详情** | `/m/supervision/order-warnings/:id` | 订单穿透、物联与估值告警、补仓/平仓/处置流转 |
 | **设备预警** | `/m/iot/device-warning-events` | 02/01 设备预警列表、抓拍回溯、严重等级过滤 |
@@ -55,9 +56,10 @@ src/
 │   └── ui/            # 原子 UI 控件
 ├── data/
 │   └── mobileMenuData.ts # 移动端全量功能清单与权限字典元数据
-├── features/          # 重点高保真专属功能模块
-│   ├── collateral-warning-events/  # 押品预警
-│   └── device-warning-events/      # 设备预警
+├── features/          # 高保真模块
+│   ├── collateral-warning-events/
+│   ├── device-warning-events/
+│   └── unlock-applies/              # 业务办理·其他审批·开锁审批
 ├── pages/             # HomePage, WorkspacePage, TasksManagementPage, ProfilePage, GenericModulePage
 └── routes/            # 集中式路由配置文件
 ```

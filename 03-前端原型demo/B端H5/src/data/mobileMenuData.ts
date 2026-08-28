@@ -1,7 +1,7 @@
 export interface MenuItemData {
   id: string
   primaryModule: "首页" | "工作台" | "业务办理"
-  secondaryCategory: string // 所属模块，例如 仓储、融资/监管、交易、风控、结算、配置管理、业务概览、业务发起、客户需求审批、其他审批
+  secondaryCategory: string // 所属模块，例如 仓储、融资/监管、交易、风控、结算、配置管理、内部审批、业务发起、客户需求审批、其他审批
   name: string // 菜单名称
   subTab?: string // 二级子功能菜单/Tab
   originPath?: string // 原路径
@@ -578,11 +578,11 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "1、新增数据自动挂靠创建人所属机构；2、登录账号角色数据权限决定",
     iconType: "Network",
   },
-  // =================== 3. 业务办理 - 业务概览 ===================
+  // =================== 3. 业务办理 - 内部审批 ===================
   {
     id: "biz-overview-pending",
     primaryModule: "业务办理",
-    secondaryCategory: "业务概览",
+    secondaryCategory: "内部审批",
     name: "待处理",
     originPath: "项目监管-审批-我的待办审批",
     description: "聚合所有待我审批的入出库、质押变更、风控预警处置及报告设置任务。",
@@ -594,7 +594,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
   {
     id: "biz-overview-processed",
     primaryModule: "业务办理",
-    secondaryCategory: "业务概览",
+    secondaryCategory: "内部审批",
     name: "已处理",
     originPath: "项目监管-审批-我的待办审批",
     description: "查看经由本人审批流转完成的历史单据与留痕意见。",
@@ -605,7 +605,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
   {
     id: "biz-overview-cc",
     primaryModule: "业务办理",
-    secondaryCategory: "业务概览",
+    secondaryCategory: "内部审批",
     name: "抄送我的",
     originPath: "项目监管-审批-我的待办审批",
     description: "知会类业务流程节点抄送副本，实时同步重要业务流转进度。",
@@ -616,7 +616,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
   {
     id: "biz-overview-my-apply",
     primaryModule: "业务办理",
-    secondaryCategory: "业务概览",
+    secondaryCategory: "内部审批",
     name: "我的申请记录",
     originPath: "项目监管-审批-我的申请管理",
     description: "本人发起的入库、出库、移库、仓单开立、抵质押等全量流程列表及催办入口。",
@@ -627,7 +627,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
   {
     id: "biz-overview-biz-apply",
     primaryModule: "业务办理",
-    secondaryCategory: "业务概览",
+    secondaryCategory: "内部审批",
     name: "业务申请记录",
     originPath: "项目监管-审批-业务申请管理",
     description: "本机构及管辖仓库范围内所有业务申请的全局流水总览。",
@@ -828,6 +828,19 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     buttons: ["查看页面", "预览", "去处理（发布/驳回）", "审核记录"],
     dataPermission: "有菜单权限账号可见所有；操作权限依据审核状态决定",
     iconType: "FileCheck2",
+  },
+  {
+    id: "biz-approve-unlock-apply",
+    primaryModule: "业务办理",
+    secondaryCategory: "其他审批",
+    name: "开锁审批",
+    originPath: "业务办理-其他审批-开锁审批",
+    description: "处理挂锁门禁临时开锁申请；审批通过后可触发凭证生成与短信下发。不进平台待处理。",
+    buttons: ["查看页面", "详情", "通过", "驳回", "审核记录"],
+    dataPermission: "须为 eligible 审批人且具备门禁仓库数据权限；列表按租户与仓库过滤",
+    customRoute: "/m/approval/unlock-applies",
+    badge: "已实现",
+    iconType: "Lock",
   },
   {
     id: "biz-approve-in-loan-risk-sso",

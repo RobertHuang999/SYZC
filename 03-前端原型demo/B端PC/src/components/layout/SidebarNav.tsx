@@ -28,6 +28,7 @@ const groupIcons: Record<string, LucideIcon> = {
   "organization-report": CircleGauge,
   "institution-report": CircleGauge,
   "settlement-management": Boxes,
+  "business-process": Settings2,
 }
 
 export function SidebarNav({ activeModule }: SidebarNavProps) {
