@@ -1,16 +1,11 @@
 import { AppRoutes } from "@/routes"
-import { BrowserRouter, HashRouter } from "react-router-dom"
-
-const Router =
-  typeof window !== "undefined" && window.location.protocol === "file:"
-    ? HashRouter
-    : BrowserRouter
+import { HashRouter } from "react-router-dom"
 
 function App() {
   return (
-    <Router>
+    <HashRouter>
       <AppRoutes />
-    </Router>
+    </HashRouter>
   )
 }
 

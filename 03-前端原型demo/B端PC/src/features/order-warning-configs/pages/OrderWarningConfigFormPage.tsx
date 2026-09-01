@@ -214,7 +214,7 @@ export function OrderWarningConfigFormPage() {
                   关联订单
                 </Label>
                 {isEdit ? (
-                  <Input value={form.orderNo} readOnly />
+                  <Input value={form.orderNo} readOnly className="h-9 font-mono" />
                 ) : (
                   <Select
                     value={form.orderNo || "none"}
@@ -222,16 +222,19 @@ export function OrderWarningConfigFormPage() {
                       if (value && value !== "none") handleOrderChange(value)
                     }}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="选择订单" />
+                    <SelectTrigger className="w-full h-9">
+                      <SelectValue placeholder="请选择关联订单" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="min-w-[360px] max-h-72">
                       <SelectItem value="none" disabled>
-                        请选择订单
+                        请选择关联订单
                       </SelectItem>
                       {MOCK_ORDERS.map((order) => (
                         <SelectItem key={order.orderNo} value={order.orderNo}>
-                          {order.orderNo} - {order.customer}
+                          <span className="font-mono font-medium text-foreground">{order.orderNo}</span>
+                          <span className="text-muted-foreground ml-1.5 text-xs">
+                            （{order.customer} · {order.orderType}）
+                          </span>
                         </SelectItem>
                       ))}
                     </SelectContent>
