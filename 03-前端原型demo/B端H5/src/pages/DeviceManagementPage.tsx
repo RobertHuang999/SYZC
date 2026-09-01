@@ -464,7 +464,7 @@ export function DeviceManagementPage() {
       {/* 页头 Tab 设备类型切换栏 */}
       <PrototypeAnnotationTarget annotationIds={["device-management-hub-tabs"]}>
         <div className="shrink-0 border-b border-gray-100 bg-white shadow-2xs">
-          <div className="flex items-center gap-1 overflow-x-auto px-3 py-2 no-scrollbar">
+          <div className="no-scrollbar flex items-center gap-1 overflow-x-auto px-3 py-2">
             {DEVICE_TABS.map((tab) => {
               const Icon = tab.icon
               const isActive = currentTab === tab.id

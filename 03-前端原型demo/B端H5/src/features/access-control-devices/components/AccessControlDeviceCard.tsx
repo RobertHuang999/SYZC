@@ -52,12 +52,12 @@ export function AccessControlDeviceCard({
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2 border-t border-gray-50 pt-3">
+      <div className="mt-3 flex flex-nowrap items-center gap-1 border-t border-gray-50 pt-3">
         {["重命名", "绑定", "数据"].map((action) => (
           <button
             key={action}
             type="button"
-            className="rounded-lg border border-gray-200 px-2.5 py-1 text-[11px] text-gray-600"
+            className="shrink-0 whitespace-nowrap rounded-lg border border-gray-200 px-1.5 py-1 text-[10px] text-gray-600"
             onClick={() => onAction(action, device)}
           >
             {action}
@@ -65,14 +65,14 @@ export function AccessControlDeviceCard({
         ))}
         <button
           type="button"
-          className="rounded-lg bg-blue-600 px-2.5 py-1 text-[11px] font-medium text-white"
+          className="min-w-0 flex-1 whitespace-nowrap rounded-lg bg-blue-600 px-1.5 py-1 text-[10px] font-medium text-white"
           onClick={() => onGetPassword(device)}
         >
           {isLock ? "获取门锁密码" : "获取门禁密码"}
         </button>
         <button
           type="button"
-          className="rounded-lg border border-rose-200 px-2.5 py-1 text-[11px] text-rose-600"
+          className="shrink-0 whitespace-nowrap rounded-lg border border-rose-200 px-1.5 py-1 text-[10px] text-rose-600"
           onClick={() => onAction("移除", device)}
         >
           移除

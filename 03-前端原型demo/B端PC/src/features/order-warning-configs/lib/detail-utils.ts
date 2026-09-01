@@ -89,7 +89,7 @@ function createDefaultStrategyState(
     enabled,
     expanded: enabled,
     severityLevelId: "sl-l3",
-    notifyChannels: ["站内信"],
+    notifyChannels: [],
     notifyTargets: [],
     upgradeEnabled: false,
     upgradeDays: "",
@@ -132,7 +132,7 @@ export function detailToFormValues(
       )
       if (active) {
         acc[def.key].severityLevelId = active.severityLevelId
-        acc[def.key].notifyChannels = active.notifyChannels ?? ["站内信"]
+        acc[def.key].notifyChannels = active.notifyChannels ?? []
         acc[def.key].notifyTargets = active.notifyTargets ?? []
         acc[def.key].upgradeEnabled = active.upgradeStrategy !== undefined
         acc[def.key].upgradeDays = active.upgradeStrategy?.includes("3")

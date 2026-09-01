@@ -5,19 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { ConfigConfirmDialog } from "@/features/device-warning-configs/components/ConfigConfirmDialog"
-import { LIST_BASE_PATH } from "../domain/constants"
-import type { ScopeType } from "../domain/types"
+import { FIXED_APPROVAL_MODE, LIST_BASE_PATH } from "../domain/constants"
 import { ApprovalNodeEditor } from "../components/ApprovalNodeEditor"
 import { FieldLabelWithHelp } from "../components/FieldHelpTooltip"
-import { ScopeCascadeSelector } from "../components/ScopeCascadeSelector"
 import { TimeoutHoursInput } from "../components/TimeoutHoursInput"
 import { UnlockDeviceSelectDialog } from "../components/UnlockDeviceSelectDialog"
 import { getUnlockApprovalConfigByNo } from "../lib/detail-utils"
@@ -87,10 +78,6 @@ export function UnlockApprovalConfigFormPage() {
     ? `编辑开锁审批配置 — ${form.configName}`
     : "新增开锁审批配置"
 
-  const scopeType = form.scopeType
-  const isGlobal = scopeType === "未绑定位置全局"
-  const showDevices = scopeType === "指定设备"
-
   const selectedDevices = MOCK_DEVICES.filter((device) =>
     form.selectedDeviceIds.includes(device.id)
   )
@@ -141,7 +128,7 @@ export function UnlockApprovalConfigFormPage() {
         <PrototypeAnnotationTarget annotationIds={["unlock-approval-config-form-scope"]}>
           <Card>
             <CardHeader>
-              <CardTitle>基础识别与范围</CardTitle>
+              <CardTitle>基础信息与适用设备</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
@@ -160,151 +147,53 @@ export function UnlockApprovalConfigFormPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>
-                  <FieldLabelWithHelp
-                    required
-                    label="适用范围类型"
-                    help="选择后将联动展示范围选择区。编辑态不可修改。"
-                  />
-                </Label>
-                {isEdit ? (
-                  <Input value={form.scopeType} readOnly />
-                ) : (
-                  <Select
-                    value={form.scopeType || "none"}
-                    onValueChange={(value) => {
-                      if (value === "none") return
-                      setForm((current) => ({
-                        ...current,
-                        scopeType: value as ScopeType,
-                        warehouseName: "",
-                        storeroomNames: [],
-                        zoneNames: [],
-                        selectedDeviceIds: [],
-                        warehouseFilter: "",
-                      }))
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="请选择适用范围类型" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none" disabled>
-                        请选择适用范围类型
-                      </SelectItem>
-                      <SelectItem value="仓库">仓库</SelectItem>
-                      <SelectItem value="库房">库房</SelectItem>
-                      <SelectItem value="分区">分区</SelectItem>
-                      <SelectItem value="指定设备">指定设备</SelectItem>
-                      <SelectItem value="未绑定位置全局">未绑定位置全局</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
-
-              <ScopeCascadeSelector
-                scopeType={scopeType}
-                warehouseName={form.warehouseName}
-                storeroomNames={form.storeroomNames}
-                zoneNames={form.zoneNames}
-                readOnly={isEdit}
-                onChange={(patch) =>
-                  setForm((current) => ({
-                    ...current,
-                    ...patch,
-                    selectedDeviceIds:
-                      patch.warehouseName !== undefined &&
-                      patch.warehouseName !== current.warehouseName
-                        ? []
-                        : current.selectedDeviceIds,
-                  }))
-                }
-              />
-
-              {showDevices && (
-                <PrototypeAnnotationTarget
-                  annotationIds={["unlock-approval-config-form-device"]}
-                >
-                  <div className="md:col-span-2 space-y-2 rounded-lg border p-4">
-                    <Label>
-                      <FieldLabelWithHelp
-                        required
-                        label="适用设备"
-                        help="点击按钮打开设备选择器，可按仓库筛选并搜索设备编码/名称，避免在长列表中逐条查找。"
-                      />
-                    </Label>
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="text-sm text-muted-foreground">
-                        {form.selectedDeviceIds.length > 0 ? (
-                          <>
-                            已选{" "}
-                            <span className="font-medium text-foreground">
-                              {form.selectedDeviceIds.length}
-                            </span>{" "}
-                            台
-                            {selectedDevices.length > 0 && (
-                              <span>
-                                {" "}
-                                · {selectedDevices.map((device) => device.code).join(" / ")}
-                              </span>
-                            )}
-                          </>
-                        ) : (
-                          "尚未选择设备"
-                        )}
-                      </div>
-                      {!isEdit && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setDeviceDialogOpen(true)}
-                        >
-                          勾选/调整设备
-                          <ChevronRightIcon className="size-4" />
-                        </Button>
+              <PrototypeAnnotationTarget
+                annotationIds={["unlock-approval-config-form-device"]}
+              >
+                <div className="md:col-span-2 space-y-2 rounded-lg border p-4">
+                  <Label>
+                    <FieldLabelWithHelp
+                      required
+                      label="适用设备"
+                      help="6.2 仅支持指定设备范围。点击按钮打开设备选择器，可按仓库筛选并搜索设备编码/名称。"
+                    />
+                  </Label>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      {form.selectedDeviceIds.length > 0 ? (
+                        <>
+                          已选{" "}
+                          <span className="font-medium text-foreground">
+                            {form.selectedDeviceIds.length}
+                          </span>{" "}
+                          台
+                          {selectedDevices.length > 0 && (
+                            <span>
+                              {" "}
+                              · {selectedDevices.map((device) => device.code).join(" / ")}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        "尚未选择设备"
                       )}
                     </div>
-                    {isEdit && (
-                      <Input readOnly value={`已选 ${form.selectedDeviceIds.length} 台`} />
+                    {!isEdit && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setDeviceDialogOpen(true)}
+                      >
+                        勾选/调整设备
+                        <ChevronRightIcon className="size-4" />
+                      </Button>
                     )}
                   </div>
-                </PrototypeAnnotationTarget>
-              )}
-
-              {isGlobal && (
-                <PrototypeAnnotationTarget
-                  annotationIds={["unlock-approval-config-form-global"]}
-                >
-                  <div className="space-y-2 md:col-span-2">
-                    <Label>
-                      <FieldLabelWithHelp
-                        required
-                        label="未绑定位置设备全局审批开关"
-                        help="关闭=未绑定具体位置设备走原有免审直发密码；开启=进入本配置的全局审批。租户内该类型仅允许 1 条已启用配置。"
-                      />
-                    </Label>
-                    <div className="flex flex-wrap gap-4">
-                      {(["关闭", "开启"] as const).map((option) => (
-                        <label key={option} className="flex items-center gap-2 text-sm">
-                          <input
-                            type="radio"
-                            name="globalSwitch"
-                            checked={form.globalSwitch === option}
-                            onChange={() =>
-                              setForm((current) => ({ ...current, globalSwitch: option }))
-                            }
-                          />
-                          {option}
-                        </label>
-                      ))}
-                    </div>
-                    <p className="text-xs leading-relaxed text-muted-foreground">
-                      关闭：未绑定具体位置设备走原有免审直发密码。开启：进入本配置的全局审批，不得静默免审（C04）。租户内该类型仅允许 1 条已启用配置（R29）。
-                    </p>
-                  </div>
-                </PrototypeAnnotationTarget>
-              )}
+                  {isEdit && (
+                    <Input readOnly value={`已选 ${form.selectedDeviceIds.length} 台`} />
+                  )}
+                </div>
+              </PrototypeAnnotationTarget>
             </CardContent>
           </Card>
         </PrototypeAnnotationTarget>
@@ -316,29 +205,10 @@ export function UnlockApprovalConfigFormPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>
-                  <FieldLabelWithHelp required label="审批方式" />
-                </Label>
-                <div className="flex flex-wrap gap-4">
-                  {(["任一人通过", "按顺序审批"] as const).map((option) => (
-                    <label key={option} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="radio"
-                        name="approvalMode"
-                        checked={form.approvalMode === option}
-                        onChange={() =>
-                          setForm((current) => ({ ...current, approvalMode: option }))
-                        }
-                      />
-                      {option}
-                    </label>
-                  ))}
-                </div>
-                {form.approvalMode === "按顺序审批" && (
-                  <p className="text-xs text-muted-foreground">
-                    按顺序审批时，下方节点顺序即审批链激活顺序
-                  </p>
-                )}
+                <Label>审批方式</Label>
+                <p className="text-sm text-muted-foreground">
+                  {FIXED_APPROVAL_MODE}（6.2 固定，不可修改）
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -365,7 +235,7 @@ export function UnlockApprovalConfigFormPage() {
 
         <UnlockDeviceSelectDialog
           open={deviceDialogOpen}
-          warehouseContext={form.warehouseName}
+          warehouseContext=""
           selectedIds={form.selectedDeviceIds}
           onOpenChange={setDeviceDialogOpen}
           onConfirm={(selectedDeviceIds) =>

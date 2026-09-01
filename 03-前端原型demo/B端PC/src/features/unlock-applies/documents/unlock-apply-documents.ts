@@ -1,4 +1,5 @@
 import type { PrototypeDocument } from "@/shared/annotations/PrototypeAnnotationLayer"
+import mockDataMarkdown from "@prototype/MOCK_DATA-开锁审批-V1.2.md?raw"
 import myApplyShellPrd from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/02-完整页/我的申请管理主PRD.md?raw"
 import myApplyShellDemo from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/02-完整页/我的申请管理_Demo_PC.md?raw"
 import prdMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请主PRD.md?raw"
@@ -56,5 +57,11 @@ export const unlockApplyDocuments: PrototypeDocument[] = [
     title: "Demo · 发起申请页",
     content: demoSubmitMarkdown,
     category: "原型交互规范",
+  },
+  {
+    id: "mock-data",
+    title: "Mock 数据示例 V1.2",
+    content: mockDataMarkdown,
+    category: "原型数据",
   },
 ]

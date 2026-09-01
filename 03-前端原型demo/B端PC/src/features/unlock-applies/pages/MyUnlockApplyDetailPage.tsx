@@ -186,9 +186,6 @@ export function MyUnlockApplyDetailPage() {
           {formatEmptyValue(apply.zoneName ?? apply.roomZone.split("/")[1]?.trim())}
         </DetailField>
         <DetailField label="具体位置">{apply.locationDetail}</DetailField>
-        {apply.locationMatchNote && (
-          <DetailField label="命中位置说明">{apply.locationMatchNote}</DetailField>
-        )}
       </DetailSection>
 
       <DetailSection title="申请内容">
@@ -269,24 +266,6 @@ export function MyUnlockApplyDetailPage() {
           onResendSms={handleResendSms}
         />
       </PrototypeAnnotationTarget>
-
-      <DetailSection title="关联事务">
-        <DetailField label="关联事务状态">{apply.transaction.linkStatus}</DetailField>
-        <DetailField label="实际开锁时间">
-          {formatEmptyValue(apply.transaction.unlockTime)}
-        </DetailField>
-        {apply.transaction.transactionId && (
-          <DetailField label="关联事务">
-            <button
-              type="button"
-              className="text-sm text-primary hover:underline"
-              onClick={() => showToast("跳转门禁事务详情（原型占位）")}
-            >
-              查看事务 &gt;
-            </button>
-          </DetailField>
-        )}
-      </DetailSection>
 
       <WithdrawConfirmDialog
         open={withdrawOpen}

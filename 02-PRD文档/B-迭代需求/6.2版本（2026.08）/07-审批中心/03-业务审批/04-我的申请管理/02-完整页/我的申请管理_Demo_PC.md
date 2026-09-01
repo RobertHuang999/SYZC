@@ -15,7 +15,7 @@
 | :--- | :--- |
 | 页面名称 | 我的申请管理 |
 | 入口 | [01-审批中心首页预览](../01-审批中心首页预览/我的申请管理预览_Demo.md) → 我的申请管理卡片 / 「查看更多」 |
-| 路由建议 | `/workbench/approval/my-applications?tab=process|lease|unlock&applyNo=` |
+| 路由建议 | `/workbench/approval/my-applications?tab=process|lease|unlock-applies&applyNo=` |
 | 骨架结构 | 页头 + Tab 栏 + 筛选区 + 表格 + 分页 |
 
 ## 2. Tab 栏
@@ -30,7 +30,7 @@
 
 | 参数 | 行为 |
 | :--- | :--- |
-| `tab=unlock` | 选中「我的开锁申请」Tab |
+| `tab=unlock-applies` | 选中「我的开锁申请」Tab（兼容读取 `tab=unlock`） |
 | `applyNo` | 打开对应详情抽屉/页 |
 | `return_route` | 详情返回时还原来源（门禁设备列表等） |
 

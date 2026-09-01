@@ -6,20 +6,42 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
     targetId: "my-apply-records-page",
     number: 1,
     kind: "页面",
-    title: "H5 我的申请记录 · 统一列表",
+    title: "H5 我的申请记录 · 三 Tab 壳页",
     content:
-      "业务办理 → 我的申请记录。混合展示流程申请与开锁审批；开锁卡片仅当前用户（zhang3）可见；筛选「开锁审批」对齐 PC Tab「我的开锁申请」。",
+      "业务办理 → 我的申请记录。与 PC「我的申请管理」一致拆分为流程申请 / 政策资讯 / 开锁审核三个独立 Tab，URL 同步 ?tab=process|policy|unlock-applies。",
     details: [
       {
         title: "入口与路由",
         items: [
           {
             label: "路由",
-            content: "/m/my-applies；详情 /m/my-applies/unlock/:applyNo。",
+            content:
+              "/m/my-applies?tab=process（默认）| policy | unlock-applies；开锁详情 /m/my-applies/unlock/:applyNo，返回时回到开锁 Tab。",
           },
           {
-            label: "业务类型筛选",
-            content: "全部 / 流程申请 / 开锁审批；选开锁审批时列表仅 UNLOCK_APPLY 卡片。",
+            label: "Tab 对齐 PC",
+            content:
+              "流程申请 ↔ 我的流程申请；政策资讯 ↔ 我的政策资讯申请（占位）；开锁审核 ↔ 我的开锁申请。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "my-apply-records-tabs",
+    targetId: "my-apply-records-tabs",
+    number: 2,
+    kind: "交互",
+    title: "页头 Tab 切换",
+    content:
+      "横向滚动 Chip 按钮；切换 Tab 更新 URL 并各自独立渲染列表/占位；各 Tab 筛选条件分别持久化到 sessionStorage。",
+    details: [
+      {
+        title: "Tab 状态",
+        items: [
+          {
+            label: "政策资讯",
+            content: "展示「功能开发中」占位，与 PC policy Tab 一致。",
           },
         ],
       },
@@ -28,25 +50,22 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
   {
     id: "my-apply-records-filter",
     targetId: "my-apply-records-filter",
-    number: 2,
+    number: 3,
     kind: "交互",
-    title: "搜索与筛选 Pill",
-    content: "即时过滤（无单独查询按钮）；搜索不含申请单号；开锁模式下 placeholder 为设备名称/编码/申请人。",
+    title: "各 Tab 独立筛选",
+    content:
+      "流程 Tab：货主/资讯关键词 + 发起日期。开锁 Tab：设备/申请人关键词 + 是否需要审核 + 发起日期；即时过滤，无单独查询按钮。",
     details: [
       {
-        title: "筛选项",
+        title: "开锁 Tab 规则",
         items: [
           {
             label: "是否需要审核",
-            content: "全部 / 是 / 否；选「否」时开锁列表为空（与 PC 一致）。",
-          },
-          {
-            label: "发起日期",
-            content: "起止 date input；与 submitTime 比较。",
+            content: "全部 / 是 / 否；仅展示当前用户（zhang3）的开锁申请。",
           },
           {
             label: "筛选持久化",
-            content: "筛选条件写入 sessionStorage；进入详情再返回列表时保留业务类型/日期/搜索等条件。",
+            content: "流程与开锁 Tab 各自 sessionStorage key，返回列表时保留对应 Tab 的筛选条件。",
           },
         ],
       },
@@ -55,16 +74,17 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
   {
     id: "my-apply-records-cards",
     targetId: "my-apply-records-cards",
-    number: 3,
+    number: 4,
     kind: "字段",
-    title: "开锁申请卡片",
-    content: "提交时间 +「开锁·临时授权」、挂锁/人脸图标、仓库/凭证状态/事由/发起人；仅「查看详情」入口。",
+    title: "列表卡片",
+    content:
+      "流程 Tab 展示 ProcessApplyCard；开锁 Tab 展示 MyUnlockApplyCard（提交时间、设备、凭证状态、查看详情）。",
     details: [
       {
         title: "空态",
         items: [
           {
-            label: "开锁审批空列表",
+            label: "开锁 Tab 空列表",
             content: "「暂无开锁申请」+ 引导至设备管理 → 门禁设备发起临时开锁申请。",
           },
         ],
@@ -80,7 +100,7 @@ export const myUnlockApplyDetailH5Annotations: PrototypeAnnotation[] = [
     number: 1,
     kind: "页面",
     title: "H5 开锁申请详情",
-    content: "NavBar + 页头摘要框（单号/设备/状态 Tag）+ KeyValue 分区；可折叠：审批配置/记录/凭证/关联事务。",
+    content: "NavBar + 页头摘要框（单号/设备/状态 Tag）+ KeyValue 分区；可折叠：审批配置/记录/凭证。",
     details: [
       {
         title: "布局",
@@ -91,7 +111,11 @@ export const myUnlockApplyDetailH5Annotations: PrototypeAnnotation[] = [
           },
           {
             label: "折叠默认",
-            content: "审批配置/关联事务默认收起；已通过时审批记录默认展开。",
+            content: "审批配置默认收起；已通过时审批记录默认展开。",
+          },
+          {
+            label: "返回",
+            content: "NavBar 返回 /m/my-applies?tab=unlock-applies。",
           },
         ],
       },

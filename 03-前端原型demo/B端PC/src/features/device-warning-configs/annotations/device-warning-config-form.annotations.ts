@@ -98,7 +98,7 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "预警对象与渠道必选",
-            content: "至少选择一种通知渠道且至少指定一位预警接收人。",
+            content: "按需选择短信、邮件等外部通知渠道；系统小角标自动更新，至少指定一位预警接收人。",
           },
           {
             label: "超时升级天数",

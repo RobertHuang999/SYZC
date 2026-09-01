@@ -55,6 +55,7 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
       "@docs": path.resolve(__dirname, "../../02-PRD文档"),
+      "@prototype": path.resolve(__dirname, ".."),
     },
   },
   server: {

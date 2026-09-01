@@ -37,7 +37,7 @@ import { cn } from "@/lib/utils"
 
 import { DEVICE_WARNING_SUB_TYPES } from "../domain/constants"
 
-const NOTIFY_CHANNEL_OPTIONS = ["站内信", "短信", "邮件"] as const
+const NOTIFY_CHANNEL_OPTIONS = ["短信", "邮件"] as const
 
 export function DeviceWarningConfigFormPage() {
   const { id } = useParams()
@@ -779,10 +779,10 @@ export function DeviceWarningConfigFormPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>
-                  <span className="text-destructive font-bold mr-1">*</span>
-                  通知渠道（至少选一项）
-                </Label>
+                <Label>通知渠道（选填）</Label>
+                <p className="text-xs text-muted-foreground">
+                  预警命中时系统自动更新预警对象系统小角标；短信/邮件按需勾选。
+                </p>
                 <div className="flex flex-wrap gap-4">
                   {NOTIFY_CHANNEL_OPTIONS.map((channel) => (
                     <label key={channel} className="flex items-center gap-2 text-sm">

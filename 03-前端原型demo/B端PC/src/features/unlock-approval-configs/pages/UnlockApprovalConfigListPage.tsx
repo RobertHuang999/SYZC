@@ -7,7 +7,10 @@ import {
   LIST_BASE_PATH,
   PAGE_SIZE,
 } from "../domain/constants"
-import type { UnlockApprovalConfigAction } from "../domain/actions"
+import {
+  DELETE_UNLOCK_APPROVAL_CONFIG_CONFIRM,
+  type UnlockApprovalConfigAction,
+} from "../domain/actions"
 import type { UnlockApprovalConfig, UnlockApprovalConfigFilters } from "../domain/types"
 import { DisableConfirmDialog } from "../components/DisableConfirmDialog"
 import { UnlockApprovalConfigFiltersPanel } from "../components/UnlockApprovalConfigFilters"
@@ -27,6 +30,7 @@ import { unlockApprovalConfigDocuments } from "../documents/unlock-approval-conf
 type PendingAction =
   | { action: "disable"; config: UnlockApprovalConfig }
   | { action: "enable"; config: UnlockApprovalConfig }
+  | { action: "delete"; config: UnlockApprovalConfig }
   | null
 
 export function UnlockApprovalConfigListPage() {
@@ -85,6 +89,9 @@ export function UnlockApprovalConfigListPage() {
       case "enable":
         setPendingAction({ action: "enable", config })
         return
+      case "delete":
+        setPendingAction({ action: "delete", config })
+        return
       default:
         return
     }
@@ -118,6 +125,16 @@ export function UnlockApprovalConfigListPage() {
     setPendingAction(null)
   }
 
+  const confirmDelete = () => {
+    if (!pendingAction || pendingAction.action !== "delete") return
+
+    setConfigs((current) =>
+      current.filter((item) => item.configNo !== pendingAction.config.configNo)
+    )
+    showToast("删除成功")
+    setPendingAction(null)
+  }
+
   return (
     <PrototypeAnnotationProvider
       title="开锁审批配置列表 · 原型批注"
@@ -129,7 +146,7 @@ export function UnlockApprovalConfigListPage() {
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">开锁审批</h1>
             <p className="text-sm text-muted-foreground">
-              配置哪些仓库/库房/分区/设备开锁需审批、由谁审批及超时规则
+              配置哪些门禁设备开锁需审批、由谁审批及超时规则
             </p>
           </div>
         </PrototypeAnnotationTarget>
@@ -195,6 +212,18 @@ export function UnlockApprovalConfigListPage() {
             if (!open) setPendingAction(null)
           }}
           onConfirm={confirmEnable}
+        />
+
+        <ConfigConfirmDialog
+          open={pendingAction?.action === "delete"}
+          title={DELETE_UNLOCK_APPROVAL_CONFIG_CONFIRM.title}
+          description={DELETE_UNLOCK_APPROVAL_CONFIG_CONFIRM.description}
+          confirmLabel={DELETE_UNLOCK_APPROVAL_CONFIG_CONFIRM.confirmLabel}
+          destructive
+          onOpenChange={(open) => {
+            if (!open) setPendingAction(null)
+          }}
+          onConfirm={confirmDelete}
         />
 
         {toastMessage && (

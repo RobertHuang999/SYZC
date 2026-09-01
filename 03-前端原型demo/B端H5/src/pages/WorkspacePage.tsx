@@ -37,6 +37,8 @@ import { useNavigate } from "react-router-dom"
 import { BuildingToast } from "@/components/common/BuildingToast"
 import { BottomTabBar } from "@/components/layout/BottomTabBar"
 import { MobileShell } from "@/components/layout/MobileShell"
+import { collateralWarningEventsMock } from "@/features/collateral-warning-events/mock/collateral-warning-events.mock"
+import { deviceWarningEventsMock } from "@/features/device-warning-events/mock/device-warning-events.mock"
 
 interface WorkstationItem {
   id: string
@@ -45,6 +47,19 @@ interface WorkstationItem {
   bgColor: string
   customRoute?: string
   isAvailable?: boolean // 仅预警两大功能为 true
+  badgeCount?: number
+}
+
+const DEVICE_PENDING_COUNT = deviceWarningEventsMock.filter(
+  (event) => event.warningStatus === "OPEN_VALID",
+).length
+
+const COLLATERAL_PENDING_COUNT = collateralWarningEventsMock.filter(
+  (event) => event.warningStatus === "OPEN_VALID",
+).length
+
+function formatBadgeCount(count: number) {
+  return count > 99 ? "99+" : String(count)
 }
 
 interface WorkstationGroup {
@@ -218,6 +233,7 @@ const WORKSPACE_GROUPS: WorkstationGroup[] = [
         bgColor: "bg-[#f57c00]",
         customRoute: "/m/iot/device-warning-events",
         isAvailable: true,
+        badgeCount: DEVICE_PENDING_COUNT,
       },
       {
         id: "ws-risk-order-warning",
@@ -226,6 +242,7 @@ const WORKSPACE_GROUPS: WorkstationGroup[] = [
         bgColor: "bg-[#e53935]",
         customRoute: "/m/supervision/order-warnings",
         isAvailable: true,
+        badgeCount: COLLATERAL_PENDING_COUNT,
       },
       {
         id: "ws-risk-device-events",
@@ -355,10 +372,17 @@ export function WorkspacePage() {
                     className="group flex flex-col items-center cursor-pointer active:scale-95 transition-transform text-center"
                   >
                     {/* 彩色圆角方形图标底座 */}
-                    <div
-                      className={`flex size-10 items-center justify-center rounded-[12px] text-white shadow-xs ${item.bgColor}`}
-                    >
-                      <IconComponent className="size-5 stroke-[2.2]" />
+                    <div className="relative">
+                      <div
+                        className={`flex size-10 items-center justify-center rounded-[12px] text-white shadow-xs ${item.bgColor}`}
+                      >
+                        <IconComponent className="size-5 stroke-[2.2]" />
+                      </div>
+                      {item.badgeCount != null && item.badgeCount > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold leading-none text-white ring-1 ring-white">
+                          {formatBadgeCount(item.badgeCount)}
+                        </span>
+                      )}
                     </div>
 
                     {/* 文字标签 */}

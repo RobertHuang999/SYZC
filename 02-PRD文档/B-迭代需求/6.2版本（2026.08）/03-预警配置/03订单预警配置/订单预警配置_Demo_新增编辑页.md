@@ -69,7 +69,7 @@
 [Switch ON/OFF]  策略 N：{名称}  （监管订单不可用提示）  [ 收起/展开 ▼▲ ]
   └─ 策略专属参数字段
   └─ 预警等级（SelectWithSearch，提交 severity_level_id）
-  └─ 通知渠道（CheckboxGroup）
+  └─ 通知渠道（CheckboxGroup，选填；系统小角标自动更新）
   └─ 预警对象（多选，R19）
   └─ 升级预警（Checkbox + 天数 + 对象，R20）
   └─ [ 保存该策略 ]  ● 未保存 / ✓ 已保存

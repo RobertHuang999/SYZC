@@ -7,8 +7,8 @@ import { SectionCard } from "@/components/ui/SectionCard"
 import { Toast } from "@/components/ui/Toast"
 import { formatDateTime } from "@/shared/lib/date-utils"
 import {
+  myApplyListPathWithTab,
   CREDENTIAL_STATUS_LABEL,
-  MY_APPLY_LIST_PATH,
   UNLOCK_APPLY_STATUS_LABEL,
 } from "../domain/constants"
 import type { UnlockApply } from "../domain/types"
@@ -70,7 +70,6 @@ export function MyUnlockApplyDetailPage() {
     () => apply?.status !== "APPROVED"
   )
   const [credentialCollapsed, setCredentialCollapsed] = useState(false)
-  const [transactionCollapsed, setTransactionCollapsed] = useState(true)
   const [withdrawOpen, setWithdrawOpen] = useState(false)
 
   useEffect(() => {
@@ -88,7 +87,7 @@ export function MyUnlockApplyDetailPage() {
   if (!apply) {
     return (
       <MobileShell>
-        <NavBar title="开锁申请详情" backTo={MY_APPLY_LIST_PATH} />
+        <NavBar title="开锁申请详情" backTo={myApplyListPathWithTab("unlock")} />
         <div className="p-6 text-center text-sm text-gray-500">申请单不存在或已不可见</div>
       </MobileShell>
     )
@@ -134,7 +133,7 @@ export function MyUnlockApplyDetailPage() {
   return (
     <MobileShell>
       <PrototypeAnnotationTarget annotationIds={["my-unlock-apply-detail-h5-page"]}>
-        <NavBar title="开锁申请详情" backTo={MY_APPLY_LIST_PATH} />
+        <NavBar title="开锁申请详情" backTo={myApplyListPathWithTab("unlock")} />
       </PrototypeAnnotationTarget>
 
       <div className="flex-1 min-h-0 overflow-y-auto px-3.5 py-3 space-y-3 pb-24 overscroll-contain">
@@ -304,24 +303,6 @@ export function MyUnlockApplyDetailPage() {
           </SectionCard>
           </PrototypeAnnotationTarget>
         )}
-
-        <SectionCard
-          title="关联事务"
-          collapsed={transactionCollapsed}
-          onToggleCollapse={setTransactionCollapsed}
-        >
-          <KeyValue label="关联状态" value={apply.transaction.linkStatus} />
-          <KeyValue label="开锁时间" value={apply.transaction.unlockTime ?? "—"} />
-          {apply.transaction.transactionId && (
-            <button
-              type="button"
-              className="mt-2 text-xs font-semibold text-orange-600"
-              onClick={() => setToast("跳转门禁事务详情（原型占位）")}
-            >
-              查看事务 &gt;
-            </button>
-          )}
-        </SectionCard>
       </div>
 
       {apply.status === "PENDING" && apply.needsApproval && (

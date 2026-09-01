@@ -15,10 +15,10 @@ import { ConfigConfirmDialog } from "@/features/device-warning-configs/component
 import {
   DetailField,
   DetailSection,
-  formatEmptyValue,
 } from "@/shared/components/DetailSection"
-import { LIST_BASE_PATH } from "../domain/constants"
+import { FIXED_APPROVAL_MODE, LIST_BASE_PATH } from "../domain/constants"
 import {
+  DELETE_UNLOCK_APPROVAL_CONFIG_CONFIRM,
   getDetailHeaderActions,
   UNLOCK_APPROVAL_CONFIG_STATUS_BADGE_CLASS,
 } from "../domain/actions"
@@ -35,7 +35,7 @@ import {
 import { unlockApprovalConfigDetailAnnotations } from "../annotations/unlock-approval-config-detail.annotations"
 import { unlockApprovalConfigDocuments } from "../documents/unlock-approval-config-documents"
 
-type PendingAction = "disable" | "enable" | null
+type PendingAction = "disable" | "enable" | "delete" | null
 
 export function UnlockApprovalConfigDetailPage() {
   const { configNo } = useParams()
@@ -60,8 +60,12 @@ export function UnlockApprovalConfigDetailPage() {
 
     if (pendingAction === "disable") {
       showToast("停用成功")
+      navigate(LIST_BASE_PATH)
     } else if (pendingAction === "enable") {
       showToast("启用成功")
+    } else if (pendingAction === "delete") {
+      showToast("删除成功")
+      navigate(LIST_BASE_PATH)
     }
 
     setPendingAction(null)
@@ -82,17 +86,6 @@ export function UnlockApprovalConfigDetailPage() {
       </div>
     )
   }
-
-  const showWarehouseFields =
-    config.scopeType !== "未绑定位置全局"
-  const showStoreroom =
-    config.scopeType === "库房" ||
-    config.scopeType === "分区" ||
-    config.scopeType === "指定设备"
-  const showZone =
-    config.scopeType === "分区" || config.scopeType === "指定设备"
-  const showDevices = config.scopeType === "指定设备"
-  const showGlobalSwitch = config.scopeType === "未绑定位置全局"
 
   return (
     <PrototypeAnnotationProvider
@@ -140,65 +133,44 @@ export function UnlockApprovalConfigDetailPage() {
                   启用
                 </Button>
               )}
+              {headerActions.includes("delete") && (
+                <Button variant="destructive" onClick={() => setPendingAction("delete")}>
+                  删除
+                </Button>
+              )}
             </div>
           </div>
         </PrototypeAnnotationTarget>
 
         <PrototypeAnnotationTarget annotationIds={["unlock-approval-config-detail-base"]}>
-          <DetailSection title="基础识别与范围">
+          <DetailSection title="基础信息与适用设备">
             <DetailField label="配置编号">{config.configNo}</DetailField>
             <DetailField label="配置名称">{config.configName}</DetailField>
-            <DetailField label="适用范围类型">{config.scopeType}</DetailField>
-            {showWarehouseFields && (
-              <DetailField label="适用仓库">
-                {formatEmptyValue(config.warehouseName ?? undefined)}
-              </DetailField>
-            )}
-            {showStoreroom && (
-              <DetailField label="适用库房">
-                {config.storeroomNames.length > 0
-                  ? config.storeroomNames.join("、")
-                  : "—"}
-              </DetailField>
-            )}
-            {showZone && (
-              <DetailField label="适用分区">
-                {config.zoneNames.length > 0 ? config.zoneNames.join("、") : "—"}
-              </DetailField>
-            )}
-            {showDevices && (
-              <DetailField label="适用设备">
-                <div className="space-y-1">
-                  <span>
-                    已选 {config.deviceCount ?? config.deviceCodes.length} 台 ·{" "}
-                    {config.deviceCodes.join(" / ")}
-                  </span>
-                  <button
-                    type="button"
-                    className="block text-sm text-primary hover:underline"
-                    onClick={() => setDeviceListOpen((open) => !open)}
-                  >
-                    {deviceListOpen ? "收起设备清单" : "查看设备清单 >"}
-                  </button>
-                  {deviceListOpen && (
-                    <p className="text-sm text-muted-foreground">
-                      {config.deviceCodes.join("、")}
-                    </p>
-                  )}
-                </div>
-              </DetailField>
-            )}
-            {showGlobalSwitch && (
-              <DetailField label="未绑定位置设备全局审批开关">
-                {config.globalSwitch}
-              </DetailField>
-            )}
+            <DetailField label="适用设备">
+              <div className="space-y-1">
+                <span>
+                  已选 {config.deviceCount} 台 · {config.deviceSummary}
+                </span>
+                <button
+                  type="button"
+                  className="block text-sm text-primary hover:underline"
+                  onClick={() => setDeviceListOpen((open) => !open)}
+                >
+                  {deviceListOpen ? "收起设备清单" : "查看设备清单 >"}
+                </button>
+                {deviceListOpen && (
+                  <p className="text-sm text-muted-foreground">
+                    {config.deviceCodes.join("、")}
+                  </p>
+                )}
+              </div>
+            </DetailField>
           </DetailSection>
         </PrototypeAnnotationTarget>
 
         <PrototypeAnnotationTarget annotationIds={["unlock-approval-config-detail-strategy"]}>
           <DetailSection title="审批策略">
-            <DetailField label="审批方式">{config.approvalMode}</DetailField>
+            <DetailField label="审批方式">{FIXED_APPROVAL_MODE}</DetailField>
             <DetailField label="审批超时时间">
               {formatTimeoutHours(config.timeoutHours)}
             </DetailField>
@@ -253,10 +225,7 @@ export function UnlockApprovalConfigDetailPage() {
           onOpenChange={(open) => {
             if (!open) setPendingAction(null)
           }}
-          onConfirm={() => {
-            handleConfirmAction()
-            navigate(LIST_BASE_PATH)
-          }}
+          onConfirm={handleConfirmAction}
         />
 
         <ConfigConfirmDialog
@@ -264,6 +233,18 @@ export function UnlockApprovalConfigDetailPage() {
           title="确认启用"
           description="启用后新申请将按本配置匹配，确认启用？"
           confirmLabel="确认启用"
+          onOpenChange={(open) => {
+            if (!open) setPendingAction(null)
+          }}
+          onConfirm={handleConfirmAction}
+        />
+
+        <ConfigConfirmDialog
+          open={pendingAction === "delete"}
+          title={DELETE_UNLOCK_APPROVAL_CONFIG_CONFIRM.title}
+          description={DELETE_UNLOCK_APPROVAL_CONFIG_CONFIRM.description}
+          confirmLabel={DELETE_UNLOCK_APPROVAL_CONFIG_CONFIRM.confirmLabel}
+          destructive
           onOpenChange={(open) => {
             if (!open) setPendingAction(null)
           }}

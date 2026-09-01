@@ -1,4 +1,5 @@
 import type { PrototypeDocument } from "@/shared/annotations/annotation.types"
+import mockDataMarkdown from "@prototype/MOCK_DATA-开锁审批-V1.2.md?raw"
 import h5ShellPrd from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/03-H5我的申请记录/我的申请记录主PRD.md?raw"
 import h5ShellDemo from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/03-H5我的申请记录/我的申请记录_Demo_移动端.md?raw"
 import prdMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请主PRD.md?raw"
@@ -48,5 +49,12 @@ export const myApplyDocuments: PrototypeDocument[] = [
     content: demoDetailMarkdown,
     category: "PRD需求规格",
     badge: "Demo · 详情",
+  },
+  {
+    id: "mock-data",
+    title: "Mock 数据示例 V1.2",
+    content: mockDataMarkdown,
+    category: "PRD需求规格",
+    badge: "Mock",
   },
 ]

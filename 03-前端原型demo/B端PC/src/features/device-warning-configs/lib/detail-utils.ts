@@ -130,7 +130,7 @@ export function createEmptyFormValues(): DeviceWarningConfigFormValues {
     debounceMode: "按持续时长判定",
     debounceValue: "3",
     debounceUnit: "分钟",
-    notifyChannels: ["站内信"],
+    notifyChannels: [],
     notifyTargets: [],
     upgradeEnabled: false,
     upgradeDays: "",

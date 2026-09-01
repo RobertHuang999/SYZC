@@ -74,7 +74,6 @@ export type UnlockApply = {
   zoneName?: string
   roomZone: string
   locationDetail: string
-  locationMatchNote?: string
   applicantName: string
   applicantAccount: string
   applicantOrg: string
@@ -89,7 +88,8 @@ export type UnlockApply = {
   finalConclusion?: string
   rejectReason?: string
   credential: CredentialInfo
-  transaction: TransactionInfo
+  /** @deprecated 6.2 详情不展示关联事务 */
+  transaction?: TransactionInfo
   eligible: boolean
   needsApproval: boolean
 }

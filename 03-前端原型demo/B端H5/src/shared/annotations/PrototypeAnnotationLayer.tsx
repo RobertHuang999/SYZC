@@ -343,6 +343,75 @@ function useMobileDragScroll(containerRef: React.RefObject<HTMLDivElement | null
   }, [containerRef])
 }
 
+type PrototypeNavItem = {
+  title: string
+  path: string
+  icon: string
+  matchPrefixes?: string[]
+}
+
+type PrototypeNavGroup = {
+  label: string
+  items: PrototypeNavItem[]
+}
+
+const PROTOTYPE_NAV_GROUPS: PrototypeNavGroup[] = [
+  {
+    label: "基础 Tab",
+    items: [
+      { title: "首页中枢", path: "/m/home", icon: "🏠" },
+      { title: "工作台", path: "/m/workspace", icon: "📊" },
+      { title: "业务办理", path: "/m/tasks", icon: "📝" },
+      { title: "机构与权限", path: "/m/profile", icon: "👤" },
+    ],
+  },
+  {
+    label: "风控预警",
+    items: [
+      { title: "押品预警列表", path: "/m/supervision/order-warnings", icon: "⚠️" },
+      { title: "设备预警列表", path: "/m/iot/device-warning-events", icon: "📡" },
+    ],
+  },
+  {
+    label: "审批中心",
+    items: [
+      {
+        title: "我的申请记录",
+        path: "/m/my-applies?tab=unlock-applies",
+        icon: "📋",
+        matchPrefixes: ["/m/my-applies"],
+      },
+      {
+        title: "开锁审核",
+        path: "/m/approval/unlock-applies",
+        icon: "🔓",
+        matchPrefixes: ["/m/approval/unlock-applies"],
+      },
+    ],
+  },
+  {
+    label: "设备管理",
+    items: [
+      {
+        title: "设备管理 Hub",
+        path: "/m/device-management",
+        icon: "📷",
+        matchPrefixes: ["/m/device-management", "/m/access-control-devices"],
+      },
+    ],
+  },
+]
+
+function isPrototypeNavActive(pathname: string, item: PrototypeNavItem) {
+  const prefixes = item.matchPrefixes ?? [item.path.split("?")[0]]
+  return prefixes.some((prefix) => {
+    if (prefix === "/m/home") {
+      return pathname === "/" || pathname === "/m/home"
+    }
+    return pathname === prefix || pathname.startsWith(`${prefix}/`)
+  })
+}
+
 /**
  * 桌面三栏工作台包装容器（清爽浅色现代 B 端风格）
  */
@@ -353,15 +422,6 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
   const phoneViewportRef = useRef<HTMLDivElement>(null)
 
   useMobileDragScroll(phoneViewportRef)
-
-  const navItems = [
-    { title: "首页中枢", path: "/m/home", icon: "🏠" },
-    { title: "押品预警列表", path: "/m/supervision/order-warnings", icon: "⚠️" },
-    { title: "设备预警列表", path: "/m/iot/device-warning-events", icon: "📡" },
-    { title: "工作台", path: "/m/workspace", icon: "📊" },
-    { title: "业务办理", path: "/m/tasks", icon: "📝" },
-    { title: "机构与权限", path: "/m/profile", icon: "👤" },
-  ]
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#edf2f7] text-slate-800 font-sans select-none">
@@ -379,36 +439,41 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
         </div>
 
         {/* 页面快速切换列表 */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-1">
+        <div className="flex-1 overflow-y-auto p-3 space-y-3">
           <div className="px-2 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
             原型页面导航
           </div>
-          {navItems.map((item) => {
-            const isActive =
-              location.pathname === item.path ||
-              (item.path !== "/m/home" && location.pathname.startsWith(item.path))
-            return (
-              <button
-                key={item.path}
-                type="button"
-                onClick={() => navigate(item.path)}
-                className={cn(
-                  "flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-medium transition-all text-left cursor-pointer",
-                  isActive
-                    ? "bg-blue-600 text-white font-semibold shadow-md shadow-blue-500/25"
-                    : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <span>{item.icon}</span>
-                  <span>{item.title}</span>
-                </div>
-                {isActive && <div className="size-1.5 rounded-full bg-white animate-pulse" />}
-              </button>
-            )
-          })}
+          {PROTOTYPE_NAV_GROUPS.map((group) => (
+            <div key={group.label} className="space-y-1">
+              <div className="px-2 py-1 text-[10px] font-medium text-slate-400">
+                {group.label}
+              </div>
+              {group.items.map((item) => {
+                const isActive = isPrototypeNavActive(location.pathname, item)
+                return (
+                  <button
+                    key={item.path}
+                    type="button"
+                    onClick={() => navigate(item.path)}
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-medium transition-all text-left cursor-pointer",
+                      isActive
+                        ? "bg-blue-600 text-white font-semibold shadow-md shadow-blue-500/25"
+                        : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>{item.icon}</span>
+                      <span>{item.title}</span>
+                    </div>
+                    {isActive && <div className="size-1.5 rounded-full bg-white animate-pulse" />}
+                  </button>
+                )
+              })}
+            </div>
+          ))}
 
-          <div className="pt-4 px-2 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+          <div className="pt-1 px-2 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
             标注与规格统计
           </div>
           <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-2.5 text-[11px] space-y-1.5 text-slate-600">

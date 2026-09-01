@@ -80,7 +80,6 @@ export function validateDeviceWarningConfig(
     }
   }
 
-  if (values.notifyChannels.length === 0) return "请至少选择一种通知渠道"
   if (values.notifyTargets.length === 0) return "请选择预警对象"
 
   if (values.newDeviceOnly && values.upgradeEnabled) {

@@ -44,9 +44,7 @@ export function UnlockApprovalConfigTable({
             <TableHead className="w-16">序号</TableHead>
             <TableHead className="w-36">配置编号</TableHead>
             <TableHead className="sticky left-0 z-10 w-44 bg-card">配置名称</TableHead>
-            <TableHead className="w-28">适用范围类型</TableHead>
-            <TableHead className="w-44">适用仓库/设备摘要</TableHead>
-            <TableHead className="w-28">审批方式</TableHead>
+            <TableHead className="w-52">适用设备摘要</TableHead>
             <TableHead className="w-24">审批超时</TableHead>
             <TableHead className="w-24">配置版本</TableHead>
             <TableHead className="w-24">状态</TableHead>
@@ -57,7 +55,7 @@ export function UnlockApprovalConfigTable({
         <TableBody>
           {configs.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={11} className="h-32 text-center text-muted-foreground">
+              <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
                 暂无开锁审批配置，点击「+ 新增配置」创建
               </TableCell>
             </TableRow>
@@ -90,16 +88,14 @@ export function UnlockApprovalConfigTable({
                       </Link>
                     </HoverOverflowText>
                   </TableCell>
-                  <TableCell>{config.scopeType}</TableCell>
                   <TableCell>
                     <HoverOverflowText
-                      className="max-w-[180px]"
-                      ariaLabel={`适用摘要：${config.scopeSummary}`}
+                      className="max-w-[220px]"
+                      ariaLabel={`适用设备：${config.deviceSummary}`}
                     >
-                      {config.scopeSummary}
+                      {config.deviceCount} 台 · {config.deviceSummary}
                     </HoverOverflowText>
                   </TableCell>
-                  <TableCell>{config.approvalMode}</TableCell>
                   <TableCell>{formatTimeoutHours(config.timeoutHours)}</TableCell>
                   <TableCell>{formatConfigVersion(config.configVersion)}</TableCell>
                   <TableCell>
@@ -149,6 +145,16 @@ export function UnlockApprovalConfigTable({
                           onClick={() => onAction("enable", config)}
                         >
                           启用
+                        </Button>
+                      )}
+                      {actions.includes("delete") && (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className="h-auto p-0 text-destructive hover:text-destructive"
+                          onClick={() => onAction("delete", config)}
+                        >
+                          删除
                         </Button>
                       )}
                     </div>

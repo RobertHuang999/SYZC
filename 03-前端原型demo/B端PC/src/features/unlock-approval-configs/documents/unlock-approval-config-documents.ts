@@ -1,4 +1,5 @@
 import type { PrototypeDocument } from "@/shared/annotations/PrototypeAnnotationLayer"
+import mockDataMarkdown from "@prototype/MOCK_DATA-开锁审批-V1.2.md?raw"
 import prdMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/06-门禁开锁审批/01-审批配置/门禁开锁审批配置主PRD.md?raw"
 import fieldsMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/06-门禁开锁审批/01-审批配置/门禁开锁审批配置字段清单.md?raw"
 import rulesMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/06-门禁开锁审批/01-审批配置/门禁开锁审批配置业务规则规格.md?raw"
@@ -42,5 +43,11 @@ export const unlockApprovalConfigDocuments: PrototypeDocument[] = [
     title: "Demo · 详情页",
     content: demoDetailMarkdown,
     category: "原型交互规范",
+  },
+  {
+    id: "mock-data",
+    title: "Mock 数据示例 V1.2",
+    content: mockDataMarkdown,
+    category: "原型数据",
   },
 ]

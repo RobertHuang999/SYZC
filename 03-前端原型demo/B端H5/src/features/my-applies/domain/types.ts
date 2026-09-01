@@ -78,7 +78,8 @@ export type UnlockApply = {
   finalConclusion?: string
   rejectReason?: string
   credential: CredentialInfo
-  transaction: TransactionInfo
+  /** @deprecated 6.2 详情不展示关联事务 */
+  transaction?: TransactionInfo
   eligible: boolean
   needsApproval: boolean
 }
@@ -90,6 +91,7 @@ export type UnlockApplyFilters = {
 
 export type MyApplyBizType = "全部" | "流程申请" | "开锁审批"
 
+/** @deprecated 旧版统一列表筛选，已拆分为 ProcessApplyFilters / UnlockTabFilters */
 export type MyApplyFilters = {
   keyword: string
   bizType: MyApplyBizType

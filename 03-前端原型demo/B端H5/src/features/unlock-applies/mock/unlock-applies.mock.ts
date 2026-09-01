@@ -1,10 +1,19 @@
 import type { UnlockApply } from "../domain/types"
 
-const baseConfig = {
+const baseConfig001 = {
   configNo: "UNLOCK-CFG-001",
-  configVersion: 3,
+  configVersion: 2,
   approvalMode: "任一人通过" as const,
-  approvalNodes: "节点1 指定人员：李四、王五",
+  approvalNodes: "节点1-指定人员 [王五（仓储部）]",
+  timeoutHours: 12,
+}
+
+const baseConfig002 = {
+  configNo: "UNLOCK-CFG-002",
+  configVersion: 1,
+  approvalMode: "任一人通过" as const,
+  approvalNodes: "节点1-指定角色 [仓库主管]",
+  timeoutHours: 24,
 }
 
 const notGenerated = { status: "NOT_GENERATED" as const }
@@ -12,7 +21,7 @@ const notGenerated = { status: "NOT_GENERATED" as const }
 export const unlockAppliesMock: UnlockApply[] = [
   {
     applyNo: "UA20260828001",
-    deviceName: "挂锁-LK02",
+    deviceName: "A库挂锁-01",
     deviceCode: "LK-2024-0082",
     deviceType: "挂锁门禁",
     warehouseName: "华东一号仓",
@@ -27,21 +36,20 @@ export const unlockAppliesMock: UnlockApply[] = [
     expectedUseWindow: "2026-08-28 14:00 ~ 18:00",
     status: "PENDING",
     submitTime: "2026-08-28 09:15:00",
-    configSnapshot: baseConfig,
+    configSnapshot: baseConfig001,
     approvalRecords: [],
     credential: notGenerated,
-    transaction: { linkStatus: "未开锁" },
     eligible: true,
     needsApproval: true,
   },
   {
     applyNo: "UA20260828002",
-    deviceName: "人脸-FACE1",
-    deviceCode: "FACE-HD-001-001",
+    deviceName: "A库人脸门禁",
+    deviceCode: "FACE-01",
     deviceType: "人脸门禁",
-    warehouseName: "华南二号仓",
-    roomZone: "B区-05库",
-    locationDetail: "西门人脸识别闸机",
+    warehouseName: "华东一号仓",
+    roomZone: "A库入口",
+    locationDetail: "A库入口人脸识别闸机",
     applicantName: "李四",
     applicantAccount: "li4",
     applicantOrg: "华南监管二部",
@@ -50,21 +58,20 @@ export const unlockAppliesMock: UnlockApply[] = [
     expectedUseWindow: "2026-08-28 10:00 ~ 12:00",
     status: "PENDING",
     submitTime: "2026-08-28 08:40:00",
-    configSnapshot: baseConfig,
+    configSnapshot: baseConfig002,
     approvalRecords: [],
     credential: notGenerated,
-    transaction: { linkStatus: "未开锁" },
     eligible: true,
     needsApproval: true,
   },
   {
     applyNo: "UA20260827015",
-    deviceName: "人脸-FACE1",
-    deviceCode: "FACE-HD-001-001",
+    deviceName: "A库人脸门禁",
+    deviceCode: "FACE-01",
     deviceType: "人脸门禁",
-    warehouseName: "华南二号仓",
-    roomZone: "B区-05库",
-    locationDetail: "西门人脸识别闸机",
+    warehouseName: "华东一号仓",
+    roomZone: "A库入口",
+    locationDetail: "A库入口人脸识别闸机",
     applicantName: "张三",
     applicantAccount: "zhang3",
     applicantOrg: "华东监管一部",
@@ -72,7 +79,7 @@ export const unlockAppliesMock: UnlockApply[] = [
     reason: "入库",
     status: "APPROVED",
     submitTime: "2026-08-27 16:20:00",
-    configSnapshot: baseConfig,
+    configSnapshot: baseConfig002,
     approvalRecords: [
       {
         nodeOrder: 1,
@@ -88,18 +95,17 @@ export const unlockAppliesMock: UnlockApply[] = [
       credentialNo: "CRED-20260827015",
       status: "DELIVERED",
     },
-    transaction: { linkStatus: "已开锁", unlockTime: "2026-08-27 17:10:00" },
     eligible: false,
     needsApproval: true,
   },
   {
     applyNo: "UA20260826006",
-    deviceName: "挂锁-LK05",
-    deviceCode: "LOCK-SH-BS-005",
+    deviceName: "A库挂锁-01",
+    deviceCode: "LK-2024-0082",
     deviceType: "挂锁门禁",
     warehouseName: "华东一号仓",
-    roomZone: "C区-01垛",
-    locationDetail: "参观通道",
+    roomZone: "A库1区",
+    locationDetail: "A库1区东门",
     applicantName: "张三",
     applicantAccount: "zhang3",
     applicantOrg: "华东监管一部",
@@ -107,7 +113,7 @@ export const unlockAppliesMock: UnlockApply[] = [
     reason: "参观",
     status: "REJECTED",
     submitTime: "2026-08-26 11:05:00",
-    configSnapshot: baseConfig,
+    configSnapshot: baseConfig001,
     approvalRecords: [
       {
         nodeOrder: 1,
@@ -121,7 +127,6 @@ export const unlockAppliesMock: UnlockApply[] = [
     finalConclusion: "驳回",
     rejectReason: "参观事由与现场安排不符",
     credential: notGenerated,
-    transaction: { linkStatus: "未开锁" },
     eligible: false,
     needsApproval: true,
   },

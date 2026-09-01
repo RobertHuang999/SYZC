@@ -65,10 +65,6 @@ export function createDirectLockUnlockApply(params: {
       validTo: formatDateTime(new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)).slice(0, 16),
       smsStatus: "发送成功",
     },
-    transaction: {
-      linkStatus: "未开锁",
-      transactionId: `TX-${applyNo.replace("UA", "")}`,
-    },
     eligible: false,
     needsApproval: false,
     ...APPLICANT,
@@ -109,10 +105,6 @@ export function createDirectFaceUnlockApply(params: {
       passwordMasked: "856778",
       validFrom: params.validFrom.replace("T", " "),
       validTo: params.validTo.replace("T", " "),
-    },
-    transaction: {
-      linkStatus: "未开锁",
-      transactionId: `TX-${applyNo.replace("UA", "")}`,
     },
     eligible: false,
     needsApproval: false,

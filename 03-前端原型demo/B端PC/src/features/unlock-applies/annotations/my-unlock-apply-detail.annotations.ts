@@ -8,7 +8,7 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "开锁申请详情 · 申请人视角",
     content:
-      "从 Tab「我的开锁申请」或 Deep link 进入；只读展示申请快照、审批记录、凭证与关联事务；待审批时可撤回。",
+      "从 Tab「我的开锁申请」或 Deep link 进入；只读展示申请快照、审批记录与凭证；待审批时可撤回。6.2 不展示关联事务（W00）。",
     details: [
       {
         title: "页面结构",
@@ -20,7 +20,7 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "分区",
             content:
-              "基础信息 / 设备与位置快照 / 申请内容 / 审批配置快照 / 审批记录 / 临时凭证 / 关联事务。",
+              "基础信息 / 设备与位置快照 / 申请内容 / 审批配置快照 / 审批记录 / 临时凭证。",
           },
           {
             label: "返回",
@@ -83,11 +83,11 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "配置编号 / 版本",
-            content: "如 CFG-UNLOCK-001 · v2；与 06 审批配置模块关联。",
+            content: "如 UNLOCK-CFG-001 · v2；与 06 审批配置模块关联。",
           },
           {
             label: "审批超时",
-            content: "如 24 小时；超时未审自动关闭规则见业务规则规格。",
+            content: "如 12 小时；超时未审自动关闭规则见业务规则规格。",
           },
           {
             label: "审批记录表",
@@ -106,8 +106,8 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "my-unlock-apply-detail-page",
     number: 4,
     kind: "规则",
-    title: "撤回确认与关联事务",
-    content: "撤回二次确认；关联事务区展示 linkStatus、实际开锁时间与事务跳转（原型占位 Toast）。",
+    title: "撤回确认",
+    content: "撤回二次确认；仅待审批且 needsApproval 时可操作。",
     details: [
       {
         title: "撤回弹窗",
@@ -119,15 +119,6 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "并发",
             content: "提交时若状态已非待审批，提示「撤回失败：申请状态已变更」。",
-          },
-        ],
-      },
-      {
-        title: "关联事务",
-        items: [
-          {
-            label: "跳转",
-            content: "有 transactionId 时「查看事务 >」穿透门禁事务详情（本原型 Toast 占位）。",
           },
         ],
       },
