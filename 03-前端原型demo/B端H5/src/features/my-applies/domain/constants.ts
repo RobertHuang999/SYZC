@@ -11,7 +11,7 @@ export const MY_APPLY_TABS: {
   pcLabel: string
   ready: boolean
 }[] = [
-  { key: "process", label: "流程申请", pcLabel: "我的流程申请", ready: true },
+  { key: "process", label: "流程申请", pcLabel: "我的流程申请", ready: false },
   { key: "policy", label: "政策资讯", pcLabel: "我的政策资讯申请", ready: false },
   { key: "unlock", label: "开锁审核", pcLabel: "我的开锁申请", ready: true },
 ]
@@ -55,6 +55,28 @@ export const CREDENTIAL_STATUS_LABEL: Record<CredentialStatus, string> = {
   SUPERSEDED: "已失效（被覆盖）",
 }
 
+export const MY_APPLY_STATUS_FILTER_OPTIONS: UnlockApplyStatus[] = [
+  "PENDING",
+  "APPROVED",
+  "REJECTED",
+  "WITHDRAWN",
+  "EXPIRED",
+  "VOIDED",
+]
+
+export const MY_CREDENTIAL_STATUS_FILTER_OPTIONS: CredentialStatus[] = [
+  "NOT_GENERATED",
+  "GENERATING",
+  "GENERATED",
+  "DELIVERED",
+  "GEN_FAILED",
+  "DELIVERY_FAILED",
+  "USED",
+  "EXPIRED",
+  "REVOKED",
+  "SUPERSEDED",
+]
+
 export type ProcessApplyFilters = {
   keyword: string
   dateFrom: string
@@ -66,6 +88,8 @@ export type UnlockTabFilters = {
   dateFrom: string
   dateTo: string
   needsApproval: "全部" | "是" | "否"
+  applyStatus: "全部" | UnlockApplyStatus
+  credentialStatus: "全部" | CredentialStatus
 }
 
 export const DEFAULT_PROCESS_APPLY_FILTERS: ProcessApplyFilters = {
@@ -79,6 +103,8 @@ export const DEFAULT_UNLOCK_TAB_FILTERS: UnlockTabFilters = {
   dateFrom: "",
   dateTo: "",
   needsApproval: "全部",
+  applyStatus: "全部",
+  credentialStatus: "全部",
 }
 
 export function loadCachedProcessApplyFilters(): ProcessApplyFilters {

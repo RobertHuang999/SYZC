@@ -70,8 +70,11 @@ export function MyApplyRecordsPage() {
         </div>
       </PrototypeAnnotationTarget>
 
-      <div className="flex flex-1 flex-col min-h-0">
-        <PrototypeAnnotationTarget annotationIds={["my-apply-records-filter", "my-apply-records-cards"]}>
+      <div className="flex flex-1 flex-col min-h-0 overflow-hidden">
+        <PrototypeAnnotationTarget
+          annotationIds={["my-apply-records-filter", "my-apply-records-cards"]}
+          className="flex flex-1 flex-col min-h-0 overflow-hidden"
+        >
           {activeTab === "process" && <ProcessApplyTabPanel />}
           {activeTab === "policy" && <PolicyApplyTabPanel />}
           {activeTab === "unlock" && <UnlockApplyTabPanel />}

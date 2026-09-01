@@ -4,18 +4,39 @@ import { FileText, Search, X } from "lucide-react"
 import { DropdownFilterPill, type DropdownOption } from "@/components/ui/DropdownFilterPill"
 import { DEVICE_MANAGEMENT_PATH } from "@/features/access-control-devices/domain/constants"
 import {
+  CREDENTIAL_STATUS_LABEL,
   CURRENT_APPLICANT_ACCOUNT,
   loadCachedUnlockTabFilters,
+  MY_APPLY_STATUS_FILTER_OPTIONS,
+  MY_CREDENTIAL_STATUS_FILTER_OPTIONS,
   saveCachedUnlockTabFilters,
+  UNLOCK_APPLY_STATUS_LABEL,
   type UnlockTabFilters,
 } from "../domain/constants"
 import { useUnlockApplies } from "../lib/unlock-applies-store"
 import { MyUnlockApplyCard } from "./MyUnlockApplyCard"
+import { TabScrollLayout } from "@/components/layout/TabScrollLayout"
 
 const needsApprovalOptions: DropdownOption[] = [
   { label: "全部", value: "全部" },
   { label: "是", value: "是" },
   { label: "否", value: "否" },
+]
+
+const applyStatusOptions: DropdownOption[] = [
+  { label: "全部", value: "全部" },
+  ...MY_APPLY_STATUS_FILTER_OPTIONS.map((status) => ({
+    label: UNLOCK_APPLY_STATUS_LABEL[status],
+    value: status,
+  })),
+]
+
+const credentialStatusOptions: DropdownOption[] = [
+  { label: "全部", value: "全部" },
+  ...MY_CREDENTIAL_STATUS_FILTER_OPTIONS.map((status) => ({
+    label: CREDENTIAL_STATUS_LABEL[status],
+    value: status,
+  })),
 ]
 
 function FilterBar({
@@ -60,6 +81,28 @@ function FilterBar({
             })
           }
         />
+        <DropdownFilterPill
+          label="申请状态"
+          value={filters.applyStatus}
+          options={applyStatusOptions}
+          onChange={(val) =>
+            onChange({
+              ...filters,
+              applyStatus: val as UnlockTabFilters["applyStatus"],
+            })
+          }
+        />
+        <DropdownFilterPill
+          label="凭证状态"
+          value={filters.credentialStatus}
+          options={credentialStatusOptions}
+          onChange={(val) =>
+            onChange({
+              ...filters,
+              credentialStatus: val as UnlockTabFilters["credentialStatus"],
+            })
+          }
+        />
       </div>
 
       <div className="flex items-center gap-2 text-[11px]">
@@ -101,6 +144,17 @@ export function UnlockApplyTabPanel() {
       if (filters.needsApproval === "否" && record.needsApproval) return false
       if (filters.needsApproval === "是" && !record.needsApproval) return false
 
+      if (filters.applyStatus !== "全部" && record.status !== filters.applyStatus) {
+        return false
+      }
+
+      if (
+        filters.credentialStatus !== "全部" &&
+        record.credential.status !== filters.credentialStatus
+      ) {
+        return false
+      }
+
       if (filters.dateFrom || filters.dateTo) {
         if (filters.dateFrom && record.submitTime < `${filters.dateFrom} 00:00:00`) {
           return false
@@ -120,9 +174,8 @@ export function UnlockApplyTabPanel() {
   }, [filters, unlockApplies])
 
   return (
-    <>
-      <FilterBar filters={filters} onChange={updateFilters} />
-      <div className="flex-1 min-h-0 space-y-3 overflow-y-auto px-3.5 py-3 overscroll-contain">
+    <TabScrollLayout header={<FilterBar filters={filters} onChange={updateFilters} />}>
+      <div className="space-y-3 px-3.5 py-3">
         {list.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-white py-16 text-center text-gray-400">
             <FileText className="size-10 text-gray-300 mb-2" />
@@ -143,6 +196,6 @@ export function UnlockApplyTabPanel() {
           </div>
         )}
       </div>
-    </>
+    </TabScrollLayout>
   )
 }

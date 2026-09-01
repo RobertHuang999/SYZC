@@ -34,14 +34,19 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
     kind: "交互",
     title: "页头 Tab 切换",
     content:
-      "横向滚动 Chip 按钮；切换 Tab 更新 URL 并各自独立渲染列表/占位；各 Tab 筛选条件分别持久化到 sessionStorage。",
+      "横向滚动 Chip 按钮；切换 Tab 更新 URL；流程申请/政策资讯展示「功能将在后续版本接入…」占位，开锁审核为完整列表。",
     details: [
       {
         title: "Tab 状态",
         items: [
           {
-            label: "政策资讯",
-            content: "展示「功能开发中」占位，与 PC policy Tab 一致。",
+            label: "流程申请 / 政策资讯",
+            content:
+              "展示「功能将在后续版本接入，与 PC 端对应 Tab 保持一致」占位。",
+          },
+          {
+            label: "开锁审核",
+            content: "已接入完整列表与筛选。",
           },
         ],
       },
@@ -54,7 +59,7 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
     kind: "交互",
     title: "各 Tab 独立筛选",
     content:
-      "流程 Tab：货主/资讯关键词 + 发起日期。开锁 Tab：设备/申请人关键词 + 是否需要审核 + 发起日期；即时过滤，无单独查询按钮。",
+      "流程 Tab：占位「功能将在后续版本接入…」。开锁 Tab：设备/申请人关键词 + 是否需要审核 + 申请状态 + 凭证状态 + 发起日期；即时过滤，无单独查询按钮。",
     details: [
       {
         title: "开锁 Tab 规则",
@@ -64,8 +69,13 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
             content: "全部 / 是 / 否；仅展示当前用户（zhang3）的开锁申请。",
           },
           {
+            label: "申请状态 / 凭证状态",
+            content:
+              "单选 Pill 筛选，与 PC 完整页默认行筛选项对齐；默认「全部」表示不过滤。",
+          },
+          {
             label: "筛选持久化",
-            content: "流程与开锁 Tab 各自 sessionStorage key，返回列表时保留对应 Tab 的筛选条件。",
+            content: "开锁 Tab 筛选条件 sessionStorage 持久化，返回列表时保留。",
           },
         ],
       },
@@ -78,7 +88,7 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
     kind: "字段",
     title: "列表卡片",
     content:
-      "流程 Tab 展示 ProcessApplyCard；开锁 Tab 展示 MyUnlockApplyCard（提交时间、设备、凭证状态、查看详情）。",
+      "流程/政策 Tab 为占位文案；开锁 Tab 展示 MyUnlockApplyCard（提交时间、设备、凭证状态、查看详情）。",
     details: [
       {
         title: "空态",
@@ -100,7 +110,7 @@ export const myUnlockApplyDetailH5Annotations: PrototypeAnnotation[] = [
     number: 1,
     kind: "页面",
     title: "H5 开锁申请详情",
-    content: "NavBar + 页头摘要框（单号/设备/状态 Tag）+ KeyValue 分区；可折叠：审批配置/记录/凭证。",
+    content: "NavBar + 页头摘要框（单号/设备/状态 Tag）+ KeyValue 分区；可折叠：审批配置/记录。凭证信息区暂不接入。",
     details: [
       {
         title: "布局",
@@ -122,28 +132,9 @@ export const myUnlockApplyDetailH5Annotations: PrototypeAnnotation[] = [
     ],
   },
   {
-    id: "my-unlock-apply-detail-h5-credential",
-    targetId: "my-unlock-apply-detail-h5-credential",
-    number: 2,
-    kind: "规则",
-    title: "凭证区 · R31 人脸无短信",
-    content: "人脸：仅页面密码 + 复制 + 无短信提示。挂锁：短信状态/失败原因/重新下发。",
-    details: [
-      {
-        title: "操作",
-        items: [
-          {
-            label: "复制 / 重发短信",
-            content: "复制 Toast；重发后 credential.status→DELIVERED、smsStatus→发送成功。",
-          },
-        ],
-      },
-    ],
-  },
-  {
     id: "my-unlock-apply-detail-h5-withdraw",
     targetId: "my-unlock-apply-detail-h5-withdraw",
-    number: 3,
+    number: 2,
     kind: "规则",
     title: "底部撤回栏",
     content: "待审批时固定底栏「撤回申请」+ 二次确认；文案与 PC 一致。",
