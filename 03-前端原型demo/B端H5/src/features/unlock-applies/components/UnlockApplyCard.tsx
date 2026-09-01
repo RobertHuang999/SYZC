@@ -1,36 +1,45 @@
-import { ChevronRight, Lock } from "lucide-react"
+import { Lock } from "lucide-react"
+import type { MouseEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { formatDateTime } from "@/shared/lib/date-utils"
-import {
-  UNLOCK_APPLY_STATUS_LABEL,
-} from "../domain/constants"
+import { UNLOCK_APPLY_STATUS_LABEL } from "../domain/constants"
 import type { UnlockApply } from "../domain/types"
 
 type UnlockApplyCardProps = {
   apply: UnlockApply
+  onProcess?: (apply: UnlockApply) => void
 }
 
-export function UnlockApplyCard({ apply }: UnlockApplyCardProps) {
+export function UnlockApplyCard({ apply, onProcess }: UnlockApplyCardProps) {
   const navigate = useNavigate()
   const statusLabel = UNLOCK_APPLY_STATUS_LABEL[apply.status]
   const isPending = apply.status === "PENDING"
+  const canProcess = isPending && apply.eligible
+  const detailPath = `/m/approval/unlock-applies/${apply.applyNo}`
+
+  const openDetail = (event?: MouseEvent) => {
+    event?.stopPropagation()
+    navigate(detailPath)
+  }
+
+  const openProcess = (event: MouseEvent) => {
+    event.stopPropagation()
+    onProcess?.(apply)
+  }
 
   return (
     <article
-      onClick={() => navigate(`/m/approval/unlock-applies/${apply.applyNo}`)}
+      onClick={() => navigate(detailPath)}
       className="group relative overflow-hidden rounded-2xl border border-gray-200/90 bg-white p-3.5 shadow-xs transition-all active:scale-[0.99] cursor-pointer hover:border-orange-200 hover:shadow-sm"
     >
       <div className="flex items-start justify-between gap-2 border-b border-gray-100/80 pb-2.5">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <Lock className="size-3.5 shrink-0 text-orange-600" />
-            <h3 className="font-mono text-sm font-bold text-gray-900 truncate">
-              {apply.applyNo}
+            <h3 className="text-sm font-bold text-gray-900 truncate">
+              {apply.deviceName}
             </h3>
           </div>
-          <p className="mt-0.5 text-[11px] text-gray-500 truncate">
-            {apply.deviceName}
-          </p>
         </div>
         <span
           className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
@@ -38,6 +47,8 @@ export function UnlockApplyCard({ apply }: UnlockApplyCardProps) {
               ? "bg-amber-50 text-amber-700"
               : apply.status === "APPROVED"
               ? "bg-emerald-50 text-emerald-700"
+              : apply.status === "REJECTED"
+              ? "bg-red-50 text-red-700"
               : "bg-gray-100 text-gray-600"
           }`}
         >
@@ -64,10 +75,24 @@ export function UnlockApplyCard({ apply }: UnlockApplyCardProps) {
 
       <div className="mt-2.5 flex items-center justify-between text-[11px]">
         <span className="text-gray-400">{formatDateTime(apply.submitTime)}</span>
-        <span className="flex items-center gap-0.5 font-semibold text-orange-600">
-          {isPending ? "去审批" : "详情"}
-          <ChevronRight className="size-3.5" />
-        </span>
+        <div className="flex items-center gap-2 font-semibold text-orange-600">
+          <button
+            type="button"
+            className="hover:underline active:opacity-70"
+            onClick={openDetail}
+          >
+            详情
+          </button>
+          {canProcess && (
+            <button
+              type="button"
+              className="hover:underline active:opacity-70"
+              onClick={openProcess}
+            >
+              去处理
+            </button>
+          )}
+        </div>
       </div>
     </article>
   )

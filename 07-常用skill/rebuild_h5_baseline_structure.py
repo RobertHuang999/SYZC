@@ -74,7 +74,7 @@ PC_RULE_SOURCE: dict[str, str | None] = {
 ITER_RULE_SOURCE: dict[str, str] = {
     "ws-risk-device-warning": "B-迭代需求/6.2版本（2026.08）/02-预警信息/01设备预警信息",
     "ws-risk-order-warning": "B-迭代需求/6.2版本（2026.08）/02-预警信息/02押品预警信息",
-    "biz-approve-unlock-apply": "B-迭代需求/6.2版本（2026.08）/07-审批中心/05-子类型/01-开锁申请",
+    "biz-approve-unlock-apply": "B-迭代需求/6.2版本（2026.08）/07-审批中心/04开锁申请",
 }
 
 
@@ -344,13 +344,13 @@ def main():
         unlock_dir = H5_BASE / unlock_folder
         unlock_dir.mkdir(parents=True, exist_ok=True)
         demo_path = unlock_dir / "开锁审批_Demo_移动端.md"
-    iter_demo = ROOT / "02-PRD文档/B-迭代需求/6.2版本（2026.08）/07-审批中心/05-子类型/01-开锁申请/开锁申请_Demo_移动端.md"
+    iter_demo = ROOT / "02-PRD文档/B-迭代需求/6.2版本（2026.08）/07-审批中心/04开锁申请/Demo_详情与凭证_移动端.md"
     if iter_demo.exists() and not demo_path.exists():
         rel = os_path_relpath(demo_path.parent, iter_demo)
         demo_path.write_text(
             f"""# 开锁审批 · H5 Demo
 
-> **6.2 迭代唯一定义（当前主文档）**：[开锁申请_Demo_移动端.md]({rel})
+> **6.2 迭代唯一定义（当前主文档）**：[Demo_详情与凭证_移动端.md]({rel})
 >
 > 定稿后可将内容回写至本目录，作为基准版 H5 Demo。
 

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Filter, Search, Shield } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
 import { IconRenderer } from "@/components/common/IconRenderer"
@@ -76,6 +76,12 @@ export function GenericModulePage() {
 
   const menuItem = MOBILE_MENU_ITEMS.find((item) => item.id === moduleId)
 
+  useEffect(() => {
+    if (menuItem?.customRoute) {
+      navigate(menuItem.customRoute, { replace: true })
+    }
+  }, [menuItem, navigate])
+
   if (!menuItem) {
     return (
       <MobileShell>
@@ -93,6 +99,10 @@ export function GenericModulePage() {
         </div>
       </MobileShell>
     )
+  }
+
+  if (menuItem.customRoute) {
+    return null
   }
 
   const mockRecords = generateMockRecords(menuItem)
@@ -132,7 +142,7 @@ export function GenericModulePage() {
       )}
 
       {/* 主滚动体 */}
-      <div className="flex-1 overflow-y-auto px-3.5 py-3 space-y-3">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3.5 py-3 space-y-3 overscroll-contain">
         {/* 1. 功能定义与权限约束看板 */}
         <section className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/80 via-indigo-50/40 to-white p-3.5 shadow-xs">
           <div className="flex items-start gap-2.5">

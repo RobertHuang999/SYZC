@@ -6,7 +6,7 @@ type MobileShellProps = {
 
 export function MobileShell({ children }: MobileShellProps) {
   return (
-    <div className="flex flex-1 flex-col h-full w-full overflow-hidden bg-[#edf2f8] relative">
+    <div className="flex flex-1 flex-col h-full w-full min-h-0 overflow-hidden bg-[#edf2f8] relative">
       {children}
     </div>
   )

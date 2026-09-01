@@ -64,7 +64,7 @@ export function TasksManagementPage() {
       </div>
 
       {/* 页面主滚动区域 */}
-      <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-3">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 space-y-3 overscroll-contain">
         {/* 顶部统计条 */}
         <section className="flex items-center justify-between rounded-xl bg-white px-3.5 py-2.5 shadow-xs">
           <div className="flex items-center gap-2">
@@ -152,7 +152,7 @@ export function TasksManagementPage() {
           {/* 下面两项：我的申请记录、业务申请记录 */}
           <div className="grid grid-cols-2 gap-2">
             <div
-              onClick={() => showBuilding("我的申请记录")}
+              onClick={() => navigate("/m/my-applies")}
               className="flex items-center justify-between rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100 transition-colors"
             >
               <div className="flex items-center gap-2">

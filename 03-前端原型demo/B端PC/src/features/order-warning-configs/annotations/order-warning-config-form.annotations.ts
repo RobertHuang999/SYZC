@@ -6,15 +6,15 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     targetId: "order-warning-config-form-header",
     number: 1,
     kind: "页面",
-    title: "订单预警一站式多策略表单",
-    content: "针对目标订单一站式配置超时、跌价、盘点、巡检、质押率与贷中风控等多维度监控策略。",
+    title: "订单预警多策略表单（逐条保存）",
+    content: "针对目标订单在同一页面配置超时、跌价、盘点、巡检、质押率与贷中风控等多维度监控策略，每条策略独立保存。",
     details: [
       {
         title: "设计规范与原则",
         items: [
           {
-            label: "一站式配置理念",
-            content: "一个订单只需填写一张综合配置单，通过各卡片独立开关精细化控制启闭，无需反复新建不同类型规则。",
+            label: "逐条保存理念",
+            content: "后端按 strategy_type 独立写入，前端每条策略卡片提供「保存该策略」按钮，与 API 粒度对齐；不提供整页统一保存。",
           },
         ],
       },
@@ -48,19 +48,19 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     targetId: "order-warning-config-form-cards",
     number: 3,
     kind: "规则",
-    title: "策略卡片独立配置与强校验",
-    content: "各子策略卡片拥有独立开关、阈值输入、03/01 预警等级选择与独立通知/升级矩阵。",
+    title: "策略卡片独立配置与逐条保存",
+    content: "各子策略卡片拥有独立开关、阈值输入、03/01 预警等级选择与独立通知/升级矩阵，底部「保存该策略」独立提交。",
     details: [
       {
         title: "卡片校验清单",
         items: [
           {
             label: "子项启用必填校验",
-            content: "任一策略卡片开关开启时，其对应的预警等级必须选择、通知渠道至少勾选一项、预警对象至少指定一人。",
+            content: "保存某策略且 Switch=ON 时，其对应的预警等级必须选择、预警对象至少指定一人。",
           },
           {
             label: "最少启用策略约束",
-            content: "整单保存提交时，必须至少启用 1 个风控策略卡片，禁止保存全关闭的空规则单据。",
+            content: "保存某策略 Switch=OFF 时，若其为最后 1 项已启用策略则 R07a 阻断。",
           },
           {
             label: "抵质押率双等级",
@@ -75,15 +75,15 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     targetId: "order-warning-config-form-actions",
     number: 4,
     kind: "交互",
-    title: "保存提交与离开拦截",
-    content: "提供保存并生效与取消返回操作，表单脏数据未保存离开时弹出确认拦截。",
+    title: "离开拦截与单策略保存",
+    content: "页头仅提供取消返回；各策略卡片独立保存，成功后停留当前页；存在未保存卡片修改时离开弹出确认。",
     details: [
       {
         title: "保存与联动",
         items: [
           {
             label: "引擎同步",
-            content: "保存后生成新 Version，幂等同步风控判定引擎并按需初始化贷中风控台账。",
+            content: "单策略保存后 Version+1，幂等同步该子项风控判定引擎；贷中风控子项按需初始化台账。",
           },
         ],
       },

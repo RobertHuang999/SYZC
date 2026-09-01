@@ -4,6 +4,19 @@ import { collateralWarningListAnnotations } from "@/features/collateral-warning-
 import { collateralWarningDocuments } from "@/features/collateral-warning-events/documents/collateral-warning-documents"
 import { deviceWarningListAnnotations } from "@/features/device-warning-events/annotations/device-warning-list.annotations"
 import { deviceWarningDocuments } from "@/features/device-warning-events/documents/device-warning-documents"
+import { accessControlDeviceH5ListAnnotations } from "@/features/access-control-devices/annotations/access-control-device-list.annotations"
+import { accessControlDeviceDocuments } from "@/features/access-control-devices/documents/access-control-device-documents"
+import {
+  myApplyRecordsListAnnotations,
+  myUnlockApplyDetailH5Annotations,
+} from "@/features/my-applies/annotations/my-apply.annotations"
+import { myApplyDocuments } from "@/features/my-applies/documents/my-apply-documents"
+import {
+  unlockApplyAuditH5DetailAnnotations,
+  unlockApplyAuditH5ListAnnotations,
+} from "@/features/unlock-applies/annotations/unlock-apply-audit.annotations"
+import { unlockApplyAuditH5Documents } from "@/features/unlock-applies/documents/unlock-apply-audit-documents"
+import { deviceManagementHubAnnotations } from "@/pages/device-management.annotations"
 import {
   PrototypeAnnotationProvider,
   type PrototypeAnnotation,
@@ -25,6 +38,32 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
     pageTitle = "IoT 设备预警事件 · 移动端交互与 PRD 标注"
     currentAnnotations = deviceWarningListAnnotations
     currentDocuments = deviceWarningDocuments
+  } else if (location.pathname.startsWith("/m/my-applies/unlock/")) {
+    pageTitle = "开锁申请详情 · 移动端交互与 PRD 标注"
+    currentAnnotations = myUnlockApplyDetailH5Annotations
+    currentDocuments = myApplyDocuments
+  } else if (location.pathname.startsWith("/m/my-applies")) {
+    pageTitle = "我的申请记录 · 移动端交互与 PRD 标注"
+    currentAnnotations = myApplyRecordsListAnnotations
+    currentDocuments = myApplyDocuments
+  } else if (
+    location.pathname.startsWith("/m/access-control-devices") ||
+    location.pathname.startsWith("/m/device-management")
+  ) {
+    pageTitle = "设备管理 · 移动端交互与 PRD 标注"
+    currentAnnotations = [
+      ...deviceManagementHubAnnotations,
+      ...accessControlDeviceH5ListAnnotations,
+    ]
+    currentDocuments = accessControlDeviceDocuments
+  } else if (location.pathname.startsWith("/m/approval/unlock-applies/")) {
+    pageTitle = "开锁审批详情 · 移动端交互与 PRD 标注"
+    currentAnnotations = unlockApplyAuditH5DetailAnnotations
+    currentDocuments = unlockApplyAuditH5Documents
+  } else if (location.pathname.startsWith("/m/approval/unlock-applies")) {
+    pageTitle = "开锁审批 · 移动端交互与 PRD 标注"
+    currentAnnotations = unlockApplyAuditH5ListAnnotations
+    currentDocuments = unlockApplyAuditH5Documents
   } else {
     pageTitle = "森云·可信供应链数字中枢 · 移动端原型"
     currentAnnotations = [
@@ -52,7 +91,7 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
         category: "PRD需求规格",
         badge: "v6.2.0",
         content: `### 移动端中枢首页
-面向企业风控总监、驻库监管员与银行客户经理，提供实时的**仓储现场视频轮播、指标大盘、风控告警穿透与扫码巡检**入口。`,
+面向企业风控总监、驻库监管员和银行客户经理，提供实时的**仓储现场视频轮播、指标大盘、风控告警穿透与扫码巡检**入口。`,
       },
     ]
   }

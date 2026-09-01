@@ -29,7 +29,7 @@ import {
   MOCK_ORDERS,
   ORDER_STRATEGY_DEFINITIONS,
 } from "../lib/detail-utils"
-import { validateOrderWarningConfig } from "../lib/validation"
+import { validateStrategySave } from "../lib/validation"
 
 const NOTIFY_CHANNEL_OPTIONS = ["站内信", "短信", "邮件"] as const
 
@@ -47,6 +47,17 @@ export function OrderWarningConfigFormPage() {
     existing ? detailToFormValues(existing) : createEmptyFormValues()
   )
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [savedStrategies, setSavedStrategies] = useState<
+    Partial<Record<OrderWarningStrategyKey, boolean>>
+  >(() => {
+    if (!existing) return {}
+    return Object.fromEntries(
+      existing.activeStrategies.map((strategy) => [strategy.key, true])
+    ) as Partial<Record<OrderWarningStrategyKey, boolean>>
+  })
+  const [dirtyStrategies, setDirtyStrategies] = useState<
+    Partial<Record<OrderWarningStrategyKey, boolean>>
+  >({})
 
   if (isEdit && !existing) {
     return (
@@ -78,6 +89,7 @@ export function OrderWarningConfigFormPage() {
         [key]: { ...current.strategies[key], ...patch },
       },
     }))
+    setDirtyStrategies((current) => ({ ...current, [key]: true }))
   }
 
   const handleOrderChange = (orderNo: string) => {
@@ -112,16 +124,46 @@ export function OrderWarningConfigFormPage() {
     })
   }
 
-  const handleSave = () => {
-    const validationError = validateOrderWarningConfig(form, id)
+  const handleSaveStrategy = (key: OrderWarningStrategyKey, strategyName: string) => {
+    const persistedEnabledKeys = ORDER_STRATEGY_DEFINITIONS.filter(
+      (def) => savedStrategies[def.key]
+    ).map((def) => def.key)
+
+    const validationError = validateStrategySave(
+      key,
+      form,
+      id,
+      isEdit ? persistedEnabledKeys : undefined
+    )
     if (validationError) {
       setToastMessage(validationError)
       window.setTimeout(() => setToastMessage(null), 3000)
       return
     }
 
-    setToastMessage("保存成功")
-    window.setTimeout(() => navigate("/预警配置/订单预警配置"), 800)
+    setSavedStrategies((current) => ({
+      ...current,
+      [key]: form.strategies[key].enabled,
+    }))
+    setDirtyStrategies((current) => ({ ...current, [key]: false }))
+    if (form.version !== null) {
+      setForm((current) => ({
+        ...current,
+        version: (current.version ?? 0) + 1,
+      }))
+    } else {
+      setForm((current) => ({ ...current, version: 1 }))
+    }
+    setToastMessage(`${strategyName}保存成功`)
+    window.setTimeout(() => setToastMessage(null), 2500)
+  }
+
+  const handleLeave = () => {
+    const hasDirty = Object.values(dirtyStrategies).some(Boolean)
+    if (hasDirty && !window.confirm("当前有未保存的策略修改，确定离开吗？")) {
+      return
+    }
+    navigate("/预警配置/订单预警配置")
   }
 
   return (
@@ -137,13 +179,10 @@ export function OrderWarningConfigFormPage() {
               {pageTitle}
             </h1>
             <div className="flex flex-wrap gap-2">
-              <Link to="/预警配置/订单预警配置">
-                <Button variant="outline">
-                  <ArrowLeftIcon />
-                  取消
-                </Button>
-              </Link>
-              <Button onClick={handleSave}>保存并生效</Button>
+              <Button variant="outline" onClick={handleLeave}>
+                <ArrowLeftIcon />
+                取消
+              </Button>
             </div>
           </div>
         </PrototypeAnnotationTarget>
@@ -242,7 +281,7 @@ export function OrderWarningConfigFormPage() {
         <PrototypeAnnotationTarget annotationIds={["order-warning-config-form-cards"]}>
           <Card>
             <CardHeader>
-              <CardTitle>预警策略配置（至少启用 1 项）</CardTitle>
+              <CardTitle>预警策略配置（逐条独立保存 · 至少启用 1 项）</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {ORDER_STRATEGY_DEFINITIONS.map((def, index) => {
@@ -597,6 +636,22 @@ export function OrderWarningConfigFormPage() {
                             </div>
                           </div>
                         )}
+
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-4 md:col-span-2">
+                          <span className="text-sm text-muted-foreground">
+                            {dirtyStrategies[def.key]
+                              ? "● 未保存"
+                              : savedStrategies[def.key] !== undefined
+                                ? "✓ 已保存"
+                                : ""}
+                          </span>
+                          <Button
+                            size="sm"
+                            onClick={() => handleSaveStrategy(def.key, def.name)}
+                          >
+                            保存该策略
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>

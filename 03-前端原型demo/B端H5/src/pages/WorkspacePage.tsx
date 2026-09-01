@@ -121,6 +121,8 @@ const WORKSPACE_GROUPS: WorkstationGroup[] = [
         name: "设备管理",
         icon: Camera,
         bgColor: "bg-[#43a047]",
+        customRoute: "/m/device-management",
+        isAvailable: true,
       },
       {
         id: "ws-cargo-movement",
@@ -331,7 +333,7 @@ export function WorkspacePage() {
       </div>
 
       {/* 滚动工作台分组列表 */}
-      <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-3">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 space-y-3 overscroll-contain">
         {WORKSPACE_GROUPS.map((group) => (
           <section
             key={group.groupName}

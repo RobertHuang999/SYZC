@@ -20,7 +20,7 @@ export type BreadcrumbItem = {
 }
 
 export const topModules: TopModule[] = [
-  { id: "home", label: "工作中心", path: "/首页" },
+  { id: "home", label: "工作中心", path: "/工作中心/审批中心" },
   { id: "storage", label: "仓储", path: "/仓储/库存查询/存货管理" },
   { id: "finance", label: "融资/监管", path: "/融资/监管/融资管理/客户融资需求线索" },
   { id: "trade", label: "交易", path: "/交易/采购需求管理" },
@@ -209,7 +209,7 @@ const decodePath = (pathname: string) => {
 }
 
 const modulePrefixes: Record<string, string> = {
-  home: "/首页",
+  home: "/工作中心/审批中心",
   storage: "/仓储",
   finance: "/融资/监管",
   trade: "/交易",

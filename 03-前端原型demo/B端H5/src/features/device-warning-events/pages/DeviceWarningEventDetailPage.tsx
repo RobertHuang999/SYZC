@@ -58,9 +58,9 @@ export function DeviceWarningEventDetailPage() {
         }
       />
 
-      <div className="flex flex-1 flex-col overflow-hidden bg-[#f4f6f8]">
+      <div className="flex flex-1 flex-col min-h-0 overflow-hidden bg-[#f4f6f8]">
         {/* 可滚动内容区域 */}
-        <div className="flex-1 space-y-3 overflow-y-auto px-3.5 py-3 pb-6">
+        <div className="flex-1 min-h-0 space-y-3 overflow-y-auto px-3.5 py-3 pb-6 overscroll-contain">
           {/* 1. 页头摘要信息（严格对齐字段清单第一章） */}
           <SectionCard
             title="预警事实摘要"

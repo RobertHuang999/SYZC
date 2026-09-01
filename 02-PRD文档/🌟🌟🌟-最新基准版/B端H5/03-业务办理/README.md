@@ -2,6 +2,7 @@
 
 > **底栏 Tab**：业务办理（`/m/tasks`）
 > **原型唯一定义来源**：`mobileMenuData.ts` · `primaryModule = "业务办理"`
+> **审批 taxonomy 对照**：[00-审批中心结构说明.md](./00-审批中心结构说明.md)
 
 ## 二级板块
 

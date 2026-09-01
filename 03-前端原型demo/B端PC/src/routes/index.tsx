@@ -21,6 +21,12 @@ import { OrderWarningConfigFormPage } from "@/features/order-warning-configs/pag
 import { UnlockApprovalConfigListPage } from "@/features/unlock-approval-configs/pages/UnlockApprovalConfigListPage"
 import { UnlockApprovalConfigDetailPage } from "@/features/unlock-approval-configs/pages/UnlockApprovalConfigDetailPage"
 import { UnlockApprovalConfigFormPage } from "@/features/unlock-approval-configs/pages/UnlockApprovalConfigFormPage"
+import { ApprovalCenterPage } from "@/features/unlock-applies/pages/ApprovalCenterPage"
+import { MyApplicationsPage } from "@/features/unlock-applies/pages/MyApplicationsPage"
+import { MyUnlockApplyDetailPage } from "@/features/unlock-applies/pages/MyUnlockApplyDetailPage"
+import { UnlockApplyListPage } from "@/features/unlock-applies/pages/UnlockApplyListPage"
+import { UnlockApplyDetailPage } from "@/features/unlock-applies/pages/UnlockApplyDetailPage"
+import { AccessControlDeviceListPage } from "@/features/access-control-devices/pages/AccessControlDeviceListPage"
 import { MigrationSchemePage } from "@/features/migration-schemes/pages/MigrationSchemePage"
 import { topModules } from "@/config/navigation"
 import { Navigate, Route, Routes } from "react-router-dom"
@@ -35,7 +41,6 @@ const monitorDeviceRoutes = [
 
 const configMenuPaths = [
   "/物联网IOT管理/监控设备",
-  "/物联网IOT管理/门禁设备",
   "/物联网IOT管理/物联设备",
   "/物联网IOT管理/GPS设备",
   "/物联网IOT管理/人脸配置",
@@ -149,6 +154,24 @@ export function AppRoutes() {
           element={<UnlockApprovalConfigFormPage />}
         />
 
+        <Route path="工作中心/审批中心" element={<ApprovalCenterPage />} />
+        <Route
+          path="工作中心/审批中心/我的申请管理"
+          element={<MyApplicationsPage />}
+        />
+        <Route
+          path="工作中心/审批中心/我的申请管理/unlock-applies/:applyNo"
+          element={<MyUnlockApplyDetailPage />}
+        />
+        <Route
+          path="工作中心/审批中心/其他审批/开锁审核"
+          element={<UnlockApplyListPage />}
+        />
+        <Route
+          path="工作中心/审批中心/其他审批/开锁审核/详情/:applyNo"
+          element={<UnlockApplyDetailPage />}
+        />
+
         <Route
           path="历史迁移与割接/历史迁移总索引"
           element={<MigrationSchemePage />}
@@ -176,6 +199,11 @@ export function AppRoutes() {
         <Route
           path="历史迁移与割接/:id"
           element={<MigrationSchemePage />}
+        />
+
+        <Route
+          path="物联网IOT管理/门禁设备"
+          element={<AccessControlDeviceListPage />}
         />
 
         {topModules.map((module) => (

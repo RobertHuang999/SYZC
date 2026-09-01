@@ -418,8 +418,11 @@ export function PrototypeAnnotationTarget({
     <div
       data-prototype-target={targetId}
       className={cn(
-        "relative",
-        context.enabled && context.showMarkers && activeAnnotation && "ring-2 ring-primary/40 ring-offset-2",
+        "relative transition-all duration-200",
+        context.enabled &&
+          context.showMarkers &&
+          activeAnnotation &&
+          "ring-1 ring-rose-400/80 shadow-[0_0_0_1px_rgba(244,63,94,0.25),0_0_10px_rgba(244,63,94,0.1)] bg-rose-500/[0.03] rounded-xl dark:ring-rose-400/70 dark:bg-rose-950/20",
         className
       )}
     >
@@ -463,6 +466,7 @@ export function PrototypeAnnotationTarget({
         <InPlaceAnnotationCard
           annotation={activeAnnotation}
           targetId={targetId}
+          markerPosition={markerPosition}
           onClose={context.closeInPlacePopup}
         />
       )}
@@ -476,10 +480,12 @@ export function PrototypeAnnotationTarget({
 function InPlaceAnnotationCard({
   annotation,
   targetId,
+  markerPosition = "top-right",
   onClose,
 }: {
   annotation: PrototypeAnnotation
   targetId?: string
+  markerPosition?: "top-left" | "top-right"
   onClose: () => void
 }) {
   const context = useAnnotationContext()
@@ -508,7 +514,8 @@ function InPlaceAnnotationCard({
         clientX: number
         clientY: number
         originSize: Size
-        handle: "right" | "bottom" | "bottom-right"
+        originOffset: Point
+        handle: "right" | "left" | "bottom" | "bottom-right" | "bottom-left"
       }
     | undefined
   >(undefined)
@@ -561,9 +568,9 @@ function InPlaceAnnotationCard({
     moveDragStart.current = undefined
   }
 
-  // 右下角与边缘拉伸处理器
+  // 边缘拉伸处理器
   const startResize = (
-    handle: "right" | "bottom" | "bottom-right",
+    handle: "right" | "left" | "bottom" | "bottom-right" | "bottom-left",
     event: ReactPointerEvent<HTMLDivElement>
   ) => {
     event.currentTarget.setPointerCapture(event.pointerId)
@@ -573,6 +580,7 @@ function InPlaceAnnotationCard({
       clientX: event.clientX,
       clientY: event.clientY,
       originSize: { ...cardSize },
+      originOffset: { ...offset },
       handle,
     }
   }
@@ -588,22 +596,45 @@ function InPlaceAnnotationCard({
 
     let nextWidth = start.originSize.width
     let nextHeight = start.originSize.height
+    let nextOffsetX = start.originOffset.x
 
+    const minW = 340
+    const maxW = Math.max(340, window.innerWidth - 60)
+    const minH = 240
+    const maxH = Math.max(240, window.innerHeight - 80)
+
+    // 水平方向拉伸
     if (start.handle === "right" || start.handle === "bottom-right") {
-      nextWidth = Math.max(
-        340,
-        Math.min(window.innerWidth - 60, start.originSize.width + deltaX)
-      )
+      if (markerPosition === "top-right") {
+        nextWidth = Math.max(minW, Math.min(maxW, start.originSize.width + deltaX))
+        const appliedDeltaX = nextWidth - start.originSize.width
+        nextOffsetX = start.originOffset.x + appliedDeltaX
+      } else {
+        nextWidth = Math.max(minW, Math.min(maxW, start.originSize.width + deltaX))
+      }
+    } else if (start.handle === "left" || start.handle === "bottom-left") {
+      if (markerPosition === "top-right") {
+        nextWidth = Math.max(minW, Math.min(maxW, start.originSize.width - deltaX))
+      } else {
+        nextWidth = Math.max(minW, Math.min(maxW, start.originSize.width - deltaX))
+        const appliedDeltaX = start.originSize.width - nextWidth
+        nextOffsetX = start.originOffset.x + appliedDeltaX
+      }
     }
 
-    if (start.handle === "bottom" || start.handle === "bottom-right") {
-      nextHeight = Math.max(
-        240,
-        Math.min(window.innerHeight - 80, start.originSize.height + deltaY)
-      )
+    // 垂直方向拉伸
+    if (
+      start.handle === "bottom" ||
+      start.handle === "bottom-right" ||
+      start.handle === "bottom-left"
+    ) {
+      nextHeight = Math.max(minH, Math.min(maxH, start.originSize.height + deltaY))
     }
 
     setCardSize({ width: nextWidth, height: nextHeight })
+    if (nextOffsetX !== offset.x) {
+      setOffset((prev) => ({ ...prev, x: nextOffsetX }))
+    }
   }
 
   const onResizeEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -624,7 +655,10 @@ function InPlaceAnnotationCard({
   return (
     <div
       ref={cardRef}
-      className="absolute top-full left-0 mt-2 z-[65] flex flex-col rounded-2xl border-2 border-blue-400/80 bg-white/95 text-slate-900 shadow-[0_20px_50px_rgba(37,99,235,0.18)] backdrop-blur-2xl transition-[box-shadow] animate-in fade-in-50 zoom-in-95 text-left select-text dark:bg-slate-900/95 dark:text-slate-100 dark:border-blue-500/80"
+      className={cn(
+        "absolute z-[65] flex flex-col rounded-2xl border-2 border-blue-400/80 bg-white/95 text-slate-900 shadow-[0_20px_50px_rgba(37,99,235,0.18)] backdrop-blur-2xl transition-[box-shadow] animate-in fade-in-50 zoom-in-95 text-left select-text dark:bg-slate-900/95 dark:text-slate-100 dark:border-blue-500/80",
+        markerPosition === "top-left" ? "top-8 left-0" : "top-8 right-0"
+      )}
       style={{
         width: `${cardSize.width}px`,
         height: `${cardSize.height}px`,
@@ -788,6 +822,18 @@ function InPlaceAnnotationCard({
         ))}
       </div>
 
+      {/* Left Edge Handle */}
+      <div
+        className="group absolute top-0 bottom-0 left-0 w-2.5 cursor-ew-resize touch-none select-none z-20 flex justify-start"
+        title="左右拖拽拉伸卡片宽度"
+        onPointerDown={(e) => startResize("left", e)}
+        onPointerMove={onResizeMove}
+        onPointerUp={onResizeEnd}
+        onPointerCancel={onResizeEnd}
+      >
+        <div className="h-full w-1 transition-colors group-hover:bg-blue-500/50 group-active:bg-blue-500" />
+      </div>
+
       {/* Right Edge Handle */}
       <div
         className="group absolute top-0 bottom-0 right-0 w-2.5 cursor-ew-resize touch-none select-none z-20 flex justify-end"
@@ -797,7 +843,7 @@ function InPlaceAnnotationCard({
         onPointerUp={onResizeEnd}
         onPointerCancel={onResizeEnd}
       >
-        <div className="h-full w-1 transition-colors group-hover:bg-primary/50 group-active:bg-primary" />
+        <div className="h-full w-1 transition-colors group-hover:bg-blue-500/50 group-active:bg-blue-500" />
       </div>
 
       {/* Bottom Edge Handle */}
@@ -809,7 +855,23 @@ function InPlaceAnnotationCard({
         onPointerUp={onResizeEnd}
         onPointerCancel={onResizeEnd}
       >
-        <div className="w-full h-1 transition-colors group-hover:bg-primary/50 group-active:bg-primary" />
+        <div className="w-full h-1 transition-colors group-hover:bg-blue-500/50 group-active:bg-blue-500" />
+      </div>
+
+      {/* Bottom-Left Corner Handle (左下角自由拖动宽高) */}
+      <div
+        className="group absolute bottom-0 left-0 size-6 cursor-nesw-resize touch-none select-none flex items-end justify-start p-0.5 z-30"
+        title="按住左下角自由拉伸卡片宽度与高度"
+        onPointerDown={(e) => startResize("bottom-left", e)}
+        onPointerMove={onResizeMove}
+        onPointerUp={onResizeEnd}
+        onPointerCancel={onResizeEnd}
+      >
+        <div className="rounded-sm bg-muted-foreground/30 p-0.5 transition-colors group-hover:bg-blue-600 group-hover:text-white group-active:bg-blue-600 shadow-xs">
+          <svg className="size-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+            <path d="M3 15L9 21M3 9L15 21M3 3L21 21" />
+          </svg>
+        </div>
       </div>
 
       {/* Bottom-Right Corner Handle (右下角自由拖动宽高) */}
@@ -821,7 +883,7 @@ function InPlaceAnnotationCard({
         onPointerUp={onResizeEnd}
         onPointerCancel={onResizeEnd}
       >
-        <div className="rounded-sm bg-muted-foreground/30 p-0.5 transition-colors group-hover:bg-primary group-hover:text-primary-foreground group-active:bg-primary shadow-xs">
+        <div className="rounded-sm bg-muted-foreground/30 p-0.5 transition-colors group-hover:bg-blue-600 group-hover:text-white group-active:bg-blue-600 shadow-xs">
           <svg className="size-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
             <path d="M21 15L15 21M21 9L9 21M21 3L3 21" />
           </svg>

@@ -5,8 +5,12 @@ import { DeviceWarningEventDetailPage } from "@/features/device-warning-events/p
 import { DeviceWarningEventListPage } from "@/features/device-warning-events/pages/DeviceWarningEventListPage"
 import { DeviceWarningEventReleasePage } from "@/features/device-warning-events/pages/DeviceWarningEventReleasePage"
 import { GenericModulePage } from "@/pages/GenericModulePage"
+import { MyApplyRecordsPage } from "@/features/my-applies/pages/MyApplyRecordsPage"
+import { MyUnlockApplyDetailPage } from "@/features/my-applies/pages/MyUnlockApplyDetailPage"
 import { UnlockApplyDetailPage } from "@/features/unlock-applies/pages/UnlockApplyDetailPage"
 import { UnlockApplyListPage } from "@/features/unlock-applies/pages/UnlockApplyListPage"
+import { AccessControlDeviceListPage } from "@/features/access-control-devices/pages/AccessControlDeviceListPage"
+import { DeviceManagementPage } from "@/pages/DeviceManagementPage"
 import { HomePage } from "@/pages/HomePage"
 import { PledgeOrderPlaceholderPage } from "@/pages/PledgeOrderPlaceholderPage"
 import { ProfilePage } from "@/pages/ProfilePage"
@@ -30,11 +34,20 @@ export function AppRoutes() {
       <Route path="/m/profile" element={<ProfilePage />} />
 
       {/* 5. 通用二级模块/Tab 原型落地承接 */}
+      <Route path="/m/my-applies" element={<MyApplyRecordsPage />} />
+      <Route
+        path="/m/my-applies/unlock/:applyNo"
+        element={<MyUnlockApplyDetailPage />}
+      />
+
       <Route path="/m/approval/unlock-applies" element={<UnlockApplyListPage />} />
       <Route
         path="/m/approval/unlock-applies/:applyNo"
         element={<UnlockApplyDetailPage />}
       />
+
+      <Route path="/m/device-management" element={<DeviceManagementPage />} />
+      <Route path="/m/access-control-devices" element={<AccessControlDeviceListPage />} />
 
       <Route path="/m/module/:moduleId" element={<GenericModulePage />} />
 

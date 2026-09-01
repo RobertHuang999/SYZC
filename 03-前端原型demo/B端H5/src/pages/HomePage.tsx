@@ -53,7 +53,7 @@ export function HomePage() {
       </div>
 
       {/* 页面主滚动区域 */}
-      <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-3">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 space-y-3 overscroll-contain">
         {/* 1. 数据看板 / 风控预警 / 设备状态卡片 */}
         <section className="rounded-2xl bg-white p-3 shadow-xs space-y-3">
           {/* 上半部分：数据看板 & 风控预警快捷入口 */}

@@ -85,22 +85,46 @@ export function validateOrderWarningConfig(
   )
   if (duplicateName) return "规则名称在当前租户内已存在"
 
-  const enabledDefinitions = ORDER_STRATEGY_DEFINITIONS.filter(
-    (definition) => values.strategies[definition.key].enabled
-  )
-  if (enabledDefinitions.length === 0) return "请至少启用一项预警策略"
-
-  for (const definition of enabledDefinitions) {
-    if (definition.disabledForSupervision && order.orderType === "监管") {
-      return `${definition.name}不适用于监管订单`
-    }
-    const error = validateStrategy(definition.key, values)
-    if (error) return error
-  }
-
   if (values.version !== null && values.version < 1) {
     return "配置版本无效，请刷新后重试"
   }
 
   return null
+}
+
+export function validateStrategySave(
+  key: OrderWarningStrategyKey,
+  values: OrderWarningConfigFormValues,
+  editingConfigId?: string,
+  persistedEnabledKeys?: OrderWarningStrategyKey[]
+): string | null {
+  const basicError = validateOrderWarningConfig(values, editingConfigId)
+  if (basicError) return basicError
+
+  const order = MOCK_ORDERS.find((item) => item.orderNo === values.orderNo)
+  if (!order) return "关联订单不存在或已失效"
+
+  const strategy = values.strategies[key]
+  const definition = ORDER_STRATEGY_DEFINITIONS.find((item) => item.key === key)
+  if (!definition) return "未知策略类型"
+
+  if (!strategy.enabled) {
+    const otherEnabled = ORDER_STRATEGY_DEFINITIONS.filter((item) => {
+      if (item.key === key) return false
+      if (persistedEnabledKeys) {
+        return persistedEnabledKeys.includes(item.key)
+      }
+      return values.strategies[item.key].enabled
+    })
+    if (otherEnabled.length === 0) {
+      return "请至少启用一项预警策略"
+    }
+    return null
+  }
+
+  if (definition.disabledForSupervision && order.orderType === "监管") {
+    return `${definition.name}不适用于监管订单`
+  }
+
+  return validateStrategy(key, values)
 }

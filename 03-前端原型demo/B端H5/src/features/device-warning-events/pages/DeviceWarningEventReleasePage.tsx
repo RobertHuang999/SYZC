@@ -128,8 +128,8 @@ export function DeviceWarningEventReleasePage() {
     <MobileShell>
       <NavBar title="解除设备预警" />
 
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="flex-1 space-y-3.5 overflow-y-auto px-3.5 py-3">
+      <div className="flex flex-1 flex-col min-h-0 overflow-hidden">
+        <div className="flex-1 min-h-0 space-y-3.5 overflow-y-auto px-3.5 py-3 overscroll-contain">
           {/* 1. 待解除预警简要卡片 */}
           <section className="rounded-2xl border border-gray-200/90 bg-white p-3.5 shadow-xs">
             <div className="flex items-start justify-between gap-2">

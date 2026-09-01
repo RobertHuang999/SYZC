@@ -332,7 +332,7 @@ export function CollateralWarningListPage() {
         )}
 
         {/* 数据列表区域 */}
-        <div className="flex-1 space-y-3 overflow-y-auto px-3.5 py-3">
+        <div className="flex-1 min-h-0 space-y-3 overflow-y-auto px-3.5 py-3 overscroll-contain">
           {filteredEvents.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-white py-16 text-center text-gray-400">
               <ShieldAlert className="size-10 text-gray-300 mb-2" />

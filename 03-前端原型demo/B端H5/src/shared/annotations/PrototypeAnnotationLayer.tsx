@@ -1,7 +1,9 @@
 import {
+  CheckIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   CompassIcon,
+  CopyIcon,
   EyeIcon,
   EyeOffIcon,
   FileSpreadsheetIcon,
@@ -20,7 +22,9 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react"
@@ -266,12 +270,89 @@ export function PrototypeAnnotationProvider({
 }
 
 /**
+ * 移动端触屏/鼠标拖拽滑动模拟 Hook（支持滚轮 + 鼠标按住拖拽滑动双重交互）
+ */
+function useMobileDragScroll(containerRef: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    let isDown = false
+    let startY = 0
+    let scrollTarget: HTMLElement | null = null
+    let startScrollTop = 0
+
+    const findScrollParent = (target: HTMLElement | null): HTMLElement | null => {
+      let curr = target
+      while (curr && curr !== el) {
+        const style = window.getComputedStyle(curr)
+        const overflowY = style.overflowY
+        if (
+          (overflowY === "auto" || overflowY === "scroll") &&
+          curr.scrollHeight > curr.clientHeight
+        ) {
+          return curr
+        }
+        curr = curr.parentElement
+      }
+      return null
+    }
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.button !== 0) return
+      const target = e.target as HTMLElement | null
+      // 忽略可输入控件、交互按钮与特定免拖拽元素
+      if (
+        target?.closest("input, select, textarea, button, a, [role='button'], [data-no-drag]")
+      ) {
+        return
+      }
+
+      scrollTarget = findScrollParent(target)
+      if (!scrollTarget) return
+
+      isDown = true
+      startY = e.clientY
+      startScrollTop = scrollTarget.scrollTop
+    }
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!isDown || !scrollTarget) return
+      const deltaY = e.clientY - startY
+      if (Math.abs(deltaY) > 1) {
+        scrollTarget.scrollTop = startScrollTop - deltaY
+      }
+    }
+
+    const onPointerUp = () => {
+      isDown = false
+      scrollTarget = null
+    }
+
+    el.addEventListener("pointerdown", onPointerDown)
+    window.addEventListener("pointermove", onPointerMove)
+    window.addEventListener("pointerup", onPointerUp)
+    window.addEventListener("pointercancel", onPointerUp)
+
+    return () => {
+      el.removeEventListener("pointerdown", onPointerDown)
+      window.removeEventListener("pointermove", onPointerMove)
+      window.removeEventListener("pointerup", onPointerUp)
+      window.removeEventListener("pointercancel", onPointerUp)
+    }
+  }, [containerRef])
+}
+
+/**
  * 桌面三栏工作台包装容器（清爽浅色现代 B 端风格）
  */
 function WorkbenchLayout({ children }: { children: ReactNode }) {
   const context = useAnnotationContext()
   const location = useLocation()
   const navigate = useNavigate()
+  const phoneViewportRef = useRef<HTMLDivElement>(null)
+
+  useMobileDragScroll(phoneViewportRef)
 
   const navItems = [
     { title: "首页中枢", path: "/m/home", icon: "🏠" },
@@ -449,7 +530,10 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
             </div>
 
             {/* 页面内容注入 */}
-            <div className="flex flex-1 flex-col min-h-0 overflow-hidden relative text-slate-900 select-text">
+            <div
+              ref={phoneViewportRef}
+              className="flex flex-1 flex-col min-h-0 overflow-hidden relative text-slate-900 select-text"
+            >
               {children}
             </div>
 
@@ -617,7 +701,8 @@ export function PrototypeAnnotationTarget({
       data-prototype-target={targetId}
       className={cn(
         "relative transition-all duration-300",
-        isTargetActive && "ring-2 ring-blue-500/80 rounded-xl bg-blue-50/10",
+        isTargetActive &&
+          "ring-1 ring-rose-400/80 shadow-[0_0_0_1px_rgba(244,63,94,0.25),0_0_10px_rgba(244,63,94,0.1)] bg-rose-500/[0.03] rounded-xl dark:ring-rose-400/70 dark:bg-rose-950/20",
         className
       )}
     >
@@ -1169,12 +1254,21 @@ function DocumentTabContent({
   fallbackCategory: string
 }) {
   const context = useAnnotationContext()
+  const [copied, setCopied] = useState(false)
   const doc = context.documents.find(
     (d) =>
       d.id === targetDocId ||
       d.category === fallbackCategory ||
       d.title.includes(fallbackCategory.slice(0, 2))
   )
+
+  const handleCopy = () => {
+    if (doc?.content) {
+      navigator.clipboard.writeText(doc.content)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
 
   if (!doc) {
     return (
@@ -1186,16 +1280,35 @@ function DocumentTabContent({
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-3">
-      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-blue-600" />
-          <h3 className="font-bold text-sm text-slate-900">{doc.title}</h3>
+      <div className="flex items-center justify-between border-b border-slate-100 pb-3 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="size-2 rounded-full bg-blue-600 shrink-0" />
+          <h3 className="font-bold text-sm text-slate-900 truncate">{doc.title}</h3>
+          {doc.badge && (
+            <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-600 border border-blue-200 shrink-0">
+              {doc.badge}
+            </span>
+          )}
         </div>
-        {doc.badge && (
-          <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-600 border border-blue-200">
-            {doc.badge}
-          </span>
-        )}
+
+        <button
+          type="button"
+          className="flex items-center gap-1 shrink-0 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-600 shadow-2xs transition-colors hover:bg-slate-50 hover:text-slate-900 active:scale-95 cursor-pointer"
+          onClick={handleCopy}
+          title="复制完整的 Markdown 文档源码"
+        >
+          {copied ? (
+            <>
+              <CheckIcon className="size-3 text-emerald-600" />
+              <span className="text-emerald-600 font-medium">已复制</span>
+            </>
+          ) : (
+            <>
+              <CopyIcon className="size-3" />
+              <span>复制 Markdown</span>
+            </>
+          )}
+        </button>
       </div>
 
       <div className="prose prose-xs max-w-none text-slate-700 text-xs leading-relaxed">

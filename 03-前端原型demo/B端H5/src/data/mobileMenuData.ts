@@ -230,6 +230,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     buttons: ["查看页面", "重命名", "仓库绑定", "设备数据", "移除设备", "获取密码"],
     dataPermission: "登录账号仓库权限决定；未绑定位置的设备所有人可见",
     iconType: "Lock",
+    customRoute: "/m/access-control-devices",
   },
   {
     id: "ws-device-gps",

@@ -43,7 +43,7 @@ export function ProfilePage() {
       </header>
 
       {/* 主滚动体 */}
-      <div className="flex-1 overflow-y-auto px-3.5 py-3 space-y-3">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3.5 py-3 space-y-3 overscroll-contain">
         {/* 1. 用户信息卡片 */}
         <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-950 p-4 text-white shadow-md">
           <div className="flex items-center gap-3">
