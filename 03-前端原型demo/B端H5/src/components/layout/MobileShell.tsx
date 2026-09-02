@@ -6,7 +6,10 @@ type MobileShellProps = {
 
 export function MobileShell({ children }: MobileShellProps) {
   return (
-    <div className="relative flex flex-1 flex-col h-full w-full min-h-0 overflow-hidden bg-[#edf2f8]">
+    <div
+      data-overlay-root=""
+      className="relative flex flex-1 flex-col h-full w-full min-h-0 overflow-hidden bg-[#edf2f8]"
+    >
       {children}
     </div>
   )

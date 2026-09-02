@@ -731,6 +731,7 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
               {/* 页面内容注入 */}
               <div
                 ref={phoneViewportRef}
+                data-overlay-root=""
                 className="flex flex-1 flex-col min-h-0 overflow-hidden relative text-slate-900 select-text transform-gpu"
               >
                 {children}
