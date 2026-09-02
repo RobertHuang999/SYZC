@@ -63,7 +63,6 @@ export function createDirectLockUnlockApply(params: {
       passwordMasked: "****5678",
       validFrom: submitTime.slice(0, 16),
       validTo: formatDateTime(new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)).slice(0, 16),
-      smsStatus: "发送成功",
     },
     eligible: false,
     needsApproval: false,

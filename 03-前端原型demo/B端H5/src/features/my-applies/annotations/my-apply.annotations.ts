@@ -110,7 +110,7 @@ export const myUnlockApplyDetailH5Annotations: PrototypeAnnotation[] = [
     number: 1,
     kind: "页面",
     title: "H5 开锁申请详情",
-    content: "NavBar + 页头摘要框（单号/设备/状态 Tag）+ KeyValue 分区；可折叠：审批配置/记录。凭证信息区暂不接入。",
+    content: "NavBar + 页头摘要框（单号/设备/申请与凭证状态 Tag）+ KeyValue 分区；可折叠：审批配置/记录/凭证信息。",
     details: [
       {
         title: "布局",
@@ -132,9 +132,29 @@ export const myUnlockApplyDetailH5Annotations: PrototypeAnnotation[] = [
     ],
   },
   {
+    id: "my-unlock-apply-detail-h5-credential",
+    targetId: "my-unlock-apply-detail-h5-credential",
+    number: 2,
+    kind: "规则",
+    title: "凭证信息 SectionCard",
+    content:
+      "已通过时展示凭证区：已下发→密码+复制；密码下发失败→失败原因+重新获取密码（脱敏展示不可复制）。",
+    details: [
+      {
+        title: "操作",
+        items: [
+          {
+            label: "重新获取密码",
+            content: "凭证=生成失败或密码下发失败时展示；成功后→已下发。",
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: "my-unlock-apply-detail-h5-withdraw",
     targetId: "my-unlock-apply-detail-h5-withdraw",
-    number: 2,
+    number: 3,
     kind: "规则",
     title: "底部撤回栏",
     content: "待审批时固定底栏「撤回申请」+ 二次确认；文案与 PC 一致。",

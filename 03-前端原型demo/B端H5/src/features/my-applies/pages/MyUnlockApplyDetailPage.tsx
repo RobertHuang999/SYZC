@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { Copy } from "lucide-react"
 import { useParams } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
@@ -7,6 +8,7 @@ import { Toast } from "@/components/ui/Toast"
 import { formatDateTime } from "@/shared/lib/date-utils"
 import {
   myApplyListPathWithTab,
+  CREDENTIAL_STATUS_LABEL,
   UNLOCK_APPLY_STATUS_LABEL,
 } from "../domain/constants"
 import type { UnlockApply } from "../domain/types"
@@ -37,6 +39,28 @@ function formatRoomZone(apply: UnlockApply): string {
   return apply.roomZone
 }
 
+function canShowPassword(apply: UnlockApply): boolean {
+  if (apply.status !== "APPROVED" || !apply.credential.password) return false
+  return (
+    apply.credential.status === "DELIVERED" ||
+    apply.credential.status === "DELIVERY_FAILED"
+  )
+}
+
+function canRetryPassword(apply: UnlockApply): boolean {
+  return (
+    apply.status === "APPROVED" &&
+    (apply.credential.status === "GEN_FAILED" ||
+      apply.credential.status === "DELIVERY_FAILED")
+  )
+}
+
+function shouldShowCredentialSection(apply: UnlockApply): boolean {
+  if (apply.status === "APPROVED") return true
+  if (apply.credential.status !== "NOT_GENERATED") return true
+  return apply.status === "REJECTED" || apply.status === "PENDING"
+}
+
 export function MyUnlockApplyDetailPage() {
   const { applyNo } = useParams<{ applyNo: string }>()
   const [apply, setApply] = useState<UnlockApply | undefined>(() =>
@@ -47,6 +71,7 @@ export function MyUnlockApplyDetailPage() {
   const [recordsCollapsed, setRecordsCollapsed] = useState(
     () => apply?.status !== "APPROVED"
   )
+  const [credentialCollapsed, setCredentialCollapsed] = useState(false)
   const [withdrawOpen, setWithdrawOpen] = useState(false)
 
   useEffect(() => {
@@ -58,6 +83,8 @@ export function MyUnlockApplyDetailPage() {
       setApply(next)
     })
   }, [applyNo])
+
+  const showPassword = useMemo(() => (apply ? canShowPassword(apply) : false), [apply])
 
   if (!apply) {
     return (
@@ -78,6 +105,34 @@ export function MyUnlockApplyDetailPage() {
     setToast("撤回成功")
   }
 
+  const handleCopy = async () => {
+    if (!apply.credential.password) return
+    try {
+      await navigator.clipboard.writeText(apply.credential.password)
+      setToast("已复制到剪贴板")
+    } catch {
+      setToast("复制失败，请手动复制")
+    }
+  }
+
+  const handleRetryPassword = () => {
+    setApply({
+      ...apply,
+      credential: {
+        ...apply.credential,
+        status: "DELIVERED",
+        deliveryFailReason: undefined,
+        genFailReason: undefined,
+        password: apply.credential.password ?? "856778",
+        passwordMasked: apply.credential.passwordMasked ?? "****5678",
+      },
+    })
+    setToast("密码已重新获取")
+  }
+
+  const credentialInvalid =
+    apply.credential.status === "EXPIRED" || apply.credential.status === "SUPERSEDED"
+
   return (
     <MobileShell>
       <PrototypeAnnotationTarget annotationIds={["my-unlock-apply-detail-h5-page"]}>
@@ -91,6 +146,9 @@ export function MyUnlockApplyDetailPage() {
           <div className="mt-2 flex flex-wrap gap-2">
             <span className="inline-flex rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-orange-700">
               {UNLOCK_APPLY_STATUS_LABEL[apply.status]}
+            </span>
+            <span className="inline-flex rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-700">
+              凭证 {CREDENTIAL_STATUS_LABEL[apply.credential.status]}
             </span>
           </div>
         </div>
@@ -166,6 +224,79 @@ export function MyUnlockApplyDetailPage() {
             <KeyValue label="最终结论" value={apply.finalConclusion} />
           )}
         </SectionCard>
+
+        {shouldShowCredentialSection(apply) && (
+          <PrototypeAnnotationTarget annotationIds={["my-unlock-apply-detail-h5-credential"]}>
+            <SectionCard
+              title="凭证信息"
+              collapsed={credentialCollapsed}
+              onToggleCollapse={setCredentialCollapsed}
+            >
+              <KeyValue
+                label="凭证状态"
+                value={CREDENTIAL_STATUS_LABEL[apply.credential.status]}
+              />
+              {apply.credential.validFrom && apply.credential.validTo && (
+                <KeyValue
+                  label="密码有效期"
+                  value={`${apply.credential.validFrom.slice(5, 16)} ~ ${apply.credential.validTo.slice(5, 16)}`}
+                />
+              )}
+
+              {(apply.credential.status === "GEN_FAILED" ||
+                apply.credential.status === "DELIVERY_FAILED") &&
+                (apply.credential.deliveryFailReason ?? apply.credential.genFailReason) && (
+                <KeyValue
+                  label="失败原因"
+                  value={
+                    apply.credential.deliveryFailReason ?? apply.credential.genFailReason ?? ""
+                  }
+                />
+              )}
+
+              {showPassword && (
+                <div className="mt-2 rounded-xl border bg-slate-50 p-3">
+                  <p className="text-[10px] text-gray-500 mb-2">临时密码</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-xl font-semibold tracking-[0.2em] text-gray-900">
+                      {apply.credential.passwordMasked ?? apply.credential.password}
+                    </span>
+                    {apply.credential.status === "DELIVERED" && (
+                      <button
+                        type="button"
+                        className="flex size-9 items-center justify-center rounded-lg bg-white border text-gray-600 active:opacity-70"
+                        onClick={handleCopy}
+                        aria-label="复制密码"
+                      >
+                        <Copy className="size-4" />
+                      </button>
+                    )}
+                  </div>
+                  <p className="mt-2 text-[10px] text-gray-500">密码仅页面展示</p>
+                </div>
+              )}
+
+              {canRetryPassword(apply) && (
+                <button
+                  type="button"
+                  className="mt-3 w-full rounded-xl bg-orange-600 py-2.5 text-sm font-semibold text-white active:opacity-90"
+                  onClick={handleRetryPassword}
+                >
+                  重新获取密码
+                </button>
+              )}
+
+              {credentialInvalid && (
+                <p className="mt-2 text-xs text-gray-500">
+                  {apply.credential.invalidReason ??
+                    (apply.credential.status === "SUPERSEDED"
+                      ? "设备密码已被更新，原密码已失效"
+                      : "凭证已过期，无法查看密码")}
+                </p>
+              )}
+            </SectionCard>
+          </PrototypeAnnotationTarget>
+        )}
       </div>
 
       {apply.status === "PENDING" && apply.needsApproval && (

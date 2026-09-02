@@ -8,19 +8,19 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "开锁申请详情 · 申请人视角",
     content:
-      "从 Tab「我的开锁申请」或 Deep link 进入；只读展示申请快照与审批记录；待审批时可撤回。6.2 不展示关联事务（W00）；凭证信息区暂不接入。",
+      "从 Tab「我的开锁申请」或 Deep link 进入；只读展示申请快照、审批记录与凭证；待审批时可撤回。6.2 不展示关联事务（W00）。",
     details: [
       {
         title: "页面结构",
         items: [
           {
             label: "页头",
-            content: "申请单号 + 申请状态 Tag；待审批展示「撤回」按钮。",
+            content: "申请单号 + 申请状态 Tag + 凭证状态 Tag；待审批展示「撤回」按钮。",
           },
           {
             label: "分区",
             content:
-              "基础信息 / 设备与位置快照 / 申请内容 / 审批配置快照 / 审批记录。",
+              "基础信息 / 设备与位置快照 / 申请内容 / 审批配置快照 / 审批记录 / 临时凭证。",
           },
           {
             label: "返回",
@@ -31,9 +31,37 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
     ],
   },
   {
+    id: "my-unlock-apply-detail-credential",
+    targetId: "my-unlock-apply-detail-credential",
+    number: 2,
+    kind: "规则",
+    title: "凭证展示 · 精简状态机",
+    content:
+      "6.2 凭证状态 6 态：未生成 / 已下发 / 生成失败 / 密码下发失败 / 已过期 / 已失效（被覆盖）。生成失败或密码下发失败时，申请人可「重新获取密码」。",
+    details: [
+      {
+        title: "详情区",
+        items: [
+          {
+            label: "挂锁 / 人脸",
+            content: "密码下发成功→「已下发」；展示密码卡片 + 复制。密码下发失败→展示失败原因 +「重新获取密码」，脱敏密码不可复制。",
+          },
+          {
+            label: "重新获取密码",
+            content: "凭证=生成失败或密码下发失败时展示；成功后→已下发，Toast「密码已重新获取」。",
+          },
+          {
+            label: "复制密码",
+            content: "仅凭证=已下发时可复制 → Toast「已复制到剪贴板」。",
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: "my-unlock-apply-detail-approval",
     targetId: "my-unlock-apply-detail-approval",
-    number: 2,
+    number: 3,
     kind: "字段",
     title: "审批配置快照与审批记录",
     content: "展示提交瞬间固化的配置编号、版本、审批方式、超时与节点；在途申请不受配置后续变更影响（C05）。",
@@ -64,7 +92,7 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
   {
     id: "my-unlock-apply-detail-withdraw",
     targetId: "my-unlock-apply-detail-page",
-    number: 3,
+    number: 4,
     kind: "规则",
     title: "撤回确认",
     content: "撤回二次确认；仅待审批且 needsApproval 时可操作。",

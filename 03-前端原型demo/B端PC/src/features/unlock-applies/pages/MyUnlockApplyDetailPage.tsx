@@ -15,6 +15,8 @@ import {
   DetailSection,
   formatEmptyValue,
 } from "@/shared/components/DetailSection"
+import { CredentialSection } from "../components/CredentialSection"
+import { CredentialStatusBadge } from "../components/CredentialStatusBadge"
 import { UnlockApplyStatusBadge } from "../components/UnlockApplyStatusBadge"
 import { WithdrawConfirmDialog } from "../components/WithdrawConfirmDialog"
 import { MY_APPLY_LIST_PATH } from "../domain/constants"
@@ -74,6 +76,32 @@ export function MyUnlockApplyDetailPage() {
     showToast("撤回成功")
   }
 
+  const handleCopyPassword = async () => {
+    if (!apply?.credential.password) return
+    try {
+      await navigator.clipboard.writeText(apply.credential.password)
+      showToast("已复制到剪贴板")
+    } catch {
+      showToast("复制失败，请手动复制")
+    }
+  }
+
+  const handleRetryPassword = () => {
+    if (!apply) return
+    setApply({
+      ...apply,
+      credential: {
+        ...apply.credential,
+        status: "DELIVERED",
+        deliveryFailReason: undefined,
+        genFailReason: undefined,
+        password: apply.credential.password ?? "856778",
+        passwordMasked: apply.credential.passwordMasked ?? "****5678",
+      },
+    })
+    showToast("密码已重新获取")
+  }
+
   const canWithdraw = apply?.status === "PENDING" && apply.needsApproval
 
   if (!apply) {
@@ -116,6 +144,8 @@ export function MyUnlockApplyDetailPage() {
                   开锁申请 {apply.applyNo}
                 </h1>
                 <UnlockApplyStatusBadge apply={apply} />
+                <span className="text-sm text-muted-foreground">凭证</span>
+                <CredentialStatusBadge status={apply.credential.status} />
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -138,6 +168,9 @@ export function MyUnlockApplyDetailPage() {
           <DetailField label="申请单号">{apply.applyNo}</DetailField>
           <DetailField label="申请状态">
             <UnlockApplyStatusBadge apply={apply} />
+          </DetailField>
+          <DetailField label="凭证状态">
+            <CredentialStatusBadge status={apply.credential.status} />
           </DetailField>
           <DetailField label="提交时间">{apply.submitTime}</DetailField>
           <DetailField label="是否需要审核">{apply.needsApproval ? "是" : "否"}</DetailField>
@@ -227,6 +260,14 @@ export function MyUnlockApplyDetailPage() {
             </DetailSection>
           </PrototypeAnnotationTarget>
         )}
+
+        <PrototypeAnnotationTarget annotationIds={["my-unlock-apply-detail-credential"]}>
+          <CredentialSection
+            apply={apply}
+            onCopyPassword={handleCopyPassword}
+            onRetryPassword={handleRetryPassword}
+          />
+        </PrototypeAnnotationTarget>
 
         <WithdrawConfirmDialog
           open={withdrawOpen}

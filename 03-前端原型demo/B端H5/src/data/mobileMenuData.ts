@@ -349,7 +349,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     id: "ws-credit-process",
     primaryModule: "工作台",
     secondaryCategory: "融资/监管",
-    name: "客户融资需求管理授信办理",
+    name: "客户融资授信办理",
     originPath: "其他～监管委托需求",
     description: "承接金融端授信业务。建立线上质押合同台账，分配任务与审批办理放款流程。",
     buttons: ["查看页面", "融资详情", "分配任务转交", "状态管理", "发起抵质押"],
@@ -739,6 +739,19 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     buttons: ["查看页面", "选择仓库/库区", "指定盲盘/明盘模式", "指派盘点人员", "立即下发"],
     dataPermission: "账号赋予的仓库权限",
     iconType: "ClipboardList",
+  },
+  {
+    id: "biz-init-processing-apply",
+    primaryModule: "业务办理",
+    secondaryCategory: "业务发起",
+    name: "加工发起",
+    originPath: "货物的转化加工",
+    description: "发起存货加工申请（切割、拆分、熔炼、组装等），校验三同并即时锁定投入库存，提交进入审批流。",
+    buttons: ["查看页面", "选择货主与类型", "添加投入货物", "配置产出规格与数量", "现场拍照/抓拍", "提交申请"],
+    dataPermission: "账号赋予的仓库权限",
+    remark: "优化页面",
+    badge: "优化",
+    iconType: "Workflow",
   },
 
   // =================== 3. 业务办理 - 客户需求审批 ===================

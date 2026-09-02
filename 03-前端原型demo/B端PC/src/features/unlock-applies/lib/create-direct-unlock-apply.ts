@@ -67,7 +67,6 @@ export function createDirectLockUnlockApply(params: {
       passwordMasked: "****5678",
       validFrom,
       validTo,
-      smsStatus: "发送成功",
     },
     eligible: false,
     needsApproval: false,

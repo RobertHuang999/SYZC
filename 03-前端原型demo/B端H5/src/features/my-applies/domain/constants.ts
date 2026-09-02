@@ -44,14 +44,10 @@ export const UNLOCK_APPLY_STATUS_LABEL: Record<UnlockApplyStatus, string> = {
 
 export const CREDENTIAL_STATUS_LABEL: Record<CredentialStatus, string> = {
   NOT_GENERATED: "未生成",
-  GENERATING: "生成中",
-  GENERATED: "已生成",
   DELIVERED: "已下发",
   GEN_FAILED: "生成失败",
-  DELIVERY_FAILED: "下发失败",
-  USED: "已使用",
+  DELIVERY_FAILED: "密码下发失败",
   EXPIRED: "已过期",
-  REVOKED: "已撤销",
   SUPERSEDED: "已失效（被覆盖）",
 }
 
@@ -66,14 +62,10 @@ export const MY_APPLY_STATUS_FILTER_OPTIONS: UnlockApplyStatus[] = [
 
 export const MY_CREDENTIAL_STATUS_FILTER_OPTIONS: CredentialStatus[] = [
   "NOT_GENERATED",
-  "GENERATING",
-  "GENERATED",
   "DELIVERED",
   "GEN_FAILED",
   "DELIVERY_FAILED",
-  "USED",
   "EXPIRED",
-  "REVOKED",
   "SUPERSEDED",
 ]
 

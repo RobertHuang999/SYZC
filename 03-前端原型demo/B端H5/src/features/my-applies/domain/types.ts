@@ -8,14 +8,10 @@ export type UnlockApplyStatus =
 
 export type CredentialStatus =
   | "NOT_GENERATED"
-  | "GENERATING"
-  | "GENERATED"
   | "DELIVERED"
   | "GEN_FAILED"
   | "DELIVERY_FAILED"
-  | "USED"
   | "EXPIRED"
-  | "REVOKED"
   | "SUPERSEDED"
 
 export type ApprovalRecord = {
@@ -42,9 +38,8 @@ export type CredentialInfo = {
   passwordMasked?: string
   validFrom?: string
   validTo?: string
-  smsStatus?: "待发送" | "发送成功" | "发送失败"
-  smsFailReason?: string
   genFailReason?: string
+  deliveryFailReason?: string
   invalidReason?: string
 }
 
