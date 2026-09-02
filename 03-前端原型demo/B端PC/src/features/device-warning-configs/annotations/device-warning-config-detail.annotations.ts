@@ -41,7 +41,7 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警子类型",
-            content: "展示标准枚举子类型（如【红外遮挡】、【电子围栏越界】、【明火烟雾感知】等）。",
+            content: "展示标准枚举子类型；设备上线类规则仅含单一上线子类型，不与其他监控类混配（R14）。",
           },
         ],
       },
@@ -60,7 +60,7 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "全局新设备规则",
-            content: "无需绑定设备 ID，未来任何新注册入库的同类硬件自动套用该告警基线策略。",
+            content: "无需绑定设备 ID，未来任何新注册入库的同类硬件自动套用该告警基线策略；此类规则子类型仅能单选「xxx设备上线」（R14）。",
           },
           {
             label: "指定设备列表",

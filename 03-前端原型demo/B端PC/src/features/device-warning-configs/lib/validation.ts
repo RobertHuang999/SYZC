@@ -1,5 +1,9 @@
 import { deviceWarningConfigsMock } from "../mock/device-warning-configs.mock"
 import type { DeviceWarningConfigFormValues } from "../domain/types"
+import { isDeviceOnlineSubType } from "../domain/constants"
+
+const R14_MUTEX_MESSAGE =
+  "设备上线通知需单独配置，不可与其他预警子类型组合"
 
 export function validateDeviceWarningConfig(
   values: DeviceWarningConfigFormValues,
@@ -24,13 +28,24 @@ export function validateDeviceWarningConfig(
   if (!values.newDeviceOnly && !values.selectedDevices.trim()) {
     return "请选择关联设备，或勾选“仅针对新设备”"
   }
-  if (values.newDeviceOnly && !values.warningSubTypes.some((s) => s.includes("上线"))) {
-    return "仅针对新设备仅适用于包含“设备上线”类子类型的规则"
-  }
-
   const normalizedSubTypes = values.warningSubTypes
     .map((item) => item.trim())
     .filter(Boolean)
+  const onlineSubTypes = normalizedSubTypes.filter(isDeviceOnlineSubType)
+  const nonOnlineSubTypes = normalizedSubTypes.filter((item) => !isDeviceOnlineSubType(item))
+
+  if (onlineSubTypes.length > 0 && nonOnlineSubTypes.length > 0) {
+    return R14_MUTEX_MESSAGE
+  }
+  if (values.newDeviceOnly) {
+    if (onlineSubTypes.length !== 1 || normalizedSubTypes.length !== 1) {
+      return "勾选「仅针对新设备」时，子类型必须且仅能选择对应的设备上线子类型"
+    }
+  }
+  if (values.newDeviceOnly && !values.warningSubTypes.some(isDeviceOnlineSubType)) {
+    return "仅针对新设备仅适用于设备上线子类型"
+  }
+
   const duplicateScope = deviceWarningConfigsMock.some((config) => {
     if (config.configId === editingConfigId || config.status === "已失效") return false
     const sameScope = config.deviceScope === values.selectedDevices.trim()

@@ -35,7 +35,12 @@ import { DeviceSelectDialog } from "../components/DeviceSelectDialog"
 import { OrgUserSelect } from "@/shared/components/OrgUserSelect"
 import { cn } from "@/lib/utils"
 
-import { DEVICE_WARNING_SUB_TYPES } from "../domain/constants"
+import {
+  DEVICE_WARNING_SUB_TYPES,
+  getDeviceOnlineSubTypeForWarningType,
+  isDeviceOnlineSubType,
+  isInstantTriggerSubType,
+} from "../domain/constants"
 
 const NOTIFY_CHANNEL_OPTIONS = ["短信", "邮件"] as const
 
@@ -93,21 +98,9 @@ export function DeviceWarningConfigFormPage() {
     (level) => level.severityLevelId === form.severityLevelId
   )
 
-  const hasOnlineSubType = form.warningSubTypes.some((s) => s.includes("上线"))
-  const isInstantTrigger = form.warningSubTypes.some(
-    (s) =>
-      [
-        "剪杆破坏",
-        "拆壳破坏",
-        "监控设备上线",
-        "物联设备上线",
-        "门锁设备上线",
-        "门禁设备上线",
-        "GPS设备上线",
-        "正常开关锁事务",
-        "正常刷脸通行记录",
-      ].includes(s) || s.includes("上线")
-  )
+  const hasOnlineSubTypeOnly =
+    form.warningSubTypes.length === 1 && isDeviceOnlineSubType(form.warningSubTypes[0] ?? "")
+  const isInstantTrigger = form.warningSubTypes.some(isInstantTriggerSubType)
 
   const updateMetricThreshold = (
     metric: keyof DeviceWarningConfigFormValues["metricThresholds"],
@@ -149,25 +142,13 @@ export function DeviceWarningConfigFormPage() {
   const handleWarningTypeChange = (type: DeviceWarningType) => {
     const available = DEVICE_WARNING_SUB_TYPES[type] || []
     const defaultSubs = available.length > 0 ? [available[0]] : []
-    const isInstant = defaultSubs.some(
-      (s) =>
-        [
-          "剪杆破坏",
-          "拆壳破坏",
-          "监控设备上线",
-          "物联设备上线",
-          "门锁设备上线",
-          "门禁设备上线",
-          "GPS设备上线",
-          "正常开关锁事务",
-          "正常刷脸通行记录",
-        ].includes(s) || s.includes("上线")
-    )
+    const isInstant = defaultSubs.some(isInstantTriggerSubType)
 
     setForm((current) => ({
       ...current,
       warningType: type,
       warningSubTypes: defaultSubs,
+      newDeviceOnly: false,
       debounceMode: isInstant ? "立即触发" : current.debounceMode,
     }))
   }
@@ -179,26 +160,34 @@ export function DeviceWarningConfigFormPage() {
       if (exists && current.warningSubTypes.length === 1) {
         return current
       }
-      const next = exists
-        ? current.warningSubTypes.filter((item) => item !== subType)
-        : [...current.warningSubTypes, subType]
-      const isInstant = next.some(
-        (s) =>
-          [
-            "剪杆破坏",
-            "拆壳破坏",
-            "监控设备上线",
-            "物联设备上线",
-            "门锁设备上线",
-            "门禁设备上线",
-            "GPS设备上线",
-            "正常开关锁事务",
-            "正常刷脸通行记录",
-          ].includes(s) || s.includes("上线")
-      )
+
+      const selectingOnline = isDeviceOnlineSubType(subType)
+      let next: string[]
+
+      if (selectingOnline) {
+        next = exists
+          ? current.warningSubTypes.filter((item) => item !== subType)
+          : [subType]
+        if (next.length === 0) {
+          return current
+        }
+      } else {
+        const withoutOnline = current.warningSubTypes.filter((item) => !isDeviceOnlineSubType(item))
+        next = exists
+          ? withoutOnline.filter((item) => item !== subType)
+          : [...withoutOnline, subType]
+        if (next.length === 0) {
+          return current
+        }
+      }
+
+      const onlyOnline = next.length === 1 && isDeviceOnlineSubType(next[0])
+      const isInstant = next.some(isInstantTriggerSubType)
+
       return {
         ...current,
         warningSubTypes: next,
+        newDeviceOnly: onlyOnline ? current.newDeviceOnly : false,
         debounceMode: isInstant ? "立即触发" : current.debounceMode,
       }
     })
@@ -299,7 +288,7 @@ export function DeviceWarningConfigFormPage() {
               <div className="space-y-2 md:col-span-2">
                 <Label>
                   <span className="text-destructive font-bold mr-1">*</span>
-                  预警子类型（支持多选）
+                  预警子类型（支持多选；设备上线类须单独配置）
                 </Label>
                 <div className="flex flex-wrap gap-2 pt-1">
                   {(DEVICE_WARNING_SUB_TYPES[form.warningType] || []).map((subType) => {
@@ -331,6 +320,9 @@ export function DeviceWarningConfigFormPage() {
                     )
                   })}
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  「xxx设备上线」须单独成规则：点击上线类将自动取消其他子类型，点击其他类将自动取消上线类（R14）。
+                </p>
               </div>
               <div className="space-y-2">
                 <Label>
@@ -383,13 +375,27 @@ export function DeviceWarningConfigFormPage() {
               <CardTitle>关联设备与触发条件</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
-              {hasOnlineSubType && (
+              {hasOnlineSubTypeOnly && (
                 <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3 md:col-span-2">
                   <input
                     id="newDeviceOnly"
                     type="checkbox"
                     checked={form.newDeviceOnly}
-                    onChange={(event) => updateForm({ newDeviceOnly: event.target.checked })}
+                    onChange={(event) => {
+                      const checked = event.target.checked
+                      if (checked) {
+                        const onlineSub = getDeviceOnlineSubTypeForWarningType(form.warningType)
+                        if (!onlineSub) return
+                        updateForm({
+                          newDeviceOnly: true,
+                          warningSubTypes: [onlineSub],
+                          upgradeEnabled: false,
+                          upgradeDays: "0",
+                        })
+                        return
+                      }
+                      updateForm({ newDeviceOnly: false })
+                    }}
                     className="size-4 rounded border-gray-300 text-primary"
                   />
                   <div className="space-y-0.5">
@@ -397,7 +403,7 @@ export function DeviceWarningConfigFormPage() {
                       仅针对新设备（全局监听）
                     </Label>
                     <p className="text-xs text-muted-foreground">
-                      勾选后后续所有新接入当前类型的设备将自动套用本规则，无需手动在下方绑定具体设备。
+                      勾选后后续所有新接入当前类型的设备将自动套用本规则，无需手动在下方绑定具体设备（R05/R14）。
                     </p>
                   </div>
                 </div>

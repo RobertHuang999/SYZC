@@ -26,7 +26,7 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     number: 2,
     kind: "字段",
     title: "基本信息与预警等级选择",
-    content: "规则名称必填、预警类型联动子类型枚举、预警等级读取 03/01 启用字典。",
+    content: "规则名称必填、预警类型联动子类型枚举、预警等级读取 03/01 启用字典；设备上线类子类型须单独成规则（R14）。",
     details: [
       {
         title: "字段与校验",
@@ -39,6 +39,10 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
             label: "等级下拉",
             content: "下拉展示等级编码、名称与颜色色块；提交 severity_level_id。",
           },
+          {
+            label: "子类型互斥 (R14)",
+            content: "「xxx设备上线」与其他运营监控类子类型不可混选；点击上线类自动取消其他项，点击其他类自动取消上线类。",
+          },
         ],
       },
     ],
@@ -49,7 +53,7 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     number: 3,
     kind: "字段",
     title: "监控设备范围配置",
-    content: "支持单选【仅针对新设备】或【选择现有设备】并勾选多台目标硬件。",
+    content: "支持单选【仅针对新设备】或【选择现有设备】并勾选多台目标硬件；全局新设备仅适用于唯一选中的设备上线子类型。",
     details: [
       {
         title: "设备选择与互斥规则",
@@ -57,6 +61,14 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           {
             label: "唯一性约束 (R04)",
             content: "同一台设备与同一个预警子类型在租户内只能归属于一条生效中规则，已绑定的设备在弹窗中置灰不可选。",
+          },
+          {
+            label: "上线类互斥 (R14)",
+            content: "设备上线通知须单独配置，不可与其他子类型组合；勾选「仅针对新设备」时子类型锁定为当前大类的 xxx设备上线。",
+          },
+          {
+            label: "全局新设备 (R05/R13)",
+            content: "每预警大类仅允许 1 条生效中的全局新设备规则；勾选后隐藏设备选择与升级预警配置。",
           },
         ],
       },
@@ -121,7 +133,7 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "校验提示",
-            content: "校验失败时精准定位到出错字段并高亮红框提示。",
+            content: "校验失败时精准定位到出错字段并高亮红框提示；R14 混选阻断时 Toast「设备上线通知需单独配置，不可与其他预警子类型组合」。",
           },
         ],
       },
