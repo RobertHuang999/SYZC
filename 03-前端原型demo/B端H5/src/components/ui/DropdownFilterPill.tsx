@@ -72,49 +72,36 @@ export function DropdownFilterPill({
         />
       </button>
 
-      {/* 下拉浮层弹窗 */}
+      {/* 下拉浮层：相对胶囊定位，避免 fixed 溢出原型手机画板 */}
       {open && (
-        <div className="fixed inset-0 z-40" onClick={() => setOpen(false)}>
-          <div
-            className="absolute z-50 mt-1 max-h-64 min-w-[150px] max-w-[240px] overflow-y-auto rounded-xl border border-gray-100 bg-white p-1 shadow-xl animate-scale-up"
-            style={{
-              top:
-                (containerRef.current?.getBoundingClientRect().bottom ?? 0) + 4,
-              left: Math.max(
-                12,
-                Math.min(
-                  containerRef.current?.getBoundingClientRect().left ?? 12,
-                  window.innerWidth - 220
-                )
-              ),
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="px-2.5 py-1 text-[10px] font-bold text-gray-400 border-b border-gray-100 mb-1">
-              {label}
-            </div>
-            {options.map((option) => {
-              const active = option.value === value
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => {
-                    onChange(option.value)
-                    setOpen(false)
-                  }}
-                  className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors ${
-                    active
-                      ? "bg-blue-50 font-bold text-blue-600"
-                      : "text-gray-700 hover:bg-gray-50 active:bg-gray-100"
-                  }`}
-                >
-                  <span className="truncate">{option.label}</span>
-                  {active && <Check className="size-3.5 text-blue-600 shrink-0 ml-1" />}
-                </button>
-              )
-            })}
+        <div
+          className="absolute left-0 top-[calc(100%+4px)] z-50 max-h-64 min-w-[150px] max-w-[min(240px,calc(100vw-24px))] overflow-y-auto rounded-xl border border-gray-100 bg-white p-1 shadow-xl animate-scale-up"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="px-2.5 py-1 text-[10px] font-bold text-gray-400 border-b border-gray-100 mb-1">
+            {label}
           </div>
+          {options.map((option) => {
+            const active = option.value === value
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  onChange(option.value)
+                  setOpen(false)
+                }}
+                className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors ${
+                  active
+                    ? "bg-blue-50 font-bold text-blue-600"
+                    : "text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+                }`}
+              >
+                <span className="truncate">{option.label}</span>
+                {active && <Check className="size-3.5 text-blue-600 shrink-0 ml-1" />}
+              </button>
+            )
+          })}
         </div>
       )}
     </div>

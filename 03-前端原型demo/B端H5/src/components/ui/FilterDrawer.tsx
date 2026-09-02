@@ -20,14 +20,14 @@ export function FilterDrawer({
   }
 
   return (
-    <div className="fixed inset-0 z-40">
+    <div className="absolute inset-0 z-40">
       <button
         type="button"
         className="absolute inset-0 bg-black/40"
         aria-label="关闭筛选"
         onClick={onClose}
       />
-      <div className="absolute inset-x-0 bottom-0 max-h-[78vh] overflow-hidden rounded-t-2xl bg-white">
+      <div className="absolute inset-x-0 bottom-0 max-h-[80%] overflow-hidden rounded-t-2xl bg-white">
         <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
           <span className="text-base font-semibold text-gray-900">更多筛选</span>
           <button
@@ -38,7 +38,7 @@ export function FilterDrawer({
             关闭
           </button>
         </div>
-        <div className="max-h-[58vh] overflow-y-auto px-4 py-3">{children}</div>
+        <div className="max-h-[55%] overflow-y-auto px-4 py-3">{children}</div>
         <div className="flex gap-3 border-t border-gray-100 px-4 py-3">
           <button
             type="button"

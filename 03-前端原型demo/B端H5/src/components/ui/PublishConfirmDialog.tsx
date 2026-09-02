@@ -18,7 +18,7 @@ export function PublishConfirmDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
+    <div className="absolute inset-0 z-50 flex items-center justify-center px-6">
       <button
         type="button"
         className="absolute inset-0 bg-black/40"
