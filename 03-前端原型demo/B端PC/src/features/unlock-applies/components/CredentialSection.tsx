@@ -25,9 +25,7 @@ function canShowPassword(apply: UnlockApply): boolean {
 
 function canRetryPassword(apply: UnlockApply): boolean {
   const { status } = apply.credential
-  if (apply.status !== "APPROVED") return false
-  if (status === "GEN_FAILED") return true
-  return status === "DELIVERY_FAILED" && apply.deviceType === "人脸门禁"
+  return apply.status === "APPROVED" && status === "GEN_FAILED"
 }
 
 function isPasswordInvalid(apply: UnlockApply): boolean {
@@ -44,7 +42,7 @@ export function CredentialSection({
   const showPassword = canShowPassword(apply)
   const showRetry = canRetryPassword(apply)
   const passwordInvalid = isPasswordInvalid(apply)
-  const failReason = credential.deliveryFailReason ?? credential.genFailReason
+  const failReason = credential.genFailReason
 
   return (
     <DetailSection title="凭证信息">
@@ -63,7 +61,7 @@ export function CredentialSection({
         </DetailField>
       )}
 
-      {failReason && (credential.status === "GEN_FAILED" || credential.status === "DELIVERY_FAILED") && (
+      {failReason && credential.status === "GEN_FAILED" && (
         <DetailField label="失败原因">{failReason}</DetailField>
       )}
 

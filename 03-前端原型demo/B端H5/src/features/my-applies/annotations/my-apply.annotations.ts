@@ -71,7 +71,7 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
           {
             label: "申请状态 / 凭证状态",
             content:
-              "单选 Pill；凭证 6 态（密码下发失败仅人脸）；与 PC 完整页默认行筛选项对齐。",
+              "单选 Pill；凭证 5 态；生成失败=密码服务失败（挂锁/人脸统一）；与 PC 完整页默认行筛选项对齐。",
           },
           {
             label: "筛选持久化",
@@ -90,6 +90,39 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
     content:
       "流程/政策 Tab 为占位文案；开锁 Tab 展示 MyUnlockApplyCard（提交时间、设备、凭证状态、查看详情）。",
     details: [
+      {
+        title: "卡片样例",
+        items: [
+          {
+            label: "UA20260826008",
+            content: "挂锁已通过 · 凭证=生成失败（密码服务超时）· 详情可重新获取密码。",
+          },
+          {
+            label: "UA20260826011",
+            content: "人脸已通过 · 凭证=生成失败（设备暂不可用）· 详情可重新获取密码。",
+          },
+          {
+            label: "UA20260826009",
+            content: "挂锁已通过 · 短信失败但凭证=已下发 · 详情有密码。",
+          },
+          {
+            label: "UA20260826010",
+            content: "人脸已通过 · 三方下发失败但凭证=已下发 · 详情有密码。",
+          },
+          {
+            label: "UA20260826012",
+            content: "挂锁已通过 · 凭证=已过期 · 详情不展示密码。",
+          },
+          {
+            label: "UA20260826013",
+            content: "人脸已通过 · 凭证=被覆盖 · 展示失效提示。",
+          },
+          {
+            label: "UA20260827021",
+            content: "人脸已通过 · 凭证=已过期 · 详情不展示密码。",
+          },
+        ],
+      },
       {
         title: "空态",
         items: [
@@ -138,13 +171,15 @@ export const myUnlockApplyDetailH5Annotations: PrototypeAnnotation[] = [
     kind: "规则",
     title: "凭证信息 SectionCard",
     content:
-      "规则来源：业务规则规格 §4.1 / §4.4、02查看与下发凭证 §三。挂锁已下发展示密码；人脸下发失败不展示密码，仅重新获取按钮。",
+      "规则来源：业务规则规格 §4.1 / §4.4、02查看与下发凭证 §三。挂锁/人脸统一：密码服务成功→已下发。",
     details: [
       {
         title: "分轨",
         items: [
           { label: "挂锁", content: "短信失败凭证仍=已下发，详情有密码。" },
-          { label: "人脸", content: "DELIVERY_FAILED 时不展示密码；重试成功后→已下发。" },
+          { label: "生成失败", content: "26008/26011：GEN_FAILED=密码服务失败；展示失败原因 + 重新获取按钮。" },
+          { label: "短信/三方失败", content: "26009/26010：凭证仍=已下发，详情有密码；见 remark。" },
+          { label: "过期/被覆盖", content: "26012/27021 过期；22004/26013 被覆盖；不展示密码。" },
         ],
       },
     ],

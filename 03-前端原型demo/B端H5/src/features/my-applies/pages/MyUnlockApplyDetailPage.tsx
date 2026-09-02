@@ -48,12 +48,7 @@ function canShowPassword(apply: UnlockApply): boolean {
 }
 
 function canRetryPassword(apply: UnlockApply): boolean {
-  if (apply.status !== "APPROVED") return false
-  if (apply.credential.status === "GEN_FAILED") return true
-  return (
-    apply.credential.status === "DELIVERY_FAILED" &&
-    apply.deviceType === "人脸门禁"
-  )
+  return apply.status === "APPROVED" && apply.credential.status === "GEN_FAILED"
 }
 
 function shouldShowCredentialSection(apply: UnlockApply): boolean {
@@ -122,7 +117,6 @@ export function MyUnlockApplyDetailPage() {
       credential: {
         ...apply.credential,
         status: "DELIVERED",
-        deliveryFailReason: undefined,
         genFailReason: undefined,
         password: apply.credential.password ?? "856778",
         passwordMasked: apply.credential.passwordMasked ?? "****5678",
@@ -244,14 +238,10 @@ export function MyUnlockApplyDetailPage() {
                 />
               )}
 
-              {(apply.credential.status === "GEN_FAILED" ||
-                apply.credential.status === "DELIVERY_FAILED") &&
-                (apply.credential.deliveryFailReason ?? apply.credential.genFailReason) && (
+              {apply.credential.status === "GEN_FAILED" && apply.credential.genFailReason && (
                 <KeyValue
                   label="失败原因"
-                  value={
-                    apply.credential.deliveryFailReason ?? apply.credential.genFailReason ?? ""
-                  }
+                  value={apply.credential.genFailReason}
                 />
               )}
 

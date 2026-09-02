@@ -93,7 +93,6 @@ export function MyUnlockApplyDetailPage() {
       credential: {
         ...apply.credential,
         status: "DELIVERED",
-        deliveryFailReason: undefined,
         genFailReason: undefined,
         password: apply.credential.password ?? "856778",
         passwordMasked: apply.credential.passwordMasked ?? "****5678",

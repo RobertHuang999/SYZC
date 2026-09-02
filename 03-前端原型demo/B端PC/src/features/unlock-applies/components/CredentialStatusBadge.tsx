@@ -5,7 +5,6 @@ const statusClass: Record<CredentialStatus, string> = {
   NOT_GENERATED: "bg-slate-100 text-slate-700",
   DELIVERED: "bg-emerald-100 text-emerald-800",
   GEN_FAILED: "bg-red-100 text-red-800",
-  DELIVERY_FAILED: "bg-amber-100 text-amber-800",
   EXPIRED: "bg-slate-100 text-slate-700",
   SUPERSEDED: "bg-slate-100 text-slate-700",
 }

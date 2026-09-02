@@ -10,7 +10,6 @@ export type CredentialStatus =
   | "NOT_GENERATED"
   | "DELIVERED"
   | "GEN_FAILED"
-  | "DELIVERY_FAILED"
   | "EXPIRED"
   | "SUPERSEDED"
 
@@ -39,7 +38,6 @@ export type CredentialInfo = {
   validFrom?: string
   validTo?: string
   genFailReason?: string
-  deliveryFailReason?: string
   invalidReason?: string
 }
 

@@ -81,7 +81,7 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
           {
             label: "凭证状态",
             content:
-              "Select 多选：未生成 / 已下发 / 生成失败 / 密码下发失败（仅人脸） / 已过期 / 已失效（被覆盖）；空选=全部。规则见业务规则规格 §4.1。",
+              "Select 多选：未生成 / 已下发 / 生成失败 / 已过期 / 已失效（被覆盖）；空选=全部。生成失败=密码服务失败（挂锁/人脸统一）。规则见业务规则规格 §4.1。",
           },
         ],
       },
@@ -130,7 +130,7 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "申请状态 / 凭证状态",
-            content: "Tag 着色；凭证状态展示为可观测 6 态（待审批时为「未生成」）。",
+            content: "Tag 着色；凭证状态 **5 态**（待审批时为「未生成」）。「生成失败」=密码服务调用失败，挂锁/人脸统一。",
           },
         ],
       },
@@ -150,8 +150,32 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
             content: "挂锁已通过 · 凭证=已下发 · 详情展示密码（短信成败不进凭证状态）。",
           },
           {
+            label: "UA20260826008",
+            content: "挂锁已通过 · 凭证=生成失败（密码服务超时）· 可重新获取密码。",
+          },
+          {
+            label: "UA20260826011",
+            content: "人脸已通过 · 凭证=生成失败（设备暂不可用）· 可重新获取密码。",
+          },
+          {
+            label: "UA20260826009",
+            content: "挂锁已通过 · 凭证=已下发 · remark 标注短信失败，详情仍有密码。",
+          },
+          {
+            label: "UA20260826010",
+            content: "人脸已通过 · 凭证=已下发 · remark 标注三方下发失败，详情仍有密码。",
+          },
+          {
+            label: "UA20260826012",
+            content: "挂锁已通过 · 凭证=已过期 · 详情不展示密码。",
+          },
+          {
+            label: "UA20260826013",
+            content: "人脸已通过 · 凭证=被覆盖 · 展示失效提示。",
+          },
+          {
             label: "UA20260827021",
-            content: "人脸已通过 · 凭证=密码下发失败 · 不展示密码 · 可重新获取。",
+            content: "人脸已通过 · 凭证=已过期 · 不展示密码。",
           },
         ],
       },

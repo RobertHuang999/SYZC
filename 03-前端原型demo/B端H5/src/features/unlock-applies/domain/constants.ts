@@ -13,7 +13,6 @@ export const CREDENTIAL_STATUS_LABEL: Record<CredentialStatus, string> = {
   NOT_GENERATED: "未生成",
   DELIVERED: "已下发",
   GEN_FAILED: "生成失败",
-  DELIVERY_FAILED: "密码下发失败",
   EXPIRED: "已过期",
   SUPERSEDED: "已失效（被覆盖）",
 }
