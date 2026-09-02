@@ -78,7 +78,7 @@
 ## 6. Mock 数据
 
 - 流程/政策 Tab：占位文案，无 Mock 列表
-- 开锁 Tab：与 [MOCK_DATA-开锁审批-V1.2](../../../../../../03-前端原型demo/MOCK_DATA-开锁审批-V1.2.md) 对齐
+- 开锁 Tab：与 [MOCK_DATA-开锁审批-V1.3](../../../../../../03-前端原型demo/MOCK_DATA-开锁审批-V1.3.md) 对齐
 - 原型实现：`03-前端原型demo/B端H5/src/features/my-applies/mock/`
 
 ---

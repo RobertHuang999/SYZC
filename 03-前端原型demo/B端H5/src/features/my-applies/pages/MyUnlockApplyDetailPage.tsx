@@ -40,18 +40,19 @@ function formatRoomZone(apply: UnlockApply): string {
 }
 
 function canShowPassword(apply: UnlockApply): boolean {
-  if (apply.status !== "APPROVED" || !apply.credential.password) return false
   return (
-    apply.credential.status === "DELIVERED" ||
-    apply.credential.status === "DELIVERY_FAILED"
+    apply.status === "APPROVED" &&
+    apply.credential.status === "DELIVERED" &&
+    !!apply.credential.password
   )
 }
 
 function canRetryPassword(apply: UnlockApply): boolean {
+  if (apply.status !== "APPROVED") return false
+  if (apply.credential.status === "GEN_FAILED") return true
   return (
-    apply.status === "APPROVED" &&
-    (apply.credential.status === "GEN_FAILED" ||
-      apply.credential.status === "DELIVERY_FAILED")
+    apply.credential.status === "DELIVERY_FAILED" &&
+    apply.deviceType === "人脸门禁"
   )
 }
 

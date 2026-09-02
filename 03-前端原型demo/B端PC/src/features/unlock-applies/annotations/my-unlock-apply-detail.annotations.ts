@@ -20,7 +20,7 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "分区",
             content:
-              "基础信息 / 设备与位置快照 / 申请内容 / 审批配置快照 / 审批记录 / 临时凭证。",
+              "基础信息 / 设备与位置快照 / 申请内容 / 审批配置快照 / 审批记录 / 凭证信息。规则见 [02查看与下发凭证字段清单] §三。",
           },
           {
             label: "返回",
@@ -35,24 +35,20 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "my-unlock-apply-detail-credential",
     number: 2,
     kind: "规则",
-    title: "凭证展示 · 精简状态机",
+    title: "凭证信息 · 挂锁/人脸分轨",
     content:
-      "6.2 凭证状态 6 态：未生成 / 已下发 / 生成失败 / 密码下发失败 / 已过期 / 已失效（被覆盖）。生成失败或密码下发失败时，申请人可「重新获取密码」。",
+      "规则来源：业务规则规格 §4.1 / §4.4、02查看与下发凭证 §三。挂锁：密码生成成功→已下发（短信失败仍为已下发，详情展示密码）。人脸：三方成功→已下发；三方失败→密码下发失败，不展示密码，可重新获取。",
     details: [
       {
         title: "详情区",
         items: [
           {
-            label: "挂锁 / 人脸",
-            content: "密码下发成功→「已下发」；展示密码卡片 + 复制。密码下发失败→展示失败原因 +「重新获取密码」，脱敏密码不可复制。",
+            label: "挂锁",
+            content: "凭证=已下发时展示密码 + 复制；短信成败不进凭证状态。",
           },
           {
-            label: "重新获取密码",
-            content: "凭证=生成失败或密码下发失败时展示；成功后→已下发，Toast「密码已重新获取」。",
-          },
-          {
-            label: "复制密码",
-            content: "仅凭证=已下发时可复制 → Toast「已复制到剪贴板」。",
+            label: "人脸",
+            content: "已下发→密码+复制；下发失败→失败原因+重新获取，成功后展示密码。",
           },
         ],
       },

@@ -80,7 +80,7 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
           {
             label: "凭证状态",
             content:
-              "Select 多选下拉：未生成 / 生成中 / 已生成 / 已下发 / 生成失败 / 下发失败 / 已使用 / 已过期 / 已撤销 / 已失效（被覆盖）；空选=全部。",
+              "Select 多选：未生成 / 已下发 / 生成失败 / 密码下发失败（仅人脸） / 已过期 / 已失效（被覆盖）；空选=全部。规则见业务规则规格 §4.1。",
           },
         ],
       },
@@ -145,8 +145,12 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
             content: "人脸已通过 · 页面密码 · 不调短信（R31）。",
           },
           {
-            label: "UA20260827020 / UA20260827021",
-            content: "挂锁已通过 · 短信成功 / 短信失败可重发。",
+            label: "UA20260827020",
+            content: "挂锁已通过 · 凭证=已下发 · 详情展示密码（短信成败不进凭证状态）。",
+          },
+          {
+            label: "UA20260827021",
+            content: "人脸已通过 · 凭证=密码下发失败 · 不展示密码 · 可重新获取。",
           },
         ],
       },

@@ -16,16 +16,18 @@ type CredentialSectionProps = {
 
 function canShowPassword(apply: UnlockApply): boolean {
   const { credential, status } = apply
-  if (status !== "APPROVED" || !credential.password) return false
-  return credential.status === "DELIVERED" || credential.status === "DELIVERY_FAILED"
+  return (
+    status === "APPROVED" &&
+    credential.status === "DELIVERED" &&
+    !!credential.password
+  )
 }
 
 function canRetryPassword(apply: UnlockApply): boolean {
   const { status } = apply.credential
-  return (
-    apply.status === "APPROVED" &&
-    (status === "GEN_FAILED" || status === "DELIVERY_FAILED")
-  )
+  if (apply.status !== "APPROVED") return false
+  if (status === "GEN_FAILED") return true
+  return status === "DELIVERY_FAILED" && apply.deviceType === "人脸门禁"
 }
 
 function isPasswordInvalid(apply: UnlockApply): boolean {

@@ -42,7 +42,7 @@ export const unlockApprovalConfigFormAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "匹配",
-            content: "仅 deviceCodes 精确命中（C01）；Mock 见 MOCK_DATA-开锁审批-V1.2.md。",
+            content: "仅 deviceCodes 精确命中（C01）；Mock 见 MOCK_DATA-开锁审批-V1.3.md。",
           },
         ],
       },

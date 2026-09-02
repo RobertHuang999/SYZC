@@ -71,7 +71,7 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
           {
             label: "申请状态 / 凭证状态",
             content:
-              "单选 Pill 筛选，与 PC 完整页默认行筛选项对齐；默认「全部」表示不过滤。",
+              "单选 Pill；凭证 6 态（密码下发失败仅人脸）；与 PC 完整页默认行筛选项对齐。",
           },
           {
             label: "筛选持久化",
@@ -138,15 +138,13 @@ export const myUnlockApplyDetailH5Annotations: PrototypeAnnotation[] = [
     kind: "规则",
     title: "凭证信息 SectionCard",
     content:
-      "已通过时展示凭证区：已下发→密码+复制；密码下发失败→失败原因+重新获取密码（脱敏展示不可复制）。",
+      "规则来源：业务规则规格 §4.1 / §4.4、02查看与下发凭证 §三。挂锁已下发展示密码；人脸下发失败不展示密码，仅重新获取按钮。",
     details: [
       {
-        title: "操作",
+        title: "分轨",
         items: [
-          {
-            label: "重新获取密码",
-            content: "凭证=生成失败或密码下发失败时展示；成功后→已下发。",
-          },
+          { label: "挂锁", content: "短信失败凭证仍=已下发，详情有密码。" },
+          { label: "人脸", content: "DELIVERY_FAILED 时不展示密码；重试成功后→已下发。" },
         ],
       },
     ],
