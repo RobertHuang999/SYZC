@@ -40,8 +40,9 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
     待审批 --> 已通过 : 审批通过
     待审批 --> 已驳回 : 审批驳回
     待审批 --> 已撤回 : 申请人撤回
-    已通过 --> 已失效 : 凭证过期/覆盖
-    已通过 --> 已作废 : 运维作废
+    待审批 --> 已失效 : 审批超时（自动 R14）
+    已通过 --> 已作废 : 设备/位置复核失败（系统自动 R15）
+    已通过 --> [*] : 凭证独立流转（保持已通过）
     已驳回 --> [*]
     已撤回 --> [*]
     已失效 --> [*]
@@ -97,7 +98,7 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "不含申请单号",
-            content: "字段清单 §2.1 明确列表筛选不含申请单号；仅表格列与详情展示。",
+            content: "字段清单 §2.1 明确申请单号为隐藏字段，列表不展示；仅详情页展示。",
           },
         ],
       },
@@ -129,7 +130,7 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "申请状态 / 凭证状态",
-            content: "Tag 着色；凭证状态在待审批时为「未生成」等中间态。",
+            content: "Tag 着色；凭证状态展示为可观测 6 态（待审批时为「未生成」）。",
           },
         ],
       },

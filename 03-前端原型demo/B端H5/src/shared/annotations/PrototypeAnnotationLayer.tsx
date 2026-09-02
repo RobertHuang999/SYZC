@@ -13,10 +13,13 @@ import {
   PanelRightCloseIcon,
   PanelRightOpenIcon,
   PinIcon,
+  RotateCcwIcon,
   SearchIcon,
   SmartphoneIcon,
   WorkflowIcon,
   XIcon,
+  ZoomInIcon,
+  ZoomOutIcon,
 } from "lucide-react"
 import {
   createContext,
@@ -420,8 +423,58 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
   const location = useLocation()
   const navigate = useNavigate()
   const phoneViewportRef = useRef<HTMLDivElement>(null)
+  const canvasAreaRef = useRef<HTMLDivElement>(null)
+
+  // 缩放模式：isAutoFit 为 true 时自动适应屏幕高度，为 false 时使用 manualScale
+  const [isAutoFit, setIsAutoFit] = useState(true)
+  const [autoScale, setAutoScale] = useState(1)
+  const [manualScale, setManualScale] = useState(1)
 
   useMobileDragScroll(phoneViewportRef)
+
+  // 动态自适应等比缩放：根据工作区可用高度自动计算缩放比，保证手机长宽比恒定
+  useEffect(() => {
+    const handleResize = () => {
+      if (!canvasAreaRef.current) return
+      const availableHeight = canvasAreaRef.current.clientHeight - 48
+      const targetHeight = context.selectedPreset.height + 16 // 包含 8px 边框
+      if (availableHeight < targetHeight) {
+        const nextScale = Math.min(1, Math.max(0.5, availableHeight / targetHeight))
+        setAutoScale(Number(nextScale.toFixed(2)))
+      } else {
+        setAutoScale(1)
+      }
+    }
+
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [context.selectedPreset])
+
+  const currentScale = isAutoFit ? autoScale : manualScale
+
+  const handleZoomIn = () => {
+    const base = isAutoFit ? autoScale : manualScale
+    const next = Math.min(1.4, Number((base + 0.05).toFixed(2)))
+    setIsAutoFit(false)
+    setManualScale(next)
+  }
+
+  const handleZoomOut = () => {
+    const base = isAutoFit ? autoScale : manualScale
+    const next = Math.max(0.4, Number((base - 0.05).toFixed(2)))
+    setIsAutoFit(false)
+    setManualScale(next)
+  }
+
+  const handleResetAuto = () => {
+    setIsAutoFit(true)
+  }
+
+  const handleSetExactScale = (target: number) => {
+    setIsAutoFit(false)
+    setManualScale(target)
+  }
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#edf2f7] text-slate-800 font-sans select-none">
@@ -509,26 +562,97 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
       <main className="flex flex-1 flex-col overflow-hidden bg-[#e6edf5]">
         {/* 顶部工具栏 */}
         <header className="flex h-12 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/90 px-4 backdrop-blur-md shadow-2xs">
-          {/* 机型尺寸选择 */}
-          <div className="flex items-center gap-2">
-            <SmartphoneIcon className="size-4 text-blue-600" />
-            <span className="text-xs font-semibold text-slate-700 hidden sm:inline">机型预览：</span>
-            <div className="flex items-center rounded-lg border border-slate-200 bg-slate-100/70 p-0.5 text-xs">
-              {PHONE_PRESETS.map((preset) => (
+          {/* 机型尺寸选择 + 缩放控制器 */}
+          <div className="flex items-center gap-3">
+            {/* 机型尺寸选择 */}
+            <div className="flex items-center gap-1.5">
+              <SmartphoneIcon className="size-4 text-blue-600" />
+              <span className="text-xs font-semibold text-slate-700 hidden sm:inline">机型：</span>
+              <div className="flex items-center rounded-lg border border-slate-200 bg-slate-100/70 p-0.5 text-xs">
+                {PHONE_PRESETS.map((preset) => (
+                  <button
+                    key={preset.name}
+                    type="button"
+                    onClick={() => context.setSelectedPreset(preset)}
+                    className={cn(
+                      "rounded-md px-2 py-1 text-[11px] font-medium transition-all cursor-pointer",
+                      context.selectedPreset.width === preset.width
+                        ? "bg-white text-blue-600 font-bold shadow-xs"
+                        : "text-slate-600 hover:text-slate-900"
+                    )}
+                  >
+                    {preset.width}px
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 缩放控制器（缩小 / 放大 / 比例展示 / 快捷自适应） */}
+            <div className="flex items-center gap-1 border-l border-slate-200/80 pl-3">
+              <span className="text-xs font-semibold text-slate-700 hidden md:inline">缩放：</span>
+              <div className="flex items-center rounded-lg border border-slate-200 bg-slate-100/70 p-0.5 text-xs">
+                {/* 缩小 */}
                 <button
-                  key={preset.name}
                   type="button"
-                  onClick={() => context.setSelectedPreset(preset)}
-                  className={cn(
-                    "rounded-md px-2.5 py-1 text-[11px] font-medium transition-all cursor-pointer",
-                    context.selectedPreset.width === preset.width
-                      ? "bg-white text-blue-600 font-bold shadow-xs"
-                      : "text-slate-600 hover:text-slate-900"
-                  )}
+                  onClick={handleZoomOut}
+                  disabled={currentScale <= 0.4}
+                  className="flex size-6 items-center justify-center rounded-md text-slate-600 hover:bg-white hover:text-blue-600 hover:shadow-xs transition-all disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
+                  title="缩小 (-5%)"
                 >
-                  {preset.width}px
+                  <ZoomOutIcon className="size-3.5" />
                 </button>
-              ))}
+
+                {/* 当前百分比展示 */}
+                <button
+                  type="button"
+                  onClick={() => handleSetExactScale(1)}
+                  className="px-1.5 text-[11px] font-bold font-mono text-slate-700 select-none min-w-[42px] text-center hover:text-blue-600 transition-colors cursor-pointer"
+                  title="点击设为 100%"
+                >
+                  {Math.round(currentScale * 100)}%
+                </button>
+
+                {/* 放大 */}
+                <button
+                  type="button"
+                  onClick={handleZoomIn}
+                  disabled={currentScale >= 1.4}
+                  className="flex size-6 items-center justify-center rounded-md text-slate-600 hover:bg-white hover:text-blue-600 hover:shadow-xs transition-all disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
+                  title="放大 (+5%)"
+                >
+                  <ZoomInIcon className="size-3.5" />
+                </button>
+              </div>
+
+              {/* 快捷自适应 / 100% 切换按钮 */}
+              <button
+                type="button"
+                onClick={handleResetAuto}
+                className={cn(
+                  "flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium transition-all cursor-pointer border",
+                  isAutoFit
+                    ? "border-blue-200 bg-blue-50 text-blue-700 font-bold shadow-2xs"
+                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                )}
+                title="自动适应当前屏幕高度"
+              >
+                <RotateCcwIcon className="size-3" />
+                <span>自适应</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSetExactScale(1)}
+                className={cn(
+                  "rounded-lg px-2 py-1 text-[11px] font-medium transition-all cursor-pointer border hidden lg:inline-block",
+                  !isAutoFit && currentScale === 1
+                    ? "border-blue-200 bg-blue-50 text-blue-700 font-bold shadow-2xs"
+                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                )}
+                title="100% 原尺寸"
+              >
+                100%
+              </button>
             </div>
           </div>
 
@@ -569,42 +693,53 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
         </header>
 
         {/* 手机模拟预览居中视口 + 画布外侧需求规则检查器（大画布联动画布） */}
-        <div className="flex-1 overflow-auto flex items-center justify-center p-6 bg-[#d8e2ec] relative gap-6">
-          {/* 1. 手机真机视口容器 */}
+        <div
+          ref={canvasAreaRef}
+          className="flex-1 overflow-auto flex items-center justify-center p-6 bg-[#d8e2ec] relative gap-6"
+        >
+          {/* 1. 手机真机视口等比例缩放外层包装 */}
           <div
-            className="relative flex flex-col shrink-0 overflow-hidden bg-[#edf2f8] shadow-[0_20px_50px_rgba(15,23,42,0.18)] transition-all duration-300 rounded-[42px] border-[8px] border-slate-800"
+            className="shrink-0 transition-all duration-200 flex items-center justify-center"
             style={{
-              width: `${context.selectedPreset.width}px`,
-              height: `${context.selectedPreset.height}px`,
-              maxHeight: "calc(100vh - 5.5rem)",
+              width: `${(context.selectedPreset.width + 16) * currentScale}px`,
+              height: `${(context.selectedPreset.height + 16) * currentScale}px`,
             }}
           >
-            {/* iOS 顶部状态栏与灵动岛 */}
-            <div className="relative flex h-10 shrink-0 items-center justify-between px-6 pt-1 text-[12px] font-semibold text-gray-900 bg-[#edf2f8] z-20 border-b border-gray-100/40 select-none">
-              <span>09:41</span>
-              {/* 灵动岛 */}
-              <div className="absolute left-1/2 -translate-x-1/2 top-2 h-4 w-24 rounded-full bg-black flex items-center justify-end px-2">
-                <div className="size-2 rounded-full bg-slate-800" />
-              </div>
-              <div className="flex items-center gap-1 text-[11px]">
-                <span className="font-mono text-[10px]">5G</span>
-                <div className="h-2.5 w-5 rounded-xs border border-gray-800 p-0.5 flex items-center">
-                  <div className="h-full w-full bg-gray-800 rounded-2xs" />
+            <div
+              className="relative flex flex-col shrink-0 overflow-hidden bg-[#edf2f8] shadow-[0_20px_50px_rgba(15,23,42,0.18)] rounded-[42px] border-[8px] border-slate-800 origin-center transition-transform duration-200"
+              style={{
+                width: `${context.selectedPreset.width}px`,
+                height: `${context.selectedPreset.height}px`,
+                transform: `scale(${currentScale})`,
+              }}
+            >
+              {/* iOS 顶部状态栏与灵动岛 */}
+              <div className="relative flex h-10 shrink-0 items-center justify-between px-6 pt-1 text-[12px] font-semibold text-gray-900 bg-[#edf2f8] z-20 border-b border-gray-100/40 select-none">
+                <span>09:41</span>
+                {/* 灵动岛 */}
+                <div className="absolute left-1/2 -translate-x-1/2 top-2 h-4 w-24 rounded-full bg-black flex items-center justify-end px-2">
+                  <div className="size-2 rounded-full bg-slate-800" />
+                </div>
+                <div className="flex items-center gap-1 text-[11px]">
+                  <span className="font-mono text-[10px]">5G</span>
+                  <div className="h-2.5 w-5 rounded-xs border border-gray-800 p-0.5 flex items-center">
+                    <div className="h-full w-full bg-gray-800 rounded-2xs" />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* 页面内容注入 */}
-            <div
-              ref={phoneViewportRef}
-              className="flex flex-1 flex-col min-h-0 overflow-hidden relative text-slate-900 select-text transform-gpu"
-            >
-              {children}
-            </div>
+              {/* 页面内容注入 */}
+              <div
+                ref={phoneViewportRef}
+                className="flex flex-1 flex-col min-h-0 overflow-hidden relative text-slate-900 select-text transform-gpu"
+              >
+                {children}
+              </div>
 
-            {/* iOS 底部小黑条 */}
-            <div className="h-4 bg-[#edf2f8] flex items-center justify-center shrink-0 z-20">
-              <div className="h-1 w-28 rounded-full bg-slate-400/80" />
+              {/* iOS 底部小黑条 */}
+              <div className="h-4 bg-[#edf2f8] flex items-center justify-center shrink-0 z-20">
+                <div className="h-1 w-28 rounded-full bg-slate-400/80" />
+              </div>
             </div>
           </div>
 

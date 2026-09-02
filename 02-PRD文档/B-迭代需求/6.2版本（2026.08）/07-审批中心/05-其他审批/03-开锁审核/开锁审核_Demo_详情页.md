@@ -148,7 +148,7 @@ SectionCard 标题「审批处理」；`indicatorColor="#f57c00"`（与原型一
 
 1. 审批意见选填
 2. 点击「通过」
-3. Toast「已通过，凭证生成中」或「审批通过」（A01）
+3. Toast「审批通过」（A01）
 4. `setTimeout` ~1200ms → `navigate('/m/approval/unlock-applies')`
 
 ### 6.4 驳回流程
