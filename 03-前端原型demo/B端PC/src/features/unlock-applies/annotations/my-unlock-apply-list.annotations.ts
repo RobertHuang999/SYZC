@@ -158,12 +158,8 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
             content: "人脸已通过 · 凭证=生成失败（设备暂不可用）· 可重新获取密码。",
           },
           {
-            label: "UA20260826009",
-            content: "挂锁已通过 · 凭证=已下发 · remark 标注短信失败，详情仍有密码。",
-          },
-          {
             label: "UA20260826010",
-            content: "人脸已通过 · 凭证=已下发 · remark 标注三方下发失败，详情仍有密码。",
+            content: "人脸已通过 · 三方下发失败但凭证=已下发 · 详情有密码（下发失败仅人脸）。",
           },
           {
             label: "UA20260826012",

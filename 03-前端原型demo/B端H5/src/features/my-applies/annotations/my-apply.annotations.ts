@@ -102,10 +102,6 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
             content: "人脸已通过 · 凭证=生成失败（设备暂不可用）· 详情可重新获取密码。",
           },
           {
-            label: "UA20260826009",
-            content: "挂锁已通过 · 短信失败但凭证=已下发 · 详情有密码。",
-          },
-          {
             label: "UA20260826010",
             content: "人脸已通过 · 三方下发失败但凭证=已下发 · 详情有密码。",
           },
@@ -171,14 +167,14 @@ export const myUnlockApplyDetailH5Annotations: PrototypeAnnotation[] = [
     kind: "规则",
     title: "凭证信息 SectionCard",
     content:
-      "规则来源：业务规则规格 §4.1 / §4.4、02查看与下发凭证 §三。挂锁/人脸统一：密码服务成功→已下发。",
+      "规则来源：业务规则规格 §4.1 / §4.4、02查看与下发凭证 §三。密码服务成功→已下发。「下发失败」仅人脸（26010），挂锁无此概念。",
     details: [
       {
         title: "分轨",
         items: [
-          { label: "挂锁", content: "短信失败凭证仍=已下发，详情有密码。" },
-          { label: "生成失败", content: "26008/26011：GEN_FAILED=密码服务失败；展示失败原因 + 重新获取按钮。" },
-          { label: "短信/三方失败", content: "26009/26010：凭证仍=已下发，详情有密码；见 remark。" },
+          { label: "生成失败", content: "26008/26011：GEN_FAILED=密码服务失败；展示失败原因 + 重新获取。" },
+          { label: "挂锁", content: "无「下发失败」；仅有已下发/生成失败等 5 态。" },
+          { label: "人脸·下发失败", content: "26010：三方失败凭证仍=已下发，详情有密码。" },
           { label: "过期/被覆盖", content: "26012/27021 过期；22004/26013 被覆盖；不展示密码。" },
         ],
       },
