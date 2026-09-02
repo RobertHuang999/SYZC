@@ -10,15 +10,19 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
     content: "展示单条设备预警规则的完整策略定义、监控设备清单、阈值防抖参数及通知升级矩阵。",
     details: [
       {
-        title: "状态操作与生命周期",
+        title: "规则状态生命周期与操作",
         items: [
           {
-            label: "页头动作",
-            content: "支持【编辑】（仅生效中/停用可用）、【停用】/【启用】切换及【删除】操作。",
+            label: "状态流转图",
+            content: `flowchart TD
+    A["生效中 (ACTIVE)"] -->|"人工停用"| B["停用 (DISABLED)"]
+    B -->|"重新启用"| A
+    A -->|"关联设备全部解绑"| C["已失效 (EXPIRED / 不可逆)"]
+    A -->|"软删除"| D["已删除 (DELETED)"]`,
           },
           {
-            label: "失效原因溯源",
-            content: "若规则为【已失效】，状态右侧显式展示具体失效原因（如【关联设备全部已注销/解绑】）。",
+            label: "页头动作与权限",
+            content: "支持【编辑】（仅生效中/停用可用）、【停用】/【启用】切换及【删除】操作；已失效状态展示具体失效原因（如【关联设备全部已注销/解绑】）。",
           },
         ],
       },
@@ -33,14 +37,14 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
     content: "展示规则名称、预警大类、预警子类型、绑定的预警等级色块与规则状态。",
     details: [
       {
-        title: "核心字段",
+        title: "核心字段字典清单",
         items: [
           {
-            label: "预警等级标签",
+            label: "预警等级标签 (severity_level)",
             content: "读取 03/01 字典的等级色块与显示名称，直观呈现严重程度。",
           },
           {
-            label: "预警子类型",
+            label: "预警子类型 (sub_type)",
             content: "展示标准枚举子类型；设备上线类规则仅含单一上线子类型，不与其他监控类混配（R14）。",
           },
         ],
@@ -56,10 +60,10 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
     content: "展示规则是作用于【仅针对新设备】还是绑定具体设备列表，支持展开查看关联设备清单。",
     details: [
       {
-        title: "范围与清单展示",
+        title: "范围与清单展示规范",
         items: [
           {
-            label: "全局新设备规则",
+            label: "全局新设备规则 (R05/R13)",
             content: "无需绑定设备 ID，未来任何新注册入库的同类硬件自动套用该告警基线策略；此类规则子类型仅能单选「xxx设备上线」（R14）。",
           },
           {

@@ -6,9 +6,9 @@ export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
     targetId: "access-control-device-h5-page",
     number: 1,
     kind: "页面",
-    title: "H5 门禁设备列表 · 双路径入口",
+    title: "H5 门禁设备列表 · 双路径入口架构",
     content:
-      "设备管理 → 门禁设备。卡片列表 + 获取密码分流；返回上一级为设备管理 hub，而非工作台根页。",
+      "设备管理 → 门禁设备。移动端卡片列表 + 获取密码分流入口；返回上一级为设备管理 hub，而非工作台根页。",
     details: [
       {
         title: "菜单与路由",
@@ -28,11 +28,11 @@ export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "需审批",
-            content: "UnlockApplySubmitSheet 发起申请 → Deep link 我的申请记录。",
+            content: "命中已启用审批配置 → 弹出 UnlockApplySubmitSheet 发起申请 → 提交成功 Deep link 我的申请记录。",
           },
           {
             label: "免审",
-            content: "GetLockPasswordSheet（挂锁）/ GetAccessPasswordSheet（人脸，无短信 R31）。",
+            content: "未命中审批配置 → 弹出 GetLockPasswordSheet（挂锁）/ GetAccessPasswordSheet（人脸，无短信 R31）。",
           },
         ],
       },
@@ -76,14 +76,19 @@ export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
     number: 3,
     kind: "字段",
     title: "设备卡片 · 行操作与加载更多",
-    content: "DeviceCard 展示图标/名称/状态/位置/更新时间；底栏重命名/绑定/数据/获取密码/移除；列表支持加载更多。",
+    content:
+      "DeviceCard 展示图标/名称/状态/位置/更新时间；底栏重命名/绑定/数据/获取密码/移除；列表支持加载更多。",
     details: [
       {
-        title: "R31",
+        title: "主操作分流",
         items: [
           {
-            label: "短信",
-            content: "人脸路径任何 Sheet 均不含短信字段与下发逻辑。",
+            label: "获取密码",
+            content: "挂锁展示「获取门锁密码」，人脸展示「获取门禁密码」，点击触发双路径 match 逻辑。",
+          },
+          {
+            label: "R31 短信边界",
+            content: "人脸路径任何 Sheet 均不含短信字段与下发逻辑；挂锁路径支持短信下发。",
           },
         ],
       },
@@ -94,8 +99,27 @@ export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
     targetId: "access-control-device-h5-sheets",
     number: 4,
     kind: "规则",
-    title: "底部 Sheet 三件套",
-    content: "UnlockApplySubmitSheet / GetLockPasswordSheet / GetAccessPasswordSheet 互斥展示。",
-    details: [],
+    title: "移动端底部 Sheet 弹窗三件套",
+    content:
+      "UnlockApplySubmitSheet / GetLockPasswordSheet / GetAccessPasswordSheet 互斥展示，提供移动端极佳的开锁交互体验。",
+    details: [
+      {
+        title: "Sheet 规范",
+        items: [
+          {
+            label: "UnlockApplySubmitSheet",
+            content: "需审批时唤起，展示目标设备快照并录入事由、备注及预计使用时段；提交成功后可直接跳转我的申请记录。",
+          },
+          {
+            label: "GetLockPasswordSheet",
+            content: "挂锁免审时唤起，展示大号开门密码与倒计时有效期，并调用短信网关向手机下发通知。",
+          },
+          {
+            label: "GetAccessPasswordSheet",
+            content: "人脸免审时唤起，展示大号开门密码与复制按钮，不调用短信服务（R31）。",
+          },
+        ],
+      },
+    ],
   },
 ]

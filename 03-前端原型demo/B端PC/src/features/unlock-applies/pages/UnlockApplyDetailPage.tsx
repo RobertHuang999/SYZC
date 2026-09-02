@@ -91,52 +91,60 @@ export function UnlockApplyDetailPage() {
           </div>
         </PrototypeAnnotationTarget>
 
-        <DetailSection title="设备与位置">
-          <DetailField label="设备编码">{apply.deviceCode}</DetailField>
-          <DetailField label="设备名称">{apply.deviceName}</DetailField>
-          <DetailField label="设备类型">{apply.deviceType}</DetailField>
-          <DetailField label="绑定仓库">{apply.warehouseName}</DetailField>
-          <DetailField label="绑定库房/分区">{apply.roomZone}</DetailField>
-          <DetailField label="具体位置">{apply.locationDetail}</DetailField>
-        </DetailSection>
+        <PrototypeAnnotationTarget annotationIds={["unlock-apply-audit-detail-device"]}>
+          <DetailSection title="设备与位置">
+            <DetailField label="设备编码">{apply.deviceCode}</DetailField>
+            <DetailField label="设备名称">{apply.deviceName}</DetailField>
+            <DetailField label="设备类型">{apply.deviceType}</DetailField>
+            <DetailField label="绑定仓库">{apply.warehouseName}</DetailField>
+            <DetailField label="绑定库房/分区">{apply.roomZone}</DetailField>
+            <DetailField label="具体位置">{apply.locationDetail}</DetailField>
+          </DetailSection>
+        </PrototypeAnnotationTarget>
 
-        <DetailSection title="申请内容">
-          <DetailField label="申请人">{formatApplicant(apply)}</DetailField>
-          <DetailField label="手机号">{maskPhone(apply.applicantPhone)}</DetailField>
-          <DetailField label="事由">{apply.reason}</DetailField>
-          <DetailField label="备注">{formatEmptyValue(apply.remark)}</DetailField>
-          <DetailField label="预计使用时段">
-            {formatEmptyValue(apply.expectedUseWindow)}
-          </DetailField>
-          <DetailField label="提交时间">{apply.submitTime}</DetailField>
-        </DetailSection>
+        <PrototypeAnnotationTarget annotationIds={["unlock-apply-audit-detail-content"]}>
+          <DetailSection title="申请内容">
+            <DetailField label="申请人">{formatApplicant(apply)}</DetailField>
+            <DetailField label="手机号">{maskPhone(apply.applicantPhone)}</DetailField>
+            <DetailField label="事由">{apply.reason}</DetailField>
+            <DetailField label="备注">{formatEmptyValue(apply.remark)}</DetailField>
+            <DetailField label="预计使用时段">
+              {formatEmptyValue(apply.expectedUseWindow)}
+            </DetailField>
+            <DetailField label="提交时间">{apply.submitTime}</DetailField>
+          </DetailSection>
+        </PrototypeAnnotationTarget>
 
-        <DetailSection title="审批配置快照">
-          <DetailField label="配置编号">{apply.configSnapshot.configNo}</DetailField>
-          <DetailField label="配置版本">v{apply.configSnapshot.configVersion}</DetailField>
-          <DetailField label="审批方式">{apply.configSnapshot.approvalMode}</DetailField>
-          <DetailField label="审批节点">{apply.configSnapshot.approvalNodes}</DetailField>
-        </DetailSection>
+        <PrototypeAnnotationTarget annotationIds={["unlock-apply-audit-detail-snapshot"]}>
+          <DetailSection title="审批配置快照">
+            <DetailField label="配置编号">{apply.configSnapshot.configNo}</DetailField>
+            <DetailField label="配置版本">v{apply.configSnapshot.configVersion}</DetailField>
+            <DetailField label="审批方式">{apply.configSnapshot.approvalMode}</DetailField>
+            <DetailField label="审批节点">{apply.configSnapshot.approvalNodes}</DetailField>
+          </DetailSection>
+        </PrototypeAnnotationTarget>
 
-        <DetailSection title="审批记录">
-          {apply.approvalRecords.length === 0 ? (
-            <DetailField label="记录">暂无记录，等待审批</DetailField>
-          ) : (
-            apply.approvalRecords.map((record) => (
-              <DetailField
-                key={`${record.nodeOrder}-${record.handlerAccount}`}
-                label={`节点${record.nodeOrder}`}
-              >
-                {record.handlerName}（{record.handlerAccount}）· {record.result} ·{" "}
-                {formatEmptyValue(record.opinion)} · {formatEmptyValue(record.processedTime)}
-              </DetailField>
-            ))
-          )}
-          {apply.finalConclusion && (
-            <DetailField label="最终审批结论">{apply.finalConclusion}</DetailField>
-          )}
-          <DetailField label="凭证状态">{apply.credential.status}</DetailField>
-        </DetailSection>
+        <PrototypeAnnotationTarget annotationIds={["unlock-apply-audit-detail-record"]}>
+          <DetailSection title="审批记录">
+            {apply.approvalRecords.length === 0 ? (
+              <DetailField label="记录">暂无记录，等待审批</DetailField>
+            ) : (
+              apply.approvalRecords.map((record) => (
+                <DetailField
+                  key={`${record.nodeOrder}-${record.handlerAccount}`}
+                  label={`节点${record.nodeOrder}`}
+                >
+                  {record.handlerName}（{record.handlerAccount}）· {record.result} ·{" "}
+                  {formatEmptyValue(record.opinion)} · {formatEmptyValue(record.processedTime)}
+                </DetailField>
+              ))
+            )}
+            {apply.finalConclusion && (
+              <DetailField label="最终审批结论">{apply.finalConclusion}</DetailField>
+            )}
+            <DetailField label="凭证状态">{apply.credential.status}</DetailField>
+          </DetailSection>
+        </PrototypeAnnotationTarget>
 
         {apply.status === "PENDING" && !apply.eligible && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">

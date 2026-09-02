@@ -16,7 +16,7 @@ export const approvalCenterHubAnnotations: PrototypeAnnotation[] = [
           {
             label: "开锁审核定位",
             content:
-              "挂载于「其他审批」卡片，带待审批数量角标；不接入系统流程引擎，不进入 07 审批中心「待处理/已处理」（见主PRD §5.0）。",
+              "挂载于「其他审批」卡片，带待审批数量红点角标；不接入系统流程引擎，不进入 07 审批中心通用「待处理/已处理」待办池，专网专道保障高频开锁响应。",
           },
           {
             label: "我的申请管理",
@@ -26,12 +26,12 @@ export const approvalCenterHubAnnotations: PrototypeAnnotation[] = [
         ],
       },
       {
-        title: "数据权限（P05）",
+        title: "数据权限与仓库隔离 (P05)",
         items: [
           {
             label: "仓管隔离",
             content:
-              "仓管角色仅可见管辖仓库下的开锁申请；管理员可见租户全量数据。",
+              "仓管角色仅可见管辖仓库下的开锁申请；管理员可见租户及各合作机构全量数据。",
           },
         ],
       },
@@ -42,7 +42,7 @@ export const approvalCenterHubAnnotations: PrototypeAnnotation[] = [
     targetId: "approval-center-preview-table",
     number: 2,
     kind: "交互",
-    title: "开锁审核页内预览表格与去处理",
+    title: "开锁审核页内预览表格与快速去处理",
     content:
       "卡片内默认展示最近 5 条待审批申请；支持「去处理」快速弹窗审批与「查看更多」跳转完整列表。",
     details: [
@@ -52,12 +52,12 @@ export const approvalCenterHubAnnotations: PrototypeAnnotation[] = [
           {
             label: "去处理",
             content:
-              "弹出审批弹窗（通过/驳回）；通过时审批意见选填，驳回时驳回原因必填（R10、R13）。",
+              "弹出 UnlockApplyApprovalDialog 审批弹窗（通过/驳回）；通过时审批意见选填，驳回时驳回原因强制必填（R10、R13）。",
           },
           {
             label: "查看更多",
             content:
-              "跳转 /工作中心/审批中心/其他审批/开锁审核 完整列表页，默认视图为「待审批」。",
+              "跳转 `/工作中心/审批中心/其他审批/开锁审核` 完整列表页，默认视图为「待审批」。",
           },
         ],
       },

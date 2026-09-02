@@ -136,8 +136,22 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
     targetId: "access-control-device-pagination",
     number: 5,
     kind: "交互",
-    title: "分页",
-    content: "默认 10 条/页；与预警列表共用 WarningListPagination 组件。",
-    details: [],
+    title: "分页与页容量控制",
+    content: "默认 10 条/页；与预警列表共用 WarningListPagination 组件，支持 10/20/50 条切换。",
+    details: [
+      {
+        title: "分页规范",
+        items: [
+          {
+            label: "重置行为",
+            content: "检索条件变更或切换分页尺寸时自动重置至第 1 页展示。",
+          },
+          {
+            label: "空态说明",
+            content: "未查询到匹配设备时展示空态占位，提示「暂无匹配的门禁设备」。",
+          },
+        ],
+      },
+    ],
   },
 ]

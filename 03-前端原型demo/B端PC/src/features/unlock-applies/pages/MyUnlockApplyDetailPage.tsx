@@ -163,47 +163,53 @@ export function MyUnlockApplyDetailPage() {
           </div>
         </PrototypeAnnotationTarget>
 
-        <DetailSection title="基础信息">
-          <DetailField label="申请单号">{apply.applyNo}</DetailField>
-          <DetailField label="申请状态">
-            <UnlockApplyStatusBadge apply={apply} />
-          </DetailField>
-          <DetailField label="凭证状态">
-            <CredentialStatusBadge status={apply.credential.status} />
-          </DetailField>
-          <DetailField label="提交时间">{apply.submitTime}</DetailField>
-          <DetailField label="是否需要审核">{apply.needsApproval ? "是" : "否"}</DetailField>
-        </DetailSection>
-
-        <DetailSection title="设备与位置快照">
-          <DetailField label="设备编码">{apply.deviceCode}</DetailField>
-          <DetailField label="设备名称">{apply.deviceName}</DetailField>
-          <DetailField label="设备类型">{apply.deviceType}</DetailField>
-          <DetailField label="绑定仓库">{apply.warehouseName}</DetailField>
-          <DetailField label="绑定库房">
-            {formatEmptyValue(apply.storeroomName ?? apply.roomZone.split("/")[0]?.trim())}
-          </DetailField>
-          <DetailField label="绑定分区">
-            {formatEmptyValue(apply.zoneName ?? apply.roomZone.split("/")[1]?.trim())}
-          </DetailField>
-          <DetailField label="具体位置">{apply.locationDetail}</DetailField>
-        </DetailSection>
-
-        <DetailSection title="申请内容">
-          <DetailField label="申请人">{formatApplicant(apply)}</DetailField>
-          <DetailField label="申请人所属机构">{apply.applicantOrg}</DetailField>
-          <DetailField label="申请人手机号">{maskPhone(apply.applicantPhone)}</DetailField>
-          <DetailField label="事由">{apply.reason}</DetailField>
-          <DetailField label="备注">{formatEmptyValue(apply.remark)}</DetailField>
-          {apply.needsApproval && (
-            <DetailField label="预计使用时段">
-              <span>{formatEmptyValue(apply.expectedUseWindow)}</span>
-              <span className="mt-1 block text-xs text-muted-foreground">
-                仅供审批参考
-              </span>
+        <PrototypeAnnotationTarget annotationIds={["my-unlock-apply-detail-base"]}>
+          <DetailSection title="基础信息">
+            <DetailField label="申请单号">{apply.applyNo}</DetailField>
+            <DetailField label="申请状态">
+              <UnlockApplyStatusBadge apply={apply} />
             </DetailField>
-          )}
-        </DetailSection>
+            <DetailField label="凭证状态">
+              <CredentialStatusBadge status={apply.credential.status} />
+            </DetailField>
+            <DetailField label="提交时间">{apply.submitTime}</DetailField>
+            <DetailField label="是否需要审核">{apply.needsApproval ? "是" : "否"}</DetailField>
+          </DetailSection>
+        </PrototypeAnnotationTarget>
+
+        <PrototypeAnnotationTarget annotationIds={["my-unlock-apply-detail-device"]}>
+          <DetailSection title="设备与位置快照">
+            <DetailField label="设备编码">{apply.deviceCode}</DetailField>
+            <DetailField label="设备名称">{apply.deviceName}</DetailField>
+            <DetailField label="设备类型">{apply.deviceType}</DetailField>
+            <DetailField label="绑定仓库">{apply.warehouseName}</DetailField>
+            <DetailField label="绑定库房">
+              {formatEmptyValue(apply.storeroomName ?? apply.roomZone.split("/")[0]?.trim())}
+            </DetailField>
+            <DetailField label="绑定分区">
+              {formatEmptyValue(apply.zoneName ?? apply.roomZone.split("/")[1]?.trim())}
+            </DetailField>
+            <DetailField label="具体位置">{apply.locationDetail}</DetailField>
+          </DetailSection>
+        </PrototypeAnnotationTarget>
+
+        <PrototypeAnnotationTarget annotationIds={["my-unlock-apply-detail-apply"]}>
+          <DetailSection title="申请内容">
+            <DetailField label="申请人">{formatApplicant(apply)}</DetailField>
+            <DetailField label="申请人所属机构">{apply.applicantOrg}</DetailField>
+            <DetailField label="申请人手机号">{maskPhone(apply.applicantPhone)}</DetailField>
+            <DetailField label="事由">{apply.reason}</DetailField>
+            <DetailField label="备注">{formatEmptyValue(apply.remark)}</DetailField>
+            {apply.needsApproval && (
+              <DetailField label="预计使用时段">
+                <span>{formatEmptyValue(apply.expectedUseWindow)}</span>
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  仅供审批参考
+                </span>
+              </DetailField>
+            )}
+          </DetailSection>
+        </PrototypeAnnotationTarget>
 
         {apply.needsApproval && (
           <PrototypeAnnotationTarget annotationIds={["my-unlock-apply-detail-approval"]}>

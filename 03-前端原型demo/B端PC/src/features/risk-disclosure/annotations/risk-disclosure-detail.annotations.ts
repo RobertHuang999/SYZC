@@ -6,12 +6,22 @@ export const riskDisclosureDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "risk-disclosure-detail-header",
     number: 1,
     kind: "页面",
-    title: "风险公示详情与撤回管理",
-    content: "展示公示事实全文、关联订单与原预警快照，支持风控主管录入理由后取消公示。",
+    title: "风险公示详情与撤回管理 · 司法存证全流程",
+    content: "展示公示事实全文、关联订单与原预警快照，支持风控主管录入理由后取消公示并全链路审计留痕。",
     details: [
       {
         title: "公示流转与权限控制",
         items: [
+          {
+            label: "合规流转与撤回图",
+            content: `flowchart TD
+    A["押品预警 (已处理有效)"] --> B["合规审核通过发起公示"]
+    B --> C["对外公开披露 (公示事实+证据快照)"]
+    C --> D{"借款主体债务重组/消除隐患"}
+    D -->|风控经理发起取消公示| E["强制录入取消理由 (限200字)"]
+    E --> F["状态流转为已取消"]
+    F --> G["记录全路径审计流水 (操作人+时间+IP+理由)"]`,
+          },
           {
             label: "合规流程",
             content: "已公示记录对外公开；如借款主体已完成债务重组或经风控复核确认消除隐患，可执行【取消公示】撤回披露。",

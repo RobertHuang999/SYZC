@@ -8,6 +8,7 @@ import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import { ImagePreviewModal } from "@/components/ui/ImagePreviewModal"
 import { SectionCard } from "@/components/ui/SectionCard"
+import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { formatDateTime } from "@/shared/lib/date-utils"
 import { canManualRelease } from "../domain/actions"
 import { DEVICE_WARNING_STATUS_LABELS } from "../domain/types"
@@ -62,7 +63,13 @@ export function DeviceWarningEventDetailPage() {
         {/* 可滚动内容区域 */}
         <div className="flex-1 min-h-0 space-y-3 overflow-y-auto px-3.5 py-3 pb-6 overscroll-contain">
           {/* 1. 页头摘要信息（严格对齐字段清单第一章） */}
-          <SectionCard
+          <PrototypeAnnotationTarget
+            annotationIds={[
+              "h5-device-warning-detail-header",
+              "h5-device-warning-detail-base",
+            ]}
+          >
+            <SectionCard
             title="预警事实摘要"
             indicatorColor="#1875f0"
             collapsed={!allExpanded}
@@ -162,35 +169,38 @@ export function DeviceWarningEventDetailPage() {
               )}
             </div>
           </SectionCard>
+          </PrototypeAnnotationTarget>
 
           {/* 2. 预警触发流水（严格对齐字段清单：触发历史时间轴明细） */}
-          <SectionCard
-            title="预警触发历史时间轴"
-            indicatorColor="#f57c00"
-            collapsed={!allExpanded}
-            extra={
-              <span className="rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-bold text-orange-700 border border-orange-200">
-                累计 {event.triggerCount} 次触发
-              </span>
-            }
-          >
-            <div className="relative pl-4 space-y-3.5 border-l-2 border-orange-200 ml-1.5 my-1 text-xs">
-              {event.triggerHistory.map((time, index) => (
-                <div key={`${time}-${index}`} className="relative">
-                  <div className="absolute -left-[21px] top-1 size-2.5 rounded-full bg-orange-500 ring-4 ring-orange-100" />
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-gray-800">
-                      第 {event.triggerHistory.length - index} 次告警触发
-                    </span>
-                    <span className="text-[11px] text-gray-500 font-mono">{time}</span>
+          <PrototypeAnnotationTarget annotationIds={["h5-device-warning-detail-facts"]}>
+            <SectionCard
+              title="预警触发历史时间轴"
+              indicatorColor="#f57c00"
+              collapsed={!allExpanded}
+              extra={
+                <span className="rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-bold text-orange-700 border border-orange-200">
+                  累计 {event.triggerCount} 次触发
+                </span>
+              }
+            >
+              <div className="relative pl-4 space-y-3.5 border-l-2 border-orange-200 ml-1.5 my-1 text-xs">
+                {event.triggerHistory.map((time, index) => (
+                  <div key={`${time}-${index}`} className="relative">
+                    <div className="absolute -left-[21px] top-1 size-2.5 rounded-full bg-orange-500 ring-4 ring-orange-100" />
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-gray-800">
+                        第 {event.triggerHistory.length - index} 次告警触发
+                      </span>
+                      <span className="text-[11px] text-gray-500 font-mono">{time}</span>
+                    </div>
+                    <div className="text-[11px] text-gray-500 mt-0.5">
+                      预警子类型: {event.warningSubType} · 防抖合并留痕
+                    </div>
                   </div>
-                  <div className="text-[11px] text-gray-500 mt-0.5">
-                    预警子类型: {event.warningSubType} · 防抖合并留痕
-                  </div>
-                </div>
-              ))}
-            </div>
-          </SectionCard>
+                ))}
+              </div>
+            </SectionCard>
+          </PrototypeAnnotationTarget>
 
           {/* 3. 处置与解除信息（严格对齐字段清单第二章：解除预警表单字段） */}
           {(isClosed || event.processing.processedTime) && (
@@ -287,37 +297,39 @@ export function DeviceWarningEventDetailPage() {
         </div>
 
         {/* 底部页内动作区（严格对齐 Demo 规格 §2.5） */}
-        <div className="border-t border-gray-200/90 bg-white px-4 py-3 shadow-lg">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="rounded-xl bg-gray-100 px-4 py-2.5 text-xs font-semibold text-gray-700 active:bg-gray-200 cursor-pointer"
-            >
-              返回列表
-            </button>
-
-            {releaseAllowed ? (
+        <PrototypeAnnotationTarget annotationIds={["h5-device-warning-detail-actions"]}>
+          <div className="border-t border-gray-200/90 bg-white px-4 py-3 shadow-lg">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() =>
-                  navigate(`/m/iot/device-warning-events/${event.eventId}/release`)
-                }
-                className="flex-1 rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-xs active:bg-blue-700 cursor-pointer"
+                onClick={() => navigate(-1)}
+                className="rounded-xl bg-gray-100 px-4 py-2.5 text-xs font-semibold text-gray-700 active:bg-gray-200 cursor-pointer"
               >
-                解除预警 ▸
+                返回列表
               </button>
-            ) : isOpenValid ? (
-              <div className="flex-1 rounded-xl bg-amber-50 px-2 py-2 text-center text-[11px] text-amber-800 border border-amber-200">
-                💡 该类型预警由系统自动恢复，不支持人工解除
-              </div>
-            ) : (
-              <div className="flex-1 rounded-xl bg-slate-100 py-2 text-center text-xs text-gray-500">
-                预警已归档
-              </div>
-            )}
+
+              {releaseAllowed ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate(`/m/iot/device-warning-events/${event.eventId}/release`)
+                  }
+                  className="flex-1 rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-xs active:bg-blue-700 cursor-pointer"
+                >
+                  解除预警 ▸
+                </button>
+              ) : isOpenValid ? (
+                <div className="flex-1 rounded-xl bg-amber-50 px-2 py-2 text-center text-[11px] text-amber-800 border border-amber-200">
+                  💡 该类型预警由系统自动恢复，不支持人工解除
+                </div>
+              ) : (
+                <div className="flex-1 rounded-xl bg-slate-100 py-2 text-center text-xs text-gray-500">
+                  预警已归档
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </PrototypeAnnotationTarget>
       </div>
 
       {/* 预警抓拍图预览弹窗 */}

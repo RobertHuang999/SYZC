@@ -11,6 +11,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import { Toast } from "@/components/ui/Toast"
+import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { canManualRelease } from "../domain/actions"
 import {
   getReleaseError,
@@ -58,19 +59,17 @@ export function DeviceWarningEventReleasePage() {
   if (accessError) {
     return (
       <MobileShell>
-        <NavBar title="解除预警" />
-        <div className="m-4 rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-xs text-amber-900 shadow-xs space-y-2">
-          <div className="flex items-center gap-2 font-bold text-sm text-amber-800">
-            <AlertCircle className="size-4 text-amber-600" />
-            <span>无法人工解除该预警</span>
-          </div>
-          <p className="leading-relaxed text-amber-700">{accessError}</p>
+        <NavBar title="无法解除" />
+        <div className="flex flex-1 flex-col items-center justify-center p-6 text-center text-sm text-gray-500">
+          <AlertCircle className="size-12 text-amber-500 mb-2" />
+          <p className="font-medium text-gray-900 mb-1">当前事件无法手动解除</p>
+          <p className="text-xs text-gray-500 max-w-xs">{accessError}</p>
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="mt-3 w-full rounded-xl bg-amber-600 py-2.5 text-xs font-semibold text-white active:bg-amber-700"
+            className="mt-4 rounded-xl bg-gray-100 px-4 py-2 text-xs font-semibold text-gray-700 active:bg-gray-200"
           >
-            返回详情页
+            返回上一页
           </button>
         </div>
       </MobileShell>
@@ -131,44 +130,42 @@ export function DeviceWarningEventReleasePage() {
       <div className="flex flex-1 flex-col min-h-0 overflow-hidden">
         <div className="flex-1 min-h-0 space-y-3.5 overflow-y-auto px-3.5 py-3 overscroll-contain">
           {/* 1. 待解除预警简要卡片 */}
-          <section className="rounded-2xl border border-gray-200/90 bg-white p-3.5 shadow-xs">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="rounded bg-slate-100 px-1.5 py-0.2 text-[10px] font-mono text-slate-700">
-                    {event.deviceCode}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {event.warningType}
-                  </span>
+          <PrototypeAnnotationTarget annotationIds={["h5-device-warning-release-header"]}>
+            <section className="rounded-2xl border border-gray-200/90 bg-white p-3.5 shadow-xs">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="rounded bg-slate-100 px-1.5 py-0.2 text-[10px] font-mono text-slate-700">
+                      {event.deviceCode}
+                    </span>
+                    <span className="text-xs text-gray-500">{event.warningType}</span>
+                  </div>
+                  <h3 className="mt-1 text-sm font-bold text-gray-900">{event.ruleName}</h3>
                 </div>
-                <h3 className="mt-1 text-sm font-bold text-gray-900">
-                  {event.ruleName}
-                </h3>
+                <span
+                  className="rounded px-1.5 py-0.5 text-[10px] font-bold text-white shadow-2xs"
+                  style={{ backgroundColor: event.severityColor }}
+                >
+                  {event.severityCode} {event.severityName}
+                </span>
               </div>
-              <span
-                className="rounded px-1.5 py-0.5 text-[10px] font-bold text-white shadow-2xs"
-                style={{ backgroundColor: event.severityColor }}
-              >
-                {event.severityCode} {event.severityName}
-              </span>
-            </div>
 
-            <div className="mt-2.5 rounded-xl bg-slate-50 p-2.5 text-xs text-gray-700 space-y-1">
-              <div className="flex justify-between">
-                <span className="text-gray-400">所属位置：</span>
-                <span className="font-medium text-gray-800">{event.location}</span>
+              <div className="mt-2.5 rounded-xl bg-slate-50 p-2.5 text-xs text-gray-700 space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">所属位置：</span>
+                  <span className="font-medium text-gray-800">{event.location}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">报警设备：</span>
+                  <span className="font-medium text-gray-800">{event.deviceName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">累计触发：</span>
+                  <span className="font-bold text-orange-600">⚡ {event.triggerCount} 次</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">报警设备：</span>
-                <span className="font-medium text-gray-800">{event.deviceName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">累计触发：</span>
-                <span className="font-bold text-orange-600">⚡ {event.triggerCount} 次</span>
-              </div>
-            </div>
-          </section>
+            </section>
+          </PrototypeAnnotationTarget>
 
           {/* 2. 联动与归档提醒 */}
           <div className="rounded-xl bg-blue-50/70 p-3 text-xs text-blue-900 border border-blue-100/80 leading-relaxed flex items-start gap-2">
@@ -181,8 +178,9 @@ export function DeviceWarningEventReleasePage() {
             </div>
           </div>
 
-          {/* 3. 表单分组：情况说明 */}
-          <section className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-xs space-y-2">
+          {/* 3. 表单分组：情况说明与现场照片 */}
+          <PrototypeAnnotationTarget annotationIds={["h5-device-warning-release-form"]}>
+            <section className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-xs space-y-2">
             <div className="flex items-center justify-between text-xs">
               <label className="font-bold text-gray-900 flex items-center gap-1">
                 <span>现场核查与处置情况说明</span>
@@ -254,6 +252,7 @@ export function DeviceWarningEventReleasePage() {
               支持 JPG / PNG 格式现场核验照片，单张不超过 10MB。
             </p>
           </section>
+          </PrototypeAnnotationTarget>
         </div>
 
         {/* 底部固定操作栏 */}

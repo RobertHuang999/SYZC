@@ -1,7 +1,10 @@
 import { useLocation } from "react-router-dom"
 import type { ReactNode } from "react"
+import { collateralWarningDetailH5Annotations } from "@/features/collateral-warning-events/annotations/collateral-warning-detail.annotations"
 import { collateralWarningListAnnotations } from "@/features/collateral-warning-events/annotations/collateral-warning-list.annotations"
 import { collateralWarningDocuments } from "@/features/collateral-warning-events/documents/collateral-warning-documents"
+import { deviceWarningDetailH5Annotations } from "@/features/device-warning-events/annotations/device-warning-detail.annotations"
+import { deviceWarningReleaseH5Annotations } from "@/features/device-warning-events/annotations/device-warning-release.annotations"
 import { deviceWarningListAnnotations } from "@/features/device-warning-events/annotations/device-warning-list.annotations"
 import { deviceWarningDocuments } from "@/features/device-warning-events/documents/device-warning-documents"
 import { accessControlDeviceH5ListAnnotations } from "@/features/access-control-devices/annotations/access-control-device-list.annotations"
@@ -30,10 +33,22 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
   let currentAnnotations: PrototypeAnnotation[] = []
   let currentDocuments: PrototypeDocument[] = []
 
-  if (location.pathname.startsWith("/m/supervision/order-warnings")) {
+  if (location.pathname.startsWith("/m/supervision/order-warnings/")) {
+    pageTitle = "押品预警详情 · 移动端交互与 PRD 标注"
+    currentAnnotations = collateralWarningDetailH5Annotations
+    currentDocuments = collateralWarningDocuments
+  } else if (location.pathname.startsWith("/m/supervision/order-warnings")) {
     pageTitle = "押品预警信息 · 移动端交互与 PRD 标注"
     currentAnnotations = collateralWarningListAnnotations
     currentDocuments = collateralWarningDocuments
+  } else if (location.pathname.endsWith("/release")) {
+    pageTitle = "设备预警解除 · 移动端交互与 PRD 标注"
+    currentAnnotations = deviceWarningReleaseH5Annotations
+    currentDocuments = deviceWarningDocuments
+  } else if (location.pathname.startsWith("/m/iot/device-warning-events/")) {
+    pageTitle = "IoT 设备预警详情 · 移动端交互与 PRD 标注"
+    currentAnnotations = deviceWarningDetailH5Annotations
+    currentDocuments = deviceWarningDocuments
   } else if (location.pathname.startsWith("/m/iot/device-warning-events")) {
     pageTitle = "IoT 设备预警事件 · 移动端交互与 PRD 标注"
     currentAnnotations = deviceWarningListAnnotations

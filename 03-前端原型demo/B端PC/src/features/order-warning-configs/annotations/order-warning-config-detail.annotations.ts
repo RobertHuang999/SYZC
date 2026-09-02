@@ -6,12 +6,23 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "order-warning-config-detail-header",
     number: 1,
     kind: "页面",
-    title: "订单预警配置详情与多策略视图",
+    title: "订单预警配置详情与多策略视图 · 全景风控架构",
     content: "展示单个订单绑定的综合风控策略全貌、各启用子项的阈值、等级与通知升级矩阵。",
     details: [
       {
-        title: "页面定位与操作",
+        title: "页面定位与多策略协同",
         items: [
+          {
+            label: "订单风控多策略流转图",
+            content: `flowchart TD
+    A["订单预警综合配置 (1:1 绑定订单)"] --> B["01 价格下跌 (跌价% + 等级)"]
+    A --> C["02 抵/质押率 (补仓线/平仓线双等级)"]
+    A --> D["03 超时预警 (到期提前天数 + 节点超时)"]
+    A --> E["04 盘点异常 (账实差% + 现场复核)"]
+    A --> F["05 巡检超期 (巡检周期 + 告警)"]
+    A --> G["06 贷中风控 (智风控模型 + 台账)"]
+    B & C & D & E & F & G --> H["02/02 押品预警信息流水承接"]`,
+          },
           {
             label: "页头操作",
             content: "提供【返回】、【编辑】与【删除】操作；已失效状态下仅支持返回或删除。",
@@ -25,19 +36,19 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "order-warning-config-detail-base",
     number: 2,
     kind: "字段",
-    title: "基础识别与订单主体信息",
+    title: "基础识别与订单主体信息清单",
     content: "展示规则 UUID、规则名称、关联订单编号、订单业务类型、借款货主企业、联系电话与押品物料明细。",
     details: [
       {
-        title: "关联订单字段",
+        title: "关联订单字段规格",
         items: [
           {
-            label: "订单类型",
+            label: "订单类型 (order_type)",
             content: "【抵押】【质押】【监管】；类型决定可选风控卡片（监管订单不适用质押率与贷中风控）。",
           },
           {
-            label: "押品物料明细",
-            content: "展示品名、规格、总重量/吨数及质押初始估值。",
+            label: "押品物料明细 (materials)",
+            content: "展示品名、规格、总重量/吨数及质押初始估值，辅助风控复核价格基线。",
           },
         ],
       },
@@ -48,7 +59,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "order-warning-config-detail-strategies",
     number: 3,
     kind: "规则",
-    title: "六大风控策略子项与阈值参数",
+    title: "六大风控策略子项与阈值参数规格",
     content: "卡片化分块展示已启用的各类风控策略的具体判定条件与通知升级参数。",
     details: [
       {
@@ -75,7 +86,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
             content: "双阈值模型：补仓线（如 LTV >= 75% 触发中危）与平仓线（如 LTV >= 85% 触发高危）。",
           },
           {
-            label: "贷中风控预警",
+            label: "06 贷中风控预警",
             content: "展示绑定的智风控模型名称及模型拒绝时的告警策略，并联动贷中台账。",
           },
         ],
@@ -88,7 +99,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "交互",
     title: "页头操作与权限控制",
-    content: "支持编辑与软删除，删除时二次确认并说明未处理流处置影响。",
+    content: "支持编辑与软删除，删除时二次确认并说明未处理流水处置影响。",
     details: [
       {
         title: "权限与约束",
@@ -96,6 +107,10 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "操作权限",
             content: "具备 R-RISK-MGR 权限人员可编辑和删除配置单据。",
+          },
+          {
+            label: "删除联动",
+            content: "规则删除后，历史已触发的未处理预警流水自动流转为【未处理（无效）】。",
           },
         ],
       },

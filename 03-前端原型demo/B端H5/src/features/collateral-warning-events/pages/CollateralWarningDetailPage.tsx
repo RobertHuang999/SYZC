@@ -16,6 +16,7 @@ import { getDetailHeaderActions } from "../domain/actions"
 import { WARNING_STATUS } from "../domain/types"
 import { CollateralWarningStatusBadge } from "../components/CollateralWarningStatusBadge"
 import { getCollateralWarningById } from "../lib/detail-utils"
+import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 
 export function CollateralWarningDetailPage() {
   const { id } = useParams()
@@ -84,7 +85,13 @@ export function CollateralWarningDetailPage() {
         {/* 可滚动内容区域 */}
         <div className="flex-1 min-h-0 space-y-3 overflow-y-auto px-3.5 py-3 pb-6 overscroll-contain">
           {/* 1. 预警基本事实摘要（严格对齐字段清单第一章） */}
-          <SectionCard
+          <PrototypeAnnotationTarget
+            annotationIds={[
+              "h5-collateral-warning-detail-header",
+              "h5-collateral-warning-detail-base",
+            ]}
+          >
+            <SectionCard
             title="预警事实摘要"
             indicatorColor="#1875f0"
             collapsed={!allExpanded}
@@ -185,6 +192,7 @@ export function CollateralWarningDetailPage() {
               )}
             </div>
           </SectionCard>
+          </PrototypeAnnotationTarget>
 
           {/* 2. 物联穿透关联字段（仅穿透类展示，严格对齐字段清单第二章） */}
           {isPenetration && (
@@ -239,12 +247,13 @@ export function CollateralWarningDetailPage() {
           )}
 
           {/* 3. 触发数据快照（严格对齐字段清单第四章：触发数据快照） */}
-          <SectionCard
-            title="触发数据快照"
-            indicatorColor="#f57c00"
-            defaultCollapsed={true}
-            collapsed={!allExpanded}
-          >
+          <PrototypeAnnotationTarget annotationIds={["h5-collateral-warning-detail-facts"]}>
+            <SectionCard
+              title="触发数据快照"
+              indicatorColor="#f57c00"
+              defaultCollapsed={true}
+              collapsed={!allExpanded}
+            >
             <div className="space-y-2 text-xs text-gray-700">
               <div className="flex items-start justify-between">
                 <span className="w-20 shrink-0 text-gray-500">快照指标:</span>
@@ -260,6 +269,7 @@ export function CollateralWarningDetailPage() {
               </div>
             </div>
           </SectionCard>
+          </PrototypeAnnotationTarget>
 
           {/* 4. 处置与核销信息（严格对齐字段清单第三章：解除预警表单字段） */}
           {(isClosed || event.processedTime) && (

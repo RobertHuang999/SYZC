@@ -6,15 +6,26 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     targetId: "device-warning-config-form-header",
     number: 1,
     kind: "页面",
-    title: "设备预警配置表单",
-    content: "录入或编辑设备策略，配置预警等级、设备范围、阈值条件、防抖参数及通知升级矩阵。",
+    title: "设备预警配置表单 · 策略定义与生命周期",
+    content: "录入或编辑设备策略，配置预警等级、设备范围、阈值条件、防抖参数及通知升级矩阵，支持瞬态/持续事件自动适配。",
     details: [
       {
-        title: "编辑限制",
+        title: "配置提交流转与校验链路",
         items: [
           {
-            label: "已失效规则拦截",
-            content: "已失效规则不可编辑，前端与服务端实施双重拦截。",
+            label: "规则提交流转图",
+            content: `flowchart TD
+    A["表单录入 (基本信息/设备范围/阈值/防抖/通知升级)"] --> B{"R14 上线类互斥判定"}
+    B -->|混配上线类与监控类| C["前端阻断 & Toast 提示单独配置"]
+    B -->|合规| D{"R04/R05 设备唯一性校验"}
+    D -->|设备+子类型已存在| E["拦截并提示已在其他生效规则中绑定"]
+    D -->|校验通过| F["保存并生效规则"]
+    F --> G["发布 DeviceWarningConfigSaved"]
+    G --> H["防抖判定引擎热加载新规则"]`,
+          },
+          {
+            label: "编辑与失效保护",
+            content: "已失效规则（关联设备全部解绑）前端与服务端实施双重拦截，只允许查看不允许编辑或重新启用。",
           },
         ],
       },
@@ -29,15 +40,19 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     content: "规则名称必填、预警类型联动子类型枚举、预警等级读取 03/01 启用字典；设备上线类子类型须单独成规则（R14）。",
     details: [
       {
-        title: "字段与校验",
+        title: "字段字典清单与校验规范",
         items: [
           {
-            label: "规则名称",
+            label: "规则名称 (rule_name) · 必填",
             content: "2~50 字符，建议包含设备类型与关键参数（如【1号冷库温湿度超限预警】）。",
           },
           {
-            label: "等级下拉",
-            content: "下拉展示等级编码、名称与颜色色块；提交 severity_level_id。",
+            label: "预警大类 / 子类型 (warn_type / sub_type) · 必填",
+            content: "大类支持安防类、离线类、传感器环境类、生命周期类等；选择大类后联动过滤对应子类型枚举。",
+          },
+          {
+            label: "预警等级下拉 (severity_level_id) · 必填",
+            content: "下拉展示 03/01 等级编码、名称与颜色色块；仅展示当前启用的等级档位，提交稳定 UUID。",
           },
           {
             label: "子类型互斥 (R14)",
@@ -52,11 +67,11 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     targetId: "device-warning-config-form-scope",
     number: 3,
     kind: "字段",
-    title: "监控设备范围配置",
+    title: "监控设备范围配置与互斥约束",
     content: "支持单选【仅针对新设备】或【选择现有设备】并勾选多台目标硬件；全局新设备仅适用于唯一选中的设备上线子类型。",
     details: [
       {
-        title: "设备选择与互斥规则",
+        title: "设备选择与互斥规则清单",
         items: [
           {
             label: "唯一性约束 (R04)",
@@ -80,18 +95,18 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "规则",
     title: "阈值条件与防抖分流表单",
-    content: "按子类型自动适配阈值表单结构，并动态控制防抖配置模式。",
+    content: "按子类型自动适配阈值表单结构，并动态控制防抖配置模式（瞬态 vs 持续）。",
     details: [
       {
-        title: "防抖配置模式",
+        title: "防抖配置模式与字段",
         items: [
           {
-            label: "瞬态事件",
-            content: "防抖模式不可选，提示【瞬态事件即时触发】。",
+            label: "瞬态事件（防拆/撞击/破门）",
+            content: "防抖模式置灰锁定，显示【瞬态事件即时触发】，无防抖窗口，0 延迟上报告警。",
           },
           {
-            label: "持续事件",
-            content: "可选择【持续时长】（单位：分钟）或【连续次数】（单位：次）。",
+            label: "持续事件（温湿度/离线/电压）",
+            content: "可选择【持续时长】（单位：分钟，如 >= 15 分钟）或【连续次数】（单位：次，如连续采样 >= 3 次），有效过滤传感器毛刺波动。",
           },
         ],
       },
@@ -113,8 +128,8 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
             content: "按需选择短信、邮件等外部通知渠道；系统小角标自动更新，至少指定一位预警接收人。",
           },
           {
-            label: "超时升级天数",
-            content: "配置升级天数（如 1~30 天）及升级对象，未配置则不触发升级。",
+            label: "超时升级天数 (escalation_days)",
+            content: "配置升级天数（如 1~30 天）及升级对象；超时未处置时自动向升级对象追加督办，未配置则不触发升级。",
           },
         ],
       },
@@ -125,15 +140,19 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     targetId: "device-warning-config-form-actions",
     number: 6,
     kind: "交互",
-    title: "保存提交与离开拦截",
+    title: "保存提交与离开拦截控制",
     content: "保存提交前进行全字段校验，表单脏数据未保存离开时弹出确认拦截。",
     details: [
       {
-        title: "提交体验",
+        title: "提交体验与错误指引",
         items: [
           {
             label: "校验提示",
             content: "校验失败时精准定位到出错字段并高亮红框提示；R14 混选阻断时 Toast「设备上线通知需单独配置，不可与其他预警子类型组合」。",
+          },
+          {
+            label: "防未保存丢失拦截",
+            content: "表单处于 Dirty 状态时点击取消或切换路由弹出离开确认框，防止数据意外丢失。",
           },
         ],
       },
