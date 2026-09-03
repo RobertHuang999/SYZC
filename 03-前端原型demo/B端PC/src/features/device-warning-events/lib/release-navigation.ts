@@ -22,8 +22,8 @@ export function getReleaseBackPath(
   from: ReleaseNavigationState["from"] | undefined
 ): string {
   if (from === "list") {
-    return "/预警信息/设备预警信息"
+    return "/物联网IOT与预警/预警信息/设备预警信息"
   }
 
-  return `/预警信息/设备预警信息/详情/${eventId}`
+  return `/物联网IOT与预警/预警信息/设备预警信息/详情/${eventId}`
 }

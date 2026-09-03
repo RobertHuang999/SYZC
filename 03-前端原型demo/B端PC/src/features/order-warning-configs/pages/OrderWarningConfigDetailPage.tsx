@@ -46,7 +46,7 @@ export function OrderWarningConfigDetailPage() {
   if (!config) {
     return (
       <div className="space-y-4 p-6">
-        <Link to="/预警配置/订单预警配置">
+        <Link to="/物联网IOT与预警/预警配置/订单预警配置">
           <Button variant="outline">
             <ArrowLeftIcon />
             返回
@@ -85,7 +85,7 @@ export function OrderWarningConfigDetailPage() {
 
             <div className="flex flex-wrap gap-2">
               {headerActions.includes("back") && (
-                <Link to="/预警配置/订单预警配置">
+                <Link to="/物联网IOT与预警/预警配置/订单预警配置">
                   <Button variant="outline">
                     <ArrowLeftIcon />
                     返回
@@ -93,7 +93,7 @@ export function OrderWarningConfigDetailPage() {
                 </Link>
               )}
               {headerActions.includes("edit") && (
-                <Link to={`/预警配置/订单预警配置/编辑/${config.configId}`}>
+                <Link to={`/物联网IOT与预警/预警配置/订单预警配置/编辑/${config.configId}`}>
                   <Button variant="secondary">编辑</Button>
                 </Link>
               )}
@@ -229,7 +229,7 @@ export function OrderWarningConfigDetailPage() {
           onConfirm={() => {
             setDeleteOpen(false)
             setToastMessage("删除成功")
-            window.setTimeout(() => navigate("/预警配置/订单预警配置"), 800)
+            window.setTimeout(() => navigate("/物联网IOT与预警/预警配置/订单预警配置"), 800)
           }}
         />
 

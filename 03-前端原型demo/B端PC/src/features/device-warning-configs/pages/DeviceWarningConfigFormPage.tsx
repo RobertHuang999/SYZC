@@ -63,7 +63,7 @@ export function DeviceWarningConfigFormPage() {
   if (isEdit && existing?.status === "已失效") {
     return (
       <div className="space-y-4 p-6">
-        <Link to="/预警配置/设备预警配置">
+        <Link to="/物联网IOT与预警/预警配置/设备预警配置">
           <Button variant="outline">
             <ArrowLeftIcon />
             返回
@@ -79,7 +79,7 @@ export function DeviceWarningConfigFormPage() {
   if (isEdit && !existing) {
     return (
       <div className="space-y-4 p-6">
-        <Link to="/预警配置/设备预警配置">
+        <Link to="/物联网IOT与预警/预警配置/设备预警配置">
           <Button variant="outline">
             <ArrowLeftIcon />
             返回
@@ -212,7 +212,7 @@ export function DeviceWarningConfigFormPage() {
 
     setToastMessage("保存成功")
     window.setTimeout(() => {
-      navigate("/预警配置/设备预警配置")
+      navigate("/物联网IOT与预警/预警配置/设备预警配置")
     }, 800)
   }
 
@@ -229,7 +229,7 @@ export function DeviceWarningConfigFormPage() {
               {pageTitle}
             </h1>
             <div className="flex flex-wrap gap-2">
-              <Link to="/预警配置/设备预警配置">
+              <Link to="/物联网IOT与预警/预警配置/设备预警配置">
                 <Button variant="outline">
                   <ArrowLeftIcon />
                   取消

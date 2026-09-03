@@ -14,29 +14,20 @@ import {
   Warehouse,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { BuildingToast } from "@/components/common/BuildingToast"
 import { BottomTabBar } from "@/components/layout/BottomTabBar"
 import { MobileShell } from "@/components/layout/MobileShell"
+import { openMenuModule } from "@/lib/open-menu-module"
 
 export function HomePage() {
   const navigate = useNavigate()
   const [isPlaying, setIsPlaying] = useState(true)
   const [selectedWarehouse, setSelectedWarehouse] = useState("水果仓库")
   const [selectedCamera, setSelectedCamera] = useState("摄像头001#")
-  const [toastFeature, setToastFeature] = useState<string | null>(null)
 
-  const showBuilding = (featureName: string) => {
-    setToastFeature(featureName)
-  }
+  const openFeature = (nameOrId: string) => openMenuModule(navigate, nameOrId)
 
   return (
     <MobileShell>
-      {/* 正在构建 Toast 提示 */}
-      <BuildingToast
-        featureName={toastFeature}
-        onClose={() => setToastFeature(null)}
-      />
-
       {/* 顶部标题区 */}
       <div className="px-4 pt-3 pb-2">
         <div className="flex items-center gap-2">
@@ -59,14 +50,14 @@ export function HomePage() {
           {/* 上半部分：数据看板 & 风控预警快捷入口 */}
           <div className="grid grid-cols-2 gap-2">
             <div
-              onClick={() => showBuilding("数据看板")}
+              onClick={() => openFeature("home-report")}
               className="flex items-center justify-between rounded-xl bg-[#f4f7fc] p-2.5 active:bg-blue-50 transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2">
                 <div className="flex size-7 items-center justify-center rounded-lg bg-[#2563eb] text-white">
                   <BarChart3 className="size-4" />
                 </div>
-                <span className="text-xs font-semibold text-gray-800">数据看板</span>
+                <span className="text-xs font-semibold text-gray-800">报表</span>
               </div>
               <ChevronRight className="size-4 text-gray-300" />
             </div>
@@ -88,7 +79,7 @@ export function HomePage() {
           {/* 下半部分：设备状态三列 */}
           <div className="grid grid-cols-3 gap-2 border-t border-gray-100 pt-2 text-[11px]">
             <div
-              onClick={() => showBuilding("监控设备管理")}
+              onClick={() => openFeature("home-digital-warehouse-monitor")}
               className="rounded-xl bg-[#f8fafc] p-2 cursor-pointer active:bg-gray-100"
             >
               <div className="flex items-center justify-between text-gray-500 font-medium">
@@ -108,11 +99,11 @@ export function HomePage() {
             </div>
 
             <div
-              onClick={() => showBuilding("物联设备管理")}
+              onClick={() => openFeature("home-digital-warehouse-temp")}
               className="rounded-xl bg-[#f8fafc] p-2 cursor-pointer active:bg-gray-100"
             >
               <div className="flex items-center justify-between text-gray-500 font-medium">
-                <span>物联设备</span>
+                <span>温湿度设备</span>
                 <ChevronRight className="size-3 text-gray-300" />
               </div>
               <div className="mt-1 space-y-0.5 text-[10px]">
@@ -242,7 +233,7 @@ export function HomePage() {
 
               <button
                 type="button"
-                onClick={() => showBuilding("全屏监控")}
+                onClick={() => openFeature("home-digital-warehouse-monitor")}
                 className="p-1 hover:text-cyan-300"
               >
                 <Maximize2 className="size-3.5" />
@@ -256,7 +247,7 @@ export function HomePage() {
           {/* 第一行：客户总数 & 当前货值 */}
           <div className="grid grid-cols-2 gap-2">
             <div
-              onClick={() => showBuilding("客户总数明细")}
+              onClick={() => openFeature("home-report")}
               className="rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100"
             >
               <div className="flex items-center text-xs font-semibold text-[#1875f0]">
@@ -267,7 +258,7 @@ export function HomePage() {
             </div>
 
             <div
-              onClick={() => showBuilding("当前货值统计")}
+              onClick={() => openFeature("home-report")}
               className="rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100"
             >
               <div className="text-xs text-gray-400">当前货值 (万元)</div>
@@ -278,7 +269,7 @@ export function HomePage() {
           {/* 第二行：仓库总数、品类总数、货物总类 */}
           <div className="grid grid-cols-3 gap-2">
             <div
-              onClick={() => showBuilding("仓库总数")}
+              onClick={() => openFeature("home-report")}
               className="rounded-xl bg-[#f8fafc] p-2 text-center cursor-pointer active:bg-gray-100"
             >
               <div className="flex justify-center mb-1">
@@ -291,7 +282,7 @@ export function HomePage() {
             </div>
 
             <div
-              onClick={() => showBuilding("品类总数")}
+              onClick={() => openFeature("home-report")}
               className="rounded-xl bg-[#f8fafc] p-2 text-center cursor-pointer active:bg-gray-100"
             >
               <div className="flex justify-center mb-1">
@@ -304,7 +295,7 @@ export function HomePage() {
             </div>
 
             <div
-              onClick={() => showBuilding("货物品类")}
+              onClick={() => openFeature("home-report")}
               className="rounded-xl bg-[#f8fafc] p-2 text-center cursor-pointer active:bg-gray-100"
             >
               <div className="flex justify-center mb-1">
@@ -320,7 +311,7 @@ export function HomePage() {
           {/* 第三行：抵/质押中笔数、抵/质押完成数、风险预警数 */}
           <div className="grid grid-cols-3 gap-2">
             <div
-              onClick={() => showBuilding("抵质押中单据")}
+              onClick={() => openFeature("home-report")}
               className="rounded-xl bg-[#f8fafc] p-2 cursor-pointer active:bg-gray-100"
             >
               <div className="text-[10px] text-gray-400">抵/质押中笔数</div>
@@ -331,7 +322,7 @@ export function HomePage() {
             </div>
 
             <div
-              onClick={() => showBuilding("抵质押完成单据")}
+              onClick={() => openFeature("home-report")}
               className="rounded-xl bg-[#f8fafc] p-2 cursor-pointer active:bg-gray-100"
             >
               <div className="text-[10px] text-gray-400">抵/质押完成数</div>
@@ -356,7 +347,7 @@ export function HomePage() {
           {/* 第四行：意向融资金额 & 意向融资笔数 */}
           <div className="grid grid-cols-2 gap-2">
             <div
-              onClick={() => showBuilding("意向融资金额")}
+              onClick={() => openFeature("home-report")}
               className="rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100"
             >
               <div className="text-[11px] text-gray-400">意向融资金额 (万元)</div>
@@ -364,7 +355,7 @@ export function HomePage() {
             </div>
 
             <div
-              onClick={() => showBuilding("意向融资笔数")}
+              onClick={() => openFeature("home-report")}
               className="rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100"
             >
               <div className="text-[11px] text-gray-400">意向融资笔数</div>
@@ -375,7 +366,7 @@ export function HomePage() {
           {/* 第五行：融资金额 & 融资笔数 */}
           <div className="grid grid-cols-2 gap-2">
             <div
-              onClick={() => showBuilding("实际融资金额")}
+              onClick={() => openFeature("home-report")}
               className="rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100"
             >
               <div className="text-[11px] text-gray-400">融资金额 (万元)</div>
@@ -383,7 +374,7 @@ export function HomePage() {
             </div>
 
             <div
-              onClick={() => showBuilding("实际融资笔数")}
+              onClick={() => openFeature("home-report")}
               className="rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100"
             >
               <div className="text-[11px] text-gray-400">融资笔数</div>
@@ -413,7 +404,7 @@ export function HomePage() {
 
           {/* 待办单据卡片 */}
           <div
-            onClick={() => showBuilding("待办审批详情")}
+            onClick={() => navigate("/m/tasks")}
             className="rounded-xl border border-gray-100 bg-[#f8fafc] p-3 text-xs space-y-2 cursor-pointer active:bg-gray-100 transition-colors"
           >
             <div className="flex items-center justify-between text-[11px] text-gray-400">

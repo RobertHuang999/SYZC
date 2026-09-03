@@ -1,6 +1,6 @@
 import { BellRing, Boxes, ChevronDown, ChevronLeft, ChevronRight, CircleGauge, Home, Settings2, ShieldAlert, Warehouse } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { NavLink, useLocation } from "react-router-dom"
 import { getSidebarGroups, type TopModule } from "@/config/navigation"
 import { cn } from "@/lib/utils"
@@ -29,6 +29,11 @@ const groupIcons: Record<string, LucideIcon> = {
   "institution-report": CircleGauge,
   "settlement-management": Boxes,
   "business-process": Settings2,
+  "功能入口": Home,
+}
+
+function buildDefaultOpenGroups(groups: ReturnType<typeof getSidebarGroups>) {
+  return Object.fromEntries(groups.map((group) => [group.id, true]))
 }
 
 export function SidebarNav({ activeModule }: SidebarNavProps) {
@@ -36,6 +41,21 @@ export function SidebarNav({ activeModule }: SidebarNavProps) {
   const [collapsed, setCollapsed] = useState(false)
   const currentPath = decodeURIComponent(pathname)
   const sidebarGroups = getSidebarGroups(activeModule)
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => buildDefaultOpenGroups(sidebarGroups))
+
+  useEffect(() => {
+    setOpenGroups(buildDefaultOpenGroups(getSidebarGroups(activeModule)))
+  }, [activeModule.id])
+
+  const toggleGroup = (groupId: string) => {
+    if (collapsed) {
+      setCollapsed(false)
+      setOpenGroups((current) => ({ ...current, [groupId]: true }))
+      return
+    }
+
+    setOpenGroups((current) => ({ ...current, [groupId]: !current[groupId] }))
+  }
 
   return (
     <aside className={cn("sidebar", collapsed && "is-collapsed")}>
@@ -49,14 +69,23 @@ export function SidebarNav({ activeModule }: SidebarNavProps) {
           const groupActive = group.items.some((item) => currentPath === item.path || currentPath.startsWith(`${item.path}/`))
           const GroupIcon = groupIcons[group.id] ?? Boxes
 
+          const isOpen = openGroups[group.id] ?? false
+
           return (
             <div className="sidebar-group" key={group.id}>
-              <button className={cn("sidebar-item sidebar-group-toggle", groupActive && "is-group-active", collapsed && "is-collapsed")} type="button">
+              <button
+                className={cn("sidebar-item sidebar-group-toggle", groupActive && "is-group-active", collapsed && "is-collapsed")}
+                type="button"
+                aria-expanded={isOpen}
+                onClick={() => toggleGroup(group.id)}
+              >
                 <GroupIcon size={16} strokeWidth={1.7} />
                 {!collapsed && <span>{group.label}</span>}
-                {!collapsed && <ChevronDown className="sidebar-chevron" size={14} strokeWidth={1.7} />}
+                {!collapsed && (
+                  <ChevronDown className={cn("sidebar-chevron", !isOpen && "is-closed")} size={14} strokeWidth={1.7} />
+                )}
               </button>
-              {!collapsed && (
+              {!collapsed && isOpen && (
                 <div className="sidebar-submenu">
                   {group.items.map((item) => (
                     <NavLink
@@ -79,10 +108,15 @@ export function SidebarNav({ activeModule }: SidebarNavProps) {
         })}
       </nav>
 
-      <button className={cn("sidebar-collapse", collapsed && "is-collapsed")} type="button" onClick={() => setCollapsed((value) => !value)}>
-        <ChevronLeft size={15} strokeWidth={1.7} />
+      <button
+        className={cn("sidebar-collapse", collapsed && "is-collapsed")}
+        type="button"
+        aria-expanded={!collapsed}
+        aria-label={collapsed ? "展开菜单" : "收起菜单"}
+        onClick={() => setCollapsed((value) => !value)}
+      >
+        {collapsed ? <ChevronRight size={15} strokeWidth={1.7} /> : <ChevronLeft size={15} strokeWidth={1.7} />}
         {!collapsed && <span>收起菜单</span>}
-        {collapsed && <ChevronRight size={15} strokeWidth={1.7} />}
       </button>
     </aside>
   )

@@ -17,7 +17,7 @@ import { PrototypeAnnotationProvider, PrototypeAnnotationTarget } from "@/shared
 import { severityLevelDetailAnnotations } from "../annotations/severity-level-detail.annotations"
 import { severityLevelDocuments } from "../documents/severity-level-documents"
 
-const listPath = "/预警配置/预警等级"
+const listPath = "/物联网IOT与预警/预警配置/预警等级"
 
 export function SeverityLevelDetailPage() {
   const { id } = useParams()

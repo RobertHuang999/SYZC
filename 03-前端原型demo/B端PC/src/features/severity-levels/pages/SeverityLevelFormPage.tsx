@@ -22,7 +22,7 @@ import { DEFAULT_LABEL_COLOR } from "../domain/constants"
 import type { SeverityLevelRecord } from "../domain/types"
 import { getSeverityLevelById } from "../lib/detail-utils"
 
-const listPath = "/预警配置/预警等级"
+const listPath = "/物联网IOT与预警/预警配置/预警等级"
 
 type FormValues = {
   severityCode: string

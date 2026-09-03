@@ -108,7 +108,7 @@ export function SeverityLevelTable({
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>
                   <Link
-                    to={`/预警配置/预警等级/详情/${record.levelId}`}
+                    to={`/物联网IOT与预警/预警配置/预警等级/详情/${record.levelId}`}
                     className="font-medium text-primary hover:underline"
                   >
                     {record.severityCode}
@@ -121,7 +121,7 @@ export function SeverityLevelTable({
                     ariaLabel={`显示名称：${record.displayName}`}
                   >
                     <Link
-                      to={`/预警配置/预警等级/详情/${record.levelId}`}
+                      to={`/物联网IOT与预警/预警配置/预警等级/详情/${record.levelId}`}
                       className="font-medium text-primary hover:underline"
                     >
                       {record.displayName}

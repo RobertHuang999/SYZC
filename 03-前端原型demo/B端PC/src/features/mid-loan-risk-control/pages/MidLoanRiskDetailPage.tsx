@@ -47,7 +47,7 @@ export function MidLoanRiskDetailPage() {
   if (!record) {
     return (
       <div className="space-y-4 p-6">
-        <Link to="/预警信息/贷中风控管理">
+        <Link to="/物联网IOT与预警/预警信息/贷中风控管理">
           <Button variant="outline">
             <ArrowLeftIcon />
             返回
@@ -82,7 +82,7 @@ export function MidLoanRiskDetailPage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Link to="/预警信息/贷中风控管理">
+              <Link to="/物联网IOT与预警/预警信息/贷中风控管理">
                 <Button variant="outline">
                   <ArrowLeftIcon />
                   返回

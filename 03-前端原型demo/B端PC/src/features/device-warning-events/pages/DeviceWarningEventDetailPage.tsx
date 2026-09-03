@@ -33,7 +33,7 @@ export function DeviceWarningEventDetailPage() {
     const candidate = new URLSearchParams(location.search).get("return_route")
     return candidate?.startsWith("/")
       ? candidate
-      : "/预警信息/设备预警信息"
+      : "/物联网IOT与预警/预警信息/设备预警信息"
   }, [location.search])
   const headerActions = useMemo(
     () => (event ? getDetailHeaderActions(event) : ["back"]),

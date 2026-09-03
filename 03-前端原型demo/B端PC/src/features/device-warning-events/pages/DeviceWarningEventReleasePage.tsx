@@ -39,7 +39,7 @@ export function DeviceWarningEventReleasePage() {
   const access = useMemo(() => getReleaseAccess(event), [event])
   const backPath = event
     ? getReleaseBackPath(event.eventId, navigationState?.from)
-    : "/预警信息/设备预警信息"
+    : "/物联网IOT与预警/预警信息/设备预警信息"
 
   const [situationDescription, setSituationDescription] = useState("")
   const [sitePhotoNames, setSitePhotoNames] = useState<string[]>([])
@@ -73,7 +73,7 @@ export function DeviceWarningEventReleasePage() {
 
     setToastMessage(access.message)
     const timer = window.setTimeout(() => {
-      navigate(`/预警信息/设备预警信息/详情/${event.eventId}`, {
+      navigate(`/物联网IOT与预警/预警信息/设备预警信息/详情/${event.eventId}`, {
         replace: true,
       })
     }, 1800)
@@ -124,7 +124,7 @@ export function DeviceWarningEventReleasePage() {
   if (!event) {
     return (
       <div className="space-y-4 p-6">
-        <Link to="/预警信息/设备预警信息">
+        <Link to="/物联网IOT与预警/预警信息/设备预警信息">
           <Button variant="outline">
             <ArrowLeftIcon />
             返回

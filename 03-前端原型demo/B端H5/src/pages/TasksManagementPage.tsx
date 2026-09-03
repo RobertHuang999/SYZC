@@ -19,45 +19,30 @@ import {
   ShoppingBag,
   SlidersHorizontal,
   Store,
+  Workflow,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { BuildingToast } from "@/components/common/BuildingToast"
 import { BottomTabBar } from "@/components/layout/BottomTabBar"
 import { MobileShell } from "@/components/layout/MobileShell"
-
-import { MOBILE_MENU_ITEMS } from "@/data/mobileMenuData"
+import { openMenuModule } from "@/lib/open-menu-module"
 
 export function TasksManagementPage() {
   const navigate = useNavigate()
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [toastFeature, setToastFeature] = useState<string | null>(null)
 
   const handleRefresh = () => {
     setIsRefreshing(true)
     setTimeout(() => setIsRefreshing(false), 800)
   }
 
-  const showBuilding = (featureName: string) => {
-    setToastFeature(featureName)
-  }
+  const openFeature = (nameOrId: string) => openMenuModule(navigate, nameOrId)
 
-  const openOtherApproval = (moduleId: string, fallbackName: string) => {
-    const item = MOBILE_MENU_ITEMS.find((entry) => entry.id === moduleId)
-    if (item?.customRoute) {
-      navigate(item.customRoute)
-      return
-    }
-    showBuilding(fallbackName)
+  const openOtherApproval = (moduleId: string) => {
+    openMenuModule(navigate, moduleId)
   }
 
   return (
-    <MobileShell>
-      {/* 正在构建 Toast 提示 */}
-      <BuildingToast
-        featureName={toastFeature}
-        onClose={() => setToastFeature(null)}
-      />
-
+      <MobileShell>
       {/* 顶部标题栏 */}
       <div className="px-4 pt-3 pb-1">
         <h1 className="text-lg font-bold text-gray-900">业务办理</h1>
@@ -89,11 +74,11 @@ export function TasksManagementPage() {
         <section className="rounded-2xl bg-white p-3.5 shadow-xs space-y-3">
           <h2 className="text-xs font-bold text-gray-800 tracking-tight">内部审批</h2>
 
-          {/* 上面三项：待处理、抄送我、已处理 */}
+          {/* 上面三项：待处理、抄送我的、已处理 */}
           <div className="grid grid-cols-3 gap-2">
             {/* 待处理 */}
             <div
-              onClick={() => showBuilding("待处理审批")}
+              onClick={() => openFeature("biz-overview-pending")}
               className="relative flex flex-col justify-between rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100 transition-colors"
             >
               <div className="flex items-center justify-between">
@@ -111,9 +96,9 @@ export function TasksManagementPage() {
               </div>
             </div>
 
-            {/* 抄送我 */}
+            {/* 抄送我的 */}
             <div
-              onClick={() => showBuilding("抄送我的")}
+              onClick={() => openFeature("biz-overview-cc")}
               className="relative flex flex-col justify-between rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100 transition-colors"
             >
               <div className="flex items-center justify-between">
@@ -124,7 +109,7 @@ export function TasksManagementPage() {
                   5
                 </span>
               </div>
-              <div className="mt-2 text-xs font-bold text-gray-900">抄送我</div>
+              <div className="mt-2 text-xs font-bold text-gray-900">抄送我的</div>
               <div className="mt-1 flex items-center text-[10px] text-amber-600 font-medium bg-amber-50 rounded px-1 py-0.2 w-fit">
                 <span>今日新增 3</span>
                 <ChevronRight className="size-2.5" />
@@ -133,7 +118,7 @@ export function TasksManagementPage() {
 
             {/* 已处理 */}
             <div
-              onClick={() => showBuilding("已处理任务")}
+              onClick={() => openFeature("biz-overview-processed")}
               className="relative flex flex-col justify-between rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100 transition-colors"
             >
               <div className="flex items-center justify-between">
@@ -152,7 +137,7 @@ export function TasksManagementPage() {
           {/* 下面两项：我的申请记录、业务申请记录 */}
           <div className="grid grid-cols-2 gap-2">
             <div
-              onClick={() => navigate("/m/my-applies")}
+              onClick={() => openFeature("biz-overview-my-apply")}
               className="flex items-center justify-between rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100 transition-colors"
             >
               <div className="flex items-center gap-2">
@@ -170,7 +155,7 @@ export function TasksManagementPage() {
             </div>
 
             <div
-              onClick={() => showBuilding("业务申请记录")}
+              onClick={() => openFeature("biz-overview-biz-apply")}
               className="flex items-center justify-between rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100 transition-colors"
             >
               <div className="flex items-center gap-2">
@@ -196,7 +181,7 @@ export function TasksManagementPage() {
           <div className="grid grid-cols-5 gap-y-3.5 gap-x-1 text-center">
             {/* 入库发起 */}
             <div
-              onClick={() => showBuilding("入库发起")}
+              onClick={() => openFeature("biz-init-inbound")}
               className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#1875f0] text-white shadow-xs">
@@ -207,7 +192,7 @@ export function TasksManagementPage() {
 
             {/* 出库发起 */}
             <div
-              onClick={() => showBuilding("出库发起")}
+              onClick={() => openFeature("biz-init-outbound")}
               className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#fb8c00] text-white shadow-xs">
@@ -218,7 +203,7 @@ export function TasksManagementPage() {
 
             {/* 移库发起 */}
             <div
-              onClick={() => showBuilding("移库发起")}
+              onClick={() => openFeature("biz-init-transfer-loc")}
               className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#43a047] text-white shadow-xs">
@@ -229,7 +214,7 @@ export function TasksManagementPage() {
 
             {/* 货物转让 */}
             <div
-              onClick={() => showBuilding("货物转让")}
+              onClick={() => openFeature("biz-init-transfer-owner")}
               className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#e53935] text-white shadow-xs">
@@ -240,7 +225,7 @@ export function TasksManagementPage() {
 
             {/* 仓单开立 */}
             <div
-              onClick={() => showBuilding("仓单开立")}
+              onClick={() => openFeature("biz-init-receipt-issue")}
               className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#f57c00] text-white shadow-xs">
@@ -251,7 +236,7 @@ export function TasksManagementPage() {
 
             {/* 抵质押业务办理 */}
             <div
-              onClick={() => showBuilding("抵质押业务办理")}
+              onClick={() => openFeature("biz-init-pledge-biz")}
               className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#1875f0] text-white shadow-xs">
@@ -264,13 +249,35 @@ export function TasksManagementPage() {
 
             {/* 异动申请 */}
             <div
-              onClick={() => showBuilding("异动申请")}
+              onClick={() => openFeature("biz-init-movement-apply")}
               className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#e53935] text-white shadow-xs">
                 <SlidersHorizontal className="size-5 stroke-[2.2]" />
               </div>
               <span className="mt-1.5 text-[10px] font-medium text-gray-700">异动申请</span>
+            </div>
+
+            {/* 盘点发起 */}
+            <div
+              onClick={() => openFeature("biz-init-stock-taking-apply")}
+              className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
+            >
+              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#0288d1] text-white shadow-xs">
+                <ClipboardList className="size-5 stroke-[2.2]" />
+              </div>
+              <span className="mt-1.5 text-[10px] font-medium text-gray-700">盘点发起</span>
+            </div>
+
+            {/* 加工发起 */}
+            <div
+              onClick={() => openFeature("biz-init-processing-apply")}
+              className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
+            >
+              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#1976d2] text-white shadow-xs">
+                <Workflow className="size-5 stroke-[2.2]" />
+              </div>
+              <span className="mt-1.5 text-[10px] font-medium text-gray-700">加工发起</span>
             </div>
           </div>
         </section>
@@ -280,9 +287,9 @@ export function TasksManagementPage() {
           <h2 className="text-xs font-bold text-gray-800 tracking-tight">客户需求审批</h2>
 
           <div className="grid grid-cols-5 gap-y-3.5 gap-x-1 text-center">
-            {/* 客户入库需求 (红点5) */}
+            {/* 客户入库预约 (红点5) */}
             <div
-              onClick={() => showBuilding("客户入库需求审批")}
+              onClick={() => openFeature("biz-approve-customer-inbound-appoint")}
               className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="relative">
@@ -294,13 +301,13 @@ export function TasksManagementPage() {
                 </span>
               </div>
               <span className="mt-1.5 text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight">
-                客户入库需求
+                客户入库预约
               </span>
             </div>
 
-            {/* 客户出库需求 (红点1) */}
+            {/* 客户出库预约 (红点1) */}
             <div
-              onClick={() => showBuilding("客户出库需求审批")}
+              onClick={() => openFeature("biz-approve-customer-outbound-appoint")}
               className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="relative">
@@ -312,13 +319,13 @@ export function TasksManagementPage() {
                 </span>
               </div>
               <span className="mt-1.5 text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight">
-                客户出库需求
+                客户出库预约
               </span>
             </div>
 
-            {/* 客户融资需求 (红点9) */}
+            {/* 客户融资需求线索 (红点9) */}
             <div
-              onClick={() => showBuilding("客户融资需求审批")}
+              onClick={() => openFeature("biz-approve-customer-finance-leads")}
               className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="relative">
@@ -330,13 +337,13 @@ export function TasksManagementPage() {
                 </span>
               </div>
               <span className="mt-1.5 text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight">
-                客户融资需求
+                客户融资需求线索
               </span>
             </div>
 
             {/* 客户销售需求 (红点12) */}
             <div
-              onClick={() => showBuilding("客户销售需求审批")}
+              onClick={() => openFeature("biz-approve-customer-sales-req")}
               className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="relative">
@@ -354,7 +361,7 @@ export function TasksManagementPage() {
 
             {/* 客户采购需求 */}
             <div
-              onClick={() => showBuilding("客户采购需求审批")}
+              onClick={() => openFeature("biz-approve-customer-procure-req")}
               className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="relative">
@@ -367,15 +374,15 @@ export function TasksManagementPage() {
               </span>
             </div>
 
-            {/* 融资尽调 */}
+            {/* 尽调办理 */}
             <div
-              onClick={() => showBuilding("融资尽调")}
+              onClick={() => openFeature("biz-approve-due-diligence-sso")}
               className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#1976d2] text-white shadow-xs">
                 <SearchCheck className="size-5 stroke-[2.2]" />
               </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700">融资尽调</span>
+              <span className="mt-1.5 text-[10px] font-medium text-gray-700">尽调办理</span>
             </div>
           </div>
         </section>
@@ -387,7 +394,7 @@ export function TasksManagementPage() {
           <div className="grid grid-cols-5 gap-y-3.5 gap-x-1 text-center">
             {/* 政策资讯审核 (红点1) */}
             <div
-              onClick={() => openOtherApproval("biz-approve-policy-news", "政策资讯审核")}
+              onClick={() => openOtherApproval("biz-approve-policy-news")}
               className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="relative">
@@ -405,7 +412,7 @@ export function TasksManagementPage() {
 
             {/* 开锁审批 */}
             <div
-              onClick={() => openOtherApproval("biz-approve-unlock-apply", "开锁审批")}
+              onClick={() => openOtherApproval("biz-approve-unlock-apply")}
               className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#f57c00] text-white shadow-xs">
@@ -418,7 +425,7 @@ export function TasksManagementPage() {
 
             {/* 贷中风控处理 */}
             <div
-              onClick={() => openOtherApproval("biz-approve-in-loan-risk-sso", "贷中风控处理")}
+              onClick={() => openOtherApproval("biz-approve-in-loan-risk-sso")}
               className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
             >
               <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#1875f0] text-white shadow-xs">

@@ -16,10 +16,11 @@ export const deviceManagementHubAnnotations: PrototypeAnnotation[] = [
           {
             label: "入口与分流流转图",
             content: `flowchart TD
-    A["工作台 (仓储管理)"] --> B["设备管理 Hub"]
+    A["工作台 (仓储管理)"] --> B["设备管理"]
     B --> C["门禁设备 (6.2 已接入)"]
     B --> D["监控 / 物联 / GPS / 事务 (通用占位)"]
-    C --> E{"点击获取密码"}
+    E{"点击获取密码"}
+    C --> E
     E -->|命中审批配置| F["UnlockApplySubmitSheet 发起申请"]
     E -->|免审/未命中| G["GetPasswordSheet 直发临时密码"]`,
           },

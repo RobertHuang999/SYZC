@@ -62,7 +62,7 @@ export function OrderWarningConfigFormPage() {
   if (isEdit && !existing) {
     return (
       <div className="space-y-4 p-6">
-        <Link to="/预警配置/订单预警配置">
+        <Link to="/物联网IOT与预警/预警配置/订单预警配置">
           <Button variant="outline">
             <ArrowLeftIcon />
             返回
@@ -163,7 +163,7 @@ export function OrderWarningConfigFormPage() {
     if (hasDirty && !window.confirm("当前有未保存的策略修改，确定离开吗？")) {
       return
     }
-    navigate("/预警配置/订单预警配置")
+    navigate("/物联网IOT与预警/预警配置/订单预警配置")
   }
 
   return (

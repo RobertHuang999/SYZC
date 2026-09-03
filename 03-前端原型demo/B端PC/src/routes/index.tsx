@@ -1,5 +1,5 @@
 import { AppLayout } from "@/components/layout/AppLayout"
-import { PlaceholderPage } from "@/pages/PlaceholderPage"
+import { PrototypeEmptyPage } from "@/pages/PrototypeEmptyPage"
 import { DeviceWarningEventListPage } from "@/features/device-warning-events/pages/DeviceWarningEventListPage"
 import { DeviceWarningEventDetailPage } from "@/features/device-warning-events/pages/DeviceWarningEventDetailPage"
 import { DeviceWarningEventReleasePage } from "@/features/device-warning-events/pages/DeviceWarningEventReleasePage"
@@ -28,7 +28,9 @@ import { UnlockApplyListPage } from "@/features/unlock-applies/pages/UnlockApply
 import { UnlockApplyDetailPage } from "@/features/unlock-applies/pages/UnlockApplyDetailPage"
 import { AccessControlDeviceListPage } from "@/features/access-control-devices/pages/AccessControlDeviceListPage"
 import { MigrationSchemePage } from "@/features/migration-schemes/pages/MigrationSchemePage"
-import { topModules } from "@/config/navigation"
+import { PermissionReferencePage } from "@/features/permission-reference/pages/PermissionReferencePage"
+import { getAllMenuPaths, topModules } from "@/config/navigation"
+import { isImplementedRoute } from "@/config/implemented-routes"
 import { Navigate, Route, Routes } from "react-router-dom"
 
 const monitorDeviceRoutes = [
@@ -39,101 +41,96 @@ const monitorDeviceRoutes = [
   "编辑/:id",
 ] as const
 
-const configMenuPaths = [
-  "/物联网IOT管理/监控设备",
-  "/物联网IOT管理/物联设备",
-  "/物联网IOT管理/GPS设备",
-  "/物联网IOT管理/人脸配置",
-]
+const placeholderPaths = getAllMenuPaths().filter((menuPath) => !isImplementedRoute(menuPath))
 
 export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<AppLayout />}>
-        <Route index element={<Navigate to="/预警信息/设备预警信息" replace />} />
+        <Route index element={<Navigate to={topModules[0].path} replace />} />
 
         <Route
-          path="预警信息/设备预警信息"
+          path="物联网IOT与预警/预警信息/设备预警信息"
           element={<DeviceWarningEventListPage />}
         />
         <Route
-          path="预警信息/设备预警信息/详情/:id"
+          path="物联网IOT与预警/预警信息/设备预警信息/详情/:id"
           element={<DeviceWarningEventDetailPage />}
         />
         <Route
-          path="预警信息/设备预警信息/解除/:id"
+          path="物联网IOT与预警/预警信息/设备预警信息/解除/:id"
           element={<DeviceWarningEventReleasePage />}
         />
 
         <Route
-          path="预警信息/押品预警信息"
+          path="物联网IOT与预警/预警信息/押品预警信息"
           element={<CollateralWarningListPage />}
         />
         <Route
-          path="预警信息/押品预警信息/详情/:id"
+          path="物联网IOT与预警/预警信息/押品预警信息/详情/:id"
           element={<CollateralWarningDetailPage />}
         />
 
         <Route
-          path="预警信息/贷中风控管理"
+          path="物联网IOT与预警/预警信息/贷中风控管理"
           element={<MidLoanRiskListPage />}
         />
         <Route
-          path="预警信息/贷中风控管理/详情/:id"
+          path="物联网IOT与预警/预警信息/贷中风控管理/详情/:id"
           element={<MidLoanRiskDetailPage />}
         />
 
-        <Route path="预警信息/风险公示" element={<RiskDisclosureListPage />} />
+        <Route path="物联网IOT与预警/预警信息/风险公示" element={<RiskDisclosureListPage />} />
         <Route
-          path="预警信息/风险公示/详情/:id"
+          path="物联网IOT与预警/预警信息/风险公示/详情/:id"
           element={<RiskDisclosureDetailPage />}
         />
 
-        <Route path="预警配置/预警等级" element={<SeverityLevelListPage />} />
+        <Route path="物联网IOT与预警/预警配置/预警等级" element={<SeverityLevelListPage />} />
         <Route
-          path="预警配置/预警等级/新增"
+          path="物联网IOT与预警/预警配置/预警等级/新增"
           element={<SeverityLevelFormPage />}
         />
         <Route
-          path="预警配置/预警等级/详情/:id"
+          path="物联网IOT与预警/预警配置/预警等级/详情/:id"
           element={<SeverityLevelDetailPage />}
         />
         <Route
-          path="预警配置/预警等级/编辑/:id"
+          path="物联网IOT与预警/预警配置/预警等级/编辑/:id"
           element={<SeverityLevelFormPage />}
         />
 
         <Route
-          path="预警配置/设备预警配置"
+          path="物联网IOT与预警/预警配置/设备预警配置"
           element={<DeviceWarningConfigListPage />}
         />
         <Route
-          path="预警配置/设备预警配置/新增"
+          path="物联网IOT与预警/预警配置/设备预警配置/新增"
           element={<DeviceWarningConfigFormPage />}
         />
         <Route
-          path="预警配置/设备预警配置/详情/:id"
+          path="物联网IOT与预警/预警配置/设备预警配置/详情/:id"
           element={<DeviceWarningConfigDetailPage />}
         />
         <Route
-          path="预警配置/设备预警配置/编辑/:id"
+          path="物联网IOT与预警/预警配置/设备预警配置/编辑/:id"
           element={<DeviceWarningConfigFormPage />}
         />
 
         <Route
-          path="预警配置/订单预警配置"
+          path="物联网IOT与预警/预警配置/订单预警配置"
           element={<OrderWarningConfigListPage />}
         />
         <Route
-          path="预警配置/订单预警配置/新增"
+          path="物联网IOT与预警/预警配置/订单预警配置/新增"
           element={<OrderWarningConfigFormPage />}
         />
         <Route
-          path="预警配置/订单预警配置/详情/:id"
+          path="物联网IOT与预警/预警配置/订单预警配置/详情/:id"
           element={<OrderWarningConfigDetailPage />}
         />
         <Route
-          path="预警配置/订单预警配置/编辑/:id"
+          path="物联网IOT与预警/预警配置/订单预警配置/编辑/:id"
           element={<OrderWarningConfigFormPage />}
         />
 
@@ -201,36 +198,30 @@ export function AppRoutes() {
           element={<MigrationSchemePage />}
         />
 
+        <Route path="系统参考/功能与数据权限" element={<PermissionReferencePage />} />
+
         <Route
-          path="物联网IOT管理/门禁设备"
+          path="物联网IOT与预警/物联网IOT管理/门禁设备"
           element={<AccessControlDeviceListPage />}
         />
 
-        {topModules.map((module) => (
-          <Route
-            key={module.id}
-            path={module.path.replace(/^\//, "")}
-            element={<PlaceholderPage />}
-          />
-        ))}
-
-        {configMenuPaths.map((menuPath) => (
+        {placeholderPaths.map((menuPath) => (
           <Route
             key={menuPath}
             path={menuPath.replace(/^\//, "")}
-            element={<PlaceholderPage />}
+            element={<PrototypeEmptyPage />}
           />
         ))}
 
         {monitorDeviceRoutes.map((suffix) => (
           <Route
             key={`monitor-${suffix}`}
-            path={`物联网IOT管理/监控设备/${suffix}`}
-            element={<PlaceholderPage />}
+            path={`物联网IOT与预警/物联网IOT管理/监控设备/${suffix}`}
+            element={<PrototypeEmptyPage />}
           />
         ))}
 
-        <Route path="*" element={<PlaceholderPage />} />
+        <Route path="*" element={<PrototypeEmptyPage />} />
       </Route>
     </Routes>
   )

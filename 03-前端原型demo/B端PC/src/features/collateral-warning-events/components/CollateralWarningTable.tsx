@@ -72,7 +72,7 @@ export function CollateralWarningTable({
                   <TableCell>{(page - 1) * pageSize + index + 1}</TableCell>
                   <TableCell>
                     <Link
-                      to={`/预警信息/押品预警信息/详情/${event.eventId}`}
+                      to={`/物联网IOT与预警/预警信息/押品预警信息/详情/${event.eventId}`}
                       className="font-medium text-primary hover:underline"
                     >
                       {event.orderNo}
@@ -138,9 +138,9 @@ export function CollateralWarningTable({
                           className="h-auto p-0"
                           onClick={() => {
                             const deviceEventId = event.deviceEventId ?? "evt-017"
-                            const returnRoute = `/预警信息/押品预警信息/详情/${event.eventId}`
+                            const returnRoute = `/物联网IOT与预警/预警信息/押品预警信息/详情/${event.eventId}`
                             navigate(
-                              `/预警信息/设备预警信息/详情/${deviceEventId}?device_event_id=${encodeURIComponent(deviceEventId)}&warn_id=${encodeURIComponent(event.eventId)}&return_route=${encodeURIComponent(returnRoute)}`
+                              `/物联网IOT与预警/预警信息/设备预警信息/详情/${deviceEventId}?device_event_id=${encodeURIComponent(deviceEventId)}&warn_id=${encodeURIComponent(event.eventId)}&return_route=${encodeURIComponent(returnRoute)}`
                             )
                           }}
                         >
@@ -158,7 +158,7 @@ export function CollateralWarningTable({
                         </Button>
                       )}
                       <Link
-                        to={`/预警信息/押品预警信息/详情/${event.eventId}`}
+                        to={`/物联网IOT与预警/预警信息/押品预警信息/详情/${event.eventId}`}
                         className="text-sm text-primary hover:underline"
                       >
                         详情

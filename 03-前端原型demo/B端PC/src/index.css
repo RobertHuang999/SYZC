@@ -268,6 +268,66 @@ textarea {
   font-size: 12px;
 }
 
+.permission-reference-button {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  color: #4e5969;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  background: transparent;
+  border: 1px solid #e5e6eb;
+  border-radius: 8px;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.permission-reference-button:hover {
+  color: #1d2129;
+  background: #f7f8fa;
+  border-color: #c9cdd4;
+}
+
+.permission-reference-button.is-active {
+  color: #165dff;
+  background: #e8f3ff;
+  border-color: #bedaff;
+}
+
+.iteration-changelog-button {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  color: #4e5969;
+  font-size: 12px;
+  font-weight: 500;
+  background: transparent;
+  border: 1px solid #e5e6eb;
+  border-radius: 8px;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  cursor: pointer;
+}
+
+.iteration-changelog-button:hover {
+  color: #1d2129;
+  background: #f7f8fa;
+  border-color: #c9cdd4;
+}
+
+.iteration-changelog-button.is-active {
+  color: #722ed1;
+  background: #f9f0ff;
+  border-color: #d3adf7;
+}
+
+.main-area-full {
+  width: 100%;
+}
+
 .profile-avatar {
   display: grid;
   width: 28px;
@@ -415,6 +475,11 @@ textarea {
 
 .sidebar-chevron {
   margin-left: auto;
+  transition: transform 160ms ease;
+}
+
+.sidebar-chevron.is-closed {
+  transform: rotate(-90deg);
 }
 
 .sidebar-submenu {
@@ -520,6 +585,25 @@ textarea {
 
 .page-surface > div {
   color: #1d2129;
+}
+
+.approval-center-nav-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.approval-center-nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.approval-center-nav-scroll {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 20px,
+    #000 calc(100% - 20px),
+    transparent
+  );
 }
 
 /* Keep the persistent prototype tab out of the main content hit area. */
@@ -718,7 +802,7 @@ textarea {
     min-width: 960px;
   }
 
-  .sidebar {
+  .sidebar:not(.is-collapsed) {
     width: 180px;
     min-width: 180px;
   }

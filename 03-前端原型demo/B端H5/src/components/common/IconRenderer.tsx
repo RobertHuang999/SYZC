@@ -61,6 +61,7 @@ import {
   UserPlus,
   Video,
   Warehouse,
+  Workflow,
   Zap,
 } from "lucide-react"
 
@@ -126,6 +127,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   UserPlus,
   Video,
   Warehouse,
+  Workflow,
   Zap,
 }
 

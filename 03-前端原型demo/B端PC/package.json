@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate:permissions": "node scripts/generate-permission-records.mjs",
+    "generate:iterations": "node scripts/generate-menu-iteration-records.mjs",
+    "generate:menu-catalog": "node scripts/generate-menu-catalog.mjs",
+    "generate:reference": "npm run generate:permissions && npm run generate:iterations && npm run generate:menu-catalog"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

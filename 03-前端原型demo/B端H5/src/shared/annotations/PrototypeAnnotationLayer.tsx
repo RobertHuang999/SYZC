@@ -348,6 +348,7 @@ function useMobileDragScroll(containerRef: React.RefObject<HTMLDivElement | null
 
 type PrototypeNavItem = {
   title: string
+  shortTitle?: string
   path: string
   icon: string
   matchPrefixes?: string[]
@@ -358,16 +359,14 @@ type PrototypeNavGroup = {
   items: PrototypeNavItem[]
 }
 
-const PROTOTYPE_NAV_GROUPS: PrototypeNavGroup[] = [
-  {
-    label: "基础 Tab",
-    items: [
-      { title: "首页中枢", path: "/m/home", icon: "🏠" },
-      { title: "工作台", path: "/m/workspace", icon: "📊" },
-      { title: "业务办理", path: "/m/tasks", icon: "📝" },
-      { title: "机构与权限", path: "/m/profile", icon: "👤" },
-    ],
-  },
+export const BASE_NAV_ITEMS: PrototypeNavItem[] = [
+  { title: "首页中枢", shortTitle: "首页", path: "/m/home", icon: "🏠" },
+  { title: "工作台", shortTitle: "工作台", path: "/m/workspace", icon: "📊" },
+  { title: "业务办理", shortTitle: "办理", path: "/m/tasks", icon: "📝" },
+  { title: "我的", shortTitle: "我的", path: "/m/profile", icon: "👤" },
+]
+
+export const PROTOTYPE_NAV_GROUPS: PrototypeNavGroup[] = [
   {
     label: "风控预警",
     items: [
@@ -396,7 +395,7 @@ const PROTOTYPE_NAV_GROUPS: PrototypeNavGroup[] = [
     label: "设备管理",
     items: [
       {
-        title: "设备管理 Hub",
+        title: "设备管理",
         path: "/m/device-management",
         icon: "📷",
         matchPrefixes: ["/m/device-management", "/m/access-control-devices"],
@@ -429,6 +428,17 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
   const [isAutoFit, setIsAutoFit] = useState(true)
   const [autoScale, setAutoScale] = useState(1)
   const [manualScale, setManualScale] = useState(1)
+  // 无机壳纯屏模式（Frameless）：隐藏外壳黑边框、iOS 状态栏与灵动岛、底部小黑条，纯净展示页面
+  const [isFrameless, setIsFrameless] = useState(false)
+  // 分类大类的展开/收起状态（默认全部展开，key 为 group.label）
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
+
+  const toggleGroup = (label: string) => {
+    setCollapsedGroups((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }))
+  }
 
   useMobileDragScroll(phoneViewportRef)
 
@@ -436,8 +446,11 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handleResize = () => {
       if (!canvasAreaRef.current) return
+      // 上下边距各预留 24px，总共 48px，完全不被顶部遮挡
       const availableHeight = canvasAreaRef.current.clientHeight - 48
-      const targetHeight = context.selectedPreset.height + 16 // 包含 8px 边框
+      const targetHeight = isFrameless
+        ? context.selectedPreset.height - 56
+        : context.selectedPreset.height + 16 // 包含 8px 边框
       if (availableHeight < targetHeight) {
         const nextScale = Math.min(1, Math.max(0.5, availableHeight / targetHeight))
         setAutoScale(Number(nextScale.toFixed(2)))
@@ -449,7 +462,7 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
     handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
-  }, [context.selectedPreset])
+  }, [context.selectedPreset, isFrameless])
 
   const currentScale = isAutoFit ? autoScale : manualScale
 
@@ -476,178 +489,117 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
     setManualScale(target)
   }
 
+  const phoneWidth = context.selectedPreset.width
+  const phoneHeight = isFrameless
+    ? context.selectedPreset.height - 56
+    : context.selectedPreset.height
+  const outerWidth = isFrameless ? phoneWidth : phoneWidth + 16
+  const outerHeight = isFrameless ? phoneHeight : phoneHeight + 16
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#edf2f7] text-slate-800 font-sans select-none">
-      {/* 1. 左侧页面导航栏（浅色清爽设计） */}
-      <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-slate-200/90 bg-white/90 shadow-sm backdrop-blur-xl">
-        {/* 系统标题 */}
-        <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-slate-100">
-          <div className="flex size-7 items-center justify-center rounded-lg bg-blue-600 font-bold text-white shadow-md text-xs">
+      {/* 1. 左侧控制与导航栏 */}
+      <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-slate-200/90 bg-white/95 shadow-sm backdrop-blur-xl z-20">
+        {/* 系统标题：脱敏仅展示 SYZC系统 */}
+        <div className="flex items-center gap-2 px-3.5 py-3 border-b border-slate-100">
+          <div className="flex size-6 items-center justify-center rounded-lg bg-blue-600 font-bold text-white shadow-xs text-xs">
             SY
           </div>
           <div>
-            <h2 className="text-xs font-bold text-slate-900 leading-tight">森云科技 · SYZC</h2>
-            <p className="text-[10px] text-slate-500">H5 移动原型与 PRD 标注台</p>
+            <h2 className="text-xs font-bold text-slate-900 tracking-wide leading-none">SYZC系统</h2>
           </div>
         </div>
 
-        {/* 页面快速切换列表 */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-3">
-          <div className="px-2 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-            原型页面导航
-          </div>
-          {PROTOTYPE_NAV_GROUPS.map((group) => (
-            <div key={group.label} className="space-y-1">
-              <div className="px-2 py-1 text-[10px] font-medium text-slate-400">
-                {group.label}
-              </div>
-              {group.items.map((item) => {
-                const isActive = isPrototypeNavActive(location.pathname, item)
-                return (
-                  <button
-                    key={item.path}
-                    type="button"
-                    onClick={() => navigate(item.path)}
-                    className={cn(
-                      "flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-medium transition-all text-left cursor-pointer",
-                      isActive
-                        ? "bg-blue-600 text-white font-semibold shadow-md shadow-blue-500/25"
-                        : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span>{item.icon}</span>
-                      <span>{item.title}</span>
-                    </div>
-                    {isActive && <div className="size-1.5 rounded-full bg-white animate-pulse" />}
-                  </button>
-                )
-              })}
-            </div>
-          ))}
-
-          <div className="pt-1 px-2 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-            标注与规格统计
-          </div>
-          <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-2.5 text-[11px] space-y-1.5 text-slate-600">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500">当前页面打点：</span>
-              <span className="font-bold text-blue-600">{context.annotations.length} 个</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500">PRD与规则文档：</span>
-              <span className="font-bold text-emerald-600">{context.documents.length} 篇</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500">打点显示状态：</span>
-              <span
-                className={cn(
-                  "font-bold",
-                  context.showMarkers ? "text-rose-600" : "text-slate-400"
-                )}
-              >
-                {context.showMarkers ? "已开启" : "已隐藏"}
-              </span>
+        {/* 画板视图微型控制区：文字更小更精致，高度更紧凑 */}
+        <div className="p-2.5 border-b border-slate-100 bg-slate-50/70 space-y-1.5">
+          {/* 行 1: 机型调整为一行 */}
+          <div className="flex items-center justify-between gap-1.5">
+            <span className="text-[10px] font-medium text-slate-400 shrink-0 flex items-center gap-1">
+              <SmartphoneIcon className="size-2.5 text-blue-500" />
+              机型
+            </span>
+            <div className="grid grid-cols-3 gap-1 flex-1">
+              {PHONE_PRESETS.map((preset) => (
+                <button
+                  key={preset.name}
+                  type="button"
+                  onClick={() => context.setSelectedPreset(preset)}
+                  className={cn(
+                    "rounded-md py-0.5 text-[10px] font-medium transition-all text-center cursor-pointer border",
+                    context.selectedPreset.width === preset.width
+                      ? "border-blue-500 bg-blue-600 text-white font-bold shadow-2xs"
+                      : "border-slate-200/90 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  )}
+                  title={preset.name}
+                >
+                  {preset.width}px
+                </button>
+              ))}
             </div>
           </div>
-        </div>
 
-        {/* 底部控制 */}
-        <div className="p-3 border-t border-slate-100 text-[10px] text-slate-400 text-center">
-          森云供应链金融存货监管系统 v6.2
-        </div>
-      </aside>
-
-      {/* 2. 中间主工作区（浅色背景 + 顶部工具栏 + 手机预览视口） */}
-      <main className="flex flex-1 flex-col overflow-hidden bg-[#e6edf5]">
-        {/* 顶部工具栏 */}
-        <header className="flex h-12 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/90 px-4 backdrop-blur-md shadow-2xs">
-          {/* 机型尺寸选择 + 缩放控制器 */}
-          <div className="flex items-center gap-3">
-            {/* 机型尺寸选择 */}
-            <div className="flex items-center gap-1.5">
-              <SmartphoneIcon className="size-4 text-blue-600" />
-              <span className="text-xs font-semibold text-slate-700 hidden sm:inline">机型：</span>
-              <div className="flex items-center rounded-lg border border-slate-200 bg-slate-100/70 p-0.5 text-xs">
-                {PHONE_PRESETS.map((preset) => (
-                  <button
-                    key={preset.name}
-                    type="button"
-                    onClick={() => context.setSelectedPreset(preset)}
-                    className={cn(
-                      "rounded-md px-2 py-1 text-[11px] font-medium transition-all cursor-pointer",
-                      context.selectedPreset.width === preset.width
-                        ? "bg-white text-blue-600 font-bold shadow-xs"
-                        : "text-slate-600 hover:text-slate-900"
-                    )}
-                  >
-                    {preset.width}px
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 缩放控制器（缩小 / 放大 / 比例展示 / 快捷自适应） */}
-            <div className="flex items-center gap-1 border-l border-slate-200/80 pl-3">
-              <span className="text-xs font-semibold text-slate-700 hidden md:inline">缩放：</span>
-              <div className="flex items-center rounded-lg border border-slate-200 bg-slate-100/70 p-0.5 text-xs">
-                {/* 缩小 */}
+          {/* 行 2: 缩放调整为一行 */}
+          <div className="flex items-center justify-between gap-1.5">
+            <span className="text-[10px] font-medium text-slate-400 shrink-0 flex items-center gap-1">
+              <ZoomInIcon className="size-2.5 text-blue-500" />
+              缩放
+            </span>
+            <div className="flex items-center gap-1 flex-1 justify-end">
+              {/* 步进器 */}
+              <div className="flex items-center rounded-md border border-slate-200/90 bg-white px-0.5 py-0.2">
                 <button
                   type="button"
                   onClick={handleZoomOut}
                   disabled={currentScale <= 0.4}
-                  className="flex size-6 items-center justify-center rounded-md text-slate-600 hover:bg-white hover:text-blue-600 hover:shadow-xs transition-all disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
+                  className="flex size-4.5 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition-all disabled:opacity-30 cursor-pointer"
                   title="缩小 (-5%)"
                 >
-                  <ZoomOutIcon className="size-3.5" />
+                  <ZoomOutIcon className="size-2.5" />
                 </button>
-
-                {/* 当前百分比展示 */}
                 <button
                   type="button"
                   onClick={() => handleSetExactScale(1)}
-                  className="px-1.5 text-[11px] font-bold font-mono text-slate-700 select-none min-w-[42px] text-center hover:text-blue-600 transition-colors cursor-pointer"
+                  className="px-1 text-[10px] font-bold font-mono text-slate-700 select-none min-w-[30px] text-center hover:text-blue-600 transition-colors cursor-pointer"
                   title="点击设为 100%"
                 >
                   {Math.round(currentScale * 100)}%
                 </button>
-
-                {/* 放大 */}
                 <button
                   type="button"
                   onClick={handleZoomIn}
                   disabled={currentScale >= 1.4}
-                  className="flex size-6 items-center justify-center rounded-md text-slate-600 hover:bg-white hover:text-blue-600 hover:shadow-xs transition-all disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
+                  className="flex size-4.5 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition-all disabled:opacity-30 cursor-pointer"
                   title="放大 (+5%)"
                 >
-                  <ZoomInIcon className="size-3.5" />
+                  <ZoomInIcon className="size-2.5" />
                 </button>
               </div>
 
-              {/* 快捷自适应 / 100% 切换按钮 */}
+              {/* 快捷自适应 */}
               <button
                 type="button"
                 onClick={handleResetAuto}
                 className={cn(
-                  "flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium transition-all cursor-pointer border",
+                  "flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium transition-all cursor-pointer border",
                   isAutoFit
                     ? "border-blue-200 bg-blue-50 text-blue-700 font-bold shadow-2xs"
-                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                    : "border-slate-200/90 bg-white text-slate-600 hover:bg-slate-50"
                 )}
                 title="自动适应当前屏幕高度"
               >
-                <RotateCcwIcon className="size-3" />
+                <RotateCcwIcon className="size-2" />
                 <span>自适应</span>
               </button>
 
+              {/* 100% 快捷 */}
               <button
                 type="button"
                 onClick={() => handleSetExactScale(1)}
                 className={cn(
-                  "rounded-lg px-2 py-1 text-[11px] font-medium transition-all cursor-pointer border hidden lg:inline-block",
+                  "rounded-md px-1.5 py-0.5 text-[10px] font-medium transition-all cursor-pointer border",
                   !isAutoFit && currentScale === 1
                     ? "border-blue-200 bg-blue-50 text-blue-700 font-bold shadow-2xs"
-                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                    : "border-slate-200/90 bg-white text-slate-600 hover:bg-slate-50"
                 )}
                 title="100% 原尺寸"
               >
@@ -656,77 +608,217 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
 
-          {/* 打点开关与抽屉切换 */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={context.toggleShowMarkers}
-              className={cn(
-                "flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-all cursor-pointer",
-                context.showMarkers
-                  ? "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
-                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              )}
-            >
-              {context.showMarkers ? (
-                <>
-                  <EyeIcon className="size-3.5 text-rose-600" />
-                  <span>打点已开启 ({context.annotations.length})</span>
-                </>
-              ) : (
-                <>
-                  <EyeOffIcon className="size-3.5 text-slate-400" />
-                  <span>纯净原型模式</span>
-                </>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => context.openDrawerTab("annotations")}
-              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-md shadow-blue-500/20 hover:bg-blue-500 transition-all cursor-pointer"
-            >
-              <PanelRightOpenIcon className="size-3.5" />
-              <span>打开 PRD/规则抽屉</span>
-            </button>
+          {/* 行 3: 纯屏模式调整为一行 */}
+          <div className="flex items-center justify-between gap-1.5">
+            <span className="text-[10px] font-medium text-slate-400 shrink-0 flex items-center gap-1">
+              <Maximize2Icon className="size-2.5 text-blue-500" />
+              外观
+            </span>
+            <div className="grid grid-cols-2 gap-1 flex-1 bg-slate-200/70 p-0.5 rounded-md">
+              <button
+                type="button"
+                onClick={() => setIsFrameless(false)}
+                className={cn(
+                  "rounded py-0.5 text-[10px] font-medium transition-all text-center cursor-pointer",
+                  !isFrameless
+                    ? "bg-white text-slate-900 font-bold shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                )}
+              >
+                📱 真机外观
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsFrameless(true)}
+                className={cn(
+                  "rounded py-0.5 text-[10px] font-medium transition-all text-center cursor-pointer",
+                  isFrameless
+                    ? "bg-white text-indigo-600 font-bold shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                )}
+              >
+                ✨ 无壳纯屏
+              </button>
+            </div>
           </div>
-        </header>
+        </div>
 
-        {/* 手机模拟预览居中视口 + 画布外侧需求规则检查器（大画布联动画布） */}
+        {/* 页面快速切换列表：专属导航区域，滚动通畅 */}
+        <div className="flex-1 overflow-y-auto p-2.5 space-y-2.5">
+          {/* 1. 基础 Tab：单行 4 项均分导航（对应底部金刚区） */}
+          <div className="space-y-1">
+            <div className="px-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+              基础导航
+            </div>
+            <div className="grid grid-cols-4 gap-1">
+              {BASE_NAV_ITEMS.map((item) => {
+                const isActive = isPrototypeNavActive(location.pathname, item)
+                return (
+                  <button
+                    key={item.path}
+                    type="button"
+                    onClick={() => navigate(item.path)}
+                    className={cn(
+                      "flex flex-col items-center justify-center rounded-lg py-1 px-0.5 transition-all text-center cursor-pointer border",
+                      isActive
+                        ? "border-blue-500 bg-blue-600 text-white font-bold shadow-xs shadow-blue-500/25"
+                        : "border-slate-200/80 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    )}
+                    title={item.title}
+                  >
+                    <span className="text-xs leading-none">{item.icon}</span>
+                    <span className="mt-0.5 text-[10px] font-medium leading-none truncate max-w-full">
+                      {item.shortTitle || item.title}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* 2. 业务功能分类大类：支持展开/收起折叠手风琴 */}
+          <div className="pt-0.5 space-y-2">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                业务功能模块
+              </span>
+              <span className="text-[9px] text-slate-400">点击大类收起/展开</span>
+            </div>
+
+            {PROTOTYPE_NAV_GROUPS.map((group) => {
+              const isCollapsed = Boolean(collapsedGroups[group.label])
+              const hasActiveChild = group.items.some((item) =>
+                isPrototypeNavActive(location.pathname, item)
+              )
+
+              return (
+                <div key={group.label} className="space-y-1">
+                  {/* 分类大类标题 + 收起/展开折叠按钮 */}
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.label)}
+                    className="flex w-full items-center justify-between rounded-lg px-2 py-1 text-[10.5px] font-semibold text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 transition-colors cursor-pointer group"
+                    title={isCollapsed ? `展开「${group.label}」` : `收起「${group.label}」`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-slate-700 font-bold">{group.label}</span>
+                      <span className="rounded-full bg-slate-100 px-1.5 py-0.2 text-[9px] font-mono text-slate-400">
+                        {group.items.length}
+                      </span>
+                      {/* 如果已被收起但当前页面属于该组，显示呼吸提示蓝点 */}
+                      {isCollapsed && hasActiveChild && (
+                        <span className="size-1.5 rounded-full bg-blue-600 animate-pulse" />
+                      )}
+                    </div>
+                    <ChevronDownIcon
+                      className={cn(
+                        "size-3 text-slate-400 transition-transform duration-200 group-hover:text-slate-700",
+                        isCollapsed ? "-rotate-90" : "rotate-0"
+                      )}
+                    />
+                  </button>
+
+                  {/* 子分类页面列表 */}
+                  {!isCollapsed && (
+                    <div className="space-y-1 pl-1">
+                      {group.items.map((item) => {
+                        const isActive = isPrototypeNavActive(location.pathname, item)
+                        return (
+                          <button
+                            key={item.path}
+                            type="button"
+                            onClick={() => navigate(item.path)}
+                            className={cn(
+                              "flex w-full items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all text-left cursor-pointer",
+                              isActive
+                                ? "bg-blue-600 text-white font-semibold shadow-md shadow-blue-500/25"
+                                : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
+                            )}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs">{item.icon}</span>
+                              <span>{item.title}</span>
+                            </div>
+                            {isActive && <div className="size-1.5 rounded-full bg-white animate-pulse" />}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* 底部固定区：标注与规格统计（脱敏，纯净常驻展示） */}
+        <div className="p-2.5 border-t border-slate-200/80 bg-slate-50/90 shrink-0 space-y-1.5 text-[10.5px] text-slate-600">
+          <div className="flex items-center justify-between">
+            <span className="text-slate-400">页面打点：</span>
+            <span className="font-bold text-blue-600 font-mono">{context.annotations.length} 个</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-slate-400">PRD与规则：</span>
+            <span className="font-bold text-emerald-600 font-mono">{context.documents.length} 篇</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-slate-400">打点状态：</span>
+            <span
+              className={cn(
+                "font-bold",
+                context.showMarkers ? "text-rose-600" : "text-slate-400"
+              )}
+            >
+              {context.showMarkers ? "已开启" : "已隐藏"}
+            </span>
+          </div>
+        </div>
+      </aside>
+
+      {/* 2. 中间主工作区（顶天立地纯净全高画板，0 顶部遮挡） */}
+      <main className="relative flex flex-1 overflow-hidden bg-[#d8e2ec]">
+        {/* 手机模拟预览居中视口 + 画布外侧需求规则检查器 */}
         <div
           ref={canvasAreaRef}
-          className="flex-1 overflow-auto flex items-center justify-center p-6 bg-[#d8e2ec] relative gap-6"
+          className="flex-1 overflow-auto flex items-center justify-center p-6 relative gap-6"
         >
-          {/* 1. 手机真机视口等比例缩放外层包装 */}
+          {/* 手机真机/纯屏视口等比例缩放外层包装 */}
           <div
             className="shrink-0 transition-all duration-200 flex items-center justify-center"
             style={{
-              width: `${(context.selectedPreset.width + 16) * currentScale}px`,
-              height: `${(context.selectedPreset.height + 16) * currentScale}px`,
+              width: `${outerWidth * currentScale}px`,
+              height: `${outerHeight * currentScale}px`,
             }}
           >
             <div
-              className="relative flex flex-col shrink-0 overflow-hidden bg-[#edf2f8] shadow-[0_20px_50px_rgba(15,23,42,0.18)] rounded-[42px] border-[8px] border-slate-800 origin-center transition-transform duration-200"
+              className={cn(
+                "relative flex flex-col shrink-0 overflow-hidden origin-center transition-all duration-200",
+                isFrameless
+                  ? "bg-[#edf2f8] shadow-[0_24px_60px_rgba(15,23,42,0.22)] rounded-2xl border border-slate-300/90"
+                  : "bg-[#edf2f8] shadow-[0_20px_50px_rgba(15,23,42,0.18)] rounded-[42px] border-[8px] border-slate-800"
+              )}
               style={{
-                width: `${context.selectedPreset.width}px`,
-                height: `${context.selectedPreset.height}px`,
+                width: `${phoneWidth}px`,
+                height: `${phoneHeight}px`,
                 transform: `scale(${currentScale})`,
               }}
             >
-              {/* iOS 顶部状态栏与灵动岛 */}
-              <div className="relative flex h-10 shrink-0 items-center justify-between px-6 pt-1 text-[12px] font-semibold text-gray-900 bg-[#edf2f8] z-20 border-b border-gray-100/40 select-none">
-                <span>09:41</span>
-                {/* 灵动岛 */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-2 h-4 w-24 rounded-full bg-black flex items-center justify-end px-2">
-                  <div className="size-2 rounded-full bg-slate-800" />
-                </div>
-                <div className="flex items-center gap-1 text-[11px]">
-                  <span className="font-mono text-[10px]">5G</span>
-                  <div className="h-2.5 w-5 rounded-xs border border-gray-800 p-0.5 flex items-center">
-                    <div className="h-full w-full bg-gray-800 rounded-2xs" />
+              {/* 非纯屏模式下：展示 iOS 顶部状态栏与灵动岛 */}
+              {!isFrameless && (
+                <div className="relative flex h-10 shrink-0 items-center justify-between px-6 pt-1 text-[12px] font-semibold text-gray-900 bg-[#edf2f8] z-20 border-b border-gray-100/40 select-none">
+                  <span>09:41</span>
+                  {/* 灵动岛 */}
+                  <div className="absolute left-1/2 -translate-x-1/2 top-2 h-4 w-24 rounded-full bg-black flex items-center justify-end px-2">
+                    <div className="size-2 rounded-full bg-slate-800" />
+                  </div>
+                  <div className="flex items-center gap-1 text-[11px]">
+                    <span className="font-mono text-[10px]">5G</span>
+                    <div className="h-2.5 w-5 rounded-xs border border-gray-800 p-0.5 flex items-center">
+                      <div className="h-full w-full bg-gray-800 rounded-2xs" />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* 页面内容注入 */}
               <div
@@ -737,14 +829,16 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
                 {children}
               </div>
 
-              {/* iOS 底部小黑条 */}
-              <div className="h-4 bg-[#edf2f8] flex items-center justify-center shrink-0 z-20">
-                <div className="h-1 w-28 rounded-full bg-slate-400/80" />
-              </div>
+              {/* 非纯屏模式下：展示 iOS 底部小黑条 */}
+              {!isFrameless && (
+                <div className="h-4 bg-[#edf2f8] flex items-center justify-center shrink-0 z-20">
+                  <div className="h-1 w-28 rounded-full bg-slate-400/80" />
+                </div>
+              )}
             </div>
           </div>
 
-          {/* 2. 原型屏幕外侧的大画布需求检查器面板（Canvas Inspector，极度舒适宽屏大字号） */}
+          {/* 原型屏幕外侧的大画布需求检查器面板 */}
           {context.enabled && context.activePopupAnnotationId && (
             <CanvasAnnotationInspector />
           )}

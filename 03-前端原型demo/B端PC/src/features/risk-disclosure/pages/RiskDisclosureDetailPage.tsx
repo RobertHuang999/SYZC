@@ -51,7 +51,7 @@ export function RiskDisclosureDetailPage() {
   if (!record) {
     return (
       <div className="space-y-4 p-6">
-        <Link to="/预警信息/风险公示">
+        <Link to="/物联网IOT与预警/预警信息/风险公示">
           <Button variant="outline">
             <ArrowLeftIcon />
             返回
@@ -88,7 +88,7 @@ export function RiskDisclosureDetailPage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Link to="/预警信息/风险公示">
+              <Link to="/物联网IOT与预警/预警信息/风险公示">
                 <Button variant="outline">
                   <ArrowLeftIcon />
                   返回

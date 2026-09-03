@@ -65,7 +65,7 @@ export function OrderWarningConfigListPage() {
 
   const handleAction = (action: OrderWarningConfigAction, config: OrderWarningConfig) => {
     if (action === "edit") {
-      navigate(`/预警配置/订单预警配置/编辑/${config.configId}`)
+      navigate(`/物联网IOT与预警/预警配置/订单预警配置/编辑/${config.configId}`)
       return
     }
     if (action === "delete") {
@@ -99,7 +99,7 @@ export function OrderWarningConfigListPage() {
               onChange={setDraftFilters}
               onSearch={handleSearch}
               onReset={handleReset}
-              onAdd={() => navigate("/预警配置/订单预警配置/新增")}
+              onAdd={() => navigate("/物联网IOT与预警/预警配置/订单预警配置/新增")}
             />
           </PrototypeAnnotationTarget>
         </form>

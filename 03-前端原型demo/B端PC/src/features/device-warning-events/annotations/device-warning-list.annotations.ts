@@ -55,7 +55,7 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "路由口径",
-            content: "6.2 PC 原型与 PRD 统一使用 /预警信息/设备预警信息，详情与解除页沿用同一菜单路径。",
+            content: "6.2 PC 原型与 PRD 统一使用 /物联网IOT与预警/预警信息/设备预警信息，详情与解除页沿用同一菜单路径。",
           },
         ],
       },

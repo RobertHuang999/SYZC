@@ -76,7 +76,7 @@ export function SeverityLevelListPage() {
                 setDraftFilters(DEFAULT_SEVERITY_LEVEL_FILTERS)
                 setAppliedFilters(DEFAULT_SEVERITY_LEVEL_FILTERS)
               }}
-              onAdd={() => navigate("/预警配置/预警等级/新增")}
+              onAdd={() => navigate("/物联网IOT与预警/预警配置/预警等级/新增")}
             />
           </PrototypeAnnotationTarget>
         </form>
@@ -84,7 +84,7 @@ export function SeverityLevelListPage() {
         <PrototypeAnnotationTarget annotationIds={["severity-level-table", "severity-level-row-actions"]}>
           <SeverityLevelTable
             records={filteredRecords}
-            onEdit={(record) => navigate(`/预警配置/预警等级/编辑/${record.levelId}`)}
+            onEdit={(record) => navigate(`/物联网IOT与预警/预警配置/预警等级/编辑/${record.levelId}`)}
             onDelete={setDeleteTarget}
             onReorder={handleReorder}
           />

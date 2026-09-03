@@ -73,7 +73,7 @@ export function DeviceWarningConfigTable({
                       ariaLabel={`规则名称：${config.ruleName}`}
                     >
                       <Link
-                        to={`/预警配置/设备预警配置/详情/${config.configId}`}
+                        to={`/物联网IOT与预警/预警配置/设备预警配置/详情/${config.configId}`}
                         className="font-medium text-primary hover:underline"
                       >
                         {config.ruleName}
@@ -134,7 +134,7 @@ export function DeviceWarningConfigTable({
                     <div className="flex flex-wrap items-center gap-2">
                       {actions.includes("edit") && (
                         <Link
-                          to={`/预警配置/设备预警配置/编辑/${config.configId}`}
+                          to={`/物联网IOT与预警/预警配置/设备预警配置/编辑/${config.configId}`}
                           className="text-sm text-primary hover:underline"
                         >
                           编辑
@@ -142,7 +142,7 @@ export function DeviceWarningConfigTable({
                       )}
                       {actions.includes("detail") && (
                         <Link
-                          to={`/预警配置/设备预警配置/详情/${config.configId}`}
+                          to={`/物联网IOT与预警/预警配置/设备预警配置/详情/${config.configId}`}
                           className="text-sm text-primary hover:underline"
                         >
                           详情

@@ -50,6 +50,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     description: "构建数字孪生底座，可视化呈现仓库平面图及实物分布，关联温湿度传感器实时感知库内环境。",
     buttons: ["查看页面", "实时监测", "历史曲线", "阈值设置"],
     dataPermission: "账号赋予的仓库权限范围内可见",
+    customRoute: "/m/device-management?tab=ws-device-iot",
     remark: "无变化",
     iconType: "Thermometer",
   },
@@ -62,6 +63,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     description: "构建数字孪生底座，可视化呈现仓库实景与AI视频监控，实现账实相符的底层物理监控。",
     buttons: ["查看页面", "查看直播", "云台控制", "回放录像"],
     dataPermission: "账号赋予的仓库权限范围内可见",
+    customRoute: "/m/device-management?tab=ws-device-monitoring",
     remark: "无变化",
     iconType: "Video",
   },
@@ -205,6 +207,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     description: "统一管理前端物联网硬件基建，配置设备参数及电子围栏边界，保障底层数据采集通道顺畅。",
     buttons: ["查看页面", "重命名", "设备数据", "仓库绑定", "查看直播", "查看回放", "移除设备"],
     dataPermission: "登录账号仓库权限决定；未绑定位置的设备所有人可见",
+    customRoute: "/m/device-management",
     iconType: "Camera",
   },
   {
@@ -623,6 +626,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     description: "本人发起的入库、出库、移库、仓单开立、抵质押等全量流程列表及催办入口。",
     buttons: ["查看页面", "查看进度", "催办", "撤销申请"],
     dataPermission: "申请人为当前登录账号",
+    customRoute: "/m/my-applies?tab=process",
     iconType: "FileUser",
   },
   {

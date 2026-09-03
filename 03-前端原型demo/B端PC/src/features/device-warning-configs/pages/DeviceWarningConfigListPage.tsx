@@ -67,7 +67,7 @@ export function DeviceWarningConfigListPage() {
   const handleAction = (action: DeviceWarningConfigAction, config: DeviceWarningConfig) => {
     switch (action) {
       case "edit":
-        navigate(`/预警配置/设备预警配置/编辑/${config.configId}`)
+        navigate(`/物联网IOT与预警/预警配置/设备预警配置/编辑/${config.configId}`)
         return
       case "disable":
         setPendingAction({ action: "disable", config })
@@ -140,7 +140,7 @@ export function DeviceWarningConfigListPage() {
               onChange={setDraftFilters}
               onSearch={handleSearch}
               onReset={handleReset}
-              onAdd={() => navigate("/预警配置/设备预警配置/新增")}
+              onAdd={() => navigate("/物联网IOT与预警/预警配置/设备预警配置/新增")}
             />
           </PrototypeAnnotationTarget>
         </form>

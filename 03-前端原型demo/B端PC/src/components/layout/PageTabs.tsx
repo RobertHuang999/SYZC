@@ -1,7 +1,7 @@
 import { X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
-import { getPageTabTitle } from "@/config/navigation"
+import { getPageTabTitle, topModules } from "@/config/navigation"
 import { cn } from "@/lib/utils"
 
 type PageTab = {
@@ -9,7 +9,7 @@ type PageTab = {
   label: string
 }
 
-const defaultPath = "/预警信息/设备预警信息"
+const defaultPath = topModules[0].path
 
 export function PageTabs() {
   const location = useLocation()

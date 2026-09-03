@@ -42,7 +42,7 @@ export function CollateralWarningDetailPage() {
   if (!event) {
     return (
       <div className="space-y-4 p-6">
-        <Link to="/预警信息/押品预警信息">
+        <Link to="/物联网IOT与预警/预警信息/押品预警信息">
           <Button variant="outline">
             <ArrowLeftIcon />
             返回
@@ -60,9 +60,9 @@ export function CollateralWarningDetailPage() {
   const showInvalid = event.warningStatus === WARNING_STATUS.OPEN_INVALID
   const deviceEventId =
     event.penetrationInfo?.relatedEventId ?? event.deviceEventId ?? "evt-017"
-  const returnRoute = `/预警信息/押品预警信息/详情/${event.eventId}`
+  const returnRoute = `/物联网IOT与预警/预警信息/押品预警信息/详情/${event.eventId}`
   const deviceDetailRoute =
-    `/预警信息/设备预警信息/详情/${deviceEventId}?device_event_id=${encodeURIComponent(deviceEventId)}&warn_id=${encodeURIComponent(event.eventId)}&return_route=${encodeURIComponent(returnRoute)}`
+    `/物联网IOT与预警/预警信息/设备预警信息/详情/${deviceEventId}?device_event_id=${encodeURIComponent(deviceEventId)}&warn_id=${encodeURIComponent(event.eventId)}&return_route=${encodeURIComponent(returnRoute)}`
   const orderProcessRoute =
     `/融资/监管/抵质押业务/抵质押业务办理?order_id=${encodeURIComponent(event.orderNo)}&warn_id=${encodeURIComponent(event.eventId)}&return_route=${encodeURIComponent(returnRoute)}`
 
@@ -84,7 +84,7 @@ export function CollateralWarningDetailPage() {
 
             <div className="flex flex-wrap gap-2">
               {headerActions.includes("back") && (
-                <Link to="/预警信息/押品预警信息">
+                <Link to="/物联网IOT与预警/预警信息/押品预警信息">
                   <Button variant="outline">
                     <ArrowLeftIcon />
                     返回

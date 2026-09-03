@@ -104,7 +104,7 @@ function DeviceWarningEventRow({
           ariaLabel={`规则名称：${event.ruleName}`}
         >
           <Link
-            to={`/预警信息/设备预警信息/详情/${event.eventId}`}
+            to={`/物联网IOT与预警/预警信息/设备预警信息/详情/${event.eventId}`}
             className="font-medium text-primary hover:underline"
           >
             {event.ruleName}
@@ -172,7 +172,7 @@ function DeviceWarningEventRow({
             </Button>
           )}
           <Link
-            to={`/预警信息/设备预警信息/详情/${event.eventId}`}
+            to={`/物联网IOT与预警/预警信息/设备预警信息/详情/${event.eventId}`}
             className="text-sm text-primary hover:underline"
           >
             详情

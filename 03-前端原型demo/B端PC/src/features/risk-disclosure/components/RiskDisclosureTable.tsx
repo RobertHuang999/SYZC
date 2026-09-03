@@ -61,7 +61,7 @@ export function RiskDisclosureTable({
                 <TableCell>{(page - 1) * pageSize + index + 1}</TableCell>
                 <TableCell>
                   <Link
-                    to={`/预警信息/风险公示/详情/${record.recordId}`}
+                    to={`/物联网IOT与预警/预警信息/风险公示/详情/${record.recordId}`}
                     className="font-medium text-primary hover:underline"
                   >
                     {record.orderNo}
@@ -125,7 +125,7 @@ export function RiskDisclosureTable({
                 </TableCell>
                 <TableCell>
                   <Link
-                    to={`/预警信息/风险公示/详情/${record.recordId}`}
+                    to={`/物联网IOT与预警/预警信息/风险公示/详情/${record.recordId}`}
                     className="text-sm text-primary hover:underline"
                   >
                     详情

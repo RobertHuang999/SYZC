@@ -58,7 +58,7 @@ export function DeviceWarningConfigDetailPage() {
       showToast("启用成功")
     } else if (pendingAction === "delete") {
       showToast("删除成功")
-      navigate("/预警配置/设备预警配置")
+      navigate("/物联网IOT与预警/预警配置/设备预警配置")
     }
 
     setPendingAction(null)
@@ -67,7 +67,7 @@ export function DeviceWarningConfigDetailPage() {
   if (!config) {
     return (
       <div className="space-y-4 p-6">
-        <Link to="/预警配置/设备预警配置">
+        <Link to="/物联网IOT与预警/预警配置/设备预警配置">
           <Button variant="outline">
             <ArrowLeftIcon />
             返回
@@ -106,7 +106,7 @@ export function DeviceWarningConfigDetailPage() {
 
             <div className="flex flex-wrap gap-2">
               {headerActions.includes("back") && (
-                <Link to="/预警配置/设备预警配置">
+                <Link to="/物联网IOT与预警/预警配置/设备预警配置">
                   <Button variant="outline">
                     <ArrowLeftIcon />
                     返回
@@ -114,7 +114,7 @@ export function DeviceWarningConfigDetailPage() {
                 </Link>
               )}
               {headerActions.includes("edit") && (
-                <Link to={`/预警配置/设备预警配置/编辑/${config.configId}`}>
+                <Link to={`/物联网IOT与预警/预警配置/设备预警配置/编辑/${config.configId}`}>
                   <Button variant="secondary">编辑</Button>
                 </Link>
               )}
