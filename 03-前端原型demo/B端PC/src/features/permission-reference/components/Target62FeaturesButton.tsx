@@ -54,7 +54,7 @@ export function Target62FeaturesButton({ records }: { records: PermissionRecord[
           "hover:bg-indigo-100 hover:border-indigo-400",
           open && "bg-indigo-200/80",
         )}
-        title="查看 6.2 目标态菜单权限（上线前不在主列表展示）"
+        title="聚合查看 6.2 目标态菜单权限（主列表已纳入）"
       >
         <LayersIcon className="size-3.5" />
         6.2目标菜单
@@ -72,7 +72,7 @@ export function Target62FeaturesButton({ records }: { records: PermissionRecord[
                 <div>
                   <h2 className="text-sm font-semibold text-indigo-950">6.2 目标菜单 · 权限预演</h2>
                   <p className="text-[11px] text-indigo-900/70">
-                    顶栏「物联网IOT与预警」路径 · 共 {records.length} 项 · 上线前主列表仍显示线上口径
+                    顶栏「物联网IOT与预警」路径 · 共 {records.length} 项 · 主列表已纳入 6.2 目标态记录
                   </p>
                 </div>
               </div>

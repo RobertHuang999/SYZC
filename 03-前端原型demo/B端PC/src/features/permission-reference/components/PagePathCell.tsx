@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom"
 import { ChevronRightIcon, ExternalLinkIcon } from "lucide-react"
-import type { PermissionRecord } from "../data/permission-records"
+import { permissionRecords, type PermissionRecord } from "../data/permission-records"
 import { resolvePrototypeRoute } from "../data/prototype-route-map"
+import { is62MigrationSource } from "../lib/record-status"
 import { cn } from "@/lib/utils"
 
 export function PagePathCell({ record }: { record: PermissionRecord }) {
@@ -21,6 +22,16 @@ export function PagePathCell({ record }: { record: PermissionRecord }) {
         <span className="rounded border border-border/70 bg-muted/20 px-1.5 py-0.5 text-[10px] text-muted-foreground">
           {moduleLabel}
         </span>
+        {record.recordStatus === "6.2-target" && (
+          <span className="rounded border border-indigo-200/80 bg-indigo-50 px-1.5 py-0.5 text-[10px] font-medium text-indigo-800">
+            6.2目标
+          </span>
+        )}
+        {is62MigrationSource(record, permissionRecords) && (
+          <span className="rounded border border-amber-200/80 bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-800">
+            6.2迁移
+          </span>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-0.5 text-xs font-medium text-foreground">
@@ -55,7 +66,7 @@ export function PagePathCell({ record }: { record: PermissionRecord }) {
 export function PagePathLegend({ className }: { className?: string }) {
   return (
     <p className={cn("text-[10px] font-normal text-muted-foreground", className)}>
-      菜单路径 + 原型路由；研发对照时以「页面路径」为唯一入口
+      菜单路径 + 原型路由；「6.2迁移」为原线上路径，「6.2目标」为新路径
     </p>
   )
 }

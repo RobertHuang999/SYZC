@@ -9,11 +9,32 @@ import { PlannedFeaturesButton } from "../components/PlannedFeaturesPanel"
 import { CancelledFeaturesButton } from "../components/CancelledFeaturesButton"
 import { Target62FeaturesButton } from "../components/Target62FeaturesButton"
 import { isRecentChange } from "../lib/is-recent-change"
-import { isArchivedFeature, is62TargetFeature, isCancelledFeature, isPlannedFeature } from "../lib/record-status"
+import { is62TargetFeature, isCancelledFeature, isPlannedFeature } from "../lib/record-status"
 import { cn } from "@/lib/utils"
 
 type PlatformFilter = "PC" | "移动" | "全部"
 type ChangeFilter = "全部" | "最近变更"
+
+const permissionModuleOrder = [
+  "1.工作中心",
+  "2.仓储",
+  "3.融资/监管",
+  "4.交易",
+  "5.风控",
+  "9.物联网IOT与预警",
+  "6.统计/看板",
+  "7.结算",
+  "8.配置管理",
+]
+
+const permissionModuleOrderMap = new Map(permissionModuleOrder.map((moduleName, index) => [moduleName, index]))
+
+function comparePermissionModules(left: string, right: string) {
+  const leftOrder = permissionModuleOrderMap.get(left) ?? Number.MAX_SAFE_INTEGER
+  const rightOrder = permissionModuleOrderMap.get(right) ?? Number.MAX_SAFE_INTEGER
+
+  return leftOrder - rightOrder || left.localeCompare(right, "zh-CN")
+}
 
 function matchesPlatform(record: PermissionRecord, platform: PlatformFilter) {
   return platform === "全部" || record.platform === platform
@@ -21,6 +42,10 @@ function matchesPlatform(record: PermissionRecord, platform: PlatformFilter) {
 
 function matchesChangeFilter(record: PermissionRecord, changeFilter: ChangeFilter) {
   return changeFilter === "全部" || isRecentChange(record)
+}
+
+function isMainListRecord(record: PermissionRecord) {
+  return !isPlannedFeature(record) && !isCancelledFeature(record)
 }
 
 function getSubMenuKey(record: PermissionRecord) {
@@ -69,7 +94,7 @@ export function PermissionReferencePage() {
       (record) =>
         matchesPlatform(record, platform) &&
         matchesChangeFilter(record, changeFilter) &&
-        !isArchivedFeature(record),
+        isMainListRecord(record),
     )
   }, [changeFilter, platform])
 
@@ -88,7 +113,7 @@ export function PermissionReferencePage() {
   const recentChangeTotal = useMemo(() => {
     return permissionRecords.filter(
       (record) =>
-        matchesPlatform(record, platform) && isRecentChange(record) && !isArchivedFeature(record),
+        matchesPlatform(record, platform) && isRecentChange(record) && isMainListRecord(record),
     ).length
   }, [platform])
 
@@ -140,7 +165,7 @@ export function PermissionReferencePage() {
       list.push(record)
       groups.set(key, list)
     }
-    return [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0], "zh-CN"))
+    return [...groups.entries()].sort(([left], [right]) => comparePermissionModules(left, right))
   }, [activeModule, filteredRecords])
 
   const showGroupHeaders = activeSubMenu === "全部" && groupedRecords.length > 1
@@ -154,7 +179,9 @@ export function PermissionReferencePage() {
   }, [scopeRecords])
 
   const visibleModules = useMemo(() => {
-    return permissionModuleTree.filter((moduleName) => (moduleCounts.get(moduleName) ?? 0) > 0)
+    return permissionModuleTree
+      .filter((moduleName) => (moduleCounts.get(moduleName) ?? 0) > 0)
+      .sort(comparePermissionModules)
   }, [moduleCounts])
 
   useEffect(() => {
