@@ -115,7 +115,7 @@ export function GetLockPasswordDialog({
   }
 
   const detailHref = createdApplyNo
-    ? `${MY_APPLY_LIST_PATH}?tab=unlock-applies&applyNo=${createdApplyNo}`
+    ? `${MY_APPLY_LIST_PATH}/unlock-applies/${createdApplyNo}`
     : `${MY_APPLY_LIST_PATH}?tab=unlock-applies`
 
   const handleViewDetail = () => {

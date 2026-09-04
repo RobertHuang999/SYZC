@@ -131,7 +131,7 @@ export function UnlockApplySubmitDialog({
 
   const handleViewDetail = () => {
     if (!result) return
-    navigate(`${MY_APPLY_LIST_PATH}?tab=unlock-applies&applyNo=${result.applyNo}`)
+    navigate(`${MY_APPLY_LIST_PATH}/unlock-applies/${result.applyNo}`)
     handleClose()
   }
 
