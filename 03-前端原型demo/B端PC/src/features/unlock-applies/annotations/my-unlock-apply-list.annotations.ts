@@ -41,12 +41,10 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
     待审批 --> 已驳回 : 审批驳回
     待审批 --> 已撤回 : 申请人撤回
     待审批 --> 已失效 : 审批超时（自动 R14）
-    已通过 --> 已作废 : 设备/位置复核失败（系统自动 R15）
-    已通过 --> [*] : 凭证独立流转（保持已通过）
+    已通过 --> [*] : 凭证独立流转（R15/密码服务失败→生成失败，主状态保持已通过）
     已驳回 --> [*]
     已撤回 --> [*]
-    已失效 --> [*]
-    已作废 --> [*]`,
+    已失效 --> [*]`,
           },
         ],
       },
@@ -76,7 +74,7 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
           {
             label: "申请状态",
             content:
-              "Select 多选下拉：待审批 / 已通过 / 已驳回 / 已撤回 / 已失效 / 已作废；空选=全部；同字段 OR。",
+              "Select 多选下拉：待审批 / 已通过 / 已驳回 / 已撤回 / 已失效；空选=全部；同字段 OR。",
           },
           {
             label: "凭证状态",
@@ -93,8 +91,9 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
             content: "名称模糊；编码精确。",
           },
           {
-            label: "设备类型 / 绑定仓库 / 事由 / 申请人 / 配置编号",
-            content: "设备类型：全部/挂锁门禁/人脸门禁；事由：出库/入库/移库/参观/其他；配置编号精确匹配运维排查。",
+            label: "设备类型 / 绑定仓库 / 事由 / 配置编号",
+            content:
+              "设备类型：全部/挂锁门禁/人脸门禁；事由：出库/入库/移库/参观/其他；配置编号精确匹配运维排查。不含申请人筛选项——本 Tab 仅展示当前登录人本人记录。",
           },
           {
             label: "不含申请单号",

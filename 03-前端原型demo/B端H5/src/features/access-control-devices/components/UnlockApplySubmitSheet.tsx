@@ -10,6 +10,13 @@ type UnlockApplySubmitSheetProps = {
   onClose: () => void
 }
 
+function validateValidity(validFrom: string, validTo: string): string | null {
+  if (validFrom >= validTo) return "有效期结束时间须晚于开始时间"
+  const spanMs = new Date(validTo).getTime() - new Date(validFrom).getTime()
+  if (spanMs > 24 * 60 * 60 * 1000) return "密码有效期最大不得超过 24 小时"
+  return null
+}
+
 export function UnlockApplySubmitSheet({ open, context, onClose }: UnlockApplySubmitSheetProps) {
   const navigate = useNavigate()
   const [reason, setReason] = useState("出库")
@@ -17,8 +24,6 @@ export function UnlockApplySubmitSheet({ open, context, onClose }: UnlockApplySu
   const [unlockCount, setUnlockCount] = useState("1")
   const [validFrom, setValidFrom] = useState("2026-08-28T14:00")
   const [validTo, setValidTo] = useState("2026-08-28T18:00")
-  const [windowStart, setWindowStart] = useState("2026-08-28T14:00")
-  const [windowEnd, setWindowEnd] = useState("2026-08-28T18:00")
   const [submitting, setSubmitting] = useState(false)
   const [applyNo, setApplyNo] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -30,8 +35,6 @@ export function UnlockApplySubmitSheet({ open, context, onClose }: UnlockApplySu
       setUnlockCount("1")
       setValidFrom("2026-08-28T14:00")
       setValidTo("2026-08-28T18:00")
-      setWindowStart("2026-08-28T14:00")
-      setWindowEnd("2026-08-28T18:00")
       setSubmitting(false)
       setApplyNo(null)
       setError(null)
@@ -44,18 +47,15 @@ export function UnlockApplySubmitSheet({ open, context, onClose }: UnlockApplySu
   const isFace = context.deviceType === "人脸门禁"
 
   const handleSubmit = () => {
-    if (windowStart > windowEnd) {
-      setError("预计使用时段开始时间不能晚于结束时间")
+    const validityError = validateValidity(validFrom, validTo)
+    if (validityError) {
+      setError(validityError)
       return
     }
     if (isFace) {
       const count = Number(unlockCount)
       if (!Number.isInteger(count) || count < 1 || count > 100) {
         setError("开锁次数须为 1~100 的整数")
-        return
-      }
-      if (validFrom >= validTo) {
-        setError("有效期结束时间须晚于开始时间")
         return
       }
     }
@@ -135,6 +135,40 @@ export function UnlockApplySubmitSheet({ open, context, onClose }: UnlockApplySu
                   ))}
                 </select>
               </label>
+
+              <label className="block text-xs text-gray-600">
+                <span className="text-rose-500">*</span> 有效期
+                <div className="mt-1 flex items-center gap-2">
+                  <input
+                    type="datetime-local"
+                    className="w-full rounded-lg border border-gray-200 px-2 py-2 text-sm"
+                    value={validFrom}
+                    onChange={(e) => setValidFrom(e.target.value)}
+                  />
+                  <span className="text-gray-400">至</span>
+                  <input
+                    type="datetime-local"
+                    className="w-full rounded-lg border border-gray-200 px-2 py-2 text-sm"
+                    value={validTo}
+                    onChange={(e) => setValidTo(e.target.value)}
+                  />
+                </div>
+              </label>
+
+              {isFace && (
+                <label className="block text-xs text-gray-600">
+                  <span className="text-rose-500">*</span> 开锁次数
+                  <input
+                    type="number"
+                    min={1}
+                    max={100}
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    value={unlockCount}
+                    onChange={(e) => setUnlockCount(e.target.value)}
+                  />
+                </label>
+              )}
+
               <label className="block text-xs text-gray-600">
                 备注
                 <textarea
@@ -145,64 +179,10 @@ export function UnlockApplySubmitSheet({ open, context, onClose }: UnlockApplySu
                 />
               </label>
 
-              {isFace && (
-                <>
-                  <label className="block text-xs text-gray-600">
-                    <span className="text-rose-500">*</span> 开锁次数
-                    <input
-                      type="number"
-                      min={1}
-                      max={100}
-                      className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-                      value={unlockCount}
-                      onChange={(e) => setUnlockCount(e.target.value)}
-                    />
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <label className="block text-xs text-gray-600">
-                      有效期起
-                      <input
-                        type="datetime-local"
-                        className="mt-1 w-full rounded-lg border border-gray-200 px-2 py-2 text-xs"
-                        value={validFrom}
-                        onChange={(e) => setValidFrom(e.target.value)}
-                      />
-                    </label>
-                    <label className="block text-xs text-gray-600">
-                      有效期止
-                      <input
-                        type="datetime-local"
-                        className="mt-1 w-full rounded-lg border border-gray-200 px-2 py-2 text-xs"
-                        value={validTo}
-                        onChange={(e) => setValidTo(e.target.value)}
-                      />
-                    </label>
-                  </div>
-                </>
-              )}
-
-              <div>
-                <p className="text-xs text-gray-600">
-                  <span className="text-rose-500">*</span> 预计使用时段
-                </p>
-                <div className="mt-1 grid grid-cols-2 gap-2">
-                  <input
-                    type="datetime-local"
-                    className="w-full rounded-lg border border-gray-200 px-2 py-2 text-xs"
-                    value={windowStart}
-                    onChange={(e) => setWindowStart(e.target.value)}
-                  />
-                  <input
-                    type="datetime-local"
-                    className="w-full rounded-lg border border-gray-200 px-2 py-2 text-xs"
-                    value={windowEnd}
-                    onChange={(e) => setWindowEnd(e.target.value)}
-                  />
-                </div>
-                <p className="mt-1 text-[10px] text-gray-400">仅供审批参考，不替代凭证有效期</p>
-              </div>
-
               {error && <p className="text-xs text-rose-600">{error}</p>}
+              <p className="text-[11px] text-gray-400">
+                最长有效期 24 小时；超过有效期凭证自动失效
+              </p>
               <p className="text-[11px] text-gray-400">
                 {isLock
                   ? "审批通过后短信下发临时密码"

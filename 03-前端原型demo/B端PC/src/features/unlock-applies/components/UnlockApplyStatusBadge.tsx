@@ -7,7 +7,6 @@ const statusClass: Record<UnlockApply["status"], string> = {
   REJECTED: "bg-red-100 text-red-800",
   WITHDRAWN: "bg-slate-100 text-slate-700",
   EXPIRED: "bg-slate-100 text-slate-700",
-  VOIDED: "bg-slate-100 text-slate-700",
 }
 
 export function UnlockApplyStatusBadge({ apply }: { apply: UnlockApply }) {

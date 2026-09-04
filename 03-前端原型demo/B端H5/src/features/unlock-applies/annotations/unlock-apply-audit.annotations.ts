@@ -74,7 +74,7 @@ export const unlockApplyAuditH5ListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "已处理",
-            content: "status ∈ {APPROVED, REJECTED, WITHDRAWN, EXPIRED, VOIDED}，查看历史归档。",
+            content: "status ∈ {APPROVED, REJECTED, WITHDRAWN, EXPIRED}，查看历史归档。",
           },
           {
             label: "全部",
@@ -146,7 +146,7 @@ export const unlockApplyAuditH5DetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "申请内容",
-            content: "展示申请人「姓名（所属机构）」、脱敏手机号、开锁事由、预计使用时段及提交时间。",
+            content: "展示申请人「姓名（所属机构）」、脱敏手机号、开锁事由、有效期及提交时间。",
           },
           {
             label: "审批配置与记录",

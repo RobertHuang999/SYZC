@@ -4,7 +4,6 @@ export type UnlockApplyStatus =
   | "REJECTED"
   | "WITHDRAWN"
   | "EXPIRED"
-  | "VOIDED"
 
 export type CredentialStatus =
   | "NOT_GENERATED"
@@ -21,7 +20,6 @@ export type ApplyStatusFilter =
   | "已驳回"
   | "已撤回"
   | "已失效"
-  | "已作废"
 
 export type ApprovalRecord = {
   nodeOrder: number
@@ -109,6 +107,5 @@ export type MyUnlockApplyFilters = {
   deviceType: "全部" | "挂锁门禁" | "人脸门禁"
   warehouseName: string
   reason: string
-  applicantKeyword: string
   configNo: string
 }

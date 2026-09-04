@@ -4,7 +4,6 @@ export type UnlockApplyStatus =
   | "REJECTED"
   | "WITHDRAWN"
   | "EXPIRED"
-  | "VOIDED"
 
 export type CredentialStatus =
   | "NOT_GENERATED"

@@ -82,6 +82,10 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
             label: "抵质押率双等级 (R18)",
             content: "抵/质押率卡片需分别指定补仓线等级与平仓线等级，平仓线严重度 sort_order 必须大于等于补仓线。",
           },
+          {
+            label: "通知渠道（notify_channels）",
+            content: "各策略子项独立配置，选填复选框组：短信、邮件；预警命中时系统自动更新预警对象系统小角标，小角标不可配置；与 03/02 设备预警配置口径一致。",
+          },
         ],
       },
     ],

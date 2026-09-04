@@ -41,12 +41,6 @@ export function filterMyUnlockApplies(
 
       if (filters.reason !== "全部" && item.reason !== filters.reason) return false
 
-      const applicantKw = filters.applicantKeyword.trim().toLowerCase()
-      if (applicantKw) {
-        const haystack = `${item.applicantName} ${item.applicantAccount}`.toLowerCase()
-        if (!haystack.includes(applicantKw)) return false
-      }
-
       if (
         filters.configNo.trim() &&
         item.configSnapshot.configNo !== filters.configNo.trim()

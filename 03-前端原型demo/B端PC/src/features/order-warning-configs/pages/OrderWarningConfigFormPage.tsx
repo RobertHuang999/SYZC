@@ -30,8 +30,7 @@ import {
   ORDER_STRATEGY_DEFINITIONS,
 } from "../lib/detail-utils"
 import { validateStrategySave } from "../lib/validation"
-
-const NOTIFY_CHANNEL_OPTIONS = ["短信", "邮件", "Webhook"] as const
+import { NOTIFY_CHANNEL_OPTIONS } from "../domain/constants"
 
 export function OrderWarningConfigFormPage() {
   const { id } = useParams()
@@ -558,7 +557,7 @@ export function OrderWarningConfigFormPage() {
                         <div className="space-y-2 md:col-span-2">
                           <Label>通知渠道（选填）</Label>
                           <p className="text-xs text-muted-foreground">
-                            预警命中时系统自动更新预警对象系统小角标；短信/邮件/Webhook 按需勾选。
+                            预警命中时系统自动更新预警对象系统小角标；短信/邮件按需勾选。
                           </p>
                           <div className="flex flex-wrap gap-4">
                             {NOTIFY_CHANNEL_OPTIONS.map((channel) => (

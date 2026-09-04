@@ -19,8 +19,8 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
     A["点击获取密码"] --> B{"matchUnlockApprovalConfig"}
     B -->|命中需审批| C["UnlockApplySubmitDialog 发起申请"]
     B -->|未命中/免审| D{"设备类型"}
-    D -->|挂锁| E["GetLockPasswordDialog 短信+页面密码"]
-    D -->|人脸| F["GetAccessPasswordDialog 仅页面密码"]
+    D -->|挂锁| E["GetLockPasswordDialog 引导我的申请记录"]
+    D -->|人脸| F["GetAccessPasswordDialog 引导我的申请记录"]
     C --> G["提交成功 Deep link 我的开锁申请"]`,
           },
           {
@@ -60,12 +60,8 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
         title: "Mock 设备覆盖",
         items: [
           {
-            label: "免审挂锁 / 免审人脸",
-            content: "未绑定或命中免审全局开关的设备 → 直接密码弹窗。",
-          },
-          {
-            label: "需审批设备",
-            content: "绑定仓库且命中已启用配置 → 发起申请弹窗。",
+            label: "Mock 设备覆盖",
+            content: "22 条 Mock（三仓、挂锁/人脸、在线/离线）；需审批：`LK-2024-0082`、`LK-0085`；免审：如 `LK-HB-003`、`FACE-2024-001`。",
           },
         ],
       },
@@ -107,7 +103,7 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "挂锁免审",
-            content: "展示临时密码 + 短信发送状态；人脸不适用此弹窗。",
+            content: "表单含事由 + 有效期（与人脸一致，最长 24h）；提交成功后引导至【我的申请记录】·开锁申请查看密码，弹窗内不展示明文。",
           },
         ],
       },
@@ -116,7 +112,7 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "人脸免审",
-            content: "仅页面密码 + 复制；无短信区块。",
+            content: "表单含事由 → **有效期** → 开锁次数 → 备注；提交成功后引导至【我的申请记录】查看密码（R31 不下发短信）。",
           },
         ],
       },
@@ -125,7 +121,7 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "需审批发起",
-            content: "只读设备快照 + 事由/备注/预计使用时段；提交后 Mock 固定单号 Deep link（动态写入列表待后续迭代）。",
+            content: "只读设备快照 + 事由/有效期/备注（挂锁）或 +开锁次数（人脸）；字段顺序与免审弹窗一致；提交后 Mock 固定单号 Deep link。",
           },
         ],
       },

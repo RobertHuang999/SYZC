@@ -64,7 +64,7 @@ export const unlockApplyAuditDetailAnnotations: PrototypeAnnotation[] = [
     kind: "字段",
     title: "申请内容与事由信息",
     content:
-      "展示申请人身份、脱敏手机号、开锁事由、详细备注、预计使用时段及提交时间戳。",
+      "展示申请人身份、脱敏手机号、开锁事由、详细备注、有效期及提交时间戳。",
     details: [
       {
         title: "字段规范与脱敏说明",
@@ -78,8 +78,8 @@ export const unlockApplyAuditDetailAnnotations: PrototypeAnnotation[] = [
             content: "前3后4脱敏展示（如「138****8000」），保障信息安全。",
           },
           {
-            label: "开锁事由与预计时段",
-            content: "展示出库、入库、移库、盘点、巡检等业务事由；预计使用时段供审批人评估授权合理性。",
+            label: "开锁事由与有效期",
+            content: "展示出库、入库、移库等业务事由；有效期与发起申请弹窗一致，供审批人评估授权合理性。",
           },
         ],
       },

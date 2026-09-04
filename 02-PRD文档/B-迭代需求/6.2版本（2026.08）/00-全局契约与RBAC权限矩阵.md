@@ -20,7 +20,7 @@
 | **策略子项** | 03-预警配置/03订单预警配置 | `strategy_id` | `is_enabled=1/0` | 仅影响该子项产生的流水和升级任务 |
 | **物联设备** | 01-物联网IOT管理 | `device_id` / `device_code` | `ONLINE` / `OFFLINE` / `ABNORMAL` | 原始通行与上报采集流水 |
 | **审批任务** | 07-审批中心 | `task_id` | — | `PENDING` / `APPROVED` / `REJECTED` / `CLOSED` |
-| **开锁申请** | 07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批 | `apply_no` | — | `PENDING` / `APPROVED` / `REJECTED` / `WITHDRAWN` / `EXPIRED` / `VOIDED` |
+| **开锁申请** | 07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批 | `apply_no` | — | `PENDING` / `APPROVED` / `REJECTED` / `WITHDRAWN` / `EXPIRED` |
 | **开锁审批配置** | 06-门禁开锁审批/01-审批配置 | `config_no` + `config_version` | `ENABLED` / `DISABLED` | 申请提交时固化配置快照 |
 
 > 所有写操作必须携带租户 ID、数据权限上下文、幂等键和审计信息；配置修改不得回写已经产生的历史等级/规则快照。

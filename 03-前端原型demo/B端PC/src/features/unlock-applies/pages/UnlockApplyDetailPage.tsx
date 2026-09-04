@@ -108,7 +108,7 @@ export function UnlockApplyDetailPage() {
             <DetailField label="手机号">{maskPhone(apply.applicantPhone)}</DetailField>
             <DetailField label="事由">{apply.reason}</DetailField>
             <DetailField label="备注">{formatEmptyValue(apply.remark)}</DetailField>
-            <DetailField label="预计使用时段">
+            <DetailField label="有效期">
               {formatEmptyValue(apply.expectedUseWindow)}
             </DetailField>
             <DetailField label="提交时间">{apply.submitTime}</DetailField>

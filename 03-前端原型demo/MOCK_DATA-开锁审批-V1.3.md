@@ -50,7 +50,7 @@
 | 已驳回 | UA20260826006 | 挂锁 | REJECTED | NOT_GENERATED | 展示驳回原因 |
 | 已撤回 | UA20260826003 | 挂锁 | WITHDRAWN | NOT_GENERATED | — |
 | 申请超时失效 | UA20260825012 | 挂锁 | EXPIRED | NOT_GENERATED | 审批超时 |
-| 申请作废 | UA20260824007 | 挂锁 | VOIDED | NOT_GENERATED | 设备/位置失效 |
+| 复核失败·生成失败 | UA20260824007 | 挂锁 | APPROVED | GEN_FAILED | 设备/位置复核失败 |
 
 ---
 
@@ -114,6 +114,15 @@
 | applyNo | UA20260826013 |
 | credential.status | SUPERSEDED |
 | invalidReason | 设备密码已被更新，原密码已失效 |
+
+### 4.8 挂锁 · 已通过 · 生成失败（设备/位置复核失败）
+
+| 字段 | 值 |
+|:---|:---|
+| applyNo | UA20260824007 |
+| credential.status | GEN_FAILED |
+| genFailReason | 设备已解绑或位置失效 |
+| 说明 | R15 复核失败；申请主状态保持已通过，申请人可重新获取密码 |
 
 ---
 

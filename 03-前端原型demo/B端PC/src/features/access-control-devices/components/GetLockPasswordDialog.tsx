@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
+import { CheckCircle2 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -33,6 +34,23 @@ type GetLockPasswordDialogProps = {
 
 type DialogState = "form" | "success" | "error"
 
+function defaultValidFrom(): string {
+  return "2026-08-31T14:00"
+}
+
+function defaultValidTo(): string {
+  return "2026-08-31T18:00"
+}
+
+function validateValidity(validFrom: string, validTo: string): string | null {
+  if (validFrom >= validTo) return "有效期结束时间须晚于开始时间"
+  const spanMs = new Date(validTo).getTime() - new Date(validFrom).getTime()
+  if (spanMs > 24 * 60 * 60 * 1000) {
+    return "密码有效期最大不得超过 24 小时"
+  }
+  return null
+}
+
 export function GetLockPasswordDialog({
   open,
   context,
@@ -41,9 +59,10 @@ export function GetLockPasswordDialog({
 }: GetLockPasswordDialogProps) {
   const [state, setState] = useState<DialogState>("form")
   const [reason, setReason] = useState("出库")
+  const [validFrom, setValidFrom] = useState(defaultValidFrom())
+  const [validTo, setValidTo] = useState(defaultValidTo())
   const [remark, setRemark] = useState("")
   const [submitting, setSubmitting] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [createdApplyNo, setCreatedApplyNo] = useState<string | null>(null)
 
@@ -51,9 +70,10 @@ export function GetLockPasswordDialog({
     if (!open) {
       setState("form")
       setReason("出库")
+      setValidFrom(defaultValidFrom())
+      setValidTo(defaultValidTo())
       setRemark("")
       setSubmitting(false)
-      setShowPassword(false)
       setErrorMessage(null)
       setCreatedApplyNo(null)
     }
@@ -66,10 +86,25 @@ export function GetLockPasswordDialog({
       setErrorMessage("请选择事由")
       return
     }
+    const validityError = validateValidity(validFrom, validTo)
+    if (validityError) {
+      setErrorMessage(validityError)
+      return
+    }
+    if (remark.length > 50) {
+      setErrorMessage("备注最多 50 字")
+      return
+    }
     setErrorMessage(null)
     setSubmitting(true)
     window.setTimeout(() => {
-      const record = createDirectLockUnlockApply({ context, reason, remark: remark || undefined })
+      const record = createDirectLockUnlockApply({
+        context,
+        reason,
+        remark: remark || undefined,
+        validFrom,
+        validTo,
+      })
       addUnlockApply(record)
       setCreatedApplyNo(record.applyNo)
       onDirectSuccess?.(record.applyNo)
@@ -78,8 +113,9 @@ export function GetLockPasswordDialog({
     }, 600)
   }
 
-  const maskedPassword = "****5678"
-  const plainPassword = "856778"
+  const detailHref = createdApplyNo
+    ? `${MY_APPLY_LIST_PATH}?tab=unlock-applies&applyNo=${createdApplyNo}`
+    : `${MY_APPLY_LIST_PATH}?tab=unlock-applies`
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -87,50 +123,32 @@ export function GetLockPasswordDialog({
         {state === "success" ? (
           <>
             <DialogHeader>
-              <DialogTitle>密码已生成并发送短信</DialogTitle>
-              <DialogDescription>
-                密码已发送至您绑定的手机号，有效期 3 天
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle2 className="size-5 text-green-600" />
+                密码已生成
+              </DialogTitle>
+              <DialogDescription className="pt-2 leading-relaxed">
+                密码已生成并已发送短信至绑定手机号。请前往
+                <span className="font-medium text-foreground">【我的申请记录】</span>
+                的
+                <span className="font-medium text-foreground">开锁申请</span>
+                查看密码。
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-3 py-2 text-sm">
-              <div className="flex items-center justify-between rounded-lg border bg-muted/40 px-4 py-3">
-                <span className="font-mono text-lg tracking-widest">
-                  {showPassword ? plainPassword : maskedPassword}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "隐藏密码" : "显示密码"}
-                >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </Button>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">密码有效期</span>
-                <span>2026-08-31 09:15 ~ 2026-09-03 09:15</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">短信发送结果</span>
-                <span className="text-green-600">发送成功</span>
-              </div>
-              {createdApplyNo && (
-                <p className="text-xs text-muted-foreground">
-                  已写入我的开锁申请（无需审核）· {createdApplyNo}
-                </p>
-              )}
-            </div>
+            {createdApplyNo && (
+              <p className="text-xs text-muted-foreground">申请单号：{createdApplyNo}</p>
+            )}
             <DialogFooter className="gap-2 sm:gap-0">
-              {createdApplyNo && (
-                <Link
-                  to={`${MY_APPLY_LIST_PATH}/unlock-applies/${createdApplyNo}`}
-                  onClick={() => onOpenChange(false)}
-                  className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium hover:bg-accent"
-                >
-                  查看记录
-                </Link>
-              )}
-              <Button onClick={() => onOpenChange(false)}>关闭</Button>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                关闭
+              </Button>
+              <Link
+                to={detailHref}
+                onClick={() => onOpenChange(false)}
+                className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                前往查看
+              </Link>
             </DialogFooter>
           </>
         ) : (
@@ -164,6 +182,26 @@ export function GetLockPasswordDialog({
               </div>
 
               <div className="space-y-2">
+                <Label>
+                  <span className="text-destructive mr-1">*</span>
+                  有效期
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="datetime-local"
+                    value={validFrom}
+                    onChange={(e) => setValidFrom(e.target.value)}
+                  />
+                  <span className="text-muted-foreground">至</span>
+                  <Input
+                    type="datetime-local"
+                    value={validTo}
+                    onChange={(e) => setValidTo(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
                 <Label>备注</Label>
                 <textarea
                   className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -179,7 +217,7 @@ export function GetLockPasswordDialog({
             </div>
 
             <p className="text-xs text-muted-foreground">
-              密码将发送至您绑定的手机号，有效期 3 天
+              密码将发送至您绑定的手机号；最长有效期 24 小时；超过有效期凭证自动失效
             </p>
             {errorMessage && <p className="text-xs text-destructive">{errorMessage}</p>}
 

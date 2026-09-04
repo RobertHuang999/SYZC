@@ -77,7 +77,7 @@ export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
     kind: "字段",
     title: "设备卡片 · 行操作与加载更多",
     content:
-      "DeviceCard 展示图标/名称/状态/位置/更新时间；底栏重命名/绑定/数据/获取密码/移除；列表支持加载更多。",
+      "DeviceCard 展示图标/名称/状态/位置/更新时间；22 条 Mock 覆盖三仓与双路径；底栏重命名/绑定/数据/获取密码/移除；列表支持加载更多。",
     details: [
       {
         title: "主操作分流",
@@ -108,15 +108,15 @@ export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "UnlockApplySubmitSheet",
-            content: "需审批时唤起，展示目标设备快照并录入事由、备注及预计使用时段；提交成功后可直接跳转我的申请记录。",
+            content: "需审批时唤起，展示目标设备快照；字段顺序：事由 → 有效期 →（人脸：开锁次数）→ 备注；提交成功后可直接跳转我的申请记录。",
           },
           {
             label: "GetLockPasswordSheet",
-            content: "挂锁免审时唤起，展示大号开门密码与倒计时有效期，并调用短信网关向手机下发通知。",
+            content: "挂锁免审：事由 + 有效期（最长 24h）；提交成功后引导至【我的申请记录】·开锁申请查看密码（后台发短信，Sheet 内不展示明文）。",
           },
           {
             label: "GetAccessPasswordSheet",
-            content: "人脸免审时唤起，展示大号开门密码与复制按钮，不调用短信服务（R31）。",
+            content: "人脸免审：事由 → 有效期 → 开锁次数 → 备注；提交成功后同样引导至【我的申请记录】查看密码（R31 不下发短信）。",
           },
         ],
       },

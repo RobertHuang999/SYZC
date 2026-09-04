@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { withResolvedCredentialExpiry } from "./credential-expiry"
 import { unlockAppliesMockSeed } from "../mock/unlock-applies.mock"
 import type { UnlockApply } from "../domain/types"
 
@@ -30,7 +31,7 @@ function notify() {
 }
 
 export function getUnlockApplies(): UnlockApply[] {
-  return items
+  return items.map(withResolvedCredentialExpiry)
 }
 
 export function subscribeUnlockApplies(listener: () => void): () => void {
@@ -55,7 +56,8 @@ export function updateUnlockApply(
 
 export function findUnlockApply(applyNo?: string): UnlockApply | undefined {
   if (!applyNo) return undefined
-  return items.find((item) => item.applyNo === applyNo)
+  const item = items.find((row) => row.applyNo === applyNo)
+  return item ? withResolvedCredentialExpiry(item) : undefined
 }
 
 export function useUnlockApplies(): UnlockApply[] {

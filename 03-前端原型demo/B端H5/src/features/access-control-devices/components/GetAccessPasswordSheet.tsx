@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Copy } from "lucide-react"
+import { CheckCircle2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { REASON_OPTIONS } from "../domain/constants"
 import type { AccessDevicePasswordContext } from "../domain/types"
@@ -26,9 +26,8 @@ export function GetAccessPasswordSheet({
   const [validTo, setValidTo] = useState("2026-08-31T18:00")
   const [remark, setRemark] = useState("")
   const [submitting, setSubmitting] = useState(false)
-  const [credential, setCredential] = useState(false)
+  const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
   const [createdApplyNo, setCreatedApplyNo] = useState<string | null>(null)
 
   useEffect(() => {
@@ -39,9 +38,8 @@ export function GetAccessPasswordSheet({
       setValidTo("2026-08-31T18:00")
       setRemark("")
       setSubmitting(false)
-      setCredential(false)
+      setSuccess(false)
       setError(null)
-      setCopied(false)
       setCreatedApplyNo(null)
     }
   }, [open])
@@ -74,18 +72,8 @@ export function GetAccessPasswordSheet({
       setCreatedApplyNo(record.applyNo)
       onDirectSuccess?.(record.applyNo)
       setSubmitting(false)
-      setCredential(true)
+      setSuccess(true)
     }, 600)
-  }
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText("856778")
-    } catch {
-      /* noop */
-    }
-    setCopied(true)
-    window.setTimeout(() => setCopied(false), 2000)
   }
 
   return (
@@ -93,49 +81,48 @@ export function GetAccessPasswordSheet({
       <button type="button" className="absolute inset-0 bg-black/40" aria-label="关闭" onClick={onClose} />
       <div className="relative max-h-[85vh] w-full overflow-y-auto rounded-t-2xl bg-white p-5 pb-8">
         <h2 className="text-base font-semibold text-gray-900">
-          {credential ? "临时开锁密码" : "获取门禁密码"}
+          {success ? "密码已生成" : "获取门禁密码"}
         </h2>
         <p className="mt-1 text-xs text-gray-500">
           {context.deviceName}（{context.deviceCode}）
         </p>
 
-        {credential ? (
-          <div className="mt-4 space-y-3 rounded-xl border border-blue-100 bg-blue-50/50 p-4 text-center">
-            <p className="text-[11px] text-gray-500">密码仅在当前页面展示（不下发短信）</p>
-            <p className="font-mono text-3xl font-bold tracking-[0.25em] text-gray-900">856778</p>
-            <p className="text-xs text-gray-600">
-              开锁次数 {unlockCount} / 剩余 {unlockCount}
-            </p>
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs"
-              onClick={handleCopy}
-            >
-              <Copy className="size-3.5" />
-              {copied ? "已复制" : "复制密码"}
-            </button>
+        {success ? (
+          <div className="mt-4 space-y-4">
+            <div className="flex gap-3 rounded-xl bg-green-50 p-4">
+              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-green-600" />
+              <p className="text-sm leading-relaxed text-gray-700">
+                密码已生成（人脸门禁不下发短信）。请前往
+                <span className="font-medium">【我的申请记录】</span>
+                的
+                <span className="font-medium">开锁申请</span>
+                查看密码。
+              </p>
+            </div>
             {createdApplyNo && (
-              <p className="text-[11px] text-gray-500">已写入我的申请记录 · {createdApplyNo}</p>
+              <p className="text-xs text-gray-500">申请单号：{createdApplyNo}</p>
             )}
-            <div className="mt-2 flex gap-2">
-              {createdApplyNo && (
-                <button
-                  type="button"
-                  className="flex-1 rounded-xl border border-blue-200 py-3 text-sm font-medium text-blue-600"
-                  onClick={() => {
-                    onClose()
-                    navigate(`/m/my-applies/unlock/${createdApplyNo}`)
-                  }}
-                >
-                  查看记录
-                </button>
-              )}
+            <div className="flex gap-2">
               <button
                 type="button"
-                className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-medium text-white"
+                className="flex-1 rounded-xl border border-gray-200 py-3 text-sm text-gray-700"
                 onClick={onClose}
               >
                 关闭
+              </button>
+              <button
+                type="button"
+                className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-medium text-white"
+                onClick={() => {
+                  onClose()
+                  navigate(
+                    createdApplyNo
+                      ? `/m/my-applies/unlock/${createdApplyNo}`
+                      : "/m/my-applies?tab=unlock-applies"
+                  )
+                }}
+              >
+                前往查看
               </button>
             </div>
           </div>
@@ -156,6 +143,24 @@ export function GetAccessPasswordSheet({
               </select>
             </label>
             <label className="block text-xs text-gray-600">
+              <span className="text-rose-500">*</span> 有效期
+              <div className="mt-1 flex items-center gap-2">
+                <input
+                  type="datetime-local"
+                  className="w-full rounded-lg border border-gray-200 px-2 py-2 text-sm"
+                  value={validFrom}
+                  onChange={(e) => setValidFrom(e.target.value)}
+                />
+                <span className="text-gray-400">至</span>
+                <input
+                  type="datetime-local"
+                  className="w-full rounded-lg border border-gray-200 px-2 py-2 text-sm"
+                  value={validTo}
+                  onChange={(e) => setValidTo(e.target.value)}
+                />
+              </div>
+            </label>
+            <label className="block text-xs text-gray-600">
               <span className="text-rose-500">*</span> 开锁次数
               <input
                 type="number"
@@ -166,26 +171,6 @@ export function GetAccessPasswordSheet({
                 onChange={(e) => setUnlockCount(e.target.value)}
               />
             </label>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="block text-xs text-gray-600">
-                开始
-                <input
-                  type="datetime-local"
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-2 py-2 text-xs"
-                  value={validFrom}
-                  onChange={(e) => setValidFrom(e.target.value)}
-                />
-              </label>
-              <label className="block text-xs text-gray-600">
-                结束
-                <input
-                  type="datetime-local"
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-2 py-2 text-xs"
-                  value={validTo}
-                  onChange={(e) => setValidTo(e.target.value)}
-                />
-              </label>
-            </div>
             <label className="block text-xs text-gray-600">
               备注
               <textarea
@@ -196,7 +181,9 @@ export function GetAccessPasswordSheet({
               />
             </label>
             {error && <p className="text-xs text-rose-600">{error}</p>}
-            <p className="text-[11px] text-gray-400">最长 24 小时；密码仅页面展示</p>
+            <p className="text-[11px] text-gray-400">
+              最长 24 小时；超过有效期凭证自动失效；请在【我的申请记录】查看密码
+            </p>
             <div className="flex gap-3 pt-2">
               <button
                 type="button"

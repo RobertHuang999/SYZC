@@ -165,7 +165,7 @@ export function MyUnlockApplyDetailPage() {
           <KeyValue label="事由" value={apply.reason} />
           {apply.remark && <KeyValue label="备注" value={apply.remark} />}
           {apply.expectedUseWindow && (
-            <KeyValue label="预计时段" value={apply.expectedUseWindow} />
+            <KeyValue label="有效期" value={apply.expectedUseWindow} />
           )}
           <KeyValue label="提交时间" value={formatDateTime(apply.submitTime)} />
         </SectionCard>

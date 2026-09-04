@@ -55,9 +55,6 @@ export function CredentialSection({
       {credential.validFrom && credential.validTo && (
         <DetailField label="密码有效期">
           {credential.validFrom.slice(0, 16)} ~ {credential.validTo.slice(0, 16)}
-          {apply.deviceType === "挂锁门禁" && (
-            <span className="ml-2 text-xs text-muted-foreground">（挂锁默认 3 天）</span>
-          )}
         </DetailField>
       )}
 

@@ -16,3 +16,6 @@ export const PAGE_SIZE = 10
 
 export const ORDER_WARNING_FOOTER_HINT =
   "物联穿透类订单预警不在此配置，由设备规则与空间穿透自动生成"
+
+/** 6.2 外部通知渠道枚举（与 03/02 设备预警配置一致） */
+export const NOTIFY_CHANNEL_OPTIONS = ["短信", "邮件"] as const

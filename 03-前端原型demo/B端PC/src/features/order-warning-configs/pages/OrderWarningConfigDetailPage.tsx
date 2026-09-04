@@ -23,6 +23,7 @@ import {
   ORDER_WARNING_CONFIG_STATUS_BADGE_CLASS,
 } from "../domain/actions"
 import {
+  formatNotifyChannels,
   getDetailHeaderActions,
   getOrderWarningConfigById,
 } from "../lib/detail-utils"
@@ -195,11 +196,9 @@ export function OrderWarningConfigDetailPage() {
                         "—"
                       )}
                     </DetailField>
-                    {strategy.notifyChannels && (
-                      <DetailField label="通知渠道">
-                        {strategy.notifyChannels.join("、")}
-                      </DetailField>
-                    )}
+                    <DetailField label="通知渠道">
+                      {formatNotifyChannels(strategy.notifyChannels)}
+                    </DetailField>
                     {strategy.notifyTargets && (
                       <DetailField label="预警对象">
                         {strategy.notifyTargets.join("、")}

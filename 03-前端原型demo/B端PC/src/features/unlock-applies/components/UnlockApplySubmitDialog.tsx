@@ -19,8 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { MY_APPLY_LIST_PATH } from "../domain/constants"
-import { REASON_OPTIONS } from "../domain/constants"
+import { MY_APPLY_LIST_PATH, REASON_OPTIONS } from "../domain/constants"
 
 export type UnlockApplySubmitContext = {
   deviceName: string
@@ -41,6 +40,23 @@ type SubmitResult = {
   applyNo: string
 } | null
 
+function defaultValidFrom(): string {
+  return "2026-08-28T14:00"
+}
+
+function defaultValidTo(): string {
+  return "2026-08-28T18:00"
+}
+
+function validateValidity(validFrom: string, validTo: string): string | null {
+  if (validFrom >= validTo) return "有效期结束时间须晚于开始时间"
+  const spanMs = new Date(validTo).getTime() - new Date(validFrom).getTime()
+  if (spanMs > 24 * 60 * 60 * 1000) {
+    return "密码有效期最大不得超过 24 小时"
+  }
+  return null
+}
+
 export function UnlockApplySubmitDialog({
   open,
   context,
@@ -50,10 +66,8 @@ export function UnlockApplySubmitDialog({
   const [reason, setReason] = useState("出库")
   const [remark, setRemark] = useState("")
   const [unlockCount, setUnlockCount] = useState("1")
-  const [validFrom, setValidFrom] = useState("2026-08-28T14:00")
-  const [validTo, setValidTo] = useState("2026-08-28T18:00")
-  const [windowStart, setWindowStart] = useState("2026-08-28T14:00")
-  const [windowEnd, setWindowEnd] = useState("2026-08-28T18:00")
+  const [validFrom, setValidFrom] = useState(defaultValidFrom())
+  const [validTo, setValidTo] = useState(defaultValidTo())
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<SubmitResult>(null)
   const [error, setError] = useState<string | null>(null)
@@ -63,10 +77,8 @@ export function UnlockApplySubmitDialog({
       setReason("出库")
       setRemark("")
       setUnlockCount("1")
-      setValidFrom("2026-08-28T14:00")
-      setValidTo("2026-08-28T18:00")
-      setWindowStart("2026-08-28T14:00")
-      setWindowEnd("2026-08-28T18:00")
+      setValidFrom(defaultValidFrom())
+      setValidTo(defaultValidTo())
       setSubmitting(false)
       setResult(null)
       setError(null)
@@ -77,25 +89,21 @@ export function UnlockApplySubmitDialog({
   const isFaceDevice = context?.deviceType === "人脸门禁"
 
   const handleSubmit = () => {
-    if (windowStart > windowEnd) {
-      setError("预计使用时段开始时间不能晚于结束时间")
+    const validityError = validateValidity(validFrom, validTo)
+    if (validityError) {
+      setError(validityError)
       return
     }
-    if (!isLockDevice) {
+    if (isFaceDevice) {
       const count = Number(unlockCount)
       if (!Number.isInteger(count) || count < 1 || count > 100) {
         setError("开锁次数须为 1~100 的整数")
         return
       }
-      if (validFrom >= validTo) {
-        setError("有效期结束时间须晚于开始时间")
-        return
-      }
-      const spanMs = new Date(validTo).getTime() - new Date(validFrom).getTime()
-      if (spanMs > 24 * 60 * 60 * 1000) {
-        setError("密码有效期最大不得超过 24 小时")
-        return
-      }
+    }
+    if (remark.length > 50) {
+      setError("备注最多 50 字")
+      return
     }
     setError(null)
     setSubmitting(true)
@@ -191,6 +199,65 @@ export function UnlockApplySubmitDialog({
               </div>
 
               <div className="space-y-2">
+                <Label>
+                  <span className="text-destructive mr-1">*</span>
+                  有效期
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="datetime-local"
+                    value={validFrom}
+                    onChange={(e) => setValidFrom(e.target.value)}
+                  />
+                  <span className="text-muted-foreground">至</span>
+                  <Input
+                    type="datetime-local"
+                    value={validTo}
+                    onChange={(e) => setValidTo(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {isFaceDevice && (
+                <div className="space-y-2">
+                  <Label>
+                    <span className="text-destructive mr-1">*</span>
+                    开锁次数
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon-sm"
+                      onClick={() =>
+                        setUnlockCount(String(Math.max(1, Number(unlockCount) - 1)))
+                      }
+                    >
+                      −
+                    </Button>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={unlockCount}
+                      onChange={(e) => setUnlockCount(e.target.value)}
+                      className="text-center"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon-sm"
+                      onClick={() =>
+                        setUnlockCount(String(Math.min(100, Number(unlockCount) + 1)))
+                      }
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
                 <Label>备注</Label>
                 <textarea
                   className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -203,70 +270,12 @@ export function UnlockApplySubmitDialog({
                   {remark.length}/50
                 </p>
               </div>
-
-              {isFaceDevice && (
-                <>
-                  <div className="space-y-2">
-                    <Label>
-                      <span className="text-destructive mr-1">*</span>
-                      开锁次数
-                    </Label>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={100}
-                      value={unlockCount}
-                      onChange={(e) => setUnlockCount(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>
-                      <span className="text-destructive mr-1">*</span>
-                      有效期
-                    </Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="datetime-local"
-                        value={validFrom}
-                        onChange={(e) => setValidFrom(e.target.value)}
-                      />
-                      <span className="text-muted-foreground">至</span>
-                      <Input
-                        type="datetime-local"
-                        value={validTo}
-                        onChange={(e) => setValidTo(e.target.value)}
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground">最长 24 小时</p>
-                  </div>
-                </>
-              )}
-
-              <div className="space-y-2">
-                <Label>
-                  <span className="text-destructive mr-1">*</span>
-                  预计使用时段
-                </Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="datetime-local"
-                    value={windowStart}
-                    onChange={(e) => setWindowStart(e.target.value)}
-                  />
-                  <span className="text-muted-foreground">至</span>
-                  <Input
-                    type="datetime-local"
-                    value={windowEnd}
-                    onChange={(e) => setWindowEnd(e.target.value)}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  仅供审批参考，不替代凭证有效期
-                </p>
-                {error && <p className="text-xs text-destructive">{error}</p>}
-              </div>
             </div>
 
+            <p className="text-xs text-muted-foreground">
+              最长有效期 24 小时；超过有效期凭证自动失效
+            </p>
+            {error && <p className="text-xs text-destructive">{error}</p>}
             <p className="text-xs text-muted-foreground">{submitHint}</p>
 
             <DialogFooter>

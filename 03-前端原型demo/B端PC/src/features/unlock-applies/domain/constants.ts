@@ -18,7 +18,6 @@ export const UNLOCK_APPLY_STATUS_LABEL: Record<UnlockApplyStatus, string> = {
   REJECTED: "已驳回",
   WITHDRAWN: "已撤回",
   EXPIRED: "已失效",
-  VOIDED: "已作废",
 }
 
 export const CREDENTIAL_STATUS_LABEL: Record<CredentialStatus, string> = {
@@ -47,7 +46,6 @@ export const APPLY_STATUS_FILTER_OPTIONS: ApplyStatusFilter[] = [
   "已驳回",
   "已撤回",
   "已失效",
-  "已作废",
 ]
 
 export const MY_APPLY_STATUS_OPTIONS: UnlockApplyStatus[] = [
@@ -56,7 +54,6 @@ export const MY_APPLY_STATUS_OPTIONS: UnlockApplyStatus[] = [
   "REJECTED",
   "WITHDRAWN",
   "EXPIRED",
-  "VOIDED",
 ]
 
 export const MY_CREDENTIAL_STATUS_OPTIONS: CredentialStatus[] = [
@@ -89,7 +86,6 @@ export const DEFAULT_MY_UNLOCK_APPLY_FILTERS: MyUnlockApplyFilters = {
   deviceType: "全部",
   warehouseName: "全部",
   reason: "全部",
-  applicantKeyword: "",
   configNo: "",
 }
 
@@ -98,5 +94,4 @@ export const PROCESSED_STATUSES: UnlockApplyStatus[] = [
   "REJECTED",
   "WITHDRAWN",
   "EXPIRED",
-  "VOIDED",
 ]

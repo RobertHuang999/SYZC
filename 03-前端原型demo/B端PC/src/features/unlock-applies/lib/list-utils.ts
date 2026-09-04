@@ -14,7 +14,6 @@ const STATUS_FILTER_TO_CODE: Record<
   已驳回: ["REJECTED"],
   已撤回: ["WITHDRAWN"],
   已失效: ["EXPIRED"],
-  已作废: ["VOIDED"],
 }
 
 export function filterUnlockApplies(

@@ -165,16 +165,16 @@ export function AccessControlDeviceListPage() {
             open={lockDialogOpen}
             context={lockContext}
             onOpenChange={setLockDialogOpen}
-            onDirectSuccess={(applyNo) =>
-              showToast(`免审获取密码成功，已写入我的开锁申请（${applyNo}）`)
+            onDirectSuccess={() =>
+              showToast("密码已生成，请前往【我的申请记录】的开锁申请查看密码")
             }
           />
           <GetAccessPasswordDialog
             open={accessDialogOpen}
             context={accessContext}
             onOpenChange={setAccessDialogOpen}
-            onDirectSuccess={(applyNo) =>
-              showToast(`免审获取密码成功，已写入我的开锁申请（${applyNo}）`)
+            onDirectSuccess={() =>
+              showToast("密码已生成，请前往【我的申请记录】的开锁申请查看密码")
             }
           />
         </PrototypeAnnotationTarget>

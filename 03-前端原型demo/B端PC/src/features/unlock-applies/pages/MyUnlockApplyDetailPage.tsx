@@ -201,11 +201,8 @@ export function MyUnlockApplyDetailPage() {
             <DetailField label="事由">{apply.reason}</DetailField>
             <DetailField label="备注">{formatEmptyValue(apply.remark)}</DetailField>
             {apply.needsApproval && (
-              <DetailField label="预计使用时段">
-                <span>{formatEmptyValue(apply.expectedUseWindow)}</span>
-                <span className="mt-1 block text-xs text-muted-foreground">
-                  仅供审批参考
-                </span>
+              <DetailField label="有效期">
+                {formatEmptyValue(apply.expectedUseWindow)}
               </DetailField>
             )}
           </DetailSection>

@@ -36,14 +36,16 @@ export function createDirectLockUnlockApply(params: {
   context: AccessDevicePasswordContext
   reason: string
   remark?: string
+  validFrom: string
+  validTo: string
 }): UnlockApply {
   const now = new Date()
   const submitTime = formatDateTime(now)
-  const validFrom = submitTime.slice(0, 16)
-  const validToDate = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
-  const validTo = formatDateTime(validToDate).slice(0, 16)
+  const validFrom = params.validFrom.replace("T", " ")
+  const validTo = params.validTo.replace("T", " ")
   const applyNo = generateDirectApplyNo()
   const credentialNo = `CRED-${applyNo.replace("UA", "")}`
+  const expectedUseWindow = `${validFrom.slice(0, 16)} ~ ${validTo.slice(0, 16)}`
 
   return {
     applyNo,
@@ -55,6 +57,7 @@ export function createDirectLockUnlockApply(params: {
     locationDetail: params.context.locationDetail,
     reason: params.reason,
     remark: params.remark,
+    expectedUseWindow,
     status: "APPROVED",
     submitTime,
     configSnapshot: emptyConfig,
@@ -86,6 +89,9 @@ export function createDirectFaceUnlockApply(params: {
   const submitTime = formatDateTime(now)
   const applyNo = generateDirectApplyNo()
   const credentialNo = `CRED-${applyNo.replace("UA", "")}`
+  const validFrom = params.validFrom.replace("T", " ")
+  const validTo = params.validTo.replace("T", " ")
+  const expectedUseWindow = `${validFrom.slice(0, 16)} ~ ${validTo.slice(0, 16)}`
 
   return {
     applyNo,
@@ -97,6 +103,7 @@ export function createDirectFaceUnlockApply(params: {
     locationDetail: params.context.locationDetail,
     reason: params.reason,
     remark: params.remark,
+    expectedUseWindow,
     status: "APPROVED",
     submitTime,
     configSnapshot: emptyConfig,
@@ -107,8 +114,8 @@ export function createDirectFaceUnlockApply(params: {
       status: "DELIVERED",
       password: "856778",
       passwordMasked: "856778",
-      validFrom: params.validFrom.replace("T", " "),
-      validTo: params.validTo.replace("T", " "),
+      validFrom,
+      validTo,
     },
     eligible: false,
     needsApproval: false,

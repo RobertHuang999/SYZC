@@ -274,4 +274,11 @@ export function buildTimeoutRowsForOrder(
   return createTimeoutRowsFromBatches(order.goodsBatches, existingRows)
 }
 
+export function formatNotifyChannels(channels: string[] | undefined): string {
+  if (!channels || channels.length === 0) {
+    return "—"
+  }
+  return channels.join("、")
+}
+
 export { formatTimeoutRowsForDetail }

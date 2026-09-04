@@ -38,7 +38,7 @@ export function UnlockApplyListPage() {
       if (filters.status === "待审批" && item.status !== "PENDING") return false
       if (
         filters.status === "已处理" &&
-        !["APPROVED", "REJECTED", "WITHDRAWN", "EXPIRED", "VOIDED"].includes(item.status)
+        !["APPROVED", "REJECTED", "WITHDRAWN", "EXPIRED"].includes(item.status)
       ) {
         return false
       }

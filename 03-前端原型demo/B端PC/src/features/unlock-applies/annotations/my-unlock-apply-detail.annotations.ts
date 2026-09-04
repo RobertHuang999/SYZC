@@ -21,7 +21,7 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "撤回主操作 (Withdraw)",
             content:
-              "仅在申请状态为 **待审批（PENDING）** 且属于需审批单据时展示【撤回】按钮；其他终态（已通过/已驳回/已撤回/已失效/已作废）全只读展示。",
+              "仅在申请状态为 **待审批（PENDING）** 且属于需审批单据时展示【撤回】按钮；其他终态（已通过/已驳回/已撤回/已失效）全只读展示。",
           },
         ],
       },
@@ -47,7 +47,7 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "申请状态与凭证状态双 Tag",
             content:
-              "申请状态反映审核生命周期（待审批/已通过/已驳回/已撤回/已失效/已作废）；凭证状态反映开门密码生命周期（未生成/已下发/生成失败/已过期/已失效）。",
+              "申请状态反映审核生命周期（待审批/已通过/已驳回/已撤回/已失效）；凭证状态反映开门密码生命周期（未生成/已下发/生成失败/已过期/已失效）。复核或密码服务失败时申请保持已通过、凭证=生成失败。",
           },
         ],
       },
@@ -80,7 +80,7 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
     kind: "字段",
     title: "申请内容与所属合作机构",
     content:
-      "展示申请人姓名、申请人所属机构、脱敏手机号、开锁事由、补充备注及预计使用时段。",
+      "展示申请人姓名、申请人所属机构、脱敏手机号、开锁事由、补充备注及有效期。",
     details: [
       {
         title: "字段与安全规范",
@@ -90,8 +90,8 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
             content: "展示申请人所归属的合作机构全称（如「浙商监管部」），便于多方协同追溯。",
           },
           {
-            label: "预计使用时段",
-            content: "仅供审批人评估参考，不强制作为物理开锁密码的有效期硬性约束。",
+            label: "有效期",
+            content: "与发起申请弹窗一致的有效起止时间；超过结束时间凭证自动失效。",
           },
         ],
       },

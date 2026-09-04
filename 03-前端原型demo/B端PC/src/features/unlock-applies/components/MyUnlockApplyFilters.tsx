@@ -274,16 +274,6 @@ export function MyUnlockApplyFiltersPanel({
               </Select>
             </FilterField>
 
-            <FilterField label="申请人">
-              <Input
-                placeholder="模糊匹配姓名或账号"
-                value={value.applicantKeyword}
-                onChange={(event) =>
-                  onChange({ ...value, applicantKeyword: event.target.value })
-                }
-              />
-            </FilterField>
-
             <FilterField label="配置编号">
               <Input
                 placeholder="精确匹配"
