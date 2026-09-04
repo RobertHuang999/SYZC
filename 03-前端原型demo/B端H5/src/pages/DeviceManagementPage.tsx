@@ -663,17 +663,11 @@ export function DeviceManagementPage() {
               open={lockOpen}
               context={lockContext}
               onClose={() => setLockOpen(false)}
-              onDirectSuccess={() =>
-                setToast("密码已生成，请前往【我的申请记录】的开锁申请查看密码")
-              }
             />
             <GetAccessPasswordSheet
               open={accessOpen}
               context={accessContext}
               onClose={() => setAccessOpen(false)}
-              onDirectSuccess={() =>
-                setToast("密码已生成，请前往【我的申请记录】的开锁申请查看密码")
-              }
             />
           </PrototypeAnnotationTarget>
         </div>

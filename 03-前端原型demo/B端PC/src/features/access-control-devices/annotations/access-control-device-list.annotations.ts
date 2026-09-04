@@ -103,7 +103,7 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "挂锁免审",
-            content: "表单含事由 + 有效期（与人脸一致，最长 24h）；提交成功后引导至【我的申请记录】·开锁申请查看密码，弹窗内不展示明文。",
+            content: "表单含事由 + 有效期（与人脸一致，最长 24h）；提交成功后展示结果摘要并引导【查看申请详情】，弹窗内不展示明文。",
           },
         ],
       },
@@ -112,7 +112,7 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "人脸免审",
-            content: "表单含事由 → **有效期** → 开锁次数 → 备注；提交成功后引导至【我的申请记录】查看密码（R31 不下发短信）。",
+            content: "表单含事由 → **有效期** → 开锁次数 → 备注；提交成功后展示结果摘要并引导【查看申请详情】（R31 不下发短信）。",
           },
         ],
       },

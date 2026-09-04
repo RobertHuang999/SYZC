@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { ShieldAlert } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -63,6 +63,7 @@ export function UnlockApplySubmitDialog({
   onOpenChange,
   onSubmitSuccess,
 }: UnlockApplySubmitDialogProps) {
+  const navigate = useNavigate()
   const [reason, setReason] = useState("出库")
   const [remark, setRemark] = useState("")
   const [unlockCount, setUnlockCount] = useState("1")
@@ -122,11 +123,17 @@ export function UnlockApplySubmitDialog({
   if (!context) return null
 
   const successHint = isLockDevice
-    ? "请等待审批，审批通过后将短信下发临时密码"
-    : "请等待审批，审批通过后可在详情页查看临时密码"
+    ? "请等待审批；审批通过后将短信下发临时密码。"
+    : "请等待审批；审批通过后在详情页查看临时密码（不下发短信）。"
   const submitHint = isLockDevice
     ? "提交后将创建开锁申请，审批通过后短信下发临时密码"
     : "提交后将创建开锁申请，审批通过后在详情页查看临时密码（人脸门禁不下发短信）"
+
+  const handleViewDetail = () => {
+    if (!result) return
+    navigate(`${MY_APPLY_LIST_PATH}?tab=unlock-applies&applyNo=${result.applyNo}`)
+    handleClose()
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -152,11 +159,7 @@ export function UnlockApplySubmitDialog({
               </div>
             </div>
             <DialogFooter className="gap-2 sm:gap-0">
-              <Link
-                to={`${MY_APPLY_LIST_PATH}?tab=unlock-applies&applyNo=${result.applyNo}`}
-              >
-                <Button onClick={handleClose}>查看申请详情</Button>
-              </Link>
+              <Button onClick={handleViewDetail}>查看申请详情</Button>
               <Button variant="outline" onClick={handleClose}>
                 返回设备列表
               </Button>

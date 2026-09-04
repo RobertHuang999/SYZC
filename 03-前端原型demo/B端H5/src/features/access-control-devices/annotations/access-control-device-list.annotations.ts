@@ -112,11 +112,11 @@ export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "GetLockPasswordSheet",
-            content: "挂锁免审：事由 + 有效期（最长 24h）；提交成功后引导至【我的申请记录】·开锁申请查看密码（后台发短信，Sheet 内不展示明文）。",
+            content: "挂锁免审：事由 + 有效期（最长 24h）；提交成功后展示结果摘要（申请单号/状态/凭证状态），引导点击【查看申请详情】，弹窗内不展示明文。",
           },
           {
             label: "GetAccessPasswordSheet",
-            content: "人脸免审：事由 → 有效期 → 开锁次数 → 备注；提交成功后同样引导至【我的申请记录】查看密码（R31 不下发短信）。",
+            content: "人脸免审：事由 → 有效期 → 开锁次数 → 备注；提交成功后同样展示结果摘要并引导【查看申请详情】（R31 不下发短信）。",
           },
         ],
       },

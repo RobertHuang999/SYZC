@@ -76,8 +76,8 @@ export function UnlockApplySubmitSheet({ open, context, onClose }: UnlockApplySu
             <h2 className="text-base font-semibold text-gray-900">开锁申请已提交</h2>
             <p className="mt-2 text-xs text-gray-500">
               {isLock
-                ? "请等待审批，审批通过后将短信下发临时密码"
-                : "请等待审批，审批通过后可在详情页查看临时密码"}
+                ? "请等待审批；审批通过后将短信下发临时密码。"
+                : "请等待审批；审批通过后在详情页查看临时密码（不下发短信）。"}
             </p>
             <div className="mt-4 space-y-2 rounded-xl bg-gray-50 p-3 text-sm">
               <div className="flex justify-between">
@@ -88,14 +88,18 @@ export function UnlockApplySubmitSheet({ open, context, onClose }: UnlockApplySu
                 <span className="text-gray-500">申请状态</span>
                 <span>待审批</span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">凭证状态</span>
+                <span>未生成</span>
+              </div>
             </div>
             <div className="mt-4 flex flex-col gap-2">
               <button
                 type="button"
                 className="w-full rounded-xl bg-blue-600 py-3 text-sm font-medium text-white"
                 onClick={() => {
-                  onClose()
                   navigate(`/m/my-applies/unlock/${applyNo}`)
+                  onClose()
                 }}
               >
                 查看申请详情

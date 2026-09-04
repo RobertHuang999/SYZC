@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
-import { CheckCircle2 } from "lucide-react"
-import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -29,10 +28,9 @@ type GetAccessPasswordDialogProps = {
   open: boolean
   context: AccessDevicePasswordContext | null
   onOpenChange: (open: boolean) => void
-  onDirectSuccess?: (applyNo: string) => void
 }
 
-type DialogState = "form" | "success" | "error"
+type DialogState = "form" | "success"
 
 function defaultValidFrom(): string {
   return "2026-08-31T14:00"
@@ -46,8 +44,8 @@ export function GetAccessPasswordDialog({
   open,
   context,
   onOpenChange,
-  onDirectSuccess,
 }: GetAccessPasswordDialogProps) {
+  const navigate = useNavigate()
   const [state, setState] = useState<DialogState>("form")
   const [reason, setReason] = useState("入库")
   const [unlockCount, setUnlockCount] = useState("3")
@@ -73,6 +71,10 @@ export function GetAccessPasswordDialog({
   }, [open])
 
   if (!context) return null
+
+  const handleClose = () => {
+    onOpenChange(false)
+  }
 
   const validate = (): string | null => {
     if (!reason) return "请选择事由"
@@ -108,7 +110,6 @@ export function GetAccessPasswordDialog({
       })
       addUnlockApply(record)
       setCreatedApplyNo(record.applyNo)
-      onDirectSuccess?.(record.applyNo)
       setSubmitting(false)
       setState("success")
     }, 600)
@@ -118,38 +119,42 @@ export function GetAccessPasswordDialog({
     ? `${MY_APPLY_LIST_PATH}?tab=unlock-applies&applyNo=${createdApplyNo}`
     : `${MY_APPLY_LIST_PATH}?tab=unlock-applies`
 
+  const handleViewDetail = () => {
+    if (!createdApplyNo) return
+    navigate(detailHref)
+    handleClose()
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[480px]">
-        {state === "success" ? (
+        {state === "success" && createdApplyNo ? (
           <>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <CheckCircle2 className="size-5 text-green-600" />
-                密码已生成
-              </DialogTitle>
-              <DialogDescription className="pt-2 leading-relaxed">
-                密码已生成（人脸门禁不下发短信）。请前往
-                <span className="font-medium text-foreground">【我的申请记录】</span>
-                的
-                <span className="font-medium text-foreground">开锁申请</span>
-                查看密码。
+              <DialogTitle>开锁凭证已生成</DialogTitle>
+              <DialogDescription>
+                临时密码已生成，请点击下方按钮在详情页查看（人脸门禁不下发短信）。
               </DialogDescription>
             </DialogHeader>
-            {createdApplyNo && (
-              <p className="text-xs text-muted-foreground">申请单号：{createdApplyNo}</p>
-            )}
+            <div className="space-y-3 py-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">申请单号</span>
+                <span className="font-mono font-medium">{createdApplyNo}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">申请状态</span>
+                <span>已通过</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">凭证状态</span>
+                <span>已下发</span>
+              </div>
+            </div>
             <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                关闭
+              <Button onClick={handleViewDetail}>查看申请详情</Button>
+              <Button variant="outline" onClick={handleClose}>
+                返回设备列表
               </Button>
-              <Link
-                to={detailHref}
-                onClick={() => onOpenChange(false)}
-                className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-              >
-                前往查看
-              </Link>
             </DialogFooter>
           </>
         ) : (
@@ -255,16 +260,16 @@ export function GetAccessPasswordDialog({
             </div>
 
             <p className="text-xs text-muted-foreground">
-              最长有效期 24 小时；超过有效期凭证自动失效；请在【我的申请记录】查看密码
+              提交后可在【我的申请记录】查看密码；最长有效期 24 小时；人脸门禁不下发短信
             </p>
             {errorMessage && <p className="text-xs text-destructive">{errorMessage}</p>}
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" onClick={handleClose}>
                 取消
               </Button>
               <Button disabled={submitting} onClick={handleSubmit}>
-                {submitting ? "获取中…" : "获取密码"}
+                {submitting ? "提交中…" : "获取密码"}
               </Button>
             </DialogFooter>
           </>
