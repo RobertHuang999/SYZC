@@ -49,7 +49,7 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "处置策略 (disposition_mode)",
-            content: "Badge 展示：触发即结案 / 人工解除结案 / 恢复自动结案；决定 02/01 流水落账方式。",
+            content: "Badge 展示：触发即结案 / 人工解除结案 / 恢复自动结案；固化入 02/01 规则快照，决定落账初态与 R14'/R03 结案路径。",
           },
         ],
       },

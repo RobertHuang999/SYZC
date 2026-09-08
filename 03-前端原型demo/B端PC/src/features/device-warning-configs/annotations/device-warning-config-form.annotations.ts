@@ -37,7 +37,7 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     number: 2,
     kind: "字段",
     title: "基本信息与预警等级选择",
-    content: "规则名称必填、预警类型联动子类型枚举、预警等级读取 03/01 启用字典；设备上线须单独成规则（R14）；处置策略三档均可自由配置，chip 为系统推荐默认。",
+    content: "规则名称必填、预警类型联动子类型枚举、预警等级读取 03/01 启用字典；设备上线须单独成规则（R14）；处置策略三档可配，chip=系统推荐；R15c 白名单外子类型禁止恢复自动结案。",
     details: [
       {
         title: "字段字典清单与校验规范",
@@ -56,7 +56,7 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "处置策略 (disposition_mode) · 必填",
-            content: "枚举：RECORD_ONLY=触发即结案 / ACTION_REQUIRED=人工解除结案 / AUTO_RECOVER=恢复自动结案。三档均写入设备预警信息；差异为落账状态与结案方式。子类型 chip=系统推荐默认；偏离推荐保存二次确认（R15）；RECORD_ONLY 禁配升级（R15a）；安防/图像/挂锁破坏/密码错误禁止 AUTO_RECOVER（R15c）。",
+            content: "枚举：RECORD_ONLY=触发即结案 / ACTION_REQUIRED=人工解除结案 / AUTO_RECOVER=恢复自动结案。R15c 白名单：仅传感器/GPS/设备离线等具 R03 恢复信号的子类型可选 AUTO_RECOVER；通知/安防/图像/事务类禁止自动（见 disposition 能力矩阵）。",
           },
           {
             label: "子类型约束 (R14)",

@@ -26,11 +26,18 @@ export const DISPOSITION_MODE_HINTS: Record<DispositionMode, string> = {
   ACTION_REQUIRED:
     "写入设备预警信息；初态「待处置 · 有效」，须人工解除后「已结案 · 有效」，支持超时升级（R14'）",
   AUTO_RECOVER:
-    "写入设备预警信息；初态「待处置 · 有效」，采集/设备恢复后系统自动「已结案 · 有效」，不可人工解除（R03/R17）",
+    "写入设备预警信息；初态「待处置 · 有效」，满足 02/01 R03 恢复信号后系统自动「已结案 · 有效」，不可人工解除",
 }
 
-const NOTIFY_SUB_TYPES = ["开锁通知", "关锁通知", "设备上线", "设备移除"] as const
+/** 通知/上线类 · 系统推荐触发即结案（R06'） */
+export const NOTIFY_SUB_TYPES = [
+  "开锁通知",
+  "关锁通知",
+  "设备上线",
+  "设备移除",
+] as const
 
+/** 传感器环境类 · R03 数值/烟感恢复 */
 const SENSOR_SUB_TYPES = [
   "温度异常",
   "湿度异常",
@@ -39,7 +46,27 @@ const SENSOR_SUB_TYPES = [
   "氧气异常",
 ] as const
 
-const SECURITY_SUB_TYPES = [
+/** GPS 围栏/限速类 · R03 GPS 正常/回到合法状态 */
+const GPS_AUTO_RECOVER_SUB_TYPES = [
+  "进围栏",
+  "出围栏",
+  "普通限速",
+  "怠速滞留",
+  "路线偏离",
+] as const
+
+/**
+ * R15c 白名单：仅下列子类型存在 02/01 R03 明确恢复信号，允许「恢复自动结案」。
+ * 其余子类型禁止 AUTO_RECOVER，避免落账后无 R03/R04 闭环。
+ */
+export const AUTO_RECOVER_ALLOWED_SUB_TYPES = [
+  ...SENSOR_SUB_TYPES,
+  "设备离线",
+  ...GPS_AUTO_RECOVER_SUB_TYPES,
+] as const
+
+/** 安防/破坏/图像/事务类 · 系统推荐人工解除 */
+const ACTION_REQUIRED_SUB_TYPES = [
   "拆壳",
   "锁舌被卡",
   "锁杆被剪",
@@ -51,27 +78,268 @@ const SECURITY_SUB_TYPES = [
   "车辆入侵",
   "物品形态变化",
   "非法拆除",
-  "怠速滞留",
-  "路线偏离",
-] as const
-
-/** R15c：无 02/01 R03 自动恢复信号的子类型，禁止 AUTO_RECOVER */
-export const AUTO_RECOVER_FORBIDDEN_SUB_TYPES = [
-  ...SECURITY_SUB_TYPES,
   "密码错误",
+  "电量低于20%",
 ] as const
 
-export function getAutoRecoverForbiddenSubTypes(subTypes: string[]): string[] {
+export type SubTypeDispositionCapability = {
+  recommended: DispositionMode
+  autoRecoverAllowed: boolean
+  r03Signal: string
+}
+
+/** 附录 A · 子类型 × disposition 能力（与 constants.ts 枚举对齐） */
+export const SUB_TYPE_DISPOSITION_BY_CATEGORY: Record<
+  string,
+  Record<string, SubTypeDispositionCapability>
+> = {
+  设备图像识别预警: {
+    行人入侵: {
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（须人工核查）",
+    },
+    车辆入侵: {
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（须人工核查）",
+    },
+    物品形态变化: {
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（须人工核查）",
+    },
+    设备离线: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "设备重新上线",
+    },
+    设备上线: {
+      recommended: "RECORD_ONLY",
+      autoRecoverAllowed: false,
+      r03Signal: "无（触发即完成）",
+    },
+    设备移除: {
+      recommended: "RECORD_ONLY",
+      autoRecoverAllowed: false,
+      r03Signal: "无（不设配置子类型）",
+    },
+  },
+  设备物联预警: {
+    温度异常: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "采集值回到阈值内并稳定 1 分钟",
+    },
+    湿度异常: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "采集值回到阈值内并稳定 1 分钟",
+    },
+    烟感异常: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "烟感恢复事件",
+    },
+    二氧化碳异常: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "采集值回到阈值内并稳定 1 分钟",
+    },
+    氧气异常: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "采集值回到阈值内并稳定 1 分钟",
+    },
+    设备离线: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "设备重新上线",
+    },
+    设备上线: {
+      recommended: "RECORD_ONLY",
+      autoRecoverAllowed: false,
+      r03Signal: "无（触发即完成）",
+    },
+    设备移除: {
+      recommended: "RECORD_ONLY",
+      autoRecoverAllowed: false,
+      r03Signal: "无（不设配置子类型）",
+    },
+  },
+  智能挂锁预警: {
+    拆壳: {
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（须人工核查）",
+    },
+    锁舌被卡: {
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（须人工核查）",
+    },
+    锁杆被剪: {
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（须人工核查）",
+    },
+    非法开箱: {
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（须人工核查）",
+    },
+    拆卡报警: {
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（须人工核查）",
+    },
+    密码错误: {
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（须人工核查）",
+    },
+    关锁异常: {
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（须人工核查）",
+    },
+    "电量低于20%": {
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无 R03 电量恢复（须人工或换电后人工解除）",
+    },
+    开锁通知: {
+      recommended: "RECORD_ONLY",
+      autoRecoverAllowed: false,
+      r03Signal: "无（不与关锁配对结案）",
+    },
+    关锁通知: {
+      recommended: "RECORD_ONLY",
+      autoRecoverAllowed: false,
+      r03Signal: "无（不与开锁配对结案）",
+    },
+    设备上线: {
+      recommended: "RECORD_ONLY",
+      autoRecoverAllowed: false,
+      r03Signal: "无（触发即完成）",
+    },
+    设备移除: {
+      recommended: "RECORD_ONLY",
+      autoRecoverAllowed: false,
+      r03Signal: "无（不设配置子类型）",
+    },
+  },
+  人脸门禁预警: {
+    门未关: {
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无 R03 门关闭信号（须人工解除）",
+    },
+    密码错误: {
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（须人工核查）",
+    },
+    设备离线: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "设备重新上线",
+    },
+    开锁通知: {
+      recommended: "RECORD_ONLY",
+      autoRecoverAllowed: false,
+      r03Signal: "无（不与关锁配对结案）",
+    },
+    关锁通知: {
+      recommended: "RECORD_ONLY",
+      autoRecoverAllowed: false,
+      r03Signal: "无（不与开锁配对结案）",
+    },
+    设备上线: {
+      recommended: "RECORD_ONLY",
+      autoRecoverAllowed: false,
+      r03Signal: "无（触发即完成）",
+    },
+    设备移除: {
+      recommended: "RECORD_ONLY",
+      autoRecoverAllowed: false,
+      r03Signal: "无（不设配置子类型）",
+    },
+  },
+  设备GPS预警: {
+    进围栏: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "GPS 回到围栏合法状态",
+    },
+    出围栏: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "GPS 回到围栏合法状态",
+    },
+    普通限速: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "GPS 速度恢复正常",
+    },
+    怠速滞留: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "GPS 滞留条件解除",
+    },
+    路线偏离: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "GPS 回到规划路线",
+    },
+    非法拆除: {
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（须人工核查）",
+    },
+    设备离线: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "设备重新上线",
+    },
+    设备上线: {
+      recommended: "RECORD_ONLY",
+      autoRecoverAllowed: false,
+      r03Signal: "无（触发即完成）",
+    },
+    设备移除: {
+      recommended: "RECORD_ONLY",
+      autoRecoverAllowed: false,
+      r03Signal: "无（不设配置子类型）",
+    },
+  },
+}
+
+export function isAutoRecoverAllowedForSubType(subType: string): boolean {
+  return (AUTO_RECOVER_ALLOWED_SUB_TYPES as readonly string[]).includes(
+    subType.trim()
+  )
+}
+
+/** 所选子类型中不允许 AUTO_RECOVER 的项（R15c） */
+export function getAutoRecoverIneligibleSubTypes(subTypes: string[]): string[] {
   return subTypes
     .map((item) => item.trim())
     .filter(Boolean)
-    .filter((subType) =>
-      (AUTO_RECOVER_FORBIDDEN_SUB_TYPES as readonly string[]).includes(subType)
-    )
+    .filter((subType) => !isAutoRecoverAllowedForSubType(subType))
+}
+
+/** @deprecated 使用 getAutoRecoverIneligibleSubTypes */
+export function getAutoRecoverForbiddenSubTypes(subTypes: string[]): string[] {
+  return getAutoRecoverIneligibleSubTypes(subTypes)
 }
 
 export function canSelectAutoRecoverDisposition(subTypes: string[]): boolean {
-  return getAutoRecoverForbiddenSubTypes(subTypes).length === 0
+  const normalized = subTypes.map((item) => item.trim()).filter(Boolean)
+  if (normalized.length === 0) {
+    return false
+  }
+  return getAutoRecoverIneligibleSubTypes(normalized).length === 0
 }
 
 export function validateAutoRecoverDisposition(
@@ -81,31 +349,23 @@ export function validateAutoRecoverDisposition(
   if (mode !== "AUTO_RECOVER") {
     return null
   }
-  const forbidden = getAutoRecoverForbiddenSubTypes(subTypes)
-  if (forbidden.length === 0) {
+  const ineligible = getAutoRecoverIneligibleSubTypes(subTypes)
+  if (ineligible.length === 0) {
     return null
   }
-  return `子类型「${forbidden.join("、")}」无自动恢复信号，不可选择「${DISPOSITION_MODE_LABELS.AUTO_RECOVER}」（R15c）`
+  return `子类型「${ineligible.join("、")}」无 02/01 R03 自动恢复信号，不可选择「${DISPOSITION_MODE_LABELS.AUTO_RECOVER}」（R15c）`
 }
 
-/** 单个子类型的系统推荐（非强制，用户可改） */
+/** 单个子类型的系统推荐（非强制，用户可改；AUTO_RECOVER 仍受 R15c 白名单约束） */
 export function getRecommendedDispositionForSubType(subType: string): DispositionMode {
-  if ((NOTIFY_SUB_TYPES as readonly string[]).includes(subType)) {
+  const normalized = subType.trim()
+  if ((NOTIFY_SUB_TYPES as readonly string[]).includes(normalized)) {
     return "RECORD_ONLY"
   }
-  if ((SENSOR_SUB_TYPES as readonly string[]).includes(subType)) {
+  if (isAutoRecoverAllowedForSubType(normalized)) {
     return "AUTO_RECOVER"
   }
-  if (subType === "设备离线") {
-    return "AUTO_RECOVER"
-  }
-  if (["进围栏", "出围栏", "普通限速", "电量低于20%"].includes(subType)) {
-    return "AUTO_RECOVER"
-  }
-  if ((SECURITY_SUB_TYPES as readonly string[]).includes(subType)) {
-    return "ACTION_REQUIRED"
-  }
-  if (subType === "密码错误") {
+  if ((ACTION_REQUIRED_SUB_TYPES as readonly string[]).includes(normalized)) {
     return "ACTION_REQUIRED"
   }
   return "ACTION_REQUIRED"
@@ -134,30 +394,10 @@ export function getRecommendedDisposition(subTypes: string[]): DispositionMode {
   ) {
     return "RECORD_ONLY"
   }
-  if (
-    normalized.some((subType) =>
-      (SENSOR_SUB_TYPES as readonly string[]).includes(subType)
-    )
-  ) {
+  if (normalized.every(isAutoRecoverAllowedForSubType)) {
     return "AUTO_RECOVER"
   }
   return "ACTION_REQUIRED"
-}
-
-/** 三种策略均可选（用户可配方案） */
-export function getAllowedDispositionsForSubType(_subType: string): DispositionMode[] {
-  return [...DISPOSITION_MODES]
-}
-
-export function getAllowedDispositionsIntersection(_subTypes: string[]): DispositionMode[] {
-  return [...DISPOSITION_MODES]
-}
-
-export function isDispositionAllowed(
-  _subTypes: string[],
-  _mode: DispositionMode
-): boolean {
-  return true
 }
 
 export function isDispositionDeviatingFromRecommendation(
@@ -184,7 +424,7 @@ export function getDispositionDeviationMessage(
   if (
     mode === "RECORD_ONLY" &&
     normalized.some((subType) =>
-      (SECURITY_SUB_TYPES as readonly string[]).includes(subType)
+      (ACTION_REQUIRED_SUB_TYPES as readonly string[]).includes(subType)
     )
   ) {
     return `子类型「${subTypeText}」系统推荐「${recommendedLabel}」。选择「${selectedLabel}」后触发即结案、无解除入口，请确认仍按此策略保存。`
@@ -192,20 +432,16 @@ export function getDispositionDeviationMessage(
 
   if (
     mode === "ACTION_REQUIRED" &&
-    normalized.some((subType) =>
-      (SENSOR_SUB_TYPES as readonly string[]).includes(subType)
-    )
+    normalized.every(isAutoRecoverAllowedForSubType)
   ) {
     return `子类型「${subTypeText}」系统推荐「${recommendedLabel}」。选择「${selectedLabel}」后须人工解除结案，请确认仍按此策略保存。`
   }
 
-  if (
-    mode === "AUTO_RECOVER" &&
-    normalized.every((subType) =>
-      (NOTIFY_SUB_TYPES as readonly string[]).includes(subType)
-    )
-  ) {
-    return `子类型「${subTypeText}」系统推荐「${recommendedLabel}」。选择「${selectedLabel}」需等待恢复信号，部分通知类事件可能长期未结案，请确认仍按此策略保存。`
+  if (mode === "AUTO_RECOVER") {
+    const ineligible = getAutoRecoverIneligibleSubTypes(normalized)
+    if (ineligible.length > 0) {
+      return `子类型「${ineligible.join("、")}」无 R03 恢复信号，不可选「${selectedLabel}」（R15c）`
+    }
   }
 
   return `系统推荐「${recommendedLabel}」，您选择了「${selectedLabel}」，确认保存？`

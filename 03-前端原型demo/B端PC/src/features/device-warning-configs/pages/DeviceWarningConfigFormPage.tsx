@@ -444,7 +444,7 @@ export function DeviceWarningConfigFormPage() {
                 </div>
                 {!autoRecoverSelectable && (
                   <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-                    当前子类型含安防/图像/挂锁破坏/密码错误等无 R03 自动恢复信号项，不可选择「恢复自动结案」（R15c）。
+                    当前所选子类型不在 R15c 白名单内（无 02/01 R03 恢复信号），不可选择「恢复自动结案」。通知/安防/图像/事务类请用「触发即结案」或「人工解除结案」。
                   </p>
                 )}
                 {dispositionDeviates && (

@@ -78,7 +78,7 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "处置策略列 (disposition_mode)",
-            content: "Badge 展示三档：触发即结案 / 人工解除结案 / 恢复自动结案；与 02/01 落账策略一致，命中后写入规则快照。",
+            content: "Badge 展示三档：触发即结案 / 人工解除结案 / 恢复自动结案；与 02/01 落账策略一致，命中后写入规则快照（R15b）。",
           },
           {
             label: "监控范围",

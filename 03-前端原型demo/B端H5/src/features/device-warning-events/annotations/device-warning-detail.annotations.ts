@@ -104,7 +104,7 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "交互",
     title: "底部处置操作与解除入口",
-    content: "待处置 · 有效状态且支持人工解除的事件，底部展示【立即解除预警】操作入口。",
+    content: "待处置 · 有效且快照 disposition=人工解除结案（R14'）时，底部展示【立即解除预警】；AUTO_RECOVER/RECORD_ONLY 无入口。",
     details: [
       {
         title: "操作规范",
