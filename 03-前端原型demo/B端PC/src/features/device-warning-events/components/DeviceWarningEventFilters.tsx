@@ -13,10 +13,11 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { WarningFilterHeader } from "@/components/business/WarningListPrimitives"
+import { WarningTypeCascadeSelect } from "@/components/business/WarningTypeCascadeSelect"
 import {
   DEFAULT_FILTERS,
-  TRIGGER_FREQUENCY_OPTIONS,
   WARNING_STATUS_FILTER_OPTIONS,
+  DEVICE_WARNING_EVENT_SUB_TYPES,
 } from "../domain/constants"
 import { WARNING_TYPES, type DeviceWarningEventFilters, type WarningType } from "../domain/types"
 import {
@@ -37,19 +38,15 @@ export function DeviceWarningEventFiltersPanel({
   onSearch,
   onReset,
 }: DeviceWarningEventFiltersProps) {
-  const [warningTypeOpen, setWarningTypeOpen] = useState(false)
   const [severityOpen, setSeverityOpen] = useState(false)
   const [expanded, setExpanded] = useState(false)
 
-  const warningTypeLabel = useMemo(() => {
-    if (value.warningTypes.length === 0) {
-      return "全部"
-    }
-    if (value.warningTypes.length === 1) {
-      return value.warningTypes[0]
-    }
-    return `已选 ${value.warningTypes.length} 项`
-  }, [value.warningTypes])
+  const warningTypeGroups = useMemo(() => {
+    return WARNING_TYPES.map((type) => ({
+      category: type,
+      subTypes: DEVICE_WARNING_EVENT_SUB_TYPES[type] || [],
+    }))
+  }, [])
 
   const severityLabel = useMemo(() => {
     if (value.severityLevelIds.length === 0) {
@@ -63,16 +60,6 @@ export function DeviceWarningEventFiltersPanel({
     }
     return `已选 ${selected.length} 项`
   }, [value.severityLevelIds])
-
-  const toggleWarningType = (type: WarningType) => {
-    const exists = value.warningTypes.includes(type)
-    onChange({
-      ...value,
-      warningTypes: exists
-        ? value.warningTypes.filter((item) => item !== type)
-        : [...value.warningTypes, type],
-    })
-  }
 
   const toggleSeverity = (severityLevelId: string) => {
     const exists = value.severityLevelIds.includes(severityLevelId)
@@ -97,8 +84,8 @@ export function DeviceWarningEventFiltersPanel({
 
     onChange({
       ...value,
-      firstWarningTimeStart: start,
-      firstWarningTimeEnd: end,
+      warningTimeStart: start,
+      warningTimeEnd: end,
     })
   }
 
@@ -117,32 +104,18 @@ export function DeviceWarningEventFiltersPanel({
 
         <div className="grid gap-4 lg:grid-cols-4">
           <FilterField label="预警类型">
-            <MultiSelectField
-              open={warningTypeOpen}
-              onOpenChange={setWarningTypeOpen}
-              label={warningTypeLabel}
-            >
-              <button
-                type="button"
-                className="flex w-full items-center px-2 py-1.5 text-left text-sm hover:bg-muted"
-                onClick={() => onChange({ ...value, warningTypes: [] })}
-              >
-                全部
-              </button>
-              {WARNING_TYPES.map((type) => (
-                <label
-                  key={type}
-                  className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-sm hover:bg-muted"
-                >
-                  <input
-                    type="checkbox"
-                    checked={value.warningTypes.includes(type)}
-                    onChange={() => toggleWarningType(type)}
-                  />
-                  <span>{type}</span>
-                </label>
-              ))}
-            </MultiSelectField>
+            <WarningTypeCascadeSelect
+              groups={warningTypeGroups}
+              selectedWarningTypes={value.warningTypes}
+              selectedSubTypes={value.subTypes || []}
+              onChange={(types, subTypes) =>
+                onChange({
+                  ...value,
+                  warningTypes: types as WarningType[],
+                  subTypes,
+                })
+              }
+            />
           </FilterField>
 
           <FilterField label="预警等级">
@@ -225,52 +198,27 @@ export function DeviceWarningEventFiltersPanel({
 
           {expanded && (
             <>
-              <FilterField label="触发频次">
-                <Select
-                  value={value.triggerFrequency}
-                  onValueChange={(nextValue) =>
-                    onChange({
-                      ...value,
-                      triggerFrequency:
-                        (nextValue as DeviceWarningEventFilters["triggerFrequency"]) ??
-                        "全部",
-                    })
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TRIGGER_FREQUENCY_OPTIONS.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FilterField>
-
-              <FilterField label="首次预警时间" className="lg:col-span-2">
+              <FilterField label="预警时间" className="lg:col-span-2">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Input
                       type="date"
-                      value={value.firstWarningTimeStart}
+                      value={value.warningTimeStart}
                       onChange={(event) =>
                         onChange({
                           ...value,
-                          firstWarningTimeStart: event.target.value,
+                          warningTimeStart: event.target.value,
                         })
                       }
                     />
                     <span className="text-muted-foreground">至</span>
                     <Input
                       type="date"
-                      value={value.firstWarningTimeEnd}
+                      value={value.warningTimeEnd}
                       onChange={(event) =>
                         onChange({
                           ...value,
-                          firstWarningTimeEnd: event.target.value,
+                          warningTimeEnd: event.target.value,
                         })
                       }
                     />

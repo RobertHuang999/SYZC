@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { ArrowLeftIcon, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { DateTimeText } from "@/shared/components/DateTimeText"
 import {
   DetailField,
   DetailSection,
@@ -19,6 +20,7 @@ import { getCollateralWarningById } from "../lib/detail-utils"
 import { PrototypeAnnotationProvider, PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { collateralWarningDetailAnnotations } from "../annotations/collateral-warning-detail.annotations"
 import { collateralWarningDocuments } from "../documents/collateral-warning-documents"
+import { SnapshotImageModal, type SnapshotPreviewData } from "@/shared/components/SnapshotImageModal"
 
 export function CollateralWarningDetailPage() {
   const { id } = useParams()
@@ -27,6 +29,7 @@ export function CollateralWarningDetailPage() {
     useState<CollateralWarningEventDetail | null>(null)
   const [releaseDialogOpen, setReleaseDialogOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [previewImage, setPreviewImage] = useState<SnapshotPreviewData | null>(null)
 
   const event = useMemo(() => getCollateralWarningById(id), [id])
   const headerActions = useMemo(
@@ -115,10 +118,13 @@ export function CollateralWarningDetailPage() {
           </div>
         </PrototypeAnnotationTarget>
 
+        {/* 1. 基础识别与业务属性（对齐字段清单第一章） */}
         <PrototypeAnnotationTarget annotationIds={["collateral-warning-detail-base"]}>
           <DetailSection title="基本信息">
+            <DetailField label="事件 ID">
+              <span className="font-mono">{event.eventId}</span>
+            </DetailField>
             <DetailField label="预警订单">{event.orderNo}</DetailField>
-            <DetailField label="订单类型">{event.orderType}</DetailField>
             <DetailField label="预警类型">{event.warningType}</DetailField>
             <DetailField label="预警等级">
               <SeverityLevelDisplay
@@ -129,108 +135,190 @@ export function CollateralWarningDetailPage() {
             </DetailField>
             <DetailField label="预警来源">{event.warningSource}</DetailField>
             <DetailField label="规则名称">{event.ruleName}</DetailField>
+            <DetailField label="预警状态">
+              <CollateralWarningStatusBadge event={event} />
+            </DetailField>
           </DetailSection>
         </PrototypeAnnotationTarget>
 
+        {/* 3. 预警事实与触发数据快照（对齐字段清单第一章与第四章） */}
         <PrototypeAnnotationTarget annotationIds={["collateral-warning-detail-facts"]}>
-          <DetailSection title="预警事实">
-            <DetailField label="预警内容">{event.warningContent}</DetailField>
-            <DetailField label="预警时间">{event.warningTime}</DetailField>
+          <DetailSection title="预警事实与位置">
+            <DetailField label="货物位置">
+              {event.orderSnapshot.storageLocation}
+            </DetailField>
+            <DetailField label="货物与数量">
+              {event.orderSnapshot.cargoName} · {event.orderSnapshot.cargoQuantity}
+            </DetailField>
+            <div className="col-span-full space-y-1">
+              <div className="detail-field-label">预警内容</div>
+              <div className="rounded-lg border bg-muted/20 p-3 text-sm leading-relaxed text-foreground">
+                {event.warningContent}
+              </div>
+            </div>
+            <DetailField label="预警时间">
+              <DateTimeText value={event.warningTime} plain />
+            </DetailField>
             <DetailField label="预警抓拍图">
-              {event.snapshotImageUrl ? (
-                <Button variant="link" className="h-auto p-0">
-                  <ImageIcon className="size-4" />
-                  查看触发抓拍大图
-                </Button>
+              {event.snapshotImageStatus === "available" ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPreviewImage({
+                      title: "预警触发监控抓拍图",
+                      desc: `订单号：${event.orderNo} | 触发时间：${event.warningTime}`,
+                      time: event.warningTime,
+                      location: event.orderSnapshot?.storageLocation || "一号钢材仓 / A库",
+                    })
+                  }
+                  className="h-auto cursor-pointer p-0 text-primary hover:underline"
+                >
+                  <ImageIcon className="size-3.5" />
+                  <span>查看现场监控抓拍图</span>
+                </button>
               ) : event.snapshotImageStatus === "failed" ? (
-                "抓拍失败"
+                <span className="text-xs text-destructive">抓拍失败（摄像头通信超时）</span>
               ) : (
-                "无抓拍图"
+                <span className="text-xs text-muted-foreground">货位无联动摄像头抓拍图</span>
               )}
             </DetailField>
-            {event.triggerSnapshot && (
-              <DetailField label="触发快照">{event.triggerSnapshot}</DetailField>
-            )}
+
+            {/* 结构化触发判定快照 */}
+            {event.triggerSnapshot ? (
+              <div className="col-span-full mt-2 rounded-lg border border-amber-200/80 bg-amber-50/40 p-3 dark:border-amber-900/40 dark:bg-amber-950/20">
+                <div className="mb-2 text-xs font-semibold text-amber-900 dark:text-amber-400">
+                  触发时刻判定数据快照（不可变存证）
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4 text-xs">
+                  <div>
+                    <span className="text-muted-foreground">监控指标项：</span>
+                    <span className="font-medium text-foreground ml-1">
+                      {event.triggerSnapshot.metricName}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">实际触发值：</span>
+                    <span className="font-mono font-bold text-destructive ml-1">
+                      {event.triggerSnapshot.triggerValue}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">规则预警阈值：</span>
+                    <span className="font-mono font-medium text-foreground ml-1">
+                      {event.triggerSnapshot.thresholdValue}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">超标判定结果：</span>
+                    <span className="font-medium text-amber-700 dark:text-amber-400 ml-1">
+                      {event.triggerSnapshot.deviation}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : event.warningType === "物联穿透告警" ? (
+              <div className="col-span-full mt-2 rounded-lg border bg-muted/30 p-3 text-xs text-muted-foreground">
+                由仓储现场物理设备传感器即时异常联动触发，详细指标见下方【穿透信息】。
+              </div>
+            ) : null}
           </DetailSection>
         </PrototypeAnnotationTarget>
 
+        {/* 4. 物联穿透关联字段（对齐字段清单第二章，仅物联穿透告警展示） */}
         {showPenetration && event.penetrationInfo && (
           <PrototypeAnnotationTarget annotationIds={["collateral-warning-detail-penetration"]}>
             <DetailSection title="穿透信息">
-              <DetailField label="触发设备">
+              <DetailField label="触发设备名称">
                 {event.penetrationInfo.triggerDevice}
               </DetailField>
-              <DetailField label="物理子类型">
-                {event.penetrationInfo.physicalSubType}
+              <DetailField label="物理事件子类型">
+                <span className="font-semibold text-destructive">
+                  {event.penetrationInfo.physicalSubType}
+                </span>
               </DetailField>
-              <DetailField label="触发位置">
+              <DetailField label="触发现场位置">
                 {event.penetrationInfo.triggerLocation}
               </DetailField>
-              <DetailField label="关联事件编号">
-                {event.penetrationInfo.relatedEventNo}
-              </DetailField>
-              <DetailField label="关联事件">
-                <Link
-                  to={deviceDetailRoute}
-                  className="text-primary hover:underline"
-                >
-                  {event.penetrationInfo.relatedEventNo}
-                </Link>
-              </DetailField>
-              <p className="text-xs text-muted-foreground">
-                须在设备预警信息现场核销后自动解除；本页无解除预警入口。
+              <p className="col-span-full text-xs text-muted-foreground mt-1">
+                💡 说明：物联穿透告警为底层设备异常自动联动生成，须在【设备预警信息】现场核销后自动解除；本页面无人工解除预警入口。
               </p>
             </DetailSection>
           </PrototypeAnnotationTarget>
         )}
 
+        {/* 5. 处置与核销信息（对齐字段清单第三章：解除预警表单字段，仅已处理展示） */}
         {showDisposal && event.disposalInfo && (
           <PrototypeAnnotationTarget annotationIds={["collateral-warning-detail-disposal"]}>
-            <DetailSection title="处置信息">
+            <DetailSection title="处置与核销信息">
               <DetailField label="处理时间">
-                {formatEmptyValue(event.processedTime)}
+                <DateTimeText value={event.processedTime} plain />
               </DetailField>
               <DetailField label="处理人">
                 {formatEmptyValue(event.processedBy)}
               </DetailField>
-              <DetailField label="情况说明">
-                {formatEmptyValue(event.disposalInfo.situationDescription)}
-              </DetailField>
-              <DetailField label="现场照片">
+              <div className="col-span-full">
+                <div className="detail-field-label mb-1">情况说明</div>
+                <div className="rounded-md border bg-muted/20 p-2.5 text-sm text-foreground">
+                  {formatEmptyValue(event.disposalInfo.situationDescription)}
+                </div>
+              </div>
+              <div className="col-span-full">
+                <div className="detail-field-label mb-1.5">现场照片</div>
                 {event.disposalInfo.sitePhotos.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2.5">
                     {event.disposalInfo.sitePhotos.map((photo) => (
-                      <span
+                      <button
                         key={photo}
-                        className="inline-flex items-center gap-1 text-primary"
+                        type="button"
+                        onClick={() =>
+                          setPreviewImage({
+                            title: `现场核实照片凭证 — ${photo}`,
+                            desc: `核销单据：${event.orderNo} | 处理人：${event.processedBy || "风控专员"}`,
+                            time: event.processedTime || event.warningTime,
+                            location: event.orderSnapshot?.storageLocation || "仓储监管现场",
+                          })
+                        }
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs text-foreground hover:border-primary/50 hover:bg-muted/40 transition-colors cursor-pointer"
                       >
-                        <ImageIcon className="size-4" />
-                        {photo}
-                      </span>
+                        <ImageIcon className="size-3.5 text-primary" />
+                        <span>{photo}</span>
+                      </button>
                     ))}
                   </div>
                 ) : (
-                  "—"
+                  <span className="text-xs text-muted-foreground">未上传现场照片</span>
                 )}
-              </DetailField>
-              <DetailField label="解除预警抓拍图">
-                {event.disposalInfo.releaseSnapshotImage ? (
-                  <span className="inline-flex items-center gap-1 text-primary">
-                    <ImageIcon className="size-4" />
-                    {event.disposalInfo.releaseSnapshotImage}
-                  </span>
-                ) : (
-                  "—"
-                )}
-              </DetailField>
+              </div>
+              {event.disposalInfo.releaseSnapshotImage && (
+                <DetailField label="解除抓拍图">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPreviewImage({
+                        title: "解除预警即时监控抓拍图",
+                        desc: `核销单据：${event.orderNo} | 解除时间：${event.processedTime}`,
+                        time: event.processedTime || event.warningTime,
+                        location: event.orderSnapshot?.storageLocation || "仓储监管现场",
+                      })
+                    }
+                    className="h-auto cursor-pointer p-0 text-primary hover:underline"
+                  >
+                    <ImageIcon className="size-3.5" />
+                    <span>查看解除抓拍图</span>
+                  </button>
+                </DetailField>
+              )}
             </DetailSection>
           </PrototypeAnnotationTarget>
         )}
 
+        {/* 6. 无效说明（仅未处理无效展示） */}
         {showInvalid && (
           <DetailSection title="无效说明">
-            <DetailField label="无效原因">
-              {formatEmptyValue(event.invalidReason)}
+            <DetailField label="失效原因">
+              <span className="text-destructive font-medium">
+                {formatEmptyValue(event.invalidReason)}
+              </span>
             </DetailField>
           </DetailSection>
         )}
@@ -257,6 +345,11 @@ export function CollateralWarningDetailPage() {
           setReleaseDialogOpen(false)
           navigate(orderProcessRoute)
         }}
+      />
+
+      <SnapshotImageModal
+        data={previewImage}
+        onClose={() => setPreviewImage(null)}
       />
 
         {toastMessage && (

@@ -12,6 +12,7 @@ import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import { Toast } from "@/components/ui/Toast"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
+import { formatDateTime } from "@/shared/lib/date-utils"
 import { canManualRelease } from "../domain/actions"
 import {
   getReleaseError,
@@ -116,7 +117,7 @@ export function DeviceWarningEventReleasePage() {
 
     setTimeout(() => {
       setSubmitting(false)
-      showToast("预警解除成功！整轮触发记录已归档")
+      showToast("预警解除成功！该条流水已归档")
       setTimeout(() => {
         navigate("/m/iot/device-warning-events")
       }, 1200)
@@ -160,8 +161,8 @@ export function DeviceWarningEventReleasePage() {
                   <span className="font-medium text-gray-800">{event.deviceName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">累计触发：</span>
-                  <span className="font-bold text-orange-600">⚡ {event.triggerCount} 次</span>
+                  <span className="text-gray-400">预警时间：</span>
+                  <span className="font-medium text-gray-800 font-mono">{formatDateTime(event.warningTime)}</span>
                 </div>
               </div>
             </section>
@@ -173,7 +174,7 @@ export function DeviceWarningEventReleasePage() {
             <div>
               <div className="font-bold">解除规则与联动机制：</div>
               <p className="mt-0.5 text-blue-800 text-[11px]">
-                提交后系统将自动联动同库位监控进行<strong>即时高清抓拍存证</strong>；确认解除后归档整轮 {event.triggerCount} 次触发并取消后续升级任务。
+                提交后系统将自动联动同库位监控进行<strong>即时高清抓拍存证</strong>；确认解除后归档该条独立流水并取消后续升级任务。
               </p>
             </div>
           </div>
@@ -289,12 +290,13 @@ export function DeviceWarningEventReleasePage() {
               <ShieldAlert className="size-6" />
             </div>
             <h3 className="text-base font-bold text-gray-900">
-              确认解除该轮次告警？
+              确认解除该条预警？
             </h3>
             <p className="text-xs text-gray-600 leading-relaxed text-left rounded-xl bg-slate-50 p-3 border border-slate-100">
               • 预警规则：<strong>{event.ruleName}</strong><br />
               • 关联设备：{event.deviceName}<br />
-              • 归档说明：提交后将归档整轮 <strong>{event.triggerCount}</strong> 次触发，并记录您的处置签名。
+              • 预警时间：{formatDateTime(event.warningTime)}<br />
+              • 归档说明：提交后该条流水将变为「已结案 · 有效」，并记录您的处置签名。
             </p>
             <div className="flex gap-2 pt-2">
               <button

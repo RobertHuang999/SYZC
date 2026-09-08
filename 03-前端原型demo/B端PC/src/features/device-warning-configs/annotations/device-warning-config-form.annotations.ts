@@ -7,7 +7,7 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     number: 1,
     kind: "页面",
     title: "设备预警配置表单 · 策略定义与生命周期",
-    content: "录入或编辑设备策略，配置预警等级、设备范围、阈值条件、防抖参数及通知升级矩阵，支持瞬态/持续事件自动适配。",
+    content: "录入或编辑设备策略，配置预警等级、设备范围、阈值条件及通知升级矩阵；设备事件由厂商侧预过滤后回调匹配。",
     details: [
       {
         title: "配置提交流转与校验链路",
@@ -15,17 +15,17 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           {
             label: "规则提交流转图",
             content: `flowchart TD
-    A["表单录入 (基本信息/设备范围/阈值/防抖/通知升级)"] --> B{"R14 上线类互斥判定"}
+    A["表单录入 (基本信息/设备范围/阈值/通知升级)"] --> B{"R14 上线类互斥判定"}
     B -->|混配上线类与监控类| C["前端阻断 & Toast 提示单独配置"]
     B -->|合规| D{"R04/R05 设备唯一性校验"}
     D -->|设备+子类型已存在| E["拦截并提示已在其他生效规则中绑定"]
-    D -->|校验通过| F["保存并生效规则"]
+    D -->|校验通过| F["保存并生效规则 Version=1 或 Version+1"]
     F --> G["发布 DeviceWarningConfigSaved"]
-    G --> H["防抖判定引擎热加载新规则"]`,
+    G --> H["等待厂商预过滤回调按最新 Version 匹配"]`,
           },
           {
             label: "编辑与失效保护",
-            content: "已失效规则（关联设备全部解绑）前端与服务端实施双重拦截，只允许查看不允许编辑或重新启用。",
+            content: "已失效规则（关联设备全部解绑）前端与服务端实施双重拦截，只允许查看不允许编辑或重新启用。编辑保存 Version+1 不回写既有未处理流水（C08）。",
           },
         ],
       },
@@ -98,19 +98,23 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     targetId: "device-warning-config-form-threshold",
     number: 4,
     kind: "规则",
-    title: "阈值条件与防抖分流表单",
-    content: "按子类型自动适配阈值表单结构，并动态控制防抖配置模式（瞬态 vs 持续）。",
+    title: "阈值条件表单",
+    content: "按子类型自动适配阈值表单结构；平台不再配置防抖，事件预过滤由设备厂商侧完成。",
     details: [
       {
-        title: "防抖配置模式与字段",
+        title: "阈值配置与厂商边界",
         items: [
           {
             label: "瞬态事件（防拆/撞击/破门）",
-            content: "防抖模式置灰锁定，显示【瞬态事件即时触发】，无防抖窗口，0 延迟上报告警。",
+            content: "展示事件型触发描述，无数值阈值输入；厂商侧实时上报，平台接收回调后逐条落账。",
           },
           {
             label: "持续事件（温湿度/离线/电压）",
-            content: "可选择【持续时长】（单位：分钟，如 >= 15 分钟）或【连续次数】（单位：次，如连续采样 >= 3 次），有效过滤传感器毛刺波动。",
+            content: "配置数值上下限（如温度 >= 35℃）；持续判定与去抖由厂商接入层完成，平台按回调逐条写入 iot_event_ledger。",
+          },
+          {
+            label: "不含防抖控件",
+            content: "表单不再展示防抖判定模式、持续时长或连续次数字段；相关逻辑已下沉至设备厂商预过滤层。",
           },
         ],
       },
@@ -133,7 +137,7 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "超时升级天数 (escalation_days)",
-            content: "配置升级天数（如 1~30 天）及升级对象；超时未处置时自动向升级对象追加督办。处置策略为「触发即结案」时不可配置（R15a）。",
+            content: "配置升级天数（如 1~30 天）及升级对象；超时未处置时自动向升级对象追加督办。处置策略为「触发即结案」时不可配置（R15a）。升级计时以每条独立流水的预警时间为起点。",
           },
         ],
       },
@@ -157,6 +161,10 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           {
             label: "防未保存丢失拦截",
             content: "表单处于 Dirty 状态时点击取消或切换路由弹出离开确认框，防止数据意外丢失。",
+          },
+          {
+            label: "Version 递增 (C08)",
+            content: "编辑保存成功后 Version+1，不回写既有未处理预警流水；等待下一次厂商回调按最新 Version 落账。",
           },
         ],
       },

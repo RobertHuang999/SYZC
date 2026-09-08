@@ -7,7 +7,7 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
     number: 1,
     kind: "页面",
     title: "设备预警配置定位与生命周期",
-    content: "物联网 IoT 策略配置中枢，集中维护硬件资产的异常告警阈值、防抖模式与通知升级策略。",
+    content: "物联网 IoT 策略配置中枢，集中维护硬件资产的异常告警阈值与通知升级策略；设备事件由厂商侧预过滤后回调匹配生效规则。",
     details: [
       {
         title: "规则生命周期流转图",
@@ -15,15 +15,17 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
           {
             label: "生命周期流转图",
             content: `flowchart TD
-    A["设备预警配置表单"] -->|"保存生效/启用"| B["生效中 (监听事件)"]
-    B -->|"人工停用/启用"| C["停用 (暂停引擎监听)"]
+    A["设备预警配置表单"] -->|"保存生效/启用 Version=1"| B["生效中 (匹配厂商回调)"]
+    B -->|"人工停用/启用"| C["停用 (暂停匹配新回调)"]
     C -->|"重新启用"| B
     B -->|"解绑全部关联设备"| D["已失效 (不可逆/禁编辑)"]
-    B -->|"软删除"| E["配置已删除 (未处理流水置无效)"]`,
+    B -->|"软删除"| E["配置已删除 (未处理流水置无效)"]
+    B -->|"编辑保存"| F["Version+1 (C08 不回写未处理流水)"]
+    F --> B`,
           },
           {
             label: "三态定义",
-            content: "生效中（实时监听硬件流）、停用（策略暂停）、已失效（关联设备全部解绑时系统自动置为失效，不可逆不可编辑）。",
+            content: "生效中（匹配厂商预过滤回调）、停用（策略暂停）、已失效（关联设备全部解绑时系统自动置为失效，不可逆不可编辑）。",
           },
         ],
       },
@@ -50,8 +52,8 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
         title: "筛选维度说明",
         items: [
           {
-            label: "预警类型 / 子类型联动",
-            content: "选择预警大类后，子类型下拉联动收敛为对应权威枚举（如安防类联动围栏越界、离线类联动心跳超时等）。",
+            label: "预警类型大类与子类型级联多选",
+            content: "采用两栏树形级联多选组件：左栏支持按大类一键全选或半选联动，右栏展示对应子类型复选列表；支持关键字搜索子类型与自适应回显（全部 / [大类](全部) / [具体子类型] / 已选 N 项）。",
           },
           {
             label: "处置策略筛选（展开行）",
@@ -70,8 +72,8 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
     targetId: "device-warning-config-table",
     number: 3,
     kind: "字段",
-    title: "表格字段与防抖参数展示",
-    content: "展示规则名称、预警类型、处置策略、预警等级、监控范围、触发/防抖条件与状态。",
+    title: "表格字段与阈值展示",
+    content: "展示规则名称、预警类型、处置策略、预警等级、监控范围、触发阈值条件、规则 Version 与状态。",
     details: [
       {
         title: "列定义与展示",
@@ -85,8 +87,12 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
             content: "显示【仅针对新设备】或【N台设备】；悬浮可查看具体设备编码与安装库位。",
           },
           {
-            label: "阈值与防抖",
-            content: "瞬态破坏事件显示【即时触发】；数值型展示具体上下限与防抖（如【持续超过 10 分钟】或【连续 3 次超标】）。",
+            label: "阈值条件",
+            content: "展示数值上下限或事件型触发描述（如【温度 > 35℃】、【剪杆破坏事件】）；平台不再配置防抖，事件预过滤由设备厂商侧完成。",
+          },
+          {
+            label: "规则 Version",
+            content: "每次编辑保存递增；后续厂商回调按最新 Version 匹配，历史流水保留触发时刻 Version 快照（C08）。",
           },
           {
             label: "状态 Tag",

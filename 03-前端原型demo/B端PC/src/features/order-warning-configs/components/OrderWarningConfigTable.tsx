@@ -2,6 +2,7 @@ import { Link } from "react-router-dom"
 import { HoverOverflowText } from "@/components/business/HoverOverflowText"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { TablePersonTimeCell } from "@/shared/components/TableCells"
 import {
   Table,
   TableBody,
@@ -43,14 +44,15 @@ export function OrderWarningConfigTable({
             <TableHead className="w-40">货主/货物摘要</TableHead>
             <TableHead className="w-64">已启用预警项摘要</TableHead>
             <TableHead className="w-24">状态</TableHead>
-            <TableHead className="w-40">更新时间</TableHead>
+            <TableHead className="w-32">创建人/时间</TableHead>
+            <TableHead className="w-32">更新人/时间</TableHead>
             <TableHead className="w-32">操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {configs.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
+              <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
                 暂无订单预警规则，点击「+ 新增订单规则」创建
               </TableCell>
             </TableRow>
@@ -116,7 +118,18 @@ export function OrderWarningConfigTable({
                       {config.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{config.updatedAt}</TableCell>
+                  <TableCell>
+                    <TablePersonTimeCell
+                      person={config.createdBy}
+                      time={config.createdAt}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <TablePersonTimeCell
+                      person={config.updatedBy}
+                      time={config.updatedAt}
+                    />
+                  </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap items-center gap-2">
                       {actions.includes("edit") && (

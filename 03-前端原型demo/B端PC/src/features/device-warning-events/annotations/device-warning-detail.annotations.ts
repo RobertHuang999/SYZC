@@ -7,26 +7,21 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
     number: 1,
     kind: "页面",
     title: "详情页定位与处置闭环",
-    content: "展示设备预警事件的完整事实快照、聚合频次轨迹与处置留痕，支持权限角色进入人工解除。",
+    content: "展示单条设备预警事件的完整事实快照与处置留痕，支持权限角色进入人工解除；一事件一条记录，无频次聚合。",
     details: [
       {
         title: "生命周期流转图",
         items: [
           {
             label: "状态流转图",
-            content: `┌──────────────┐     防抖判定通过     ┌──────────────┐     人工解除/自动恢复     ┌──────────────┐
-│  IoT设备事件  │ ──────────────────> │ 待处置·有效  │ ──────────────────────> │ 已结案·有效  │
-└──────────────┘                      └──────────────┘                          └──────────────┘
-                                             │
-                                             │ 规则删除/设备解绑
-                                             v
-                                      ┌──────────────┐
-                                      │   已作废     │ (终态只读)
-                                      └──────────────┘`,
+            content: `flowchart TD
+    V["厂商预过滤回调"] --> B["待处置·有效 (逐条落账 R01)"]
+    B -->|"人工解除/自动恢复"| C["已结案·有效"]
+    B -->|"规则删除/设备解绑"| D["已作废 (终态只读)"]`,
           },
           {
             label: "业务定位",
-            content: "页面承载单条轮次事件的全部只读事实与快照；待处置 · 有效且支持人工处置的类型可由此发起解除，其余状态仅供穿透溯源。",
+            content: "页面承载单条独立流水的全部只读事实与快照；待处置 · 有效且支持人工处置的类型可由此发起解除，其余状态仅供穿透溯源。",
           },
         ],
       },
@@ -35,11 +30,11 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "上游数据",
-            content: "触发时固化规则快照（阈值、防抖、升级策略）、预警等级字典快照与抓拍图片签名 URL。",
+            content: "触发时固化规则快照（阈值、处置策略、规则 Version、升级策略）、预警等级字典快照与抓拍图片签名 URL。",
           },
           {
             label: "下游联动",
-            content: "解除成功后触发 DeviceEventReleased 事件，取消未完成的通知升级定时任务，并同步刷新列表与大屏状态。",
+            content: "解除成功后触发 DeviceEventReleased 事件，取消该条流水挂起的未执行升级通知，并同步刷新列表与大屏状态。",
           },
         ],
       },
@@ -51,7 +46,7 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
     number: 2,
     kind: "字段",
     title: "基本信息与状态快照",
-    content: "展示事件系统标识、规则名称、类型分类、等级色块与当前生命周期状态。",
+    content: "展示事件系统标识、规则名称、类型分类、等级色块、预警时间与当前生命周期状态。",
     details: [
       {
         title: "核心字段定义",
@@ -71,6 +66,10 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "预警等级",
             content: "等级编码（01-04）及颜色快照（高危红/中危橙/低危黄/提示蓝），由 severity_level 字典在触发时固化。",
+          },
+          {
+            label: "预警时间 (warningTime)",
+            content: "本条独立流水的触发时间，格式 YYYY-MM-DD HH:mm:ss；作为升级通知策略的计时基准起点。",
           },
           {
             label: "预警状态",
@@ -101,7 +100,7 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警内容",
-            content: "规则引擎根据事件 payload 自动拼装的标准事实描述：【位置】+【设备】+【触发事实与数值】。",
+            content: "规则引擎根据厂商回调 payload 自动拼装的标准事实描述：【位置】+【设备】+【触发事实与数值】。",
           },
           {
             label: "预警抓拍图",
@@ -112,40 +111,9 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
     ],
   },
   {
-    id: "device-warning-detail-timeline",
-    targetId: "device-warning-detail-timeline",
-    number: 4,
-    kind: "交互",
-    title: "频次聚合轨迹与防抖留痕",
-    content: "同设备同子类型的待处置 · 有效聚合轮次统计，展示累计触发次数、首次/最近时间与防抖状态流转。",
-    details: [
-      {
-        title: "聚合机制与公式",
-        items: [
-          {
-            label: "聚合轮次规则",
-            content: "事件处于待处置 · 有效期间，同一设备再次触发同子类型且防抖通过，累计计入本轮次：Count = Count + 1，更新最近预警时间。聚合键=设备+子类型，不含阈值/通知人/规则 Version 变更。",
-          },
-          {
-            label: "首次预警时间",
-            content: "本轮次首次命中的精确时间点，作为升级通知策略（如 2小时未处理升级）的计时基准起点。",
-          },
-          {
-            label: "防抖留痕",
-            content: "展示引擎防抖流转记录：Pending(持续满足N秒) → Firing(正式入账)；若为瞬态偶发未达阈值则自动丢弃不入账。",
-          },
-          {
-            label: "查看频次抽屉",
-            content: "点击【查看触发历史】或页头【查看频次】按钮，右侧滑出抽屉，按时间轴倒序展示每一次触发的具体事实与抓拍图。",
-          },
-        ],
-      },
-    ],
-  },
-  {
     id: "device-warning-detail-release-info",
     targetId: "device-warning-detail-release-info",
-    number: 5,
+    number: 4,
     kind: "规则",
     title: "处置信息与现场复核凭据",
     content: "归档状态下的真实处置人、处理时间、情况说明、现场核验照片及二次联动抓拍快照。",
@@ -176,10 +144,10 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
   {
     id: "device-warning-detail-rule-snapshot",
     targetId: "device-warning-detail-rule-snapshot",
-    number: 6,
+    number: 5,
     kind: "规则",
-    title: "触发时规则快照固化",
-    content: "展示事件产生时生效的监控阈值、防抖过滤条件与升级通知策略，保障历史事件可溯源可复盘。",
+    title: "触发时规则配置快照（C03-N04）",
+    content: "展示事件产生时生效的监控阈值、处置策略、规则 Version 与升级通知策略，保障历史事件可溯源可复盘。",
     details: [
       {
         title: "快照字段与不可变性",
@@ -190,11 +158,11 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "监控阈值快照",
-            content: "如【图像识别置信度≥85% 且 目标类型=人体】或【库内温度 > 35℃ 持续 5 分钟】。",
+            content: "如【图像识别置信度≥85% 且 目标类型=人体】或【库内温度 > 35℃】。",
           },
           {
-            label: "防抖策略快照",
-            content: "如【持续超过 3 分钟 或 连续 3 次采集超标】才判定为有效事件，防止偶发噪点误报。",
+            label: "规则 Version 快照 (ruleVersion)",
+            content: "固化触发时刻匹配的规则版本号；规则后续编辑 Version+1 不回写本条流水（C08）。",
           },
           {
             label: "升级策略快照",
@@ -211,10 +179,10 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
   {
     id: "device-warning-detail-actions",
     targetId: "device-warning-detail-header",
-    number: 7,
+    number: 6,
     kind: "交互",
     title: "页头动作权限与解除流程",
-    content: "根据事件类型与当前状态动态渲染【返回】、【解除预警】、【查看频次】操作按钮。",
+    content: "根据事件类型与当前状态动态渲染【返回】、【解除预警】操作按钮。",
     details: [
       {
         title: "状态 × 动作矩阵",
@@ -225,7 +193,7 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "已作废 / 已结案 · 有效",
-            content: "仅展示【返回】与【查看频次】，不提供再次解除入口；再次超标将开启新轮次事件。",
+            content: "仅展示【返回】，不提供再次解除入口；再次超标将产生新的独立流水。",
           },
           {
             label: "权限要求",

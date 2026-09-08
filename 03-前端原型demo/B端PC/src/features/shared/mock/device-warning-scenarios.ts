@@ -12,7 +12,6 @@ export type DeviceWarningRuleScenario = {
   warningSubTypes: string[]
   dispositionMode: DispositionMode
   triggerCondition: string
-  debounceCondition: string
   status: "生效中" | "停用" | "已失效"
   linkedEventIds: string[]
 }
@@ -27,8 +26,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["行人入侵", "车辆入侵"],
     dispositionMode: "ACTION_REQUIRED",
     triggerCondition: "行人入侵/车辆入侵",
-    debounceCondition: "持续>5秒",
-    status: "生效中",
+        status: "生效中",
     linkedEventIds: ["evt-002"],
   },
   {
@@ -40,8 +38,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["温度异常"],
     dispositionMode: "AUTO_RECOVER",
     triggerCondition: "温度异常",
-    debounceCondition: "持续>3分",
-    status: "生效中",
+        status: "生效中",
     linkedEventIds: ["evt-001", "evt-010"],
   },
   {
@@ -53,8 +50,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["锁杆被剪", "拆壳"],
     dispositionMode: "ACTION_REQUIRED",
     triggerCondition: "锁杆被剪/拆壳",
-    debounceCondition: "立即触发",
-    status: "生效中",
+        status: "生效中",
     linkedEventIds: ["evt-011", "evt-017"],
   },
   {
@@ -66,8 +62,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["开锁通知", "关锁通知"],
     dispositionMode: "RECORD_ONLY",
     triggerCondition: "开锁通知/关锁通知",
-    debounceCondition: "立即触发",
-    status: "停用",
+        status: "停用",
     linkedEventIds: ["evt-003", "evt-018"],
   },
   {
@@ -79,8 +74,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["设备上线"],
     dispositionMode: "RECORD_ONLY",
     triggerCondition: "设备上线",
-    debounceCondition: "立即触发",
-    status: "生效中",
+        status: "生效中",
     linkedEventIds: [],
   },
   {
@@ -92,8 +86,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["设备离线"],
     dispositionMode: "ACTION_REQUIRED",
     triggerCondition: "设备离线",
-    debounceCondition: "持续>5分",
-    status: "已失效",
+        status: "已失效",
     linkedEventIds: ["evt-004"],
   },
   {
@@ -105,8 +98,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["开锁通知", "关锁通知"],
     dispositionMode: "RECORD_ONLY",
     triggerCondition: "开锁通知/关锁通知",
-    debounceCondition: "立即触发",
-    status: "生效中",
+        status: "生效中",
     linkedEventIds: ["evt-005"],
   },
   {
@@ -118,8 +110,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["门未关"],
     dispositionMode: "ACTION_REQUIRED",
     triggerCondition: "门未关",
-    debounceCondition: "持续>1分",
-    status: "生效中",
+        status: "生效中",
     linkedEventIds: ["evt-009"],
   },
   {
@@ -131,8 +122,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["进围栏", "出围栏"],
     dispositionMode: "AUTO_RECOVER",
     triggerCondition: "进围栏/出围栏",
-    debounceCondition: "持续>10秒",
-    status: "生效中",
+        status: "生效中",
     linkedEventIds: ["evt-014"],
   },
   {
@@ -144,8 +134,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["设备离线"],
     dispositionMode: "AUTO_RECOVER",
     triggerCondition: "设备离线",
-    debounceCondition: "持续>5分",
-    status: "生效中",
+        status: "生效中",
     linkedEventIds: ["evt-008"],
   },
   {
@@ -157,8 +146,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["非法开箱"],
     dispositionMode: "ACTION_REQUIRED",
     triggerCondition: "非法开箱",
-    debounceCondition: "立即触发",
-    status: "生效中",
+        status: "生效中",
     linkedEventIds: ["evt-012"],
   },
   {
@@ -170,8 +158,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["锁舌被卡"],
     dispositionMode: "ACTION_REQUIRED",
     triggerCondition: "锁舌被卡",
-    debounceCondition: "立即触发",
-    status: "生效中",
+        status: "生效中",
     linkedEventIds: ["evt-016"],
   },
   {
@@ -183,8 +170,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["密码错误"],
     dispositionMode: "ACTION_REQUIRED",
     triggerCondition: "密码错误",
-    debounceCondition: "立即触发",
-    status: "生效中",
+        status: "生效中",
     linkedEventIds: ["evt-015"],
   },
   {
@@ -196,8 +182,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["湿度异常"],
     dispositionMode: "AUTO_RECOVER",
     triggerCondition: "湿度异常",
-    debounceCondition: "持续>3分",
-    status: "生效中",
+        status: "生效中",
     linkedEventIds: ["evt-006"],
   },
   {
@@ -209,8 +194,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["烟感异常"],
     dispositionMode: "AUTO_RECOVER",
     triggerCondition: "烟感异常",
-    debounceCondition: "持续>3分",
-    status: "已失效",
+        status: "已失效",
     linkedEventIds: ["evt-007"],
   },
   {
@@ -222,8 +206,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     warningSubTypes: ["开锁通知"],
     dispositionMode: "ACTION_REQUIRED",
     triggerCondition: "开锁通知",
-    debounceCondition: "立即触发",
-    status: "生效中",
+        status: "生效中",
     linkedEventIds: ["evt-013"],
   },
 ]

@@ -18,10 +18,15 @@ export type CollateralWarningType = (typeof COLLATERAL_WARNING_TYPES)[number]
 export const WARNING_SOURCES = [
   "订单配置触发",
   "物联穿透",
+] as const
+
+export const ARCHIVE_WARNING_SOURCES = [
   "历史",
 ] as const
 
-export type WarningSource = (typeof WARNING_SOURCES)[number]
+export type WarningSource =
+  | (typeof WARNING_SOURCES)[number]
+  | (typeof ARCHIVE_WARNING_SOURCES)[number]
 
 export type SnapshotImageStatus = "available" | "none" | "failed"
 

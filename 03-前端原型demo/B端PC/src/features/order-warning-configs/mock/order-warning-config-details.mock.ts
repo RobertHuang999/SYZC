@@ -60,8 +60,6 @@ const detailExtensions: Record<string, DetailExtension> = {
       "贷中风控模型预警：未启用",
     ],
     invalidReason: null,
-    createdBy: "张风控",
-    createdAt: "2026-08-17 09:30:00",
   },
   "owc-002": {
     ruleUuid: "rule-ord-supervision-002",
@@ -112,8 +110,6 @@ const detailExtensions: Record<string, DetailExtension> = {
       "贷中风控模型预警：未启用",
     ],
     invalidReason: null,
-    createdBy: "李客户经理",
-    createdAt: "2026-08-20 16:30:22",
   },
   "owc-005": {
     ruleUuid: "rule-ord-grain-005",
@@ -168,8 +164,6 @@ const detailExtensions: Record<string, DetailExtension> = {
       "贷中风控模型预警：未启用",
     ],
     invalidReason: null,
-    createdBy: "张风控",
-    createdAt: "2026-08-17 14:05:33",
   },
   "owc-004": {
     ruleUuid: "rule-ord-expired-004",
@@ -202,8 +196,6 @@ const detailExtensions: Record<string, DetailExtension> = {
       "贷中风控模型预警：未启用",
     ],
     invalidReason: "关联订单已办结",
-    createdBy: "张风控",
-    createdAt: "2026-06-05 10:00:00",
   },
 }
 
@@ -318,7 +310,5 @@ export function getOrderWarningConfigDetailExtension(
         ? disabledStrategies.slice(0, 3)
         : ["暂无未启用策略"],
     invalidReason: config.status === "已失效" ? "关联订单已办结" : null,
-    createdBy: "张风控",
-    createdAt: "2026-08-01 09:00:00",
   }
 }

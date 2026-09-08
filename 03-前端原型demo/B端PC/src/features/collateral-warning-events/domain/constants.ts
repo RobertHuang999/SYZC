@@ -31,5 +31,9 @@ export const WARNING_SOURCE_FILTER_OPTIONS = [
   "全部",
   "订单配置触发",
   "物联穿透",
+] as const
+
+export const ARCHIVE_SOURCE_FILTER_OPTIONS = [
+  "全部",
   "历史",
 ] as const

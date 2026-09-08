@@ -13,10 +13,15 @@ export type CollateralWarningType = (typeof COLLATERAL_WARNING_TYPES)[number]
 export const WARNING_SOURCES = [
   "订单配置触发",
   "物联穿透",
+] as const
+
+export const ARCHIVE_WARNING_SOURCES = [
   "历史",
 ] as const
 
-export type WarningSource = (typeof WARNING_SOURCES)[number]
+export type WarningSource =
+  | (typeof WARNING_SOURCES)[number]
+  | (typeof ARCHIVE_WARNING_SOURCES)[number]
 
 export type SnapshotImageStatus = "available" | "none" | "failed"
 
@@ -97,10 +102,30 @@ export type CollateralDisposalInfo = {
   releaseSnapshotImage: string | null
 }
 
+export type CollateralOrderSnapshot = {
+  orderType: "抵/质押" | "监管"
+  ownerCompany: string // 货主企业名称
+  cargoName: string // 货物名称与规格型号
+  cargoQuantity: string // 货物在押数量
+  storageLocation: string // 仓库及货位
+  collateralValue: string // 质物评估货值
+  loanBalance: string // 贷款余额/敞口
+}
+
+export type CollateralTriggerSnapshot = {
+  metricName: string // 监控指标名称
+  triggerValue: string // 触发时刻实际采集值
+  thresholdValue: string // 预警设定阈值
+  deviation: string // 偏离/超标说明
+  ruleVersion: string // 判定规则版本
+}
+
 export type CollateralWarningEventDetailExtension = {
   orderType: "抵/质押" | "监管"
   ruleName: string
-  triggerSnapshot: string | null
+  version: number // 乐观锁版本号，对齐字段清单第四章 Version
+  orderSnapshot: CollateralOrderSnapshot
+  triggerSnapshot: CollateralTriggerSnapshot | null
   snapshotImageUrl: string | null
   invalidReason: string | null
   penetrationInfo: CollateralPenetrationInfo | null

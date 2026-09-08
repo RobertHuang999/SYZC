@@ -8,14 +8,8 @@ export function formatWarningContent(event: DeviceWarningEvent): string {
   return `位置：${event.location}；设备：${event.deviceName}；触发内容：${event.triggerSummary}`
 }
 
-export function formatLatestWarningTime(value: string): string {
-  const [date, time] = value.split(" ")
-  if (!date || !time) {
-    return value
-  }
-
-  const [, month, day] = date.split("-")
-  return `${month}-${day} ${time.slice(0, 5)}`
+export function formatWarningTime(value: string): string {
+  return value || "—"
 }
 
 export function filterDeviceWarningEvents(
@@ -26,7 +20,22 @@ export function filterDeviceWarningEvents(
 
   return events
     .filter((event) => {
-      if (
+      if (filters.subTypes && filters.subTypes.length > 0) {
+        const matchesSubType =
+          (event.subType && filters.subTypes.includes(event.subType)) ||
+          filters.subTypes.some(
+            (sub) =>
+              event.triggerSummary.includes(sub) ||
+              event.ruleName.includes(sub) ||
+              (sub === "温度异常" && event.triggerSummary.includes("℃")) ||
+              (sub === "湿度异常" && event.triggerSummary.includes("湿度")) ||
+              (sub === "设备离线" && (event.triggerSummary.includes("离线") || event.ruleName.includes("离线"))) ||
+              (sub === "正常开关锁事务" && (event.triggerSummary.includes("开锁") || event.triggerSummary.includes("关锁")))
+          )
+        if (!matchesSubType) {
+          return false
+        }
+      } else if (
         filters.warningTypes.length > 0 &&
         !filters.warningTypes.includes(event.warningType)
       ) {
@@ -51,24 +60,17 @@ export function filterDeviceWarningEvents(
         return false
       }
 
-      if (
-        filters.triggerFrequency === "高频（>5 次）" &&
-        event.triggerCount <= 5
-      ) {
-        return false
-      }
-
-      if (filters.firstWarningTimeStart) {
-        const start = new Date(`${filters.firstWarningTimeStart}T00:00:00`)
-        const eventTime = new Date(event.firstWarningTime.replace(" ", "T"))
+      if (filters.warningTimeStart) {
+        const start = new Date(`${filters.warningTimeStart}T00:00:00`)
+        const eventTime = new Date(event.warningTime.replace(" ", "T"))
         if (eventTime < start) {
           return false
         }
       }
 
-      if (filters.firstWarningTimeEnd) {
-        const end = new Date(`${filters.firstWarningTimeEnd}T23:59:59`)
-        const eventTime = new Date(event.firstWarningTime.replace(" ", "T"))
+      if (filters.warningTimeEnd) {
+        const end = new Date(`${filters.warningTimeEnd}T23:59:59`)
+        const eventTime = new Date(event.warningTime.replace(" ", "T"))
         if (eventTime > end) {
           return false
         }
@@ -78,8 +80,8 @@ export function filterDeviceWarningEvents(
     })
     .sort(
       (a, b) =>
-        new Date(b.latestWarningTime.replace(" ", "T")).getTime() -
-        new Date(a.latestWarningTime.replace(" ", "T")).getTime()
+        new Date(b.warningTime.replace(" ", "T")).getTime() -
+        new Date(a.warningTime.replace(" ", "T")).getTime()
     )
 }
 

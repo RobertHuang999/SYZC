@@ -98,7 +98,7 @@ export function CollateralWarningListPage() {
         <PrototypeAnnotationTarget annotationIds={["collateral-warning-page"]}>
           <h1 className="text-2xl font-semibold tracking-tight">押品预警信息</h1>
           <p className="text-sm text-muted-foreground">
-            查看订单侧 7 类预警流水，筛选后处置或跳转详情
+            查看订单侧 7 类全新实时预警流水，筛选后处置或跳转详情
           </p>
         </PrototypeAnnotationTarget>
 
@@ -128,9 +128,6 @@ export function CollateralWarningListPage() {
                 onClick={() => showToast("批量公示风险确认")}
               >
                 批量公示风险
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => showToast("导出")}>
-                导出
               </Button>
               {!batchPublishEnabled && (
                 <span className="text-xs text-muted-foreground">

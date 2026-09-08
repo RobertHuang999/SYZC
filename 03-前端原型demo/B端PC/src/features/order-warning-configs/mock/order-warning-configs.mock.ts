@@ -1,6 +1,11 @@
 import type { OrderWarningConfig } from "../domain/types"
 
-export const orderWarningConfigsMock: OrderWarningConfig[] = [
+type OrderWarningConfigSeed = Omit<
+  OrderWarningConfig,
+  "createdBy" | "createdAt" | "updatedBy"
+>
+
+const orderWarningConfigSeeds: OrderWarningConfigSeed[] = [
   {
     configId: "owc-001",
     ruleName: "PO1002大宗综合风控",
@@ -159,3 +164,14 @@ export const orderWarningConfigsMock: OrderWarningConfig[] = [
     updatedAt: "2026-08-10 09:00:00",
   },
 ]
+
+const ORDER_CONFIG_CREATORS = ["张风控", "李客户经理", "王风控", "张风控"]
+const ORDER_CONFIG_UPDATERS = ["黄k", "李客户经理", "王风控", "系统"]
+
+export const orderWarningConfigsMock: OrderWarningConfig[] =
+  orderWarningConfigSeeds.map((config, index) => ({
+    ...config,
+    createdBy: ORDER_CONFIG_CREATORS[index % ORDER_CONFIG_CREATORS.length],
+    createdAt: `${config.updatedAt.slice(0, 10)} 09:30:00`,
+    updatedBy: ORDER_CONFIG_UPDATERS[index % ORDER_CONFIG_UPDATERS.length],
+  }))

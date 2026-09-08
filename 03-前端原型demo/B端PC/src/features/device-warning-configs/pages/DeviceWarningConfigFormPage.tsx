@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { ArrowLeftIcon, HelpCircleIcon } from "lucide-react"
+import { ArrowLeftIcon, InfoIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,12 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { SeverityLevelDisplay } from "@/shared/components/SeverityLevelDisplay"
 import { ENABLED_SEVERITY_LEVELS } from "@/shared/mock/severity-levels"
 import { DEVICE_WARNING_TYPES, type DeviceWarningType } from "../domain/types"
@@ -40,7 +34,6 @@ import {
   DEVICE_WARNING_SUB_TYPES,
   getDeviceOnlineSubTypeForWarningType,
   isDeviceOnlineSubType,
-  isInstantTriggerSubType,
 } from "../domain/constants"
 import {
   canSelectAutoRecoverDisposition,
@@ -114,21 +107,14 @@ export function DeviceWarningConfigFormPage() {
 
   const hasOnlineSubTypeOnly =
     form.warningSubTypes.length === 1 && isDeviceOnlineSubType(form.warningSubTypes[0] ?? "")
-  const isInstantTrigger = form.warningSubTypes.some(isInstantTriggerSubType)
-  const recommendedDisposition = useMemo(
-    () => getRecommendedDisposition(form.warningSubTypes),
-    [form.warningSubTypes]
-  )
+  const recommendedDisposition = getRecommendedDisposition(form.warningSubTypes)
   const dispositionEffects = resolveDispositionEffects(form.dispositionMode)
   const hideUpgradeSection = isGlobalNewDevice || dispositionEffects.hideUpgrade
   const dispositionDeviates = isDispositionDeviatingFromRecommendation(
     form.warningSubTypes,
     form.dispositionMode
   )
-  const autoRecoverSelectable = useMemo(
-    () => canSelectAutoRecoverDisposition(form.warningSubTypes),
-    [form.warningSubTypes]
-  )
+  const autoRecoverSelectable = canSelectAutoRecoverDisposition(form.warningSubTypes)
 
   const updateMetricThreshold = (
     metric: keyof DeviceWarningConfigFormValues["metricThresholds"],
@@ -170,7 +156,6 @@ export function DeviceWarningConfigFormPage() {
   const handleWarningTypeChange = (type: DeviceWarningType) => {
     const available = DEVICE_WARNING_SUB_TYPES[type] || []
     const defaultSubs = available.length > 0 ? [available[0]] : []
-    const isInstant = defaultSubs.some(isInstantTriggerSubType)
     const dispositionMode = getRecommendedDisposition(defaultSubs)
 
     setForm((current) => ({
@@ -179,7 +164,6 @@ export function DeviceWarningConfigFormPage() {
       warningSubTypes: defaultSubs,
       dispositionMode,
       newDeviceOnly: false,
-      debounceMode: isInstant ? "立即触发" : current.debounceMode,
       upgradeEnabled: resolveDispositionEffects(dispositionMode).hideUpgrade
         ? false
         : current.upgradeEnabled,
@@ -224,13 +208,11 @@ export function DeviceWarningConfigFormPage() {
 
       const onlyOnline = next.length === 1 && isDeviceOnlineSubType(next[0])
       const effects = resolveDispositionEffects(current.dispositionMode)
-      const isInstant = next.some(isInstantTriggerSubType)
 
       return {
         ...current,
         warningSubTypes: next,
         newDeviceOnly: onlyOnline ? current.newDeviceOnly : false,
-        debounceMode: isInstant ? "立即触发" : current.debounceMode,
         upgradeEnabled: effects.hideUpgrade ? false : current.upgradeEnabled,
         upgradeDays: effects.hideUpgrade ? "0" : current.upgradeDays,
       }
@@ -380,7 +362,7 @@ export function DeviceWarningConfigFormPage() {
                   })}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  R14：「设备上线」须单独成规则。下方三种处置策略均可自由配置；chip 标注为系统推荐默认，偏离推荐保存时将二次确认。
+                  注：「设备上线」监控须单独配置为独立规则。下方处置策略支持自由配置，非系统推荐策略保存时将进行二次确认。
                 </p>
               </div>
               <div className="space-y-3 md:col-span-2">
@@ -405,7 +387,7 @@ export function DeviceWarningConfigFormPage() {
                         className={cn(
                           "flex gap-3 rounded-lg border p-3 transition-colors",
                           disabled
-                            ? "cursor-not-allowed border-border bg-muted/40 opacity-60"
+                            ? "cursor-not-allowed border-border/70 bg-muted/30 opacity-70"
                             : "cursor-pointer",
                           !disabled &&
                             (selected
@@ -433,38 +415,26 @@ export function DeviceWarningConfigFormPage() {
                                 推荐
                               </span>
                             )}
+                            {disabled && (
+                              <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-normal text-muted-foreground">
+                                不可用
+                              </span>
+                            )}
                           </div>
                           <p className="text-xs leading-relaxed text-muted-foreground">
-                            {DISPOSITION_MODE_HINTS[mode]}
+                            {disabled
+                              ? "当前所选预警子类型无设备状态恢复信号，暂不支持此策略。"
+                              : DISPOSITION_MODE_HINTS[mode]}
                           </p>
                         </div>
                       </label>
                     )
                   })}
                 </div>
-                {!autoRecoverSelectable && (
-                  <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-                    当前所选子类型不在 R15c 白名单内（无 02/01 R03 恢复信号），不可选择「恢复自动结案」。通知/安防/图像/事务类请用「触发即结案」或「人工解除结案」。
-                  </p>
-                )}
                 {dispositionDeviates && (
-                  <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                    当前选择与系统推荐不一致，保存时将弹出确认提示。
-                  </p>
-                )}
-                {form.dispositionMode === "RECORD_ONLY" && (
-                  <p className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800">
-                    当前策略：写入设备预警信息，触发时直接「已结案 · 有效」；可作通知留痕，无待处置待办与解除入口。
-                  </p>
-                )}
-                {form.dispositionMode === "ACTION_REQUIRED" && (
-                  <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-xs text-orange-800">
-                    当前策略：初态「待处置 · 有效」，须人工解除后「已结案 · 有效」，可配置超时升级。
-                  </p>
-                )}
-                {form.dispositionMode === "AUTO_RECOVER" && (
-                  <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
-                    当前策略：初态「待处置 · 有效」，采集/设备恢复后自动「已结案 · 有效」，不可人工解除。
+                  <p className="flex items-center gap-1.5 rounded-md border border-amber-200/80 bg-amber-50/60 px-3 py-1.5 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-400">
+                    <InfoIcon className="size-3.5 shrink-0" />
+                    <span>当前选择与系统推荐（{DISPOSITION_MODE_LABELS[recommendedDisposition]}）不同，保存时将进行二次确认。</span>
                   </p>
                 )}
               </div>
@@ -503,12 +473,6 @@ export function DeviceWarningConfigFormPage() {
                   </SelectContent>
                 </Select>
               </div>
-              {isEdit && form.version !== null && (
-                <div className="space-y-2">
-                  <Label>版本号</Label>
-                  <Input value={String(form.version)} readOnly />
-                </div>
-              )}
             </CardContent>
           </Card>
         </PrototypeAnnotationTarget>
@@ -814,108 +778,6 @@ export function DeviceWarningConfigFormPage() {
                       </div>
                     )}
                   </div>
-                </div>
-              )}
-              <div className="space-y-2 md:col-span-2">
-                <div className="flex items-center gap-1.5">
-                  <Label>
-                    <span className="text-destructive font-bold mr-1">*</span>
-                    防抖判定模式
-                  </Label>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger
-                        type="button"
-                        className="inline-flex cursor-help items-center text-muted-foreground hover:text-foreground"
-                      >
-                        <HelpCircleIcon className="size-4" />
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="w-80 space-y-2.5 p-3.5 shadow-xl border border-border/80 bg-popover/98 rounded-xl text-left">
-                        <div className="flex items-center gap-1.5 font-semibold text-foreground pb-2 border-b border-border/60">
-                          <HelpCircleIcon className="size-4 text-primary" />
-                          <span>防抖判定机制说明</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          防抖机制用于过滤环境瞬时毛刺与设备通信偶然波动，避免产生无意义误报：
-                        </p>
-                        <div className="space-y-1.5 text-xs">
-                          <div className="rounded-lg bg-muted/60 p-2">
-                            <div className="font-medium text-foreground">1. 按持续时长判定</div>
-                            <div className="text-muted-foreground text-[11px] mt-0.5">异常指标需连续维持达到设定分钟数才正式生成预警。</div>
-                          </div>
-                          <div className="rounded-lg bg-muted/60 p-2">
-                            <div className="font-medium text-foreground">2. 按连续超标次数判定</div>
-                            <div className="text-muted-foreground text-[11px] mt-0.5">传感器需连续多次采集超标才正式生成预警。</div>
-                          </div>
-                          <div className="rounded-lg bg-muted/60 p-2">
-                            <div className="font-medium text-foreground">3. 立即触发</div>
-                            <div className="text-muted-foreground text-[11px] mt-0.5">物理破坏、设备上线等瞬态事件发生即刻报警，无防抖延迟。</div>
-                          </div>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <div className="flex flex-wrap gap-4 pt-1">
-                  {(["按持续时长判定", "按连续超标次数判定", "立即触发"] as const).map(
-                    (mode) => (
-                      <label key={mode} className="flex cursor-pointer items-center gap-2 text-sm">
-                        <input
-                          type="radio"
-                          name="debounceMode"
-                          checked={form.debounceMode === mode}
-                          disabled={isInstantTrigger && mode !== "立即触发"}
-                          onChange={() => updateForm({ debounceMode: mode })}
-                        />
-                        <span>{mode}</span>
-                      </label>
-                    )
-                  )}
-                </div>
-              </div>
-              {form.debounceMode !== "立即触发" && (
-                <div className="space-y-2 md:col-span-2">
-                  <Label>
-                    <span className="text-destructive font-bold mr-1">*</span>
-                    {form.debounceMode === "按持续时长判定"
-                      ? "防抖持续时长阈值"
-                      : "防抖连续超标次数阈值"}
-                  </Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min={1}
-                      value={form.debounceValue}
-                      onChange={(event) => updateForm({ debounceValue: event.target.value })}
-                      placeholder={form.debounceMode === "按持续时长判定" ? "请输入持续时长" : "请输入连续次数"}
-                      className="w-40"
-                    />
-                    {form.debounceMode === "按持续时长判定" ? (
-                      <Select
-                        value={form.debounceUnit || "分钟"}
-                        onValueChange={(val) =>
-                          updateForm({ debounceUnit: val as "分钟" | "秒" })
-                        }
-                      >
-                        <SelectTrigger className="w-28">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="分钟">分钟 (min)</SelectItem>
-                          <SelectItem value="秒">秒 (s)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <span className="text-sm font-medium text-muted-foreground">
-                        次 (times)
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {form.debounceMode === "按持续时长判定"
-                      ? `提示：指标异常必须连续维持达到设定 ${form.debounceValue || "0"} ${form.debounceUnit || "分钟"} 才生成预警流水。`
-                      : `提示：采集数据必须连续达到设定 ${form.debounceValue || "0"} 次超标才生成预警流水。`}
-                  </p>
                 </div>
               )}
             </CardContent>

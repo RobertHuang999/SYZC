@@ -233,7 +233,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
       releaseSnapshotImage: "cold-snapshot-normal.jpg",
     },
   },
-  // 12. 设备GPS异常 (L4 · 历史 · 电子围栏越界)
+  // 12. 设备GPS异常 (L4 · 物联穿透 · 电子围栏越界)
   {
     orderNo: "PO202606-20",
     ruleName: "在途押品运输车载GPS偏航告警",
@@ -242,7 +242,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     severityCode: l4.severityCode,
     severityName: l4.severityName,
     severityColor: l4.severityColor,
-    warningSource: "历史",
+    warningSource: "物联穿透",
     warningContent: "位置：G15沈海高速段；设备名称：车载GPS追踪器-GPS09；触发预警：偏离既定物流轨迹超 5 公里！",
     snapshotImageStatus: "none",
     warningTime: "2026-06-15 14:00:00",
@@ -250,7 +250,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     publicityStatus: "已取消",
     processedBy: "物流监管员（外部专员）",
     warningStatus: "CLOSED_VALID",
-    deviceEventId: null,
+    deviceEventId: "evt-012",
     disposalInfo: {
       situationDescription: "因前方道路施工临时绕行，现已回归主航线，确认货物铅封完好。",
       sitePhotos: [],

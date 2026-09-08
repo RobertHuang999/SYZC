@@ -84,8 +84,8 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
     targetId: "collateral-warning-toolbar",
     number: 3,
     kind: "交互",
-    title: "批量风险公示与数据导出",
-    content: "支持对已处理（有效）且未公示的预警记录进行批量公示操作，以及筛选结果全量导出。",
+    title: "批量风险公示",
+    content: "支持对已处理（有效）且未公示的预警记录进行批量公示操作。",
     details: [
       {
         title: "操作规则与权限控制",
@@ -93,10 +93,6 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
           {
             label: "批量公示风险",
             content: "仅当当前筛选结果中包含【已处理（有效）且 未公示】的数据时按钮激活；点击弹出批量公示确认框并展示候选记录数。",
-          },
-          {
-            label: "导出数据",
-            content: "导出当前筛选条件匹配的全部押品预警数据，包含订单号、品类规格、预警类型、等级、处置状态与时间戳。",
           },
           {
             label: "权限控制",

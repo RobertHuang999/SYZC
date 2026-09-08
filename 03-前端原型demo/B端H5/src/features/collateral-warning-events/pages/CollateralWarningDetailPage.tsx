@@ -235,13 +235,6 @@ export function CollateralWarningDetailPage() {
                     {event.penetrationInfo?.triggerLocation || "一号钢材仓 / A库 / 01分区"}
                   </span>
                 </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="w-24 shrink-0 text-gray-500">关联设备事件ID:</span>
-                  <span className="flex-1 text-right font-mono text-gray-700">
-                    {event.deviceEventId || "dev-evt-2026082001"}
-                  </span>
-                </div>
               </div>
             </SectionCard>
           )}

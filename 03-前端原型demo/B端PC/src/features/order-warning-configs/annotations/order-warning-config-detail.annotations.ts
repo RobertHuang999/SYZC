@@ -120,4 +120,27 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
       },
     ],
   },
+  {
+    id: "order-warning-config-detail-audit",
+    targetId: "order-warning-config-detail-audit",
+    number: 5,
+    kind: "字段",
+    title: "系统审计信息",
+    content: "与设备预警配置统一展示规则 Version、状态、创建人/创建时间与更新人/更新时间；已失效规则追加失效原因。",
+    details: [
+      {
+        title: "配置审计字段",
+        items: [
+          {
+            label: "创建/更新主体与时间",
+            content: "创建与最近更新均展示操作主体和完整秒级时间戳，避免订单规则仅显示更新时间。",
+          },
+          {
+            label: "Version",
+            content: "综合策略保存后递增，并作为订单规则快照和风控引擎同步的版本标识。",
+          },
+        ],
+      },
+    ],
+  },
 ]

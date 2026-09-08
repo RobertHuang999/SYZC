@@ -24,7 +24,6 @@ export function inferDispositionModeFromEvent(
 ): DispositionMode {
   const linkedRule = RULE_SCENARIO_BY_EVENT_ID[event.eventId]
   if (linkedRule) {
-    // 精编流水：以规则上用户保存的 dispositionMode 为准（非系统推荐硬锁）
     return linkedRule.dispositionMode
   }
 
@@ -63,14 +62,13 @@ export function applyDispositionLedger(
   if (warningStatus !== WARNING_STATUS.OPEN_INVALID) {
     if (effects.initialStatusClosed) {
       warningStatus = WARNING_STATUS.CLOSED_VALID
-      processedTime = processedTime ?? event.latestWarningTime
+      processedTime = processedTime ?? event.warningTime
       processedBy = processedBy ?? "系统自动处理"
     } else if (
       effects.manualReleaseAllowed &&
       warningStatus === WARNING_STATUS.CLOSED_VALID &&
       processedBy === "系统自动处理"
     ) {
-      // 待办类不应被系统直接结案（除非明确写了人工处理）
       warningStatus = WARNING_STATUS.OPEN_VALID
       processedTime = null
       processedBy = null

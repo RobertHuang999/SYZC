@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { RELEASE_CONFIRM_MESSAGE } from "../domain/actions"
+import { BATCH_RELEASE_CONFIRM_MESSAGE } from "../domain/actions"
 import type { DeviceWarningEvent } from "../domain/types"
 import { ReleaseMaterialForm } from "./ReleaseMaterialForm"
 import {
@@ -17,19 +17,19 @@ import {
 } from "../domain/release-validation"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 
-type ReleaseConfirmDialogProps = {
+type BatchReleaseConfirmDialogProps = {
   open: boolean
-  event: DeviceWarningEvent | null
+  events: DeviceWarningEvent[]
   onOpenChange: (open: boolean) => void
-  onConfirm: (event: DeviceWarningEvent) => void
+  onConfirm: (events: DeviceWarningEvent[]) => void
 }
 
-export function ReleaseConfirmDialog({
+export function BatchReleaseConfirmDialog({
   open,
-  event,
+  events,
   onOpenChange,
   onConfirm,
-}: ReleaseConfirmDialogProps) {
+}: BatchReleaseConfirmDialogProps) {
   const [step, setStep] = useState<"confirm" | "materials">("confirm")
   const [situationDescription, setSituationDescription] = useState("")
   const [sitePhotoNames, setSitePhotoNames] = useState<string[]>([])
@@ -44,17 +44,13 @@ export function ReleaseConfirmDialog({
     setSituationDescription("")
     setSitePhotoNames([])
     setErrors({})
-  }, [event?.eventId, open])
+  }, [open, events.map((event) => event.eventId).join(",")])
 
   const handleSubmit = () => {
-    if (!event) {
-      return
-    }
-
     const nextErrors = validateReleaseForm({
       situationDescription,
       sitePhotoNames,
-      version: event.version,
+      version: events[0]?.version ?? 1,
     })
     setErrors(nextErrors)
 
@@ -62,7 +58,7 @@ export function ReleaseConfirmDialog({
       return
     }
 
-    onConfirm(event)
+    onConfirm(events)
     onOpenChange(false)
   }
 
@@ -70,15 +66,27 @@ export function ReleaseConfirmDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-2xl">
         <PrototypeAnnotationTarget
-          annotationIds={["device-warning-release-confirm"]}
+          annotationIds={["device-warning-batch-release"]}
           markerPosition="top-left"
         >
           {step === "confirm" ? (
             <>
               <DialogHeader>
-                <DialogTitle>确认解除</DialogTitle>
-                <DialogDescription>{RELEASE_CONFIRM_MESSAGE}</DialogDescription>
+                <DialogTitle>批量解除预警</DialogTitle>
+                <DialogDescription>
+                  {BATCH_RELEASE_CONFIRM_MESSAGE}
+                  <span className="mt-2 block text-foreground">
+                    已选 {events.length} 条待处置 · 有效且支持人工解除的预警。
+                  </span>
+                </DialogDescription>
               </DialogHeader>
+              <ul className="max-h-40 overflow-y-auto rounded-md border bg-muted/30 p-3 text-sm">
+                {events.map((event) => (
+                  <li key={event.eventId} className="py-0.5">
+                    {event.ruleName} · {event.deviceName} · {event.warningTime}
+                  </li>
+                ))}
+              </ul>
               <DialogFooter>
                 <Button variant="outline" onClick={() => onOpenChange(false)}>
                   取消
@@ -91,34 +99,32 @@ export function ReleaseConfirmDialog({
           ) : (
             <>
               <DialogHeader>
-                <DialogTitle>填写解除说明</DialogTitle>
+                <DialogTitle>填写批量解除说明</DialogTitle>
                 <DialogDescription>
-                  请填写现场核实情况，提交后该条预警将归档为「已结案 · 有效」。
+                  统一情况说明将写入所选 {events.length} 条预警的处置记录；每条仍独立携带 Version 提交。
                 </DialogDescription>
               </DialogHeader>
-              {event && (
-                <ReleaseMaterialForm
-                  situationDescription={situationDescription}
-                  sitePhotoNames={sitePhotoNames}
-                  version={event.version}
-                  errors={errors}
-                  onSituationChange={(value) => {
-                    setSituationDescription(value)
-                    if (errors.situationDescription) {
-                      setErrors((current) => ({
-                        ...current,
-                        situationDescription: undefined,
-                      }))
-                    }
-                  }}
-                  onSitePhotosChange={(names) => {
-                    setSitePhotoNames(names)
-                    if (errors.sitePhotos) {
-                      setErrors((current) => ({ ...current, sitePhotos: undefined }))
-                    }
-                  }}
-                />
-              )}
+              <ReleaseMaterialForm
+                situationDescription={situationDescription}
+                sitePhotoNames={sitePhotoNames}
+                version={events[0]?.version ?? 1}
+                errors={errors}
+                onSituationChange={(value) => {
+                  setSituationDescription(value)
+                  if (errors.situationDescription) {
+                    setErrors((current) => ({
+                      ...current,
+                      situationDescription: undefined,
+                    }))
+                  }
+                }}
+                onSitePhotosChange={(names) => {
+                  setSitePhotoNames(names)
+                  if (errors.sitePhotos) {
+                    setErrors((current) => ({ ...current, sitePhotos: undefined }))
+                  }
+                }}
+              />
               <DialogFooter>
                 <Button variant="outline" onClick={() => setStep("confirm")}>
                   返回确认
@@ -126,7 +132,7 @@ export function ReleaseConfirmDialog({
                 <Button variant="outline" onClick={() => onOpenChange(false)}>
                   取消
                 </Button>
-                <Button onClick={handleSubmit}>提交解除</Button>
+                <Button onClick={handleSubmit}>提交批量解除</Button>
               </DialogFooter>
             </>
           )}

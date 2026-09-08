@@ -7,14 +7,23 @@ export const deviceWarningReleaseH5Annotations: PrototypeAnnotation[] = [
     number: 1,
     kind: "页面",
     title: "移动端 · 设备预警解除与现场拍照",
-    content: "录入现场核实说明、拍照上传现场照片并调取设备联动抓拍，完成整轮告警归档解除。",
+    content: "录入现场核实说明、拍照上传现场照片并调取设备联动抓拍，完成单条流水归档解除。",
     details: [
       {
         title: "解除流转与业务意义",
         items: [
           {
-            label: "整轮归档",
-            content: "人工解除提交将归档本轮累计的全部 N 次触发，取消未完成的通知升级任务并恢复大屏状态。",
+            label: "单条归档流转图",
+            content: `flowchart TD
+    A["详情/列表发起"] --> B["二次确认"]
+    B --> C["录入材料 + 联动抓拍"]
+    C --> D["Version 乐观锁校验"]
+    D --> E["归档该条流水为已结案·有效"]
+    E --> F["取消该条升级任务"]`,
+          },
+          {
+            label: "业务意义",
+            content: "人工解除提交仅归档本条独立流水，取消该条挂起的升级通知；不涉及频次聚合或整轮归档。",
           },
           {
             label: "操作权限",
@@ -30,7 +39,7 @@ export const deviceWarningReleaseH5Annotations: PrototypeAnnotation[] = [
     number: 2,
     kind: "交互",
     title: "处置说明录入与现场拍照",
-    content: "录入 10~500 字符情况说明、现场拍照上传（最多 5 张）并调用摄像头联动抓拍。",
+    content: "录入 10~200 字符情况说明、现场拍照上传（最多 10 张）并调用摄像头联动抓拍。",
     details: [
       {
         title: "表单与校验",

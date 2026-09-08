@@ -19,11 +19,11 @@ function scenarioToConfig(
     configId: scenario.configId,
     ruleName: scenario.ruleName,
     warningType: scenario.warningType,
+    subTypes: scenario.warningSubTypes,
     severityLevelId: scenario.severityLevelId,
     dispositionMode: scenario.dispositionMode,
     deviceScope: scenario.deviceScope,
     triggerCondition: scenario.triggerCondition,
-    debounceCondition: scenario.debounceCondition,
     status: scenario.status,
     createdBy: meta.createdBy,
     createdAt: meta.createdAt,
@@ -93,30 +93,13 @@ function buildExtraConfigs(): DeviceWarningConfig[] {
       configId: `dwc-${String(index + 17).padStart(3, "0")}`,
       ruleName: sample.ruleName,
       warningType: sample.warningType,
+      subTypes: sample.subTypes,
       severityLevelId: severityCycle[index % severityCycle.length],
       dispositionMode: sample.dispositionMode ?? getRecommendedDisposition(subTypes),
       deviceScope: subTypes.includes("设备上线")
         ? "仅针对新设备（全局监听）"
         : `已选 ${3 + (index % 10)} 台设备`,
       triggerCondition: formatTriggerCondition(subTypes),
-      debounceCondition: subTypes.some((item) =>
-        [
-          "开锁通知",
-          "关锁通知",
-          "设备上线",
-          "设备移除",
-          "拆壳",
-          "锁杆被剪",
-          "锁舌被卡",
-          "非法开箱",
-          "拆卡报警",
-          "密码错误",
-          "关锁异常",
-          "非法拆除",
-        ].includes(item)
-      )
-        ? "立即触发"
-        : "持续>3分",
       status,
       createdBy: index % 2 === 0 ? "张工" : "李运维",
       createdAt: `08-${day} ${hour}:00`,

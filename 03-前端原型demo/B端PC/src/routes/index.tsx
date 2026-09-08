@@ -4,6 +4,7 @@ import { DeviceWarningEventListPage } from "@/features/device-warning-events/pag
 import { DeviceWarningEventDetailPage } from "@/features/device-warning-events/pages/DeviceWarningEventDetailPage"
 import { DeviceWarningEventReleasePage } from "@/features/device-warning-events/pages/DeviceWarningEventReleasePage"
 import { CollateralWarningListPage } from "@/features/collateral-warning-events/pages/CollateralWarningListPage"
+import { CollateralWarningArchivePage } from "@/features/collateral-warning-events/pages/CollateralWarningArchivePage"
 import { CollateralWarningDetailPage } from "@/features/collateral-warning-events/pages/CollateralWarningDetailPage"
 import { MidLoanRiskListPage } from "@/features/mid-loan-risk-control/pages/MidLoanRiskListPage"
 import { MidLoanRiskDetailPage } from "@/features/mid-loan-risk-control/pages/MidLoanRiskDetailPage"
@@ -65,6 +66,10 @@ export function AppRoutes() {
         <Route
           path="物联网IOT与预警/预警信息/押品预警信息"
           element={<CollateralWarningListPage />}
+        />
+        <Route
+          path="物联网IOT与预警/预警信息/历史押品预警"
+          element={<CollateralWarningArchivePage />}
         />
         <Route
           path="物联网IOT与预警/预警信息/押品预警信息/详情/:id"

@@ -16,11 +16,11 @@ export type DeviceWarningConfig = {
   configId: string
   ruleName: string
   warningType: DeviceWarningType
+  subTypes?: string[]
   severityLevelId: string
   dispositionMode: import("./disposition").DispositionMode
   deviceScope: string
   triggerCondition: string
-  debounceCondition: string
   status: DeviceWarningConfigStatus
   createdBy: string
   createdAt: string
@@ -31,13 +31,11 @@ export type DeviceWarningConfig = {
 export type DeviceWarningConfigFilters = {
   ruleName: string
   warningTypes: DeviceWarningType[]
+  subTypes: string[]
   severityLevelIds: string[]
   dispositionModes: import("./disposition").DispositionMode[]
   status: "全部" | DeviceWarningConfigStatus
 }
-
-export type DebounceMode = "按持续时长判定" | "按连续超标次数判定" | "立即触发"
-export type DebounceUnit = "分钟" | "秒"
 
 export type DeviceWarningConfigDetail = DeviceWarningConfig & {
   ruleUuid: string
@@ -47,8 +45,6 @@ export type DeviceWarningConfigDetail = DeviceWarningConfig & {
   monitorThresholdMin: number | null
   monitorThresholdMax: number | null
   monitorThresholdUnit: string | null
-  debounceMode: DebounceMode
-  debounceConditionDetail: string
   notifyChannels: string[]
   notifyTargets: string[]
   upgradeStrategy: string | null
@@ -78,9 +74,6 @@ export type DeviceWarningConfigFormValues = {
     co2: MetricThreshold
     oxygen: MetricThreshold
   }
-  debounceMode: DebounceMode
-  debounceValue: string
-  debounceUnit: DebounceUnit
   notifyChannels: string[]
   notifyTargets: string[]
   upgradeEnabled: boolean

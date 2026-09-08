@@ -29,12 +29,6 @@ function buildScenarioExtension(
     monitorThresholdMin: hasTemperature ? -5 : null,
     monitorThresholdMax: hasTemperature ? 35 : null,
     monitorThresholdUnit: hasTemperature ? "℃" : null,
-    debounceMode:
-      scenario.debounceCondition === "立即触发" ? "立即触发" : "按持续时长判定",
-    debounceConditionDetail:
-      scenario.debounceCondition === "立即触发"
-        ? "立即触发"
-        : "超标须持续超过 3 分钟才正式触发有效告警",
     notifyChannels: ["短信"],
     notifyTargets:
       scenario.dispositionMode === "RECORD_ONLY"
@@ -67,8 +61,6 @@ const defaultExtension = (
   monitorThresholdMin: warningType.includes("物联") ? 0 : null,
   monitorThresholdMax: warningType.includes("物联") ? 100 : null,
   monitorThresholdUnit: warningType.includes("物联") ? "℃" : null,
-  debounceMode: "按持续时长判定",
-  debounceConditionDetail: "持续超过 3 分钟",
   notifyChannels: [],
   notifyTargets: ["张主管(风控部)"],
   upgradeStrategy: "持续未解除 3 天后升级 ➔ 王总监(风控部)",

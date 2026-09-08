@@ -23,9 +23,7 @@ function cloneWithIndex(index: number, template: DeviceWarningEvent): DeviceWarn
       index < deviceWarningEventUseCases.length
         ? template.ruleName
         : `${template.ruleName}-${index + 1}`,
-    firstWarningTime: `2026-08-${day} ${hour}:${minute}:00`,
-    latestWarningTime: `2026-08-${day} ${hour}:${minute}:00`,
-    triggerCount: template.triggerCount > 1 ? (index % 8) + 2 : 1,
+    warningTime: `2026-08-${day} ${hour}:${minute}:00`,
     version: template.version,
   }
 

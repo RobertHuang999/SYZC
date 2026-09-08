@@ -1,4 +1,5 @@
 import { Lock, UserRound } from "lucide-react"
+import { formatDateTime } from "@/shared/lib/date-utils"
 import type { AccessDevice } from "../domain/types"
 
 type AccessControlDeviceCardProps = {
@@ -48,7 +49,9 @@ export function AccessControlDeviceCard({
           <p className="mt-1 text-xs text-gray-500">
             {device.warehouseName ?? "未绑定"} · {device.locationDetail}
           </p>
-          <p className="mt-1 text-[10px] text-gray-400">更新 {device.updatedAt}</p>
+          <p className="mt-1 font-mono text-[10px] text-gray-400">
+            更新 {formatDateTime(device.updatedAt)}
+          </p>
         </div>
       </div>
 

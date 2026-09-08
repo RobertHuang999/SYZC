@@ -16,6 +16,7 @@ export const RELEASE_VALIDATION_MESSAGES = {
   alreadyProcessed: "该预警已结案或已作废",
   manualReleaseNotAllowed: "该类型预警不支持人工解除，请等待自动恢复",
   versionConflict: "数据已被他人修改，请刷新后重试",
+  batchEmpty: "请至少勾选一条可解除的预警",
 } as const
 
 export type ReleaseFormValues = {
@@ -95,8 +96,8 @@ export function validateSitePhotoFile(
   return null
 }
 
-export function getReleaseHintText(triggerCount: number): string {
-  return `确认解除后将归档整轮 ${triggerCount} 次触发，状态变为「已结案 · 有效」，并同步取消相关升级任务。`
+export function getReleaseHintText(): string {
+  return "确认解除后该条预警将归档为「已结案 · 有效」，并同步取消相关升级任务。"
 }
 
 export const RELEASE_DEMO_SITUATION_BY_EVENT: Record<string, string> = {

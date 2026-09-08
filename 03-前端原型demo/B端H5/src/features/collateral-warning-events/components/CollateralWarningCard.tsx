@@ -170,6 +170,23 @@ export function CollateralWarningCard({
           </span>
         </div>
 
+        {/* 已处置时展示处理信息合并行 */}
+        {(event.processedBy || event.processedTime) && (
+          <div className="mt-1.5 flex items-center justify-between text-[11px] text-gray-400">
+            <div className="flex items-center gap-1 truncate">
+              <span>处理信息:</span>
+              <span className="text-gray-700 font-medium truncate">
+                {event.processedBy || "系统自动处理"}
+              </span>
+            </div>
+            {event.processedTime && (
+              <span className="font-mono text-[10px] text-gray-500 shrink-0">
+                {formatDateTime(event.processedTime)}
+              </span>
+            )}
+          </div>
+        )}
+
         {/* 4. 底部动作栏 —— 严格对齐规则规格 */}
         {!batchMode && (
           <PrototypeAnnotationTarget annotationIds={["collateral-warning-row-actions"]}>

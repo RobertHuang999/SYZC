@@ -10,8 +10,10 @@ export function getDeviceWarningEventById(
   }
 
   let event = deviceWarningEventsMock.find((item) => item.eventId === eventId)
-  if (!event && eventId.startsWith("dev-evt-")) {
-    event = deviceWarningEventsMock.find((item) => item.eventId === "evt-017") ?? deviceWarningEventsMock[0]
+  if (!event) {
+    event =
+      deviceWarningEventsMock.find((item) => item.eventId === "evt-017") ??
+      deviceWarningEventsMock[0]
   }
   if (!event) {
     return null

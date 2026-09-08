@@ -7,7 +7,7 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
     number: 1,
     kind: "页面",
     title: "设备预警配置详情与状态流转",
-    content: "展示单条设备预警规则的完整策略定义、监控设备清单、阈值防抖参数及通知升级矩阵。",
+    content: "展示单条设备预警规则的完整策略定义、监控设备清单、阈值条件、规则 Version 及通知升级矩阵。",
     details: [
       {
         title: "规则状态生命周期与操作",
@@ -18,7 +18,9 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
     A["生效中 (ACTIVE)"] -->|"人工停用"| B["停用 (DISABLED)"]
     B -->|"重新启用"| A
     A -->|"关联设备全部解绑"| C["已失效 (EXPIRED / 不可逆)"]
-    A -->|"软删除"| D["已删除 (DELETED)"]`,
+    A -->|"软删除"| D["已删除 (DELETED)"]
+    A -->|"编辑保存"| E["Version+1 (C08)"]
+    E --> A`,
           },
           {
             label: "页头动作与权限",
@@ -34,7 +36,7 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
     number: 2,
     kind: "字段",
     title: "基本信息与预警等级画像",
-    content: "展示规则名称、预警大类、预警子类型、绑定的预警等级色块与规则状态。",
+    content: "展示规则名称、预警大类、预警子类型、绑定的预警等级色块、规则 Version 与规则状态。",
     details: [
       {
         title: "核心字段字典清单",
@@ -50,6 +52,10 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "处置策略 (disposition_mode)",
             content: "Badge 展示：触发即结案 / 人工解除结案 / 恢复自动结案；固化入 02/01 规则快照，决定落账初态与 R14'/R03 结案路径。",
+          },
+          {
+            label: "规则 Version",
+            content: "当前生效版本号；编辑保存后递增，不回写既有未处理流水，等待下一次厂商回调按最新 Version 落账（C08）。",
           },
         ],
       },
@@ -83,19 +89,23 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "device-warning-config-detail-threshold",
     number: 4,
     kind: "规则",
-    title: "监控阈值与防抖判定模型",
-    content: "区分瞬态安防事件与持续传感器事件，展示阈值条件、持续时长或连续次数判定规则。",
+    title: "监控阈值与厂商预过滤",
+    content: "展示数值阈值或事件型触发条件；平台不再配置防抖，事件预过滤与去抖由设备厂商侧完成后再回调平台。",
     details: [
       {
-        title: "防抖模型规格",
+        title: "阈值规格",
         items: [
           {
             label: "瞬态安防事件",
-            content: "如防拆报警、强行破门，防抖置灰并锁定为【即时触发】，0 延时上报保障安全。",
+            content: "如防拆报警、强行破门，展示事件型触发描述；厂商侧实时上报，平台直接接收回调落账。",
           },
           {
             label: "持续传感器事件",
-            content: "如温湿度超标，支持【持续超标 M 分钟】或【连续 N 次采样超标】才判定为有效预警，过滤环境毛刺波动。",
+            content: "如温湿度超标，展示数值上下限（如【温度 > 35℃】）；持续判定由厂商接入层完成，平台按回调逐条落账。",
+          },
+          {
+            label: "厂商预过滤边界",
+            content: "防抖、持续时长、连续次数等判定均在厂商侧完成；平台 03/02 仅维护阈值策略与通知升级，不再展示防抖配置项。",
           },
         ],
       },
@@ -118,7 +128,30 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "超时升级梯队",
-            content: "配置超时 T 天未解除时向升级对象追加督办；处置策略为「触发即结案」时升级区隐藏（R15a）。",
+            content: "配置超时 T 天未解除时向升级对象追加督办；处置策略为「触发即结案」时升级区隐藏（R15a）。升级计时以每条流水的预警时间为起点。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "device-warning-config-detail-audit",
+    targetId: "device-warning-config-detail-audit",
+    number: 6,
+    kind: "字段",
+    title: "系统审计信息",
+    content: "统一展示规则 Version、状态、创建人/创建时间与更新人/更新时间；已失效规则追加失效原因。",
+    details: [
+      {
+        title: "配置审计字段",
+        items: [
+          {
+            label: "创建/更新主体与时间",
+            content: "创建与最近更新均展示操作主体和完整秒级时间戳，和设备预警配置列表保持一致。",
+          },
+          {
+            label: "Version",
+            content: "编辑保存后递增；该版本号与规则快照一起用于历史事件追溯。",
           },
         ],
       },

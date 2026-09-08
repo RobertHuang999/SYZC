@@ -27,11 +27,9 @@ export function AccessControlDeviceFilters({
 }: AccessControlDeviceFiltersProps) {
   return (
     <Card>
-      <div className="px-4 pt-4">
-        <h1 className="text-lg font-semibold">门禁设备</h1>
-      </div>
-      <WarningFilterHeader onSearch={onSearch} onReset={onReset} />
-      <CardContent className="grid gap-4 pb-4 md:grid-cols-3 lg:grid-cols-6">
+      <CardContent className="space-y-4 pt-4">
+        <WarningFilterHeader onSearch={onSearch} onReset={onReset} />
+        <div className="grid gap-4 pb-4 md:grid-cols-3 lg:grid-cols-6">
         <div className="space-y-2">
           <Label>设备名称</Label>
           <Input
@@ -120,6 +118,7 @@ export function AccessControlDeviceFilters({
             value={value.updatedFrom}
             onChange={(e) => onChange({ ...value, updatedFrom: e.target.value })}
           />
+        </div>
         </div>
       </CardContent>
     </Card>

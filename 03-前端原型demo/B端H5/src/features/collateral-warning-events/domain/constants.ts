@@ -52,10 +52,9 @@ export const PUBLICITY_STATUS_FILTER_OPTIONS: ("全部" | PublicityStatus)[] = [
   "已取消",
 ]
 
-// 预警来源
+// 预警来源（6.2 全新仅包含订单配置触发与物联穿透，历史已归档）
 export const WARNING_SOURCE_FILTER_OPTIONS = [
   "全部",
   "订单配置触发",
   "物联穿透",
-  "历史",
 ] as const

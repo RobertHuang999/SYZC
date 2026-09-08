@@ -15,7 +15,6 @@ type ReleaseMaterialFormProps = {
   situationDescription: string
   sitePhotoNames: string[]
   version: number
-  triggerCount: number
   errors: ReleaseFormErrors
   onSituationChange: (value: string) => void
   onSitePhotosChange: (names: string[]) => void
@@ -25,7 +24,6 @@ export function ReleaseMaterialForm({
   situationDescription,
   sitePhotoNames,
   version,
-  triggerCount,
   errors,
   onSituationChange,
   onSitePhotosChange,
@@ -137,8 +135,7 @@ export function ReleaseMaterialForm({
       </div>
 
       <div className="rounded-lg border border-dashed bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-        确认解除后将归档整轮 <strong>{triggerCount}</strong>{" "}
-        次触发，状态变为「已结案 · 有效」。
+        确认解除后该条预警将归档为「已结案 · 有效」，并同步取消相关升级任务。
       </div>
 
       <input type="hidden" name="version" value={version} readOnly />

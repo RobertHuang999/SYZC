@@ -106,7 +106,7 @@ export function AccessControlDeviceListPage() {
       annotations={accessControlDeviceListAnnotations}
       documents={accessControlDeviceDocuments}
     >
-      <div className="space-y-4 p-4 md:p-6">
+      <div className="space-y-4 p-6">
         <PrototypeAnnotationTarget annotationIds={["access-control-device-page"]}>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">门禁设备</h1>
@@ -116,14 +116,21 @@ export function AccessControlDeviceListPage() {
           </div>
         </PrototypeAnnotationTarget>
 
-        <PrototypeAnnotationTarget annotationIds={["access-control-device-filter"]}>
-          <AccessControlDeviceFilters
-            value={draftFilters}
-            onChange={setDraftFilters}
-            onSearch={handleSearch}
-            onReset={handleReset}
-          />
-        </PrototypeAnnotationTarget>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault()
+            handleSearch()
+          }}
+        >
+          <PrototypeAnnotationTarget annotationIds={["access-control-device-filter"]}>
+            <AccessControlDeviceFilters
+              value={draftFilters}
+              onChange={setDraftFilters}
+              onSearch={handleSearch}
+              onReset={handleReset}
+            />
+          </PrototypeAnnotationTarget>
+        </form>
 
         <PrototypeAnnotationTarget annotationIds={["access-control-device-table"]}>
           <AccessControlDeviceTable

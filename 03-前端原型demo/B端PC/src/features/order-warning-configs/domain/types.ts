@@ -26,6 +26,9 @@ export type OrderWarningConfig = {
   ownerGoodsSummary: string
   enabledItems: OrderWarningItemBadge[]
   status: OrderWarningConfigStatus
+  createdBy: string
+  createdAt: string
+  updatedBy: string
   updatedAt: string
 }
 

@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { PersonTimeText } from "@/shared/components/TableCells"
 import type { SeverityLevelRecord } from "../domain/types"
 
 type SeverityLevelTableProps = {
@@ -157,7 +158,7 @@ export function SeverityLevelTable({
                   </HoverOverflowText>
                 </TableCell>
                 <TableCell>
-                  {record.updatedBy} / {record.updatedAt}
+                  <PersonTimeText person={record.updatedBy} time={record.updatedAt} />
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">

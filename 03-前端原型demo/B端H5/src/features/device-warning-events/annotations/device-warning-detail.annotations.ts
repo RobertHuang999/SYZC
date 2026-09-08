@@ -7,7 +7,7 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
     number: 1,
     kind: "页面",
     title: "移动端 · 设备预警详情与现场处置",
-    content: "展示 IoT 硬件告警事实快照、现场抓拍凭证及处置流转历史；支持现场运维人员发起人工解除。",
+    content: "展示单条 IoT 硬件告警事实快照、现场抓拍凭证及处置留痕；一事件一条记录，无频次聚合。",
     details: [
       {
         title: "生命周期与处置流转图",
@@ -15,13 +15,13 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
           {
             label: "状态流转",
             content: `flowchart TD
-    A["IoT设备事件 (防抖通过)"] --> B["待处置·有效"]
+    V["厂商预过滤回调"] --> B["待处置·有效 (逐条落账 R01)"]
     B -->|"现场核验 / 人工解除"| C["已结案·有效"]
     B -->|"规则删除/设备解绑"| D["已作废 (只读归档)"]`,
           },
           {
             label: "业务定位",
-            content: "移动端承载单条轮次事件的现场核查、抓拍调阅与快捷解除，保障一线监管与运维人员快速响应闭环。",
+            content: "移动端承载单条独立流水的现场核查、抓拍调阅与快捷解除，保障一线监管与运维人员快速响应闭环。",
           },
         ],
       },
@@ -30,11 +30,11 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "数据快照",
-            content: "触发时固化规则快照（阈值、防抖参数、升级策略）、预警等级字典及抓拍凭证。",
+            content: "触发时固化规则快照（阈值、处置策略、规则 Version、升级策略）、预警等级字典及抓拍凭证。",
           },
           {
             label: "下游联动",
-            content: "解除成功后取消未完成的通知升级定时器，并同步更新 PC 大屏与移动端告警指标。",
+            content: "解除成功后取消该条流水挂起的升级定时器，并同步更新 PC 大屏与移动端告警指标。",
           },
         ],
       },
@@ -46,7 +46,7 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
     number: 2,
     kind: "字段",
     title: "基本信息与生命周期状态",
-    content: "展示事件系统标识、规则名称、预警大类/子类型、预警等级色块与当前状态。",
+    content: "展示事件标识、规则名称、预警大类/子类型、预警等级色块、预警时间与当前状态。",
     details: [
       {
         title: "字段规范",
@@ -60,8 +60,8 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
             content: "展示触发时的规则名称与监控阈值快照，保持历史数据一致性。",
           },
           {
-            label: "预警等级",
-            content: "等级编码（01-04）及颜色快照（高危红/中危橙/低危黄/提示蓝）。",
+            label: "预警时间",
+            content: "本条独立流水的触发时间 warningTime，作为升级计时起点。",
           },
           {
             label: "预警状态",
@@ -104,14 +104,14 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "交互",
     title: "底部处置操作与解除入口",
-    content: "待处置 · 有效且快照 disposition=人工解除结案（R14'）时，底部展示【立即解除预警】；AUTO_RECOVER/RECORD_ONLY 无入口。",
+    content: "待处置 · 有效且快照 disposition=人工解除结案（R14'）时，底部展示【解除预警】；AUTO_RECOVER/RECORD_ONLY 无入口。",
     details: [
       {
         title: "操作规范",
         items: [
           {
             label: "进入解除",
-            content: "点击【立即解除预警】跳转至 `/m/iot/device-warning-events/:id/release` 填报现场处置材料。",
+            content: "点击【解除预警】跳转至 `/m/iot/device-warning-events/:id/release` 填报现场处置材料。",
           },
           {
             label: "已结案 · 有效",

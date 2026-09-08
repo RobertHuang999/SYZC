@@ -270,12 +270,6 @@ export function OrderWarningConfigFormPage() {
                   <Input value={form.goodsDetail || "—"} readOnly />
                 )}
               </div>
-              {isEdit && form.version !== null && (
-                <div className="space-y-2">
-                  <Label>版本号</Label>
-                  <Input value={String(form.version)} readOnly />
-                </div>
-              )}
             </CardContent>
           </Card>
         </PrototypeAnnotationTarget>

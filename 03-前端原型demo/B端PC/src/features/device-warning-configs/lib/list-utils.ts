@@ -15,6 +15,12 @@ export function filterDeviceWarningConfigs(
       return config.ruleName.includes(filters.ruleName.trim())
     })
     .filter((config) => {
+      if (filters.subTypes && filters.subTypes.length > 0) {
+        if (config.subTypes && config.subTypes.length > 0) {
+          return config.subTypes.some((sub) => filters.subTypes.includes(sub))
+        }
+        return filters.warningTypes.includes(config.warningType)
+      }
       if (filters.warningTypes.length === 0) {
         return true
       }
@@ -44,8 +50,4 @@ export function filterDeviceWarningConfigs(
 export function paginateConfigs<T>(items: T[], page: number, pageSize: number): T[] {
   const start = (page - 1) * pageSize
   return items.slice(start, start + pageSize)
-}
-
-export function formatPersonTime(person: string, time: string): string {
-  return `${person}/${time}`
 }

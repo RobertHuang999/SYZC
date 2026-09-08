@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom"
 import { ArrowLeftIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ConfigAuditSection } from "@/shared/components/ConfigAuditSection"
+import { DateTimeText } from "@/shared/components/DateTimeText"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   DetailField,
@@ -119,7 +121,6 @@ export function OrderWarningConfigDetailPage() {
               {config.ownerName} {config.ownerPhone}
             </DetailField>
             <DetailField label="货物">{config.goodsDetail}</DetailField>
-            <DetailField label="版本号">{config.version}</DetailField>
           </DetailSection>
         </PrototypeAnnotationTarget>
 
@@ -166,10 +167,12 @@ export function OrderWarningConfigDetailPage() {
                                     <TableCell>{row.warningType}</TableCell>
                                     <TableCell>{row.qrCode}</TableCell>
                                     <TableCell>{row.goodsLabel}</TableCell>
-                                    <TableCell>{row.pledgedAt}</TableCell>
+                                    <TableCell>
+                                      <DateTimeText value={row.pledgedAt} stacked />
+                                    </TableCell>
                                     <TableCell>{row.timeoutDays} 天</TableCell>
                                     <TableCell>
-                                      {row.expectedTriggerAt ?? "—"}
+                                      <DateTimeText value={row.expectedTriggerAt} stacked />
                                     </TableCell>
                                   </TableRow>
                                 ))}
@@ -220,6 +223,25 @@ export function OrderWarningConfigDetailPage() {
               ))}
             </ul>
           </DetailSection>
+        </PrototypeAnnotationTarget>
+
+        <PrototypeAnnotationTarget annotationIds={["order-warning-config-detail-audit"]}>
+          <ConfigAuditSection
+            version={config.version}
+            status={
+              <Badge
+                variant="outline"
+                className={ORDER_WARNING_CONFIG_STATUS_BADGE_CLASS[config.status]}
+              >
+                {config.status}
+              </Badge>
+            }
+            createdBy={config.createdBy}
+            createdAt={config.createdAt}
+            updatedBy={config.updatedBy}
+            updatedAt={config.updatedAt}
+            invalidReason={config.invalidReason}
+          />
         </PrototypeAnnotationTarget>
 
         <DeleteConfirmDialog

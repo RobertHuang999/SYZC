@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom"
 import { ArrowLeftIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ConfigAuditSection } from "@/shared/components/ConfigAuditSection"
 import {
   DetailField,
   DetailSection,
@@ -202,7 +203,7 @@ export function DeviceWarningConfigDetailPage() {
         </PrototypeAnnotationTarget>
 
         <PrototypeAnnotationTarget annotationIds={["device-warning-config-detail-threshold"]}>
-          <DetailSection title="触发条件与防抖">
+          <DetailSection title="触发条件">
             <DetailField label="监控阈值">
               {formatMonitorThreshold(
                 config.monitorThresholdMin,
@@ -211,8 +212,6 @@ export function DeviceWarningConfigDetailPage() {
               )}
             </DetailField>
             <DetailField label="触发条件摘要">{config.triggerCondition}</DetailField>
-            <DetailField label="防抖判定模式">{config.debounceMode}</DetailField>
-            <DetailField label="防抖生效条件">{config.debounceConditionDetail}</DetailField>
           </DetailSection>
         </PrototypeAnnotationTarget>
 
@@ -230,6 +229,25 @@ export function DeviceWarningConfigDetailPage() {
               </DetailField>
             )}
           </DetailSection>
+        </PrototypeAnnotationTarget>
+
+        <PrototypeAnnotationTarget annotationIds={["device-warning-config-detail-audit"]}>
+          <ConfigAuditSection
+            version={config.version}
+            status={
+              <Badge
+                variant="outline"
+                className={DEVICE_WARNING_CONFIG_STATUS_BADGE_CLASS[config.status]}
+              >
+                {config.status}
+              </Badge>
+            }
+            createdBy={config.createdBy}
+            createdAt={config.createdAt}
+            updatedBy={config.updatedBy}
+            updatedAt={config.updatedAt}
+            invalidReason={config.invalidReason}
+          />
         </PrototypeAnnotationTarget>
 
         <ConfigConfirmDialog

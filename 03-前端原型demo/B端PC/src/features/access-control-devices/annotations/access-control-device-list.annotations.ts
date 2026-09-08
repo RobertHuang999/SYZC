@@ -73,8 +73,21 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
     number: 3,
     kind: "字段",
     title: "表格列与行操作",
-    content: "展示设备编码、系统内名称、类型、绑定仓库/位置、在线状态；主操作「获取密码」按类型文案区分。",
+    content: "展示设备编码、系统内名称、类型、绑定仓库/位置、在线状态及「更新人/时间」；主操作「获取密码」按类型文案区分。",
     details: [
+      {
+        title: "更新人/时间",
+        items: [
+          {
+            label: "上下行展示",
+            content: "「修改人员」与「更新时间」合并为同一列：上行显示更新人，下行显示更新时间；时间精确到秒，格式为 `YYYY-MM-DD HH:mm:ss`。",
+          },
+          {
+            label: "字体规范",
+            content: "人员和时间使用与「预警等级」表格一致的默认正文字体，不再单独使用较小或更浅的时间样式。",
+          },
+        ],
+      },
       {
         title: "行操作",
         items: [

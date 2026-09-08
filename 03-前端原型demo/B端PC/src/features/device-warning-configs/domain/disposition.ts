@@ -22,11 +22,11 @@ export const DISPOSITION_MODE_SHORT_LABELS: Record<DispositionMode, string> = {
 
 export const DISPOSITION_MODE_HINTS: Record<DispositionMode, string> = {
   RECORD_ONLY:
-    "写入设备预警信息；触发时直接「已结案 · 有效」。可作通知留痕，无待处置待办与解除入口（R06'）",
+    "预警触发后直接自动结案，仅作通知留痕，无需人工处置与解除。",
   ACTION_REQUIRED:
-    "写入设备预警信息；初态「待处置 · 有效」，须人工解除后「已结案 · 有效」，支持超时升级（R14'）",
+    "预警触发后进入待处置状态，须现场核查并人工解除结案，支持配置超时升级。",
   AUTO_RECOVER:
-    "写入设备预警信息；初态「待处置 · 有效」，满足 02/01 R03 恢复信号后系统自动「已结案 · 有效」，不可人工解除",
+    "预警触发后进入待处置状态，当检测到设备状态恢复后系统自动结案，无需人工解除。",
 }
 
 /** 通知/上线类 · 系统推荐触发即结案（R06'） */

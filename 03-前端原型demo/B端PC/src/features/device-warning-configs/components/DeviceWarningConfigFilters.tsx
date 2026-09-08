@@ -12,10 +12,12 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { WarningFilterHeader } from "@/components/business/WarningListPrimitives"
+import { WarningTypeCascadeSelect } from "@/components/business/WarningTypeCascadeSelect"
 import { ENABLED_SEVERITY_LEVELS } from "@/shared/mock/severity-levels"
 import {
   DEFAULT_DEVICE_WARNING_CONFIG_FILTERS,
   DEVICE_WARNING_CONFIG_STATUS_OPTIONS,
+  DEVICE_WARNING_SUB_TYPES,
 } from "../domain/constants"
 import {
   DISPOSITION_MODES,
@@ -44,19 +46,15 @@ export function DeviceWarningConfigFiltersPanel({
   onAdd,
 }: DeviceWarningConfigFiltersPanelProps) {
   const [expanded, setExpanded] = useState(false)
-  const [warningTypeOpen, setWarningTypeOpen] = useState(false)
   const [severityOpen, setSeverityOpen] = useState(false)
   const [dispositionOpen, setDispositionOpen] = useState(false)
 
-  const warningTypeLabel = useMemo(() => {
-    if (value.warningTypes.length === 0) {
-      return "全部"
-    }
-    if (value.warningTypes.length === 1) {
-      return value.warningTypes[0]
-    }
-    return `已选 ${value.warningTypes.length} 项`
-  }, [value.warningTypes])
+  const warningTypeGroups = useMemo(() => {
+    return DEVICE_WARNING_TYPES.map((type) => ({
+      category: type,
+      subTypes: DEVICE_WARNING_SUB_TYPES[type] || [],
+    }))
+  }, [])
 
   const severityLabel = useMemo(() => {
     if (value.severityLevelIds.length === 0) {
@@ -80,16 +78,6 @@ export function DeviceWarningConfigFiltersPanel({
     }
     return `已选 ${value.dispositionModes.length} 项`
   }, [value.dispositionModes])
-
-  const toggleWarningType = (type: DeviceWarningType) => {
-    const exists = value.warningTypes.includes(type)
-    onChange({
-      ...value,
-      warningTypes: exists
-        ? value.warningTypes.filter((item) => item !== type)
-        : [...value.warningTypes, type],
-    })
-  }
 
   const toggleSeverity = (severityLevelId: string) => {
     const exists = value.severityLevelIds.includes(severityLevelId)
@@ -137,32 +125,18 @@ export function DeviceWarningConfigFiltersPanel({
           </FilterField>
 
           <FilterField label="预警类型">
-            <MultiSelectField
-              open={warningTypeOpen}
-              onOpenChange={setWarningTypeOpen}
-              label={warningTypeLabel}
-            >
-              <button
-                type="button"
-                className="flex w-full items-center px-2 py-1.5 text-left text-sm hover:bg-muted"
-                onClick={() => onChange({ ...value, warningTypes: [] })}
-              >
-                全部
-              </button>
-              {DEVICE_WARNING_TYPES.map((type) => (
-                <label
-                  key={type}
-                  className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-sm hover:bg-muted"
-                >
-                  <input
-                    type="checkbox"
-                    checked={value.warningTypes.includes(type)}
-                    onChange={() => toggleWarningType(type)}
-                  />
-                  <span>{type}</span>
-                </label>
-              ))}
-            </MultiSelectField>
+            <WarningTypeCascadeSelect
+              groups={warningTypeGroups}
+              selectedWarningTypes={value.warningTypes}
+              selectedSubTypes={value.subTypes || []}
+              onChange={(types, subTypes) =>
+                onChange({
+                  ...value,
+                  warningTypes: types as DeviceWarningType[],
+                  subTypes,
+                })
+              }
+            />
           </FilterField>
 
           <FilterField label="预警等级">

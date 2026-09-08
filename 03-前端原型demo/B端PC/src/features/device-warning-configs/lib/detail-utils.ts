@@ -73,13 +73,6 @@ export function getDetailHeaderActions(
 export function detailToFormValues(
   detail: DeviceWarningConfigDetail
 ): DeviceWarningConfigFormValues {
-  const debounceValue =
-    detail.debounceMode === "立即触发"
-      ? "0"
-      : detail.debounceConditionDetail.includes("3")
-        ? "3"
-        : "5"
-
   return {
     ruleName: detail.ruleName,
     warningType: detail.warningType,
@@ -100,9 +93,6 @@ export function detailToFormValues(
       co2: { min: "0", max: "1500" },
       oxygen: { min: "18.0", max: "23.5" },
     },
-    debounceMode: detail.debounceMode,
-    debounceValue,
-    debounceUnit: detail.debounceConditionDetail.includes("秒") ? "秒" : "分钟",
     notifyChannels: detail.notifyChannels,
     notifyTargets: detail.notifyTargets,
     upgradeEnabled: detail.upgradeStrategy !== null,
@@ -131,9 +121,6 @@ export function createEmptyFormValues(): DeviceWarningConfigFormValues {
       co2: { min: "0", max: "1500" },
       oxygen: { min: "18.0", max: "23.5" },
     },
-    debounceMode: "按持续时长判定",
-    debounceValue: "3",
-    debounceUnit: "分钟",
     notifyChannels: [],
     notifyTargets: [],
     upgradeEnabled: false,

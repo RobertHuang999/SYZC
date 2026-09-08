@@ -74,6 +74,28 @@ const DETAIL_OVERRIDES: Record<
   },
 }
 
+function getRealTriggerSnapshot(event: CollateralWarningEvent): string | null {
+  if (event.warningSource === "物联穿透" || Boolean(event.deviceEventId)) {
+    return null
+  }
+  if (event.warningType === "抵/质押率异常") {
+    return "当前抵/质押率: 88.50% | 平仓警戒线: 85.00% | 超出平仓线: +3.50%"
+  }
+  if (event.warningType === "价格下跌") {
+    return "现货结算价跌幅: -12.80% | 预警阈值: -12.00% | 超跌: -0.80%"
+  }
+  if (event.warningType === "巡检异常") {
+    return "现场巡检逾期: 24.0 小时 | 计划时限: 08-19 08:00 | 巡检员未打卡"
+  }
+  if (event.warningType === "盘点异常") {
+    return "账实盘点差异: 2.30% | 允许公差: 2.00% | 盘亏差异: 2.50 吨"
+  }
+  if (event.warningType === "贷中风控预警") {
+    return "智风控综合评分: 38.5 分 (高危) | 准入下限: 60.0 分 | 新增涉诉标的"
+  }
+  return "业务指标超出预设风控阈值，触发规则审计快照"
+}
+
 function buildDefaultExtension(
   event: CollateralWarningEvent
 ): CollateralWarningEventDetailExtension {
@@ -83,20 +105,18 @@ function buildDefaultExtension(
 
   return {
     orderType: event.orderNo.includes("99") || event.orderNo.includes("55") ? "监管" : "抵/质押",
-    ruleName: event.ruleName || `${event.warningType}监控`,
-    triggerSnapshot: isIot
-      ? null
-      : `触发数据快照 — ${event.warningType} / 预警订单 ${event.orderNo}`,
+    ruleName: event.ruleName || (isIot ? "智能挂锁防拆规则" : `${event.warningType}监控规则`),
+    triggerSnapshot: getRealTriggerSnapshot(event),
     snapshotImageUrl:
       event.snapshotImageStatus === "available"
         ? `snapshot-${event.eventId}.jpg`
         : null,
-    invalidReason: isInvalid ? "关联订单预警配置已删除" : null,
+    invalidReason: isInvalid ? "关联订单预警配置已注销或删除" : null,
     penetrationInfo:
       isIot && event.deviceEventId
         ? {
-            triggerDevice: "智能挂锁-A01（DEV-LOCK-0001）",
-            physicalSubType: "锁杆被剪",
+            triggerDevice: "智能挂锁-A01 (A库挂锁位)",
+            physicalSubType: "剪杆破坏",
             triggerLocation: "一号钢材仓 / A库 / 01分区",
             relatedEventNo: `DEV-${event.eventId}`,
             relatedEventId: event.deviceEventId,
@@ -104,9 +124,11 @@ function buildDefaultExtension(
         : null,
     disposalInfo: isClosed
       ? {
-          situationDescription: "已完成现场核查并解除预警。",
+          situationDescription: "已联系货主核实处理，完成补保并解除预警。",
           sitePhotos:
-            event.snapshotImageStatus === "available" ? ["现场-01.jpg"] : [],
+            event.snapshotImageStatus === "available"
+              ? ["现场核对记录单.jpg", "现场货物实拍.jpg"]
+              : [],
           releaseSnapshotImage:
             event.snapshotImageStatus === "available"
               ? `release-${event.eventId}.jpg`

@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react"
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
 import { ArrowLeftIcon, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { DateTimeText } from "@/shared/components/DateTimeText"
 import { ReleaseMaterialForm } from "../components/ReleaseMaterialForm"
-import { TriggerHistoryDrawer } from "../components/TriggerHistoryDrawer"
 import { DetailField, DetailSection } from "../components/DetailSection"
 import { WarningStatusBadge } from "../components/WarningStatusBadge"
 import { SeverityLevelDisplay } from "../components/SeverityLevelDisplay"
@@ -45,7 +45,6 @@ export function DeviceWarningEventReleasePage() {
   const [sitePhotoNames, setSitePhotoNames] = useState<string[]>([])
   const [errors, setErrors] = useState<ReleaseFormErrors>({})
   const [dirty, setDirty] = useState(false)
-  const [timelineOpen, setTimelineOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
   useEffect(() => {
@@ -157,7 +156,7 @@ export function DeviceWarningEventReleasePage() {
   }
 
   const warningContent = formatDetailWarningContent(event)
-  const hintText = getReleaseHintText(event.triggerCount)
+  const hintText = getReleaseHintText()
 
   return (
     <PrototypeAnnotationProvider
@@ -200,26 +199,9 @@ export function DeviceWarningEventReleasePage() {
             <DetailField label="预警状态">
               <WarningStatusBadge event={event} />
             </DetailField>
-            <DetailField label="预警次数">
-              <button
-                type="button"
-                className="font-semibold text-orange-600 hover:underline"
-                onClick={() => setTimelineOpen(true)}
-              >
-                {event.triggerCount} 次
-              </button>
-              <button
-                type="button"
-                className="ml-2 text-primary hover:underline"
-                onClick={() => setTimelineOpen(true)}
-              >
-                查看触发历史
-              </button>
+            <DetailField label="预警时间">
+              <DateTimeText value={event.warningTime} plain />
             </DetailField>
-            <DetailField label="首次预警时间">
-              {event.firstWarningTime}
-            </DetailField>
-            <DetailField label="最近预警时间">{event.latestWarningTime}</DetailField>
           </DetailSection>
         </PrototypeAnnotationTarget>
 
@@ -249,7 +231,6 @@ export function DeviceWarningEventReleasePage() {
               situationDescription={situationDescription}
               sitePhotoNames={sitePhotoNames}
               version={event.version}
-              triggerCount={event.triggerCount}
               errors={errors}
               onSituationChange={(value) => {
                 markDirty()
@@ -272,15 +253,6 @@ export function DeviceWarningEventReleasePage() {
           </DetailSection>
         </PrototypeAnnotationTarget>
 
-        <TriggerHistoryDrawer
-          open={timelineOpen}
-          event={event}
-          onOpenChange={setTimelineOpen}
-          onSnapshotPreview={(sequence) => {
-            setToastMessage(`抓拍预览 — 第 ${sequence} 次触发`)
-            window.setTimeout(() => setToastMessage(null), 2500)
-          }}
-        />
         {toastMessage && (
           <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
             {toastMessage}

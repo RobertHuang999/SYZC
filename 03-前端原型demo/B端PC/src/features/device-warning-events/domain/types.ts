@@ -29,13 +29,12 @@ export type DeviceWarningEvent = {
   severityName: string
   severityColor: string
   warningType: WarningType
+  subType?: string
   location: string
   deviceName: string
   triggerSummary: string
   snapshotImageStatus: SnapshotImageStatus
-  firstWarningTime: string
-  latestWarningTime: string
-  triggerCount: number
+  warningTime: string
   processedTime: string | null
   processedBy: string | null
   warningStatus: WarningStatus
@@ -49,24 +48,22 @@ export type DeviceWarningEvent = {
 
 export type { WarningStatusFilter } from "./status"
 
-export type TriggerFrequencyFilter = "全部" | "高频（>5 次）"
-
 export type DeviceWarningEventFilters = {
   warningTypes: WarningType[]
+  subTypes: string[]
   severityLevelIds: string[]
   warningStatus: WarningStatusFilter
   warehouseName: string
-  triggerFrequency: TriggerFrequencyFilter
-  firstWarningTimeStart: string
-  firstWarningTimeEnd: string
+  warningTimeStart: string
+  warningTimeEnd: string
 }
 
 /** 字段清单第三章 + 详情页专属展示字段 */
 export type RuleConfigSnapshot = {
   dispositionMode: string
   monitorThreshold: string
-  debounceCondition: string
   upgradeStrategy: string
+  ruleVersion: number
 }
 
 export type ReleaseMaterialSnapshot = {
@@ -81,7 +78,6 @@ export type DeviceWarningEventDetailExtension = {
   warehouseDetail: string
   deviceCode: string
   invalidReason: string | null
-  debounceTrace: string | null
   ruleConfigSnapshot: RuleConfigSnapshot
   releaseMaterialSnapshot: ReleaseMaterialSnapshot
   createdAt: string
@@ -91,11 +87,3 @@ export type DeviceWarningEventDetailExtension = {
 
 export type DeviceWarningEventDetail = DeviceWarningEvent &
   DeviceWarningEventDetailExtension
-
-/** 字段清单第三章 event_trigger_timeline（C02） */
-export type TriggerTimelineEntry = {
-  sequence: number
-  triggeredAt: string
-  collectedValue: string
-  snapshotAvailable: boolean
-}

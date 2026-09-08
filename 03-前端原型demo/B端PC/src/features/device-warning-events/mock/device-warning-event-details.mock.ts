@@ -20,142 +20,138 @@ type DeviceWarningEventDetailOverride = Omit<
   ruleConfigSnapshot?: Partial<RuleConfigSnapshot>
 }
 
-const DETAIL_OVERRIDES: Record<string, DeviceWarningEventDetailOverride> =
-  {
-    "evt-001": {
-      eventUuid: "evt-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-      warningSubType: "温度异常",
-      warehouseDetail: "一号钢材仓 / A库 / 01分区",
-      deviceCode: "DEV-IOT-0003",
-      debounceTrace: "Pending 2026-08-20 13:00:00 → Firing 2026-08-20 13:03:00（持续 180 秒）",
-      ruleConfigSnapshot: {
-        monitorThreshold: "温度 > 35.0 ℃ 或 < -5.0 ℃",
-        debounceCondition: "持续超过 3 分钟",
-        upgradeStrategy: "持续未解除 3 天后 ➔ 王总监(风控部)",
-      },
+const DETAIL_OVERRIDES: Record<string, DeviceWarningEventDetailOverride> = {
+  "evt-001": {
+    eventUuid: "evt-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    warningSubType: "温度异常",
+    warehouseDetail: "一号钢材仓 / A库 / 01分区",
+    deviceCode: "DEV-IOT-0003",
+    ruleConfigSnapshot: {
+      monitorThreshold: "温度 > 35.0 ℃ 或 < -5.0 ℃",
+      ruleVersion: 2,
+      upgradeStrategy: "持续未解除 3 天后 ➔ 王总监(风控部)",
     },
-    "evt-002": {
-      eventUuid: "evt-b2c3d4e5-f6a7-8901-bcde-f12345678901",
-      warningSubType: "行人入侵",
-      warehouseDetail: "一号钢材仓 / B库 / 监控区",
-      deviceCode: "DEV-CAM-0001",
-      debounceTrace: "Pending 2026-08-20 12:40:00 → Firing 2026-08-20 12:45:00（持续 5 秒）",
-      ruleConfigSnapshot: {
-        monitorThreshold: "行人入侵/车辆入侵",
-        debounceCondition: "持续超过 5 秒",
-        upgradeStrategy: "持续未解除 2 天后 ➔ 李主管(安保部)",
-      },
+  },
+  "evt-002": {
+    eventUuid: "evt-b2c3d4e5-f6a7-8901-bcde-f12345678901",
+    warningSubType: "行人入侵",
+    warehouseDetail: "一号钢材仓 / B库 / 监控区",
+    deviceCode: "DEV-CAM-0001",
+    ruleConfigSnapshot: {
+      monitorThreshold: "行人入侵/车辆入侵",
+      ruleVersion: 1,
+      upgradeStrategy: "持续未解除 2 天后 ➔ 李主管(安保部)",
     },
-    "evt-003": {
-      warningSubType: "开锁通知",
-      ruleConfigSnapshot: {
-        monitorThreshold: "开锁通知/关锁通知",
-        debounceCondition: "立即触发",
-        upgradeStrategy: "—",
-      },
+  },
+  "evt-003": {
+    warningSubType: "开锁通知",
+    ruleConfigSnapshot: {
+      monitorThreshold: "开锁通知/关锁通知",
+      ruleVersion: 1,
+      upgradeStrategy: "—",
     },
-    "evt-005": {
-      warningSubType: "开锁通知",
-      ruleConfigSnapshot: {
-        monitorThreshold: "开锁通知/关锁通知",
-        debounceCondition: "立即触发",
-        upgradeStrategy: "—",
-      },
+  },
+  "evt-005": {
+    warningSubType: "开锁通知",
+    ruleConfigSnapshot: {
+      monitorThreshold: "开锁通知/关锁通知",
+      ruleVersion: 1,
+      upgradeStrategy: "—",
     },
-    "evt-007": {
-      eventUuid: "evt-c3d4e5f6-a7b8-9012-cdef-123456789012",
-      warningSubType: "烟感异常",
-      warehouseDetail: "四号化工仓 / D库 / 危化区",
-      deviceCode: "DEV-IOT-0103",
-      invalidReason: "关联规则已删除",
-      ruleConfigSnapshot: {
-        monitorThreshold: "烟感异常",
-        debounceCondition: "持续超过 3 分钟",
-        upgradeStrategy: "—",
-      },
+  },
+  "evt-007": {
+    eventUuid: "evt-c3d4e5f6-a7b8-9012-cdef-123456789012",
+    warningSubType: "烟感异常",
+    warehouseDetail: "四号化工仓 / D库 / 危化区",
+    deviceCode: "DEV-IOT-0103",
+    invalidReason: "关联规则已删除",
+    ruleConfigSnapshot: {
+      monitorThreshold: "烟感异常",
+      ruleVersion: 1,
+      upgradeStrategy: "—",
     },
-    "evt-009": {
-      warningSubType: "门未关",
-      ruleConfigSnapshot: {
-        monitorThreshold: "门未关",
-        debounceCondition: "持续超过 1 分钟",
-        upgradeStrategy: "持续未解除 3 天后 ➔ 王总监(风控部)",
-      },
+  },
+  "evt-009": {
+    warningSubType: "门未关",
+    ruleConfigSnapshot: {
+      monitorThreshold: "门未关",
+      ruleVersion: 1,
+      upgradeStrategy: "持续未解除 3 天后 ➔ 王总监(风控部)",
     },
-    "evt-010": {
-      warningSubType: "温度异常",
-      ruleConfigSnapshot: {
-        monitorThreshold: "温度 > 35.0 ℃ 或 < -5.0 ℃",
-        debounceCondition: "持续超过 3 分钟",
-        upgradeStrategy: "—",
-      },
+  },
+  "evt-010": {
+    warningSubType: "温度异常",
+    ruleConfigSnapshot: {
+      monitorThreshold: "温度 > 35.0 ℃ 或 < -5.0 ℃",
+      ruleVersion: 2,
+      upgradeStrategy: "—",
     },
-    "evt-014": {
-      warningSubType: "进围栏",
-      ruleConfigSnapshot: {
-        monitorThreshold: "进围栏/出围栏",
-        debounceCondition: "持续超过 10 秒",
-        upgradeStrategy: "持续未解除 3 天后 ➔ 王总监(风控部)",
-      },
+  },
+  "evt-014": {
+    warningSubType: "进围栏",
+    ruleConfigSnapshot: {
+      monitorThreshold: "进围栏/出围栏",
+      ruleVersion: 1,
+      upgradeStrategy: "持续未解除 3 天后 ➔ 王总监(风控部)",
     },
-    "evt-015": {
-      eventUuid: "evt-e5f6a7b8-c9d0-1234-ef01-345678901234",
-      warningSubType: "密码错误",
-      warehouseDetail: "一号钢材仓 / 主入口 / 门禁区",
-      deviceCode: "DEV-FACE-0001",
-      debounceTrace: null,
-      ruleConfigSnapshot: {
-        monitorThreshold: "密码错误",
-        debounceCondition: "立即触发",
-        upgradeStrategy: "—",
-      },
-      releaseMaterialSnapshot: {
-        situationDescription: "经现场安保核实，系访客误输临时密码，已登记离场",
-        sitePhotos: ["现场照片1.jpg"],
-        releaseSnapshotImage: "解除联动抓拍.jpg",
-      },
+  },
+  "evt-015": {
+    eventUuid: "evt-e5f6a7b8-c9d0-1234-ef01-345678901234",
+    warningSubType: "密码错误",
+    warehouseDetail: "一号钢材仓 / 主入口 / 门禁区",
+    deviceCode: "DEV-FACE-0001",
+    ruleConfigSnapshot: {
+      monitorThreshold: "密码错误",
+      ruleVersion: 1,
+      upgradeStrategy: "—",
     },
-    "evt-004": {
-      warningSubType: "设备离线",
-      ruleConfigSnapshot: {
-        monitorThreshold: "设备离线",
-        debounceCondition: "持续超过 5 分钟",
-        upgradeStrategy: "持续未解除 3 天后 ➔ 王总监(风控部)",
-      },
+    releaseMaterialSnapshot: {
+      situationDescription: "经现场安保核实，系访客误输临时密码，已登记离场",
+      sitePhotos: ["现场照片1.jpg"],
+      releaseSnapshotImage: "解除联动抓拍.jpg",
     },
-    "evt-006": {
-      warningSubType: "湿度异常",
-      ruleConfigSnapshot: {
-        monitorThreshold: "湿度异常",
-        debounceCondition: "持续超过 3 分钟",
-        upgradeStrategy: "持续未解除 3 天后 ➔ 王总监(风控部)",
-      },
+  },
+  "evt-004": {
+    warningSubType: "设备离线",
+    ruleConfigSnapshot: {
+      monitorThreshold: "设备离线",
+      ruleVersion: 1,
+      upgradeStrategy: "持续未解除 3 天后 ➔ 王总监(风控部)",
     },
-    "evt-008": {
-      warningSubType: "设备离线",
-      ruleConfigSnapshot: {
-        monitorThreshold: "设备离线",
-        debounceCondition: "持续超过 5 分钟",
-        upgradeStrategy: "—",
-      },
+  },
+  "evt-006": {
+    warningSubType: "湿度异常",
+    ruleConfigSnapshot: {
+      monitorThreshold: "湿度异常",
+      ruleVersion: 1,
+      upgradeStrategy: "持续未解除 3 天后 ➔ 王总监(风控部)",
     },
-    "evt-013": {
-      warningSubType: "开锁通知",
-      ruleConfigSnapshot: {
-        monitorThreshold: "开锁通知",
-        debounceCondition: "立即触发",
-        upgradeStrategy: "—",
-      },
+  },
+  "evt-008": {
+    warningSubType: "设备离线",
+    ruleConfigSnapshot: {
+      monitorThreshold: "设备离线",
+      ruleVersion: 1,
+      upgradeStrategy: "—",
     },
-    "evt-018": {
-      warningSubType: "关锁通知",
-      ruleConfigSnapshot: {
-        monitorThreshold: "开锁通知/关锁通知",
-        debounceCondition: "立即触发",
-        upgradeStrategy: "—",
-      },
+  },
+  "evt-013": {
+    warningSubType: "开锁通知",
+    ruleConfigSnapshot: {
+      monitorThreshold: "开锁通知",
+      ruleVersion: 1,
+      upgradeStrategy: "—",
     },
-  }
+  },
+  "evt-018": {
+    warningSubType: "关锁通知",
+    ruleConfigSnapshot: {
+      monitorThreshold: "开锁通知/关锁通知",
+      ruleVersion: 1,
+      upgradeStrategy: "—",
+    },
+  },
+}
 
 function inferSubType(event: DeviceWarningEvent): string {
   const linked = RULE_SCENARIO_BY_EVENT_ID[event.eventId]
@@ -204,20 +200,10 @@ function buildDefaultDetail(
       event.warningStatus === WARNING_STATUS.OPEN_INVALID
         ? "关联规则已删除"
         : null,
-    debounceTrace:
-      dispositionMode === "RECORD_ONLY"
-        ? null
-        : event.triggerCount > 1 || event.warningType === "设备物联预警"
-          ? `Pending ${event.firstWarningTime} → Firing ${event.firstWarningTime.replace(/:\d{2}$/, ":03")}（持续 180 秒）`
-          : null,
     ruleConfigSnapshot: {
       dispositionMode: formatDispositionSnapshotLabel(dispositionMode),
-      monitorThreshold:
-        linkedConfig?.triggerCondition ?? event.triggerSummary,
-      debounceCondition:
-        linkedConfig?.debounceCondition === "立即触发"
-          ? "立即触发"
-          : linkedConfig?.debounceCondition ?? "持续超过 3 分钟",
+      monitorThreshold: linkedConfig?.triggerCondition ?? event.triggerSummary,
+      ruleVersion: linkedConfig ? 1 : 1,
       upgradeStrategy:
         hideUpgrade
           ? "—"
@@ -232,8 +218,8 @@ function buildDefaultDetail(
       sitePhotos: hasManualRelease ? ["现场照片1.jpg"] : [],
       releaseSnapshotImage: hasManualRelease ? "解除联动抓拍.jpg" : null,
     },
-    createdAt: event.firstWarningTime,
-    updatedAt: event.latestWarningTime,
+    createdAt: event.warningTime,
+    updatedAt: event.processedTime ?? event.warningTime,
     dataSource: "iot_event_ledger",
   }
 }

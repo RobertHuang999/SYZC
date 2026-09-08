@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { SeverityLevelDisplay } from "@/shared/components/SeverityLevelDisplay"
+import { TablePersonTimeCell } from "@/shared/components/TableCells"
 import { getSeverityLevelById } from "@/shared/mock/severity-levels"
 import {
   DEVICE_WARNING_CONFIG_STATUS_BADGE_CLASS,
@@ -22,7 +23,6 @@ import {
   DISPOSITION_MODE_LABELS,
 } from "../domain/disposition"
 import type { DeviceWarningConfig } from "../domain/types"
-import { formatPersonTime } from "../lib/list-utils"
 
 type DeviceWarningConfigTableProps = {
   configs: DeviceWarningConfig[]
@@ -49,7 +49,6 @@ export function DeviceWarningConfigTable({
             <TableHead className="w-32">预警等级</TableHead>
             <TableHead className="w-40">关联设备范围</TableHead>
             <TableHead className="w-36">触发条件</TableHead>
-            <TableHead className="w-28">防抖条件</TableHead>
             <TableHead className="w-24">状态</TableHead>
             <TableHead className="w-32">创建人/时间</TableHead>
             <TableHead className="w-32">更新人/时间</TableHead>
@@ -59,7 +58,7 @@ export function DeviceWarningConfigTable({
         <TableBody>
           {configs.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={12} className="h-32 text-center text-muted-foreground">
+              <TableCell colSpan={11} className="h-32 text-center text-muted-foreground">
                 暂无设备预警规则，点击「+ 新增设备规则」创建
               </TableCell>
             </TableRow>
@@ -122,14 +121,6 @@ export function DeviceWarningConfigTable({
                     </HoverOverflowText>
                   </TableCell>
                   <TableCell>
-                    <HoverOverflowText
-                      className="max-w-[120px]"
-                      ariaLabel={`防抖条件：${config.debounceCondition}`}
-                    >
-                      {config.debounceCondition}
-                    </HoverOverflowText>
-                  </TableCell>
-                  <TableCell>
                     <Badge
                       variant="outline"
                       className={DEVICE_WARNING_CONFIG_STATUS_BADGE_CLASS[config.status]}
@@ -138,10 +129,16 @@ export function DeviceWarningConfigTable({
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {formatPersonTime(config.createdBy, config.createdAt)}
+                    <TablePersonTimeCell
+                      person={config.createdBy}
+                      time={config.createdAt}
+                    />
                   </TableCell>
                   <TableCell>
-                    {formatPersonTime(config.updatedBy, config.updatedAt.slice(5, 16))}
+                    <TablePersonTimeCell
+                      person={config.updatedBy}
+                      time={config.updatedAt}
+                    />
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap items-center gap-2">

@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { TablePersonTimeCell } from "@/shared/components/TableCells"
 import {
   Table,
   TableBody,
@@ -38,15 +39,14 @@ export function AccessControlDeviceTable({
             <TableHead>状态</TableHead>
             <TableHead>绑定仓库</TableHead>
             <TableHead>具体位置</TableHead>
-            <TableHead>修改人员</TableHead>
-            <TableHead>更新时间</TableHead>
+            <TableHead>更新人/时间</TableHead>
             <TableHead className="min-w-[280px]">操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {devices.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={11} className="h-32 text-center text-muted-foreground">
+              <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
                 暂无门禁设备
               </TableCell>
             </TableRow>
@@ -67,8 +67,12 @@ export function AccessControlDeviceTable({
                 </TableCell>
                 <TableCell>{device.warehouseName ?? "未绑定"}</TableCell>
                 <TableCell>{device.locationDetail}</TableCell>
-                <TableCell>{device.updatedBy}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{device.updatedAt}</TableCell>
+                <TableCell>
+                  <TablePersonTimeCell
+                    person={device.updatedBy}
+                    time={device.updatedAt}
+                  />
+                </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
                     <Button
