@@ -10,6 +10,10 @@
 import type { DeviceWarningEvent } from "../domain/types"
 import { WARNING_STATUS } from "../domain/status"
 import { getSeverityLevelByCode } from "@/shared/mock/severity-levels"
+import {
+  enrichDeviceWarningEvent,
+  type RawDeviceWarningEvent,
+} from "../../shared/mock/device-warning-mock-sync"
 
 export const USECASE_WAREHOUSES = {
   WH_A: "一号钢材仓",
@@ -55,12 +59,12 @@ export const USECASE_SCENARIOS = [
 
 /**
  * 精编用例记录（18 条，覆盖三态 + Demo ASCII 5 行）
- * 默认筛选「未处理（有效）」下，前 5 条按最近预警时间倒序对齐 ASCII。
+ * 默认筛选「待处置 · 有效」下，前 5 条按最近预警时间倒序对齐 ASCII。
  */
-export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
+const rawDeviceWarningEventUseCases: RawDeviceWarningEvent[] = [
   {
     eventId: "evt-001",
-    ruleName: "库温告警",
+    ruleName: "库温超标预警",
     ...USECASE_SEVERITY.L4,
     warningType: "设备物联预警",
     location: "一号钢材仓·A库",
@@ -78,7 +82,7 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-002",
-    ruleName: "人体入侵",
+    ruleName: "A库人体入侵",
     ...USECASE_SEVERITY.L5,
     warningType: "设备图像识别预警",
     location: "一号钢材仓·B库",
@@ -96,12 +100,12 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-003",
-    ruleName: "开锁记录",
+    ruleName: "门锁开关通知",
     ...USECASE_SEVERITY.L2,
     warningType: "智能挂锁预警",
     location: "二号粮油仓·1号门",
     deviceName: "LK02",
-    triggerSummary: "蓝牙开锁成功",
+    triggerSummary: "开锁通知",
     snapshotImageStatus: "available",
     firstWarningTime: "2026-08-20 11:30:00",
     latestWarningTime: "2026-08-20 11:30:00",
@@ -114,7 +118,7 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-004",
-    ruleName: "离线告警",
+    ruleName: "传感器离线",
     ...USECASE_SEVERITY.L3,
     warningType: "设备物联预警",
     location: "三号冷链仓·监测区",
@@ -132,12 +136,12 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-005",
-    ruleName: "人员通行",
+    ruleName: "人脸通行通知",
     ...USECASE_SEVERITY.L2,
-    warningType: "常规通行与操作事务",
+    warningType: "人脸门禁预警",
     location: "一号钢材仓·主入口",
     deviceName: "FACE1",
-    triggerSummary: "刷脸通行",
+    triggerSummary: "开锁通知",
     snapshotImageStatus: "available",
     firstWarningTime: "2026-08-20 09:15:00",
     latestWarningTime: "2026-08-20 09:15:00",
@@ -150,7 +154,7 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-006",
-    ruleName: "湿度超标",
+    ruleName: "湿度超标预警",
     ...USECASE_SEVERITY.L4,
     warningType: "设备物联预警",
     location: "二号粮油仓·C库",
@@ -168,12 +172,12 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-007",
-    ruleName: "规则删除遗留",
+    ruleName: "烟感异常告警",
     ...USECASE_SEVERITY.L3,
     warningType: "设备物联预警",
     location: "四号化工仓·D库",
     deviceName: "烟感YG03",
-    triggerSummary: "烟感触发",
+    triggerSummary: "烟感异常",
     snapshotImageStatus: "failed",
     firstWarningTime: "2026-08-18 22:10:00",
     latestWarningTime: "2026-08-18 22:10:00",
@@ -186,12 +190,12 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-008",
-    ruleName: "GPS离线",
+    ruleName: "GPS设备离线",
     ...USECASE_SEVERITY.L3,
     warningType: "设备GPS预警",
     location: "五号监管仓·运输线",
     deviceName: "GPS-T001",
-    triggerSummary: "GPS设备离线",
+    triggerSummary: "设备离线",
     snapshotImageStatus: "none",
     firstWarningTime: "2026-08-20 06:30:00",
     latestWarningTime: "2026-08-20 06:30:00",
@@ -204,12 +208,12 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-009",
-    ruleName: "门打开超时",
+    ruleName: "门未关告警",
     ...USECASE_SEVERITY.L4,
     warningType: "人脸门禁预警",
     location: "三号冷链仓·2号门",
     deviceName: "DOOR-A2",
-    triggerSummary: "门打开超时 18 分钟",
+    triggerSummary: "门未关 18 分钟",
     snapshotImageStatus: "available",
     firstWarningTime: "2026-08-20 05:10:00",
     latestWarningTime: "2026-08-20 05:28:00",
@@ -222,7 +226,7 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-010",
-    ruleName: "温湿度自动恢复",
+    ruleName: "库温超标预警",
     ...USECASE_SEVERITY.L4,
     warningType: "设备物联预警",
     location: "一号钢材仓·A库",
@@ -240,12 +244,12 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-011",
-    ruleName: "拆壳报警",
+    ruleName: "挂锁防拆报警",
     ...USECASE_SEVERITY.L5,
     warningType: "智能挂锁预警",
     location: "四号化工仓·东门",
     deviceName: "LK15",
-    triggerSummary: "拆壳报警",
+    triggerSummary: "拆壳",
     snapshotImageStatus: "available",
     firstWarningTime: "2026-08-17 14:00:00",
     latestWarningTime: "2026-08-17 14:00:00",
@@ -258,7 +262,7 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-012",
-    ruleName: "非法开箱",
+    ruleName: "非法开箱告警",
     ...USECASE_SEVERITY.L5,
     warningType: "智能挂锁预警",
     location: "二号粮油仓·3号门",
@@ -276,30 +280,30 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-013",
-    ruleName: "获取密码成功",
-    ...USECASE_SEVERITY.L2,
-    warningType: "常规通行与操作事务",
+    ruleName: "高安保门锁需确认",
+    ...USECASE_SEVERITY.L3,
+    warningType: "智能挂锁预警",
     location: "五号监管仓·侧门",
     deviceName: "LK21",
-    triggerSummary: "获取密码成功",
-    snapshotImageStatus: "none",
+    triggerSummary: "开锁通知",
+    snapshotImageStatus: "available",
     firstWarningTime: "2026-08-20 08:05:00",
     latestWarningTime: "2026-08-20 08:05:00",
     triggerCount: 1,
-    processedTime: "2026-08-20 08:05:00",
-    processedBy: "系统自动处理",
-    warningStatus: WARNING_STATUS.CLOSED_VALID,
+    processedTime: null,
+    processedBy: null,
+    warningStatus: WARNING_STATUS.OPEN_VALID,
     warehouseName: USECASE_WAREHOUSES.WH_E,
     version: 1,
   },
   {
     eventId: "evt-014",
-    ruleName: "围栏越界",
+    ruleName: "GPS进围栏告警",
     ...USECASE_SEVERITY.L4,
     warningType: "设备GPS预警",
     location: "五号监管仓·运输线",
     deviceName: "GPS-T002",
-    triggerSummary: "围栏越界 1.2km",
+    triggerSummary: "进围栏 1.2km",
     snapshotImageStatus: "none",
     firstWarningTime: "2026-08-19 20:10:00",
     latestWarningTime: "2026-08-20 01:30:00",
@@ -312,12 +316,12 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-015",
-    ruleName: "人脸认证失败",
+    ruleName: "人脸密码错误",
     ...USECASE_SEVERITY.L3,
     warningType: "人脸门禁预警",
     location: "一号钢材仓·主入口",
     deviceName: "FACE1",
-    triggerSummary: "人脸认证失败",
+    triggerSummary: "密码错误",
     snapshotImageStatus: "available",
     firstWarningTime: "2026-08-19 18:40:00",
     latestWarningTime: "2026-08-19 18:40:00",
@@ -330,12 +334,12 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-016",
-    ruleName: "撬锁报警",
+    ruleName: "锁舌被卡告警",
     ...USECASE_SEVERITY.L5,
     warningType: "智能挂锁预警",
     location: "三号冷链仓·1号门",
     deviceName: "LK06",
-    triggerSummary: "撬锁报警",
+    triggerSummary: "锁舌被卡",
     snapshotImageStatus: "failed",
     firstWarningTime: "2026-08-16 23:50:00",
     latestWarningTime: "2026-08-16 23:50:00",
@@ -348,12 +352,12 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-017",
-    ruleName: "剪杆破坏",
+    ruleName: "挂锁防拆报警",
     ...USECASE_SEVERITY.L5,
     warningType: "智能挂锁预警",
     location: "一号钢材仓·西门",
     deviceName: "LK11",
-    triggerSummary: "剪杆破坏",
+    triggerSummary: "锁杆被剪",
     snapshotImageStatus: "available",
     firstWarningTime: "2026-08-20 02:10:00",
     latestWarningTime: "2026-08-20 02:55:00",
@@ -366,12 +370,12 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
   },
   {
     eventId: "evt-018",
-    ruleName: "远程开锁成功",
+    ruleName: "门锁开关通知",
     ...USECASE_SEVERITY.L2,
-    warningType: "常规通行与操作事务",
+    warningType: "智能挂锁预警",
     location: "二号粮油仓·2号门",
     deviceName: "LK18",
-    triggerSummary: "远程开锁成功",
+    triggerSummary: "关锁通知",
     snapshotImageStatus: "available",
     firstWarningTime: "2026-08-20 07:20:00",
     latestWarningTime: "2026-08-20 07:20:00",
@@ -383,6 +387,10 @@ export const deviceWarningEventUseCases: DeviceWarningEvent[] = [
     version: 1,
   },
 ]
+
+/** 注入处置策略快照并与配置侧规则对齐 */
+export const deviceWarningEventUseCases: DeviceWarningEvent[] =
+  rawDeviceWarningEventUseCases.map((event) => enrichDeviceWarningEvent(event))
 
 export function getUseCaseStatusCoverage() {
   return deviceWarningEventUseCases.reduce<

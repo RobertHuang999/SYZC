@@ -10,11 +10,14 @@ export type DeviceWarningType = (typeof DEVICE_WARNING_TYPES)[number]
 
 export type DeviceWarningConfigStatus = "生效中" | "停用" | "已失效"
 
+export type { DispositionMode } from "./disposition"
+
 export type DeviceWarningConfig = {
   configId: string
   ruleName: string
   warningType: DeviceWarningType
   severityLevelId: string
+  dispositionMode: import("./disposition").DispositionMode
   deviceScope: string
   triggerCondition: string
   debounceCondition: string
@@ -29,6 +32,7 @@ export type DeviceWarningConfigFilters = {
   ruleName: string
   warningTypes: DeviceWarningType[]
   severityLevelIds: string[]
+  dispositionModes: import("./disposition").DispositionMode[]
   status: "全部" | DeviceWarningConfigStatus
 }
 
@@ -61,6 +65,7 @@ export type DeviceWarningConfigFormValues = {
   ruleName: string
   warningType: DeviceWarningType
   warningSubTypes: string[]
+  dispositionMode: import("./disposition").DispositionMode
   severityLevelId: string
   warehouseFilter: string
   selectedDevices: string

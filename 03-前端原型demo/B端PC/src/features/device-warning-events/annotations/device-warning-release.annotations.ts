@@ -7,7 +7,7 @@ export const deviceWarningReleaseAnnotations: PrototypeAnnotation[] = [
     number: 1,
     kind: "页面",
     title: "解除处置全流程闭环",
-    content: "对未处理（有效）的设备告警录入现场处置凭证与核实说明，完成整轮次告警归档。",
+    content: "对待处置 · 有效的设备告警录入现场处置凭证与核实说明，完成整轮次告警归档。",
     details: [
       {
         title: "解除处置业务流转图",
@@ -35,7 +35,7 @@ export const deviceWarningReleaseAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "前置状态校验",
-            content: "仅【未处理（有效）】且预警配置允许人工解除的事件方可进入；已处理或仅自动恢复类型直接拦截并引导返回。",
+            content: "仅【待处置 · 有效】且预警配置允许人工解除的事件方可进入；已结案 · 有效或仅自动恢复类型直接拦截并引导返回。",
           },
           {
             label: "操作权限",

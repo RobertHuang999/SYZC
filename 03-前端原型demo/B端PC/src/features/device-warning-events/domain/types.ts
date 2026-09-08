@@ -1,4 +1,5 @@
-import type { WarningStatus } from "./status"
+import type { WarningStatus, WarningStatusFilter } from "./status"
+import type { DispositionMode } from "../../device-warning-configs/domain/disposition"
 
 export const WARNING_TYPES = [
   "设备图像识别预警",
@@ -39,14 +40,14 @@ export type DeviceWarningEvent = {
   processedBy: string | null
   warningStatus: WarningStatus
   warehouseName: string
+  /** 触发时规则处置策略快照 */
+  dispositionMode: DispositionMode
+  /** 是否允许人工解除（R14'） */
+  manualReleaseAllowed: boolean
   version: number
 }
 
-export type WarningStatusFilter =
-  | "全部"
-  | "未处理（有效）"
-  | "未处理（无效）"
-  | "已处理（有效）"
+export type { WarningStatusFilter } from "./status"
 
 export type TriggerFrequencyFilter = "全部" | "高频（>5 次）"
 
@@ -62,6 +63,7 @@ export type DeviceWarningEventFilters = {
 
 /** 字段清单第三章 + 详情页专属展示字段 */
 export type RuleConfigSnapshot = {
+  dispositionMode: string
   monitorThreshold: string
   debounceCondition: string
   upgradeStrategy: string

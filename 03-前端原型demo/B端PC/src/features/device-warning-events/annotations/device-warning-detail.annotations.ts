@@ -15,18 +15,18 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "状态流转图",
             content: `┌──────────────┐     防抖判定通过     ┌──────────────┐     人工解除/自动恢复     ┌──────────────┐
-│  IoT设备事件  │ ──────────────────> │ 未处理(有效)  │ ──────────────────────> │ 已处理(有效)  │
+│  IoT设备事件  │ ──────────────────> │ 待处置·有效  │ ──────────────────────> │ 已结案·有效  │
 └──────────────┘                      └──────────────┘                          └──────────────┘
                                              │
                                              │ 规则删除/设备解绑
                                              v
                                       ┌──────────────┐
-                                      │ 未处理(无效)  │ (终态只读)
+                                      │   已作废     │ (终态只读)
                                       └──────────────┘`,
           },
           {
             label: "业务定位",
-            content: "页面承载单条轮次事件的全部只读事实与快照；未处理（有效）且支持人工处置的类型可由此发起解除，其余状态仅供穿透溯源。",
+            content: "页面承载单条轮次事件的全部只读事实与快照；待处置 · 有效且支持人工处置的类型可由此发起解除，其余状态仅供穿透溯源。",
           },
         ],
       },
@@ -74,7 +74,7 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警状态",
-            content: "未处理（有效）/ 未处理（无效）/ 已处理（有效）；若为无效态需展示失效原因（如规则已被删除）。",
+            content: "待处置 · 有效/ 已作废/ 已结案 · 有效；若为无效态需展示失效原因（如规则已被删除）。",
           },
         ],
       },
@@ -117,14 +117,14 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "交互",
     title: "频次聚合轨迹与防抖留痕",
-    content: "同设备同子类型的未处理聚合轮次统计，展示累计触发次数、首次/最近时间与防抖状态流转。",
+    content: "同设备同子类型的待处置 · 有效聚合轮次统计，展示累计触发次数、首次/最近时间与防抖状态流转。",
     details: [
       {
         title: "聚合机制与公式",
         items: [
           {
             label: "聚合轮次规则",
-            content: "事件处于未处理（有效）期间，同一设备再次触发同子类型告警，累计计入本轮次：Count = Count + 1，更新最近预警时间。",
+            content: "事件处于待处置 · 有效期间，同一设备再次触发同子类型且防抖通过，累计计入本轮次：Count = Count + 1，更新最近预警时间。聚合键=设备+子类型，不含阈值/通知人/规则 Version 变更。",
           },
           {
             label: "首次预警时间",
@@ -185,6 +185,10 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
         title: "快照字段与不可变性",
         items: [
           {
+            label: "处置策略快照 (disposition_mode)",
+            content: "固化触发时刻规则处置策略：触发即结案 / 人工解除结案 / 恢复自动结案；决定详情是否展示「解除预警」入口（R14'：仅人工解除档=有）。",
+          },
+          {
             label: "监控阈值快照",
             content: "如【图像识别置信度≥85% 且 目标类型=人体】或【库内温度 > 35℃ 持续 5 分钟】。",
           },
@@ -216,11 +220,11 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
         title: "状态 × 动作矩阵",
         items: [
           {
-            label: "未处理（有效）",
-            content: "允许人工处置类型展示【解除预警】（高亮 Primary 按钮）；仅自动恢复类型（如库温）隐藏解除按钮。",
+            label: "待处置 · 有效",
+            content: "快照 disposition_mode=ACTION_REQUIRED（R14'）时展示【解除预警】；恢复自动结案/触发即结案隐藏解除按钮。",
           },
           {
-            label: "未处理（无效） / 已处理",
+            label: "已作废 / 已结案 · 有效",
             content: "仅展示【返回】与【查看频次】，不提供再次解除入口；再次超标将开启新轮次事件。",
           },
           {

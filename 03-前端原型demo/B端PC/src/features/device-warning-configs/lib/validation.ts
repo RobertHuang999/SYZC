@@ -1,9 +1,10 @@
 import { deviceWarningConfigsMock } from "../mock/device-warning-configs.mock"
 import type { DeviceWarningConfigFormValues } from "../domain/types"
 import { isDeviceOnlineSubType } from "../domain/constants"
+import { DISPOSITION_MODE_LABELS, resolveDispositionEffects, validateAutoRecoverDisposition } from "../domain/disposition"
 
 const R14_MUTEX_MESSAGE =
-  "设备上线通知需单独配置，不可与其他预警子类型组合"
+  "设备上线须单独配置，不可与其他预警子类型组合"
 
 export function validateDeviceWarningConfig(
   values: DeviceWarningConfigFormValues,
@@ -37,6 +38,7 @@ export function validateDeviceWarningConfig(
   if (onlineSubTypes.length > 0 && nonOnlineSubTypes.length > 0) {
     return R14_MUTEX_MESSAGE
   }
+
   if (values.newDeviceOnly) {
     if (onlineSubTypes.length !== 1 || normalizedSubTypes.length !== 1) {
       return "勾选「仅针对新设备」时，子类型必须且仅能选择对应的设备上线子类型"
@@ -75,9 +77,9 @@ export function validateDeviceWarningConfig(
         if (min >= max) return "湿度最低值必须小于最高值"
       }
     }
-    if (values.warningSubTypes.includes("CO2异常")) {
+    if (values.warningSubTypes.includes("二氧化碳异常")) {
       const c = values.metricThresholds?.co2
-      if (c && !c.max.trim()) return "请填写二氧化碳 (CO2) 浓度告警上限"
+      if (c && !c.max.trim()) return "请填写二氧化碳浓度告警上限"
       if (c && c.max.trim()) {
         const max = Number(c.max)
         if (!Number.isFinite(max) || max <= 0) return "请输入合法的二氧化碳上限数值 (ppm)"
@@ -97,8 +99,21 @@ export function validateDeviceWarningConfig(
 
   if (values.notifyTargets.length === 0) return "请选择预警对象"
 
+  const dispositionEffects = resolveDispositionEffects(values.dispositionMode)
+
+  const autoRecoverError = validateAutoRecoverDisposition(
+    normalizedSubTypes,
+    values.dispositionMode
+  )
+  if (autoRecoverError) {
+    return autoRecoverError
+  }
+
   if (values.newDeviceOnly && values.upgradeEnabled) {
     return "仅针对新设备的全局规则不允许配置升级预警"
+  }
+  if (dispositionEffects.hideUpgrade && values.upgradeEnabled) {
+    return `「${DISPOSITION_MODE_LABELS.RECORD_ONLY}」处置策略不允许配置升级预警`
   }
   if (values.upgradeEnabled) {
     const days = Number(values.upgradeDays)

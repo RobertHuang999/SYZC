@@ -47,6 +47,10 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
             label: "预警子类型 (sub_type)",
             content: "展示标准枚举子类型；设备上线类规则仅含单一上线子类型，不与其他监控类混配（R14）。",
           },
+          {
+            label: "处置策略 (disposition_mode)",
+            content: "Badge 展示：触发即结案 / 人工解除结案 / 恢复自动结案；决定 02/01 流水落账方式。",
+          },
         ],
       },
     ],
@@ -114,7 +118,7 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "超时升级梯队",
-            content: "配置超时 T 天未解除时，通知引擎自动向升级对象（如风控总监/主管）追加高优先级督办通知。",
+            content: "配置超时 T 天未解除时向升级对象追加督办；处置策略为「触发即结案」时升级区隐藏（R15a）。",
           },
         ],
       },

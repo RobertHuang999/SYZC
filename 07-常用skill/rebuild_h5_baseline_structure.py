@@ -75,8 +75,9 @@ PC_RULE_SOURCE: dict[str, str | None] = {
 ITER_RULE_SOURCE: dict[str, str] = {
     "ws-risk-device-warning": "B-迭代需求/6.2版本（2026.08）/02-预警信息/01设备预警信息",
     "ws-risk-order-warning": "B-迭代需求/6.2版本（2026.08）/02-预警信息/02押品预警信息",
-    "biz-approve-unlock-apply": "B-迭代需求/6.2版本（2026.08）/07-审批中心/04开锁申请",
+    "biz-approve-unlock-apply": "B-迭代需求/6.2版本（2026.08）/07-审批中心/05-其他审批/03-开锁审核",
 }
+
 
 
 def parse_menu_items() -> list[dict]:
@@ -323,22 +324,50 @@ def main():
                 md.write_text(module_readme(item, md), encoding="utf-8")
                 created += 1
 
-    # 04-机构权限
-    profile_dir = H5_BASE / "04-机构权限"
+    # 04-我的
+    profile_dir = H5_BASE / "04-我的"
     profile_dir.mkdir(exist_ok=True)
-    (profile_dir / "README.md").write_text(
-        """# 机构权限
+    if not (profile_dir / "README.md").exists():
+        (profile_dir / "README.md").write_text(
+            """# 我的
 
-> **底栏 Tab**：机构权限（`/m/profile`）
+> **底栏 Tab**：我的（路由：`/m/profile`，原型组件：`BottomTabBar.tsx` 中 `id: "profile", label: "我的"`）
 > **原型页面**：`ProfilePage.tsx`
-> **说明**：登录人信息、管辖仓库、权限矩阵说明；无独立业务 moduleId。
+> **模块定位**：移动端个人中心与账号权限管理。展示登录人基础信息、当前登录机构、授权管辖仓库列表以及三维权限矩阵规则说明。
+> **数据源特征**：属于平台公共框架能力，无独立业务 `moduleId`（不参与 `mobileMenuData.ts` 业务宫格流水，不产生审批单据）。
 
 ---
 
-<!-- 占位：若后续拆分字段清单/权限说明，在此维护。 -->
+## 一、模块定位与页面结构
+
+1. **登录人信息卡片**：
+   - 姓名、账号、手机号（脱敏）、头像；
+   - 当前所属机构全称、机构编码、所属租户；
+   - 角色标签（如：平台管理员、监管员、风控经理等）。
+2. **授权管辖仓库列表**：
+   - 当前账号被赋予数据权限的物理仓库/监管库点列表；
+   - 仓库编码、仓库类型、地理位置及启用状态。
+3. **功能与数据权限说明**：
+   - 解释当前角色在移动端可操作的菜单范围；
+   - 关联 PC 端《功能与数据权限清单》（见 [00-功能与数据权限/](../../00-功能与数据权限/)）。
+4. **系统操作**：
+   - 切换仓库/机构（如有跨机构多重授权）；
+   - 清除本地缓存、版本信息、安全退出登录。
+
+---
+
+## 二、导航与菜单地图对照
+
+| 维度 | 文档口径 | 前端原型口径 (`03-前端原型demo/B端H5`) | 权限清单口径 |
+| :--- | :--- | :--- | :--- |
+| **底栏 Tab 标签** | **「我的」** | **「我的」** (`label: "我的"`, icon: `User`) | 不独立成行（公共支撑） |
+| **页面路由** | `/m/profile` | `/m/profile` | — |
+| **页面标题 (Header)** | **「我的」** | **「我的」** | — |
+| **文档目录** | `B端H5/04-我的/` | — | — |
 """,
-        encoding="utf-8",
-    )
+            encoding="utf-8",
+        )
+
 
     # Unlock apply Demo stub
     if unlock_folder:

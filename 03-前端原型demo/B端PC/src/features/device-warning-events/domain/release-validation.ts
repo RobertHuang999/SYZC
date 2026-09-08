@@ -13,7 +13,7 @@ export const RELEASE_VALIDATION_MESSAGES = {
   sitePhotoTooMany: "现场照片最多上传 10 张",
   sitePhotoInvalidType: "仅支持 jpg、png、jpeg 格式",
   sitePhotoTooLarge: "单张照片不可超过 5MB",
-  alreadyProcessed: "该预警已处理或已失效",
+  alreadyProcessed: "该预警已结案或已作废",
   manualReleaseNotAllowed: "该类型预警不支持人工解除，请等待自动恢复",
   versionConflict: "数据已被他人修改，请刷新后重试",
 } as const
@@ -96,7 +96,7 @@ export function validateSitePhotoFile(
 }
 
 export function getReleaseHintText(triggerCount: number): string {
-  return `确认解除后将归档整轮 ${triggerCount} 次触发，状态变为「已处理（有效）」，并同步取消相关升级任务。`
+  return `确认解除后将归档整轮 ${triggerCount} 次触发，状态变为「已结案 · 有效」，并同步取消相关升级任务。`
 }
 
 export const RELEASE_DEMO_SITUATION_BY_EVENT: Record<string, string> = {

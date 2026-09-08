@@ -1,76 +1,60 @@
 import type { DeviceWarningConfigDetail } from "../domain/types"
+import {
+  DEVICE_WARNING_RULE_SCENARIOS,
+  RULE_SCENARIO_BY_ID,
+} from "../../shared/mock/device-warning-scenarios"
+import { resolveDispositionEffects } from "../domain/disposition"
 
 type DetailExtension = Omit<
   DeviceWarningConfigDetail,
   keyof import("../domain/types").DeviceWarningConfig
 >
 
-const detailExtensions: Record<string, DetailExtension> = {
-  "dwc-002": {
-    ruleUuid: "rule-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-    warningSubTypes: ["温度异常"],
-    deviceScopeDetail: "一号大宗钢材仓 · DEV-IOT-01 ~ DEV-IOT-06",
-    newDeviceOnly: false,
-    monitorThresholdMin: -5,
-    monitorThresholdMax: 35,
-    monitorThresholdUnit: "℃",
-    debounceMode: "按持续时长判定",
-    debounceConditionDetail: "超标须持续超过 3 分钟才正式触发有效告警",
+function buildScenarioExtension(
+  scenario: (typeof DEVICE_WARNING_RULE_SCENARIOS)[number]
+): DetailExtension {
+  const { hideUpgrade } = resolveDispositionEffects(scenario.dispositionMode)
+  const isOnlineOnly =
+    scenario.warningSubTypes.length === 1 && scenario.warningSubTypes[0] === "设备上线"
+  const hasTemperature = scenario.warningSubTypes.includes("温度异常")
+
+  return {
+    ruleUuid: `rule-${scenario.configId}-uuid`,
+    warningSubTypes: [...scenario.warningSubTypes],
+    deviceScopeDetail:
+      scenario.deviceScope === "仅针对新设备（全局监听）"
+        ? "全局监听（所有新接入同类设备）"
+        : `${scenario.ruleName} · ${scenario.deviceScope}`,
+    newDeviceOnly: isOnlineOnly,
+    monitorThresholdMin: hasTemperature ? -5 : null,
+    monitorThresholdMax: hasTemperature ? 35 : null,
+    monitorThresholdUnit: hasTemperature ? "℃" : null,
+    debounceMode:
+      scenario.debounceCondition === "立即触发" ? "立即触发" : "按持续时长判定",
+    debounceConditionDetail:
+      scenario.debounceCondition === "立即触发"
+        ? "立即触发"
+        : "超标须持续超过 3 分钟才正式触发有效告警",
     notifyChannels: ["短信"],
-    notifyTargets: ["张主管(风控部)", "李四(仓管部)"],
-    upgradeStrategy: "持续未解除 3 天后升级 ➔ 王总监(风控部)",
-    version: 2,
-    invalidReason: null,
-  },
-  "dwc-006": {
-    ruleUuid: "rule-sensor-offline-001",
-    warningSubTypes: ["物联传感器离线"],
-    deviceScopeDetail: "二号冷链仓 · DEV-IOT-11 ~ DEV-IOT-13",
-    newDeviceOnly: false,
-    monitorThresholdMin: null,
-    monitorThresholdMax: null,
-    monitorThresholdUnit: null,
-    debounceMode: "按持续时长判定",
-    debounceConditionDetail: "离线须持续超过 5 分钟才正式触发有效告警",
-    notifyChannels: [],
-    notifyTargets: ["张主管(风控部)"],
-    upgradeStrategy: null,
-    version: 3,
-    invalidReason: "关联设备已全部移除",
-  },
-  "dwc-005": {
-    ruleUuid: "rule-new-device-global-001",
-    warningSubTypes: ["监控设备上线"],
-    deviceScopeDetail: "全局监听（所有新接入监控设备）",
-    newDeviceOnly: true,
-    monitorThresholdMin: null,
-    monitorThresholdMax: null,
-    monitorThresholdUnit: null,
-    debounceMode: "立即触发",
-    debounceConditionDetail: "立即触发",
-    notifyChannels: [],
-    notifyTargets: ["系统管理员"],
-    upgradeStrategy: null,
-    version: 1,
-    invalidReason: null,
-  },
-  "dwc-003": {
-    ruleUuid: "rule-lock-tamper-001",
-    warningSubTypes: ["剪杆/拆壳破坏"],
-    deviceScopeDetail: "三号监管仓 · LOCK-01 ~ LOCK-12",
-    newDeviceOnly: false,
-    monitorThresholdMin: null,
-    monitorThresholdMax: null,
-    monitorThresholdUnit: null,
-    debounceMode: "立即触发",
-    debounceConditionDetail: "立即触发",
-    notifyChannels: ["短信"],
-    notifyTargets: ["李运维(设备部)", "张主管(风控部)"],
-    upgradeStrategy: "持续未解除 1 天后升级 ➔ 王总监(风控部)",
-    version: 1,
-    invalidReason: null,
-  },
+    notifyTargets:
+      scenario.dispositionMode === "RECORD_ONLY"
+        ? ["李运维(设备部)"]
+        : ["张主管(风控部)", "李四(仓管部)"],
+    upgradeStrategy:
+      hideUpgrade || isOnlineOnly
+        ? null
+        : "持续未解除 3 天后升级 ➔ 王总监(风控部)",
+    version: scenario.status === "已失效" ? 3 : 1,
+    invalidReason: scenario.status === "已失效" ? "关联设备已全部移除" : null,
+  }
 }
+
+const detailExtensions: Record<string, DetailExtension> = Object.fromEntries(
+  DEVICE_WARNING_RULE_SCENARIOS.map((scenario) => [
+    scenario.configId,
+    buildScenarioExtension(scenario),
+  ])
+)
 
 const defaultExtension = (
   configId: string,
@@ -97,7 +81,11 @@ export function getDeviceWarningConfigDetailExtension(
   warningType: string,
   status: string
 ): DetailExtension {
-  const base = detailExtensions[configId] ?? defaultExtension(configId, warningType)
+  const scenario = RULE_SCENARIO_BY_ID[configId]
+  const base =
+    detailExtensions[configId] ??
+    (scenario ? buildScenarioExtension(scenario) : defaultExtension(configId, warningType))
+
   if (status === "已失效" && !base.invalidReason) {
     return { ...base, invalidReason: "规则已失效" }
   }

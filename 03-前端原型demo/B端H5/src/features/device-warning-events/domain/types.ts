@@ -61,7 +61,7 @@ export type DeviceWarningStatusFilter = "全部" | DeviceWarningStatus
 
 // 组合枚举严格对齐《设备预警信息字段清单》
 export const DEVICE_WARNING_STATUS_LABELS: Record<DeviceWarningStatus, string> = {
-  OPEN_VALID: "未处理（有效）",
-  OPEN_INVALID: "未处理（无效）",
-  CLOSED_VALID: "已处理（有效）",
+  OPEN_VALID: "待处置 · 有效",
+  OPEN_INVALID: "已作废",
+  CLOSED_VALID: "已结案 · 有效",
 }

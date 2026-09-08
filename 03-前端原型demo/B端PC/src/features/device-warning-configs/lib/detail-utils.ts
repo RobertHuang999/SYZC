@@ -4,6 +4,7 @@ import type {
   DeviceWarningConfigDetail,
   DeviceWarningConfigFormValues,
 } from "../domain/types"
+import { getRecommendedDisposition } from "../domain/disposition"
 
 export function getDeviceWarningConfigById(
   id: string | undefined
@@ -83,6 +84,7 @@ export function detailToFormValues(
     ruleName: detail.ruleName,
     warningType: detail.warningType,
     warningSubTypes: detail.warningSubTypes,
+    dispositionMode: detail.dispositionMode,
     severityLevelId: detail.severityLevelId,
     warehouseFilter: "一号大宗钢材仓",
     selectedDevices: detail.deviceScope,
@@ -111,10 +113,12 @@ export function detailToFormValues(
 }
 
 export function createEmptyFormValues(): DeviceWarningConfigFormValues {
+  const defaultSubTypes = ["温度异常"]
   return {
     ruleName: "",
     warningType: "设备物联预警",
-    warningSubTypes: ["温度异常"],
+    warningSubTypes: defaultSubTypes,
+    dispositionMode: getRecommendedDisposition(defaultSubTypes),
     severityLevelId: "sl-l3",
     warehouseFilter: "",
     selectedDevices: "",

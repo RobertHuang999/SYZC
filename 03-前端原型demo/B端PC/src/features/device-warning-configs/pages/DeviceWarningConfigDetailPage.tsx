@@ -20,6 +20,11 @@ import {
   getDeviceWarningConfigById,
   isGlobalNewDeviceRule,
 } from "../lib/detail-utils"
+import {
+  DISPOSITION_MODE_BADGE_CLASS,
+  DISPOSITION_MODE_LABELS,
+  resolveDispositionEffects,
+} from "../domain/disposition"
 
 import { PrototypeAnnotationProvider, PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { deviceWarningConfigDetailAnnotations } from "../annotations/device-warning-config-detail.annotations"
@@ -40,7 +45,9 @@ export function DeviceWarningConfigDetailPage() {
     [config]
   )
   const severity = config ? getSeverityLevelById(config.severityLevelId) : undefined
-  const hideUpgrade = config ? isGlobalNewDeviceRule(config) : false
+  const hideUpgrade = config
+    ? isGlobalNewDeviceRule(config) || resolveDispositionEffects(config.dispositionMode).hideUpgrade
+    : false
 
   const showToast = (message: string) => {
     setToastMessage(message)
@@ -144,6 +151,14 @@ export function DeviceWarningConfigDetailPage() {
             <DetailField label="预警类型">{config.warningType}</DetailField>
             <DetailField label="预警子类型">
               {config.warningSubTypes.join("、")}
+            </DetailField>
+            <DetailField label="处置策略">
+              <Badge
+                variant="outline"
+                className={DISPOSITION_MODE_BADGE_CLASS[config.dispositionMode]}
+              >
+                {DISPOSITION_MODE_LABELS[config.dispositionMode]}
+              </Badge>
             </DetailField>
             <DetailField label="预警等级">
               {severity ? (

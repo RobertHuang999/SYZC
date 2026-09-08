@@ -37,7 +37,7 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     number: 2,
     kind: "字段",
     title: "基本信息与预警等级选择",
-    content: "规则名称必填、预警类型联动子类型枚举、预警等级读取 03/01 启用字典；设备上线类子类型须单独成规则（R14）。",
+    content: "规则名称必填、预警类型联动子类型枚举、预警等级读取 03/01 启用字典；设备上线须单独成规则（R14）；处置策略三档均可自由配置，chip 为系统推荐默认。",
     details: [
       {
         title: "字段字典清单与校验规范",
@@ -55,8 +55,12 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
             content: "下拉展示 03/01 等级编码、名称与颜色色块；仅展示当前启用的等级档位，提交稳定 UUID。",
           },
           {
-            label: "子类型互斥 (R14)",
-            content: "「xxx设备上线」与其他运营监控类子类型不可混选；点击上线类自动取消其他项，点击其他类自动取消上线类。",
+            label: "处置策略 (disposition_mode) · 必填",
+            content: "枚举：RECORD_ONLY=触发即结案 / ACTION_REQUIRED=人工解除结案 / AUTO_RECOVER=恢复自动结案。三档均写入设备预警信息；差异为落账状态与结案方式。子类型 chip=系统推荐默认；偏离推荐保存二次确认（R15）；RECORD_ONLY 禁配升级（R15a）；安防/图像/挂锁破坏/密码错误禁止 AUTO_RECOVER（R15c）。",
+          },
+          {
+            label: "子类型约束 (R14)",
+            content: "R14：「设备上线」与其他子类型不可混选。不再按子类型硬锁处置策略。",
           },
         ],
       },
@@ -129,7 +133,7 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "超时升级天数 (escalation_days)",
-            content: "配置升级天数（如 1~30 天）及升级对象；超时未处置时自动向升级对象追加督办，未配置则不触发升级。",
+            content: "配置升级天数（如 1~30 天）及升级对象；超时未处置时自动向升级对象追加督办。处置策略为「触发即结案」时不可配置（R15a）。",
           },
         ],
       },

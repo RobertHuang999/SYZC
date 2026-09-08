@@ -36,7 +36,7 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
           {
             label: "状态边界",
             content:
-              "用户可见状态为未处理（有效）、未处理（无效）、已处理（有效）；Pending/Firing 属于引擎内部态，不在列表直接展示。",
+              "用户可见状态为待处置 · 有效、已作废、已结案 · 有效；Pending/Firing 属于引擎内部态，不在列表直接展示。",
           },
         ],
       },
@@ -84,7 +84,7 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
           {
             label: "预警状态",
             content:
-              "全部、未处理（有效）、未处理（无效）、已处理（有效）；默认未处理（有效），与配置侧规则生命周期状态不是同一语义。",
+              "全部、待处置 · 有效、已作废、已结案 · 有效；默认待处置 · 有效，与配置侧规则生命周期状态不是同一语义。",
           },
           {
             label: "所属仓库",
@@ -111,7 +111,7 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "重置",
-            content: "恢复全部类型、全部等级、未处理（有效）、全部仓库、全部频次和空日期范围，并刷新列表。",
+            content: "恢复全部类型、全部等级、待处置 · 有效、全部仓库、全部频次和空日期范围，并刷新列表。",
           },
           {
             label: "控件差异",
@@ -196,21 +196,21 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "规则",
     title: "状态 × 行操作能力矩阵",
-    content: "详情、频次时间轴对三种状态均可用；解除仅对未处理（有效）且命中人工解除条件的事件展示。",
+    content: "详情、频次时间轴对三种状态均可用；解除仅对待处置 · 有效且快照 disposition=人工解除结案（R14'）的事件展示。",
     details: [
       {
         title: "展示矩阵",
         items: [
           {
-            label: "未处理（有效）",
-            content: "允许详情和频次查看；图像入侵、挂锁破坏、非法开箱、物联离线、GPS 离线、门禁离线等配置允许人工处理的类型才展示解除。",
+            label: "待处置 · 有效",
+            content: "允许详情和频次查看；是否展示解除由触发快照 manualReleaseAllowed（R14'：ACTION_REQUIRED）决定。",
           },
           {
-            label: "未处理（无效）",
+            label: "已作废",
             content: "仅允许查看详情和频次，不可人工恢复或解除；通常由规则删除或设备移除联动进入终态。",
           },
           {
-            label: "已处理（有效）",
+            label: "已结案 · 有效",
             content: "自动恢复、人工解除或瞬态通行落账后的归档只读状态；未来再次超标须开启新轮次，Count 从 1 重新计算。",
           },
         ],
@@ -232,7 +232,7 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "失败处理",
-            content: "状态已变更或 Version 冲突时提示“数据已被他人修改，请刷新重试”；重复解除返回“该预警已处理”。",
+            content: "状态已变更或 Version 冲突时提示“数据已被他人修改，请刷新重试”；重复解除返回“该预警已结案 · 有效”。",
           },
         ],
       },
@@ -244,14 +244,14 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     number: 5,
     kind: "交互",
     title: "预警次数与频次时间轴",
-    content: "预警次数来自同一设备同一子类型的未处理聚合轮次，点击后打开时间轴抽屉查看每次触发事实。",
+    content: "预警次数来自同一设备同一子类型的待处置 · 有效聚合轮次，点击后打开时间轴抽屉查看每次触发事实。",
     details: [
       {
         title: "聚合规则",
         items: [
           {
             label: "Count 累加",
-            content: "未处理（有效）期间同设备同子类型再次超标时 Count + 1，同时更新最近时间和最新快照。",
+            content: "待处置 · 有效期间同设备同子类型再次超标且防抖通过时 Count + 1，同时更新最近时间和最新快照。聚合键=设备+子类型，不含阈值/通知人/规则 Version 变更。",
           },
           {
             label: "幂等",
@@ -360,7 +360,7 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "服务端校验",
-            content: "最终提交必须再次校验未处理（有效）、仓库权限和 Version；页面二次确认不能替代服务端幂等与并发锁。",
+            content: "最终提交必须再次校验待处置 · 有效、仓库权限和 Version；页面二次确认不能替代服务端幂等与并发锁。",
           },
           {
             label: "审计",

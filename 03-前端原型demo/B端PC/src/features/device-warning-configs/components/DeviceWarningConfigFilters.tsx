@@ -18,6 +18,11 @@ import {
   DEVICE_WARNING_CONFIG_STATUS_OPTIONS,
 } from "../domain/constants"
 import {
+  DISPOSITION_MODES,
+  DISPOSITION_MODE_LABELS,
+  type DispositionMode,
+} from "../domain/disposition"
+import {
   DEVICE_WARNING_TYPES,
   type DeviceWarningConfigFilters,
   type DeviceWarningType,
@@ -38,8 +43,10 @@ export function DeviceWarningConfigFiltersPanel({
   onReset,
   onAdd,
 }: DeviceWarningConfigFiltersPanelProps) {
+  const [expanded, setExpanded] = useState(false)
   const [warningTypeOpen, setWarningTypeOpen] = useState(false)
   const [severityOpen, setSeverityOpen] = useState(false)
+  const [dispositionOpen, setDispositionOpen] = useState(false)
 
   const warningTypeLabel = useMemo(() => {
     if (value.warningTypes.length === 0) {
@@ -64,6 +71,16 @@ export function DeviceWarningConfigFiltersPanel({
     return `已选 ${selected.length} 项`
   }, [value.severityLevelIds])
 
+  const dispositionLabel = useMemo(() => {
+    if (value.dispositionModes.length === 0) {
+      return "全部"
+    }
+    if (value.dispositionModes.length === 1) {
+      return DISPOSITION_MODE_LABELS[value.dispositionModes[0]]
+    }
+    return `已选 ${value.dispositionModes.length} 项`
+  }, [value.dispositionModes])
+
   const toggleWarningType = (type: DeviceWarningType) => {
     const exists = value.warningTypes.includes(type)
     onChange({
@@ -84,10 +101,22 @@ export function DeviceWarningConfigFiltersPanel({
     })
   }
 
+  const toggleDisposition = (mode: DispositionMode) => {
+    const exists = value.dispositionModes.includes(mode)
+    onChange({
+      ...value,
+      dispositionModes: exists
+        ? value.dispositionModes.filter((item) => item !== mode)
+        : [...value.dispositionModes, mode],
+    })
+  }
+
   return (
     <Card>
       <CardContent className="space-y-4 pt-4">
         <WarningFilterHeader
+          expanded={expanded}
+          onToggle={() => setExpanded((current) => !current)}
           onSearch={onSearch}
           onReset={() => {
             onChange({ ...DEFAULT_DEVICE_WARNING_CONFIG_FILTERS })
@@ -96,7 +125,7 @@ export function DeviceWarningConfigFiltersPanel({
           onAdd={onAdd}
           addLabel="新增设备规则"
         />
-        <div className="grid gap-4 xl:grid-cols-4">
+        <div className="grid gap-4 lg:grid-cols-4">
           <FilterField label="规则名称">
             <Input
               placeholder="请输入规则名称"
@@ -194,6 +223,39 @@ export function DeviceWarningConfigFiltersPanel({
             </Select>
           </FilterField>
         </div>
+
+        {expanded && (
+          <div className="grid gap-4 border-t pt-4 lg:grid-cols-4">
+            <FilterField label="处置策略">
+              <MultiSelectField
+                open={dispositionOpen}
+                onOpenChange={setDispositionOpen}
+                label={dispositionLabel}
+              >
+                <button
+                  type="button"
+                  className="flex w-full items-center px-2 py-1.5 text-left text-sm hover:bg-muted"
+                  onClick={() => onChange({ ...value, dispositionModes: [] })}
+                >
+                  全部
+                </button>
+                {DISPOSITION_MODES.map((mode) => (
+                  <label
+                    key={mode}
+                    className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-sm hover:bg-muted"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={value.dispositionModes.includes(mode)}
+                      onChange={() => toggleDisposition(mode)}
+                    />
+                    <span>{DISPOSITION_MODE_LABELS[mode]}</span>
+                  </label>
+                ))}
+              </MultiSelectField>
+            </FilterField>
+          </div>
+        )}
 
       </CardContent>
     </Card>

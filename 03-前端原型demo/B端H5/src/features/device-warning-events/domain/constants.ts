@@ -19,9 +19,9 @@ export const DEVICE_WARNING_STATUS_FILTER_OPTIONS = [
 
 export const DEVICE_WARNING_STATUS_LABEL_OPTIONS = {
   全部: "全部",
-  OPEN_VALID: "未处理（有效）",
-  OPEN_INVALID: "未处理（无效）",
-  CLOSED_VALID: "已处理（有效）",
+  OPEN_VALID: "待处置 · 有效",
+  OPEN_INVALID: "已作废",
+  CLOSED_VALID: "已结案 · 有效",
 } as const
 
 export const DEVICE_WARNING_WAREHOUSES = [

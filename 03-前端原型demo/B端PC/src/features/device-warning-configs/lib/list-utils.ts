@@ -27,6 +27,12 @@ export function filterDeviceWarningConfigs(
       return filters.severityLevelIds.includes(config.severityLevelId)
     })
     .filter((config) => {
+      if (filters.dispositionModes.length === 0) {
+        return true
+      }
+      return filters.dispositionModes.includes(config.dispositionMode)
+    })
+    .filter((config) => {
       if (filters.status === "全部") {
         return true
       }

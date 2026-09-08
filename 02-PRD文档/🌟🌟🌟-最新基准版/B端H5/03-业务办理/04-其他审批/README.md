@@ -5,8 +5,20 @@
 
 ## 功能列表
 
-| 序号 | 菜单 | moduleId | 原型路由 | 文档 |
-| :---: | :--- | :--- | :--- | :--- |
-| 01 | 政策资讯审核 | `biz-approve-policy-news` | `/m/module/biz-approve-policy-news` | [01-政策资讯审核/](./01-政策资讯审核/README.md) |
-| 02 | 开锁审批 | `biz-approve-unlock-apply` | `/m/approval/unlock-applies` | [02-开锁审批/](./02-开锁审批/README.md) |
-| 03 | 贷中风控处理 | `biz-approve-in-loan-risk-sso` | `/m/module/biz-approve-in-loan-risk-sso` | [03-贷中风控处理/](./03-贷中风控处理/README.md) |
+| 序号 | 菜单 | moduleId | 原型路由 | 对应 PC 菜单 | 文档 |
+| :---: | :--- | :--- | :--- | :--- | :--- |
+| 01 | 政策资讯审核 | `biz-approve-policy-news` | `/m/module/biz-approve-policy-news` | 工作中心 → 审批中心 → 政策资讯审核 | [01-政策资讯审核/](./01-政策资讯审核/README.md) |
+| 02 | **开锁审批** | `biz-approve-unlock-apply` | `/m/approval/unlock-applies` | 工作中心 → 审批中心 → **开锁审核** | [02-开锁审批/](./02-开锁审批/README.md) |
+| 03 | 贷中风控处理 | `biz-approve-in-loan-risk-sso` | `/m/module/biz-approve-in-loan-risk-sso` | 工作中心 → 审批中心 → 贷中风控处理（联登SSO） | [03-贷中风控处理/](./03-贷中风控处理/README.md) |
+
+---
+
+## 核心业务与端协同说明
+
+1. **开锁审批（专网专道）**：
+   - 对应 6.2 迭代中门禁开锁审批人终端，PC 端名为「开锁审核」，H5 端名为「开锁审批」；
+   - **不接入系统常规流程引擎**，不进通用待处理池，支持现场即时审批与密码生成/短信下发（挂锁门禁支持短信，人脸门禁仅页面展示密码，遵循 R31 约束）；
+   - 6.2 迭代唯一定义来源见：[07/05/03-开锁审核](../../../../B-迭代需求/6.2版本（2026.08）/07-审批中心/05-其他审批/03-开锁审核/开锁审核主PRD.md)。
+2. **贷中风控处理**：
+   - 承接智风控模型风险告警，H5 端为外部决策引擎联登入口；处置流水与复核结果联动回写至押品预警。
+

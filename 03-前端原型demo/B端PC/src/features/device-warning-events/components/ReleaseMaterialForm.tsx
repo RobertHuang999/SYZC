@@ -138,7 +138,7 @@ export function ReleaseMaterialForm({
 
       <div className="rounded-lg border border-dashed bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
         确认解除后将归档整轮 <strong>{triggerCount}</strong>{" "}
-        次触发，状态变为「已处理（有效）」。
+        次触发，状态变为「已结案 · 有效」。
       </div>
 
       <input type="hidden" name="version" value={version} readOnly />

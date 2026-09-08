@@ -44,7 +44,7 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
     number: 2,
     kind: "交互",
     title: "多维组合检索与新增入口",
-    content: "支持规则名称、预警类型、预警子类型、预警等级与规则状态组合筛选，并提供【新增规则】入口。",
+    content: "默认行四列：规则名称、预警类型、预警等级、状态；展开筛选后追加「处置策略」多选。与 ASCII/Demo 列表页 4 列栅格一致。",
     details: [
       {
         title: "筛选维度说明",
@@ -52,6 +52,10 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
           {
             label: "预警类型 / 子类型联动",
             content: "选择预警大类后，子类型下拉联动收敛为对应权威枚举（如安防类联动围栏越界、离线类联动心跳超时等）。",
+          },
+          {
+            label: "处置策略筛选（展开行）",
+            content: "点击「展开筛选」后展示；多选：触发即结案 / 人工解除结案 / 恢复自动结案；空选=全部。",
           },
           {
             label: "状态筛选",
@@ -67,11 +71,15 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
     number: 3,
     kind: "字段",
     title: "表格字段与防抖参数展示",
-    content: "展示规则名称、预警大类/子类型、预警等级 Tag、监控范围、监控阈值/防抖参数、通知渠道与状态。",
+    content: "展示规则名称、预警类型、处置策略、预警等级、监控范围、触发/防抖条件与状态。",
     details: [
       {
         title: "列定义与展示",
         items: [
+          {
+            label: "处置策略列 (disposition_mode)",
+            content: "Badge 展示三档：触发即结案 / 人工解除结案 / 恢复自动结案；与 02/01 落账策略一致，命中后写入规则快照。",
+          },
           {
             label: "监控范围",
             content: "显示【仅针对新设备】或【N台设备】；悬浮可查看具体设备编码与安装库位。",
@@ -105,7 +113,7 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "删除联动",
-            content: "软删除前弹出强提示确认，删除后该规则关联的所有【未处理】告警流水自动转为【未处理（无效）】并终止超时升级定时器。",
+            content: "软删除前弹出强提示确认，删除后该规则关联的所有【未处理】告警流水自动转为【已作废】并终止超时升级定时器。",
           },
         ],
       },

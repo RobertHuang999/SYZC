@@ -9,11 +9,22 @@ export const WARNING_STATUS = {
 export type WarningStatus =
   (typeof WARNING_STATUS)[keyof typeof WARNING_STATUS]
 
+/** 信息侧：流水处置进度 + 有效性（与配置侧「结案路径」词表解耦） */
 export const WARNING_STATUS_LABELS: Record<WarningStatus, string> = {
-  [WARNING_STATUS.OPEN_VALID]: "未处理（有效）",
-  [WARNING_STATUS.OPEN_INVALID]: "未处理（无效）",
-  [WARNING_STATUS.CLOSED_VALID]: "已处理（有效）",
+  [WARNING_STATUS.OPEN_VALID]: "待处置 · 有效",
+  [WARNING_STATUS.OPEN_INVALID]: "已作废",
+  [WARNING_STATUS.CLOSED_VALID]: "已结案 · 有效",
 }
+
+export const WARNING_STATUS_FILTER_OPTIONS = [
+  "全部",
+  WARNING_STATUS_LABELS[WARNING_STATUS.OPEN_VALID],
+  WARNING_STATUS_LABELS[WARNING_STATUS.OPEN_INVALID],
+  WARNING_STATUS_LABELS[WARNING_STATUS.CLOSED_VALID],
+] as const
+
+export type WarningStatusFilter =
+  (typeof WARNING_STATUS_FILTER_OPTIONS)[number]
 
 export const WARNING_STATUS_BADGE_CLASS: Record<WarningStatus, string> = {
   [WARNING_STATUS.OPEN_VALID]:
@@ -32,21 +43,21 @@ export function getWarningStatusLabel(
     status === WARNING_STATUS.CLOSED_VALID &&
     warningType === "常规通行与操作事务"
   ) {
-    return "已处理"
+    return "已结案"
   }
 
   return WARNING_STATUS_LABELS[status]
 }
 
 export function mapStatusFilterToValue(
-  filter: "全部" | "未处理（有效）" | "未处理（无效）" | "已处理（有效）"
+  filter: WarningStatusFilter
 ): WarningStatus | "ALL" {
   switch (filter) {
-    case "未处理（有效）":
+    case WARNING_STATUS_LABELS[WARNING_STATUS.OPEN_VALID]:
       return WARNING_STATUS.OPEN_VALID
-    case "未处理（无效）":
+    case WARNING_STATUS_LABELS[WARNING_STATUS.OPEN_INVALID]:
       return WARNING_STATUS.OPEN_INVALID
-    case "已处理（有效）":
+    case WARNING_STATUS_LABELS[WARNING_STATUS.CLOSED_VALID]:
       return WARNING_STATUS.CLOSED_VALID
     default:
       return "ALL"

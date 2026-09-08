@@ -220,6 +220,9 @@ export function DeviceWarningEventDetailPage() {
 
       <PrototypeAnnotationTarget annotationIds={["device-warning-detail-rule-snapshot"]}>
         <DetailSection title="规则快照">
+          <DetailField label="处置策略快照">
+            {event.ruleConfigSnapshot.dispositionMode}
+          </DetailField>
           <DetailField label="监控阈值">
             {event.ruleConfigSnapshot.monitorThreshold}
           </DetailField>

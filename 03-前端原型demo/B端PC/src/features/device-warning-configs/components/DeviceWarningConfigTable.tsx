@@ -17,6 +17,10 @@ import {
   getDeviceWarningConfigActions,
   type DeviceWarningConfigAction,
 } from "../domain/actions"
+import {
+  DISPOSITION_MODE_BADGE_CLASS,
+  DISPOSITION_MODE_LABELS,
+} from "../domain/disposition"
 import type { DeviceWarningConfig } from "../domain/types"
 import { formatPersonTime } from "../lib/list-utils"
 
@@ -41,6 +45,7 @@ export function DeviceWarningConfigTable({
             <TableHead className="w-16">序号</TableHead>
             <TableHead className="w-40">规则名称</TableHead>
             <TableHead className="w-36">预警类型</TableHead>
+            <TableHead className="w-40">处置策略</TableHead>
             <TableHead className="w-32">预警等级</TableHead>
             <TableHead className="w-40">关联设备范围</TableHead>
             <TableHead className="w-36">触发条件</TableHead>
@@ -54,7 +59,7 @@ export function DeviceWarningConfigTable({
         <TableBody>
           {configs.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={11} className="h-32 text-center text-muted-foreground">
+              <TableCell colSpan={12} className="h-32 text-center text-muted-foreground">
                 暂无设备预警规则，点击「+ 新增设备规则」创建
               </TableCell>
             </TableRow>
@@ -81,6 +86,14 @@ export function DeviceWarningConfigTable({
                     </HoverOverflowText>
                   </TableCell>
                   <TableCell>{config.warningType}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={DISPOSITION_MODE_BADGE_CLASS[config.dispositionMode]}
+                    >
+                      {DISPOSITION_MODE_LABELS[config.dispositionMode]}
+                    </Badge>
+                  </TableCell>
                   <TableCell>
                     {severity ? (
                       <SeverityLevelDisplay

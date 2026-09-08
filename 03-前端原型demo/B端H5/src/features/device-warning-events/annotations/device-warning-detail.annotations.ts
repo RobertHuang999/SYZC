@@ -15,9 +15,9 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
           {
             label: "状态流转",
             content: `flowchart TD
-    A["IoT设备事件 (防抖通过)"] --> B["未处理(有效)"]
-    B -->|"现场核验 / 人工解除"| C["已处理(有效)"]
-    B -->|"规则删除/设备解绑"| D["未处理(无效) (只读归档)"]`,
+    A["IoT设备事件 (防抖通过)"] --> B["待处置·有效"]
+    B -->|"现场核验 / 人工解除"| C["已结案·有效"]
+    B -->|"规则删除/设备解绑"| D["已作废 (只读归档)"]`,
           },
           {
             label: "业务定位",
@@ -65,7 +65,7 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警状态",
-            content: "未处理（有效）/ 未处理（无效）/ 已处理（有效）。",
+            content: "待处置 · 有效/ 已作废/ 已结案 · 有效。",
           },
         ],
       },
@@ -104,7 +104,7 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "交互",
     title: "底部处置操作与解除入口",
-    content: "未处理（有效）状态且支持人工解除的事件，底部展示【立即解除预警】操作入口。",
+    content: "待处置 · 有效状态且支持人工解除的事件，底部展示【立即解除预警】操作入口。",
     details: [
       {
         title: "操作规范",
@@ -114,7 +114,7 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
             content: "点击【立即解除预警】跳转至 `/m/iot/device-warning-events/:id/release` 填报现场处置材料。",
           },
           {
-            label: "已处理状态",
+            label: "已结案 · 有效",
             content: "展示解除人、解除时间与解除说明，全页面只读归档。",
           },
         ],

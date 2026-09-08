@@ -32,6 +32,7 @@ import { PrototypeAnnotationProvider, PrototypeAnnotationTarget } from "@/shared
 import { deviceWarningConfigFormAnnotations } from "../annotations/device-warning-config-form.annotations"
 import { deviceWarningConfigDocuments } from "../documents/device-warning-config-documents"
 import { DeviceSelectDialog } from "../components/DeviceSelectDialog"
+import { ConfigConfirmDialog } from "../components/ConfigConfirmDialog"
 import { OrgUserSelect } from "@/shared/components/OrgUserSelect"
 import { cn } from "@/lib/utils"
 
@@ -41,6 +42,18 @@ import {
   isDeviceOnlineSubType,
   isInstantTriggerSubType,
 } from "../domain/constants"
+import {
+  canSelectAutoRecoverDisposition,
+  DISPOSITION_MODES,
+  DISPOSITION_MODE_HINTS,
+  DISPOSITION_MODE_LABELS,
+  formatRecommendedDispositionHint,
+  getDispositionDeviationMessage,
+  getRecommendedDisposition,
+  isDispositionDeviatingFromRecommendation,
+  resolveDispositionEffects,
+  type DispositionMode,
+} from "../domain/disposition"
 
 const NOTIFY_CHANNEL_OPTIONS = ["短信", "邮件"] as const
 
@@ -59,6 +72,7 @@ export function DeviceWarningConfigFormPage() {
   )
   const [deviceDialogOpen, setDeviceDialogOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [dispositionConfirmOpen, setDispositionConfirmOpen] = useState(false)
 
   if (isEdit && existing?.status === "已失效") {
     return (
@@ -101,6 +115,20 @@ export function DeviceWarningConfigFormPage() {
   const hasOnlineSubTypeOnly =
     form.warningSubTypes.length === 1 && isDeviceOnlineSubType(form.warningSubTypes[0] ?? "")
   const isInstantTrigger = form.warningSubTypes.some(isInstantTriggerSubType)
+  const recommendedDisposition = useMemo(
+    () => getRecommendedDisposition(form.warningSubTypes),
+    [form.warningSubTypes]
+  )
+  const dispositionEffects = resolveDispositionEffects(form.dispositionMode)
+  const hideUpgradeSection = isGlobalNewDevice || dispositionEffects.hideUpgrade
+  const dispositionDeviates = isDispositionDeviatingFromRecommendation(
+    form.warningSubTypes,
+    form.dispositionMode
+  )
+  const autoRecoverSelectable = useMemo(
+    () => canSelectAutoRecoverDisposition(form.warningSubTypes),
+    [form.warningSubTypes]
+  )
 
   const updateMetricThreshold = (
     metric: keyof DeviceWarningConfigFormValues["metricThresholds"],
@@ -127,7 +155,7 @@ export function DeviceWarningConfigFormPage() {
 
   const hasTemp = form.warningSubTypes.includes("温度异常")
   const hasHumidity = form.warningSubTypes.includes("湿度异常")
-  const hasCO2 = form.warningSubTypes.includes("CO2异常")
+  const hasCO2 = form.warningSubTypes.includes("二氧化碳异常")
   const hasOxygen = form.warningSubTypes.includes("氧气异常")
   const hasSmoke = form.warningSubTypes.includes("烟感异常")
   const hasAnyMetricThreshold =
@@ -143,13 +171,28 @@ export function DeviceWarningConfigFormPage() {
     const available = DEVICE_WARNING_SUB_TYPES[type] || []
     const defaultSubs = available.length > 0 ? [available[0]] : []
     const isInstant = defaultSubs.some(isInstantTriggerSubType)
+    const dispositionMode = getRecommendedDisposition(defaultSubs)
 
     setForm((current) => ({
       ...current,
       warningType: type,
       warningSubTypes: defaultSubs,
+      dispositionMode,
       newDeviceOnly: false,
       debounceMode: isInstant ? "立即触发" : current.debounceMode,
+      upgradeEnabled: resolveDispositionEffects(dispositionMode).hideUpgrade
+        ? false
+        : current.upgradeEnabled,
+    }))
+  }
+
+  const handleDispositionChange = (mode: DispositionMode) => {
+    const effects = resolveDispositionEffects(mode)
+    setForm((current) => ({
+      ...current,
+      dispositionMode: mode,
+      upgradeEnabled: effects.hideUpgrade ? false : current.upgradeEnabled,
+      upgradeDays: effects.hideUpgrade ? "0" : current.upgradeDays,
     }))
   }
 
@@ -161,27 +204,26 @@ export function DeviceWarningConfigFormPage() {
         return current
       }
 
-      const selectingOnline = isDeviceOnlineSubType(subType)
       let next: string[]
-
-      if (selectingOnline) {
+      if (isDeviceOnlineSubType(subType)) {
         next = exists
           ? current.warningSubTypes.filter((item) => item !== subType)
           : [subType]
-        if (next.length === 0) {
-          return current
-        }
       } else {
-        const withoutOnline = current.warningSubTypes.filter((item) => !isDeviceOnlineSubType(item))
+        const withoutOnline = current.warningSubTypes.filter(
+          (item) => !isDeviceOnlineSubType(item)
+        )
         next = exists
           ? withoutOnline.filter((item) => item !== subType)
           : [...withoutOnline, subType]
-        if (next.length === 0) {
-          return current
-        }
+      }
+
+      if (next.length === 0) {
+        return current
       }
 
       const onlyOnline = next.length === 1 && isDeviceOnlineSubType(next[0])
+      const effects = resolveDispositionEffects(current.dispositionMode)
       const isInstant = next.some(isInstantTriggerSubType)
 
       return {
@@ -189,6 +231,8 @@ export function DeviceWarningConfigFormPage() {
         warningSubTypes: next,
         newDeviceOnly: onlyOnline ? current.newDeviceOnly : false,
         debounceMode: isInstant ? "立即触发" : current.debounceMode,
+        upgradeEnabled: effects.hideUpgrade ? false : current.upgradeEnabled,
+        upgradeDays: effects.hideUpgrade ? "0" : current.upgradeDays,
       }
     })
   }
@@ -202,6 +246,13 @@ export function DeviceWarningConfigFormPage() {
     }))
   }
 
+  const performSave = () => {
+    setToastMessage("保存成功")
+    window.setTimeout(() => {
+      navigate("/物联网IOT与预警/预警配置/设备预警配置")
+    }, 800)
+  }
+
   const handleSave = () => {
     const validationError = validateDeviceWarningConfig(form, id)
     if (validationError) {
@@ -210,10 +261,12 @@ export function DeviceWarningConfigFormPage() {
       return
     }
 
-    setToastMessage("保存成功")
-    window.setTimeout(() => {
-      navigate("/物联网IOT与预警/预警配置/设备预警配置")
-    }, 800)
+    if (dispositionDeviates) {
+      setDispositionConfirmOpen(true)
+      return
+    }
+
+    performSave()
   }
 
   return (
@@ -288,11 +341,12 @@ export function DeviceWarningConfigFormPage() {
               <div className="space-y-2 md:col-span-2">
                 <Label>
                   <span className="text-destructive font-bold mr-1">*</span>
-                  预警子类型（支持多选；设备上线类须单独配置）
+                  预警子类型（支持多选；设备上线须单独配置）
                 </Label>
                 <div className="flex flex-wrap gap-2 pt-1">
                   {(DEVICE_WARNING_SUB_TYPES[form.warningType] || []).map((subType) => {
                     const isSelected = form.warningSubTypes.includes(subType)
+                    const recommendationHint = formatRecommendedDispositionHint(subType)
                     return (
                       <button
                         key={subType}
@@ -300,29 +354,119 @@ export function DeviceWarningConfigFormPage() {
                         disabled={isEdit}
                         onClick={() => toggleSubType(subType)}
                         className={cn(
-                          "flex cursor-pointer items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors",
+                          "flex cursor-pointer flex-col items-start gap-0.5 rounded-md border px-3 py-1.5 text-sm transition-colors",
                           isSelected
                             ? "border-primary bg-primary/10 font-medium text-primary shadow-xs"
                             : "border-input bg-background text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                           isEdit && "cursor-not-allowed opacity-60"
                         )}
                       >
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          disabled={isEdit}
-                          onChange={() => toggleSubType(subType)}
-                          className="size-3.5 rounded border-gray-300 text-primary"
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                        <span>{subType}</span>
+                        <span className="flex items-center gap-1.5">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            disabled={isEdit}
+                            onChange={() => toggleSubType(subType)}
+                            className="size-3.5 rounded border-gray-300 text-primary"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <span>{subType}</span>
+                        </span>
+                        <span className="pl-5 text-[10px] text-muted-foreground">
+                          推荐：{recommendationHint}
+                        </span>
                       </button>
                     )
                   })}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  「xxx设备上线」须单独成规则：点击上线类将自动取消其他子类型，点击其他类将自动取消上线类（R14）。
+                  R14：「设备上线」须单独成规则。下方三种处置策略均可自由配置；chip 标注为系统推荐默认，偏离推荐保存时将二次确认。
                 </p>
+              </div>
+              <div className="space-y-3 md:col-span-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Label>
+                    <span className="text-destructive font-bold mr-1">*</span>
+                    处置策略
+                  </Label>
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+                    系统推荐：{DISPOSITION_MODE_LABELS[recommendedDisposition]}
+                  </span>
+                </div>
+                <div className="grid gap-3 md:grid-cols-3">
+                  {DISPOSITION_MODES.map((mode) => {
+                    const selected = form.dispositionMode === mode
+                    const isRecommended = mode === recommendedDisposition
+                    const disabled =
+                      mode === "AUTO_RECOVER" && !autoRecoverSelectable
+                    return (
+                      <label
+                        key={mode}
+                        className={cn(
+                          "flex gap-3 rounded-lg border p-3 transition-colors",
+                          disabled
+                            ? "cursor-not-allowed border-border bg-muted/40 opacity-60"
+                            : "cursor-pointer",
+                          !disabled &&
+                            (selected
+                              ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                              : "border-border bg-card hover:bg-muted/30")
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="dispositionMode"
+                          className="mt-1 size-4"
+                          checked={selected}
+                          disabled={disabled}
+                          onChange={() => {
+                            if (!disabled) {
+                              handleDispositionChange(mode)
+                            }
+                          }}
+                        />
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                            <span>{DISPOSITION_MODE_LABELS[mode]}</span>
+                            {isRecommended && (
+                              <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-normal text-primary">
+                                推荐
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs leading-relaxed text-muted-foreground">
+                            {DISPOSITION_MODE_HINTS[mode]}
+                          </p>
+                        </div>
+                      </label>
+                    )
+                  })}
+                </div>
+                {!autoRecoverSelectable && (
+                  <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                    当前子类型含安防/图像/挂锁破坏/密码错误等无 R03 自动恢复信号项，不可选择「恢复自动结案」（R15c）。
+                  </p>
+                )}
+                {dispositionDeviates && (
+                  <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                    当前选择与系统推荐不一致，保存时将弹出确认提示。
+                  </p>
+                )}
+                {form.dispositionMode === "RECORD_ONLY" && (
+                  <p className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800">
+                    当前策略：写入设备预警信息，触发时直接「已结案 · 有效」；可作通知留痕，无待处置待办与解除入口。
+                  </p>
+                )}
+                {form.dispositionMode === "ACTION_REQUIRED" && (
+                  <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-xs text-orange-800">
+                    当前策略：初态「待处置 · 有效」，须人工解除后「已结案 · 有效」，可配置超时升级。
+                  </p>
+                )}
+                {form.dispositionMode === "AUTO_RECOVER" && (
+                  <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+                    当前策略：初态「待处置 · 有效」，采集/设备恢复后自动「已结案 · 有效」，不可人工解除。
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>
@@ -813,7 +957,7 @@ export function DeviceWarningConfigFormPage() {
                   placeholder="点击按部门组织架构选择预警接收人"
                 />
               </div>
-              {!isGlobalNewDevice && (
+              {!hideUpgradeSection && (
                 <>
                   <div className="flex items-center gap-2 pt-2 border-t">
                     <input
@@ -872,6 +1016,21 @@ export function DeviceWarningConfigFormPage() {
           onOpenChange={setDeviceDialogOpen}
           onConfirm={(summary) => {
             updateForm({ selectedDevices: summary })
+          }}
+        />
+
+        <ConfigConfirmDialog
+          open={dispositionConfirmOpen}
+          title="确认处置策略"
+          description={getDispositionDeviationMessage(
+            form.warningSubTypes,
+            form.dispositionMode
+          )}
+          confirmLabel="确认保存"
+          onOpenChange={setDispositionConfirmOpen}
+          onConfirm={() => {
+            setDispositionConfirmOpen(false)
+            performSave()
           }}
         />
 

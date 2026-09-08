@@ -4,6 +4,7 @@ export const DEFAULT_DEVICE_WARNING_CONFIG_FILTERS: DeviceWarningConfigFilters =
   ruleName: "",
   warningTypes: [],
   severityLevelIds: [],
+  dispositionModes: [],
   status: "全部",
 }
 
@@ -16,46 +17,109 @@ export const DEVICE_WARNING_CONFIG_STATUS_OPTIONS = [
 
 export const PAGE_SIZE = 10
 
+/** 附录 A · 线上枚举（2026-09-07 对齐） */
 export const DEVICE_WARNING_SUB_TYPES: Record<string, string[]> = {
-  "设备图像识别预警": ["行人入侵", "车辆入侵", "物品形态变化", "摄像头离线", "监控设备上线"],
-  "设备物联预警": ["温度异常", "湿度异常", "烟感异常", "CO2异常", "氧气异常", "物联传感器离线", "物联设备上线"],
-  "智能挂锁预警": ["拆壳破坏", "剪杆破坏", "撬锁报警", "非法开箱", "低电量", "门锁离线", "门锁设备上线", "正常开关锁事务"],
-  "人脸门禁预警": ["门未关超时", "密码错误", "门禁离线", "门禁设备上线", "正常刷脸通行记录"],
-  "设备GPS预警": ["进出围栏", "超速", "怠速滞留", "偏离路线", "非法拆除", "GPS设备上线", "GPS离线"],
+  "设备图像识别预警": [
+    "行人入侵",
+    "车辆入侵",
+    "物品形态变化",
+    "设备离线",
+    "设备上线",
+    "设备移除",
+  ],
+  "设备物联预警": [
+    "温度异常",
+    "湿度异常",
+    "烟感异常",
+    "二氧化碳异常",
+    "氧气异常",
+    "设备离线",
+    "设备上线",
+    "设备移除",
+  ],
+  "智能挂锁预警": [
+    "拆壳",
+    "锁舌被卡",
+    "锁杆被剪",
+    "非法开箱",
+    "拆卡报警",
+    "密码错误",
+    "关锁异常",
+    "电量低于20%",
+    "开锁通知",
+    "关锁通知",
+    "设备上线",
+    "设备移除",
+  ],
+  "人脸门禁预警": [
+    "门未关",
+    "密码错误",
+    "设备离线",
+    "开锁通知",
+    "关锁通知",
+    "设备上线",
+    "设备移除",
+  ],
+  "设备GPS预警": [
+    "进围栏",
+    "出围栏",
+    "普通限速",
+    "怠速滞留",
+    "路线偏离",
+    "非法拆除",
+    "设备离线",
+    "设备上线",
+    "设备移除",
+  ],
 }
 
-/** 各预警大类「设备上线」子类型（R14 互斥基准） */
-export const DEVICE_ONLINE_SUB_TYPES = [
-  "监控设备上线",
-  "物联设备上线",
-  "门锁设备上线",
-  "门禁设备上线",
-  "GPS设备上线",
+/** 持续型子类型 · 防抖须 >0（R02） */
+const SUSTAINED_DEBOUNCE_SUB_TYPES = [
+  "门未关",
+  "设备离线",
+  "电量低于20%",
+  "温度异常",
+  "湿度异常",
+  "烟感异常",
+  "二氧化碳异常",
+  "氧气异常",
+  "进围栏",
+  "出围栏",
+  "普通限速",
+  "怠速滞留",
+  "路线偏离",
+  "行人入侵",
+  "车辆入侵",
+  "物品形态变化",
 ] as const
 
+/** @deprecated 仅用于兼容旧引用；处置策略请用 disposition.ts */
+export const NOTIFY_FLEXIBLE_SUB_TYPES = [
+  "开锁通知",
+  "关锁通知",
+  "设备上线",
+  "设备移除",
+] as const
+
+export function isNotifyFlexibleSubType(subType: string): boolean {
+  return (NOTIFY_FLEXIBLE_SUB_TYPES as readonly string[]).includes(subType)
+}
+
+/** @deprecated 请改用 event.manualReleaseAllowed / disposition 快照 */
+export function matchesTransactionSubType(text: string): boolean {
+  return NOTIFY_FLEXIBLE_SUB_TYPES.some((subType) => text.includes(subType))
+}
+
+/** R14：设备上线须单独成规则 */
 export function isDeviceOnlineSubType(subType: string): boolean {
-  return subType.endsWith("设备上线")
+  return subType === "设备上线"
 }
 
 export function getDeviceOnlineSubTypeForWarningType(warningType: string): string | undefined {
-  return (DEVICE_WARNING_SUB_TYPES[warningType] || []).find(isDeviceOnlineSubType)
+  const subs = DEVICE_WARNING_SUB_TYPES[warningType] || []
+  return subs.includes("设备上线") ? "设备上线" : undefined
 }
 
-const INSTANT_SUB_TYPES = [
-  "剪杆破坏",
-  "拆壳破坏",
-  "撬锁报警",
-  "非法开箱",
-  "正常开关锁事务",
-  "正常刷脸通行记录",
-  "密码错误",
-  "非法拆除",
-  ...DEVICE_ONLINE_SUB_TYPES,
-] as const
-
 export function isInstantTriggerSubType(subType: string): boolean {
-  return (
-    isDeviceOnlineSubType(subType) ||
-    (INSTANT_SUB_TYPES as readonly string[]).includes(subType)
-  )
+  return !(SUSTAINED_DEBOUNCE_SUB_TYPES as readonly string[]).includes(subType)
 }
