@@ -1068,7 +1068,7 @@ export function DeviceManagementPage() {
         </div>
       )}
 
-      <Toast message={toast} />
+      <Toast message={toast} onClose={() => setToast(null)} />
     </MobileShell>
   )
 }

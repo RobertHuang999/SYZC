@@ -42,19 +42,47 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
     targetId: "h5-collateral-warning-detail-base",
     number: 2,
     kind: "字段",
-    title: "订单基本信息与风险分类",
-    content: "展示预警订单号、订单类型（抵押/质押/监管）、预警类型及预警等级色块。",
+    title: "预警基本事实与关键字段",
+    content: "展示预警订单号、规则名称、预警类型、预警等级、来源渠道、公示状态、预警时间及预警内容。",
     details: [
       {
-        title: "字段清单",
+        title: "核心字段定义与数据源头",
         items: [
           {
-            label: "预警订单号",
-            content: "业务单据编号（如 PO202608-01），支持一键复制。",
+            label: "预警订单 (orderNo)",
+            content: "业务单据编号（如 PO202608-01），支持一键复制单号并支持跨模块查询。",
+          },
+          {
+            label: "规则名称 (ruleName)",
+            content: "触发预警时刻固化的风控规则名称快照（如“铜价下跌监控”）。",
+          },
+          {
+            label: "预警类型 (warningType)",
+            content: "6.2 收敛的 7 大预警类型之一（解抵/质押/监管超时、价格下跌、盘点异常、巡检异常、抵/质押率异常、贷中风控预警、物联穿透告警）。",
           },
           {
             label: "预警等级",
-            content: "03/01 字典等级快照（如 L4 严重风险 / L5 紧急危险）。",
+            content: "03/01 预警等级字典快照（如 L4 严重风险 / L5 紧急危险），展示对应彩色色块与等级编码。",
+          },
+          {
+            label: "来源渠道 (warningSource)",
+            content: "订单配置触发 (ORDER_CONFIG) 或 物联穿透 (IOT_PENETRATION)。",
+          },
+          {
+            label: "是否公示 (publicityStatus)",
+            content: "未公示、已公示、已取消；已处理（有效）记录支持发起公示风险。",
+          },
+          {
+            label: "预警时间 (warningTime)",
+            content: "预警实际发生的系统落账时间（YYYY-MM-DD HH:mm:ss）。",
+          },
+          {
+            label: "预警内容 (warningContent)",
+            content: "风控引擎拼装的标准化参数事实描述。",
+          },
+          {
+            label: "预警抓拍图",
+            content: "现场监控设备联动抓拍画面，点击弹出图片预览 Modal 查看。",
           },
         ],
       },
@@ -65,18 +93,27 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
     targetId: "h5-collateral-warning-detail-facts",
     number: 3,
     kind: "规则",
-    title: "预警事实与风控计算公式",
+    title: "预警事实、快照与风控计算公式",
     content: "展示触发指标快照（不可变存证）、6 大商业类型判定标准及 LTV/跌价计算模型。",
     details: [
       {
-        title: "结构化触发判定快照规范",
+        title: "快照与字段来源机制",
         items: [
+          {
+            label: "货物位置与数量来源",
+            content: "来源于订单项下的仓单/WMS货位台账（`orderSnapshot`），触发时刻固化不可变快照，锁定发生风险时的物理仓位与货品标的物明细。",
+          },
           {
             label: "快照 4 列要素",
             content: "监控指标项、实际触发值、规则预警阈值、超标判定结果。触发后固化历史事实，不可篡改。",
           },
+        ],
+      },
+      {
+        title: "6 大商业类型快照",
+        items: [
           {
-            label: "6 大商业类型快照",
+            label: "类型判定矩阵",
             content: `1. 贷中风控：智风控评分 / 准入线 (60分)
 2. 抵质押率：当前 LTV / 平仓线 (85%) / 补仓线 (75%)
 3. 价格下跌：现货价格跌幅 / 预警阈值 (-12%)
@@ -85,18 +122,10 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
 6. 业务超时：存续期限 / 约定期限
 7. 物联穿透：现场传感器物理异常联动`,
           },
-          {
-            label: "预警内容标准模板",
-            content: `• 贷中风控：模型：【{模型名}】；分数：【{分数}】；描述：【{描述}】
-• 抵/质押率：订单抵/质押率异常！触发【{平仓线}】，LTV {值}%
-• 价格下跌：货值已下跌超过{跌幅}%（阈值 {阈值}%）
-• 盘点/巡检：经现场盘点/巡检发现异常，请及时核查
-• 超时预警：货物未在约定日期完成解押/解监管`,
-          },
         ],
       },
       {
-        title: "风控公式",
+        title: "风控计算公式",
         items: [
           {
             label: "LTV 质押率",

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { ArrowLeftIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
+import { ArrowLeftIcon, EyeIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ConfigAuditSection } from "@/shared/components/ConfigAuditSection"
@@ -12,6 +12,7 @@ import {
 import { SeverityLevelDisplay } from "@/shared/components/SeverityLevelDisplay"
 import { getSeverityLevelById } from "@/shared/mock/severity-levels"
 import { ConfigConfirmDialog } from "../components/ConfigConfirmDialog"
+import { DeviceScopeDialog } from "../components/DeviceScopeDialog"
 import { DEVICE_WARNING_CONFIG_STATUS_BADGE_CLASS } from "../domain/actions"
 import {
   formatMonitorThreshold,
@@ -36,7 +37,7 @@ type PendingAction = "disable" | "enable" | "delete" | null
 export function DeviceWarningConfigDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [deviceListOpen, setDeviceListOpen] = useState(false)
+  const [deviceScopeDialogOpen, setDeviceScopeDialogOpen] = useState(false)
   const [pendingAction, setPendingAction] = useState<PendingAction>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
@@ -179,23 +180,18 @@ export function DeviceWarningConfigDetailPage() {
           <DetailSection title="关联设备">
             <DetailField label="所属仓库">一号大宗钢材仓</DetailField>
             <DetailField label="关联设备范围">
-              <div className="space-y-1">
-                <span>{config.deviceScope}</span>
-                <button
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="font-medium text-foreground">{config.deviceScope}</span>
+                <Button
                   type="button"
-                  className="flex items-center gap-1 text-sm text-primary hover:underline"
-                  onClick={() => setDeviceListOpen((open) => !open)}
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1.5 px-2.5 text-xs text-primary hover:text-primary hover:bg-primary/5 cursor-pointer"
+                  onClick={() => setDeviceScopeDialogOpen(true)}
                 >
-                  查看设备清单
-                  {deviceListOpen ? (
-                    <ChevronUpIcon className="size-4" />
-                  ) : (
-                    <ChevronDownIcon className="size-4" />
-                  )}
-                </button>
-                {deviceListOpen && (
-                  <p className="text-sm text-muted-foreground">{config.deviceScopeDetail}</p>
-                )}
+                  <EyeIcon className="size-3.5" />
+                  <span>查看设备清单</span>
+                </Button>
               </div>
             </DetailField>
             <DetailField label="仅针对新设备">{config.newDeviceOnly ? "是" : "否"}</DetailField>
@@ -282,6 +278,12 @@ export function DeviceWarningConfigDetailPage() {
             if (!open) setPendingAction(null)
           }}
           onConfirm={handleConfirmAction}
+        />
+
+        <DeviceScopeDialog
+          open={deviceScopeDialogOpen}
+          config={config}
+          onOpenChange={setDeviceScopeDialogOpen}
         />
 
         {toastMessage && (

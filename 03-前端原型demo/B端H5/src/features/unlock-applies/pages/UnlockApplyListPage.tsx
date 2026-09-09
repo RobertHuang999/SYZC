@@ -9,7 +9,11 @@ import { DEFAULT_UNLOCK_APPLY_FILTERS } from "../domain/constants"
 import type { UnlockApply, UnlockApplyFilters } from "../domain/types"
 import { UnlockApplyCard } from "../components/UnlockApplyCard"
 import { UnlockApplyApprovalDialog } from "../components/UnlockApplyApprovalDialog"
-import { useUnlockApplies } from "@/features/my-applies/lib/unlock-applies-store"
+import {
+  approveUnlockApply,
+  rejectUnlockApply,
+  useUnlockApplies,
+} from "@/features/my-applies/lib/unlock-applies-store"
 
 const statusOptions: DropdownOption[] = [
   { label: "待审批", value: "待审批" },
@@ -116,8 +120,15 @@ export function UnlockApplyListPage() {
         open={approvalOpen}
         apply={processingApply}
         onClose={() => setApprovalOpen(false)}
-        onApprove={(_apply, _opinion) => setToast("审批通过")}
-        onReject={(_apply, _reason) => setToast("已驳回")}
+        onSubmit={(apply, decision, opinion) => {
+          if (decision === "同意") {
+            approveUnlockApply(apply.applyNo, opinion)
+            setToast("已同意审批，开锁凭证已下发")
+          } else {
+            rejectUnlockApply(apply.applyNo, opinion)
+            setToast("已驳回开锁申请")
+          }
+        }}
       />
 
       {toast && <Toast message={toast} />}

@@ -12,7 +12,6 @@ import { UnlockApplyStatusBadge } from "../components/UnlockApplyStatusBadge"
 import { LIST_BASE_PATH } from "../domain/constants"
 import {
   formatApplicant,
-  getUnlockApplyByNo,
   maskPhone,
 } from "../lib/detail-utils"
 import {
@@ -22,13 +21,20 @@ import {
 import { unlockApplyAuditDetailAnnotations } from "../annotations/unlock-apply-audit-detail.annotations"
 import { unlockApplyAuditDocuments } from "../documents/unlock-apply-audit-documents"
 
+import {
+  approveUnlockApply,
+  rejectUnlockApply,
+  useUnlockApplies,
+} from "../lib/unlock-applies-store"
+
 export function UnlockApplyDetailPage() {
   const { applyNo } = useParams()
   const navigate = useNavigate()
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [approvalOpen, setApprovalOpen] = useState(false)
 
-  const apply = useMemo(() => getUnlockApplyByNo(applyNo), [applyNo])
+  const allApplies = useUnlockApplies()
+  const apply = useMemo(() => allApplies.find((item) => item.applyNo === applyNo), [allApplies, applyNo])
 
   const showToast = (message: string) => {
     setToastMessage(message)
@@ -51,13 +57,15 @@ export function UnlockApplyDetailPage() {
 
   const canApprove = apply.status === "PENDING" && apply.eligible
 
-  const handleApprove = (_opinion: string) => {
-    showToast("审批通过")
+  const handleApprove = (opinion: string) => {
+    if (apply) approveUnlockApply(apply.applyNo, opinion)
+    showToast("已同意审批，开锁凭证已生成")
     window.setTimeout(() => navigate(LIST_BASE_PATH), 800)
   }
 
-  const handleReject = (_reason: string) => {
-    showToast("已驳回")
+  const handleReject = (reason: string) => {
+    if (apply) rejectUnlockApply(apply.applyNo, reason)
+    showToast("已驳回开锁申请")
     window.setTimeout(() => navigate(LIST_BASE_PATH), 800)
   }
 
@@ -156,6 +164,13 @@ export function UnlockApplyDetailPage() {
           open={approvalOpen}
           apply={apply}
           onOpenChange={setApprovalOpen}
+          onSubmit={(_apply, decision, opinion) => {
+            if (decision === "同意") {
+              handleApprove(opinion)
+            } else {
+              handleReject(opinion)
+            }
+          }}
           onApprove={(_item, opinion) => handleApprove(opinion)}
           onReject={(_item, reason) => handleReject(reason)}
         />

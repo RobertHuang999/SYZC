@@ -4,7 +4,11 @@ import { ApprovalCenterNavStrip } from "../components/ApprovalCenterNavStrip"
 import { ApprovalCenterPreviewPanel } from "../components/ApprovalCenterPreviewPanel"
 import type { UnlockApply } from "../domain/types"
 import { countPendingForCurrentUser, filterUnlockApplies } from "../lib/list-utils"
-import { useUnlockApplies } from "../lib/unlock-applies-store"
+import {
+  approveUnlockApply,
+  rejectUnlockApply,
+  useUnlockApplies,
+} from "../lib/unlock-applies-store"
 import {
   PREVIEW_ROW_LIMIT,
   approvalCenterCardGroups,
@@ -120,8 +124,23 @@ export function ApprovalCenterPage() {
           open={approvalOpen}
           apply={processingApply}
           onOpenChange={setApprovalOpen}
-          onApprove={(_apply, _opinion) => showToast("审批通过")}
-          onReject={(_apply, _reason) => showToast("已驳回")}
+          onSubmit={(apply, decision, opinion) => {
+            if (decision === "同意") {
+              approveUnlockApply(apply.applyNo, opinion)
+              showToast("已同意审批，开锁凭证已生成")
+            } else {
+              rejectUnlockApply(apply.applyNo, opinion)
+              showToast("已驳回开锁申请")
+            }
+          }}
+          onApprove={(apply, opinion) => {
+            approveUnlockApply(apply.applyNo, opinion)
+            showToast("已同意审批，开锁凭证已生成")
+          }}
+          onReject={(apply, reason) => {
+            rejectUnlockApply(apply.applyNo, reason)
+            showToast("已驳回开锁申请")
+          }}
         />
 
         {toastMessage && (

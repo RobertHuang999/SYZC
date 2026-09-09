@@ -7,26 +7,23 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
     number: 1,
     kind: "页面",
     title: "押品预警详情与处置流转",
-    content: "展示订单级风险事实、动态风控计算指标、物联穿透关联详情与处置公示全流程。",
+    content: "展示订单级风险事实、动态风控计算指标、物联穿透关联详情与处置公示全流程；基于单条独立流水展示不可变存证快照。",
     details: [
       {
         title: "预警生命周期与处置流程图",
         items: [
           {
             label: "业务流转图",
-            content: `┌──────────────────┐     规则命中/物联穿透     ┌──────────────────┐     商业类单据处置/物联核销     ┌──────────────────┐
-│  商业规则/IoT事件 │ ──────────────────────> │  未处理(有效)    │ ──────────────────────────────> │  已处理(有效)    │
-└──────────────────┘                          └──────────────────┘                                └──────────────────┘
-                                                       │                                                   │
-                                                       │ 订单结清/规则失效                                 │ 满足公示条件
-                                                       v                                                   v
-                                              ┌──────────────────┐                                ┌──────────────────┐
-                                              │  未处理(无效)    │                                │     风险公示     │
-                                              └──────────────────┘                                └──────────────────┘`,
+            content: `flowchart TD
+    A["商业风控引擎计算 / 物联穿透联动"] --> B["未处理·有效 (待处置)"]
+    B -->|"商业类: 补仓/解押/还款"| C["已处理·有效"]
+    B -->|"穿透类: 设备台账现场核销"| C
+    B -->|"订单结清 / 规则删除"| D["未处理·无效 (终态只读)"]
+    C -->|"高危且满足披露条件"| E["风险公示"]`,
           },
           {
             label: "处置路径分流",
-            content: "商业类预警引导跳转抵质押订单单据完成补仓/解押；物联穿透类需跳转设备预警核销物理告警后联动解除。",
+            content: "商业类预警引导跳转抵质押订单办理页完成补保、追加保证金或解押；物联穿透类需跳转设备预警核销物理告警后联动回写解除。",
           },
         ],
       },
@@ -35,7 +32,7 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "订单与估值上游",
-            content: "关联订单主数据、仓单数据与大宗商品实时行情估值模型，计算质押率与跌价幅度。",
+            content: "关联订单主数据、仓单数据与大宗商品实时行情估值模型，计算质押率与跌价幅度；触发瞬间捕获订单业务快照。",
           },
           {
             label: "下游风险公示",
@@ -50,27 +47,43 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "collateral-warning-detail-base",
     number: 2,
     kind: "字段",
-    title: "订单基本信息与风险分类",
+    title: "基本信息与风险分类",
     content: "展示预警订单编号、订单类型、预警类型分类、预警等级快照与触发规则归属。",
     details: [
       {
         title: "核心字段定义",
         items: [
           {
-            label: "预警订单号",
-            content: "关联的抵质押业务单据编号（如 PO202608-01），支持跨模块穿透。",
+            label: "事件 ID (eventId)",
+            content: "系统全局唯一的押品预警流水号（如 evt-001），作为详情查询、跨模块关联与操作审计的唯一主键。",
           },
           {
-            label: "订单类型",
-            content: "抵/质押订单、监管订单、标准仓单质押等不同供应链金融模式。",
+            label: "预警订单 (orderNo)",
+            content: "发生预警的抵/质押或监管业务订单编号（如 PO202608-01），只读展示，支持跨模块跳转至抵质押业务单据办理页。",
           },
           {
-            label: "预警类型 / 等级",
-            content: "7 大预警类型之一；等级展示 03/01 启用档快照（如 L4 严重风险 / L5 紧急危险）。",
+            label: "预警类型 (warningType)",
+            content: "6.2 版本收敛的 7 大预警类型之一（解抵/质押/监管超时、价格下跌、盘点异常、巡检异常、抵/质押率异常、贷中风控预警、物联穿透告警）。",
           },
           {
-            label: "预警来源",
-            content: "订单配置触发 (ORDER_CONFIG) 或 物联穿透 (IOT_PENETRATION)。",
+            label: "预警等级 (severityLevel)",
+            content: "预警触发时命中的严重度等级快照（如 L4 严重风险、L5 紧急危险），包含等级编码、名称及色块；由租户 03/01 预警等级字典在触发时刻固化。",
+          },
+          {
+            label: "预警来源 (warningSource)",
+            content: "区分预警产生的源头系统与触发机制：订单配置触发 (ORDER_CONFIG) 或 物联穿透 (IOT_PENETRATION)。",
+          },
+          {
+            label: "规则名称 (ruleName)",
+            content: "产生本条预警的 03/03 订单预警规则名称（如“钢材双控规则”）；若为物联穿透则为触发的设备规则名称快照。",
+          },
+          {
+            label: "预警状态 (warningStatus)",
+            content: "未处理（有效）、已处理（有效）、未处理（无效）；当单据货物全部出库、解押完成或规则删除后自动更新为未处理（无效）。",
+          },
+          {
+            label: "失效原因 (invalidReason)",
+            content: "仅在预警状态为未处理（无效）时展示，详细说明导致预警作废的原因（如“关联订单预警配置已删除（C11）”或“订单已正常解质押出库”）。",
           },
         ],
       },
@@ -80,19 +93,40 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
     id: "collateral-warning-detail-facts",
     targetId: "collateral-warning-detail-facts",
     number: 3,
-    kind: "规则",
-    title: "预警事实与风控计算公式",
-    content: "展示参数化模板文本、触发时指标快照（不可变存证）与 6 大商业风控类型判定标准。",
+    kind: "字段",
+    title: "预警事实、位置与判定快照",
+    content: "展示现场空间位置、货物明细与数量快照、参数化预警文本、抓拍凭证以及不可变 4 列判定数据快照。",
     details: [
       {
-        title: "结构化触发判定快照规范（4列不可变存证）",
+        title: "核心字段定义与数据源头（含货物位置与数量来源）",
         items: [
           {
-            label: "快照 4 列要素定义",
-            content: `1. 监控指标项 (metricName)：判定的核心风控指标
-2. 实际触发值 (triggerValue)：事件触发时采集或计算得出的实时数值
-3. 规则预警阈值 (thresholdValue)：触发时命中的规则阈值/警戒线
-4. 超标判定结果 (deviation)：偏离程度及详细原因说明`,
+            label: "货物位置 (storageLocation)",
+            content: `【数据来源】：来源于产生预警的业务订单所绑定的仓单系统/仓储 WMS 货位台账。
+【生成逻辑】：在预警触发瞬间，风控引擎抓取该订单项下在押标的物的物理存放空间拓扑层级快照并固化存证，展示格式为“【仓库名称】/【库区/库房】/【货位编号】”（如“一号钢材仓 / A库区 / 01分区-H02”）。
+【审计意义】：锁定发生风险时刻的真实物理存放位置，供监管人员现场排查与摄像头调阅，并用于核验物联设备与货物的空间重合性；后续单据发生移库、转库不回写历史预警记录。`,
+          },
+          {
+            label: "货物与数量 (cargoName · cargoQuantity)",
+            content: `【数据来源】：来源于预警订单项下标的物仓单明细台账。
+【生成逻辑】：预警触发瞬间，系统锁定该笔订单对应的质物货物名称、规格型号及当前在押锁定数量与计量单位，固化生成快照并组合呈现为“【品名 规格型号】·【在押数量 计量单位】”（如“热轧卷板 Q235B · 250.00吨”）。
+【审计意义】：明确该条风险事件所威胁的特定货权资产标的，作为价格下跌估值重算、质押率敞口测算、账实盘点差异核对以及出库熔断判定的法定事实依据。`,
+          },
+          {
+            label: "预警内容 (warningContent)",
+            content: "由风控规则引擎根据触发指标与模板参数自动拼装的标准事实文本，包含预警发生位置、设备、具体业务指标、采集值及预警阈值对比。",
+          },
+          {
+            label: "预警时间 (warningTime)",
+            content: "预警事件实际发生并被系统记录的时间（YYYY-MM-DD HH:mm:ss），作为未处理状态下计算升级提醒的计时基准起点。",
+          },
+          {
+            label: "预警抓拍图 (snapshotImageStatus)",
+            content: "预警触发时，系统联动押品存放货位所对应的智能监控摄像头即时抓拍的现场画面；图片存储于私有 OSS，前端通过 15 分钟时效临时签名 URL 预览。",
+          },
+          {
+            label: "触发判定数据快照 (triggerSnapshot)",
+            content: "由 4 列不可变存证指标构成：监控指标项 (metricName)、实际触发值 (triggerValue)、规则预警阈值 (thresholdValue)、超标判定结果 (deviation)；固化触发瞬间的判定事实，后续规则阈值调整不改变历史快照。",
           },
         ],
       },
@@ -174,10 +208,6 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
             content: `跌幅比例 = (基准估值单价 - 当前市场估值单价) ÷ 基准估值单价 × 100%
 预警条件：跌幅比例 ≥ 配置跌幅阈值（如 15%）`,
           },
-          {
-            label: "预警抓拍凭证",
-            content: "若存在安防或盘点联动抓拍，展示时效图片预览入口（受 P05 权限控制）。",
-          },
         ],
       },
     ],
@@ -186,12 +216,29 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
     id: "collateral-warning-detail-penetration",
     targetId: "collateral-warning-detail-penetration",
     number: 4,
-    kind: "规则",
+    kind: "字段",
     title: "物联穿透关联信息与核销约束",
-    content: "展示触发穿透的物理设备编号、位置、抓拍画面与唯一核销流转路径。",
+    content: "仅针对物联穿透告警展示，精准关联底层物理设备事件、异常子类型与物理空间位置。",
     details: [
       {
-        title: "穿透机制与协同",
+        title: "核心字段定义与物理追溯",
+        items: [
+          {
+            label: "触发设备名称 (triggerDevice)",
+            content: "产生物理预警的底层硬件设备名称与安装位置快照（如“智能挂锁 LK-02 (A库01区)”），固化触发时刻的设备快照。",
+          },
+          {
+            label: "物理事件子类型 (physicalSubType)",
+            content: "底层硬件端实际采集检测到的物理异常子类型（如“剪杆破坏”、“异常震动”、“超温告警”），真实还原物理现场险情。",
+          },
+          {
+            label: "触发现场位置 (triggerLocation)",
+            content: "发生物理预警设备所在的空间拓扑层级位置（如“一号钢材仓 / A库区 / 01分区”），用于核验底层设备与在押订单货物的物理空间重叠关系。",
+          },
+        ],
+      },
+      {
+        title: "穿透机制与协同核销",
         items: [
           {
             label: "关联设备事件 ID",
@@ -202,8 +249,8 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
             content: "物联穿透告警禁止在押品详情页人工点击解除；必须前往设备预警详情页核销物理隐患，由系统发布 DeviceEventReleased 事件联动回写已处理。",
           },
           {
-            label: "空间重合匹配",
-            content: "仅当处于在押监管状态且物理空间完全重合（同仓同库区）的设备高危告警才触发押品穿透告警。",
+            label: "空间重合匹配原则",
+            content: "仅当处于在押监管状态且物理空间完全重合（同仓同库区同货位）的设备高危告警才触发押品穿透告警。",
           },
         ],
       },
@@ -213,17 +260,38 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
     id: "collateral-warning-detail-disposal",
     targetId: "collateral-warning-detail-disposal",
     number: 5,
-    kind: "规则",
+    kind: "字段",
     title: "处置记录、留痕与风险公示",
-    content: "展示处置时间、处理人、处置方式说明、公示状态与公示历史。",
+    content: "展示已处理状态下的核销时间、责任人、情况说明、现场核验照片凭证与联动抓拍图。",
     details: [
+      {
+        title: "核心字段定义与留痕凭据",
+        items: [
+          {
+            label: "处理时间 (processedTime)",
+            content: "预警完成人工解除核销或底层设备联动核销的时间（YYYY-MM-DD HH:mm:ss）；未处理状态下显示为空。",
+          },
+          {
+            label: "处理人 (processedBy)",
+            content: "完成预警核销的责任主体；人工解除记录为风控操作员姓名及所属机构，物联穿透类联动核销后自动记录为“系统自动处理”。",
+          },
+          {
+            label: "情况说明 (situationDescription)",
+            content: "人工解除本次预警时风控人员填写的核实结论与处置措施（必填，≤200 字），如“借款企业已完成追加保证金 50 万元，LTV 降至 68.2%，风险已化解”。",
+          },
+          {
+            label: "现场照片 (sitePhotos)",
+            content: "解除预警时上传的现场排查核实凭证照片列表（最多 10 张），支持多图缩略预览与全屏查看大图。",
+          },
+          {
+            label: "解除抓拍图 (releaseSnapshotImage)",
+            content: "人工解除提交时，系统向押品货位对应监控摄像头下发即时抓拍指令所留存的现场画面，用以佐证解除时刻现场货品完好、环境正常。",
+          },
+        ],
+      },
       {
         title: "合规处置与公示联动",
         items: [
-          {
-            label: "处置记录",
-            content: "已处理（有效）状态下展示处理人、处理时间与处置说明（如已追加保证金 500 万元，LTV 降至 65%）。",
-          },
           {
             label: "公示风险流程",
             content: "点击【公示风险】调起确认对话框，录入公示理由与公示范围，提交后进入风险公示审批流。",
@@ -249,11 +317,11 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "商业类 · 未处理",
-            content: "展示【解除预警】，点击跳转对应抵质押订单信息页进行处置。",
+            content: "展示【解除预警】，点击弹出引导对话框并跳转对应抵质押订单信息页进行处置。",
           },
           {
             label: "物联类 · 未处理",
-            content: "展示【查看设备事件】，点击跳转设备预警详情页查看物理事实。",
+            content: "展示【查看设备事件】，点击跳转设备预警详情页查看物理事实与现场核销。",
           },
           {
             label: "已处理 · 未公示",

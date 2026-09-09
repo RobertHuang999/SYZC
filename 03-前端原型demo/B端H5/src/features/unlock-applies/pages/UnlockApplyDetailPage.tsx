@@ -8,7 +8,11 @@ import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotat
 import { formatDateTime } from "@/shared/lib/date-utils"
 import { UNLOCK_APPLY_STATUS_LABEL } from "../domain/constants"
 import { UnlockApplyApprovalDialog } from "../components/UnlockApplyApprovalDialog"
-import { getUnlockApplies } from "@/features/my-applies/lib/unlock-applies-store"
+import {
+  approveUnlockApply,
+  rejectUnlockApply,
+  useUnlockApplies,
+} from "@/features/my-applies/lib/unlock-applies-store"
 
 function KeyValue({ label, value }: { label: string; value: string }) {
   return (
@@ -27,9 +31,10 @@ function maskPhone(phone: string): string {
 export function UnlockApplyDetailPage() {
   const { applyNo } = useParams<{ applyNo: string }>()
   const navigate = useNavigate()
+  const unlockApplies = useUnlockApplies()
   const apply = useMemo(
-    () => getUnlockApplies().find((item) => item.applyNo === applyNo && item.needsApproval),
-    [applyNo]
+    () => unlockApplies.find((item) => item.applyNo === applyNo && item.needsApproval),
+    [unlockApplies, applyNo]
   )
   const [toast, setToast] = useState<string | null>(null)
   const [configCollapsed, setConfigCollapsed] = useState(true)
@@ -158,8 +163,15 @@ export function UnlockApplyDetailPage() {
         open={approvalOpen}
         apply={apply}
         onClose={() => setApprovalOpen(false)}
-        onApprove={(_item, _opinion) => handleComplete("审批通过")}
-        onReject={(_item, _reason) => handleComplete("已驳回")}
+        onSubmit={(apply, decision, opinion) => {
+          if (decision === "同意") {
+            approveUnlockApply(apply.applyNo, opinion)
+            handleComplete("已同意审批，开锁凭证已下发")
+          } else {
+            rejectUnlockApply(apply.applyNo, opinion)
+            handleComplete("已驳回开锁申请")
+          }
+        }}
       />
 
       {toast && <Toast message={toast} />}

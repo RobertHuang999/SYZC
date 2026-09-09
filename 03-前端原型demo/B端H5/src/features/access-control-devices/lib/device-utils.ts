@@ -18,7 +18,7 @@ export function matchUnlockApprovalConfig(
     config.deviceCodes.includes(device.deviceCode)
   )
 
-  if (matched.length === 1) {
+  if (matched.length >= 1) {
     return { needApproval: true, matchedConfig: matched[0] }
   }
 
