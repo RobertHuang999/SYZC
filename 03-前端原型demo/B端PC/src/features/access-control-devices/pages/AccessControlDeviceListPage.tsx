@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
 import { WarningListPagination } from "@/components/business/WarningListPrimitives"
+import type { UnlockApprovalConfig } from "@/features/unlock-approval-configs/domain/types"
 import {
   UnlockApplySubmitDialog,
   type UnlockApplySubmitContext,
@@ -44,6 +45,8 @@ export function AccessControlDeviceListPage() {
 
   const [submitOpen, setSubmitOpen] = useState(false)
   const [submitContext, setSubmitContext] = useState<UnlockApplySubmitContext | null>(null)
+  const [submitMatchedConfig, setSubmitMatchedConfig] =
+    useState<UnlockApprovalConfig | null>(null)
   const [lockDialogOpen, setLockDialogOpen] = useState(false)
   const [lockContext, setLockContext] = useState<AccessDevicePasswordContext | null>(null)
   const [accessDialogOpen, setAccessDialogOpen] = useState(false)
@@ -78,11 +81,12 @@ export function AccessControlDeviceListPage() {
   }
 
   const handleGetPassword = (device: AccessDevice) => {
-    const { needApproval } = matchUnlockApprovalConfig(device)
+    const { needApproval, matchedConfig } = matchUnlockApprovalConfig(device)
     const context = toPasswordContext(device)
 
-    if (needApproval) {
+    if (needApproval && matchedConfig) {
       setSubmitContext(context)
+      setSubmitMatchedConfig(matchedConfig)
       setSubmitOpen(true)
       return
     }
@@ -162,23 +166,23 @@ export function AccessControlDeviceListPage() {
           </div>
         )}
 
-        <PrototypeAnnotationTarget annotationIds={["access-control-device-password-dialogs"]}>
-          <UnlockApplySubmitDialog
-            open={submitOpen}
-            context={submitContext}
-            onOpenChange={setSubmitOpen}
-          />
-          <GetLockPasswordDialog
-            open={lockDialogOpen}
-            context={lockContext}
-            onOpenChange={setLockDialogOpen}
-          />
-          <GetAccessPasswordDialog
-            open={accessDialogOpen}
-            context={accessContext}
-            onOpenChange={setAccessDialogOpen}
-          />
-        </PrototypeAnnotationTarget>
+        <UnlockApplySubmitDialog
+          open={submitOpen}
+          context={submitContext}
+          matchedConfig={submitMatchedConfig}
+          onOpenChange={setSubmitOpen}
+          onBlocked={showToast}
+        />
+        <GetLockPasswordDialog
+          open={lockDialogOpen}
+          context={lockContext}
+          onOpenChange={setLockDialogOpen}
+        />
+        <GetAccessPasswordDialog
+          open={accessDialogOpen}
+          context={accessContext}
+          onOpenChange={setAccessDialogOpen}
+        />
       </div>
     </PrototypeAnnotationProvider>
   )

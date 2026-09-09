@@ -8,7 +8,7 @@ export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "H5 门禁设备列表 · 双路径入口架构",
     content:
-      "设备管理 → 门禁设备。移动端卡片列表 + 获取密码分流入口；返回上一级为设备管理 hub，而非工作台根页。",
+      "设备管理 → 门禁设备。移动端卡片列表 + 获取密码分流；Sheet 规格与 R07 见打点 **#3 设备卡片**。",
     details: [
       {
         title: "菜单与路由",
@@ -28,11 +28,11 @@ export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "需审批",
-            content: "命中已启用审批配置 → 弹出 UnlockApplySubmitSheet 发起申请 → 提交成功 Deep link 我的申请记录。",
+            content: "命中配置 → UnlockApplySubmitSheet → Deep link `/m/my-applies/unlock/:applyNo`。",
           },
           {
             label: "免审",
-            content: "未命中审批配置 → 弹出 GetLockPasswordSheet（挂锁）/ GetAccessPasswordSheet（人脸，无短信 R31）。",
+            content: "未命中 → GetLockPasswordSheet（挂锁）/ GetAccessPasswordSheet（人脸，R31 无短信）。",
           },
         ],
       },
@@ -64,7 +64,7 @@ export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "筛选持久化",
-            content: "已应用筛选写入 sessionStorage；从设备管理 hub 离开再返回，或打开 Sheet 后关闭，均保留条件。",
+            content: "已应用筛选写入 sessionStorage；离开再返回保留条件。",
           },
         ],
       },
@@ -74,49 +74,52 @@ export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
     id: "access-control-device-h5-cards",
     targetId: "access-control-device-h5-cards",
     number: 3,
-    kind: "字段",
-    title: "设备卡片 · 行操作与加载更多",
+    kind: "规则",
+    title: "设备卡片 · 获取密码与 R07",
     content:
-      "DeviceCard 展示图标/名称/状态/位置/更新时间；22 条 Mock 覆盖三仓与双路径；底栏重命名/绑定/数据/获取密码/移除；列表支持加载更多。",
+      "卡片底栏「获取密码」为双路径入口；R07 在途阻断与 Mock 场景在挂锁-LK02 / 人脸-FC01 / 挂锁-LK08 上验证。",
     details: [
       {
-        title: "主操作分流",
+        title: "卡片字段",
         items: [
           {
-            label: "获取密码",
-            content: "挂锁展示「获取门锁密码」，人脸展示「获取门禁密码」，点击触发双路径 match 逻辑。",
+            label: "展示内容",
+            content: "图标/名称/状态/位置/更新时间；22 条 Mock 覆盖三仓与双路径。",
           },
           {
             label: "R31 短信边界",
-            content: "人脸路径任何 Sheet 均不含短信字段与下发逻辑；挂锁路径支持短信下发。",
+            content: "人脸路径任何 Sheet 均不含短信；挂锁支持短信下发。",
           },
         ],
       },
-    ],
-  },
-  {
-    id: "access-control-device-h5-sheets",
-    targetId: "access-control-device-h5-sheets",
-    number: 4,
-    kind: "规则",
-    title: "移动端底部 Sheet 弹窗三件套",
-    content:
-      "UnlockApplySubmitSheet / GetLockPasswordSheet / GetAccessPasswordSheet 互斥展示，提供移动端极佳的开锁交互体验。",
-    details: [
       {
-        title: "Sheet 规范",
+        title: "获取密码 · 点击后 Sheet",
         items: [
           {
             label: "UnlockApplySubmitSheet",
-            content: "需审批时唤起，展示目标设备快照；字段顺序：事由 → 有效期 →（人脸：开锁次数）→ 备注；提交成功后可直接跳转我的申请记录。",
+            content:
+              "需审批；字段：事由 → 有效期 →（人脸：开锁次数）→ 备注。R07 Toast 阻断；R08 60s 幂等。",
           },
           {
-            label: "GetLockPasswordSheet",
-            content: "挂锁免审：事由 + 有效期（最长 24h）；提交成功后展示结果摘要（申请单号/状态/凭证状态），引导点击【查看申请详情】，弹窗内不展示明文。",
+            label: "GetLockPasswordSheet / GetAccessPasswordSheet",
+            content: "免审挂锁/人脸；成功后引导查看申请详情。",
+          },
+        ],
+      },
+      {
+        title: "Mock 场景索引（再次提交）",
+        items: [
+          {
+            label: "R07 阻断",
+            content: "LK-2024-0082（UA28001）· FACE-01（UA28002）· 提交应 Toast 阻断。",
           },
           {
-            label: "GetAccessPasswordSheet",
-            content: "人脸免审：事由 → 有效期 → 开锁次数 → 备注；提交成功后同样展示结果摘要并引导【查看申请详情】（R31 不下发短信）。",
+            label: "允许提交",
+            content: "LK-0085 无在途，应新建待审批单。",
+          },
+          {
+            label: "文档对齐",
+            content: "PC Demo §5.1 · MOCK_DATA V1.7 §2 · 发起申请 §8.0。",
           },
         ],
       },

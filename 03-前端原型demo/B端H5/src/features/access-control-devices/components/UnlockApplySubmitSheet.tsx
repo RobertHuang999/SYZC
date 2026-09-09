@@ -3,11 +3,15 @@ import { useNavigate } from "react-router-dom"
 import { ShieldAlert } from "lucide-react"
 import { REASON_OPTIONS } from "../domain/constants"
 import type { UnlockApplySubmitContext } from "../domain/types"
+import type { UnlockApprovalConfig } from "../mock/unlock-approval-configs.mock"
+import { submitUnlockApply } from "@/features/my-applies/lib/submit-unlock-apply"
 
 type UnlockApplySubmitSheetProps = {
   open: boolean
   context: UnlockApplySubmitContext | null
+  matchedConfig: UnlockApprovalConfig | null
   onClose: () => void
+  onBlocked?: (message: string) => void
 }
 
 function validateValidity(validFrom: string, validTo: string): string | null {
@@ -17,7 +21,13 @@ function validateValidity(validFrom: string, validTo: string): string | null {
   return null
 }
 
-export function UnlockApplySubmitSheet({ open, context, onClose }: UnlockApplySubmitSheetProps) {
+export function UnlockApplySubmitSheet({
+  open,
+  context,
+  matchedConfig,
+  onClose,
+  onBlocked,
+}: UnlockApplySubmitSheetProps) {
   const navigate = useNavigate()
   const [reason, setReason] = useState("出库")
   const [remark, setRemark] = useState("")
@@ -47,6 +57,7 @@ export function UnlockApplySubmitSheet({ open, context, onClose }: UnlockApplySu
   const isFace = context.deviceType === "人脸门禁"
 
   const handleSubmit = () => {
+    if (!context || !matchedConfig) return
     const validityError = validateValidity(validFrom, validTo)
     if (validityError) {
       setError(validityError)
@@ -63,7 +74,22 @@ export function UnlockApplySubmitSheet({ open, context, onClose }: UnlockApplySu
     setSubmitting(true)
     window.setTimeout(() => {
       setSubmitting(false)
-      setApplyNo("UA20260828001")
+      const outcome = submitUnlockApply({
+        context,
+        matchedConfig,
+        reason,
+        remark: remark.trim() || undefined,
+        validFrom,
+        validTo,
+        unlockCount: isFace ? Number(unlockCount) : undefined,
+      })
+      if (!outcome.ok) {
+        const message = `设备已有在途申请 ${outcome.pendingApplyNo}，请等待处理完成`
+        setError(message)
+        onBlocked?.(message)
+        return
+      }
+      setApplyNo(outcome.applyNo)
     }, 600)
   }
 

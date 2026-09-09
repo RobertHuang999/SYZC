@@ -7,6 +7,8 @@ import fieldsMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审�
 import rulesMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请业务规则规格.md?raw"
 import demoCredentialMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/02-操作字段清单/02查看与下发凭证字段清单.md?raw"
 import demoDetailMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请_Demo_详情页_移动端.md?raw"
+import demoListMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请_Demo_列表页_PC.md?raw"
+import demoSubmitMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请_Demo_发起申请页.md?raw"
 
 export const myApplyDocuments: PrototypeDocument[] = [
   {
@@ -59,8 +61,22 @@ export const myApplyDocuments: PrototypeDocument[] = [
     badge: "Demo · 详情",
   },
   {
+    id: "demo-list",
+    title: "Demo · 列表页 PC（Mock §6 索引）",
+    content: demoListMarkdown,
+    category: "PRD需求规格",
+    badge: "Demo · Mock",
+  },
+  {
+    id: "demo-submit",
+    title: "Demo · 发起申请（R07/R08）",
+    content: demoSubmitMarkdown,
+    category: "PRD需求规格",
+    badge: "Demo · 提交",
+  },
+  {
     id: "mock-data",
-    title: "Mock 数据示例 V1.3",
+    title: "Mock 数据示例 V1.7",
     content: mockDataMarkdown,
     category: "PRD需求规格",
     badge: "Mock",

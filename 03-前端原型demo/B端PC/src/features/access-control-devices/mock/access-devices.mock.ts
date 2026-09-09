@@ -2,8 +2,13 @@ import type { AccessDevice } from "../domain/types"
 
 /**
  * PRD §5 示例 + 扩展 Mock（三仓、挂锁/人脸、在线/离线、需审批/免审双路径）
- * - 需审批：`LK-2024-0082`（acd-001）、`LK-0085`（acd-006）
- * - 免审直发：其余已绑定且未唯一命中审批配置的设备
+ *
+ * 需审批设备（命中 UNLOCK-CFG-001/002）：
+ * - LK-2024-0082 挂锁-LK02：Mock UA28001 待审批 → 再次提交 R07 阻断
+ * - LK-0085 挂锁-LK08：无在途，可正常提交；历史见 UA28004~09 各终态/凭证态
+ * - FACE-01 人脸-FC01：Mock UA28002 待审批 → R07 阻断
+ *
+ * 免审直发：其余已绑定且未唯一命中审批配置的设备
  */
 export const accessDevicesMock: AccessDevice[] = [
   {

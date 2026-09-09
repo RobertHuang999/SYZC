@@ -4,6 +4,7 @@ import {
   ChevronUpIcon,
   CompassIcon,
   CopyIcon,
+  DownloadIcon,
   EyeIcon,
   EyeOffIcon,
   FileSpreadsheetIcon,
@@ -1565,6 +1566,21 @@ function DocumentTabContent({
     }
   }
 
+  const handleDownload = () => {
+    if (!doc?.content) return
+    const blob = new Blob([doc.content], { type: "text/markdown;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    const rawTitle = (doc.title || fallbackCategory || "document").trim()
+    const safeTitle = rawTitle.replace(/[\\/:*?"<>|]/g, "_")
+    a.download = safeTitle.endsWith(".md") ? safeTitle : `${safeTitle}.md`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
   if (!doc) {
     return (
       <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-xs text-slate-400">
@@ -1586,24 +1602,36 @@ function DocumentTabContent({
           )}
         </div>
 
-        <button
-          type="button"
-          className="flex items-center gap-1 shrink-0 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-600 shadow-2xs transition-colors hover:bg-slate-50 hover:text-slate-900 active:scale-95 cursor-pointer"
-          onClick={handleCopy}
-          title="复制完整的 Markdown 文档源码"
-        >
-          {copied ? (
-            <>
-              <CheckIcon className="size-3 text-emerald-600" />
-              <span className="text-emerald-600 font-medium">已复制</span>
-            </>
-          ) : (
-            <>
-              <CopyIcon className="size-3" />
-              <span>复制 Markdown</span>
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-600 shadow-2xs transition-colors hover:bg-slate-50 hover:text-slate-900 active:scale-95 cursor-pointer"
+            onClick={handleCopy}
+            title="复制完整的 Markdown 文档源码"
+          >
+            {copied ? (
+              <>
+                <CheckIcon className="size-3 text-emerald-600" />
+                <span className="text-emerald-600 font-medium">已复制</span>
+              </>
+            ) : (
+              <>
+                <CopyIcon className="size-3" />
+                <span>复制</span>
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-600 shadow-2xs transition-colors hover:bg-slate-50 hover:text-slate-900 active:scale-95 cursor-pointer"
+            onClick={handleDownload}
+            title="下载当前 Markdown 文档 (.md)"
+          >
+            <DownloadIcon className="size-3" />
+            <span>下载文档</span>
+          </button>
+        </div>
       </div>
 
       <div className="prose prose-xs max-w-none text-slate-700 text-xs leading-relaxed">

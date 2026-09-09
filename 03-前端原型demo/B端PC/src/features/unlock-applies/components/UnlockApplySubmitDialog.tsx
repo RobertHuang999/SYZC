@@ -20,6 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { MY_APPLY_LIST_PATH, REASON_OPTIONS } from "../domain/constants"
+import type { UnlockApprovalConfig } from "@/features/unlock-approval-configs/domain/types"
+import { submitUnlockApply } from "../lib/submit-unlock-apply"
 
 export type UnlockApplySubmitContext = {
   deviceName: string
@@ -32,8 +34,10 @@ export type UnlockApplySubmitContext = {
 type UnlockApplySubmitDialogProps = {
   open: boolean
   context: UnlockApplySubmitContext | null
+  matchedConfig: UnlockApprovalConfig | null
   onOpenChange: (open: boolean) => void
   onSubmitSuccess?: (applyNo: string) => void
+  onBlocked?: (message: string) => void
 }
 
 type SubmitResult = {
@@ -60,8 +64,10 @@ function validateValidity(validFrom: string, validTo: string): string | null {
 export function UnlockApplySubmitDialog({
   open,
   context,
+  matchedConfig,
   onOpenChange,
   onSubmitSuccess,
+  onBlocked,
 }: UnlockApplySubmitDialogProps) {
   const navigate = useNavigate()
   const [reason, setReason] = useState("出库")
@@ -90,6 +96,7 @@ export function UnlockApplySubmitDialog({
   const isFaceDevice = context?.deviceType === "人脸门禁"
 
   const handleSubmit = () => {
+    if (!context || !matchedConfig) return
     const validityError = validateValidity(validFrom, validTo)
     if (validityError) {
       setError(validityError)
@@ -110,9 +117,23 @@ export function UnlockApplySubmitDialog({
     setSubmitting(true)
     window.setTimeout(() => {
       setSubmitting(false)
-      const applyNo = "UA20260828001"
-      setResult({ applyNo })
-      onSubmitSuccess?.(applyNo)
+      const outcome = submitUnlockApply({
+        context,
+        matchedConfig,
+        reason,
+        remark: remark.trim() || undefined,
+        validFrom,
+        validTo,
+        unlockCount: isFaceDevice ? Number(unlockCount) : undefined,
+      })
+      if (!outcome.ok) {
+        const message = `设备已有在途申请 ${outcome.pendingApplyNo}，请等待处理完成`
+        setError(message)
+        onBlocked?.(message)
+        return
+      }
+      setResult({ applyNo: outcome.applyNo })
+      onSubmitSuccess?.(outcome.applyNo)
     }, 600)
   }
 

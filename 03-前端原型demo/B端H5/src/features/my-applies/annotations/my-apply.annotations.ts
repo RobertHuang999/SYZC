@@ -26,7 +26,12 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
           {
             label: "Deep Link 直达",
             content:
-              "从门禁设备获取密码成功后，通过 Deep Link 直达详情页并支持回跳门禁设备。",
+              "从门禁设备获取密码成功后，通过 Deep Link 直达详情页并支持回跳门禁设备。R07 阻断时 Toast 留在 Sheet 内。",
+          },
+          {
+            label: "Mock 场景索引",
+            content:
+              "23 条与 PC 对齐；R07：LK-2024-0082 / FACE-01；可提交：LK-0085。见 MOCK_DATA V1.7 §2 / Demo 列表 §6.1。",
           },
         ],
       },
@@ -111,35 +116,48 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
       "开锁 Tab 展示 MyUnlockApplyCard（提交时间、设备名称/编码、所属仓库、事由、双状态 Tag、查看详情）。",
     details: [
       {
+        title: "Mock 场景索引（与 PC 对齐 · 23 条）",
+        items: [
+          {
+            label: "R07 在途",
+            content: "UA20260828001（挂锁-LK02）· UA20260828002（人脸-FC01）· 门禁设备再次提交阻断。",
+          },
+          {
+            label: "LK-0085 终态/凭证态",
+            content: "UA28004 驳回 · UA28005 撤回 · UA28006 失效 · UA28007~09 已通过各凭证态。",
+          },
+          {
+            label: "免审",
+            content: "UA20260828003 · UA20260827016 · needsApproval=false。",
+          },
+        ],
+      },
+      {
         title: "卡片验收样例",
         items: [
           {
             label: "UA20260828001",
-            content: "待审批 · 详情页可撤回。",
+            content: "待审批 · 详情页可撤回 · 对应 R07 阻断设备 LK-2024-0082。",
           },
           {
-            label: "UA20260827015",
-            content: "人脸门禁已通过 · 详情页展示明文密码 · 不调短信（R31）。",
+            label: "UA20260827015 / UA20260827020",
+            content: "已通过 · DELIVERED · 人脸 R31 / 挂锁密码+复制。",
           },
           {
-            label: "UA20260827020",
-            content: "挂锁门禁已通过 · 凭证=已下发 · 详情有密码与一键复制。",
-          },
-          {
-            label: "UA20260826008",
-            content: "挂锁已通过 · 凭证=生成失败（服务超时）· 详情支持重新获取密码。",
-          },
-          {
-            label: "UA20260826011",
-            content: "人脸已通过 · 凭证=生成失败（设备不可用）· 详情支持重新获取密码。",
+            label: "UA20260826008 / UA20260826011",
+            content: "GEN_FAILED · 详情【重新获取密码】。",
           },
           {
             label: "UA20260826010",
-            content: "人脸已通过 · 三方下发失败但凭证=已下发 · 详情展示密码及终端异常备注。",
+            content: "人脸 · 三方失败 · 凭证仍 DELIVERED。",
           },
           {
-            label: "UA20260826012 / UA20260827021",
-            content: "凭证=已过期 · 详情隐藏密码并提示过期。",
+            label: "UA20260826012 / UA20260827021 / UA20260828009",
+            content: "EXPIRED 或 SUPERSEDED · 详情不展示/失效提示。",
+          },
+          {
+            label: "文档对齐",
+            content: "Demo 列表 §6 · MOCK_DATA V1.7 · unlock-applies-seed.ts。",
           },
         ],
       },

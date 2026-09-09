@@ -134,7 +134,7 @@ function buildTriggerSnapshot(event: CollateralWarningEvent): CollateralTriggerS
     return {
       metricName: "智风控综合评分",
       triggerValue: "38.5 分 (高危)",
-      thresholdValue: "准入底线 60.0 分",
+      thresholdValue: "准入线 60.0 分",
       deviation: "低于准入线 -21.5 分 (借款企业新增诉讼冻结)",
       ruleVersion: "Version 3 (v3.1)",
     }

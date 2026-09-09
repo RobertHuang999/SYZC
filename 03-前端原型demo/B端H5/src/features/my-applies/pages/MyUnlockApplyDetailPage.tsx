@@ -250,7 +250,7 @@ export function MyUnlockApplyDetailPage() {
                   <p className="text-[10px] text-gray-500 mb-2">临时密码</p>
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-mono text-xl font-semibold tracking-[0.2em] text-gray-900">
-                      {apply.credential.passwordMasked ?? apply.credential.password}
+                      {apply.credential.password}
                     </span>
                     {apply.credential.status === "DELIVERED" && (
                       <button
@@ -263,7 +263,6 @@ export function MyUnlockApplyDetailPage() {
                       </button>
                     )}
                   </div>
-                  <p className="mt-2 text-[10px] text-gray-500">密码仅页面展示</p>
                 </div>
               )}
 

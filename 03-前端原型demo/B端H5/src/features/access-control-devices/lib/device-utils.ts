@@ -4,15 +4,25 @@ import {
   type UnlockApprovalConfig,
 } from "../mock/unlock-approval-configs.mock"
 
+export type MatchUnlockApprovalResult = {
+  needApproval: boolean
+  matchedConfig: UnlockApprovalConfig | null
+}
+
 export function matchUnlockApprovalConfig(
   device: AccessDevice,
   configs: UnlockApprovalConfig[] = unlockApprovalConfigsMock
-): boolean {
+): MatchUnlockApprovalResult {
   const enabled = configs.filter((item) => item.status === "已启用")
   const matched = enabled.filter((config) =>
     config.deviceCodes.includes(device.deviceCode)
   )
-  return matched.length === 1
+
+  if (matched.length === 1) {
+    return { needApproval: true, matchedConfig: matched[0] }
+  }
+
+  return { needApproval: false, matchedConfig: null }
 }
 
 export function toPasswordContext(device: AccessDevice) {

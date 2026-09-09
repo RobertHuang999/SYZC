@@ -26,7 +26,12 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
           {
             label: "Deep link",
             content:
-              "门禁设备提交成功后 `ROUTE-IOT-APPR-01`：`?tab=unlock-applies&applyNo=xxx` 自动跳转详情页。",
+              "门禁设备提交成功后 `ROUTE-IOT-APPR-01`：`?tab=unlock-applies&applyNo=xxx` 自动跳转详情页。LK-0085 新提交可生成新单；LK-2024-0082 在途时 R07 阻断不跳转。",
+          },
+          {
+            label: "Mock 场景索引",
+            content:
+              "23 条 Mock 覆盖 5 申请态 × 5 凭证态；§6.1 设备×R07 索引 · §6.3 全量单号 · MOCK_DATA V1.7。",
           },
         ],
       },
@@ -134,43 +139,56 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
         ],
       },
       {
-        title: "Mock 验收单号",
+        title: "Mock 场景索引（§6.1 · 23 条）",
         items: [
           {
-            label: "UA20260828001",
-            content: "待审批 · 可撤回。",
+            label: "R07 在途 · 挂锁-LK02",
+            content: "UA20260828001 · 待审批 · 门禁设备再次提交阻断。",
           },
           {
-            label: "UA20260827015",
-            content: "人脸已通过 · 页面密码 · 不调短信（R31）。",
+            label: "R07 在途 · 人脸-FC01",
+            content: "UA20260828002 · 待审批 · 李四发起，同设备任意用户阻断。",
           },
           {
-            label: "UA20260827020",
-            content: "挂锁已通过 · 凭证=已下发 · 详情展示密码（短信成败不进凭证状态）。",
+            label: "LK-0085 无在途",
+            content: "UA28004~09 覆盖驳回/撤回/失效/已通过各凭证态；设备侧可正常新提。",
           },
           {
-            label: "UA20260826008",
-            content: "挂锁已通过 · 凭证=生成失败（密码服务超时）· 可重新获取密码。",
+            label: "免审直发",
+            content: "UA20260828003（挂锁 DELIVERED）· UA20260827016（人脸 EXPIRED）· needsApproval=false。",
+          },
+        ],
+      },
+      {
+        title: "Mock 验收单号（凭证态）",
+        items: [
+          {
+            label: "UA20260827015 / UA20260827020",
+            content: "已通过 · DELIVERED · 人脸 R31 不下发短信 / 挂锁详情有密码。",
           },
           {
-            label: "UA20260826011",
-            content: "人脸已通过 · 凭证=生成失败（设备暂不可用）· 可重新获取密码。",
+            label: "UA20260826008 / UA20260826011 / UA20260824007",
+            content: "已通过 · GEN_FAILED · 重新获取密码（含 R15 复核失败）。",
           },
           {
             label: "UA20260826010",
-            content: "人脸已通过 · 三方下发失败但凭证=已下发 · 详情有密码（下发失败仅人脸）。",
+            content: "人脸 · 三方下发失败 · 凭证仍 DELIVERED · 详情有密码。",
           },
           {
-            label: "UA20260826012",
-            content: "挂锁已通过 · 凭证=已过期 · 详情不展示密码。",
+            label: "UA20260826012 / UA20260827021",
+            content: "已通过 · EXPIRED · 详情不展示密码。",
           },
           {
-            label: "UA20260826013",
-            content: "人脸已通过 · 凭证=被覆盖 · 展示失效提示。",
+            label: "UA20260822004 / UA20260826013 / UA20260828009",
+            content: "已通过 · SUPERSEDED · 「设备密码已被更新，原密码已失效」。",
           },
           {
-            label: "UA20260827021",
-            content: "人脸已通过 · 凭证=已过期 · 不展示密码。",
+            label: "UA20260826006 / UA20260826003 / UA20260825012",
+            content: "已驳回 / 已撤回 / 已失效 · NOT_GENERATED · 释放防重后可重提。",
+          },
+          {
+            label: "文档对齐",
+            content: "Demo 列表 §6.3 · MOCK_DATA V1.7 §4 · `unlock-applies.mock.ts`。",
           },
         ],
       },

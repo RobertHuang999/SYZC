@@ -8,7 +8,7 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "门禁设备列表 · 双路径获取密码入口",
     content:
-      "物联网 IOT 管理 → 门禁设备。行操作「获取门锁密码」（挂锁）/「获取门禁密码」（人脸）为统一入口；先 matchUnlockApprovalConfig 再分流。",
+      "物联网 IOT 管理 → 门禁设备。行操作「获取门锁密码」（挂锁）/「获取门禁密码」（人脸）为统一入口；先 matchUnlockApprovalConfig 再分流。弹窗规格与 R07/R08 见打点 **#3 行操作**。",
     details: [
       {
         title: "双路径分流",
@@ -16,7 +16,7 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
           {
             label: "分流流程图",
             content: `flowchart TD
-    A["点击获取密码"] --> B{"matchUnlockApprovalConfig"}
+    A["表格行 · 点击获取密码"] --> B{"matchUnlockApprovalConfig"}
     B -->|命中需审批| C["UnlockApplySubmitDialog 发起申请"]
     B -->|未命中/免审| D{"设备类型"}
     D -->|挂锁| E["GetLockPasswordDialog 引导我的申请记录"]
@@ -60,8 +60,9 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
         title: "Mock 设备覆盖",
         items: [
           {
-            label: "Mock 设备覆盖",
-            content: "22 条 Mock（三仓、挂锁/人脸、在线/离线）；需审批：`LK-2024-0082`、`LK-0085`；免审：如 `LK-HB-003`、`FACE-2024-001`。",
+            label: "22 条设备 Mock",
+            content:
+              "三仓、挂锁/人脸、在线/离线。需审批：`LK-2024-0082`（挂锁-LK02）、`LK-0085`（挂锁-LK08）、`FACE-01`（人脸-FC01）；免审：如 `LK-HB-003`、`FACE-2024-001`。详见 Demo 列表页 §5 / §5.1。",
           },
         ],
       },
@@ -71,29 +72,26 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
     id: "access-control-device-table",
     targetId: "access-control-device-table",
     number: 3,
-    kind: "字段",
-    title: "表格列与行操作",
-    content: "展示设备编码、系统内名称、类型、绑定仓库/位置、在线状态及「更新人/时间」；主操作「获取密码」按类型文案区分。",
+    kind: "规则",
+    title: "表格行操作 · 获取密码双路径与 R07",
+    content:
+      "主操作「获取密码」挂载在本表格操作列：点击后按审批配置分流至三个互斥弹窗之一；R07 在途阻断与 Mock 场景在此验证。",
     details: [
       {
-        title: "更新人/时间",
+        title: "表格列",
         items: [
           {
-            label: "上下行展示",
-            content: "「修改人员」与「更新时间」合并为同一列：上行显示更新人，下行显示更新时间；时间精确到秒，格式为 `YYYY-MM-DD HH:mm:ss`。",
-          },
-          {
-            label: "字体规范",
-            content: "人员和时间使用与「预警等级」表格一致的默认正文字体，不再单独使用较小或更浅的时间样式。",
+            label: "更新人/时间",
+            content: "合并列：上行更新人、下行 `YYYY-MM-DD HH:mm:ss`；字体与预警等级表格一致。",
           },
         ],
       },
       {
-        title: "行操作",
+        title: "行操作 · 获取密码",
         items: [
           {
-            label: "获取密码",
-            content: "挂锁→「获取门锁密码」；人脸→「获取门禁密码」；触发双路径 handler。",
+            label: "入口文案",
+            content: "挂锁→「获取门锁密码」；人脸→「获取门禁密码」；触发 `handleGetPassword` 双路径 handler。",
           },
           {
             label: "其他操作",
@@ -101,40 +99,52 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
-    ],
-  },
-  {
-    id: "access-control-device-password-dialogs",
-    targetId: "access-control-device-password-dialogs",
-    number: 4,
-    kind: "规则",
-    title: "免审弹窗与发起申请弹窗",
-    content: "三个弹窗互斥：GetLockPasswordDialog / GetAccessPasswordDialog / UnlockApplySubmitDialog（复用 unlock-applies 模块）。",
-    details: [
       {
-        title: "GetLockPasswordDialog",
+        title: "弹窗分流（点击后）",
         items: [
           {
-            label: "挂锁免审",
-            content: "表单含事由 + 有效期（与人脸一致，最长 24h）；提交成功后展示结果摘要并引导【查看申请详情】，弹窗内不展示明文。",
+            label: "UnlockApplySubmitDialog · 需审批",
+            content:
+              "只读设备快照 + 事由/有效期/备注（挂锁）或 +开锁次数（人脸）；提交成功 Deep link 我的开锁申请详情。",
+          },
+          {
+            label: "GetLockPasswordDialog · 挂锁免审",
+            content: "事由 + 有效期（最长 24h）；成功后引导【查看申请详情】，弹窗内不展示明文。",
+          },
+          {
+            label: "GetAccessPasswordDialog · 人脸免审",
+            content: "事由 → 有效期 → 开锁次数 → 备注；R31 不下发短信。",
           },
         ],
       },
       {
-        title: "GetAccessPasswordDialog",
+        title: "R07 / R08（发起申请弹窗内提交时）",
         items: [
           {
-            label: "人脸免审",
-            content: "表单含事由 → **有效期** → 开锁次数 → 备注；提交成功后展示结果摘要并引导【查看申请详情】（R31 不下发短信）。",
+            label: "R07 同设备在途阻断",
+            content:
+              "挂锁-LK02 → Toast「设备已有在途申请 UA20260828001…」；人脸-FC01 → UA20260828002；挂锁-LK08 无在途可新建。",
+          },
+          {
+            label: "R08 幂等",
+            content: "60 秒内同设备重复提交返回原单号及状态。",
           },
         ],
       },
       {
-        title: "UnlockApplySubmitDialog",
+        title: "Mock 场景索引（再次提交）",
         items: [
           {
-            label: "需审批发起",
-            content: "只读设备快照 + 事由/有效期/备注（挂锁）或 +开锁次数（人脸）；字段顺序与免审弹窗一致；提交后 Mock 固定单号 Deep link。",
+            label: "R07 阻断",
+            content: "在本表找到 LK-2024-0082 或 FACE-01 → 获取密码 → 填表提交 → 应 Toast 阻断。",
+          },
+          {
+            label: "允许提交",
+            content: "LK-0085：无在途，提交应新建待审批单。",
+          },
+          {
+            label: "文档对齐",
+            content: "Demo §5.1 · 发起申请 §8.0 · MOCK_DATA V1.7 §2。",
           },
         ],
       },
@@ -143,7 +153,7 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
   {
     id: "access-control-device-pagination",
     targetId: "access-control-device-pagination",
-    number: 5,
+    number: 4,
     kind: "交互",
     title: "分页与页容量控制",
     content: "默认 10 条/页；与预警列表共用 WarningListPagination 组件，支持 10/20/50 条切换。",

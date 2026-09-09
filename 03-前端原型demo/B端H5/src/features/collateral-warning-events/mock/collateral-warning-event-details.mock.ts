@@ -91,7 +91,10 @@ function getRealTriggerSnapshot(event: CollateralWarningEvent): string | null {
     return "账实盘点差异: 2.30% | 允许公差: 2.00% | 盘亏差异: 2.50 吨"
   }
   if (event.warningType === "贷中风控预警") {
-    return "智风控综合评分: 38.5 分 (高危) | 准入下限: 60.0 分 | 新增涉诉标的"
+    return "智风控综合评分: 38.5 分 (高危) | 准入线: 60.0 分 | 低于准入线 -21.5 分 (借款企业新增诉讼冻结)"
+  }
+  if (event.warningType === "解抵/质押/监管超时") {
+    return "监管业务存续期限: 逾期 15 天 | 约定期限: 2026-06-01 | 监管期满未办理解除或展期"
   }
   return "业务指标超出预设风控阈值，触发规则审计快照"
 }

@@ -67,7 +67,7 @@ export const unlockApplyDocuments: PrototypeDocument[] = [
   },
   {
     id: "mock-data",
-    title: "Mock 数据示例 V1.3",
+    title: "Mock 数据示例 V1.7",
     content: mockDataMarkdown,
     category: "原型数据",
   },

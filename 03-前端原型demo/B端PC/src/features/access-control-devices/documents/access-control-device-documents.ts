@@ -5,6 +5,8 @@ import rulesMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/01-物联
 import demoListMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/01-物联网IOT管理/02门禁设备/门禁设备_Demo_列表页_PC.md?raw"
 import demoLockPasswordMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/01-物联网IOT管理/02门禁设备/门禁设备_Demo_获取门锁密码.md?raw"
 import demoAccessPasswordMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/01-物联网IOT管理/02门禁设备/门禁设备_Demo_获取门禁密码.md?raw"
+import demoSubmitMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请_Demo_发起申请页.md?raw"
+import mockDataMarkdown from "@prototype/MOCK_DATA-开锁审批-V1.3.md?raw"
 
 export const accessControlDeviceDocuments: PrototypeDocument[] = [
   {
@@ -42,5 +44,17 @@ export const accessControlDeviceDocuments: PrototypeDocument[] = [
     title: "Demo · 获取门禁密码",
     content: demoAccessPasswordMarkdown,
     category: "原型交互规范",
+  },
+  {
+    id: "demo-submit",
+    title: "Demo · 发起开锁申请（需审批）",
+    content: demoSubmitMarkdown,
+    category: "原型交互规范",
+  },
+  {
+    id: "mock-data",
+    title: "Mock 数据示例 V1.7",
+    content: mockDataMarkdown,
+    category: "原型数据",
   },
 ]

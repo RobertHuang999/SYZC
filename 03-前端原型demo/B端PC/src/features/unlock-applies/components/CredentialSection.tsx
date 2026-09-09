@@ -67,7 +67,7 @@ export function CredentialSection({
           <div className="space-y-2 rounded-lg border bg-muted/40 px-4 py-3">
             <div className="flex items-center gap-3">
               <span className="font-mono text-2xl font-semibold tracking-[0.25em]">
-                {credential.passwordMasked ?? credential.password}
+                {credential.password}
               </span>
               {credential.status === "DELIVERED" && (
                 <Button
@@ -81,9 +81,6 @@ export function CredentialSection({
                 </Button>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">
-              密码仅页面展示，关闭详情后清除
-            </p>
           </div>
         </DetailField>
       )}

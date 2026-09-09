@@ -19,6 +19,11 @@ export const myUnlockApplyDetailAnnotations: PrototypeAnnotation[] = [
               "支持从列表进入，或由门禁设备提交后 Deep Link `?tab=unlock-applies&applyNo=xxx` 直达；顶部返回按钮保留原上下文及 `return_route` 参数。",
           },
           {
+            label: "Mock 样例单号",
+            content:
+              "待审批 UA28001/28002 · 凭证已下发 UA27015/27020/28007 · 生成失败 UA26008/26011/24007/28008 · 过期 UA26012/27021 · 被覆盖 UA22004/26013/28009 · 详见列表标注 §Mock 场景索引。",
+          },
+          {
             label: "撤回主操作 (Withdraw)",
             content:
               "仅在申请状态为 **待审批（PENDING）** 且属于需审批单据时展示【撤回】按钮；其他终态（已通过/已驳回/已撤回/已失效）全只读展示。",

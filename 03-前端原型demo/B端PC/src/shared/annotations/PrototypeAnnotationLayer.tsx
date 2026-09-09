@@ -5,6 +5,7 @@ import {
   CompassIcon,
   CopyIcon,
   DatabaseIcon,
+  DownloadIcon,
   EyeIcon,
   EyeOffIcon,
   FileSpreadsheetIcon,
@@ -70,7 +71,7 @@ function AnnotationItemContent({ content }: { content: string }) {
     )
   }
 
-  return <>{content}</>
+  return <span className="whitespace-pre-wrap">{content}</span>
 }
 
 type Point = {
@@ -1268,7 +1269,7 @@ function AnnotationSidebarDrawer() {
                                           <AnnotationItemContent content={item.content} />
                                         </div>
                                       ) : (
-                                        <span className="text-muted-foreground">
+                                        <span className="text-muted-foreground whitespace-pre-wrap">
                                           {item.content}
                                         </span>
                                       )}
@@ -1368,6 +1369,21 @@ function DocumentContentRenderer({
     }
   }
 
+  const handleDownload = () => {
+    if (!doc?.content) return
+    const blob = new Blob([doc.content], { type: "text/markdown;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    const rawTitle = (doc.title || fallbackTitle || "document").trim()
+    const safeTitle = rawTitle.replace(/[\\/:*?"<>|]/g, "_")
+    a.download = safeTitle.endsWith(".md") ? safeTitle : `${safeTitle}.md`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
   if (!doc) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground space-y-3">
@@ -1396,24 +1412,36 @@ function DocumentContentRenderer({
           </h1>
         </div>
 
-        <button
-          type="button"
-          className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-xs transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
-          onClick={handleCopy}
-          title="复制完整的 Markdown 文档源码"
-        >
-          {copied ? (
-            <>
-              <CheckIcon className="size-3.5 text-emerald-600" />
-              <span className="text-emerald-600 font-medium">已复制 Markdown</span>
-            </>
-          ) : (
-            <>
-              <CopyIcon className="size-3.5" />
-              <span>复制 Markdown</span>
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-xs transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
+            onClick={handleCopy}
+            title="复制完整的 Markdown 文档源码"
+          >
+            {copied ? (
+              <>
+                <CheckIcon className="size-3.5 text-emerald-600" />
+                <span className="text-emerald-600 font-medium">已复制 Markdown</span>
+              </>
+            ) : (
+              <>
+                <CopyIcon className="size-3.5" />
+                <span>复制 Markdown</span>
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-xs transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
+            onClick={handleDownload}
+            title="下载当前 Markdown 文档 (.md)"
+          >
+            <DownloadIcon className="size-3.5" />
+            <span>下载文档</span>
+          </button>
+        </div>
       </div>
 
       {/* Markdown Document Content with Full Styling */}

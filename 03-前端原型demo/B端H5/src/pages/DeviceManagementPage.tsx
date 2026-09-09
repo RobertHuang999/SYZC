@@ -42,6 +42,7 @@ import {
   toPasswordContext,
 } from "@/features/access-control-devices/lib/device-utils"
 import { accessDevicesMock } from "@/features/access-control-devices/mock/access-devices.mock"
+import type { UnlockApprovalConfig } from "@/features/access-control-devices/mock/unlock-approval-configs.mock"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 
 const PAGE_SIZE = 10
@@ -365,6 +366,8 @@ export function DeviceManagementPage() {
 
   const [submitOpen, setSubmitOpen] = useState(false)
   const [submitContext, setSubmitContext] = useState<UnlockApplySubmitContext | null>(null)
+  const [submitMatchedConfig, setSubmitMatchedConfig] =
+    useState<UnlockApprovalConfig | null>(null)
   const [lockOpen, setLockOpen] = useState(false)
   const [lockContext, setLockContext] = useState<AccessDevicePasswordContext | null>(null)
   const [accessOpen, setAccessOpen] = useState(false)
@@ -432,11 +435,12 @@ export function DeviceManagementPage() {
   }
 
   const handleGetPassword = (device: AccessDevice) => {
-    const needApproval = matchUnlockApprovalConfig(device)
+    const { needApproval, matchedConfig } = matchUnlockApprovalConfig(device)
     const context = toPasswordContext(device)
 
-    if (needApproval) {
+    if (needApproval && matchedConfig) {
       setSubmitContext(context)
+      setSubmitMatchedConfig(matchedConfig)
       setSubmitOpen(true)
       return
     }
@@ -653,23 +657,23 @@ export function DeviceManagementPage() {
             </DrawerField>
           </FilterDrawer>
 
-          <PrototypeAnnotationTarget annotationIds={["access-control-device-h5-sheets"]}>
-            <UnlockApplySubmitSheet
-              open={submitOpen}
-              context={submitContext}
-              onClose={() => setSubmitOpen(false)}
-            />
-            <GetLockPasswordSheet
-              open={lockOpen}
-              context={lockContext}
-              onClose={() => setLockOpen(false)}
-            />
-            <GetAccessPasswordSheet
-              open={accessOpen}
-              context={accessContext}
-              onClose={() => setAccessOpen(false)}
-            />
-          </PrototypeAnnotationTarget>
+          <UnlockApplySubmitSheet
+            open={submitOpen}
+            context={submitContext}
+            matchedConfig={submitMatchedConfig}
+            onClose={() => setSubmitOpen(false)}
+            onBlocked={setToast}
+          />
+          <GetLockPasswordSheet
+            open={lockOpen}
+            context={lockContext}
+            onClose={() => setLockOpen(false)}
+          />
+          <GetAccessPasswordSheet
+            open={accessOpen}
+            context={accessContext}
+            onClose={() => setAccessOpen(false)}
+          />
         </div>
       )}
 
