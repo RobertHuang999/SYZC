@@ -35,6 +35,7 @@ export const PERSON_OPTIONS = [
   "张工（华东监管分公司）",
   "黄k（风控管理部）",
   "赵六（物产中大保理）",
+  "孙七（已停用·质押风控部）",
 ] as const
 
 export const ROLE_OPTIONS = [

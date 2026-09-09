@@ -65,7 +65,7 @@ export const unlockApprovalConfigDetailAnnotations: PrototypeAnnotation[] = [
     kind: "字段",
     title: "审批策略与节点只读表格",
     content:
-      "展示审批方式（任一人通过）、审批超时时间、当前配置版本号，以及按序号排列的审批节点表格（展示指定人员/角色及其所属合作机构）。",
+      "展示审批方式（任一人通过）、审批超时时间、当前配置版本号，以及按序号排列的审批节点表格（展示指定人员/角色及其所属机构标签）。",
     details: [
       {
         title: "审批策略字段",
@@ -98,7 +98,7 @@ export const unlockApprovalConfigDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "审批对象（含所属机构）",
             content:
-              "展示指定人员或角色的名称与所属机构标签（如「李四（仓储监管部）」、「监管主管（华东监管分公司）」），体现跨合作机构协同背景。",
+              "展示指定人员（含启用/停用）或角色的名称与所属机构标签（如「李四（仓储监管部）」、「监管主管（华东监管分公司）」）。",
           },
         ],
       },
