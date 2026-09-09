@@ -93,24 +93,24 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
     targetId: "h5-collateral-warning-detail-facts",
     number: 3,
     kind: "规则",
-    title: "预警事实、快照与风控计算公式",
-    content: "展示触发指标快照（不可变存证）、6 大商业类型判定标准及 LTV/跌价计算模型。",
+    title: "预警事实与风控计算公式",
+    content: "展示参数化预警内容（含触发指标、实际值与阈值对比）、6 大商业类型判定标准及 LTV/跌价计算模型。",
     details: [
       {
-        title: "快照与字段来源机制",
+        title: "字段来源机制",
         items: [
           {
             label: "货物位置与数量来源",
             content: "来源于订单项下的仓单/WMS货位台账（`orderSnapshot`），触发时刻固化不可变快照，锁定发生风险时的物理仓位与货品标的物明细。",
           },
           {
-            label: "快照 4 列要素",
-            content: "监控指标项、实际触发值、规则预警阈值、超标判定结果。触发后固化历史事实，不可篡改。",
+            label: "预警内容内嵌判定数据",
+            content: "监控指标项、实际触发值、规则预警阈值、超标判定结果已内嵌拼接至 `warningContent` 标准模板文本，详情页不再单独展示结构化快照区块。",
           },
         ],
       },
       {
-        title: "6 大商业类型快照",
+        title: "6 大商业类型预警内容模板",
         items: [
           {
             label: "类型判定矩阵",

@@ -200,7 +200,7 @@ export function MyUnlockApplyDetailPage() {
             <DetailField label="申请人手机号">{maskPhone(apply.applicantPhone)}</DetailField>
             <DetailField label="事由">{apply.reason}</DetailField>
             <DetailField label="备注">{formatEmptyValue(apply.remark)}</DetailField>
-            {apply.needsApproval && (
+            {apply.deviceType !== "挂锁门禁" && apply.expectedUseWindow && (
               <DetailField label="有效期">
                 {formatEmptyValue(apply.expectedUseWindow)}
               </DetailField>

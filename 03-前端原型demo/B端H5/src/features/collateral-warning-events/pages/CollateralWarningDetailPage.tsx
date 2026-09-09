@@ -89,6 +89,7 @@ export function CollateralWarningDetailPage() {
             annotationIds={[
               "h5-collateral-warning-detail-header",
               "h5-collateral-warning-detail-base",
+              "h5-collateral-warning-detail-facts",
             ]}
           >
             <SectionCard
@@ -239,32 +240,7 @@ export function CollateralWarningDetailPage() {
             </SectionCard>
           )}
 
-          {/* 3. 触发数据快照（严格对齐字段清单第四章：触发数据快照） */}
-          <PrototypeAnnotationTarget annotationIds={["h5-collateral-warning-detail-facts"]}>
-            <SectionCard
-              title="触发数据快照"
-              indicatorColor="#f57c00"
-              defaultCollapsed={true}
-              collapsed={!allExpanded}
-            >
-            <div className="space-y-2 text-xs text-gray-700">
-              <div className="flex items-start justify-between">
-                <span className="w-20 shrink-0 text-gray-500">快照指标:</span>
-                <span className="flex-1 text-right font-medium text-gray-900">
-                  {event.triggerSnapshot || "抵/质押物价值下跌突破预警阈值 12.0%"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="w-20 shrink-0 text-gray-500">单据类型:</span>
-                <span className="flex-1 text-right text-gray-800">
-                  {event.orderType || "抵/质押订单"}
-                </span>
-              </div>
-            </div>
-          </SectionCard>
-          </PrototypeAnnotationTarget>
-
-          {/* 4. 处置与核销信息（严格对齐字段清单第三章：解除预警表单字段） */}
+          {/* 3. 处置与核销信息（严格对齐字段清单第三章：解除预警表单字段） */}
           {(isClosed || event.processedTime) && (
             <SectionCard
               title="处置与核销信息"

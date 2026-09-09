@@ -58,12 +58,12 @@ export function UnlockApplySubmitSheet({
 
   const handleSubmit = () => {
     if (!context || !matchedConfig) return
-    const validityError = validateValidity(validFrom, validTo)
-    if (validityError) {
-      setError(validityError)
-      return
-    }
     if (isFace) {
+      const validityError = validateValidity(validFrom, validTo)
+      if (validityError) {
+        setError(validityError)
+        return
+      }
       const count = Number(unlockCount)
       if (!Number.isInteger(count) || count < 1 || count > 100) {
         setError("开锁次数须为 1~100 的整数")
@@ -79,8 +79,8 @@ export function UnlockApplySubmitSheet({
         matchedConfig,
         reason,
         remark: remark.trim() || undefined,
-        validFrom,
-        validTo,
+        validFrom: isFace ? validFrom : undefined,
+        validTo: isFace ? validTo : undefined,
         unlockCount: isFace ? Number(unlockCount) : undefined,
       })
       if (!outcome.ok) {
@@ -182,12 +182,14 @@ export function UnlockApplySubmitSheet({
                   <span className="text-gray-500">凭证状态</span>
                   <span className="font-medium text-gray-400">未生成（审批后下发）</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">申请有效期</span>
-                  <span className="text-gray-700 font-mono">
-                    {validFrom.replace("T", " ")} ~ {validTo.replace("T", " ")}
-                  </span>
-                </div>
+                {isFace && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">申请有效期</span>
+                    <span className="text-gray-700 font-mono">
+                      {validFrom.replace("T", " ")} ~ {validTo.replace("T", " ")}
+                    </span>
+                  </div>
+                )}
                 {isFace && (
                   <div className="flex justify-between">
                     <span className="text-gray-500">申请开锁次数</span>
@@ -228,32 +230,34 @@ export function UnlockApplySubmitSheet({
                 </select>
               </div>
 
-              {/* 有效期 (移动端上下两行布局，避免横向截断) */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-gray-700">
-                  <span className="text-rose-500 mr-0.5">*</span> 预计使用窗口（最长24小时）
-                </label>
-                <div className="space-y-2 rounded-xl border border-gray-200/80 bg-gray-50/50 p-2.5">
-                  <div className="flex items-center gap-2">
-                    <span className="w-12 shrink-0 text-xs text-gray-500">开始时间</span>
-                    <input
-                      type="datetime-local"
-                      className="flex-1 min-w-0 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-800 shadow-2xs focus:border-blue-500 focus:outline-hidden"
-                      value={validFrom}
-                      onChange={(e) => setValidFrom(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-12 shrink-0 text-xs text-gray-500">结束时间</span>
-                    <input
-                      type="datetime-local"
-                      className="flex-1 min-w-0 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-800 shadow-2xs focus:border-blue-500 focus:outline-hidden"
-                      value={validTo}
-                      onChange={(e) => setValidTo(e.target.value)}
-                    />
+              {/* 有效期仅人脸展示 */}
+              {isFace && (
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-gray-700">
+                    <span className="text-rose-500 mr-0.5">*</span> 预计使用窗口（最长24小时）
+                  </label>
+                  <div className="space-y-2 rounded-xl border border-gray-200/80 bg-gray-50/50 p-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-12 shrink-0 text-xs text-gray-500">开始时间</span>
+                      <input
+                        type="datetime-local"
+                        className="flex-1 min-w-0 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-800 shadow-2xs focus:border-blue-500 focus:outline-hidden"
+                        value={validFrom}
+                        onChange={(e) => setValidFrom(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-12 shrink-0 text-xs text-gray-500">结束时间</span>
+                      <input
+                        type="datetime-local"
+                        className="flex-1 min-w-0 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-800 shadow-2xs focus:border-blue-500 focus:outline-hidden"
+                        value={validTo}
+                        onChange={(e) => setValidTo(e.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* 人脸专属：开锁次数 */}
               {isFace && (
@@ -321,13 +325,15 @@ export function UnlockApplySubmitSheet({
 
               {/* 规则说明 */}
               <div className="rounded-xl bg-gray-50 p-2.5 text-[11px] text-gray-500 border border-gray-100 space-y-1">
-                <div className="flex items-center gap-1">
-                  <Clock className="size-3 text-gray-400 shrink-0" />
-                  <span>最长有效期 24 小时；超过有效期凭证自动失效。</span>
-                </div>
+                {isFace && (
+                  <div className="flex items-center gap-1">
+                    <Clock className="size-3 text-gray-400 shrink-0" />
+                    <span>最长有效期 24 小时；超过有效期凭证自动失效。</span>
+                  </div>
+                )}
                 <p>
                   {isLock
-                    ? "挂锁门禁：审批通过后短信下发临时密码。"
+                    ? "挂锁门禁：审批通过后短信下发临时密码，请凭此密码前往设备开锁。"
                     : "人脸门禁：审批通过后在详情页查看临时密码（不下发短信，R31）。"}
                 </p>
               </div>

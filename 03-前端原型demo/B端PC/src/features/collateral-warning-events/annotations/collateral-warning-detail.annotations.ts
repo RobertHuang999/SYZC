@@ -94,8 +94,8 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "collateral-warning-detail-facts",
     number: 3,
     kind: "字段",
-    title: "预警事实、位置与判定快照",
-    content: "展示现场空间位置、货物明细与数量快照、参数化预警文本、抓拍凭证以及不可变 4 列判定数据快照。",
+    title: "预警事实与位置",
+    content: "展示现场空间位置、货物明细与数量快照、参数化预警文本（含触发指标、实际值与阈值对比）及抓拍凭证。",
     details: [
       {
         title: "核心字段定义与数据源头（含货物位置与数量来源）",
@@ -114,7 +114,7 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警内容 (warningContent)",
-            content: "由风控规则引擎根据触发指标与模板参数自动拼装的标准事实文本，包含预警发生位置、设备、具体业务指标、采集值及预警阈值对比。",
+            content: "由风控规则引擎根据触发指标与模板参数自动拼装的标准事实文本，包含预警发生位置、设备、具体业务指标、采集值及预警阈值对比；触发时刻判定数据（监控指标项、实际触发值、规则阈值、超标判定结果）已内嵌拼接，详情页不再单独展示结构化快照卡片。",
           },
           {
             label: "预警时间 (warningTime)",
@@ -124,14 +124,10 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
             label: "预警抓拍图 (snapshotImageStatus)",
             content: "预警触发时，系统联动押品存放货位所对应的智能监控摄像头即时抓拍的现场画面；图片存储于私有 OSS，前端通过 15 分钟时效临时签名 URL 预览。",
           },
-          {
-            label: "触发判定数据快照 (triggerSnapshot)",
-            content: "由 4 列不可变存证指标构成：监控指标项 (metricName)、实际触发值 (triggerValue)、规则预警阈值 (thresholdValue)、超标判定结果 (deviation)；固化触发瞬间的判定事实，后续规则阈值调整不改变历史快照。",
-          },
         ],
       },
       {
-        title: "6 大商业类型快照枚举矩阵（卡片化明细）",
+        title: "6 大商业类型预警内容模板（内嵌判定数据）",
         items: [
           {
             label: "① 贷中风控预警",
@@ -186,7 +182,7 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "⑦ 特殊类 · 物联穿透告警",
             content: `• 触发机制：硬件传感器物理异常即时联动触发，无商业指标对比
-• 页面展示：快照卡片展示固定提示：“由仓储现场物理设备传感器即时异常联动触发，详细指标见下方【穿透信息】”
+• 页面展示：预警内容区下方展示固定提示：“由仓储现场物理设备传感器即时异常联动触发，详细指标见下方【穿透信息】”
 • 穿透联动：关联设备名称、物理事件子类型（如锁杆被剪）、空间拓扑位置及现场设备台账 Deep Link
 • 标准模板：【物联穿透】{仓库/库房/分区} {设备名称} 发生 {物理事件描述}（{等级}）；关联设备事件 {事件编号}，请至设备事件台账现场核销`,
           },

@@ -141,7 +141,7 @@ export function CollateralWarningDetailPage() {
           </DetailSection>
         </PrototypeAnnotationTarget>
 
-        {/* 3. 预警事实与触发数据快照（对齐字段清单第一章与第四章） */}
+        {/* 3. 预警事实与位置（对齐字段清单第一章） */}
         <PrototypeAnnotationTarget annotationIds={["collateral-warning-detail-facts"]}>
           <DetailSection title="预警事实与位置">
             <DetailField label="货物位置">
@@ -183,40 +183,7 @@ export function CollateralWarningDetailPage() {
               )}
             </DetailField>
 
-            {/* 结构化触发判定快照 */}
-            {event.triggerSnapshot ? (
-              <div className="col-span-full mt-2 rounded-lg border border-amber-200/80 bg-amber-50/40 p-3 dark:border-amber-900/40 dark:bg-amber-950/20">
-                <div className="mb-2 text-xs font-semibold text-amber-900 dark:text-amber-400">
-                  触发时刻判定数据快照（不可变存证）
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4 text-xs">
-                  <div>
-                    <span className="text-muted-foreground">监控指标项：</span>
-                    <span className="font-medium text-foreground ml-1">
-                      {event.triggerSnapshot.metricName}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">实际触发值：</span>
-                    <span className="font-mono font-bold text-destructive ml-1">
-                      {event.triggerSnapshot.triggerValue}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">规则预警阈值：</span>
-                    <span className="font-mono font-medium text-foreground ml-1">
-                      {event.triggerSnapshot.thresholdValue}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">超标判定结果：</span>
-                    <span className="font-medium text-amber-700 dark:text-amber-400 ml-1">
-                      {event.triggerSnapshot.deviation}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ) : event.warningType === "物联穿透告警" ? (
+            {event.warningType === "物联穿透告警" ? (
               <div className="col-span-full mt-2 rounded-lg border bg-muted/30 p-3 text-xs text-muted-foreground">
                 由仓储现场物理设备传感器即时异常联动触发，详细指标见下方【穿透信息】。
               </div>

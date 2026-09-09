@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Check, Clock, Copy, KeyRound, Lock, Smartphone, X } from "lucide-react"
+import { Check, Copy, KeyRound, Lock, Smartphone, X } from "lucide-react"
 import { REASON_OPTIONS } from "../domain/constants"
 import type { AccessDevicePasswordContext } from "../domain/types"
 import { createDirectLockUnlockApply } from "@/features/my-applies/lib/create-direct-unlock-apply"
@@ -12,13 +12,6 @@ type GetLockPasswordSheetProps = {
   onClose: () => void
 }
 
-function validateValidity(validFrom: string, validTo: string): string | null {
-  if (validFrom >= validTo) return "有效期结束时间须晚于开始时间"
-  const spanMs = new Date(validTo).getTime() - new Date(validFrom).getTime()
-  if (spanMs > 24 * 60 * 60 * 1000) return "密码有效期最大不得超过 24 小时"
-  return null
-}
-
 export function GetLockPasswordSheet({
   open,
   context,
@@ -26,8 +19,6 @@ export function GetLockPasswordSheet({
 }: GetLockPasswordSheetProps) {
   const navigate = useNavigate()
   const [reason, setReason] = useState("出库")
-  const [validFrom, setValidFrom] = useState("2026-08-31T14:00")
-  const [validTo, setValidTo] = useState("2026-08-31T18:00")
   const [remark, setRemark] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [createdApplyNo, setCreatedApplyNo] = useState<string | null>(null)
@@ -38,8 +29,6 @@ export function GetLockPasswordSheet({
   useEffect(() => {
     if (!open) {
       setReason("出库")
-      setValidFrom("2026-08-31T14:00")
-      setValidTo("2026-08-31T18:00")
       setRemark("")
       setSubmitting(false)
       setCreatedApplyNo(null)
@@ -52,11 +41,6 @@ export function GetLockPasswordSheet({
   if (!open || !context) return null
 
   const handleSubmit = () => {
-    const validityError = validateValidity(validFrom, validTo)
-    if (validityError) {
-      setError(validityError)
-      return
-    }
     setError(null)
     setSubmitting(true)
     window.setTimeout(() => {
@@ -64,8 +48,6 @@ export function GetLockPasswordSheet({
         context,
         reason,
         remark: remark || undefined,
-        validFrom,
-        validTo,
       })
       addUnlockApply(record)
       setCreatedApplyNo(record.applyNo)
@@ -159,16 +141,12 @@ export function GetLockPasswordSheet({
                     )}
                   </button>
                 </div>
-                <div className="mt-2 flex items-center justify-center gap-1 text-[11px] text-gray-500">
-                  <Clock className="size-3 text-gray-400" />
-                  <span>有效期至 {validTo.replace("T", " ")}（最长 24 小时）</span>
-                </div>
               </div>
 
               {/* 短信下发提示 */}
               <div className="flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2.5 text-xs text-emerald-800 border border-emerald-100">
                 <Smartphone className="size-4 shrink-0 text-emerald-600" />
-                <span>临时密码已同步通过短信下发至您的手机号</span>
+                <span>临时密码已同步通过短信下发至您的手机号，请凭此密码前往设备开锁</span>
               </div>
 
               {/* 审计摘要卡片 */}
@@ -223,33 +201,6 @@ export function GetLockPasswordSheet({
                 </select>
               </div>
 
-              {/* 有效期 (移动端上下两行布局，避免横向截断) */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-gray-700">
-                  <span className="text-rose-500 mr-0.5">*</span> 有效期区间（最长24小时）
-                </label>
-                <div className="space-y-2 rounded-xl border border-gray-200/80 bg-gray-50/50 p-2.5">
-                  <div className="flex items-center gap-2">
-                    <span className="w-12 shrink-0 text-xs text-gray-500">生效时间</span>
-                    <input
-                      type="datetime-local"
-                      className="flex-1 min-w-0 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-800 shadow-2xs focus:border-blue-500 focus:outline-hidden"
-                      value={validFrom}
-                      onChange={(e) => setValidFrom(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-12 shrink-0 text-xs text-gray-500">失效时间</span>
-                    <input
-                      type="datetime-local"
-                      className="flex-1 min-w-0 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-800 shadow-2xs focus:border-blue-500 focus:outline-hidden"
-                      value={validTo}
-                      onChange={(e) => setValidTo(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
               {/* 备注 */}
               <div>
                 <div className="flex items-center justify-between">
@@ -268,7 +219,7 @@ export function GetLockPasswordSheet({
 
               {/* 规则说明 */}
               <div className="rounded-xl bg-amber-50/70 p-2.5 text-[11px] text-amber-800 border border-amber-200/60 leading-relaxed">
-                💡 挂锁门禁支持【页面直接展示密码】+【短信同步发送至绑定手机号】；开锁流水将自动落账审计。
+                💡 挂锁门禁临时密码将以短信同步发送至绑定手机号，请凭此密码前往设备开锁；开锁流水将自动落账审计。
               </div>
 
               {error && (

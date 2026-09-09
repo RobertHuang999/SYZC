@@ -85,8 +85,8 @@ export function approveUnlockApply(applyNo: string, opinion: string = ""): void 
             status: "DELIVERED",
             password: pwd,
             passwordMasked: pwd,
-            validFrom: nowStr,
-            validTo: validToStr,
+            validFrom: item.deviceType === "挂锁门禁" ? undefined : nowStr,
+            validTo: item.deviceType === "挂锁门禁" ? undefined : validToStr,
           }
         : item.credential,
   }))

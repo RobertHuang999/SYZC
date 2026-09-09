@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -32,23 +31,6 @@ type GetLockPasswordDialogProps = {
 
 type DialogState = "form" | "success"
 
-function defaultValidFrom(): string {
-  return "2026-08-31T14:00"
-}
-
-function defaultValidTo(): string {
-  return "2026-08-31T18:00"
-}
-
-function validateValidity(validFrom: string, validTo: string): string | null {
-  if (validFrom >= validTo) return "有效期结束时间须晚于开始时间"
-  const spanMs = new Date(validTo).getTime() - new Date(validFrom).getTime()
-  if (spanMs > 24 * 60 * 60 * 1000) {
-    return "密码有效期最大不得超过 24 小时"
-  }
-  return null
-}
-
 export function GetLockPasswordDialog({
   open,
   context,
@@ -57,8 +39,6 @@ export function GetLockPasswordDialog({
   const navigate = useNavigate()
   const [state, setState] = useState<DialogState>("form")
   const [reason, setReason] = useState("出库")
-  const [validFrom, setValidFrom] = useState(defaultValidFrom())
-  const [validTo, setValidTo] = useState(defaultValidTo())
   const [remark, setRemark] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -68,8 +48,6 @@ export function GetLockPasswordDialog({
     if (!open) {
       setState("form")
       setReason("出库")
-      setValidFrom(defaultValidFrom())
-      setValidTo(defaultValidTo())
       setRemark("")
       setSubmitting(false)
       setErrorMessage(null)
@@ -88,11 +66,6 @@ export function GetLockPasswordDialog({
       setErrorMessage("请选择事由")
       return
     }
-    const validityError = validateValidity(validFrom, validTo)
-    if (validityError) {
-      setErrorMessage(validityError)
-      return
-    }
     if (remark.length > 50) {
       setErrorMessage("备注最多 50 字")
       return
@@ -104,8 +77,6 @@ export function GetLockPasswordDialog({
         context,
         reason,
         remark: remark || undefined,
-        validFrom,
-        validTo,
       })
       addUnlockApply(record)
       setCreatedApplyNo(record.applyNo)
@@ -132,7 +103,7 @@ export function GetLockPasswordDialog({
             <DialogHeader>
               <DialogTitle>开锁凭证已生成</DialogTitle>
               <DialogDescription>
-                临时密码已短信发送至绑定手机号，请点击下方按钮查看详情。
+                临时密码已短信发送至绑定手机号，请凭此密码前往设备开锁，也可点击下方按钮查看详情。
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-3 py-2 text-sm">
@@ -187,26 +158,6 @@ export function GetLockPasswordDialog({
               </div>
 
               <div className="space-y-2">
-                <Label>
-                  <span className="text-destructive mr-1">*</span>
-                  有效期
-                </Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="datetime-local"
-                    value={validFrom}
-                    onChange={(e) => setValidFrom(e.target.value)}
-                  />
-                  <span className="text-muted-foreground">至</span>
-                  <Input
-                    type="datetime-local"
-                    value={validTo}
-                    onChange={(e) => setValidTo(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
                 <Label>备注</Label>
                 <textarea
                   className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -222,7 +173,7 @@ export function GetLockPasswordDialog({
             </div>
 
             <p className="text-xs text-muted-foreground">
-              提交后可在【我的申请记录】查看密码；短信将发送至绑定手机号；最长有效期 24 小时
+              密码将以短信形式发送至您绑定的手机号，请凭此密码前往设备开锁，同时可在【我的申请记录】查看凭证。
             </p>
             {errorMessage && <p className="text-xs text-destructive">{errorMessage}</p>}
 

@@ -23,8 +23,8 @@ export type SubmitUnlockApplyInput = {
   context: UnlockApplySubmitContext
   reason: string
   remark?: string
-  validFrom: string
-  validTo: string
+  validFrom?: string
+  validTo?: string
   unlockCount?: number
   matchedConfig: UnlockApprovalConfig
 }
@@ -78,6 +78,11 @@ export function submitUnlockApply(
 
   const applyNo = generateDirectApplyNo()
   const submitTime = formatDateTime(new Date())
+  const expectedUseWindow =
+    input.validFrom && input.validTo
+      ? formatExpectedWindow(input.validFrom, input.validTo)
+      : undefined
+
   const record: UnlockApply = {
     applyNo,
     deviceName: context.deviceName,
@@ -88,7 +93,7 @@ export function submitUnlockApply(
     locationDetail: context.locationDetail,
     reason: input.reason,
     remark: input.remark,
-    expectedUseWindow: formatExpectedWindow(input.validFrom, input.validTo),
+    expectedUseWindow,
     status: "PENDING",
     submitTime,
     configSnapshot: buildConfigSnapshot(matchedConfig),

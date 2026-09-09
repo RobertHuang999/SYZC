@@ -164,7 +164,7 @@ export function MyUnlockApplyDetailPage() {
           <KeyValue label="手机号" value={maskPhone(apply.applicantPhone)} />
           <KeyValue label="事由" value={apply.reason} />
           {apply.remark && <KeyValue label="备注" value={apply.remark} />}
-          {apply.expectedUseWindow && (
+          {apply.deviceType !== "挂锁门禁" && apply.expectedUseWindow && (
             <KeyValue label="有效期" value={apply.expectedUseWindow} />
           )}
           <KeyValue label="提交时间" value={formatDateTime(apply.submitTime)} />
@@ -231,7 +231,7 @@ export function MyUnlockApplyDetailPage() {
                 label="凭证状态"
                 value={CREDENTIAL_STATUS_LABEL[apply.credential.status]}
               />
-              {apply.credential.validFrom && apply.credential.validTo && (
+              {apply.deviceType !== "挂锁门禁" && apply.credential.validFrom && apply.credential.validTo && (
                 <KeyValue
                   label="密码有效期"
                   value={`${apply.credential.validFrom.slice(5, 16)} ~ ${apply.credential.validTo.slice(5, 16)}`}

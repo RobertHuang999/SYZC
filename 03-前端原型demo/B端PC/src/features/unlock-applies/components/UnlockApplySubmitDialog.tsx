@@ -97,12 +97,12 @@ export function UnlockApplySubmitDialog({
 
   const handleSubmit = () => {
     if (!context || !matchedConfig) return
-    const validityError = validateValidity(validFrom, validTo)
-    if (validityError) {
-      setError(validityError)
-      return
-    }
     if (isFaceDevice) {
+      const validityError = validateValidity(validFrom, validTo)
+      if (validityError) {
+        setError(validityError)
+        return
+      }
       const count = Number(unlockCount)
       if (!Number.isInteger(count) || count < 1 || count > 100) {
         setError("开锁次数须为 1~100 的整数")
@@ -122,8 +122,8 @@ export function UnlockApplySubmitDialog({
         matchedConfig,
         reason,
         remark: remark.trim() || undefined,
-        validFrom,
-        validTo,
+        validFrom: isFaceDevice ? validFrom : undefined,
+        validTo: isFaceDevice ? validTo : undefined,
         unlockCount: isFaceDevice ? Number(unlockCount) : undefined,
       })
       if (!outcome.ok) {
@@ -144,10 +144,10 @@ export function UnlockApplySubmitDialog({
   if (!context) return null
 
   const successHint = isLockDevice
-    ? "请等待审批；审批通过后将短信下发临时密码。"
+    ? "请等待审批；审批通过后将短信下发临时密码，请凭此密码前往设备开锁。"
     : "请等待审批；审批通过后在详情页查看临时密码（不下发短信）。"
   const submitHint = isLockDevice
-    ? "提交后将创建开锁申请，审批通过后短信下发临时密码"
+    ? "提交后将创建开锁申请，审批通过后短信下发临时密码，请凭此密码前往设备开锁"
     : "提交后将创建开锁申请，审批通过后在详情页查看临时密码（人脸门禁不下发短信）"
 
   const handleViewDetail = () => {
@@ -222,25 +222,27 @@ export function UnlockApplySubmitDialog({
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label>
-                  <span className="text-destructive mr-1">*</span>
-                  有效期
-                </Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="datetime-local"
-                    value={validFrom}
-                    onChange={(e) => setValidFrom(e.target.value)}
-                  />
-                  <span className="text-muted-foreground">至</span>
-                  <Input
-                    type="datetime-local"
-                    value={validTo}
-                    onChange={(e) => setValidTo(e.target.value)}
-                  />
+              {isFaceDevice && (
+                <div className="space-y-2">
+                  <Label>
+                    <span className="text-destructive mr-1">*</span>
+                    有效期
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="datetime-local"
+                      value={validFrom}
+                      onChange={(e) => setValidFrom(e.target.value)}
+                    />
+                    <span className="text-muted-foreground">至</span>
+                    <Input
+                      type="datetime-local"
+                      value={validTo}
+                      onChange={(e) => setValidTo(e.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {isFaceDevice && (
                 <div className="space-y-2">
@@ -296,9 +298,11 @@ export function UnlockApplySubmitDialog({
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground">
-              最长有效期 24 小时；超过有效期凭证自动失效
-            </p>
+            {isFaceDevice && (
+              <p className="text-xs text-muted-foreground">
+                最长有效期 24 小时；超过有效期凭证自动失效
+              </p>
+            )}
             {error && <p className="text-xs text-destructive">{error}</p>}
             <p className="text-xs text-muted-foreground">{submitHint}</p>
 

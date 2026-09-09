@@ -102,7 +102,7 @@ export function UnlockApplyDetailPage() {
           <KeyValue label="手机号" value={maskPhone(apply.applicantPhone)} />
           <KeyValue label="事由" value={apply.reason} />
           {apply.remark && <KeyValue label="备注" value={apply.remark} />}
-          {apply.expectedUseWindow && (
+          {apply.deviceType !== "挂锁门禁" && apply.expectedUseWindow && (
             <KeyValue label="有效期" value={apply.expectedUseWindow} />
           )}
           <KeyValue label="提交时间" value={formatDateTime(apply.submitTime)} />

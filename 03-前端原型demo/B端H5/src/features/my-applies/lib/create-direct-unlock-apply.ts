@@ -36,15 +36,10 @@ export function createDirectLockUnlockApply(params: {
   context: AccessDevicePasswordContext
   reason: string
   remark?: string
-  validFrom: string
-  validTo: string
 }): UnlockApply {
   const now = new Date()
   const submitTime = formatDateTime(now)
   const applyNo = generateDirectApplyNo()
-  const validFrom = params.validFrom.replace("T", " ")
-  const validTo = params.validTo.replace("T", " ")
-  const expectedUseWindow = `${validFrom.slice(0, 16)} ~ ${validTo.slice(0, 16)}`
 
   return {
     applyNo,
@@ -56,7 +51,6 @@ export function createDirectLockUnlockApply(params: {
     locationDetail: params.context.locationDetail,
     reason: params.reason,
     remark: params.remark,
-    expectedUseWindow,
     status: "APPROVED",
     submitTime,
     configSnapshot: emptyConfig,
@@ -67,8 +61,6 @@ export function createDirectLockUnlockApply(params: {
       status: "DELIVERED",
       password: "856778",
       passwordMasked: "****5678",
-      validFrom,
-      validTo,
     },
     eligible: false,
     needsApproval: false,
