@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react"
 import {
-  SearchIcon,
   CopyIcon,
   CheckIcon,
   RadioTowerIcon,
@@ -14,18 +13,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
   getDevicesForUnlockConfig,
-  type UnlockDeviceDetailItem,
 } from "../mock/reference-data.mock"
 
 interface UnlockDeviceScopeDialogProps {
@@ -43,38 +33,12 @@ export function UnlockDeviceScopeDialog({
   deviceCodes,
   onOpenChange,
 }: UnlockDeviceScopeDialogProps) {
-  const [searchKeyword, setSearchKeyword] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [typeFilter, setTypeFilter] = useState<string>("all")
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
 
   // 获取该配置下的已关联门禁设备详情列表
   const rawDevices = useMemo(() => {
     return getDevicesForUnlockConfig(deviceCodes)
   }, [deviceCodes])
-
-  // 搜索和多维度过滤
-  const filteredDevices = useMemo(() => {
-    return rawDevices.filter((item: UnlockDeviceDetailItem) => {
-      if (statusFilter !== "all" && item.status !== statusFilter) {
-        return false
-      }
-      if (typeFilter !== "all" && item.deviceType !== typeFilter) {
-        return false
-      }
-      if (searchKeyword.trim()) {
-        const kw = searchKeyword.toLowerCase()
-        return (
-          item.deviceName.toLowerCase().includes(kw) ||
-          item.deviceCode.toLowerCase().includes(kw) ||
-          item.location.toLowerCase().includes(kw) ||
-          item.warehouseName.toLowerCase().includes(kw) ||
-          item.deviceType.toLowerCase().includes(kw)
-        )
-      }
-      return true
-    })
-  }, [rawDevices, statusFilter, typeFilter, searchKeyword])
 
   const copyDeviceCode = (code: string) => {
     navigator.clipboard?.writeText(code)
@@ -128,48 +92,8 @@ export function UnlockDeviceScopeDialog({
           </div>
         </DialogHeader>
 
-        {/* 主体内容 */}
-        <div className="flex-1 overflow-y-auto space-y-4 py-2">
-          {/* 搜索与过滤工具栏 */}
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <div className="relative flex-1 w-full">
-              <SearchIcon className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
-              <Input
-                placeholder="按设备编号、设备名称、所属仓库或安装货位快速过滤..."
-                value={searchKeyword}
-                onChange={(e) => setSearchKeyword(e.target.value)}
-                className="pl-9 h-9 text-xs"
-              />
-            </div>
-            <div className="flex w-full sm:w-auto items-center gap-2">
-              <div className="w-1/2 sm:w-32">
-                <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v ?? "all")}>
-                  <SelectTrigger className="h-9 text-xs">
-                    <SelectValue placeholder="设备类型" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部类型</SelectItem>
-                    <SelectItem value="挂锁门禁">挂锁门禁</SelectItem>
-                    <SelectItem value="人脸门禁">人脸门禁</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="w-1/2 sm:w-32">
-                <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v ?? "all")}>
-                  <SelectTrigger className="h-9 text-xs">
-                    <SelectValue placeholder="设备状态" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部状态</SelectItem>
-                    <SelectItem value="在线">在线</SelectItem>
-                    <SelectItem value="离线">离线</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          {/* 设备表格 */}
+        {/* 主体内容：纯粹展示设备清单表格 */}
+        <div className="flex-1 overflow-y-auto py-2">
           <div className="rounded-lg border overflow-hidden">
             <table className="w-full text-left text-xs border-collapse">
               <thead className="bg-muted/50 text-muted-foreground border-b font-medium">
@@ -184,8 +108,8 @@ export function UnlockDeviceScopeDialog({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
-                {filteredDevices.length > 0 ? (
-                  filteredDevices.map((device, idx) => (
+                {rawDevices.length > 0 ? (
+                  rawDevices.map((device, idx) => (
                     <tr
                       key={device.deviceCode}
                       className="hover:bg-muted/30 transition-colors"
@@ -252,7 +176,7 @@ export function UnlockDeviceScopeDialog({
                       colSpan={7}
                       className="py-8 text-center text-muted-foreground"
                     >
-                      未找到匹配的设备记录
+                      暂无设备记录
                     </td>
                   </tr>
                 )}
@@ -264,7 +188,7 @@ export function UnlockDeviceScopeDialog({
         {/* 底部 */}
         <DialogFooter className="border-t pt-3 flex items-center justify-between sm:justify-between">
           <div className="text-xs text-muted-foreground">
-            显示 {filteredDevices.length} / {rawDevices.length} 台设备
+            共 {rawDevices.length} 台设备
           </div>
           <Button
             type="button"

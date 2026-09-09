@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react"
 import {
-  SearchIcon,
   CopyIcon,
   CheckIcon,
   RadioTowerIcon,
@@ -15,15 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import type { DeviceWarningConfigDetail } from "../domain/types"
 import { getDevicesForConfig } from "../mock/devices.mock"
 
@@ -38,8 +29,6 @@ export function DeviceScopeDialog({
   config,
   onOpenChange,
 }: DeviceScopeDialogProps) {
-  const [searchKeyword, setSearchKeyword] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
 
   // 获取该配置下的已关联设备列表
@@ -50,25 +39,6 @@ export function DeviceScopeDialog({
       config.newDeviceOnly
     )
   }, [config.warningType, config.deviceScope, config.newDeviceOnly])
-
-  // 搜索和状态过滤
-  const filteredDevices = useMemo(() => {
-    return rawDevices.filter((item) => {
-      if (statusFilter !== "all" && item.status !== statusFilter) {
-        return false
-      }
-      if (searchKeyword.trim()) {
-        const kw = searchKeyword.toLowerCase()
-        return (
-          item.deviceName.toLowerCase().includes(kw) ||
-          item.deviceCode.toLowerCase().includes(kw) ||
-          item.location.toLowerCase().includes(kw) ||
-          item.deviceType.toLowerCase().includes(kw)
-        )
-      }
-      return true
-    })
-  }, [rawDevices, statusFilter, searchKeyword])
 
   const copyDeviceCode = (code: string) => {
     navigator.clipboard?.writeText(code)
@@ -134,114 +104,86 @@ export function DeviceScopeDialog({
               </p>
             </div>
           ) : (
-            <>
-              {/* 搜索与过滤工具栏 */}
-              <div className="flex flex-col sm:flex-row items-center gap-3">
-                <div className="relative flex-1 w-full">
-                  <SearchIcon className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
-                  <Input
-                    placeholder="按设备编号、设备名称、安装货位快速过滤..."
-                    value={searchKeyword}
-                    onChange={(e) => setSearchKeyword(e.target.value)}
-                    className="pl-9 h-9 text-xs"
-                  />
-                </div>
-                <div className="w-full sm:w-36">
-                  <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v ?? "all")}>
-                    <SelectTrigger className="h-9 text-xs">
-                      <SelectValue placeholder="设备状态" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">全部状态</SelectItem>
-                      <SelectItem value="在线">在线</SelectItem>
-                      <SelectItem value="离线">离线</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* 设备表格 */}
-              <div className="rounded-lg border overflow-hidden">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead className="bg-muted/50 text-muted-foreground border-b font-medium">
-                    <tr>
-                      <th className="py-2.5 px-3 w-12 text-center">序号</th>
-                      <th className="py-2.5 px-3">设备编号</th>
-                      <th className="py-2.5 px-3">设备名称</th>
-                      <th className="py-2.5 px-3">设备类型</th>
-                      <th className="py-2.5 px-3">所属仓库</th>
-                      <th className="py-2.5 px-3">安装货位 / 位置</th>
-                      <th className="py-2.5 px-3 w-20 text-center">状态</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/60">
-                    {filteredDevices.length > 0 ? (
-                      filteredDevices.map((device, idx) => (
-                        <tr
-                          key={device.deviceCode}
-                          className="hover:bg-muted/30 transition-colors"
-                        >
-                          <td className="py-2.5 px-3 text-center text-muted-foreground">
-                            {idx + 1}
-                          </td>
-                          <td className="py-2.5 px-3">
-                            <div className="flex items-center gap-1.5 font-mono text-foreground">
-                              <span>{device.deviceCode}</span>
-                              <button
-                                type="button"
-                                onClick={() => copyDeviceCode(device.deviceCode)}
-                                className="text-muted-foreground hover:text-foreground cursor-pointer"
-                                title="复制设备编号"
-                              >
-                                {copiedCode === device.deviceCode ? (
-                                  <CheckIcon className="size-3 text-emerald-600" />
-                                ) : (
-                                  <CopyIcon className="size-3" />
-                                )}
-                              </button>
-                            </div>
-                          </td>
-                          <td className="py-2.5 px-3 font-medium text-foreground">
-                            {device.deviceName}
-                          </td>
-                          <td className="py-2.5 px-3 text-muted-foreground">
-                            {device.deviceType}
-                          </td>
-                          <td className="py-2.5 px-3 text-muted-foreground">
-                            {device.warehouseName}
-                          </td>
-                          <td className="py-2.5 px-3 text-foreground">
-                            {device.location}
-                          </td>
-                          <td className="py-2.5 px-3 text-center">
-                            {device.status === "在线" ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
-                                <span className="size-1.5 rounded-full bg-emerald-500" />
-                                在线
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                                <span className="size-1.5 rounded-full bg-muted-foreground" />
-                                离线
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan={7}
-                          className="py-8 text-center text-muted-foreground"
-                        >
-                          未找到匹配的设备记录
+            <div className="rounded-lg border overflow-hidden">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead className="bg-muted/50 text-muted-foreground border-b font-medium">
+                  <tr>
+                    <th className="py-2.5 px-3 w-12 text-center">序号</th>
+                    <th className="py-2.5 px-3">设备编号</th>
+                    <th className="py-2.5 px-3">设备名称</th>
+                    <th className="py-2.5 px-3">设备类型</th>
+                    <th className="py-2.5 px-3">所属仓库</th>
+                    <th className="py-2.5 px-3">安装货位 / 位置</th>
+                    <th className="py-2.5 px-3 w-20 text-center">状态</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {rawDevices.length > 0 ? (
+                    rawDevices.map((device, idx) => (
+                      <tr
+                        key={device.deviceCode}
+                        className="hover:bg-muted/30 transition-colors"
+                      >
+                        <td className="py-2.5 px-3 text-center text-muted-foreground">
+                          {idx + 1}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <div className="flex items-center gap-1.5 font-mono text-foreground">
+                            <span>{device.deviceCode}</span>
+                            <button
+                              type="button"
+                              onClick={() => copyDeviceCode(device.deviceCode)}
+                              className="text-muted-foreground hover:text-foreground cursor-pointer"
+                              title="复制设备编号"
+                            >
+                              {copiedCode === device.deviceCode ? (
+                                <CheckIcon className="size-3 text-emerald-600" />
+                              ) : (
+                                <CopyIcon className="size-3" />
+                              )}
+                            </button>
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 font-medium text-foreground">
+                          {device.deviceName}
+                        </td>
+                        <td className="py-2.5 px-3 text-muted-foreground">
+                          {device.deviceType}
+                        </td>
+                        <td className="py-2.5 px-3 text-muted-foreground">
+                          {device.warehouseName}
+                        </td>
+                        <td className="py-2.5 px-3 text-foreground">
+                          {device.location}
+                        </td>
+                        <td className="py-2.5 px-3 text-center">
+                          {device.status === "在线" ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+                              <span className="size-1.5 rounded-full bg-emerald-500" />
+                              在线
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                              <span className="size-1.5 rounded-full bg-muted-foreground" />
+                              离线
+                            </span>
+                          )}
                         </td>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        className="py-8 text-center text-muted-foreground"
+                      >
+                        暂无设备记录
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
 
@@ -250,7 +192,7 @@ export function DeviceScopeDialog({
           <div className="text-xs text-muted-foreground">
             {!config.newDeviceOnly && (
               <span>
-                显示 {filteredDevices.length} / {rawDevices.length} 台设备
+                共 {rawDevices.length} 台设备
               </span>
             )}
           </div>
