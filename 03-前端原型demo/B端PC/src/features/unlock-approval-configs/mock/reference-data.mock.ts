@@ -44,3 +44,31 @@ export const ROLE_OPTIONS = [
   "风控经理（物产中大保理）",
   "业务审批人（总行普惠金融部）",
 ] as const
+
+export interface UnlockDeviceDetailItem {
+  id: string
+  deviceCode: string
+  deviceName: string
+  deviceType: "挂锁门禁" | "人脸门禁"
+  warehouseName: string
+  location: string
+  status: "在线" | "离线"
+}
+
+export function getDevicesForUnlockConfig(deviceCodes: string[]): UnlockDeviceDetailItem[] {
+  const codeSet = new Set(deviceCodes)
+  return MOCK_DEVICES.filter((d) => codeSet.has(d.code)).map((d) => {
+    const isFace = d.code.startsWith("FACE")
+    const isOffline = d.code === "LK-0085" || d.code === "LK-HB-002"
+    return {
+      id: d.id,
+      deviceCode: d.code,
+      deviceName: d.name,
+      deviceType: isFace ? "人脸门禁" : "挂锁门禁",
+      warehouseName: d.warehouse,
+      location: d.location,
+      status: isOffline ? "离线" : "在线",
+    }
+  })
+}
+

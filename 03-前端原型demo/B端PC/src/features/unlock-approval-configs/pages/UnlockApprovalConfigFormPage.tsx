@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { ArrowLeftIcon, ChevronRightIcon } from "lucide-react"
+import { ArrowLeftIcon, ChevronRightIcon, EyeIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,6 +11,7 @@ import { ApprovalNodeEditor } from "../components/ApprovalNodeEditor"
 import { FieldLabelWithHelp } from "../components/FieldHelpTooltip"
 import { TimeoutHoursInput } from "../components/TimeoutHoursInput"
 import { UnlockDeviceSelectDialog } from "../components/UnlockDeviceSelectDialog"
+import { UnlockDeviceScopeDialog } from "../components/UnlockDeviceScopeDialog"
 import { getUnlockApprovalConfigByNo } from "../lib/detail-utils"
 import { MOCK_DEVICES } from "../mock/reference-data.mock"
 import {
@@ -40,6 +41,7 @@ export function UnlockApprovalConfigFormPage() {
   )
   const [saveConfirmOpen, setSaveConfirmOpen] = useState(false)
   const [deviceDialogOpen, setDeviceDialogOpen] = useState(false)
+  const [deviceScopeDialogOpen, setDeviceScopeDialogOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
   if (isEdit && !existing) {
@@ -178,7 +180,18 @@ export function UnlockApprovalConfigFormPage() {
                         "尚未选择设备"
                       )}
                     </div>
-                    {!isEdit && (
+                    {isEdit ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 gap-1.5 px-2.5 text-xs text-primary hover:text-primary hover:bg-primary/5 cursor-pointer"
+                        onClick={() => setDeviceScopeDialogOpen(true)}
+                      >
+                        <EyeIcon className="size-3.5" />
+                        <span>查看设备清单</span>
+                      </Button>
+                    ) : (
                       <Button
                         type="button"
                         variant="outline"
@@ -190,7 +203,7 @@ export function UnlockApprovalConfigFormPage() {
                     )}
                   </div>
                   {isEdit && (
-                    <Input readOnly value={`已选 ${form.selectedDeviceIds.length} 台`} />
+                    <Input readOnly value={`已选 ${form.selectedDeviceIds.length} 台（不可直接修改）`} />
                   )}
                 </div>
               </PrototypeAnnotationTarget>
@@ -242,6 +255,16 @@ export function UnlockApprovalConfigFormPage() {
             setForm((current) => ({ ...current, selectedDeviceIds }))
           }
         />
+
+        {existing && (
+          <UnlockDeviceScopeDialog
+            open={deviceScopeDialogOpen}
+            configName={existing.configName}
+            configNo={existing.configNo}
+            deviceCodes={existing.deviceCodes}
+            onOpenChange={setDeviceScopeDialogOpen}
+          />
+        )}
 
         <ConfigConfirmDialog
           open={saveConfirmOpen}

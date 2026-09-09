@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { ArrowLeftIcon } from "lucide-react"
+import { ArrowLeftIcon, EyeIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -23,7 +23,9 @@ import {
   UNLOCK_APPROVAL_CONFIG_STATUS_BADGE_CLASS,
 } from "../domain/actions"
 import { DisableConfirmDialog } from "../components/DisableConfirmDialog"
+import { UnlockDeviceScopeDialog } from "../components/UnlockDeviceScopeDialog"
 import { getUnlockApprovalConfigDetail } from "../lib/detail-utils"
+
 import {
   formatConfigVersion,
   formatTimeoutHours,
@@ -147,26 +149,32 @@ export function UnlockApprovalConfigDetailPage() {
             <DetailField label="配置编号">{config.configNo}</DetailField>
             <DetailField label="配置名称">{config.configName}</DetailField>
             <DetailField label="适用设备">
-              <div className="space-y-1">
-                <span>
-                  已选 {config.deviceCount} 台 · {config.deviceSummary}
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="font-medium text-foreground">
+                  已选 {config.deviceCount} 台（{config.deviceSummary}）
                 </span>
-                <button
+                <Button
                   type="button"
-                  className="block text-sm text-primary hover:underline"
-                  onClick={() => setDeviceListOpen((open) => !open)}
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1.5 px-2.5 text-xs text-primary hover:text-primary hover:bg-primary/5 cursor-pointer"
+                  onClick={() => setDeviceListOpen(true)}
                 >
-                  {deviceListOpen ? "收起设备清单" : "查看设备清单 >"}
-                </button>
-                {deviceListOpen && (
-                  <p className="text-sm text-muted-foreground">
-                    {config.deviceCodes.join("、")}
-                  </p>
-                )}
+                  <EyeIcon className="size-3.5" />
+                  <span>查看设备清单</span>
+                </Button>
               </div>
             </DetailField>
           </DetailSection>
         </PrototypeAnnotationTarget>
+
+        <UnlockDeviceScopeDialog
+          open={deviceListOpen}
+          configName={config.configName}
+          configNo={config.configNo}
+          deviceCodes={config.deviceCodes}
+          onOpenChange={setDeviceListOpen}
+        />
 
         <PrototypeAnnotationTarget annotationIds={["unlock-approval-config-detail-strategy"]}>
           <DetailSection title="审批策略">
