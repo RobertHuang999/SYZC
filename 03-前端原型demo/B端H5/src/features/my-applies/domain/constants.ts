@@ -33,6 +33,8 @@ export function myApplyListPathWithTab(tab: MyApplyTabKey = "process"): string {
 export const PROCESS_APPLY_FILTER_STORAGE_KEY = "SYZC_H5_MY_PROCESS_APPLY_FILTERS"
 export const UNLOCK_APPLY_FILTER_STORAGE_KEY = "SYZC_H5_MY_UNLOCK_APPLY_FILTERS"
 
+// 业务系统旧称映射：待分配→待审批、未通过→已驳回、已撤销→已撤回。
+// 我的申请与开锁审批页面共用这套标准展示文案。
 export const UNLOCK_APPLY_STATUS_LABEL: Record<UnlockApplyStatus, string> = {
   PENDING: "待审批",
   APPROVED: "已通过",

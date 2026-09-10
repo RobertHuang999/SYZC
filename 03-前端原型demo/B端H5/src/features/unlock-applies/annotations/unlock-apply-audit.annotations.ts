@@ -61,9 +61,9 @@ export const unlockApplyAuditH5ListAnnotations: PrototypeAnnotation[] = [
     targetId: "h5-unlock-audit-filter",
     number: 2,
     kind: "交互",
-    title: "搜索与状态胶囊过滤",
+    title: "搜索与申请状态胶囊过滤",
     content:
-      "搜索框支持申请单号、设备、申请人、事由即时过滤；状态下拉胶囊默认「待审批」（L04），可选已处理与全部。",
+      "搜索框支持申请单号、设备、申请人、事由即时过滤；申请状态下拉胶囊默认「待审批」（L04），可选已处理与全部。真实系统中的「待分配 / 未通过 / 已撤销」统一展示为「待审批 / 已驳回 / 已撤回」。",
     details: [
       {
         title: "过滤逻辑",

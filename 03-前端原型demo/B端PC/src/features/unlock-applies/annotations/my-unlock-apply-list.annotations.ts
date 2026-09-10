@@ -79,7 +79,7 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
           {
             label: "申请状态",
             content:
-              "Select 多选下拉：待审批 / 已通过 / 已驳回 / 已撤回 / 已失效；空选=全部；同字段 OR。",
+              "Select 多选下拉：待审批 / 已通过 / 已驳回 / 已撤回 / 已失效；空选=全部；同字段 OR。真实系统旧称「待分配 / 未通过 / 已撤销」分别统一展示为「待审批 / 已驳回 / 已撤回」。",
           },
           {
             label: "凭证状态",

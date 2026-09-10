@@ -1,5 +1,7 @@
 import type { UnlockApplyStatus, CredentialStatus } from "./types"
 
+// 业务系统旧称映射：待分配→待审批、未通过→已驳回、已撤销→已撤回。
+// 页面统一使用申请状态标准文案，内部枚举保持不变。
 export const UNLOCK_APPLY_STATUS_LABEL: Record<UnlockApplyStatus, string> = {
   PENDING: "待审批",
   APPROVED: "已通过",

@@ -87,7 +87,7 @@ export function UnlockApplyListPage() {
           </div>
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
             <DropdownFilterPill
-              label="状态"
+              label="申请状态"
               value={filters.status}
               options={statusOptions}
               onChange={(val) =>

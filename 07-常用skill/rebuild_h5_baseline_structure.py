@@ -51,7 +51,7 @@ PC_RULE_SOURCE: dict[str, str | None] = {
     "ws-cargo-movement": "B端PC/02-仓储/13-货物异动-异动记录",
     "ws-tally-stacking": "B端PC/02-仓储/02-库存查询-理货堆放",
     "ws-stock-detail": "B端PC/02-仓储/03-库存查询-库存明细",
-    "ws-pledge-order-mgr": "B端PC/03-融资监管/06-抵质押业务-抵质押业务管理",
+    "ws-pledge-order-mgr": "B端PC/03-融资监管/07-抵质押业务-抵质押业务管理",
     "ws-supervision-order-mgr": "B端PC/03-融资监管/11-监管业务-供应链监管业务",
     "ws-credit-process": "B端PC/03-融资监管/03-融资管理-客户融资授信办理",
     "ws-online-pledge-process": "B端PC/03-融资监管/04-融资管理-融资结果-线上抵质押办理",

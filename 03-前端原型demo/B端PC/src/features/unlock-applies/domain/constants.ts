@@ -12,6 +12,8 @@ export const APPROVAL_CENTER_PATH = "/工作中心/审批中心"
 export const CURRENT_APPLICANT_ACCOUNT = "zhang3"
 export const PAGE_SIZE = 10
 
+// 业务系统旧称映射：待分配→待审批、未通过→已驳回、已撤销→已撤回。
+// PC 与 H5 统一使用申请状态标准文案，内部枚举保持不变。
 export const UNLOCK_APPLY_STATUS_LABEL: Record<UnlockApplyStatus, string> = {
   PENDING: "待审批",
   APPROVED: "已通过",
