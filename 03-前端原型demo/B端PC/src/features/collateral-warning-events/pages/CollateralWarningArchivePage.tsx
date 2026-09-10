@@ -24,13 +24,15 @@ import { Badge } from "@/components/ui/badge"
 import { TableDateTimeCell } from "@/shared/components/TableCells"
 import { ENABLED_SEVERITY_LEVELS } from "@/shared/mock/severity-levels"
 import { archivedCollateralWarningEventsMock } from "../mock/collateral-warning-events.mock"
+import type { WarningStatusFilter } from "../domain/status"
+import { mapStatusFilterToValue } from "../domain/status"
 
 export function CollateralWarningArchivePage() {
   const navigate = useNavigate()
   const [orderNo, setOrderNo] = useState("")
   const [warningType, setWarningType] = useState("全部")
   const [severityLevelId, setSeverityLevelId] = useState("全部")
-  const [statusFilter, setStatusFilter] = useState("全部")
+  const [statusFilter, setStatusFilter] = useState<WarningStatusFilter>("全部")
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
@@ -46,8 +48,7 @@ export function CollateralWarningArchivePage() {
         return false
       }
       if (statusFilter !== "全部") {
-        if (statusFilter === "已处理" && event.warningStatus !== "CLOSED_VALID") return false
-        if (statusFilter === "未处理" && event.warningStatus === "CLOSED_VALID") return false
+        if (event.warningStatus !== mapStatusFilterToValue(statusFilter)) return false
       }
       return true
     })
@@ -169,15 +170,19 @@ export function CollateralWarningArchivePage() {
               </Select>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">处理状态</label>
-              <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val || "全部")}>
+              <label className="text-xs font-medium text-muted-foreground">预警状态</label>
+              <Select
+                value={statusFilter}
+                onValueChange={(val) => setStatusFilter((val || "全部") as WarningStatusFilter)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="全部状态" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="全部">全部状态</SelectItem>
-                  <SelectItem value="已处理">已处理归档</SelectItem>
-                  <SelectItem value="未处理">未处理（无效历史）</SelectItem>
+                  <SelectItem value="待处置 · 有效">待处置 · 有效</SelectItem>
+                  <SelectItem value="已结案 · 有效">已结案 · 有效</SelectItem>
+                  <SelectItem value="已作废">已作废</SelectItem>
                 </SelectContent>
               </Select>
             </div>

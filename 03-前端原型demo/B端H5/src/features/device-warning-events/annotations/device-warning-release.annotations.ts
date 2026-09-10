@@ -18,7 +18,7 @@ export const deviceWarningReleaseH5Annotations: PrototypeAnnotation[] = [
     A["详情/列表发起"] --> B["二次确认"]
     B --> C["录入材料 + 联动抓拍"]
     C --> D["Version 乐观锁校验"]
-    D --> E["归档该条流水为已结案·有效"]
+    D --> E["归档该条流水为已结案 · 有效"]
     E --> F["取消该条升级任务"]`,
           },
           {

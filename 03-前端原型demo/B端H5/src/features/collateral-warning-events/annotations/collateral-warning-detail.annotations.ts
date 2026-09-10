@@ -15,9 +15,9 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
           {
             label: "业务流转",
             content: `flowchart TD
-    A["商业规则命中 / IoT事件穿透"] --> B["未处理(有效)"]
-    B -->|"单据补仓 / 物联核销"| C["已处理(有效)"]
-    B -->|"订单结清 / 规则失效"| D["未处理(无效)"]
+    A["商业规则命中 / IoT事件穿透"] --> B["待处置 · 有效"]
+    B -->|"单据补仓 / 物联核销"| C["已结案 · 有效"]
+    B -->|"订单结清 / 规则失效"| D["已作废"]
     C -->|"高危审核通过"| E["风险公示"]`,
           },
         ],
@@ -70,7 +70,7 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
           },
           {
             label: "是否公示 (publicityStatus)",
-            content: "未公示、已公示、已取消；已处理（有效）记录支持发起公示风险。",
+            content: "未公示、已公示、已取消；已结案 · 有效记录支持发起公示风险。",
           },
           {
             label: "预警时间 (warningTime)",

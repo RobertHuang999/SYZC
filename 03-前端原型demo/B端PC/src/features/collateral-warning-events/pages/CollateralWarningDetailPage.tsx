@@ -11,7 +11,10 @@ import {
 import { SeverityLevelDisplay } from "@/shared/components/SeverityLevelDisplay"
 import { getDetailHeaderActions } from "../domain/actions"
 import { WARNING_STATUS } from "../domain/types"
-import type { CollateralWarningEventDetail } from "../domain/types"
+import type {
+  CollateralCargoSnapshot,
+  CollateralWarningEventDetail,
+} from "../domain/types"
 import { CollateralWarningStatusBadge } from "../components/CollateralWarningStatusBadge"
 import { PublishConfirmDialog } from "../components/PublishConfirmDialog"
 import { ReleasePromptDialog } from "../components/ReleasePromptDialog"
@@ -21,6 +24,21 @@ import { PrototypeAnnotationProvider, PrototypeAnnotationTarget } from "@/shared
 import { collateralWarningDetailAnnotations } from "../annotations/collateral-warning-detail.annotations"
 import { collateralWarningDocuments } from "../documents/collateral-warning-documents"
 import { SnapshotImageModal, type SnapshotPreviewData } from "@/shared/components/SnapshotImageModal"
+
+function formatCargoSummary(cargoItem: CollateralCargoSnapshot): string {
+  const cargoDescription = [
+    cargoItem.cargoCategory,
+    cargoItem.cargoName,
+    cargoItem.cargoSpecification,
+  ]
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .join(" / ")
+
+  return [cargoDescription, cargoItem.cargoQuantity.trim()]
+    .filter(Boolean)
+    .join(" - ")
+}
 
 export function CollateralWarningDetailPage() {
   const { id } = useParams()
@@ -68,6 +86,9 @@ export function CollateralWarningDetailPage() {
     `/物联网IOT与预警/预警信息/设备预警信息/详情/${deviceEventId}?device_event_id=${encodeURIComponent(deviceEventId)}&warn_id=${encodeURIComponent(event.eventId)}&return_route=${encodeURIComponent(returnRoute)}`
   const orderProcessRoute =
     `/融资/监管/抵质押业务/抵质押业务办理?order_id=${encodeURIComponent(event.orderNo)}&warn_id=${encodeURIComponent(event.eventId)}&return_route=${encodeURIComponent(returnRoute)}`
+  const cargoItems = event.orderSnapshot.cargoItems
+  const primaryStorageLocation =
+    cargoItems[0]?.storageLocation || "仓储监管现场"
 
   return (
     <PrototypeAnnotationProvider
@@ -144,12 +165,44 @@ export function CollateralWarningDetailPage() {
         {/* 3. 预警事实与位置（对齐字段清单第一章） */}
         <PrototypeAnnotationTarget annotationIds={["collateral-warning-detail-facts"]}>
           <DetailSection title="预警事实与位置">
-            <DetailField label="货物位置">
-              {event.orderSnapshot.storageLocation}
-            </DetailField>
-            <DetailField label="货物与数量">
-              {event.orderSnapshot.cargoName} · {event.orderSnapshot.cargoQuantity}
-            </DetailField>
+            <div className="col-span-full space-y-2">
+              <div className="grid gap-x-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
+                <div className="detail-field-label">货物位置</div>
+                <div className="detail-field-label">货物与数量</div>
+              </div>
+              {cargoItems.length > 0 ? (
+                cargoItems.map((cargoItem, index) => (
+                  <div
+                    key={`${cargoItem.cargoName}-${index}`}
+                    className="grid gap-x-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]"
+                  >
+                    <div className="detail-field-value flex min-w-0 items-start leading-relaxed">
+                      {cargoItems.length > 1 && (
+                        <span className="mr-2 shrink-0 text-xs text-muted-foreground">
+                          货物 {index + 1}
+                        </span>
+                      )}
+                      <span className="min-w-0">{cargoItem.storageLocation}</span>
+                    </div>
+                    <div className="detail-field-value flex min-w-0 items-start leading-relaxed">
+                      {cargoItems.length > 1 && (
+                        <span className="mr-2 shrink-0 text-xs text-muted-foreground">
+                          货物 {index + 1}
+                        </span>
+                      )}
+                      <span className="min-w-0">
+                        {formatCargoSummary(cargoItem) || "—"}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="grid gap-x-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
+                  <div className="detail-field-value">{formatEmptyValue(primaryStorageLocation)}</div>
+                  <div className="detail-field-value">—</div>
+                </div>
+              )}
+            </div>
             <div className="col-span-full space-y-1">
               <div className="detail-field-label">预警内容</div>
               <div className="rounded-lg border bg-muted/20 p-3 text-sm leading-relaxed text-foreground">
@@ -168,7 +221,7 @@ export function CollateralWarningDetailPage() {
                       title: "预警触发监控抓拍图",
                       desc: `订单号：${event.orderNo} | 触发时间：${event.warningTime}`,
                       time: event.warningTime,
-                      location: event.orderSnapshot?.storageLocation || "一号钢材仓 / A库",
+                      location: primaryStorageLocation,
                     })
                   }
                   className="h-auto cursor-pointer p-0 text-primary hover:underline"
@@ -213,7 +266,7 @@ export function CollateralWarningDetailPage() {
           </PrototypeAnnotationTarget>
         )}
 
-        {/* 5. 处置与核销信息（对齐字段清单第三章：解除预警表单字段，仅已处理展示） */}
+        {/* 5. 处置与核销信息（对齐字段清单第三章：解除预警表单字段，仅已结案 · 有效展示） */}
         {showDisposal && event.disposalInfo && (
           <PrototypeAnnotationTarget annotationIds={["collateral-warning-detail-disposal"]}>
             <DetailSection title="处置与核销信息">
@@ -242,7 +295,7 @@ export function CollateralWarningDetailPage() {
                             title: `现场核实照片凭证 — ${photo}`,
                             desc: `核销单据：${event.orderNo} | 处理人：${event.processedBy || "风控专员"}`,
                             time: event.processedTime || event.warningTime,
-                            location: event.orderSnapshot?.storageLocation || "仓储监管现场",
+                            location: primaryStorageLocation,
                           })
                         }
                         className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs text-foreground hover:border-primary/50 hover:bg-muted/40 transition-colors cursor-pointer"
@@ -265,7 +318,7 @@ export function CollateralWarningDetailPage() {
                         title: "解除预警即时监控抓拍图",
                         desc: `核销单据：${event.orderNo} | 解除时间：${event.processedTime}`,
                         time: event.processedTime || event.warningTime,
-                        location: event.orderSnapshot?.storageLocation || "仓储监管现场",
+                        location: primaryStorageLocation,
                       })
                     }
                     className="h-auto cursor-pointer p-0 text-primary hover:underline"
@@ -279,7 +332,7 @@ export function CollateralWarningDetailPage() {
           </PrototypeAnnotationTarget>
         )}
 
-        {/* 6. 无效说明（仅未处理无效展示） */}
+        {/* 6. 无效说明（仅已作废展示） */}
         {showInvalid && (
           <DetailSection title="无效说明">
             <DetailField label="失效原因">

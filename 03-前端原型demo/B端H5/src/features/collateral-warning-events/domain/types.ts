@@ -2,15 +2,11 @@
 export const COLLATERAL_WARNING_TYPES = [
   "解抵/质押/监管超时",
   "价格下跌",
-  "图像识别异常",
   "盘点异常",
   "巡检异常",
-  "物联设备",
-  "智能挂锁异常",
   "抵/质押率异常",
-  "人脸门禁异常",
-  "GPS异常",
   "贷中风控预警",
+  "物联穿透告警",
 ] as const
 
 export type CollateralWarningType = (typeof COLLATERAL_WARNING_TYPES)[number]
@@ -33,7 +29,7 @@ export type SnapshotImageStatus = "available" | "none" | "failed"
 // 严格对齐字段清单：未公示、已公示、已取消
 export type PublicityStatus = "未公示" | "已公示" | "已取消"
 
-// 预警状态严格对齐字段清单组合枚举：未处理（有效）、未处理（无效）、已处理（有效）
+// 预警状态统一为信息侧词表：待处置 · 有效、已作废、已结案 · 有效
 export const WARNING_STATUS = {
   OPEN_VALID: "OPEN_VALID",
   OPEN_INVALID: "OPEN_INVALID",
@@ -67,9 +63,9 @@ export type CollateralWarningEvent = {
 
 export type WarningStatusFilter =
   | "全部"
-  | "未处理（有效）"
-  | "未处理（无效）"
-  | "已处理（有效）"
+  | "待处置 · 有效"
+  | "已作废"
+  | "已结案 · 有效"
 
 export type PublicityStatusFilter = "全部" | PublicityStatus
 

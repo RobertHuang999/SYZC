@@ -38,7 +38,7 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     number: 2,
     kind: "字段",
     title: "订单选择与业务数据联动清单",
-    content: "选择订单编号后，自动带出订单类型、货主主体、电话、押品明细，并动态禁用不适用的策略卡片。",
+    content: "选择订单编号后，自动带出订单类型、货主主体、电话和全部订单货物明细，并动态禁用不适用的策略卡片；货物行不是手工录入明细。",
     details: [
       {
         title: "联动与互斥约束",
@@ -53,7 +53,11 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "带出字段清单",
-            content: "关联订单号 (order_no)、订单类型 (order_type)、货主企业名称 (owner_name)、联系电话 (phone)、质押物料清单 (materials)。",
+            content: "关联订单号 (order_no)、订单类型 (order_type)、货主企业名称 (owner_name)、联系电话 (phone)、质押物料清单 (materials)；订单货物行由订单主数据自动生成，不提供手工新增或删除入口。",
+          },
+          {
+            label: "超时货物行",
+            content: "超时策略按订单返回的货物二维码/批次逐行生成配置行；二维码/批次、货物和成功时间只读带出，仅允许填写超时天数，不能单独添加批次或删除某个货物。无对应二维码/批次或成功时间时不渲染该字段。",
           },
         ],
       },

@@ -37,15 +37,8 @@ export const WARNING_STATUS_BADGE_CLASS: Record<WarningStatus, string> = {
 
 export function getWarningStatusLabel(
   status: WarningStatus,
-  warningType?: WarningType
+  _warningType?: WarningType
 ): string {
-  if (
-    status === WARNING_STATUS.CLOSED_VALID &&
-    warningType === "常规通行与操作事务"
-  ) {
-    return "已结案"
-  }
-
   return WARNING_STATUS_LABELS[status]
 }
 

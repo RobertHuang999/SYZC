@@ -44,7 +44,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: "evt-001",
   },
-  // 3. 价格下跌 (L4 · 订单配置触发 · 已处理未公示 · 支持批量公示)
+  // 3. 价格下跌 (L4 · 订单配置触发 · 已结案 · 有效 · 未公示 · 支持批量公示)
   {
     orderNo: "PO202607-12",
     warningType: "价格下跌",
@@ -80,7 +80,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "CLOSED_VALID",
     deviceEventId: null,
   },
-  // 5. 巡检异常 (L3 · 订单配置触发 · 抓拍失败 · 未处理有效)
+  // 5. 巡检异常 (L3 · 订单配置触发 · 抓拍失败 · 待处置有效)
   {
     orderNo: "PO202608-88",
     warningType: "巡检异常",
@@ -98,7 +98,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: null,
   },
-  // 6. 盘点异常 (L2 · 订单配置触发 · 未处理无效 · 附带 invalidReason)
+  // 6. 盘点异常 (L2 · 订单配置触发 · 已作废 · 附带 invalidReason)
   {
     orderNo: "PO202606-99",
     warningType: "盘点异常",
@@ -188,7 +188,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: "evt-005",
   },
-  // 11. 物联穿透告警 (L3 · 物联穿透 · 库温超标 · 已处理未公示)
+  // 11. 物联穿透告警 (L3 · 物联穿透 · 库温超标 · 已结案 · 有效 · 未公示)
   {
     orderNo: "PO202607-88",
     warningType: "物联穿透告警",

@@ -104,7 +104,7 @@ export const orderWarningConfigListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "删除联动",
-            content: "软删除后该订单所有未处理押品预警自动置为【未处理（无效）】，终止超时升级定时器，历史已处理流水不受影响。",
+            content: "软删除后该订单所有待处置 · 有效押品预警自动置为【已作废】，终止超时升级定时器，历史已结案 · 有效流水不受影响。",
           },
         ],
       },

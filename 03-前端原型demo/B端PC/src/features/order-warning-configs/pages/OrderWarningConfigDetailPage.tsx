@@ -131,6 +131,9 @@ export function OrderWarningConfigDetailPage() {
             </h2>
             {config.activeStrategies.map((strategy, index) => {
               const severity = getSeverityLevelById(strategy.severityLevelId)
+              const timeoutRows = strategy.timeoutRows ?? []
+              const showQrCodeColumn = timeoutRows.some((row) => row.qrCode.trim())
+              const showPledgedAtColumn = timeoutRows.some((row) => row.pledgedAt.trim())
 
               return (
                 <Card key={strategy.key}>
@@ -146,7 +149,7 @@ export function OrderWarningConfigDetailPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    {strategy.timeoutRows && strategy.timeoutRows.length > 0 ? (
+                    {timeoutRows.length > 0 ? (
                       <div className="space-y-2">
                         <DetailField label="超时配置列表">
                           <div className="overflow-x-auto rounded-lg border">
@@ -154,22 +157,30 @@ export function OrderWarningConfigDetailPage() {
                               <TableHeader>
                                 <TableRow>
                                   <TableHead>预警类型</TableHead>
-                                  <TableHead>二维码/批次</TableHead>
+                                  {showQrCodeColumn && <TableHead>二维码/批次</TableHead>}
                                   <TableHead>货物</TableHead>
-                                  <TableHead>成功时间</TableHead>
+                                  {showPledgedAtColumn && <TableHead>成功时间</TableHead>}
                                   <TableHead>超时天数</TableHead>
                                   <TableHead>预计触发</TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
-                                {strategy.timeoutRows.map((row) => (
+                                {timeoutRows.map((row) => (
                                   <TableRow key={row.rowId}>
                                     <TableCell>{row.warningType}</TableCell>
-                                    <TableCell>{row.qrCode}</TableCell>
+                                    {showQrCodeColumn && (
+                                      <TableCell>{row.qrCode.trim() || "—"}</TableCell>
+                                    )}
                                     <TableCell>{row.goodsLabel}</TableCell>
-                                    <TableCell>
-                                      <DateTimeText value={row.pledgedAt} stacked />
-                                    </TableCell>
+                                    {showPledgedAtColumn && (
+                                      <TableCell>
+                                        {row.pledgedAt.trim() ? (
+                                          <DateTimeText value={row.pledgedAt} stacked />
+                                        ) : (
+                                          "—"
+                                        )}
+                                      </TableCell>
+                                    )}
                                     <TableCell>{row.timeoutDays} 天</TableCell>
                                     <TableCell>
                                       <DateTimeText value={row.expectedTriggerAt} stacked />

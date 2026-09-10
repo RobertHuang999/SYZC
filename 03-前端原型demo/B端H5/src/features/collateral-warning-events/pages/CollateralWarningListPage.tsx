@@ -35,13 +35,21 @@ import {
   hasBatchPublishCandidates,
 } from "../lib/event-utils"
 import { collateralWarningEventsMock } from "../mock/collateral-warning-events.mock"
+import { normalizeWarningStatusFilter } from "../domain/status"
 
 const COLLATERAL_WARNING_FILTER_STORAGE_KEY = "SYZC_H5_COLLATERAL_WARNING_FILTERS"
 
 function loadCachedCollateralFilters(): CollateralWarningFilters {
   try {
     const raw = sessionStorage.getItem(COLLATERAL_WARNING_FILTER_STORAGE_KEY)
-    if (raw) return JSON.parse(raw)
+    if (raw) {
+      const cached = JSON.parse(raw) as Partial<CollateralWarningFilters>
+      return {
+        ...DEFAULT_FILTERS,
+        ...cached,
+        warningStatus: normalizeWarningStatusFilter(cached.warningStatus),
+      }
+    }
   } catch {}
   return DEFAULT_FILTERS
 }
@@ -88,7 +96,7 @@ export function CollateralWarningListPage() {
     })
   )
 
-  // 2. 预警类型 11 个大类下拉选项（严格对齐《押品预警信息字段清单》）
+  // 2. 预警类型 7 个大类下拉选项（与 PC 端保持一致）
   const warningTypeOptions: DropdownOption[] = [
     { label: "全部类型", value: "全部" },
     ...COLLATERAL_WARNING_TYPES.map((type) => ({
@@ -312,7 +320,7 @@ export function CollateralWarningListPage() {
               <div className="flex items-center gap-1.5">
                 <Layers className="size-4 text-amber-600" />
                 <span>
-                  已选择 <strong className="text-amber-700">{selectedIds.length}</strong> 条 · 仅“已处理未公示”可勾选
+                  已选择 <strong className="text-amber-700">{selectedIds.length}</strong> 条 · 仅“已结案 · 有效且未公示”可勾选
                 </span>
               </div>
               <button

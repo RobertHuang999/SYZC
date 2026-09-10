@@ -260,7 +260,7 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     B --> C["二次确认 + 展示已选清单"]
     C --> D["统一填写情况说明/现场照片"]
     D --> E["逐条校验 Version 与状态"]
-    E --> F["每条独立归档为已结案·有效"]
+    E --> F["每条独立归档为已结案 · 有效"]
     F --> G["取消各条升级任务 + 发布 Released"]`,
           },
           {

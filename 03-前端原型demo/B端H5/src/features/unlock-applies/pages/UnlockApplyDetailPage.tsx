@@ -146,10 +146,6 @@ export function UnlockApplyDetailPage() {
           {apply.finalConclusion && (
             <KeyValue label="最终结论" value={apply.finalConclusion} />
           )}
-          <KeyValue
-            label="凭证状态"
-            value={apply.credential.status}
-          />
         </SectionCard>
 
         {apply.status === "PENDING" && !apply.eligible && (

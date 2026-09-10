@@ -50,7 +50,7 @@ const DETAIL_OVERRIDES: Record<
     ruleName: "仓库例行盘点账实差异监控",
     triggerSnapshot: "盘点差异 2.3% / 阈值 2.0%",
     snapshotImageUrl: null,
-    invalidReason: "关联订单预警配置已删除，历史记录置为未处理（无效）",
+    invalidReason: "关联订单预警配置已删除，历史记录置为已作废",
     penetrationInfo: null,
     disposalInfo: null,
   },

@@ -7,15 +7,16 @@ import {
   type DropdownOption,
 } from "@/components/ui/DropdownFilterPill"
 import { DrawerField, FilterDrawer } from "@/components/ui/FilterDrawer"
+import { WarningTypeCascadePill } from "@/components/ui/WarningTypeCascadePill"
 import { ENABLED_SEVERITY_LEVELS } from "@/shared/mock/severity-levels"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import {
   DEFAULT_DEVICE_WARNING_FILTERS,
   DEVICE_WARNING_STATUS_FILTER_OPTIONS,
   DEVICE_WARNING_STATUS_LABEL_OPTIONS,
+  DEVICE_WARNING_SUB_TYPES,
   DEVICE_WARNING_TYPES,
   DEVICE_WARNING_WAREHOUSES,
-  DEVICE_WARNING_SUB_TYPES,
 } from "../domain/constants"
 import type {
   DeviceWarningFilters,
@@ -75,14 +76,6 @@ export function DeviceWarningEventListPage() {
     })
   )
 
-  const warningTypeOptions: DropdownOption[] = [
-    { label: "全部类型", value: "全部" },
-    ...DEVICE_WARNING_TYPES.map((type) => ({
-      label: type,
-      value: type,
-    })),
-  ]
-
   const warehouseOptions: DropdownOption[] = DEVICE_WARNING_WAREHOUSES.map(
     (warehouse) => ({
       label: warehouse === "全部" ? "全部仓库" : warehouse,
@@ -92,15 +85,6 @@ export function DeviceWarningEventListPage() {
 
   const handleStatusChange = (val: string) => {
     const next = { ...appliedFilters, warningStatus: val as DeviceWarningStatusFilter }
-    setDraftFilters(next)
-    setAppliedFilters(next)
-    saveCachedDeviceFilters(next)
-  }
-
-  const handleTypeChange = (val: string) => {
-    const nextTypes: DeviceWarningType[] =
-      val === "全部" ? [] : [val as DeviceWarningType]
-    const next = { ...appliedFilters, warningTypes: nextTypes }
     setDraftFilters(next)
     setAppliedFilters(next)
     saveCachedDeviceFilters(next)
@@ -122,23 +106,24 @@ export function DeviceWarningEventListPage() {
     }))
   }
 
-  const availableSubTypes = useMemo(() => {
-    if (draftFilters.warningTypes.length === 0) {
-      return Object.values(DEVICE_WARNING_SUB_TYPES).flat()
-    }
-    return draftFilters.warningTypes.flatMap(
-      (type) => DEVICE_WARNING_SUB_TYPES[type] || []
-    )
-  }, [draftFilters.warningTypes])
+  const warningTypeGroups = useMemo(
+    () =>
+      DEVICE_WARNING_TYPES.map((type) => ({
+        category: type,
+        subTypes: DEVICE_WARNING_SUB_TYPES[type] || [],
+      })),
+    []
+  )
 
-  const toggleSubType = (subType: string) => {
-    const current = draftFilters.subTypes || []
-    setDraftFilters((curr) => ({
-      ...curr,
-      subTypes: current.includes(subType)
-        ? current.filter((item) => item !== subType)
-        : [...current, subType],
-    }))
+  const handleTypeCascadeChange = (types: string[], subTypes: string[]) => {
+    const next = {
+      ...appliedFilters,
+      warningTypes: types as DeviceWarningType[],
+      subTypes,
+    }
+    setDraftFilters(next)
+    setAppliedFilters(next)
+    saveCachedDeviceFilters(next)
   }
 
   const drawerFiltersCount =
@@ -222,15 +207,11 @@ export function DeviceWarningEventListPage() {
               onChange={handleStatusChange}
             />
 
-            <DropdownFilterPill
-              label="预警类型"
-              value={
-                appliedFilters.warningTypes.length === 0
-                  ? "全部"
-                  : appliedFilters.warningTypes[0]
-              }
-              options={warningTypeOptions}
-              onChange={handleTypeChange}
+            <WarningTypeCascadePill
+              groups={warningTypeGroups}
+              selectedWarningTypes={appliedFilters.warningTypes}
+              selectedSubTypes={appliedFilters.subTypes || []}
+              onChange={handleTypeCascadeChange}
             />
 
             <DropdownFilterPill
@@ -294,28 +275,6 @@ export function DeviceWarningEventListPage() {
                 {level.severityCode} {level.severityName}
               </button>
             ))}
-          </div>
-        </DrawerField>
-
-        <DrawerField label="预警子类型">
-          <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
-            {availableSubTypes.map((subType) => {
-              const checked = (draftFilters.subTypes || []).includes(subType)
-              return (
-                <button
-                  key={subType}
-                  type="button"
-                  className={`rounded-full px-2.5 py-1 text-xs transition-colors ${
-                    checked
-                      ? "bg-blue-600 text-white font-semibold shadow-xs"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                  onClick={() => toggleSubType(subType)}
-                >
-                  {subType}
-                </button>
-              )
-            })}
           </div>
         </DrawerField>
 

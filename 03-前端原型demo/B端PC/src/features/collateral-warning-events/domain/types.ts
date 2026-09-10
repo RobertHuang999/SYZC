@@ -57,9 +57,9 @@ export type CollateralWarningEvent = {
 
 export type WarningStatusFilter =
   | "全部"
-  | "未处理（有效）"
-  | "未处理（无效）"
-  | "已处理（有效）"
+  | "待处置 · 有效"
+  | "已作废"
+  | "已结案 · 有效"
 
 export type PublicityStatusFilter = "全部" | "未公示" | "已公示"
 
@@ -102,12 +102,18 @@ export type CollateralDisposalInfo = {
   releaseSnapshotImage: string | null
 }
 
+export type CollateralCargoSnapshot = {
+  cargoCategory: string // 货物大类
+  cargoName: string // 货物品类
+  cargoSpecification: string // 货物规格
+  cargoQuantity: string // 货物在押数量
+  storageLocation: string // 仓库及货位
+}
+
 export type CollateralOrderSnapshot = {
   orderType: "抵/质押" | "监管"
   ownerCompany: string // 货主企业名称
-  cargoName: string // 货物名称与规格型号
-  cargoQuantity: string // 货物在押数量
-  storageLocation: string // 仓库及货位
+  cargoItems: CollateralCargoSnapshot[] // 货物、数量与库位的逐项快照
   collateralValue: string // 质物评估货值
   loanBalance: string // 贷款余额/敞口
 }

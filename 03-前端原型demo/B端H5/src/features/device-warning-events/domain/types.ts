@@ -6,7 +6,7 @@ export type DeviceWarningType =
   | "设备物联预警"
   | "智能挂锁预警"
   | "人脸门禁预警"
-  | "设备 GPS 预警"
+  | "设备GPS预警"
   | "常规通行与操作事务"
 
 export type DeviceWarningEvent = {

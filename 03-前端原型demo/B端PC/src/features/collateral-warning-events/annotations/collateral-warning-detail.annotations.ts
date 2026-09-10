@@ -15,10 +15,10 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "业务流转图",
             content: `flowchart TD
-    A["商业风控引擎计算 / 物联穿透联动"] --> B["未处理·有效 (待处置)"]
-    B -->|"商业类: 补仓/解押/还款"| C["已处理·有效"]
+    A["商业风控引擎计算 / 物联穿透联动"] --> B["待处置 · 有效"]
+    B -->|"商业类: 补仓/解押/还款"| C["已结案 · 有效"]
     B -->|"穿透类: 设备台账现场核销"| C
-    B -->|"订单结清 / 规则删除"| D["未处理·无效 (终态只读)"]
+    B -->|"订单结清 / 规则删除"| D["已作废 (终态只读)"]
     C -->|"高危且满足披露条件"| E["风险公示"]`,
           },
           {
@@ -79,11 +79,11 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警状态 (warningStatus)",
-            content: "未处理（有效）、已处理（有效）、未处理（无效）；当单据货物全部出库、解押完成或规则删除后自动更新为未处理（无效）。",
+            content: "待处置 · 有效、已结案 · 有效、已作废；当单据货物全部出库、解押完成或规则删除后自动更新为已作废。",
           },
           {
             label: "失效原因 (invalidReason)",
-            content: "仅在预警状态为未处理（无效）时展示，详细说明导致预警作废的原因（如“关联订单预警配置已删除（C11）”或“订单已正常解质押出库”）。",
+            content: "仅在预警状态为已作废时展示，详细说明导致预警作废的原因（如“关联订单预警配置已删除（C11）”或“订单已正常解质押出库”）。",
           },
         ],
       },
@@ -101,15 +101,15 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
         title: "核心字段定义与数据源头（含货物位置与数量来源）",
         items: [
           {
-            label: "货物位置 (storageLocation)",
+            label: "货物位置 (cargoItems[].storageLocation)",
             content: `【数据来源】：来源于产生预警的业务订单所绑定的仓单系统/仓储 WMS 货位台账。
-【生成逻辑】：在预警触发瞬间，风控引擎抓取该订单项下在押标的物的物理存放空间拓扑层级快照并固化存证，展示格式为“【仓库名称】/【库区/库房】/【货位编号】”（如“一号钢材仓 / A库区 / 01分区-H02”）。
+【生成逻辑】：在预警触发瞬间，风控引擎按订单货物逐项抓取在押标的物的物理存放空间拓扑层级快照并固化存证，详情按货物序号逐行展示，并与右侧“货物与数量”按同一货物序号对齐，格式为“【仓库名称】/【库区/库房】/【货位编号】”（如“一号钢材仓 / A库区 / 01分区-H02”）。
 【审计意义】：锁定发生风险时刻的真实物理存放位置，供监管人员现场排查与摄像头调阅，并用于核验物联设备与货物的空间重合性；后续单据发生移库、转库不回写历史预警记录。`,
           },
           {
-            label: "货物与数量 (cargoName · cargoQuantity)",
+            label: "货物与数量 (cargoItems[].cargoCategory / cargoName / cargoSpecification / cargoQuantity)",
             content: `【数据来源】：来源于预警订单项下标的物仓单明细台账。
-【生成逻辑】：预警触发瞬间，系统锁定该笔订单对应的质物货物名称、规格型号及当前在押锁定数量与计量单位，固化生成快照并组合呈现为“【品名 规格型号】·【在押数量 计量单位】”（如“热轧卷板 Q235B · 250.00吨”）。
+【生成逻辑】：预警触发瞬间，系统按货物逐项锁定货物大类、品类、规格、当前在押数量与计量单位，固化生成快照并按货物序号逐行组合呈现为“【大类】 / 【品类】 / 【规格】 - 【在押数量 计量单位】”（如“有色金属 / 铝锭 / A00（GB/T 1196-2017） - 280.00吨”）；空值字段不展示。
 【审计意义】：明确该条风险事件所威胁的特定货权资产标的，作为价格下跌估值重算、质押率敞口测算、账实盘点差异核对以及出库熔断判定的法定事实依据。`,
           },
           {
@@ -118,7 +118,7 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警时间 (warningTime)",
-            content: "预警事件实际发生并被系统记录的时间（YYYY-MM-DD HH:mm:ss），作为未处理状态下计算升级提醒的计时基准起点。",
+            content: "预警事件实际发生并被系统记录的时间（YYYY-MM-DD HH:mm:ss），作为待处置状态下计算升级提醒的计时基准起点。",
           },
           {
             label: "预警抓拍图 (snapshotImageStatus)",
@@ -242,7 +242,7 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "禁止直接人工解除",
-            content: "物联穿透告警禁止在押品详情页人工点击解除；必须前往设备预警详情页核销物理隐患，由系统发布 DeviceEventReleased 事件联动回写已处理。",
+            content: "物联穿透告警禁止在押品详情页人工点击解除；必须前往设备预警详情页核销物理隐患，由系统发布 DeviceEventReleased 事件联动回写已结案 · 有效。",
           },
           {
             label: "空间重合匹配原则",
@@ -258,14 +258,14 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
     number: 5,
     kind: "字段",
     title: "处置记录、留痕与风险公示",
-    content: "展示已处理状态下的核销时间、责任人、情况说明、现场核验照片凭证与联动抓拍图。",
+    content: "展示已结案 · 有效状态下的核销时间、责任人、情况说明、现场核验照片凭证与联动抓拍图。",
     details: [
       {
         title: "核心字段定义与留痕凭据",
         items: [
           {
             label: "处理时间 (processedTime)",
-            content: "预警完成人工解除核销或底层设备联动核销的时间（YYYY-MM-DD HH:mm:ss）；未处理状态下显示为空。",
+            content: "预警完成人工解除核销或底层设备联动核销的时间（YYYY-MM-DD HH:mm:ss）；待处置 · 有效状态下显示为空。",
           },
           {
             label: "处理人 (processedBy)",
@@ -312,15 +312,15 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
         title: "动作矩阵",
         items: [
           {
-            label: "商业类 · 未处理",
+            label: "商业类 · 待处置 · 有效",
             content: "展示【解除预警】，点击弹出引导对话框并跳转对应抵质押订单信息页进行处置。",
           },
           {
-            label: "物联类 · 未处理",
+            label: "物联类 · 待处置 · 有效",
             content: "展示【查看设备事件】，点击跳转设备预警详情页查看物理事实与现场核销。",
           },
           {
-            label: "已处理 · 未公示",
+            label: "已结案 · 有效 · 未公示",
             content: "展示【公示风险】，具备 R-RISK-MGR 权限人员可点击发起单条风险公示。",
           },
         ],

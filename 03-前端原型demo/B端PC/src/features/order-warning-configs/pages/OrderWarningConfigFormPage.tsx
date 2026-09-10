@@ -76,6 +76,9 @@ export function OrderWarningConfigFormPage() {
 
   const pageTitle = isEdit ? `编辑订单规则 — ${form.ruleName}` : "新增订单规则"
   const isSupervision = form.orderType === "监管"
+  const selectedOrder = form.orderNo ? getMockOrderByNo(form.orderNo) : undefined
+  const visibleGoods =
+    selectedOrder?.goodsBatches.filter((batch) => batch.goodsLabel.trim()) ?? []
 
   const updateStrategy = (
     key: OrderWarningStrategyKey,
@@ -257,12 +260,11 @@ export function OrderWarningConfigFormPage() {
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label>货物</Label>
-                {form.orderNo && getMockOrderByNo(form.orderNo)?.goodsBatches.length ? (
+                {visibleGoods.length > 0 ? (
                   <div className="rounded-lg border bg-muted/20 p-3 text-sm">
-                    {getMockOrderByNo(form.orderNo)?.goodsBatches.map((batch) => (
+                    {visibleGoods.map((batch) => (
                       <div key={batch.batchId} className="flex flex-wrap gap-x-4 gap-y-1">
                         <span>{batch.goodsLabel}</span>
-                        <span className="text-muted-foreground">{batch.qrCode}</span>
                       </div>
                     ))}
                   </div>

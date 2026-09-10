@@ -152,7 +152,6 @@ export function UnlockApplyDetailPage() {
             {apply.finalConclusion && (
               <DetailField label="最终审批结论">{apply.finalConclusion}</DetailField>
             )}
-            <DetailField label="凭证状态">{apply.credential.status}</DetailField>
           </DetailSection>
         </PrototypeAnnotationTarget>
 

@@ -39,18 +39,22 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     number: 2,
     kind: "交互",
     title: "组合筛选与查询",
-    content: "顶部胶囊筛选 + 抽屉扩展预警等级与预警时间范围；关键词搜索实时生效。",
+    content: "顶部胶囊快速筛选预警状态、预警类型与所属仓库；预警类型采用与 PC 一致的大类+子类型级联多选；抽屉扩展预警等级与预警时间范围；关键词搜索实时生效。",
     details: [
       {
         title: "筛选字段",
         items: [
           {
             label: "预警状态 / 类型 / 仓库",
-            content: "顶部胶囊下拉快速筛选；默认预警状态为待处置 · 有效。",
+            content: "顶部胶囊快速筛选；预警状态默认待处置 · 有效，预警类型使用两栏级联多选。",
           },
           {
-            label: "预警等级与子类型",
-            content: "抽屉内支持多选预警等级以及根据已选大类联动展开的具体细粒子类型标签。",
+            label: "预警类型级联",
+            content: "类型面板与 PC 一致：左栏展示 6 个预警大类，右栏按已选大类展开具体子类型；支持大类全选/半选联动、子类型多选和精确筛选，类型不在抽屉内重复配置。",
+          },
+          {
+            label: "预警等级与预警时间",
+            content: "抽屉内支持多选预警等级和预警时间范围；按预警时间倒序展示。",
           },
           {
             label: "预警时间",
@@ -99,7 +103,7 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
             content: "展示详情与解除（R14' 人工解除档）；AUTO_RECOVER/RECORD_ONLY 仅详情。",
           },
           {
-            label: "已作废 / 已结案",
+            label: "已作废 / 已结案 · 有效",
             content: "仅展示详情，不可再次解除。",
           },
         ],

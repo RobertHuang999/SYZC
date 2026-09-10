@@ -118,20 +118,20 @@ export const unlockApplyAuditDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "unlock-apply-audit-detail-record",
     number: 5,
     kind: "字段",
-    title: "审批记录与凭证状态",
+    title: "审批记录与最终结论",
     content:
-      "展示各节点审批人、处理结论、审批意见/驳回原因、处理时间戳及后置凭证生成状态。",
+      "审批人侧展示各节点审批人、处理结论、审批意见/驳回原因、处理时间戳及最终审批结论，不展示开锁凭证信息。",
     details: [
       {
-        title: "审批留痕与凭证状态",
+        title: "审批留痕与最终结论",
         items: [
           {
             label: "审批记录表格",
             content: "包含节点序号、处理人姓名（账号）、处理结论（同意/驳回）、意见及处理时间。",
           },
           {
-            label: "最终结论与凭证状态",
-            content: "展示最终审批结论；审批通过后展示凭证状态（未生成/已下发/生成失败/已过期/已失效）。",
+            label: "最终审批结论",
+            content: "流程结束后展示最终审批结论；开锁凭证信息由申请人侧在审批通过后查阅。",
           },
         ],
       },

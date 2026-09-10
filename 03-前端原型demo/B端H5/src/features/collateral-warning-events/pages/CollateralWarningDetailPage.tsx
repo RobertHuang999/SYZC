@@ -302,7 +302,7 @@ export function CollateralWarningDetailPage() {
             </SectionCard>
           )}
 
-          {/* 5. 记录有效性/失效说明（仅未处理无效展示） */}
+        {/* 5. 记录有效性/失效说明（仅已作废展示） */}
           {isInvalid && event.invalidReason && (
             <SectionCard
               title="记录失效说明"

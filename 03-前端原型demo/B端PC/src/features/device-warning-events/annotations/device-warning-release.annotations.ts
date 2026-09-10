@@ -18,7 +18,7 @@ export const deviceWarningReleaseAnnotations: PrototypeAnnotation[] = [
     A["列表/详情发起"] --> B["二次确认"]
     B --> C["录入材料 + 联动抓拍"]
     C --> D["提交乐观锁校验"]
-    D -->|"校验成功"| E["归档该条流水为已结案·有效"]
+    D -->|"校验成功"| E["归档该条流水为已结案 · 有效"]
     E --> F["发布 DeviceEventReleased"]
     F --> G["取消该条升级定时任务"]`,
           },

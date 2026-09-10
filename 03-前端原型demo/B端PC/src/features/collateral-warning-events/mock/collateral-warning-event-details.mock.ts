@@ -14,9 +14,15 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
     return {
       orderType: "抵/质押",
       ownerCompany: "浙江物产中大金属集团有限公司",
-      cargoName: "热轧卷板 Q235B (批次 202608-A)",
-      cargoQuantity: "500.00 吨",
-      storageLocation: "一号钢材仓 / A库 / 01分区-H02",
+      cargoItems: [
+        {
+          cargoCategory: "黑色金属",
+          cargoName: "热轧卷板",
+          cargoSpecification: "Q235B（批次 202608-A）",
+          cargoQuantity: "500.00 吨",
+          storageLocation: "一号钢材仓 / A库 / 01分区-H02",
+        },
+      ],
       collateralValue: "¥ 4,875,000.00",
       loanBalance: "¥ 4,314,375.00",
     }
@@ -25,9 +31,15 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
     return {
       orderType: "抵/质押",
       ownerCompany: "江苏国泰大宗供应链有限公司",
-      cargoName: "阴极电解铜 A级 (GB/T 467-2010)",
-      cargoQuantity: "120.00 吨",
-      storageLocation: "有色金属标准仓 / B库 / 03货位",
+      cargoItems: [
+        {
+          cargoCategory: "有色金属",
+          cargoName: "阴极电解铜",
+          cargoSpecification: "A级（GB/T 467-2010）",
+          cargoQuantity: "120.00 吨",
+          storageLocation: "有色金属标准仓 / B库 / 03货位",
+        },
+      ],
       collateralValue: "¥ 8,184,000.00",
       loanBalance: "¥ 6,200,000.00",
     }
@@ -36,9 +48,15 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
     return {
       orderType: "抵/质押",
       ownerCompany: "无锡中联仓储物流实业有限公司",
-      cargoName: "热轧卷板 Q235B (批次 202608-A)",
-      cargoQuantity: "350.00 吨",
-      storageLocation: "一号钢材仓 / A库 / 01分区",
+      cargoItems: [
+        {
+          cargoCategory: "黑色金属",
+          cargoName: "热轧卷板",
+          cargoSpecification: "Q235B（批次 202608-A）",
+          cargoQuantity: "350.00 吨",
+          storageLocation: "一号钢材仓 / A库 / 01分区",
+        },
+      ],
       collateralValue: "¥ 3,412,500.00",
       loanBalance: "¥ 2,800,000.00",
     }
@@ -47,9 +65,22 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
     return {
       orderType: isCustody ? "监管" : "抵/质押",
       ownerCompany: "上海远大国际贸易实业有限公司",
-      cargoName: "铝锭 A00 (GB/T 1196-2017)",
-      cargoQuantity: "280.00 吨",
-      storageLocation: "二号有色仓 / C库 / 02货区",
+      cargoItems: [
+        {
+          cargoCategory: "有色金属",
+          cargoName: "铝锭",
+          cargoSpecification: "A00（GB/T 1196-2017）",
+          cargoQuantity: "280.00 吨",
+          storageLocation: "二号有色仓 / C库 / 02货区",
+        },
+        {
+          cargoCategory: "有色金属",
+          cargoName: "电解铜",
+          cargoSpecification: "A级（GB/T 467-2010）",
+          cargoQuantity: "160.00 吨",
+          storageLocation: "二号有色仓 / C库 / 03货区",
+        },
+      ],
       collateralValue: "¥ 5,600,000.00",
       loanBalance: "¥ 4,000,000.00",
     }
@@ -58,9 +89,15 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
     return {
       orderType: "监管",
       ownerCompany: "山东寿光农产品现货物流有限公司",
-      cargoName: "菜籽油 一级 (国标GB 1536)",
-      cargoQuantity: "400.00 吨",
-      storageLocation: "液体储罐仓 / 罐区T-03",
+      cargoItems: [
+        {
+          cargoCategory: "农副产品",
+          cargoName: "菜籽油",
+          cargoSpecification: "一级（国标GB 1536）",
+          cargoQuantity: "400.00 吨",
+          storageLocation: "液体储罐仓 / 罐区T-03",
+        },
+      ],
       collateralValue: "¥ 3,800,000.00",
       loanBalance: "¥ 2,600,000.00",
     }
@@ -69,9 +106,15 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
     return {
       orderType: "抵/质押",
       ownerCompany: "中融泰和国际大宗贸易有限公司",
-      cargoName: "天然橡胶 SCR 5 (国标GB/T 8081)",
-      cargoQuantity: "200.00 吨",
-      storageLocation: "橡胶恒温仓 / 库房D-01",
+      cargoItems: [
+        {
+          cargoCategory: "橡胶",
+          cargoName: "天然橡胶",
+          cargoSpecification: "SCR 5（国标GB/T 8081）",
+          cargoQuantity: "200.00 吨",
+          storageLocation: "橡胶恒温仓 / 库房D-01",
+        },
+      ],
       collateralValue: "¥ 3,100,000.00",
       loanBalance: "¥ 2,500,000.00",
     }
@@ -79,9 +122,15 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
   return {
     orderType: isCustody ? "监管" : "抵/质押",
     ownerCompany: "河南中原黄金大宗供应链有限公司",
-    cargoName: "工业硅 421# (GB/T 2881)",
-    cargoQuantity: "150.00 吨",
-    storageLocation: "综合原料仓 / E库 / 01货架",
+    cargoItems: [
+      {
+        cargoCategory: "有色金属",
+        cargoName: "工业硅",
+        cargoSpecification: "421#（GB/T 2881）",
+        cargoQuantity: "150.00 吨",
+        storageLocation: "综合原料仓 / E库 / 01货架",
+      },
+    ],
     collateralValue: "¥ 2,250,000.00",
     loanBalance: "¥ 1,800,000.00",
   }
@@ -183,7 +232,8 @@ export function getCollateralWarningDetailExtension(
       ? {
           triggerDevice: "智能挂锁-A01 (A库挂锁位)",
           physicalSubType: "剪杆破坏",
-          triggerLocation: orderSnapshot.storageLocation,
+          triggerLocation:
+            orderSnapshot.cargoItems[0]?.storageLocation || "仓储监管现场",
           relatedEventNo: "DEV-2026082001",
           relatedEventId: event.deviceEventId ?? "evt-017",
         }

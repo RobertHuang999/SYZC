@@ -98,7 +98,7 @@ export const unlockApplyAuditH5ListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "审批通过",
-            content: "审批意见选填（≤200 字）；确认后触发凭证生成与短信下发（挂锁）。",
+            content: "审批意见选填（≤200 字）；确认后仅回写申请状态并触发后置凭证生成，凭证由申请人侧「我的申请」查看。",
           },
           {
             label: "审批驳回",
@@ -106,7 +106,7 @@ export const unlockApplyAuditH5ListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "人脸门禁凭证差异 (R31)",
-            content: "人脸门禁审批通过后生成临时密码并在页面展示，**不调用短信服务**。",
+            content: "人脸门禁审批通过后生成临时密码，**不调用短信服务**；审批人侧不展示凭证，申请人侧页面查看。",
           },
         ],
       },
@@ -122,7 +122,7 @@ export const unlockApplyAuditH5DetailAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "开锁审批详情 · 审批人移动端操作与快照",
     content:
-      "展示申请单设备与位置、申请内容、审批配置快照与审批记录；支持审批人在移动端执行通过与驳回操作。",
+      "展示申请单设备与位置、申请内容、审批配置快照与审批记录；支持审批人在移动端执行通过与驳回操作；审批人侧不展示开锁凭证信息。",
     details: [
       {
         title: "处理权限与交互",
@@ -150,7 +150,7 @@ export const unlockApplyAuditH5DetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "审批配置与记录",
-            content: "固化提交时的配置编号、版本号、审批方式及各节点审批人处理结论与意见留痕。",
+            content: "固化提交时的配置编号、版本号、审批方式及各节点审批人处理结论与意见留痕；不展示凭证状态、凭证编号或临时密码。",
           },
         ],
       },

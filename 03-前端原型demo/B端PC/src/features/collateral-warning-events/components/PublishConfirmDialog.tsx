@@ -28,7 +28,7 @@ export function PublishConfirmDialog({
         <DialogHeader>
           <DialogTitle>公示风险确认</DialogTitle>
           <DialogDescription>
-            确认将订单 {event?.orderNo ?? "—"} 的已处理预警公示至风险公示列表？
+            确认将订单 {event?.orderNo ?? "—"} 的已结案 · 有效预警公示至风险公示列表？
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

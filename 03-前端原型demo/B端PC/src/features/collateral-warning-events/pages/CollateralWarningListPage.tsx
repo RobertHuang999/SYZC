@@ -21,13 +21,21 @@ import { collateralWarningDocuments } from "../documents/collateral-warning-docu
 
 import { useNavigate } from "react-router-dom"
 import { ReleasePromptDialog } from "../components/ReleasePromptDialog"
+import { normalizeWarningStatusFilter } from "../domain/status"
 
 const PC_COLLATERAL_WARNING_FILTER_KEY = "SYZC_PC_COLLATERAL_WARNING_FILTERS"
 
 function loadCachedPcCollateralFilters(): CollateralWarningFilters {
   try {
     const raw = sessionStorage.getItem(PC_COLLATERAL_WARNING_FILTER_KEY)
-    if (raw) return JSON.parse(raw)
+    if (raw) {
+      const cached = JSON.parse(raw) as Partial<CollateralWarningFilters>
+      return {
+        ...DEFAULT_FILTERS,
+        ...cached,
+        warningStatus: normalizeWarningStatusFilter(cached.warningStatus),
+      }
+    }
   } catch {}
   return DEFAULT_FILTERS
 }
@@ -131,7 +139,7 @@ export function CollateralWarningListPage() {
               </Button>
               {!batchPublishEnabled && (
                 <span className="text-xs text-muted-foreground">
-                  当前筛选无已处理未公示记录
+                  当前筛选无已结案 · 有效且未公示记录
                 </span>
               )}
             </div>

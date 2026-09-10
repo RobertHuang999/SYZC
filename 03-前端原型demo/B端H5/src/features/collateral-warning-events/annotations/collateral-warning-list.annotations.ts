@@ -19,7 +19,7 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
     B["02/01 设备预警信息<br/>(物联穿透事件)"] --> C
     C -->|"商业类预警"| D["抵质押单据 / 补保处置"]
     C -->|"物联穿透类"| E["跳转设备预警现场核销"]
-    D -->|"处置完成回写"| F["已处理有效状态"]
+    D -->|"处置完成回写"| F["已结案 · 有效"]
     E -->|"设备解除联动"| F
     F -->|"满足公示条件"| G["02/04 风险公示"]`,
           },
@@ -65,7 +65,7 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警状态",
-            content: "全部、未处理（有效）、未处理（无效）、已处理（有效）；默认展示未处理（有效）。",
+            content: "全部、待处置 · 有效、已作废、已结案 · 有效；默认展示待处置 · 有效。",
           },
           {
             label: "公示状态",
@@ -85,14 +85,14 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
     number: 3,
     kind: "交互",
     title: "批量风险公示与数据导出",
-    content: "支持对已处理（有效）且未公示的预警记录进行批量公示操作，以及筛选结果全量导出。",
+    content: "支持对已结案 · 有效且未公示的预警记录进行批量公示操作，以及筛选结果全量导出。",
     details: [
       {
         title: "操作规则与权限控制",
         items: [
           {
             label: "批量公示风险",
-            content: "仅当当前筛选结果中包含【已处理（有效）且 未公示】的数据时按钮激活；点击弹出批量公示确认框并展示候选记录数。",
+            content: "仅当当前筛选结果中包含【已结案 · 有效且未公示】的数据时按钮激活；点击弹出批量公示确认框并展示候选记录数。",
           },
           {
             label: "导出数据",
@@ -149,19 +149,19 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
         title: "操作与流转矩阵",
         items: [
           {
-            label: "商业类 · 未处理（有效）",
+            label: "商业类 · 待处置 · 有效",
             content: "展示【解除预警】按钮，点击跳转至【融资监管 → 抵质押订单】详情页，引导用户在单据内完成追加担保或解押审批。",
           },
           {
-            label: "物联穿透类 · 未处理（有效）",
+            label: "物联穿透类 · 待处置 · 有效",
             content: "展示【查看设备事件】按钮，点击跳转至【设备预警信息 → 详情页】；严格禁止在押品端人工解除，必须在设备端核销物理告警。",
           },
           {
-            label: "商业/穿透类 · 已处理（有效）",
+            label: "商业/穿透类 · 已结案 · 有效",
             content: "若尚未公示，展示【公示风险】操作；若已公示则仅保留只读【详情】入口。",
           },
           {
-            label: "未处理（无效）",
+            label: "已作废",
             content: "仅支持查看详情，通常因上游订单已结清或规则失效而自动置无效。",
           },
         ],

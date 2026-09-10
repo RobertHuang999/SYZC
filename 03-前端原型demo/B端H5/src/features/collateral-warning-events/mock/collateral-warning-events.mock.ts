@@ -6,7 +6,7 @@ const l3 = getSeverityLevelByCode("L3")!
 const l4 = getSeverityLevelByCode("L4")!
 const l5 = getSeverityLevelByCode("L5")!
 
-// 严格对齐《押品预警信息字段清单》11个预警大类、所有状态、所有来源渠道与抓拍场景
+// 严格对齐 PC 端 7 个预警大类；设备具体异常保留在物联穿透事实中
 const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
   // 1. 抵/质押率异常 (L4 · 订单配置触发 · 未公示 · 有抓拍图)
   {
@@ -27,11 +27,11 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: null,
   },
-  // 2. 智能挂锁异常 (L5 · 物联穿透 · 关联设备事件 · 有抓拍图)
+  // 2. 物联穿透告警：智能挂锁异常 (L5 · 关联设备事件 · 有抓拍图)
   {
     orderNo: "PO202608-01",
     ruleName: "智能挂锁剪杆破坏预警",
-    warningType: "智能挂锁异常",
+    warningType: "物联穿透告警",
     severityLevelId: l5.severityLevelId,
     severityCode: l5.severityCode,
     severityName: l5.severityName,
@@ -46,7 +46,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: "dev-evt-2026082001",
   },
-  // 3. 价格下跌 (L4 · 订单配置触发 · 已处理未公示 · 支持批量公示)
+  // 3. 价格下跌 (L4 · 订单配置触发 · 已结案 · 有效 · 未公示 · 支持批量公示)
   {
     orderNo: "PO202607-12",
     ruleName: "大宗金属质押价格下跌预警",
@@ -94,7 +94,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
       releaseSnapshotImage: null,
     },
   },
-  // 5. 巡检异常 (L3 · 订单配置触发 · 抓拍失败 · 未处理有效)
+  // 5. 巡检异常 (L3 · 订单配置触发 · 抓拍失败 · 待处置有效)
   {
     orderNo: "PO202608-88",
     ruleName: "监管货物例行巡检盘点超时监控",
@@ -113,7 +113,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: null,
   },
-  // 6. 盘点异常 (L2 · 订单配置触发 · 未处理无效 · 附带 invalidReason)
+  // 6. 盘点异常 (L2 · 订单配置触发 · 已作废 · 附带 invalidReason)
   {
     orderNo: "PO202606-99",
     ruleName: "仓库例行盘点账实差异监控",
@@ -171,11 +171,11 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: null,
   },
-  // 9. 摄像头图像识别异常 (L5 · 物联穿透 · 人体入侵)
+  // 9. 物联穿透告警：摄像头图像识别异常 (L5 · 人体入侵)
   {
     orderNo: "PO202608-66",
     ruleName: "非作业时间非法入侵摄像头识别",
-    warningType: "图像识别异常",
+    warningType: "物联穿透告警",
     severityLevelId: l5.severityLevelId,
     severityCode: l5.severityCode,
     severityName: l5.severityName,
@@ -190,11 +190,11 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: "evt-002",
   },
-  // 10. 人脸门禁异常 (L4 · 物联穿透 · 门禁超时)
+  // 10. 物联穿透告警：人脸门禁异常 (L4 · 门禁超时)
   {
     orderNo: "PO202608-77",
     ruleName: "冷库主通道人脸门禁长时间开启",
-    warningType: "人脸门禁异常",
+    warningType: "物联穿透告警",
     severityLevelId: l4.severityLevelId,
     severityCode: l4.severityCode,
     severityName: l4.severityName,
@@ -209,11 +209,11 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: "dev-evt-2026081502",
   },
-  // 11. 物联传感器异常 (L3 · 物联穿透 · 库温超标 · 已处理未公示)
+  // 11. 物联穿透告警：物联传感器异常 (L3 · 库温超标 · 已结案 · 有效 · 未公示)
   {
     orderNo: "PO202607-88",
     ruleName: "冷链冷库温度超上限预警",
-    warningType: "物联设备",
+    warningType: "物联穿透告警",
     severityLevelId: l3.severityLevelId,
     severityCode: l3.severityCode,
     severityName: l3.severityName,
@@ -233,11 +233,11 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
       releaseSnapshotImage: "cold-snapshot-normal.jpg",
     },
   },
-  // 12. 设备GPS异常 (L4 · 物联穿透 · 电子围栏越界)
+  // 12. 物联穿透告警：设备GPS异常 (L4 · 电子围栏越界)
   {
     orderNo: "PO202606-20",
     ruleName: "在途押品运输车载GPS偏航告警",
-    warningType: "GPS异常",
+    warningType: "物联穿透告警",
     severityLevelId: l4.severityLevelId,
     severityCode: l4.severityCode,
     severityName: l4.severityName,

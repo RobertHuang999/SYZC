@@ -67,7 +67,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "01 超时预警",
-            content: "展示解押/监管到期提前预警天数及多行节点超时配置表格。",
+            content: "展示解押/监管到期提前预警天数及多行节点超时配置表格；二维码/批次、成功时间按整列有值才展示，某行无值时显示「—」。",
           },
           {
             label: "02 价格下跌预警",
@@ -114,7 +114,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "删除联动",
-            content: "规则删除后，历史已触发的未处理预警流水自动流转为【未处理（无效）】。",
+            content: "规则删除后，历史已触发的待处置 · 有效预警流水自动流转为【已作废】。",
           },
         ],
       },

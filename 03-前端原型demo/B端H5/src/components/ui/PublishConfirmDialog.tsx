@@ -28,7 +28,7 @@ export function PublishConfirmDialog({
       <div className="relative w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
         <h2 className="text-base font-semibold text-gray-900">公示风险确认</h2>
         <p className="mt-2 text-sm text-gray-600">
-          已选择 {events.length} 条【已处理（有效）且未公示】记录。公示后将进入【05
+          已选择 {events.length} 条【已结案 · 有效且未公示】记录。公示后将进入【05
           风险公示】候选池。
         </p>
         <ul className="mt-3 max-h-32 space-y-1 overflow-y-auto rounded-lg bg-gray-50 p-3 text-xs text-gray-700">

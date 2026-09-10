@@ -16,7 +16,7 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
             label: "状态流转",
             content: `flowchart TD
     V["厂商预过滤回调"] --> B["待处置·有效 (逐条落账 R01)"]
-    B -->|"现场核验 / 人工解除"| C["已结案·有效"]
+    B -->|"现场核验 / 人工解除"| C["已结案 · 有效"]
     B -->|"规则删除/设备解绑"| D["已作废 (只读归档)"]`,
           },
           {
