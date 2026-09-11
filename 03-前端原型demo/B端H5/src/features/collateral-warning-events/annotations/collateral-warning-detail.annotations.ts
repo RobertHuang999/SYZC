@@ -58,7 +58,7 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警类型 (warningType)",
-            content: "6.2 收敛的 7 大预警类型之一（解抵/质押/监管超时、价格下跌、盘点异常、巡检异常、抵/质押率异常、贷中风控预警、物联穿透告警）。",
+            content: "6.2 当前收敛的 7 大预警类型之一（解抵/质押超时、价格下跌、盘点异常、巡检异常、抵/质押率异常、贷中风控预警、物联穿透告警）；旧“解抵/质押/监管超时”仅作为历史监管归档兼容类型。",
           },
           {
             label: "预警等级",
@@ -94,7 +94,7 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
     number: 3,
     kind: "规则",
     title: "预警事实与风控计算公式",
-    content: "展示参数化预警内容（含触发指标、实际值与阈值对比）、6 大商业类型判定标准及 LTV/跌价计算模型。",
+    content: "展示参数化预警内容（含触发指标、实际值与阈值对比）、7 大当前类型判定标准及 LTV/跌价计算模型；历史监管记录仅展示不可变快照。",
     details: [
       {
         title: "字段来源机制",
@@ -120,7 +120,8 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
 4. 盘点异常：账实盘点差异率 / 允许公差 (2%)
 5. 巡检异常：例行巡检时效 / 计划时限
 6. 业务超时：存续期限 / 约定期限
-7. 物联穿透：现场传感器物理异常联动`,
+7. 物联穿透：现场传感器物理异常联动
+历史监管兼容：监管存续期限/解监管超时，仅可查看历史快照，不产生新流水`,
           },
         ],
       },

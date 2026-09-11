@@ -10,6 +10,8 @@ export const LIST_BASE_PATH = "/工作中心/审批中心/其他审批/开锁审
 export const MY_APPLY_LIST_PATH = "/工作中心/审批中心/我的申请管理"
 export const APPROVAL_CENTER_PATH = "/工作中心/审批中心"
 export const CURRENT_APPLICANT_ACCOUNT = "zhang3"
+export const CURRENT_APPROVER_ACCOUNT = "wang5"
+export const CURRENT_APPROVER_NAME = "王五"
 export const PAGE_SIZE = 10
 
 // 业务系统旧称映射：待分配→待审批、未通过→已驳回、已撤销→已撤回。

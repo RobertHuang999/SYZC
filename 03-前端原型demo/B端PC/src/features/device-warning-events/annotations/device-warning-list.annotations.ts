@@ -159,6 +159,11 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
             content: "组合展示位置、设备名称和触发内容；长文本截断并保留 title 作为完整内容查看入口。",
           },
           {
+            label: "数值型触发示例",
+            content:
+              "二氧化碳事件展示实际采集值与触发时阈值快照，例如：二氧化碳浓度超标 1800 ppm / 阈值 400~1500 ppm；详情规则快照展示为二氧化碳 < 400 ppm 或 > 1500 ppm。",
+          },
+          {
             label: "预警时间",
             content: "本条独立流水的触发时间 warningTime，格式 YYYY-MM-DD HH:mm:ss；同时作为升级计时起点。",
           },

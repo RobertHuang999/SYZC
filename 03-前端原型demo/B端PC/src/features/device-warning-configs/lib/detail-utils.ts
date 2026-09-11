@@ -5,6 +5,35 @@ import type {
   DeviceWarningConfigFormValues,
 } from "../domain/types"
 import { getRecommendedDisposition } from "../domain/disposition"
+import {
+  DEFAULT_METRIC_THRESHOLDS,
+  getMetricThresholdForSubType,
+  getMetricThresholdKeyForSubType,
+} from "../../shared/mock/device-warning-scenarios"
+
+const VERSION_OVERRIDES_STORAGE_KEY = "SYZC_PC_DEVICE_WARNING_CONFIG_VERSIONS_V1"
+
+function loadVersionOverrides(): Record<string, number> {
+  try {
+    const raw = sessionStorage.getItem(VERSION_OVERRIDES_STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as Record<string, number>) : {}
+  } catch {
+    return {}
+  }
+}
+
+let versionOverrides = loadVersionOverrides()
+
+function persistVersionOverrides() {
+  try {
+    sessionStorage.setItem(
+      VERSION_OVERRIDES_STORAGE_KEY,
+      JSON.stringify(versionOverrides)
+    )
+  } catch {
+    /* ignore */
+  }
+}
 
 export function getDeviceWarningConfigById(
   id: string | undefined
@@ -20,11 +49,25 @@ export function getDeviceWarningConfigById(
 
   const extension = getDeviceWarningConfigDetailExtension(
     base.configId,
-    base.warningType,
-    base.status
+    base.status,
+    base.subTypes ?? []
   )
 
-  return { ...base, ...extension }
+  return {
+    ...base,
+    ...extension,
+    version: versionOverrides[base.configId] ?? extension.version,
+  }
+}
+
+export function incrementDeviceWarningConfigVersion(
+  configId: string,
+  currentVersion: number
+): number {
+  const nextVersion = Math.max(versionOverrides[configId] ?? currentVersion, currentVersion) + 1
+  versionOverrides = { ...versionOverrides, [configId]: nextVersion }
+  persistVersionOverrides()
+  return nextVersion
 }
 
 export function formatNotifyChannels(channels: string[]): string {
@@ -73,6 +116,37 @@ export function getDetailHeaderActions(
 export function detailToFormValues(
   detail: DeviceWarningConfigDetail
 ): DeviceWarningConfigFormValues {
+  const metricThresholds = {
+    temperature: {
+      min: DEFAULT_METRIC_THRESHOLDS.temperature.min.toString(),
+      max: DEFAULT_METRIC_THRESHOLDS.temperature.max.toString(),
+    },
+    humidity: {
+      min: DEFAULT_METRIC_THRESHOLDS.humidity.min.toString(),
+      max: DEFAULT_METRIC_THRESHOLDS.humidity.max.toString(),
+    },
+    co2: {
+      min: DEFAULT_METRIC_THRESHOLDS.co2.min.toString(),
+      max: DEFAULT_METRIC_THRESHOLDS.co2.max.toString(),
+    },
+    oxygen: {
+      min: DEFAULT_METRIC_THRESHOLDS.oxygen.min.toString(),
+      max: DEFAULT_METRIC_THRESHOLDS.oxygen.max.toString(),
+    },
+  }
+  const metricSubType = detail.warningSubTypes.find((subType) =>
+    getMetricThresholdForSubType(subType)
+  )
+  const metricKey = metricSubType
+    ? getMetricThresholdKeyForSubType(metricSubType)
+    : undefined
+  if (metricKey) {
+    metricThresholds[metricKey] = {
+      min: detail.monitorThresholdMin?.toString() ?? metricThresholds[metricKey].min,
+      max: detail.monitorThresholdMax?.toString() ?? metricThresholds[metricKey].max,
+    }
+  }
+
   return {
     ruleName: detail.ruleName,
     warningType: detail.warningType,
@@ -84,15 +158,7 @@ export function detailToFormValues(
     newDeviceOnly: detail.newDeviceOnly,
     thresholdMin: detail.monitorThresholdMin?.toString() ?? "",
     thresholdMax: detail.monitorThresholdMax?.toString() ?? "",
-    metricThresholds: {
-      temperature: {
-        min: detail.monitorThresholdMin?.toString() ?? "-5",
-        max: detail.monitorThresholdMax?.toString() ?? "35",
-      },
-      humidity: { min: "30", max: "80" },
-      co2: { min: "0", max: "1500" },
-      oxygen: { min: "18.0", max: "23.5" },
-    },
+    metricThresholds,
     notifyChannels: detail.notifyChannels,
     notifyTargets: detail.notifyTargets,
     upgradeEnabled: detail.upgradeStrategy !== null,
@@ -118,7 +184,7 @@ export function createEmptyFormValues(): DeviceWarningConfigFormValues {
     metricThresholds: {
       temperature: { min: "-5", max: "35" },
       humidity: { min: "30", max: "80" },
-      co2: { min: "0", max: "1500" },
+      co2: { min: "400", max: "1500" },
       oxygen: { min: "18.0", max: "23.5" },
     },
     notifyChannels: [],

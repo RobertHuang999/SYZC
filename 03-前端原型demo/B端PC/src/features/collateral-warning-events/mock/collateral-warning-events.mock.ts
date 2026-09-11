@@ -134,25 +134,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: null,
   },
-  // 8. 解抵/质押/监管超时 (L3 · 订单配置触发 · 未公示)
-  {
-    orderNo: "PO202608-55",
-    warningType: "解抵/质押/监管超时",
-    severityLevelId: l3.severityLevelId,
-    severityCode: l3.severityCode,
-    severityName: l3.severityName,
-    severityColor: l3.severityColor,
-    warningSource: "订单配置触发",
-    warningContent: "当前监管物 热轧卷板 Q235B（1,250.00吨）未在 2026年08月25日 完成解监管！（预警阈值 3 天）",
-    snapshotImageStatus: "none",
-    warningTime: "2026-08-25 09:00:00",
-    processedTime: null,
-    publicityStatus: "未公示",
-    processedBy: null,
-    warningStatus: "OPEN_VALID",
-    deviceEventId: null,
-  },
-  // 9. 物联穿透告警 (L5 · 物联穿透 · 人体入侵)
+  // 8. 物联穿透告警 (L5 · 物联穿透 · 人体入侵)
   {
     orderNo: "PO202608-66",
     warningType: "物联穿透告警",
@@ -170,7 +152,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: "evt-002",
   },
-  // 10. 物联穿透告警 (L4 · 物联穿透 · 门禁超时)
+  // 9. 物联穿透告警 (L4 · 物联穿透 · 门禁超时)
   {
     orderNo: "PO202608-77",
     warningType: "物联穿透告警",
@@ -188,7 +170,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: "evt-005",
   },
-  // 11. 物联穿透告警 (L3 · 物联穿透 · 库温超标 · 已结案 · 有效 · 未公示)
+  // 10. 物联穿透告警 (L3 · 物联穿透 · 库温超标 · 已结案 · 有效 · 未公示)
   {
     orderNo: "PO202607-88",
     warningType: "物联穿透告警",
@@ -230,7 +212,7 @@ function buildGeneratedEvents(): CollateralWarningEvent[] {
     "价格下跌",
     "盘点异常",
     "巡检异常",
-    "解抵/质押/监管超时",
+    "解抵/质押超时",
     "贷中风控预警",
     "物联穿透告警",
   ] as const
@@ -302,6 +284,25 @@ export const collateralWarningEventsMock: CollateralWarningEvent[] = [
  * 历史割接存量预警归档数据集（6.1 及存量历史五类硬件、旧订单规则产生的只读归档记录）
  */
 export const archivedCollateralWarningEventsMock: CollateralWarningEvent[] = [
+  {
+    eventId: "arch-010",
+    orderNo: "PO202608-55",
+    orderType: "监管",
+    warningType: "解抵/质押/监管超时",
+    severityLevelId: l3.severityLevelId,
+    severityCode: l3.severityCode,
+    severityName: l3.severityName,
+    severityColor: l3.severityColor,
+    warningSource: "历史",
+    warningContent: "【历史归档】监管物 热轧卷板 Q235B（1,250.00吨）未在 2026年08月25日 完成解监管，历史规则已停止触发",
+    snapshotImageStatus: "none",
+    warningTime: "2026-08-25 09:00:00",
+    processedTime: null,
+    publicityStatus: "未公示",
+    processedBy: null,
+    warningStatus: "OPEN_VALID",
+    deviceEventId: null,
+  },
   {
     eventId: "arch-001",
     orderNo: "PO202606-20",

@@ -10,6 +10,7 @@ import {
 import { UnlockApplyApprovalDialog } from "../components/UnlockApplyApprovalDialog"
 import { UnlockApplyStatusBadge } from "../components/UnlockApplyStatusBadge"
 import { LIST_BASE_PATH } from "../domain/constants"
+import { getUnlockApprovalDecision } from "../domain/eligibility"
 import {
   formatApplicant,
   maskPhone,
@@ -55,7 +56,8 @@ export function UnlockApplyDetailPage() {
     )
   }
 
-  const canApprove = apply.status === "PENDING" && apply.eligible
+  const decision = getUnlockApprovalDecision(apply)
+  const canApprove = decision.canProcess
 
   const handleApprove = (opinion: string) => {
     if (apply) approveUnlockApply(apply.applyNo, opinion)
@@ -155,9 +157,9 @@ export function UnlockApplyDetailPage() {
           </DetailSection>
         </PrototypeAnnotationTarget>
 
-        {apply.status === "PENDING" && !apply.eligible && (
+        {apply.status === "PENDING" && !decision.canProcess && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-            您不是当前审批人，仅可查看。
+            {decision.reason}，仅可查看。
           </div>
         )}
 

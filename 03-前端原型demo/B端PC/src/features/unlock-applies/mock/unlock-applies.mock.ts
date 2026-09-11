@@ -14,6 +14,7 @@ const baseConfig001 = {
   configVersion: 2,
   approvalMode: "任一人通过" as const,
   approvalNodes: "节点1-指定人员 [王五（仓储部）]",
+  approvalNodeAccounts: ["wang5"],
   timeoutHours: 12,
 }
 
@@ -22,6 +23,7 @@ const baseConfig002 = {
   configVersion: 1,
   approvalMode: "任一人通过" as const,
   approvalNodes: "节点1-指定角色 [仓库主管]",
+  approvalNodeAccounts: ["wang5"],
   timeoutHours: 24,
 }
 
@@ -58,7 +60,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
     configSnapshot: baseConfig001,
     approvalRecords: [],
     credential: notGenerated,
-    eligible: true,
     needsApproval: true,
   },
   {
@@ -91,7 +92,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       password: "856778",
       passwordMasked: "856778",
     },
-    eligible: false,
     needsApproval: false,
   },
   {
@@ -126,7 +126,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       validFrom: "2026-08-27 09:20",
       validTo: "2026-08-27 17:20",
     },
-    eligible: false,
     needsApproval: false,
   },
   {
@@ -151,7 +150,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
     configSnapshot: baseConfig002,
     approvalRecords: [],
     credential: notGenerated,
-    eligible: true,
     needsApproval: true,
   },
   {
@@ -193,7 +191,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       validFrom: getRelativeDateTime(-3.5),
       validTo: getRelativeDateTime(16),
     },
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -230,7 +227,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       password: "731892",
       passwordMasked: "731892",
     },
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -264,7 +260,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
     finalConclusion: "驳回",
     rejectReason: "参观事由与现场安排不符",
     credential: notGenerated,
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -288,7 +283,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
     approvalRecords: [],
     finalConclusion: "撤回",
     credential: notGenerated,
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -312,7 +306,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
     approvalRecords: [],
     finalConclusion: "超时失效",
     credential: notGenerated,
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -347,7 +340,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       status: "GEN_FAILED",
       genFailReason: "设备已解绑或位置失效",
     },
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -384,7 +376,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       password: "629143",
       passwordMasked: "629143",
     },
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -419,7 +410,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       status: "GEN_FAILED",
       genFailReason: "密码服务返回：设备暂不可用",
     },
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -459,7 +449,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       validFrom: "2026-08-26 16:20:00",
       validTo: "2026-08-26 20:20:00",
     },
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -496,7 +485,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       password: "318925",
       passwordMasked: "318925",
     },
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -530,7 +518,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       status: "SUPERSEDED",
       invalidReason: "设备密码已被更新，原密码已失效",
     },
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -568,7 +555,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       validTo: "2026-08-27 20:30:00",
       invalidReason: "凭证已过期，无法查看密码",
     },
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -605,7 +591,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       password: "520198",
       passwordMasked: "520198",
     },
-    eligible: false,
     needsApproval: true,
   },
   // --- LK-0085（挂锁-LK08）· 无在途，终态/凭证态 Demo ---
@@ -641,7 +626,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
     finalConclusion: "驳回",
     rejectReason: "现场作业计划变更，请重新提交",
     credential: notGenerated,
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -666,7 +650,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
     approvalRecords: [],
     finalConclusion: "撤回",
     credential: notGenerated,
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -691,7 +674,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
     approvalRecords: [],
     finalConclusion: "超时失效",
     credential: notGenerated,
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -729,7 +711,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       password: "482916",
       passwordMasked: "482916",
     },
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -766,7 +747,6 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       status: "GEN_FAILED",
       genFailReason: "密码服务调用超时",
     },
-    eligible: false,
     needsApproval: true,
   },
   {
@@ -804,7 +784,29 @@ export const unlockAppliesMockSeed: UnlockApply[] = [
       status: "SUPERSEDED",
       invalidReason: "设备密码已被更新，原密码已失效",
     },
-    eligible: false,
+    needsApproval: true,
+  },
+  {
+    applyNo: "UA20260828010",
+    deviceName: "挂锁-LK08",
+    deviceCode: "LK-0085",
+    deviceType: "挂锁门禁",
+    warehouseName: "华东一号仓",
+    storeroomName: "A库",
+    zoneName: "3区",
+    roomZone: "A库 / 3区",
+    locationDetail: "A库3区侧门（热轧卷板）",
+    applicantName: "王五",
+    applicantAccount: "wang5",
+    applicantOrg: "仓储部",
+    applicantPhone: "13912345678",
+    reason: "移库",
+    remark: "Demo：申请人同时是当前审批节点处理人，命中 P06 自审禁止",
+    status: "PENDING",
+    submitTime: "2026-08-28 11:10:00",
+    configSnapshot: baseConfig001,
+    approvalRecords: [],
+    credential: notGenerated,
     needsApproval: true,
   },
 ]

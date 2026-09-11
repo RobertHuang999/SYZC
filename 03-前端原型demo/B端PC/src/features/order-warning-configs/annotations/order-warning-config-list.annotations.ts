@@ -15,10 +15,11 @@ export const orderWarningConfigListAnnotations: PrototypeAnnotation[] = [
           {
             label: "多策略流转图",
             content: `flowchart TD
-    A["抵/质押或监管订单"] -->|"一站式多策略配置"| B["订单预警综合规则包"]
+    A["有效抵/质押订单"] -->|"一站式多策略配置"| B["订单预警综合规则包"]
     B -->|"指标偏离触发"| C["02/02 押品预警信息 (6类告警)"]
     B -->|"勾选启用贷中风控预警"| D["02/03 贷中风控管理台账"]
-    C -->|"订单结清/出库办结"| E["未处理流水自动置无效"]`,
+    C -->|"订单结清/出库办结"| E["未处理流水自动置无效"]
+    H["监管历史规则"] -->|"只读查询/审计/资料"| I["不允许写操作或新触发"]`,
           },
           {
             label: "业务定位",
@@ -47,7 +48,7 @@ export const orderWarningConfigListAnnotations: PrototypeAnnotation[] = [
     number: 2,
     kind: "交互",
     title: "多维组合检索与新增入口",
-    content: "支持规则名称、订单号、订单类型（抵押/质押/监管）、已启用预警项及规则状态组合筛选。",
+    content: "支持规则名称、订单号、订单类型（抵押/质押/监管历史）、已启用预警项及规则状态组合筛选；监管仅用于定位历史只读规则。",
     details: [
       {
         title: "筛选维度说明",
@@ -93,18 +94,18 @@ export const orderWarningConfigListAnnotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "交互",
     title: "行操作控制与软删除保护",
-    content: "提供【编辑】与【删除】操作，受 R-RISK-MGR 权限控制与未处理告警联动约束。",
+    content: "当前抵/质押规则提供【编辑】与【删除】操作；监管历史规则仅提供【详情】，受 R-RISK-MGR 权限控制与未处理告警联动约束。",
     details: [
       {
         title: "操作与联动约束",
         items: [
           {
             label: "编辑限制",
-            content: "已失效规则禁止编辑；编辑保存后生成新 Version 并幂等同步风控判定引擎。",
+            content: "已失效规则禁止编辑；当前抵/质押规则编辑保存后生成新 Version 并幂等同步风控判定引擎；监管历史规则不允许写入。",
           },
           {
             label: "删除联动",
-            content: "软删除后该订单所有待处置 · 有效押品预警自动置为【已作废】，终止超时升级定时器，历史已结案 · 有效流水不受影响。",
+            content: "当前抵/质押规则软删除后，该订单所有待处置 · 有效押品预警自动置为【已作废】，终止超时升级定时器，历史已结案 · 有效流水不受影响；监管历史规则禁止删除。",
           },
         ],
       },

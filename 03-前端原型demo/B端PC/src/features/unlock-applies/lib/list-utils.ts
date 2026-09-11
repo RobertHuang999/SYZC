@@ -1,6 +1,7 @@
 import {
   PROCESSED_STATUSES,
 } from "../domain/constants"
+import { getUnlockApprovalDecision } from "../domain/eligibility"
 import type { UnlockApply, UnlockApplyFilters } from "../domain/types"
 
 const STATUS_FILTER_TO_CODE: Record<
@@ -73,5 +74,5 @@ export function paginateUnlockApplies<T>(items: T[], page: number, pageSize: num
 }
 
 export function countPendingForCurrentUser(items: UnlockApply[]): number {
-  return items.filter((item) => item.status === "PENDING" && item.eligible).length
+  return items.filter((item) => getUnlockApprovalDecision(item).canProcess).length
 }

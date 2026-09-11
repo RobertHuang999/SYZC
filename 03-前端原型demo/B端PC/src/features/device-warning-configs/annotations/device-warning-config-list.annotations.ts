@@ -88,7 +88,7 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "阈值条件",
-            content: "展示数值上下限或事件型触发描述（如【温度 > 35℃】、【剪杆破坏事件】）；平台不再配置防抖，事件预过滤由设备厂商侧完成。",
+            content: "展示数值上下限或事件型触发描述（如【温度 < -5℃ 或 > 35℃】、【二氧化碳 < 400 ppm 或 > 1500 ppm】、【剪杆破坏事件】）；平台不再配置防抖，事件预过滤由设备厂商侧完成。",
           },
           {
             label: "规则 Version",

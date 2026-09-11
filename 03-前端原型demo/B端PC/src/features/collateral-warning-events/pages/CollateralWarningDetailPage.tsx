@@ -79,6 +79,7 @@ export function CollateralWarningDetailPage() {
   const showPenetration = event.penetrationInfo !== null
   const showDisposal = event.warningStatus === WARNING_STATUS.CLOSED_VALID
   const showInvalid = event.warningStatus === WARNING_STATUS.OPEN_INVALID
+  const isHistoricalReadOnly = event.warningSource === "历史" || event.orderType === "监管"
   const deviceEventId =
     event.penetrationInfo?.relatedEventId ?? event.deviceEventId ?? "evt-017"
   const returnRoute = `/物联网IOT与预警/预警信息/押品预警信息/详情/${event.eventId}`
@@ -138,6 +139,14 @@ export function CollateralWarningDetailPage() {
             </div>
           </div>
         </PrototypeAnnotationTarget>
+
+        {isHistoricalReadOnly && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            {event.orderType === "监管"
+              ? "监管订单当前关闭，本记录仅支持详情、审计和资料查看，不提供解除、公示或其他写操作。"
+              : "本记录为历史归档，仅支持详情、审计和资料查看，不提供业务写操作。"}
+          </div>
+        )}
 
         {/* 1. 基础识别与业务属性（对齐字段清单第一章） */}
         <PrototypeAnnotationTarget annotationIds={["collateral-warning-detail-base"]}>

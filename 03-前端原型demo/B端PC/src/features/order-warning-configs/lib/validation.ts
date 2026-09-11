@@ -68,6 +68,9 @@ export function validateOrderWarningConfig(
 
   const order = MOCK_ORDERS.find((item) => item.orderNo === values.orderNo)
   if (!order) return "关联订单不存在或已失效"
+  if (order.orderType === "监管") {
+    return "监管订单当前关闭，历史规则仅供审计，不允许新增、编辑或保存"
+  }
 
   const duplicateOrder = orderWarningConfigsMock.some(
     (config) =>
@@ -120,10 +123,6 @@ export function validateStrategySave(
       return "请至少启用一项预警策略"
     }
     return null
-  }
-
-  if (definition.disabledForSupervision && order.orderType === "监管") {
-    return `${definition.name}不适用于监管订单`
   }
 
   return validateStrategy(key, values)

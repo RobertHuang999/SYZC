@@ -60,6 +60,7 @@ const WORKSPACE_GROUPS: WorkstationGroup[] = WORKSPACE_GROUP_ORDER.map((groupNam
     (item) =>
       item.primaryModule === "工作台" &&
       item.secondaryCategory === groupName &&
+      item.enabled !== false &&
       !DEVICE_HUB_TAB_IDS.has(item.id),
   ).map((item, index) => ({
     ...item,

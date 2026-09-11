@@ -62,7 +62,6 @@ export function createDirectLockUnlockApply(params: {
       password: "856778",
       passwordMasked: "****5678",
     },
-    eligible: false,
     needsApproval: false,
     ...APPLICANT,
   }
@@ -107,7 +106,6 @@ export function createDirectFaceUnlockApply(params: {
       validFrom,
       validTo,
     },
-    eligible: false,
     needsApproval: false,
     ...APPLICANT,
   }

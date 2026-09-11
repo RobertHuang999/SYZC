@@ -83,6 +83,11 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
             label: "预警时间",
             content: "单条流水触发时间 warningTime，同时作为升级计时起点。",
           },
+          {
+            label: "数值型预警示例",
+            content:
+              "二氧化碳卡片展示实际值与阈值区间：1800 ppm，安全区间 400~1500 ppm；进入详情后规则快照仍按二氧化碳 < 400 ppm 或 > 1500 ppm 展示。",
+          },
         ],
       },
     ],

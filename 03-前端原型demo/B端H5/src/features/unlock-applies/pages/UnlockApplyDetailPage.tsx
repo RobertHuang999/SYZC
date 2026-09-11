@@ -7,6 +7,7 @@ import { Toast } from "@/components/ui/Toast"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { formatDateTime } from "@/shared/lib/date-utils"
 import { UNLOCK_APPLY_STATUS_LABEL } from "../domain/constants"
+import { getUnlockApprovalDecision } from "../domain/eligibility"
 import { UnlockApplyApprovalDialog } from "../components/UnlockApplyApprovalDialog"
 import {
   approveUnlockApply,
@@ -50,7 +51,8 @@ export function UnlockApplyDetailPage() {
     )
   }
 
-  const canApprove = apply.status === "PENDING" && apply.eligible
+  const decision = getUnlockApprovalDecision(apply)
+  const canApprove = decision.canProcess
 
   const handleComplete = (message: string) => {
     setToast(message)
@@ -148,9 +150,9 @@ export function UnlockApplyDetailPage() {
           )}
         </SectionCard>
 
-        {apply.status === "PENDING" && !apply.eligible && (
+        {apply.status === "PENDING" && !decision.canProcess && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-            您不是当前审批人，仅可查看。
+            {decision.reason}，仅可查看。
           </div>
         )}
       </div>

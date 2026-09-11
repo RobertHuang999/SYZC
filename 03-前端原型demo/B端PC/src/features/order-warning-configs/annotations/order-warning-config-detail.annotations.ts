@@ -25,7 +25,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "页头操作",
-            content: "提供【返回】、【编辑】与【删除】操作；已失效状态下仅支持返回或删除。",
+            content: "当前抵/质押规则按状态提供【返回】、【编辑】与【删除】；监管历史规则仅提供【返回】，只读查看详情、审计和资料。",
           },
         ],
       },
@@ -44,7 +44,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "订单类型 (order_type)",
-            content: "【抵押】【质押】【监管】；类型决定可选风控卡片（监管订单不适用质押率与贷中风控）。",
+            content: "【抵押】【质押】为当前可运营类型；【监管】仅用于历史快照兼容，不进入新增候选且不提供写操作。",
           },
           {
             label: "押品物料明细 (materials)",
@@ -103,18 +103,18 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "交互",
     title: "页头操作与权限控制",
-    content: "支持编辑与软删除，删除时二次确认并说明未处理流水处置影响。",
+    content: "当前抵/质押规则支持编辑与软删除；监管历史规则仅只读，禁止编辑、删除和保存。",
     details: [
       {
         title: "权限与约束",
         items: [
           {
             label: "操作权限",
-            content: "具备 R-RISK-MGR 权限人员可编辑和删除配置单据。",
+            content: "具备 R-RISK-MGR 权限人员可编辑和删除当前抵/质押配置；监管历史规则不开放写操作。",
           },
           {
             label: "删除联动",
-            content: "规则删除后，历史已触发的待处置 · 有效预警流水自动流转为【已作废】。",
+            content: "当前抵/质押规则删除后，历史已触发的待处置 · 有效预警流水自动流转为【已作废】；监管历史规则不允许删除。",
           },
         ],
       },

@@ -12,6 +12,7 @@ export interface MenuItemData {
   customRoute?: string // 如果有定制页面路由
   badge?: string // 标签如 "优化"、"新拆分"、"联登"
   iconType?: string // 图标类型
+  enabled?: boolean // 当前是否展示并允许从菜单进入；缺省为启用
 }
 
 export const MOBILE_MENU_ITEMS: MenuItemData[] = [
@@ -248,18 +249,6 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     iconType: "MapPin",
   },
   {
-    id: "ws-device-access-logs",
-    primaryModule: "工作台",
-    secondaryCategory: "仓储",
-    name: "设备管理",
-    subTab: "门禁事务记录",
-    originPath: "设备管理～门禁事务记录",
-    description: "记录人员、车辆进出道闸的刷卡、人脸识别与通行时间戳明细，防范非授权进出。",
-    buttons: ["查看页面", "通行检索", "抓拍照片查看", "异常过滤"],
-    dataPermission: "登录账号仓库权限决定；未绑定位置的设备所有人可见",
-    iconType: "History",
-  },
-  {
     id: "ws-cargo-movement",
     primaryModule: "工作台",
     secondaryCategory: "仓储",
@@ -333,7 +322,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     secondaryCategory: "融资/监管",
     name: "监管订单",
     originPath: "项目监管～项目管理",
-    description: "监管机构专属台账。全生命周期监库，严格把控最低货值底线与异常预警处置。",
+    description: "监管订单当前关闭。历史数据仅允许按权限只读查询、审计和资料查看。",
     buttons: [
       "查看页面",
       "查看监控",
@@ -345,7 +334,9 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
       "查看详情",
       "监管报告（生成/撤销/下载/重申）",
     ],
-    dataPermission: "任务发起人及处理人可见；其他人员需对应机构数据权限",
+    dataPermission: "当前不开放新建及业务写操作；历史数据按机构与仓库权限只读可见",
+    enabled: false,
+    remark: "当前关闭；保留旧 moduleId 作为历史兼容路由",
     iconType: "ShieldAlert",
   },
   {
@@ -480,17 +471,6 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     iconType: "AlertTriangle",
   },
   {
-    id: "ws-risk-device-events",
-    primaryModule: "工作台",
-    secondaryCategory: "风控",
-    name: "设备事务通知",
-    originPath: "项目监管-预警管理-设备事务通知",
-    description: "接收设备离线、电量低、心跳超时、防拆触发等硬件事务提醒，推动运维闭环。",
-    buttons: ["查看页面", "去处理", "设备自检", "运维工单派发"],
-    dataPermission: "根据仓库权限决定；未绑定位置设备事务所有账号可见",
-    iconType: "BellRing",
-  },
-  {
     id: "ws-risk-in-loan",
     primaryModule: "工作台",
     secondaryCategory: "风控",
@@ -499,9 +479,23 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     description: "平台主动式安全防御中枢。多维侦测设备断线、押品跌价、违规作业，并按风险等级推送责任人排查。",
     buttons: ["查看页面", "查看详情", "执行风控模型", "批量执行"],
     dataPermission: "订单数据权限",
+    customRoute: "/m/risk/mid-loan",
+    badge: "只读",
     iconType: "Activity",
   },
-
+  {
+    id: "ws-risk-disclosure",
+    primaryModule: "工作台",
+    secondaryCategory: "风控",
+    name: "风险公示",
+    originPath: "项目监管-预警管理-风险公示",
+    description: "查看已完成处置的有效风险公示记录及不可变快照，移动端仅支持只读查询。",
+    buttons: ["查看页面", "查看详情"],
+    dataPermission: "订单数据权限与公示标签页权限",
+    customRoute: "/m/risk/disclosures",
+    badge: "只读",
+    iconType: "ShieldCheck",
+  },
   // =================== 2. 工作台 - 结算 ===================
   {
     id: "ws-settle-mgr",

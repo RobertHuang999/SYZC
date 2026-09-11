@@ -14,6 +14,64 @@ export type DeviceWarningRuleScenario = {
   triggerCondition: string
   status: "生效中" | "停用" | "已失效"
   linkedEventIds: string[]
+  metricThresholds?: MetricThresholdOverrides
+}
+
+export type MetricThresholdKey = "temperature" | "humidity" | "co2" | "oxygen"
+
+export type MetricThresholdDefinition = {
+  min: number
+  max: number
+  unit: string
+  label: string
+}
+
+export type MetricThresholdOverrides = Partial<
+  Record<MetricThresholdKey, Partial<MetricThresholdDefinition>>
+>
+
+export const DEFAULT_METRIC_THRESHOLDS: Record<
+  MetricThresholdKey,
+  MetricThresholdDefinition
+> = {
+  temperature: { min: -5, max: 35, unit: "℃", label: "温度" },
+  humidity: { min: 30, max: 80, unit: "%RH", label: "湿度" },
+  co2: { min: 400, max: 1500, unit: "ppm", label: "二氧化碳" },
+  oxygen: { min: 18, max: 23.5, unit: "%Vol", label: "氧气" },
+}
+
+const METRIC_KEY_BY_SUB_TYPE: Record<string, MetricThresholdKey> = {
+  温度异常: "temperature",
+  湿度异常: "humidity",
+  二氧化碳异常: "co2",
+  氧气异常: "oxygen",
+}
+
+export function getMetricThresholdKeyForSubType(
+  subType: string
+): MetricThresholdKey | undefined {
+  return METRIC_KEY_BY_SUB_TYPE[subType]
+}
+
+export function getMetricThresholdForSubType(
+  subType: string,
+  overrides: MetricThresholdOverrides = {}
+): MetricThresholdDefinition | undefined {
+  const metricKey = METRIC_KEY_BY_SUB_TYPE[subType]
+  if (!metricKey) return undefined
+  return {
+    ...DEFAULT_METRIC_THRESHOLDS[metricKey],
+    ...overrides[metricKey],
+  }
+}
+
+export function formatMetricTriggerCondition(
+  subType: string,
+  overrides: MetricThresholdOverrides = {}
+): string {
+  const threshold = getMetricThresholdForSubType(subType, overrides)
+  if (!threshold) return subType
+  return `${threshold.label} < ${threshold.min} ${threshold.unit} 或 > ${threshold.max} ${threshold.unit}`
 }
 
 export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
@@ -37,7 +95,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     deviceScope: "已选 6 台温湿度计",
     warningSubTypes: ["温度异常"],
     dispositionMode: "AUTO_RECOVER",
-    triggerCondition: "温度异常",
+    triggerCondition: formatMetricTriggerCondition("温度异常"),
         status: "生效中",
     linkedEventIds: ["evt-001", "evt-010"],
   },
@@ -181,7 +239,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     deviceScope: "已选 4 台温湿度计",
     warningSubTypes: ["湿度异常"],
     dispositionMode: "AUTO_RECOVER",
-    triggerCondition: "湿度异常",
+    triggerCondition: formatMetricTriggerCondition("湿度异常"),
         status: "生效中",
     linkedEventIds: ["evt-006"],
   },
@@ -208,6 +266,18 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     triggerCondition: "开锁通知",
         status: "生效中",
     linkedEventIds: ["evt-013"],
+  },
+  {
+    configId: "dwc-017",
+    ruleName: "库区二氧化碳浓度异常",
+    warningType: "设备物联预警",
+    severityLevelId: "sl-l4",
+    deviceScope: "已选 3 台气体传感器",
+    warningSubTypes: ["二氧化碳异常"],
+    dispositionMode: "AUTO_RECOVER",
+    triggerCondition: formatMetricTriggerCondition("二氧化碳异常"),
+    status: "生效中",
+    linkedEventIds: ["evt-019"],
   },
 ]
 
@@ -271,7 +341,7 @@ export const EXTRA_RULE_NAME_SAMPLES: ExtraRuleSample[] = [
 ]
 
 export function formatTriggerCondition(subTypes: string[]): string {
-  return subTypes.join("/")
+  return subTypes.map((subType) => formatMetricTriggerCondition(subType)).join("/")
 }
 
 export function pickSubTypesForWarningType(

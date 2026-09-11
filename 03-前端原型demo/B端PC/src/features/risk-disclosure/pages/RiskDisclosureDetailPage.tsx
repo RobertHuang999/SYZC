@@ -64,7 +64,8 @@ export function RiskDisclosureDetailPage() {
     )
   }
 
-  const canCancel = record.disclosureStatus === "已公示"
+  const isHistoricalReadOnly = record.isHistorical || record.orderType === "监管"
+  const canCancel = record.disclosureStatus === "已公示" && !isHistoricalReadOnly
 
   return (
     <PrototypeAnnotationProvider
@@ -85,6 +86,11 @@ export function RiskDisclosureDetailPage() {
               >
                 {record.disclosureStatus}
               </Badge>
+              {isHistoricalReadOnly && (
+                <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800">
+                  历史兼容 · 只读
+                </Badge>
+              )}
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -102,6 +108,12 @@ export function RiskDisclosureDetailPage() {
             </div>
           </div>
         </PrototypeAnnotationTarget>
+
+        {isHistoricalReadOnly && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50/70 p-3 text-sm leading-relaxed text-amber-900">
+            当前监管订单及旧类型公示写操作已关闭，本记录仅支持查询、详情和审计，不提供取消公示或其他写操作。
+          </div>
+        )}
 
         <PrototypeAnnotationTarget annotationIds={["risk-disclosure-detail-info"]}>
           <DetailSection title="公示信息">

@@ -35,6 +35,7 @@ export type ConfigSnapshot = {
   configVersion: number
   approvalMode: "任一人通过" | "按顺序审批"
   approvalNodes: string
+  approvalNodeAccounts?: string[]
   timeoutHours?: number
 }
 
@@ -81,7 +82,6 @@ export type UnlockApply = {
   credential: CredentialInfo
   /** @deprecated 6.2 详情不展示关联事务 */
   transaction?: TransactionInfo
-  eligible: boolean
   needsApproval: boolean
 }
 

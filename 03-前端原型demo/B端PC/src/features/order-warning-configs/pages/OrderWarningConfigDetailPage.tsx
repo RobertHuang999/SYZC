@@ -41,8 +41,9 @@ export function OrderWarningConfigDetailPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
   const config = useMemo(() => getOrderWarningConfigById(id), [id])
+  const isHistoricalSupervision = config?.orderType === "监管"
   const headerActions = useMemo(
-    () => (config ? getDetailHeaderActions(config.status) : ["back"]),
+    () => (config ? getDetailHeaderActions(config.status, config.orderType) : ["back"]),
     [config]
   )
 
@@ -109,6 +110,12 @@ export function OrderWarningConfigDetailPage() {
           </div>
         </PrototypeAnnotationTarget>
 
+        {isHistoricalSupervision && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            监管订单当前关闭，本记录为历史规则快照，仅支持详情、审计和资料查看，不支持编辑、删除或重新触发预警。
+          </div>
+        )}
+
         <PrototypeAnnotationTarget annotationIds={["order-warning-config-detail-base"]}>
           <DetailSection title="基础识别">
             <DetailField label="规则 ID">{config.ruleUuid}</DetailField>
@@ -127,7 +134,7 @@ export function OrderWarningConfigDetailPage() {
         <PrototypeAnnotationTarget annotationIds={["order-warning-config-detail-strategies"]}>
           <div className="space-y-3">
             <h2 className="text-lg font-semibold">
-              已激活风控策略详情（共激活 {config.activeStrategies.length} 项策略）
+              {isHistoricalSupervision ? "历史规则快照" : "已激活风控策略详情"}（共 {config.activeStrategies.length} 项策略）
             </h2>
             {config.activeStrategies.map((strategy, index) => {
               const severity = getSeverityLevelById(strategy.severityLevelId)
@@ -144,7 +151,7 @@ export function OrderWarningConfigDetailPage() {
                         variant="outline"
                         className="border-emerald-200 bg-emerald-50 text-emerald-700"
                       >
-                        运行中
+                        {isHistoricalSupervision ? "历史快照" : "运行中"}
                       </Badge>
                     </CardTitle>
                   </CardHeader>

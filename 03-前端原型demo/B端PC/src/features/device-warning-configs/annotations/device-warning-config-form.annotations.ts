@@ -109,8 +109,8 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
             content: "展示事件型触发描述，无数值阈值输入；厂商侧实时上报，平台接收回调后逐条落账。",
           },
           {
-            label: "持续事件（温湿度/离线/电压）",
-            content: "配置数值上下限（如温度 >= 35℃）；持续判定与去抖由厂商接入层完成，平台按回调逐条写入 iot_event_ledger。",
+            label: "持续事件（温湿度/气体/离线/电压）",
+            content: "温度、湿度、二氧化碳、氧气等数值型指标均配置最低值与最高值（如二氧化碳 400~1500 ppm）；持续判定与去抖由厂商接入层完成，平台按回调逐条写入 iot_event_ledger。",
           },
           {
             label: "不含防抖控件",

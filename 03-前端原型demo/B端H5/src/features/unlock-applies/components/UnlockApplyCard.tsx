@@ -3,6 +3,7 @@ import type { MouseEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { formatDateTime } from "@/shared/lib/date-utils"
 import { UNLOCK_APPLY_STATUS_LABEL } from "../domain/constants"
+import { getUnlockApprovalDecision } from "../domain/eligibility"
 import type { UnlockApply } from "../domain/types"
 
 type UnlockApplyCardProps = {
@@ -14,7 +15,7 @@ export function UnlockApplyCard({ apply, onProcess }: UnlockApplyCardProps) {
   const navigate = useNavigate()
   const statusLabel = UNLOCK_APPLY_STATUS_LABEL[apply.status]
   const isPending = apply.status === "PENDING"
-  const canProcess = isPending && apply.eligible
+  const canProcess = isPending && getUnlockApprovalDecision(apply).canProcess
   const detailPath = `/m/approval/unlock-applies/${apply.applyNo}`
 
   const openDetail = (event?: MouseEvent) => {

@@ -79,10 +79,17 @@ export function validateDeviceWarningConfig(
     }
     if (values.warningSubTypes.includes("二氧化碳异常")) {
       const c = values.metricThresholds?.co2
-      if (c && !c.max.trim()) return "请填写二氧化碳浓度告警上限"
-      if (c && c.max.trim()) {
+      if (c && (!c.min.trim() || !c.max.trim())) {
+        return "请完整填写二氧化碳浓度的最低值和最高值"
+      }
+      if (c && c.min.trim() && c.max.trim()) {
+        const min = Number(c.min)
         const max = Number(c.max)
-        if (!Number.isFinite(max) || max <= 0) return "请输入合法的二氧化碳上限数值 (ppm)"
+        if (!Number.isFinite(min) || !Number.isFinite(max)) {
+          return "请输入合法的二氧化碳浓度数值 (ppm)"
+        }
+        if (min < 0) return "二氧化碳最低值不能小于 0 ppm"
+        if (min >= max) return "二氧化碳最低值必须小于最高值"
       }
     }
     if (values.warningSubTypes.includes("氧气异常")) {

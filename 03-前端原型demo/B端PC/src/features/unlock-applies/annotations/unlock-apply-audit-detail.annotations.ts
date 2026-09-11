@@ -19,7 +19,7 @@ export const unlockApplyAuditDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "非当前审批人 / 本人自审禁止",
-            content: "不展示【去处理】按钮，并在底部提示「您不是当前审批人，仅可查看。」（P06/R11）。",
+            content: "运行时比较当前用户账号、申请人账号与配置快照审批节点；命中 P06/R11 时不展示【去处理】按钮，并提示「申请人本人不得审批自己的开锁申请（P06），仅可查看」。",
           },
           {
             label: "终态单据",
@@ -103,7 +103,7 @@ export const unlockApplyAuditDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "审批方式",
-            content: "固化为「任一人通过」，节点内任何一位 eligible 审批人操作即生效。",
+            content: "固化为「任一人通过」及审批节点账号快照；节点内具备当前处理资格且非申请人本人的审批人操作才可生效。",
           },
           {
             label: "审批节点链",

@@ -109,7 +109,7 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "持续传感器事件",
-            content: "如温湿度超标，展示数值上下限（如【温度 > 35℃】）；持续判定由厂商接入层完成，平台按回调逐条落账。",
+            content: "如温湿度或气体浓度超标，展示数值上下限（如【温度 < -5℃ 或 > 35℃】、【二氧化碳 < 400 ppm 或 > 1500 ppm】）；持续判定由厂商接入层完成，平台按回调逐条落账。",
           },
           {
             label: "厂商预过滤边界",
@@ -160,6 +160,29 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "Version",
             content: "编辑保存后递增；该版本号与规则快照一起用于历史事件追溯。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "device-warning-config-detail-actions",
+    targetId: "device-warning-config-detail-actions",
+    number: 7,
+    kind: "交互",
+    title: "详情页状态操作与版本边界",
+    content: "详情页根据规则状态展示编辑、启用/停用和删除操作；编辑保存后 Version 递增，历史未处理流水保留原规则快照，不被回写。",
+    details: [
+      {
+        title: "操作门控",
+        items: [
+          {
+            label: "生效中 / 停用",
+            content: "生效中与停用规则可进入编辑；停用和启用操作按当前状态切换，已失效规则不可编辑。",
+          },
+          {
+            label: "版本与历史流水",
+            content: "编辑保存成功后 Version +1；既有未处理预警流水不回写，后续设备回调按最新 Version 固化新快照（C08）。",
           },
         ],
       },

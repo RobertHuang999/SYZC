@@ -46,7 +46,20 @@ const DETAIL_OVERRIDES: Record<
     },
   },
   "cw-004": {
-    orderType: "监管",
+    orderType: "抵/质押",
+    ruleName: "农产品菜籽油现货价格下行预警",
+    triggerSnapshot: "跌幅 -6.5% / 预警阈值 -6.0% / 基准价 8,200 元/吨",
+    snapshotImageUrl: null,
+    invalidReason: null,
+    penetrationInfo: null,
+    disposalInfo: {
+      situationDescription: "已在资方信贷系统与全国保理信息平台完成风险公示登记。",
+      sitePhotos: [],
+      releaseSnapshotImage: null,
+    },
+  },
+  "cw-006": {
+    orderType: "抵/质押",
     ruleName: "仓库例行盘点账实差异监控",
     triggerSnapshot: "盘点差异 2.3% / 阈值 2.0%",
     snapshotImageUrl: null,
@@ -54,7 +67,7 @@ const DETAIL_OVERRIDES: Record<
     penetrationInfo: null,
     disposalInfo: null,
   },
-  "cw-006": {
+  "cw-007": {
     orderType: "抵/质押",
     ruleName: "贷中大数据风控决策模型",
     triggerSnapshot: "模型名称: 借款人司法诉讼与涉诉高风险模型；模型分数: 82.5；预警描述: 借款主体新增被执行人记录",
@@ -63,10 +76,10 @@ const DETAIL_OVERRIDES: Record<
     penetrationInfo: null,
     disposalInfo: null,
   },
-  "cw-007": {
+  "cw-008": {
     orderType: "监管",
-    ruleName: "监管到期未解监管预警",
-    triggerSnapshot: "监管到期日: 2026年08月25日；超时天数: 3天",
+    ruleName: "监管到期未解监管预警（历史快照）",
+    triggerSnapshot: "监管到期日: 2026年08月25日；超时天数: 3天（历史快照）",
     snapshotImageUrl: null,
     invalidReason: null,
     penetrationInfo: null,
@@ -93,8 +106,11 @@ function getRealTriggerSnapshot(event: CollateralWarningEvent): string | null {
   if (event.warningType === "贷中风控预警") {
     return "智风控综合评分: 38.5 分 (高危) | 准入线: 60.0 分 | 低于准入线 -21.5 分 (借款企业新增诉讼冻结)"
   }
+  if (event.warningType === "解抵/质押超时") {
+    return "抵/质押业务存续期限: 逾期 15 天 | 约定期限: 2026-06-01 | 抵/质押期限届满未办理解押或展期"
+  }
   if (event.warningType === "解抵/质押/监管超时") {
-    return "监管业务存续期限: 逾期 15 天 | 约定期限: 2026-06-01 | 监管期满未办理解除或展期"
+    return "监管业务存续期限: 逾期 15 天 | 约定期限: 2026-06-01 | 监管期满未办理解除或展期（历史快照）"
   }
   return "业务指标超出预设风控阈值，触发规则审计快照"
 }
@@ -107,7 +123,7 @@ function buildDefaultExtension(
   const isInvalid = event.warningStatus === "OPEN_INVALID"
 
   return {
-    orderType: event.orderNo.includes("99") || event.orderNo.includes("55") ? "监管" : "抵/质押",
+    orderType: event.orderType ?? "抵/质押",
     ruleName: event.ruleName || (isIot ? "智能挂锁防拆规则" : `${event.warningType}监控规则`),
     triggerSnapshot: getRealTriggerSnapshot(event),
     snapshotImageUrl:

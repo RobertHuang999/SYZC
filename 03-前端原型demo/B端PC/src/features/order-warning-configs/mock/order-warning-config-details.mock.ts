@@ -55,7 +55,7 @@ const detailExtensions: Record<string, DetailExtension> = {
       },
     ],
     disabledStrategies: [
-      "解抵/质押/监管超时监控：未启用",
+      "解抵/质押超时监控：未启用",
       "盘点账实差异告警：未启用",
       "贷中风控模型预警：未启用",
     ],
@@ -83,7 +83,7 @@ const detailExtensions: Record<string, DetailExtension> = {
       },
       {
         key: "timeout",
-        name: "解抵/质押/监管超时监控",
+        name: "解抵/质押/监管超时监控（历史快照）",
         fields: [],
         timeoutRows: [
           {
@@ -121,7 +121,7 @@ const detailExtensions: Record<string, DetailExtension> = {
     activeStrategies: [
       {
         key: "timeout",
-        name: "解抵/质押/监管超时监控",
+        name: "解抵/质押/监管超时监控（历史快照）",
         fields: [],
         timeoutRows: [
           {
@@ -192,7 +192,7 @@ const detailExtensions: Record<string, DetailExtension> = {
     disabledStrategies: [
       "抵/质押率双控预警：未启用",
       "仓储巡检超期预警：未启用",
-      "解抵/质押/监管超时监控：未启用",
+      "解抵/质押超时监控：未启用",
       "贷中风控模型预警：未启用",
     ],
     invalidReason: "关联订单已办结",
@@ -231,7 +231,7 @@ function buildDefaultStrategies(
     },
     超时: {
       key: "timeout",
-      name: "解抵/质押/监管超时监控",
+      name: "解抵/质押/监管超时监控（历史快照）",
       fields: [{ label: "超时配置", value: "已配置二维码超时阈值" }],
       timeoutRows: [
         {
@@ -271,7 +271,7 @@ function buildDefaultStrategies(
 }
 
 const allDisabledLabels = [
-  "解抵/质押/监管超时监控：未启用",
+  "解抵/质押超时监控：未启用",
   "抵/质押率双控预警：未启用",
   "仓储巡检超期预警：未启用",
   "盘点账实差异告警：未启用",

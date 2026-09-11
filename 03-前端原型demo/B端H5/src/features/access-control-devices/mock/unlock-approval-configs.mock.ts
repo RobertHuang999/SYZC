@@ -4,6 +4,7 @@ export type UnlockApprovalConfig = {
   configName: string
   deviceCodes: string[]
   approvalMode: "任一人通过"
+  approvalNodeAccounts?: string[]
   timeoutHours: number
   configVersion: number
   status: "已启用" | "已停用"
@@ -15,6 +16,7 @@ export const unlockApprovalConfigsMock: UnlockApprovalConfig[] = [
     configName: "A库指定挂锁审批",
     deviceCodes: ["LK-2024-0082", "LK-0085", "FACE-01"],
     approvalMode: "任一人通过",
+    approvalNodeAccounts: ["wang5"],
     timeoutHours: 12,
     configVersion: 2,
     status: "已启用",
@@ -24,6 +26,7 @@ export const unlockApprovalConfigsMock: UnlockApprovalConfig[] = [
     configName: "华东入口人脸审批",
     deviceCodes: ["FACE-01"],
     approvalMode: "任一人通过",
+    approvalNodeAccounts: ["wang5"],
     timeoutHours: 24,
     configVersion: 1,
     status: "已启用",
@@ -33,6 +36,7 @@ export const unlockApprovalConfigsMock: UnlockApprovalConfig[] = [
     configName: "华南监管挂锁审批",
     deviceCodes: ["LK-HN-001", "LK-HN-002", "FACE-HN-01", "LK-HB-001", "LK-HB-002"],
     approvalMode: "任一人通过",
+    approvalNodeAccounts: ["wang5"],
     timeoutHours: 48,
     configVersion: 1,
     status: "已停用",

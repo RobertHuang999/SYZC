@@ -5,7 +5,6 @@ import {
   Camera,
   ChevronDown,
   Filter,
-  History,
   Lock,
   MapPin,
   Play,
@@ -52,7 +51,6 @@ type DeviceTabId =
   | "ws-device-monitoring"
   | "ws-device-iot"
   | "ws-device-gps"
-  | "ws-device-access-logs"
 
 const DEVICE_TABS = [
   {
@@ -79,12 +77,6 @@ const DEVICE_TABS = [
     name: "GPS设备",
     icon: MapPin,
     description: "在途押品与露天货位定位终端、实时轨迹追踪",
-  },
-  {
-    id: "ws-device-access-logs" as const,
-    name: "门禁事务记录",
-    icon: History,
-    description: "刷卡、人脸、密码开锁流水与异常试码审计",
   },
 ]
 
@@ -244,59 +236,6 @@ const GPS_DEVICES_MOCK = [
     speed: "0 km/h (固定)",
     location: "广东省广州市南沙港保税园区 C-04",
     lastReport: "2026-09-01 10:15:30",
-  },
-]
-
-// 门禁事务记录 Mock 数据
-const ACCESS_LOGS_MOCK = [
-  {
-    id: "LOG-20260901-01",
-    deviceName: "挂锁-LK01",
-    deviceCode: "LK-2024-0012",
-    deviceType: "挂锁门禁",
-    warehouse: "华东一号仓 · A库",
-    eventType: "密码开锁成功",
-    operator: "张三 (zhang3)",
-    applyNo: "UA20260822001",
-    timestamp: "2026-09-01 09:30:15",
-    isWarning: false,
-  },
-  {
-    id: "LOG-20260901-02",
-    deviceName: "人脸门禁-FC01",
-    deviceCode: "FC-2024-0041",
-    deviceType: "人脸门禁",
-    warehouse: "华北智能仓 · 1区主门",
-    eventType: "刷脸进门成功",
-    operator: "李四 (li4)",
-    applyNo: "免审长期授权",
-    timestamp: "2026-09-01 09:12:08",
-    isWarning: false,
-  },
-  {
-    id: "LOG-20260901-03",
-    deviceName: "挂锁-LK02",
-    deviceCode: "LK-2024-0082",
-    deviceType: "挂锁门禁",
-    warehouse: "华东一号仓 · A库1区",
-    eventType: "非法试码告警",
-    operator: "未知人员",
-    applyNo: "无关联申请",
-    timestamp: "2026-09-01 08:45:00",
-    isWarning: true,
-    warningDetail: "密码连续输入错误 3 次，已锁定 15 分钟并推送风控预警",
-  },
-  {
-    id: "LOG-20260901-04",
-    deviceName: "挂锁-LK03",
-    deviceCode: "LK-2024-0099",
-    deviceType: "挂锁门禁",
-    warehouse: "华南二号仓 · B库",
-    eventType: "临时凭证下发生效",
-    operator: "王五 (wang5)",
-    applyNo: "UA20260822002",
-    timestamp: "2026-09-01 08:30:00",
-    isWarning: false,
   },
 ]
 
@@ -936,83 +875,6 @@ export function DeviceManagementPage() {
                     轨迹回放
                   </button>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ===================== Tab 5: 门禁事务记录 ===================== */}
-      {currentTab === "ws-device-access-logs" && (
-        <div className="flex flex-1 flex-col min-h-0">
-          <div className="shrink-0 border-b border-gray-100 bg-white px-3.5 py-2.5">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
-              <input
-                className="w-full rounded-xl bg-[#f4f5f7] py-2.5 pl-9 pr-3 text-sm focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500/20"
-                placeholder="搜索通行人员/单号/设备"
-                value={genericKeyword}
-                onChange={(e) => setGenericKeyword(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="flex-1 min-h-0 space-y-3 overflow-y-auto px-3.5 py-3 overscroll-contain">
-            {ACCESS_LOGS_MOCK.filter(
-              (log) =>
-                !genericKeyword ||
-                log.operator.includes(genericKeyword) ||
-                log.deviceName.includes(genericKeyword) ||
-                log.applyNo.includes(genericKeyword)
-            ).map((log) => (
-              <div
-                key={log.id}
-                className={`rounded-2xl border bg-white p-4 shadow-xs space-y-2.5 ${
-                  log.isWarning
-                    ? "border-rose-200 bg-rose-50/20"
-                    : "border-gray-100"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`size-2 rounded-full ${
-                        log.isWarning ? "bg-rose-500" : "bg-emerald-500"
-                      }`}
-                    />
-                    <h4 className="font-semibold text-sm text-gray-900">
-                      {log.eventType}
-                    </h4>
-                  </div>
-                  <span className="font-mono text-[11px] text-gray-400">
-                    {log.timestamp}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 bg-gray-50/70 p-2.5 rounded-xl">
-                  <div>
-                    <span className="text-gray-400">操作人：</span>
-                    <span className="font-medium text-gray-800">{log.operator}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">设备：</span>
-                    <span className="font-medium text-gray-800">{log.deviceName}</span>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="text-gray-400">位置：</span>
-                    <span className="font-medium text-gray-800">{log.warehouse}</span>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="text-gray-400">关联申请：</span>
-                    <span className="font-mono text-blue-600">{log.applyNo}</span>
-                  </div>
-                </div>
-
-                {log.warningDetail && (
-                  <p className="text-xs text-rose-600 bg-rose-50 p-2 rounded-lg leading-relaxed">
-                    {log.warningDetail}
-                  </p>
-                )}
               </div>
             ))}
           </div>

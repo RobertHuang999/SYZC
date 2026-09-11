@@ -1,6 +1,7 @@
 import type { DeviceWarningConfigDetail } from "../domain/types"
 import {
   DEVICE_WARNING_RULE_SCENARIOS,
+  getMetricThresholdForSubType,
   RULE_SCENARIO_BY_ID,
 } from "../../shared/mock/device-warning-scenarios"
 import { resolveDispositionEffects } from "../domain/disposition"
@@ -16,7 +17,11 @@ function buildScenarioExtension(
   const { hideUpgrade } = resolveDispositionEffects(scenario.dispositionMode)
   const isOnlineOnly =
     scenario.warningSubTypes.length === 1 && scenario.warningSubTypes[0] === "设备上线"
-  const hasTemperature = scenario.warningSubTypes.includes("温度异常")
+  const metricThreshold = scenario.warningSubTypes
+    .map((subType) =>
+      getMetricThresholdForSubType(subType, scenario.metricThresholds)
+    )
+    .find((threshold) => threshold)
 
   return {
     ruleUuid: `rule-${scenario.configId}-uuid`,
@@ -26,9 +31,9 @@ function buildScenarioExtension(
         ? "全局监听（所有新接入同类设备）"
         : `${scenario.ruleName} · ${scenario.deviceScope}`,
     newDeviceOnly: isOnlineOnly,
-    monitorThresholdMin: hasTemperature ? -5 : null,
-    monitorThresholdMax: hasTemperature ? 35 : null,
-    monitorThresholdUnit: hasTemperature ? "℃" : null,
+    monitorThresholdMin: metricThreshold?.min ?? null,
+    monitorThresholdMax: metricThreshold?.max ?? null,
+    monitorThresholdUnit: metricThreshold?.unit ?? null,
     notifyChannels: ["短信"],
     notifyTargets:
       scenario.dispositionMode === "RECORD_ONLY"
@@ -52,15 +57,23 @@ const detailExtensions: Record<string, DetailExtension> = Object.fromEntries(
 
 const defaultExtension = (
   configId: string,
-  warningType: string
+  warningSubTypes: string[]
 ): DetailExtension => ({
+  ...(() => {
+    const metricThreshold = warningSubTypes
+      .map((subType) => getMetricThresholdForSubType(subType))
+      .find((threshold) => threshold)
+    return {
+      monitorThresholdMin: metricThreshold?.min ?? null,
+      monitorThresholdMax: metricThreshold?.max ?? null,
+      monitorThresholdUnit: metricThreshold?.unit ?? null,
+    }
+  })(),
   ruleUuid: `rule-${configId}-uuid`,
-  warningSubTypes: ["默认子类型"],
+  warningSubTypes: warningSubTypes.length > 0 ? warningSubTypes : ["默认子类型"],
   deviceScopeDetail: "示例仓库 · DEV-001 ~ DEV-003",
   newDeviceOnly: false,
-  monitorThresholdMin: warningType.includes("物联") ? 0 : null,
-  monitorThresholdMax: warningType.includes("物联") ? 100 : null,
-  monitorThresholdUnit: warningType.includes("物联") ? "℃" : null,
+  // 物联事件只有明确匹配到数值型子类型时才展示阈值，避免把 CO2 等指标误标成温度。
   notifyChannels: [],
   notifyTargets: ["张主管(风控部)"],
   upgradeStrategy: "持续未解除 3 天后升级 ➔ 王总监(风控部)",
@@ -70,13 +83,15 @@ const defaultExtension = (
 
 export function getDeviceWarningConfigDetailExtension(
   configId: string,
-  warningType: string,
-  status: string
+  status: string,
+  warningSubTypes: string[] = []
 ): DetailExtension {
   const scenario = RULE_SCENARIO_BY_ID[configId]
   const base =
     detailExtensions[configId] ??
-    (scenario ? buildScenarioExtension(scenario) : defaultExtension(configId, warningType))
+    (scenario
+      ? buildScenarioExtension(scenario)
+      : defaultExtension(configId, warningSubTypes))
 
   if (status === "已失效" && !base.invalidReason) {
     return { ...base, invalidReason: "规则已失效" }

@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { LIST_BASE_PATH } from "../domain/constants"
+import { getUnlockApprovalDecision } from "../domain/eligibility"
 import type { UnlockApply } from "../domain/types"
 import { formatApplicant } from "../lib/detail-utils"
 import { UnlockApplyStatusBadge } from "./UnlockApplyStatusBadge"
@@ -76,7 +77,7 @@ export function UnlockApplyTable({
                   >
                     {detailLabel}
                   </Link>
-                  {item.status === "PENDING" && item.eligible && (
+                  {getUnlockApprovalDecision(item).canProcess && (
                     <button
                       type="button"
                       className="text-sm text-primary hover:underline"

@@ -8,7 +8,7 @@
 | 序号 | 菜单 | moduleId | 原型路由 | 文档 |
 | :---: | :--- | :--- | :--- | :--- |
 | 01 | 抵质押订单 | `ws-pledge-order-mgr` | `/m/module/ws-pledge-order-mgr` | [01-抵质押订单/](./01-抵质押订单/README.md) |
-| 02 | 监管订单 | `ws-supervision-order-mgr` | `/m/module/ws-supervision-order-mgr` | [02-监管订单/](./02-监管订单/README.md) |
+| 02 | 监管订单（当前关闭） | `ws-supervision-order-mgr` | 旧路由仅历史只读 | [02-监管订单/](./02-监管订单/README.md) |
 | 03 | 客户融资授信办理 | `ws-credit-process` | `/m/module/ws-credit-process` | [03-客户融资授信办理/](./03-客户融资授信办理/README.md) |
 | 04 | 线上抵质押办理 | `ws-online-pledge-process` | `/m/module/ws-online-pledge-process` | [04-线上抵质押办理/](./04-线上抵质押办理/README.md) |
 | 05 | 客户融资尽调办理 | `ws-due-diligence-process` | `/m/module/ws-due-diligence-process` | [05-客户融资尽调办理/](./05-客户融资尽调办理/README.md) |

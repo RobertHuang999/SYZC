@@ -106,12 +106,26 @@ export const riskDisclosureRecordsMock: RiskDisclosureRecord[] = [
   })),
   ...Array.from({ length: 10 }, (_, index) => {
     const day = String(5 + index).padStart(2, "0")
+    const warningType = extraTypes[index % extraTypes.length]
+    const isHistorical = ![
+      "解抵/质押超时",
+      "价格下跌",
+      "盘点异常",
+      "巡检异常",
+      "抵/质押率异常",
+      "贷中风控预警",
+      "物联穿透告警",
+    ].includes(warningType)
+    const orderType: RiskDisclosureRecord["orderType"] =
+      warningType === "解抵/质押/监管超时" ? "监管" : "抵/质押"
     return {
       recordId: `pub-gen-${String(index + 6).padStart(3, "0")}`,
       ruleName: extraRules[index % extraRules.length],
       orderNo: `PO202608-${String(200 + index).padStart(3, "0")}`,
+      orderType,
+      isHistorical,
       ownerName: extraOwners[index % extraOwners.length],
-      warningType: extraTypes[index % extraTypes.length],
+      warningType,
       warningContent: `已处理风险公示记录 #${index + 6}，${extraRules[index % extraRules.length]}触发`,
       snapshotImageStatus: index % 2 === 0 ? ("available" as const) : ("none" as const),
       warningTime: `2026-08-${day} 09:00:00`,

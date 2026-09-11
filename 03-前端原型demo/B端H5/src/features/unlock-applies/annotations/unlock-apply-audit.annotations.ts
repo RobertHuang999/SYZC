@@ -41,7 +41,7 @@ export const unlockApplyAuditH5ListAnnotations: PrototypeAnnotation[] = [
           {
             label: "P06 自审禁止（R11）",
             content:
-              "审批人不能审批自己发起的开锁申请；若为本人申请，卡片底部仅展示「详情 ▸」，不提供「去审批 ▸」操作。",
+              "运行时比较当前用户账号、申请人账号与配置快照审批节点；审批人不能审批自己发起的开锁申请。若为本人申请，卡片底部仅展示「详情 ▸」，不提供「去审批 ▸」操作。",
           },
           {
             label: "P01b 合作机构协同",

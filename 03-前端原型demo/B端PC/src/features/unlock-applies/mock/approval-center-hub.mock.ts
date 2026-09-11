@@ -14,7 +14,6 @@ import {
   Search,
   Shield,
   ShoppingCart,
-  UserCheck,
 } from "lucide-react"
 import { LIST_BASE_PATH, MY_APPLY_LIST_PATH } from "../domain/constants"
 
@@ -95,15 +94,6 @@ export const approvalCenterCardGroups: ApprovalCenterCardGroup[] = [
         label: "业务申请管理",
         path: "/工作中心/审批中心/业务管理审批/业务申请管理",
         icon: ClipboardList,
-        previewType: "business",
-        ...businessGroup,
-      },
-      {
-        id: "supervision-entrust",
-        label: "监管委托受理",
-        path: "/工作中心/审批中心/业务管理审批/监管委托受理",
-        icon: UserCheck,
-        badge: 39,
         previewType: "business",
         ...businessGroup,
       },
@@ -222,28 +212,6 @@ export type PolicyPreviewRow = {
 export const businessPendingPreviewMock: BusinessPendingPreviewRow[] = [
   {
     id: 1,
-    processType: "监管 / 监管报告",
-    ownerName: "动物公司1(监管)",
-    ownerCode: "11433422CNHTJGEQP9",
-    processStatus: "待分配",
-    goodsInfo: "水果-香蕉-海南-72斤",
-    safetyLine: "--",
-    initiator: "lxy (四川享宇科技有限公司)",
-    arrivedAt: "2026-05-25 15:26:28",
-  },
-  {
-    id: 2,
-    processType: "监管 / 监管报告",
-    ownerName: "华东铜业(监管)",
-    ownerCode: "22334455CNHTJGEQP8",
-    processStatus: "待分配",
-    goodsInfo: "电解铜-99.99%-32吨",
-    safetyLine: "--",
-    initiator: "wang5 (上海森云监管)",
-    arrivedAt: "2026-05-24 11:08:16",
-  },
-  {
-    id: 3,
     processType: "融资 / 尽调申请",
     ownerName: "华南橡胶贸易",
     ownerCode: "99887766CNHTJGEQP7",
@@ -254,7 +222,7 @@ export const businessPendingPreviewMock: BusinessPendingPreviewRow[] = [
     arrivedAt: "2026-05-23 09:42:03",
   },
   {
-    id: 4,
+    id: 2,
     processType: "仓储 / 入库预约",
     ownerName: "西南铝业",
     ownerCode: "55667788CNHTJGEQP6",
@@ -265,15 +233,15 @@ export const businessPendingPreviewMock: BusinessPendingPreviewRow[] = [
     arrivedAt: "2026-05-22 16:15:44",
   },
   {
-    id: 5,
-    processType: "监管 / 委托受理",
-    ownerName: "北方热轧物流",
-    ownerCode: "11223344CNHTJGEQP5",
-    processStatus: "待分配",
-    goodsInfo: "热轧卷板-Q235B-56吨",
+    id: 3,
+    processType: "交易 / 采购需求",
+    ownerName: "西部有色贸易",
+    ownerCode: "66778899CNHTJGEQP4",
+    processStatus: "待确认",
+    goodsInfo: "铝锭-ADC12-64吨",
     safetyLine: "--",
-    initiator: "chen7 (天津监管)",
-    arrivedAt: "2026-05-21 14:30:12",
+    initiator: "liu6 (重庆贸易)",
+    arrivedAt: "2026-05-20 10:18:26",
   },
 ]
 

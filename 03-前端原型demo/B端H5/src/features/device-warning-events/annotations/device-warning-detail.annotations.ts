@@ -57,7 +57,7 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
           },
           {
             label: "规则快照",
-            content: "展示触发时的规则名称与监控阈值快照，保持历史数据一致性。",
+            content: "展示触发时的规则名称与监控阈值快照；温度、湿度和气体浓度均按最低值/最高值展示，例如二氧化碳 < 400 ppm 或 > 1500 ppm，保持历史数据一致性。",
           },
           {
             label: "预警时间",

@@ -30,7 +30,7 @@ const orderWarningConfigSeeds: OrderWarningConfigSeed[] = [
       { type: "巡检", levels: "L3" },
       { type: "超时", levels: "L2" },
     ],
-    status: "生效中",
+    status: "已失效",
     updatedAt: "2026-08-20 16:30:22",
   },
   {
@@ -70,7 +70,7 @@ const orderWarningConfigSeeds: OrderWarningConfigSeed[] = [
       { type: "超时", levels: "L3" },
       { type: "盘点", levels: "L2" },
     ],
-    status: "生效中",
+    status: "已失效",
     updatedAt: "2026-08-17 14:05:33",
   },
   {
@@ -97,7 +97,7 @@ const orderWarningConfigSeeds: OrderWarningConfigSeed[] = [
       { type: "巡检", levels: "L2/L3" },
       { type: "超时", levels: "L2" },
     ],
-    status: "生效中",
+    status: "已失效",
     updatedAt: "2026-08-15 17:22:45",
   },
   {
@@ -133,7 +133,7 @@ const orderWarningConfigSeeds: OrderWarningConfigSeed[] = [
       { type: "巡检", levels: "L3" },
       { type: "盘点", levels: "L2" },
     ],
-    status: "生效中",
+    status: "已失效",
     updatedAt: "2026-08-12 15:30:00",
   },
   {

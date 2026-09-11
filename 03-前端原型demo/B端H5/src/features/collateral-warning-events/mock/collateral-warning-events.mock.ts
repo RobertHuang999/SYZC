@@ -6,7 +6,7 @@ const l3 = getSeverityLevelByCode("L3")!
 const l4 = getSeverityLevelByCode("L4")!
 const l5 = getSeverityLevelByCode("L5")!
 
-// 严格对齐 PC 端 7 个预警大类；设备具体异常保留在物联穿透事实中
+// 当前实时链路严格对齐 PC 端 7 个预警大类；设备具体异常保留在物联穿透事实中。
 const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
   // 1. 抵/质押率异常 (L4 · 订单配置触发 · 未公示 · 有抓拍图)
   {
@@ -152,26 +152,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: null,
   },
-  // 8. 解抵/质押/监管超时 (L3 · 订单配置触发 · 未公示)
-  {
-    orderNo: "PO202608-55",
-    ruleName: "监管到期未解监管预警",
-    warningType: "解抵/质押/监管超时",
-    severityLevelId: l3.severityLevelId,
-    severityCode: l3.severityCode,
-    severityName: l3.severityName,
-    severityColor: l3.severityColor,
-    warningSource: "订单配置触发",
-    warningContent: "当前监管物 热轧卷板 Q235B（1,250.00吨）未在 2026年08月25日 完成解监管！（预警阈值 3 天）",
-    snapshotImageStatus: "none",
-    warningTime: "2026-08-25 09:00:00",
-    processedTime: null,
-    publicityStatus: "未公示",
-    processedBy: null,
-    warningStatus: "OPEN_VALID",
-    deviceEventId: null,
-  },
-  // 9. 物联穿透告警：摄像头图像识别异常 (L5 · 人体入侵)
+  // 8. 物联穿透告警：摄像头图像识别异常 (L5 · 人体入侵)
   {
     orderNo: "PO202608-66",
     ruleName: "非作业时间非法入侵摄像头识别",
@@ -190,7 +171,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: "evt-002",
   },
-  // 10. 物联穿透告警：人脸门禁异常 (L4 · 门禁超时)
+  // 9. 物联穿透告警：人脸门禁异常 (L4 · 门禁超时)
   {
     orderNo: "PO202608-77",
     ruleName: "冷库主通道人脸门禁长时间开启",
@@ -209,7 +190,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: "dev-evt-2026081502",
   },
-  // 11. 物联穿透告警：物联传感器异常 (L3 · 库温超标 · 已结案 · 有效 · 未公示)
+  // 10. 物联穿透告警：物联传感器异常 (L3 · 库温超标 · 已结案 · 有效 · 未公示)
   {
     orderNo: "PO202607-88",
     ruleName: "冷链冷库温度超上限预警",
@@ -233,7 +214,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
       releaseSnapshotImage: "cold-snapshot-normal.jpg",
     },
   },
-  // 12. 物联穿透告警：设备GPS异常 (L4 · 电子围栏越界)
+  // 11. 物联穿透告警：设备GPS异常 (L4 · 电子围栏越界)
   {
     orderNo: "PO202606-20",
     ruleName: "在途押品运输车载GPS偏航告警",
@@ -267,7 +248,6 @@ const seedEventIds = [
   "cw-005",
   "cw-006",
   "cw-007",
-  "cw-008",
   "cw-009",
   "cw-010",
   "cw-011",
@@ -278,4 +258,33 @@ export const collateralWarningEventsMock: CollateralWarningEvent[] =
   seedEvents.map((event, index) => ({
     ...event,
     eventId: seedEventIds[index] ?? `col-seed-${String(index + 1).padStart(3, "0")}`,
+  }))
+
+// 历史监管预警仅供旧链接查询、详情、审计和资料查看，不进入实时列表。
+const archivedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
+  {
+    orderNo: "PO202608-55",
+    orderType: "监管",
+    ruleName: "监管到期未解监管预警（历史快照）",
+    warningType: "解抵/质押/监管超时",
+    severityLevelId: l3.severityLevelId,
+    severityCode: l3.severityCode,
+    severityName: l3.severityName,
+    severityColor: l3.severityColor,
+    warningSource: "历史",
+    warningContent: "【历史归档】监管物 热轧卷板 Q235B（1,250.00吨）未在 2026年08月25日 完成解监管，历史规则已停止触发",
+    snapshotImageStatus: "none",
+    warningTime: "2026-08-25 09:00:00",
+    processedTime: null,
+    publicityStatus: "未公示",
+    processedBy: null,
+    warningStatus: "OPEN_VALID",
+    deviceEventId: null,
+  },
+]
+
+export const collateralWarningArchiveEventsMock: CollateralWarningEvent[] =
+  archivedEvents.map((event, index) => ({
+    ...event,
+    eventId: ["cw-008"][index] ?? `col-archive-${String(index + 1).padStart(3, "0")}`,
   }))

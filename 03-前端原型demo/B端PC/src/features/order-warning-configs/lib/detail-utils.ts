@@ -17,7 +17,6 @@ import {
 export const ORDER_STRATEGY_DEFINITIONS: {
   key: OrderWarningStrategyKey
   name: string
-  disabledForSupervision?: boolean
   defaultParams: Record<string, string>
 }[] = [
   {
@@ -28,7 +27,6 @@ export const ORDER_STRATEGY_DEFINITIONS: {
   {
     key: "ltvDual",
     name: "抵/质押率双控预警",
-    disabledForSupervision: true,
     defaultParams: {
       marginCallLtv: "75",
       closeOutLtv: "85",
@@ -42,7 +40,7 @@ export const ORDER_STRATEGY_DEFINITIONS: {
   },
   {
     key: "timeout",
-    name: "解抵/质押/监管超时监控",
+    name: "解抵/质押超时监控",
     defaultParams: {},
   },
   {
@@ -53,7 +51,6 @@ export const ORDER_STRATEGY_DEFINITIONS: {
   {
     key: "midLoan",
     name: "贷中风控模型预警",
-    disabledForSupervision: true,
     defaultParams: { modelVersion: "默认风控模型 v2" },
   },
 ]
@@ -71,12 +68,23 @@ export function getOrderWarningConfigById(
   }
 
   const extension = getOrderWarningConfigDetailExtension(base.configId, base)
-  return { ...base, ...extension }
+  return {
+    ...base,
+    ...extension,
+    invalidReason:
+      base.orderType === "监管"
+        ? "监管订单当前关闭，历史规则仅供审计"
+        : extension.invalidReason,
+  }
 }
 
 export function getDetailHeaderActions(
-  status: OrderWarningConfigDetail["status"]
+  status: OrderWarningConfigDetail["status"],
+  orderType?: OrderWarningConfigDetail["orderType"]
 ): Array<"back" | "edit" | "delete"> {
+  if (orderType === "监管") {
+    return ["back"]
+  }
   return status === "生效中" ? ["back", "edit", "delete"] : ["back", "delete"]
 }
 

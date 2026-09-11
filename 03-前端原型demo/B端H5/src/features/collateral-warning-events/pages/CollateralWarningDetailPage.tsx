@@ -63,6 +63,8 @@ export function CollateralWarningDetailPage() {
   }
 
   const isPenetration = event.warningSource === "物联穿透" || Boolean(event.deviceEventId)
+  const isHistoricalReadOnly =
+    event.warningSource === "历史" || event.orderType === "监管"
   const isClosed = event.warningStatus === WARNING_STATUS.CLOSED_VALID
   const isInvalid = event.warningStatus === WARNING_STATUS.OPEN_INVALID
 
@@ -92,6 +94,11 @@ export function CollateralWarningDetailPage() {
               "h5-collateral-warning-detail-facts",
             ]}
           >
+            {isHistoricalReadOnly && (
+              <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900">
+                历史监管记录 · 只读。当前监管订单已关闭，本记录仅支持详情、审计和资料查看，不提供解除、公示或其他业务写操作。
+              </div>
+            )}
             <SectionCard
             title="预警事实摘要"
             indicatorColor="#1875f0"

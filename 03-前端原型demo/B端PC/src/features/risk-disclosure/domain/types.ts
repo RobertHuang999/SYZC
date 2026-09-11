@@ -1,11 +1,15 @@
 export const RISK_DISCLOSURE_WARNING_TYPES = [
-  "解抵/质押/监管超时",
+  "解抵/质押超时",
   "价格下跌",
   "盘点异常",
   "巡检异常",
   "抵/质押率异常",
   "贷中风控预警",
   "物联穿透告警",
+] as const
+
+export const ARCHIVED_RISK_DISCLOSURE_WARNING_TYPES = [
+  "解抵/质押/监管超时",
   "图像识别异常",
   "物联设备",
   "智能挂锁异常",
@@ -14,7 +18,8 @@ export const RISK_DISCLOSURE_WARNING_TYPES = [
 ] as const
 
 export type RiskDisclosureWarningType =
-  (typeof RISK_DISCLOSURE_WARNING_TYPES)[number]
+  | (typeof RISK_DISCLOSURE_WARNING_TYPES)[number]
+  | (typeof ARCHIVED_RISK_DISCLOSURE_WARNING_TYPES)[number]
 
 export type DisclosureStatus = "未公示" | "已公示" | "已取消"
 
@@ -24,6 +29,8 @@ export type RiskDisclosureRecord = {
   recordId: string
   ruleName: string
   orderNo: string
+  orderType?: "抵/质押" | "监管"
+  isHistorical?: boolean
   ownerName: string
   warningType: RiskDisclosureWarningType
   warningContent: string

@@ -16,6 +16,8 @@ import { PledgeOrderPlaceholderPage } from "@/pages/PledgeOrderPlaceholderPage"
 import { ProfilePage } from "@/pages/ProfilePage"
 import { TasksManagementPage } from "@/pages/TasksManagementPage"
 import { WorkspacePage } from "@/pages/WorkspacePage"
+import { ReadOnlyDetailPage } from "@/features/readonly-risk-views/pages/ReadOnlyDetailPage"
+import { ReadOnlyListPage } from "@/features/readonly-risk-views/pages/ReadOnlyListPage"
 
 export function AppRoutes() {
   return (
@@ -72,6 +74,23 @@ export function AppRoutes() {
       <Route
         path="/m/iot/device-warning-events/:id/release"
         element={<DeviceWarningEventReleasePage />}
+      />
+
+      <Route
+        path="/m/risk/mid-loan"
+        element={<ReadOnlyListPage module="mid-loan" />}
+      />
+      <Route
+        path="/m/risk/mid-loan/:id"
+        element={<ReadOnlyDetailPage module="mid-loan" />}
+      />
+      <Route
+        path="/m/risk/disclosures"
+        element={<ReadOnlyListPage module="risk-disclosure" />}
+      />
+      <Route
+        path="/m/risk/disclosures/:id"
+        element={<ReadOnlyDetailPage module="risk-disclosure" />}
       />
 
       <Route

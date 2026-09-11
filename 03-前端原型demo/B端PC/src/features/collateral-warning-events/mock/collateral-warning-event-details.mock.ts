@@ -9,7 +9,7 @@ import type {
  * 结构化构建真实的押品订单与仓储位置快照（严格对齐字段清单第四章）
  */
 function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnapshot {
-  const isCustody = event.orderNo.includes("99") || event.warningType.includes("监管")
+  const isCustody = event.orderType === "监管"
   if (event.warningType === "抵/质押率异常") {
     return {
       orderType: "抵/质押",
@@ -87,7 +87,7 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
   }
   if (event.warningType === "盘点异常") {
     return {
-      orderType: "监管",
+      orderType: isCustody ? "监管" : "抵/质押",
       ownerCompany: "山东寿光农产品现货物流有限公司",
       cargoItems: [
         {
@@ -188,12 +188,18 @@ function buildTriggerSnapshot(event: CollateralWarningEvent): CollateralTriggerS
       ruleVersion: "Version 3 (v3.1)",
     }
   }
-  if (event.warningType === "解抵/质押/监管超时") {
+  if (
+    event.warningType === "解抵/质押超时" ||
+    event.warningType === "解抵/质押/监管超时"
+  ) {
     return {
-      metricName: "监管业务存续期限",
+      metricName: event.orderType === "监管" ? "监管业务存续期限" : "抵/质押业务存续期限",
       triggerValue: "逾期 15 天",
       thresholdValue: "约定期限: 2026-06-01",
-      deviation: "监管期满未办理解除或展期",
+      deviation:
+        event.orderType === "监管"
+          ? "监管期满未办理解除或展期"
+          : "抵/质押期限届满未办理解押或展期",
       ruleVersion: "Version 1 (v1.0)",
     }
   }

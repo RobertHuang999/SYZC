@@ -18,6 +18,7 @@ export type UnlockApprovalConfig = {
   deviceCodes: string[]
   deviceSummary: string
   approvalMode: ApprovalMode
+  approvalNodeAccounts?: string[]
   timeoutHours: number
   configVersion: number
   status: ConfigStatus

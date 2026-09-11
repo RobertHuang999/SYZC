@@ -8,7 +8,7 @@ export const deviceManagementHubAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "设备管理 · 移动端子 Tab 入口 hub",
     content:
-      "工作台 → 仓储 → 设备管理。本页聚合 5 个子 Tab：监控设备 / 物联设备 / 门禁设备 / GPS设备 / 门禁事务记录，提供 6.2 门禁设备与开锁审批专属入口。",
+      "工作台 → 仓储 → 设备管理。本页聚合 4 个子 Tab：监控设备 / 物联设备 / 门禁设备 / GPS设备；6.2 当前交付门禁设备与开锁审批专属入口。",
     details: [
       {
         title: "移动端导航与路由分流",
@@ -62,7 +62,7 @@ export const deviceManagementHubAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "其余 Tab",
-            content: "监控/物联/GPS/门禁事务 → `/m/module/{id}` 通用占位页（非 6.2 范围）。",
+            content: "监控/物联/GPS → `/m/module/{id}` 通用占位页（当前不属于 6.2 门禁交付范围）。",
           },
         ],
       },

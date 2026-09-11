@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react"
 import { withResolvedCredentialExpiry } from "./credential-expiry"
 import { unlockAppliesMockSeed } from "../mock/unlock-applies.mock"
+import { CURRENT_APPROVER_ACCOUNT, CURRENT_APPROVER_NAME } from "../domain/constants"
+import { getUnlockApprovalDecision } from "../domain/eligibility"
 import type { UnlockApply } from "../domain/types"
 
-const STORAGE_KEY = "SYZC_PC_UNLOCK_APPLIES_V3"
+const STORAGE_KEY = "SYZC_PC_UNLOCK_APPLIES_V4"
 
 let items: UnlockApply[] = loadInitial()
 const listeners = new Set<() => void>()
@@ -62,34 +64,37 @@ export function approveUnlockApply(applyNo: string, opinion: string = ""): void 
   const validToStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} 23:59:59`
   const pwd = Math.floor(100000 + Math.random() * 900000).toString()
 
-  updateUnlockApply(applyNo, (item) => ({
-    ...item,
-    status: "APPROVED",
-    eligible: false,
-    finalConclusion: "通过",
-    approvalRecords: [
-      ...item.approvalRecords,
-      {
-        nodeOrder: item.approvalRecords.length + 1,
-        handlerName: "当前审批人",
-        handlerAccount: "auditor",
-        result: "通过",
-        opinion: opinion.trim() || "同意",
-        processedTime: nowStr,
-      },
-    ],
-    credential:
-      item.credential.status === "NOT_GENERATED"
-        ? {
-            credentialNo: `CRED-${Date.now()}`,
-            status: "DELIVERED",
-            password: pwd,
-            passwordMasked: pwd,
-            validFrom: item.deviceType === "挂锁门禁" ? undefined : nowStr,
-            validTo: item.deviceType === "挂锁门禁" ? undefined : validToStr,
-          }
-        : item.credential,
-  }))
+  updateUnlockApply(applyNo, (item) => {
+    if (!getUnlockApprovalDecision(item).canProcess) return item
+
+    return {
+      ...item,
+      status: "APPROVED",
+      finalConclusion: "通过",
+      approvalRecords: [
+        ...item.approvalRecords,
+        {
+          nodeOrder: item.approvalRecords.length + 1,
+          handlerName: CURRENT_APPROVER_NAME,
+          handlerAccount: CURRENT_APPROVER_ACCOUNT,
+          result: "通过",
+          opinion: opinion.trim() || "同意",
+          processedTime: nowStr,
+        },
+      ],
+      credential:
+        item.credential.status === "NOT_GENERATED"
+          ? {
+              credentialNo: `CRED-${Date.now()}`,
+              status: "DELIVERED",
+              password: pwd,
+              passwordMasked: pwd,
+              validFrom: item.deviceType === "挂锁门禁" ? undefined : nowStr,
+              validTo: item.deviceType === "挂锁门禁" ? undefined : validToStr,
+            }
+          : item.credential,
+    }
+  })
 }
 
 /** 审批驳回：更新状态为 REJECTED，记录驳回理由并追加审批记录 */
@@ -98,24 +103,27 @@ export function rejectUnlockApply(applyNo: string, reason: string): void {
   const pad = (n: number) => String(n).padStart(2, "0")
   const nowStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`
 
-  updateUnlockApply(applyNo, (item) => ({
-    ...item,
-    status: "REJECTED",
-    eligible: false,
-    finalConclusion: "驳回",
-    rejectReason: reason.trim(),
-    approvalRecords: [
-      ...item.approvalRecords,
-      {
-        nodeOrder: item.approvalRecords.length + 1,
-        handlerName: "当前审批人",
-        handlerAccount: "auditor",
-        result: "驳回",
-        opinion: reason.trim(),
-        processedTime: nowStr,
-      },
-    ],
-  }))
+  updateUnlockApply(applyNo, (item) => {
+    if (!getUnlockApprovalDecision(item).canProcess) return item
+
+    return {
+      ...item,
+      status: "REJECTED",
+      finalConclusion: "驳回",
+      rejectReason: reason.trim(),
+      approvalRecords: [
+        ...item.approvalRecords,
+        {
+          nodeOrder: item.approvalRecords.length + 1,
+          handlerName: CURRENT_APPROVER_NAME,
+          handlerAccount: CURRENT_APPROVER_ACCOUNT,
+          result: "驳回",
+          opinion: reason.trim(),
+          processedTime: nowStr,
+        },
+      ],
+    }
+  })
 }
 
 export function findUnlockApply(applyNo?: string): UnlockApply | undefined {

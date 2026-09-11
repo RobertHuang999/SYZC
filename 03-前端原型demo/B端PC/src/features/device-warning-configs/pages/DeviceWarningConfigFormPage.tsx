@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { ArrowLeftIcon, InfoIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,7 @@ import {
   createEmptyFormValues,
   detailToFormValues,
   getDeviceWarningConfigById,
+  incrementDeviceWarningConfigVersion,
 } from "../lib/detail-utils"
 import { validateDeviceWarningConfig } from "../lib/validation"
 import { PrototypeAnnotationProvider, PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
@@ -49,6 +50,7 @@ import {
 } from "../domain/disposition"
 
 const NOTIFY_CHANNEL_OPTIONS = ["短信", "邮件"] as const
+const DEVICE_WARNING_CONFIG_LIST_PATH = "/物联网IOT与预警/预警配置/设备预警配置"
 
 export function DeviceWarningConfigFormPage() {
   const { id } = useParams()
@@ -66,6 +68,19 @@ export function DeviceWarningConfigFormPage() {
   const [deviceDialogOpen, setDeviceDialogOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [dispositionConfirmOpen, setDispositionConfirmOpen] = useState(false)
+  const [dirty, setDirty] = useState(false)
+
+  useEffect(() => {
+    if (!dirty) return
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+      event.returnValue = ""
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload)
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+  }, [dirty])
 
   if (isEdit && existing?.status === "已失效") {
     return (
@@ -120,6 +135,7 @@ export function DeviceWarningConfigFormPage() {
     metric: keyof DeviceWarningConfigFormValues["metricThresholds"],
     patch: Partial<MetricThreshold>
   ) => {
+    setDirty(true)
     setForm((current) => ({
       ...current,
       metricThresholds: {
@@ -150,10 +166,12 @@ export function DeviceWarningConfigFormPage() {
     (hasTemp || hasHumidity || hasCO2 || hasOxygen || hasSmoke)
 
   const updateForm = (patch: Partial<DeviceWarningConfigFormValues>) => {
+    setDirty(true)
     setForm((current) => ({ ...current, ...patch }))
   }
 
   const handleWarningTypeChange = (type: DeviceWarningType) => {
+    setDirty(true)
     const available = DEVICE_WARNING_SUB_TYPES[type] || []
     const defaultSubs = available.length > 0 ? [available[0]] : []
     const dispositionMode = getRecommendedDisposition(defaultSubs)
@@ -171,6 +189,7 @@ export function DeviceWarningConfigFormPage() {
   }
 
   const handleDispositionChange = (mode: DispositionMode) => {
+    setDirty(true)
     const effects = resolveDispositionEffects(mode)
     setForm((current) => ({
       ...current,
@@ -182,6 +201,7 @@ export function DeviceWarningConfigFormPage() {
 
   const toggleSubType = (subType: string) => {
     if (isEdit) return
+    setDirty(true)
     setForm((current) => {
       const exists = current.warningSubTypes.includes(subType)
       if (exists && current.warningSubTypes.length === 1) {
@@ -220,6 +240,7 @@ export function DeviceWarningConfigFormPage() {
   }
 
   const toggleChannel = (channel: string) => {
+    setDirty(true)
     setForm((current) => ({
       ...current,
       notifyChannels: current.notifyChannels.includes(channel)
@@ -229,10 +250,26 @@ export function DeviceWarningConfigFormPage() {
   }
 
   const performSave = () => {
-    setToastMessage("保存成功")
+    const nextVersion =
+      isEdit && id
+        ? incrementDeviceWarningConfigVersion(id, form.version ?? existing?.version ?? 0)
+        : 1
+    setForm((current) => ({ ...current, version: nextVersion }))
+    setDirty(false)
+    setToastMessage(
+      isEdit ? `保存成功，规则 Version 已更新为 v${nextVersion}` : "保存成功，规则 Version v1"
+    )
     window.setTimeout(() => {
-      navigate("/物联网IOT与预警/预警配置/设备预警配置")
+      navigate(DEVICE_WARNING_CONFIG_LIST_PATH)
     }, 800)
+  }
+
+  const handleNavigateAway = () => {
+    if (dirty && !window.confirm("当前有未保存的规则修改，确认离开吗？")) {
+      return
+    }
+
+    navigate(DEVICE_WARNING_CONFIG_LIST_PATH)
   }
 
   const handleSave = () => {
@@ -264,12 +301,10 @@ export function DeviceWarningConfigFormPage() {
               {pageTitle}
             </h1>
             <div className="flex flex-wrap gap-2">
-              <Link to="/物联网IOT与预警/预警配置/设备预警配置">
-                <Button variant="outline">
-                  <ArrowLeftIcon />
-                  取消
-                </Button>
-              </Link>
+              <Button variant="outline" onClick={handleNavigateAway}>
+                <ArrowLeftIcon />
+                取消
+              </Button>
               <Button onClick={handleSave}>保存并生效</Button>
             </div>
           </div>
@@ -473,6 +508,17 @@ export function DeviceWarningConfigFormPage() {
                   </SelectContent>
                 </Select>
               </div>
+              {isEdit && (
+                <div className="space-y-2">
+                  <Label>当前规则 Version</Label>
+                  <div className="flex h-10 items-center rounded-md border bg-muted/30 px-3 text-sm font-semibold">
+                    v{form.version ?? existing?.version ?? 1}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    本次保存成功后 Version +1，既有未处理预警流水不回写（C08）。
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </PrototypeAnnotationTarget>
@@ -686,24 +732,40 @@ export function DeviceWarningConfigFormPage() {
                             单位: ppm
                           </span>
                         </div>
-                        <div className="space-y-1 pt-1">
-                          <span className="text-xs text-muted-foreground">浓度告警上限</span>
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="number"
-                              min={0}
-                              value={form.metricThresholds.co2.max}
-                              onChange={(e) =>
-                                updateMetricThreshold("co2", { max: e.target.value })
-                              }
-                              placeholder="如: 1500"
-                              className="max-w-[200px]"
-                            />
-                            <span className="text-xs text-muted-foreground">ppm</span>
+                        <div className="grid grid-cols-2 gap-2 pt-1">
+                          <div className="space-y-1">
+                            <span className="text-xs text-muted-foreground">最低浓度 (Min)</span>
+                            <div className="flex items-center gap-1">
+                              <Input
+                                type="number"
+                                min={0}
+                                value={form.metricThresholds.co2.min}
+                                onChange={(e) =>
+                                  updateMetricThreshold("co2", { min: e.target.value })
+                                }
+                                placeholder="如: 400"
+                              />
+                              <span className="text-xs text-muted-foreground">ppm</span>
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <span className="text-xs text-muted-foreground">最高浓度 (Max)</span>
+                            <div className="flex items-center gap-1">
+                              <Input
+                                type="number"
+                                min={0}
+                                value={form.metricThresholds.co2.max}
+                                onChange={(e) =>
+                                  updateMetricThreshold("co2", { max: e.target.value })
+                                }
+                                placeholder="如: 1500"
+                              />
+                              <span className="text-xs text-muted-foreground">ppm</span>
+                            </div>
                           </div>
                         </div>
                         <p className="text-[11px] text-muted-foreground">
-                          触发规则：环境 CO2 浓度超出设定上限（如 1500 ppm）时触发预警
+                          触发规则：环境 CO2 浓度 &lt; 最低值或 &gt; 最高值时触发预警
                         </p>
                       </div>
                     )}

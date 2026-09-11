@@ -7,6 +7,8 @@ import { SeverityLevelFiltersPanel } from "../components/SeverityLevelFilters"
 import { SeverityLevelTable } from "../components/SeverityLevelTable"
 import { filterSeverityLevels } from "../lib/list-utils"
 import { severityLevelsMock } from "../mock/severity-levels.mock"
+import { deviceWarningConfigsMock } from "@/features/device-warning-configs/mock/device-warning-configs.mock"
+import { orderWarningConfigsMock } from "@/features/order-warning-configs/mock/order-warning-configs.mock"
 
 import { PrototypeAnnotationProvider, PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { severityLevelListAnnotations } from "../annotations/severity-level-list.annotations"
@@ -32,6 +34,21 @@ export function SeverityLevelListPage() {
   const showToast = (message: string) => {
     setToastMessage(message)
     window.setTimeout(() => setToastMessage(null), 2500)
+  }
+
+  const getActiveReferenceCount = (record: SeverityLevelRecord) => {
+    const deviceReferences = deviceWarningConfigsMock.filter(
+      (config) => config.status === "生效中" && config.severityLevelId === record.levelId
+    ).length
+    const orderReferences = orderWarningConfigsMock.filter(
+      (config) =>
+        config.status === "生效中" &&
+        config.enabledItems.some((item) =>
+          item.levels.split("/").includes(record.severityCode)
+        )
+    ).length
+
+    return deviceReferences + orderReferences
   }
 
   const handleReorder = (fromIndex: number, toIndex: number) => {
@@ -103,6 +120,19 @@ export function SeverityLevelListPage() {
             }
           }}
           onConfirm={(record) => {
+            if (records.length <= 2) {
+              showToast("删除被阻断：租户至少保留 2 档预警等级（R08）")
+              return
+            }
+
+            const referenceCount = getActiveReferenceCount(record)
+            if (referenceCount > 0) {
+              showToast(
+                `删除被阻断：该等级已被 ${referenceCount} 条生效规则引用，请先解绑或改为停用（R09）`
+              )
+              return
+            }
+
             setRecords((current) => current.filter((item) => item.levelId !== record.levelId))
             setDeleteTarget(null)
             showToast("删除成功")

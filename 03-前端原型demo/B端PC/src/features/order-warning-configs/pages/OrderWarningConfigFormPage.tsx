@@ -75,7 +75,7 @@ export function OrderWarningConfigFormPage() {
   }
 
   const pageTitle = isEdit ? `编辑订单规则 — ${form.ruleName}` : "新增订单规则"
-  const isSupervision = form.orderType === "监管"
+  const isHistoricalSupervision = existing?.orderType === "监管"
   const selectedOrder = form.orderNo ? getMockOrderByNo(form.orderNo) : undefined
   const visibleGoods =
     selectedOrder?.goodsBatches.filter((batch) => batch.goodsLabel.trim()) ?? []
@@ -168,6 +168,25 @@ export function OrderWarningConfigFormPage() {
     navigate("/物联网IOT与预警/预警配置/订单预警配置")
   }
 
+  if (isHistoricalSupervision && existing) {
+    return (
+      <div className="space-y-4 p-6">
+        <Link to={`/物联网IOT与预警/预警配置/订单预警配置/详情/${existing.configId}`}>
+          <Button variant="outline">
+            <ArrowLeftIcon />
+            返回详情
+          </Button>
+        </Link>
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-8 text-center">
+          <h1 className="text-xl font-semibold text-amber-950">监管订单当前关闭</h1>
+          <p className="mt-2 text-sm text-amber-900">
+            该规则属于历史监管订单配置，仅支持详情、审计和资料查看，不允许编辑或保存。
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <PrototypeAnnotationProvider
       title={`${pageTitle} · 原型批注`}
@@ -231,7 +250,7 @@ export function OrderWarningConfigFormPage() {
                       <SelectItem value="none" disabled>
                         请选择关联订单
                       </SelectItem>
-                      {MOCK_ORDERS.map((order) => (
+                      {MOCK_ORDERS.filter((order) => order.orderType === "抵/质押").map((order) => (
                         <SelectItem key={order.orderNo} value={order.orderNo}>
                           <span className="font-mono font-medium text-foreground">{order.orderNo}</span>
                           <span className="text-muted-foreground ml-1.5 text-xs">
@@ -284,7 +303,6 @@ export function OrderWarningConfigFormPage() {
             <CardContent className="space-y-4">
               {ORDER_STRATEGY_DEFINITIONS.map((def, index) => {
                 const strategy = form.strategies[def.key]
-                const disabled = Boolean(def.disabledForSupervision && isSupervision)
 
                 return (
                   <div key={def.key} className="rounded-lg border p-4">
@@ -293,7 +311,6 @@ export function OrderWarningConfigFormPage() {
                         <input
                           type="checkbox"
                           checked={strategy.enabled}
-                          disabled={disabled}
                           onChange={(event) => {
                             const enabled = event.target.checked
                             updateStrategy(def.key, {
@@ -325,11 +342,6 @@ export function OrderWarningConfigFormPage() {
                         <span className="font-medium">
                           策略 {index + 1}：{def.name}
                         </span>
-                        {disabled && (
-                          <span className="text-sm text-muted-foreground">
-                            监管订单不可用
-                          </span>
-                        )}
                       </div>
                       {strategy.enabled && (
                         <Button

@@ -1,6 +1,6 @@
 // 严格对齐《押品预警信息字段清单》
 export const COLLATERAL_WARNING_TYPES = [
-  "解抵/质押/监管超时",
+  "解抵/质押超时",
   "价格下跌",
   "盘点异常",
   "巡检异常",
@@ -9,7 +9,12 @@ export const COLLATERAL_WARNING_TYPES = [
   "物联穿透告警",
 ] as const
 
-export type CollateralWarningType = (typeof COLLATERAL_WARNING_TYPES)[number]
+// 旧监管超时类型只允许出现在历史归档记录，不进入当前筛选和新触发链路。
+export const ARCHIVED_COLLATERAL_WARNING_TYPES = ["解抵/质押/监管超时"] as const
+
+export type CollateralWarningType =
+  | (typeof COLLATERAL_WARNING_TYPES)[number]
+  | (typeof ARCHIVED_COLLATERAL_WARNING_TYPES)[number]
 
 export const WARNING_SOURCES = [
   "订单配置触发",
@@ -42,6 +47,7 @@ export type WarningStatus =
 export type CollateralWarningEvent = {
   eventId: string // 预警信息唯一标识
   orderNo: string // 预警订单
+  orderType?: "抵/质押" | "监管" // 历史监管归档记录显式保留订单类型
   ruleName?: string // 预警规则名称
   warningType: CollateralWarningType // 预警类型
   severityLevelId: string

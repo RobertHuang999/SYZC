@@ -158,7 +158,7 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "监控阈值快照",
-            content: "如【图像识别置信度≥85% 且 目标类型=人体】或【库内温度 > 35℃】。",
+            content: "如【图像识别置信度≥85% 且 目标类型=人体】、【库内温度 < -5℃ 或 > 35℃】或【二氧化碳 < 400 ppm 或 > 1500 ppm】。",
           },
           {
             label: "规则 Version 快照 (ruleVersion)",

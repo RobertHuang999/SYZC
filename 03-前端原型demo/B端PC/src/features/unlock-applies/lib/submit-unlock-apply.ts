@@ -47,6 +47,7 @@ function buildConfigSnapshot(config: UnlockApprovalConfig): ConfigSnapshot {
     configVersion: config.configVersion,
     approvalMode: config.approvalMode,
     approvalNodes: `${config.configName} · ${config.approvalMode}`,
+    approvalNodeAccounts: config.approvalNodeAccounts,
     timeoutHours: config.timeoutHours,
   }
 }
@@ -99,7 +100,6 @@ export function submitUnlockApply(
     configSnapshot: buildConfigSnapshot(matchedConfig),
     approvalRecords: [],
     credential: { status: "NOT_GENERATED" },
-    eligible: true,
     needsApproval: true,
     ...APPLICANT,
   }

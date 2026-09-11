@@ -15,7 +15,7 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           {
             label: "逐条保存流转图",
             content: `flowchart TD
-    A["选择抵/质押或监管订单"] --> B["带出订单物料与货主信息"]
+    A["选择有效抵/质押订单"] --> B["带出订单物料与货主信息"]
     B --> C["展示 6 大策略配置卡片"]
     C --> D["按需开启 Switch 并配置阈值/等级/通知人"]
     D --> E["点击单卡片「保存该策略」"]
@@ -48,8 +48,8 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
             content: "已配置过有效规则的订单在选择下拉中置灰不可再选，保证 1:1 实体映射。",
           },
           {
-            label: "监管订单策略限制",
-            content: "当选择【监管】订单时，系统自动置灰禁用【抵/质押率预警】与【贷中风控预警】卡片，防止商业逻辑冲突。",
+            label: "监管历史规则限制",
+            content: "新增候选仅返回有效抵/质押订单；监管订单当前关闭，历史监管规则仅可查看详情、审计和资料，旧编辑地址进入只读提示页。",
           },
           {
             label: "带出字段清单",

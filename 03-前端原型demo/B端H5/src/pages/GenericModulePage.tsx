@@ -35,6 +35,17 @@ export function GenericModulePage() {
     return null
   }
 
+  if (menuItem.enabled === false) {
+    return (
+      <PrototypeEmptyPage
+        title={menuItem.name}
+        menuItem={menuItem}
+        backTo={backToByModule[menuItem.primaryModule] ?? "/m/workspace"}
+        description="该业务当前已关闭，不提供新建、编辑、解除或其他写操作；历史数据仅允许按权限只读查询、审计和资料查看。"
+      />
+    )
+  }
+
   return (
     <PrototypeEmptyPage
       title={menuItem.name}

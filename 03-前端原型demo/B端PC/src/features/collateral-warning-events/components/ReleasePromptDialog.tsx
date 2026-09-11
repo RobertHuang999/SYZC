@@ -35,7 +35,7 @@ export function ReleasePromptDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="text-sm text-muted-foreground">
-          该预警为商业类规则触发{orderNo ? `（订单：${orderNo}）` : ""}，需前往对应的抵质押/监管订单业务流程中完成人工核销与解除。
+          该预警为商业类规则触发{orderNo ? `（订单：${orderNo}）` : ""}，需前往对应的抵押/质押订单业务流程中完成人工核销与解除。
         </div>
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
