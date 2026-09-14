@@ -1,13 +1,12 @@
 export type DeviceWarningStatus = "OPEN_VALID" | "OPEN_INVALID" | "CLOSED_VALID"
 
-// 严格对齐《设备预警信息字段清单》5 大类 + 合流大类
+// 严格对齐《设备预警信息字段清单》5 大类
 export type DeviceWarningType =
   | "设备图像识别预警"
   | "设备物联预警"
   | "智能挂锁预警"
   | "人脸门禁预警"
   | "设备GPS预警"
-  | "常规通行与操作事务"
 
 export type DeviceWarningEvent = {
   eventId: string

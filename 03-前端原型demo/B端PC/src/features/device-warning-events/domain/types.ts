@@ -7,7 +7,6 @@ export const WARNING_TYPES = [
   "智能挂锁预警",
   "人脸门禁预警",
   "设备GPS预警",
-  "常规通行与操作事务",
 ] as const
 
 export type WarningType = (typeof WARNING_TYPES)[number]
