@@ -31,6 +31,7 @@ import {
   useRef,
   useState,
   type ReactNode,
+  type RefObject,
 } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
@@ -39,11 +40,20 @@ import { isMermaidCode, MermaidDiagram } from "@/shared/components/MermaidDiagra
 import type {
   AnnotationKind,
   DrawerTabKey,
+  DocumentLocator,
+  DocumentTabKey,
   PrototypeAnnotation,
   PrototypeDocument,
 } from "./annotation.types"
 
-export type { AnnotationKind, DrawerTabKey, PrototypeAnnotation, PrototypeDocument }
+export type {
+  AnnotationKind,
+  DocumentLocator,
+  DocumentTabKey,
+  DrawerTabKey,
+  PrototypeAnnotation,
+  PrototypeDocument,
+}
 
 function cn(...classes: (string | boolean | undefined | null)[]) {
   return classes.filter(Boolean).join(" ")
@@ -73,12 +83,14 @@ type AnnotationContextValue = {
   selectedPreset: PhoneDevicePreset
   annotations: PrototypeAnnotation[]
   documents: PrototypeDocument[]
+  documentTargetRequest: DocumentTargetRequest | null
   setEnabled: (enabled: boolean) => void
   setDrawerOpen: (open: boolean) => void
   toggleDrawer: () => void
   toggleWideDrawer: () => void
   setActiveDrawerTab: (tab: DrawerTabKey) => void
   openDrawerTab: (tab: DrawerTabKey) => void
+  openDocumentTarget: (tab: DocumentTabKey, locator?: DocumentLocator) => void
   setShowMarkers: (show: boolean) => void
   toggleShowMarkers: () => void
   openInPlacePopup: (annotationId: string) => void
@@ -128,6 +140,103 @@ function AnnotationItemContent({ content }: { content: string }) {
   return <span className="whitespace-pre-wrap">{content}</span>
 }
 
+function normalizeDocumentText(value: string | null | undefined) {
+  return (value ?? "").replace(/\s+/g, " ").trim().toLowerCase()
+}
+
+function findDocumentTarget(root: HTMLElement, locator: DocumentLocator) {
+  const elements = Array.from(
+    root.querySelectorAll<HTMLElement>("h1,h2,h3,h4,h5,h6,p,li,tr,blockquote")
+  )
+  const sectionText = normalizeDocumentText(locator.section)
+  const sectionHeading = sectionText
+    ? elements.find(
+        (element) =>
+          /^h[1-6]$/i.test(element.tagName) &&
+          normalizeDocumentText(element.textContent).includes(sectionText)
+      )
+    : undefined
+
+  let scopedElements = elements
+  if (sectionHeading) {
+    const sectionIndex = elements.indexOf(sectionHeading)
+    const sectionLevel = Number(sectionHeading.tagName.slice(1))
+    const sectionEnd = elements.findIndex(
+      (element, index) =>
+        index > sectionIndex &&
+        /^h[1-6]$/i.test(element.tagName) &&
+        Number(element.tagName.slice(1)) <= sectionLevel
+    )
+    scopedElements = elements.slice(
+      sectionIndex + 1,
+      sectionEnd === -1 ? elements.length : sectionEnd
+    )
+  }
+
+  if (locator.element === "heading") {
+    return sectionHeading ?? null
+  }
+
+  const matchText = normalizeDocumentText(locator.match)
+  if (!matchText) {
+    return sectionHeading ?? scopedElements[0] ?? null
+  }
+
+  const candidates =
+    locator.element === "row"
+      ? scopedElements.filter((element) => element.tagName === "TR")
+      : locator.element === "text"
+        ? scopedElements.filter((element) => element.tagName !== "TR")
+        : scopedElements
+  const matchedElement = candidates.find((element) =>
+    normalizeDocumentText(element.textContent).includes(matchText)
+  )
+  const matchedRow =
+    locator.element === "text"
+      ? scopedElements.find(
+          (element) =>
+            element.tagName === "TR" &&
+            normalizeDocumentText(element.textContent).includes(matchText)
+        )
+      : null
+
+  return matchedElement ?? matchedRow ?? sectionHeading ?? null
+}
+
+type DocumentTargetRequest = {
+  tab: DocumentTabKey
+  locator?: DocumentLocator
+  requestId: number
+}
+
+function useDocumentTargetEffect(
+  articleRef: RefObject<HTMLElement | null>,
+  request: DocumentTargetRequest | null,
+  docId: string
+) {
+  useEffect(() => {
+    if (!request?.locator || !articleRef.current) {
+      return
+    }
+
+    const target = findDocumentTarget(articleRef.current, request.locator)
+    if (!target) {
+      return
+    }
+
+    target.scrollIntoView({ behavior: "smooth", block: "center" })
+    target.classList.add("document-anchor-highlight")
+    const timeoutId = window.setTimeout(() => {
+      target.classList.remove("document-anchor-highlight")
+    }, 2400)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+      target.classList.remove("document-anchor-highlight")
+    }
+  }, [articleRef, docId, request?.requestId, request?.locator, request?.tab])
+}
+
 export function PrototypeAnnotationProvider({
   title = "森云 H5 移动端原型与业务标注",
   annotations = [],
@@ -147,6 +256,13 @@ export function PrototypeAnnotationProvider({
   const [activePopupAnnotationId, setActivePopupAnnotationId] = useState<string | null>(null)
   const [filterKind, setFilterKind] = useState<AnnotationKind | "全部">("全部")
   const [selectedPreset, setSelectedPreset] = useState<PhoneDevicePreset>(PHONE_PRESETS[0])
+  const [documentTargetRequest, setDocumentTargetRequest] =
+    useState<DocumentTargetRequest | null>(null)
+  const documentTargetRequestId = useRef(0)
+  const selectDrawerTab = useCallback((tab: DrawerTabKey) => {
+    setActiveDrawerTab(tab)
+    setDocumentTargetRequest(null)
+  }, [])
 
   const setEnabled = useCallback((nextEnabled: boolean) => {
     setEnabledState(nextEnabled)
@@ -177,7 +293,22 @@ export function PrototypeAnnotationProvider({
   const openDrawerTab = useCallback((tab: DrawerTabKey) => {
     setActiveDrawerTab(tab)
     setDrawerOpen(true)
+    setDocumentTargetRequest(null)
   }, [])
+
+  const openDocumentTarget = useCallback(
+    (tab: DocumentTabKey, locator?: DocumentLocator) => {
+      documentTargetRequestId.current += 1
+      setActiveDrawerTab(tab)
+      setDrawerOpen(true)
+      setDocumentTargetRequest({
+        tab,
+        locator,
+        requestId: documentTargetRequestId.current,
+      })
+    },
+    []
+  )
 
   const openInPlacePopup = useCallback((annotationId: string) => {
     setActivePopupAnnotationId((prev) => (prev === annotationId ? null : annotationId))
@@ -222,12 +353,14 @@ export function PrototypeAnnotationProvider({
       selectedPreset,
       annotations,
       documents,
+      documentTargetRequest,
       setEnabled,
       setDrawerOpen,
       toggleDrawer,
       toggleWideDrawer,
-      setActiveDrawerTab,
+      setActiveDrawerTab: selectDrawerTab,
       openDrawerTab,
+      openDocumentTarget,
       setShowMarkers,
       toggleShowMarkers,
       openInPlacePopup,
@@ -248,10 +381,13 @@ export function PrototypeAnnotationProvider({
       selectedPreset,
       annotations,
       documents,
+      documentTargetRequest,
       setEnabled,
       toggleDrawer,
       toggleWideDrawer,
+      selectDrawerTab,
       openDrawerTab,
+      openDocumentTarget,
       setShowMarkers,
       toggleShowMarkers,
       openInPlacePopup,
@@ -1119,6 +1255,38 @@ function CanvasAnnotationInspector() {
         </div>
       </div>
 
+      {/* 文档快速定位 */}
+      <div className="flex items-center gap-1.5 border-b border-slate-100 bg-white px-4 py-2">
+        <span className="mr-1 text-[10px] font-medium text-slate-400">快速定位</span>
+        <button
+          type="button"
+          className="flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-medium text-emerald-600 hover:bg-emerald-50 cursor-pointer"
+          onClick={() => context.openDocumentTarget("fields", activeAnnotation.documentRefs?.fields)}
+          title="打开字段清单并定位到相关字段"
+        >
+          <FileSpreadsheetIcon className="size-3" />
+          <span>查字段</span>
+        </button>
+        <button
+          type="button"
+          className="flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-medium text-sky-600 hover:bg-sky-50 cursor-pointer"
+          onClick={() => context.openDocumentTarget("prd", activeAnnotation.documentRefs?.prd)}
+          title="打开 PRD 并定位到相关章节"
+        >
+          <FileTextIcon className="size-3" />
+          <span>读PRD</span>
+        </button>
+        <button
+          type="button"
+          className="flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-medium text-orange-600 hover:bg-orange-50 cursor-pointer"
+          onClick={() => context.openDocumentTarget("rules", activeAnnotation.documentRefs?.rules)}
+          title="打开业务规则并定位到相关规则"
+        >
+          <WorkflowIcon className="size-3" />
+          <span>看规则</span>
+        </button>
+      </div>
+
       {/* 2. 核心内容区域（宽敞舒服的大字号阅读体验） */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs">
         {/* 核心事实需求摘要 */}
@@ -1519,6 +1687,7 @@ function AnnotationSidebarDrawer() {
           <DocumentTabContent
             targetDocId="fields"
             fallbackCategory="字段字典清单"
+            targetRequest={context.documentTargetRequest}
           />
         )}
 
@@ -1527,6 +1696,7 @@ function AnnotationSidebarDrawer() {
           <DocumentTabContent
             targetDocId="prd"
             fallbackCategory="PRD需求规格"
+            targetRequest={context.documentTargetRequest}
           />
         )}
 
@@ -1535,6 +1705,7 @@ function AnnotationSidebarDrawer() {
           <DocumentTabContent
             targetDocId="rules"
             fallbackCategory="业务规则规格"
+            targetRequest={context.documentTargetRequest}
           />
         )}
       </div>
@@ -1545,9 +1716,11 @@ function AnnotationSidebarDrawer() {
 function DocumentTabContent({
   targetDocId,
   fallbackCategory,
+  targetRequest,
 }: {
   targetDocId: string
   fallbackCategory: string
+  targetRequest: DocumentTargetRequest | null
 }) {
   const context = useAnnotationContext()
   const [copied, setCopied] = useState(false)
@@ -1556,6 +1729,13 @@ function DocumentTabContent({
       d.id === targetDocId ||
       d.category === fallbackCategory ||
       d.title.includes(fallbackCategory.slice(0, 2))
+  )
+  const articleRef = useRef<HTMLElement>(null)
+
+  useDocumentTargetEffect(
+    articleRef,
+    targetRequest?.tab === doc?.id ? targetRequest : null,
+    doc?.id ?? targetDocId
   )
 
   const handleCopy = () => {
@@ -1634,7 +1814,10 @@ function DocumentTabContent({
         </div>
       </div>
 
-      <div className="prose prose-xs max-w-none text-slate-700 text-xs leading-relaxed">
+      <article
+        ref={articleRef}
+        className="prose prose-xs max-w-none text-slate-700 text-xs leading-relaxed"
+      >
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
@@ -1716,7 +1899,7 @@ function DocumentTabContent({
         >
           {doc.content}
         </ReactMarkdown>
-      </div>
+      </article>
     </div>
   )
 }

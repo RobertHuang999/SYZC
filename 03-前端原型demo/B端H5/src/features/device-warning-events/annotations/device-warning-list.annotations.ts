@@ -8,6 +8,23 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "移动端 · 设备预警列表",
     content: "设备侧事件流水只读列表，厂商预过滤回调后逐条独立落账；核心任务是筛选、查看单条事实并进入解除处置。",
+    documentRefs: {
+      fields: {
+        section: "一、基础识别与列表业务字段",
+        match: "预警状态",
+        element: "row",
+      },
+      prd: {
+        section: "4.4 H5 移动端",
+        match: "列表形态",
+        element: "text",
+      },
+      rules: {
+        section: "一、能力定位",
+        match: "逐条独立落账",
+        element: "text",
+      },
+    },
     details: [
       {
         title: "逐条落账与穿透流程",
@@ -40,6 +57,23 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     kind: "交互",
     title: "组合筛选与查询",
     content: "顶部胶囊快速筛选预警状态、预警类型与所属仓库；预警类型采用与 PC 一致的大类+子类型级联多选；抽屉扩展预警等级与预警时间范围；关键词搜索实时生效。",
+    documentRefs: {
+      fields: {
+        section: "一、基础识别与列表业务字段",
+        match: "预警类型",
+        element: "row",
+      },
+      prd: {
+        section: "4.4 H5 移动端",
+        match: "筛选",
+        element: "text",
+      },
+      rules: {
+        section: "六、校验规则",
+        match: "预警类型",
+        element: "text",
+      },
+    },
     details: [
       {
         title: "筛选字段",
@@ -71,6 +105,23 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     kind: "字段",
     title: "预警卡片字段",
     content: "卡片展示规则名称、等级、状态、设备、仓库、预警内容、抓拍入口与预警时间。",
+    documentRefs: {
+      fields: {
+        section: "一、基础识别与列表业务字段",
+        match: "预警内容",
+        element: "row",
+      },
+      prd: {
+        section: "4.4 H5 移动端",
+        match: "卡片",
+        element: "text",
+      },
+      rules: {
+        section: "六、校验规则",
+        match: "R01",
+        element: "row",
+      },
+    },
     details: [
       {
         title: "展示规范",
@@ -99,6 +150,23 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     kind: "规则",
     title: "卡片行操作矩阵",
     content: "详情对所有状态可用；解除仅对待处置 · 有效且 manualReleaseAllowed（R14'）的事件展示。",
+    documentRefs: {
+      fields: {
+        section: "一、基础识别与列表业务字段",
+        match: "预警状态",
+        element: "row",
+      },
+      prd: {
+        section: "4.4 H5 移动端",
+        match: "解除",
+        element: "text",
+      },
+      rules: {
+        section: "五、动作能力矩阵",
+        match: "人工解除",
+        element: "row",
+      },
+    },
     details: [
       {
         title: "操作矩阵",

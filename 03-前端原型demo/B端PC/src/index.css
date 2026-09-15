@@ -808,3 +808,25 @@ textarea {
   }
 
 }
+
+.document-anchor-highlight {
+  scroll-margin-block: 7rem;
+  border-radius: 6px;
+  outline: 2px solid rgb(37 99 235 / 45%);
+  outline-offset: 4px;
+  background-color: rgb(219 234 254 / 55%);
+  animation: document-anchor-pulse 2.4s ease-out;
+}
+
+@keyframes document-anchor-pulse {
+  0%,
+  100% {
+    outline-color: rgb(37 99 235 / 45%);
+    background-color: rgb(219 234 254 / 55%);
+  }
+
+  45% {
+    outline-color: rgb(37 99 235 / 90%);
+    background-color: rgb(191 219 254 / 90%);
+  }
+}

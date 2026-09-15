@@ -32,8 +32,10 @@ import {
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
+  type RefObject,
   type ReactNode,
 } from "react"
+import { createPortal } from "react-dom"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { cn } from "@/lib/utils"
@@ -44,6 +46,13 @@ export type { PrototypeDocument }
 
 export type AnnotationKind = "页面" | "交互" | "字段" | "规则" | "待确认"
 export type DrawerTabKey = "annotations" | "fields" | "prd" | "rules"
+export type DocumentTabKey = Exclude<DrawerTabKey, "annotations">
+
+export type DocumentLocator = {
+  section?: string
+  match?: string
+  element?: "heading" | "row" | "text"
+}
 
 export type PrototypeAnnotation = {
   id: string
@@ -52,6 +61,7 @@ export type PrototypeAnnotation = {
   kind: AnnotationKind
   title: string
   content: string
+  documentRefs?: Partial<Record<DocumentTabKey, DocumentLocator>>
   details: Array<{
     title: string
     items: Array<{
@@ -74,6 +84,97 @@ function AnnotationItemContent({ content }: { content: string }) {
   return <span className="whitespace-pre-wrap">{content}</span>
 }
 
+function normalizeDocumentText(value: string | null | undefined) {
+  return (value ?? "").replace(/\s+/g, " ").trim().toLowerCase()
+}
+
+function findDocumentTarget(root: HTMLElement, locator: DocumentLocator) {
+  const elements = Array.from(
+    root.querySelectorAll<HTMLElement>("h1,h2,h3,h4,h5,h6,p,li,tr,blockquote")
+  )
+  const sectionText = normalizeDocumentText(locator.section)
+  const sectionHeading = sectionText
+    ? elements.find(
+        (element) =>
+          /^h[1-6]$/i.test(element.tagName) &&
+          normalizeDocumentText(element.textContent).includes(sectionText)
+      )
+    : undefined
+
+  let scopedElements = elements
+  if (sectionHeading) {
+    const sectionIndex = elements.indexOf(sectionHeading)
+    const sectionLevel = Number(sectionHeading.tagName.slice(1))
+    const sectionEnd = elements.findIndex(
+      (element, index) =>
+        index > sectionIndex &&
+        /^h[1-6]$/i.test(element.tagName) &&
+        Number(element.tagName.slice(1)) <= sectionLevel
+    )
+    scopedElements = elements.slice(
+      sectionIndex + 1,
+      sectionEnd === -1 ? elements.length : sectionEnd
+    )
+  }
+
+  if (locator.element === "heading") {
+    return sectionHeading ?? null
+  }
+
+  const matchText = normalizeDocumentText(locator.match)
+  if (!matchText) {
+    return sectionHeading ?? scopedElements[0] ?? null
+  }
+
+  const candidates =
+    locator.element === "row"
+      ? scopedElements.filter((element) => element.tagName === "TR")
+      : locator.element === "text"
+        ? scopedElements.filter((element) => element.tagName !== "TR")
+        : scopedElements
+  const matchedElement = candidates.find((element) =>
+    normalizeDocumentText(element.textContent).includes(matchText)
+  )
+  const matchedRow =
+    locator.element === "text"
+      ? scopedElements.find(
+          (element) =>
+            element.tagName === "TR" &&
+            normalizeDocumentText(element.textContent).includes(matchText)
+        )
+      : null
+
+  return matchedElement ?? matchedRow ?? sectionHeading ?? null
+}
+
+function useDocumentTargetEffect(
+  articleRef: RefObject<HTMLElement | null>,
+  request: DocumentTargetRequest | null,
+  docId: string
+) {
+  useEffect(() => {
+    if (!request?.locator || !articleRef.current) {
+      return
+    }
+
+    const target = findDocumentTarget(articleRef.current, request.locator)
+    if (!target) {
+      return
+    }
+
+    target.scrollIntoView({ behavior: "smooth", block: "center" })
+    target.classList.add("document-anchor-highlight")
+    const timeoutId = window.setTimeout(() => {
+      target.classList.remove("document-anchor-highlight")
+    }, 2400)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+      target.classList.remove("document-anchor-highlight")
+    }
+  }, [articleRef, docId, request?.requestId, request?.locator, request?.tab])
+}
+
 type Point = {
   x: number
   y: number
@@ -82,6 +183,20 @@ type Point = {
 type Size = {
   width: number
   height: number
+}
+
+function clampViewportPosition(position: Point, size: Size): Point {
+  const gutter = 12
+  return {
+    x: Math.min(
+      Math.max(gutter, position.x),
+      Math.max(gutter, window.innerWidth - size.width - gutter)
+    ),
+    y: Math.min(
+      Math.max(gutter, position.y),
+      Math.max(gutter, window.innerHeight - size.height - gutter)
+    ),
+  }
 }
 
 type AnnotationContextValue = {
@@ -95,18 +210,26 @@ type AnnotationContextValue = {
   filterKind: AnnotationKind | "全部"
   annotations: PrototypeAnnotation[]
   documents: PrototypeDocument[]
+  documentTargetRequest: DocumentTargetRequest | null
   setEnabled: (enabled: boolean) => void
   setDrawerOpen: (open: boolean) => void
   toggleDrawer: () => void
   toggleWideDrawer: () => void
   setActiveDrawerTab: (tab: DrawerTabKey) => void
   openDrawerTab: (tab: DrawerTabKey) => void
+  openDocumentTarget: (tab: DocumentTabKey, locator?: DocumentLocator) => void
   setShowMarkers: (show: boolean) => void
   toggleShowMarkers: () => void
   openInPlacePopup: (annotationId: string) => void
   closeInPlacePopup: () => void
   locateAndOpenPopup: (annotationId: string) => void
   setFilterKind: (kind: AnnotationKind | "全部") => void
+}
+
+type DocumentTargetRequest = {
+  tab: DocumentTabKey
+  locator?: DocumentLocator
+  requestId: number
 }
 
 const AnnotationContext = createContext<AnnotationContextValue | null>(null)
@@ -146,6 +269,13 @@ export function PrototypeAnnotationProvider({
   const [showMarkers, setShowMarkers] = useState(true)
   const [activePopupAnnotationId, setActivePopupAnnotationId] = useState<string | null>(null)
   const [filterKind, setFilterKind] = useState<AnnotationKind | "全部">("全部")
+  const [documentTargetRequest, setDocumentTargetRequest] =
+    useState<DocumentTargetRequest | null>(null)
+  const documentTargetRequestId = useRef(0)
+  const selectDrawerTab = useCallback((tab: DrawerTabKey) => {
+    setActiveDrawerTab(tab)
+    setDocumentTargetRequest(null)
+  }, [])
 
   const setEnabled = useCallback((nextEnabled: boolean) => {
     setEnabledState(nextEnabled)
@@ -176,7 +306,22 @@ export function PrototypeAnnotationProvider({
   const openDrawerTab = useCallback((tab: DrawerTabKey) => {
     setActiveDrawerTab(tab)
     setDrawerOpen(true)
+    setDocumentTargetRequest(null)
   }, [])
+
+  const openDocumentTarget = useCallback(
+    (tab: DocumentTabKey, locator?: DocumentLocator) => {
+      documentTargetRequestId.current += 1
+      setActiveDrawerTab(tab)
+      setDrawerOpen(true)
+      setDocumentTargetRequest({
+        tab,
+        locator,
+        requestId: documentTargetRequestId.current,
+      })
+    },
+    []
+  )
 
   const openInPlacePopup = useCallback((annotationId: string) => {
     setActivePopupAnnotationId((prev) => (prev === annotationId ? null : annotationId))
@@ -216,12 +361,14 @@ export function PrototypeAnnotationProvider({
       filterKind,
       annotations,
       documents,
+      documentTargetRequest,
       setEnabled,
       setDrawerOpen,
       toggleDrawer,
       toggleWideDrawer,
-      setActiveDrawerTab,
+      setActiveDrawerTab: selectDrawerTab,
       openDrawerTab,
+      openDocumentTarget,
       setShowMarkers,
       toggleShowMarkers,
       openInPlacePopup,
@@ -240,10 +387,13 @@ export function PrototypeAnnotationProvider({
       filterKind,
       annotations,
       documents,
+      documentTargetRequest,
       setEnabled,
       toggleDrawer,
       toggleWideDrawer,
+      selectDrawerTab,
       openDrawerTab,
+      openDocumentTarget,
       setShowMarkers,
       toggleShowMarkers,
       openInPlacePopup,
@@ -493,13 +643,14 @@ function InPlaceAnnotationCard({
   const cardRef = useRef<HTMLDivElement>(null)
 
   // 1. 位置拖拽偏移状态
-  const [offset, setOffset] = useState<Point>({ x: 0, y: 0 })
+  const [position, setPosition] = useState<Point | null>(null)
   const moveDragStart = useRef<
     | {
         pointerId: number
         clientX: number
         clientY: number
         origin: Point
+        cardRect: Pick<DOMRect, "left" | "top" | "width" | "height">
       }
     | undefined
   >(undefined)
@@ -515,7 +666,7 @@ function InPlaceAnnotationCard({
         clientX: number
         clientY: number
         originSize: Size
-        originOffset: Point
+        originPosition: Point
         handle: "right" | "left" | "bottom" | "bottom-right" | "bottom-left"
       }
     | undefined
@@ -531,6 +682,39 @@ function InPlaceAnnotationCard({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [onClose])
 
+  useEffect(() => {
+    const target = targetId
+      ? document.querySelector<HTMLElement>(
+          `[data-prototype-target="${targetId}"]`
+        )
+      : null
+    const placeCard = () => {
+      const targetRect = target?.getBoundingClientRect()
+      const width = Math.min(cardSize.width, Math.max(340, window.innerWidth - 24))
+      const height = Math.min(cardSize.height, Math.max(240, window.innerHeight - 24))
+      const rawPosition = targetRect
+        ? {
+            x:
+              markerPosition === "top-left"
+                ? targetRect.left
+                : targetRect.right - width,
+            y: targetRect.top + 32,
+          }
+        : {
+            x: (window.innerWidth - width) / 2,
+            y: (window.innerHeight - height) / 2,
+          }
+
+      setPosition((current) =>
+        current ? clampViewportPosition(current, { width, height }) : clampViewportPosition(rawPosition, { width, height })
+      )
+    }
+
+    placeCard()
+    window.addEventListener("resize", placeCard)
+    return () => window.removeEventListener("resize", placeCard)
+  }, [cardSize.height, cardSize.width, markerPosition, targetId])
+
   // 头部位置拖拽处理器
   const onMovePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (
@@ -539,12 +723,17 @@ function InPlaceAnnotationCard({
     ) {
       return
     }
+    const cardRect = cardRef.current?.getBoundingClientRect()
+    if (!position || !cardRect) {
+      return
+    }
     event.currentTarget.setPointerCapture(event.pointerId)
     moveDragStart.current = {
       pointerId: event.pointerId,
       clientX: event.clientX,
       clientY: event.clientY,
-      origin: offset,
+      origin: position,
+      cardRect,
     }
   }
 
@@ -553,10 +742,14 @@ function InPlaceAnnotationCard({
     if (!start || start.pointerId !== event.pointerId) {
       return
     }
-    setOffset({
-      x: start.origin.x + event.clientX - start.clientX,
-      y: start.origin.y + event.clientY - start.clientY,
-    })
+    const nextPosition = clampViewportPosition(
+      {
+        x: start.origin.x + event.clientX - start.clientX,
+        y: start.origin.y + event.clientY - start.clientY,
+      },
+      start.cardRect
+    )
+    setPosition(nextPosition)
   }
 
   const onMovePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -576,12 +769,15 @@ function InPlaceAnnotationCard({
   ) => {
     event.currentTarget.setPointerCapture(event.pointerId)
     event.stopPropagation()
+    if (!position) {
+      return
+    }
     resizeDragStart.current = {
       pointerId: event.pointerId,
       clientX: event.clientX,
       clientY: event.clientY,
       originSize: { ...cardSize },
-      originOffset: { ...offset },
+      originPosition: { ...position },
       handle,
     }
   }
@@ -597,30 +793,19 @@ function InPlaceAnnotationCard({
 
     let nextWidth = start.originSize.width
     let nextHeight = start.originSize.height
-    let nextOffsetX = start.originOffset.x
+    let nextPosition = { ...start.originPosition }
 
     const minW = 340
-    const maxW = Math.max(340, window.innerWidth - 60)
+    const maxW = Math.max(minW, window.innerWidth - 24)
     const minH = 240
-    const maxH = Math.max(240, window.innerHeight - 80)
+    const maxH = Math.max(minH, window.innerHeight - 24)
 
     // 水平方向拉伸
     if (start.handle === "right" || start.handle === "bottom-right") {
-      if (markerPosition === "top-right") {
-        nextWidth = Math.max(minW, Math.min(maxW, start.originSize.width + deltaX))
-        const appliedDeltaX = nextWidth - start.originSize.width
-        nextOffsetX = start.originOffset.x + appliedDeltaX
-      } else {
-        nextWidth = Math.max(minW, Math.min(maxW, start.originSize.width + deltaX))
-      }
+      nextWidth = Math.max(minW, Math.min(maxW, start.originSize.width + deltaX))
     } else if (start.handle === "left" || start.handle === "bottom-left") {
-      if (markerPosition === "top-right") {
-        nextWidth = Math.max(minW, Math.min(maxW, start.originSize.width - deltaX))
-      } else {
-        nextWidth = Math.max(minW, Math.min(maxW, start.originSize.width - deltaX))
-        const appliedDeltaX = start.originSize.width - nextWidth
-        nextOffsetX = start.originOffset.x + appliedDeltaX
-      }
+      nextWidth = Math.max(minW, Math.min(maxW, start.originSize.width - deltaX))
+      nextPosition.x = start.originPosition.x + start.originSize.width - nextWidth
     }
 
     // 垂直方向拉伸
@@ -632,10 +817,12 @@ function InPlaceAnnotationCard({
       nextHeight = Math.max(minH, Math.min(maxH, start.originSize.height + deltaY))
     }
 
+    nextPosition = clampViewportPosition(nextPosition, {
+      width: nextWidth,
+      height: nextHeight,
+    })
     setCardSize({ width: nextWidth, height: nextHeight })
-    if (nextOffsetX !== offset.x) {
-      setOffset((prev) => ({ ...prev, x: nextOffsetX }))
-    }
+    setPosition(nextPosition)
   }
 
   const onResizeEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -649,23 +836,28 @@ function InPlaceAnnotationCard({
   }
 
   const handleReset = () => {
-    setOffset({ x: 0, y: 0 })
+    setPosition(null)
     setCardSize({ width: 520, height: 400 })
   }
 
-  return (
+  if (!position) {
+    return null
+  }
+
+  return createPortal(
+    (
     <div
       ref={cardRef}
       className={cn(
-        "absolute z-[65] flex flex-col rounded-2xl border-2 border-blue-400/80 bg-white/95 text-slate-900 shadow-[0_20px_50px_rgba(37,99,235,0.18)] backdrop-blur-2xl transition-[box-shadow] animate-in fade-in-50 zoom-in-95 text-left select-text dark:bg-slate-900/95 dark:text-slate-100 dark:border-blue-500/80",
-        markerPosition === "top-left" ? "top-8 left-0" : "top-8 right-0"
+        "fixed z-[110] flex flex-col rounded-2xl border-2 border-blue-400/80 bg-white/95 text-slate-900 shadow-[0_20px_50px_rgba(37,99,235,0.18)] backdrop-blur-2xl transition-[box-shadow] animate-in fade-in-50 zoom-in-95 text-left select-text dark:bg-slate-900/95 dark:text-slate-100 dark:border-blue-500/80"
       )}
       style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
         width: `${cardSize.width}px`,
         height: `${cardSize.height}px`,
-        maxWidth: "calc(100vw - 2rem)",
-        maxHeight: "calc(100vh - 2rem)",
-        transform: `translate(${offset.x}px, ${offset.y}px)`,
+        maxWidth: "calc(100vw - 24px)",
+        maxHeight: "calc(100vh - 24px)",
       }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -766,7 +958,7 @@ function InPlaceAnnotationCard({
           <button
             type="button"
             className="text-[11px] text-emerald-600 hover:underline cursor-pointer flex items-center gap-0.5"
-            onClick={() => context.openDrawerTab("fields")}
+            onClick={() => context.openDocumentTarget("fields", annotation.documentRefs?.fields)}
           >
             <FileSpreadsheetIcon className="size-3" />
             <span>查字段</span>
@@ -775,7 +967,7 @@ function InPlaceAnnotationCard({
           <button
             type="button"
             className="text-[11px] text-sky-600 hover:underline cursor-pointer flex items-center gap-0.5"
-            onClick={() => context.openDrawerTab("prd")}
+            onClick={() => context.openDocumentTarget("prd", annotation.documentRefs?.prd)}
           >
             <FileTextIcon className="size-3" />
             <span>读PRD</span>
@@ -784,7 +976,7 @@ function InPlaceAnnotationCard({
           <button
             type="button"
             className="text-[11px] text-orange-600 hover:underline cursor-pointer flex items-center gap-0.5"
-            onClick={() => context.openDrawerTab("rules")}
+            onClick={() => context.openDocumentTarget("rules", annotation.documentRefs?.rules)}
           >
             <WorkflowIcon className="size-3" />
             <span>看规则</span>
@@ -891,6 +1083,8 @@ function InPlaceAnnotationCard({
         </div>
       </div>
     </div>
+    ),
+    document.body
   )
 }
 
@@ -1313,11 +1507,12 @@ function AnnotationSidebarDrawer() {
 
         {/* Tab 2: 【字段清单】直接在页面展示 */}
         {context.activeDrawerTab === "fields" && (
-          <DocumentContentRenderer
+        <DocumentContentRenderer
             doc={fieldsDoc}
             fallbackTitle="字段清单"
             badge="数据模型与字段规范"
             badgeColor="text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/50"
+            targetRequest={context.documentTargetRequest}
           />
         )}
 
@@ -1328,6 +1523,7 @@ function AnnotationSidebarDrawer() {
             fallbackTitle="PRD需求文档"
             badge="产品需求规格说明书"
             badgeColor="text-sky-700 bg-sky-50 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-900/50"
+            targetRequest={context.documentTargetRequest}
           />
         )}
 
@@ -1338,6 +1534,7 @@ function AnnotationSidebarDrawer() {
             fallbackTitle="业务规则规格"
             badge="状态机与风控业务规则"
             badgeColor="text-orange-700 bg-orange-50 border-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-900/50"
+            targetRequest={context.documentTargetRequest}
           />
         )}
       </div>
@@ -1353,13 +1550,22 @@ function DocumentContentRenderer({
   fallbackTitle,
   badge,
   badgeColor,
+  targetRequest,
 }: {
   doc?: PrototypeDocument
   fallbackTitle: string
   badge: string
   badgeColor: string
+  targetRequest: DocumentTargetRequest | null
 }) {
   const [copied, setCopied] = useState(false)
+  const articleRef = useRef<HTMLElement>(null)
+
+  useDocumentTargetEffect(
+    articleRef,
+    targetRequest?.tab === doc?.id ? targetRequest : null,
+    doc?.id ?? fallbackTitle
+  )
 
   const handleCopy = () => {
     if (doc?.content) {
@@ -1445,7 +1651,10 @@ function DocumentContentRenderer({
       </div>
 
       {/* Markdown Document Content with Full Styling */}
-      <article className="prose prose-slate max-w-none text-xs leading-relaxed dark:prose-invert">
+      <article
+        ref={articleRef}
+        className="prose prose-slate max-w-none text-xs leading-relaxed dark:prose-invert"
+      >
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{

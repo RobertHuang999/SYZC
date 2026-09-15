@@ -2,6 +2,14 @@ export type AnnotationKind = "页面" | "交互" | "字段" | "规则" | "待确
 
 export type DrawerTabKey = "annotations" | "fields" | "prd" | "rules"
 
+export type DocumentTabKey = Exclude<DrawerTabKey, "annotations">
+
+export type DocumentLocator = {
+  section?: string
+  match?: string
+  element?: "heading" | "row" | "text"
+}
+
 export type PrototypeAnnotation = {
   id: string
   targetId?: string
@@ -9,6 +17,7 @@ export type PrototypeAnnotation = {
   kind: AnnotationKind
   title: string
   content: string
+  documentRefs?: Partial<Record<DocumentTabKey, DocumentLocator>>
   details: Array<{
     title: string
     items: Array<{

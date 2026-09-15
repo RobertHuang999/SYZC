@@ -8,6 +8,23 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "页面定位与处理闭环",
     content: "这是设备侧事件流水的只读列表，核心任务是筛选、查看单条事件事实并进入解除处置；厂商预过滤回调后逐条独立落账（一事件一条记录）。",
+    documentRefs: {
+      fields: {
+        section: "一、基础识别与列表业务字段",
+        match: "预警状态",
+        element: "row",
+      },
+      prd: {
+        section: "3.1 写入机制与生命周期",
+        match: "逐条独立落账",
+        element: "text",
+      },
+      rules: {
+        section: "一、能力定位",
+        match: "逐条独立落账",
+        element: "text",
+      },
+    },
     details: [
       {
         title: "物联穿透与判定流程",
@@ -68,6 +85,23 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     kind: "交互",
     title: "组合筛选与查询边界",
     content: "筛选条件先进入草稿值，点击查询或按 Enter 后才应用；查询和重置都会将页码归一到第 1 页。",
+    documentRefs: {
+      fields: {
+        section: "一、基础识别与列表业务字段",
+        match: "预警类型",
+        element: "row",
+      },
+      prd: {
+        section: "4.1 PC 列表页",
+        match: "筛选区",
+        element: "text",
+      },
+      rules: {
+        section: "六、校验规则",
+        match: "预警类型",
+        element: "text",
+      },
+    },
     details: [
       {
         title: "字段与默认值",
@@ -130,6 +164,23 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     kind: "字段",
     title: "表格字段、快照与展示格式",
     content: "表格承载当前筛选结果的单条事件事实快照；序号按当前页重算，预警时间用于默认排序。",
+    documentRefs: {
+      fields: {
+        section: "一、基础识别与列表业务字段",
+        match: "列表业务字段展示顺序",
+        element: "text",
+      },
+      prd: {
+        section: "4.1 PC 列表页",
+        match: "列表区",
+        element: "text",
+      },
+      rules: {
+        section: "六、校验规则",
+        match: "R01",
+        element: "row",
+      },
+    },
     details: [
       {
         title: "列定义",
@@ -206,6 +257,23 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     kind: "规则",
     title: "状态 × 行操作能力矩阵",
     content: "详情对三种状态均可用；解除仅对待处置 · 有效且快照 disposition=人工解除结案（R14'）的事件展示；支持复选框批量解除。",
+    documentRefs: {
+      fields: {
+        section: "一、基础识别与列表业务字段",
+        match: "预警状态",
+        element: "row",
+      },
+      prd: {
+        section: "8.2 解除",
+        match: "R14'",
+        element: "text",
+      },
+      rules: {
+        section: "五、动作能力矩阵",
+        match: "人工解除",
+        element: "row",
+      },
+    },
     details: [
       {
         title: "展示矩阵",
@@ -254,6 +322,23 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     kind: "交互",
     title: "批量解除预警（R16）",
     content: "列表工具区【批量解除】按钮；选中 ≥1 条 R14' 可解除记录后启用，统一填写情况说明与可选现场照片，逐条独立归档。",
+    documentRefs: {
+      fields: {
+        section: "二、解除预警表单字段",
+        match: "情况说明",
+        element: "row",
+      },
+      prd: {
+        section: "4.1 PC 列表页",
+        match: "批量解除",
+        element: "text",
+      },
+      rules: {
+        section: "六、校验规则",
+        match: "R16",
+        element: "row",
+      },
+    },
     details: [
       {
         title: "批量解除流程",
@@ -291,6 +376,23 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     kind: "交互",
     title: "分页、页容量与空结果",
     content: "分页只作用于已应用的筛选结果；调整页容量、查询或重置后回到第 1 页，避免当前页超出结果范围。",
+    documentRefs: {
+      fields: {
+        section: "一、基础识别与列表业务字段",
+        match: "序号",
+        element: "row",
+      },
+      prd: {
+        section: "4.1 PC 列表页",
+        match: "分页",
+        element: "text",
+      },
+      rules: {
+        section: "六、校验规则",
+        match: "R16",
+        element: "row",
+      },
+    },
     details: [
       {
         title: "分页行为",
@@ -335,6 +437,23 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     kind: "规则",
     title: "单条解除前二次确认",
     content: "确认解除该条预警；确认后在当前弹窗展开解除材料，真正状态变更和审计由提交解除流程完成。",
+    documentRefs: {
+      fields: {
+        section: "二、解除预警表单字段",
+        match: "情况说明",
+        element: "row",
+      },
+      prd: {
+        section: "4.3 PC 解除（弹窗为主流程）",
+        match: "二次确认",
+        element: "text",
+      },
+      rules: {
+        section: "六、校验规则",
+        match: "R04",
+        element: "row",
+      },
+    },
     details: [
       {
         title: "确认内容",
