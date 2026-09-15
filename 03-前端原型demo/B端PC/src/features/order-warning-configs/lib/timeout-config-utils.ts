@@ -8,19 +8,19 @@ import type {
 export function getDefaultTimeoutWarningType(
   orderType: OrderType | ""
 ): TimeoutWarningType {
-  return orderType === "监管" ? "解监管超时" : "解抵/质押超时"
+  if (orderType === "抵押") return "解抵押超时"
+  if (orderType === "质押") return "解质押超时"
+  if (orderType === "监管服务") return "监管服务超时"
+  return "解抵押超时"
 }
 
 export function getTimeoutWarningTypeOptions(
   orderType: OrderType | ""
 ): TimeoutWarningType[] {
-  if (orderType === "监管") {
-    return ["解监管超时"]
-  }
-  if (orderType === "抵/质押") {
-    return ["解抵/质押超时"]
-  }
-  return ["解抵/质押超时", "解监管超时"]
+  if (orderType === "抵押") return ["解抵押超时"]
+  if (orderType === "质押") return ["解质押超时"]
+  if (orderType === "监管服务") return ["监管服务超时"]
+  return ["解抵押超时", "解质押超时", "监管服务超时"]
 }
 
 function addDaysToDateTime(base: string, days: number): string | null {

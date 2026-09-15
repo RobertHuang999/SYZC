@@ -9,12 +9,11 @@ export const COLLATERAL_WARNING_TYPES = [
   "物联穿透告警",
 ] as const
 
-// 旧监管超时类型只允许出现在历史归档记录，不进入当前筛选和新触发链路。
-export const ARCHIVED_COLLATERAL_WARNING_TYPES = ["解抵/质押/监管超时"] as const
-
 export type CollateralWarningType =
-  | (typeof COLLATERAL_WARNING_TYPES)[number]
-  | (typeof ARCHIVED_COLLATERAL_WARNING_TYPES)[number]
+  (typeof COLLATERAL_WARNING_TYPES)[number]
+
+export const ORDER_TYPE_OPTIONS = ["抵押", "质押", "监管服务"] as const
+export type OrderType = (typeof ORDER_TYPE_OPTIONS)[number]
 
 export const WARNING_SOURCES = [
   "订单配置触发",
@@ -47,7 +46,7 @@ export type WarningStatus =
 export type CollateralWarningEvent = {
   eventId: string // 预警信息唯一标识
   orderNo: string // 预警订单
-  orderType?: "抵/质押" | "监管" // 历史监管归档记录显式保留订单类型
+  orderType?: OrderType
   ruleName?: string // 预警规则名称
   warningType: CollateralWarningType // 预警类型
   severityLevelId: string
@@ -114,14 +113,23 @@ export type CollateralDisposalInfo = {
   releaseSnapshotImage: string | null // 解除预警抓拍图
 }
 
+export type LtvHitSnapshot = {
+  hitLine: "补仓线" | "平仓线"
+  triggerLtv: string
+  marginCallThreshold: string
+  closeOutThreshold: string
+  allowedReleaseMethods: string[]
+}
+
 export type CollateralWarningEventDetailExtension = {
-  orderType: "抵/质押" | "监管"
+  orderType: OrderType
   ruleName: string // 预警规则名称
   triggerSnapshot: string | null // 触发数据快照
   snapshotImageUrl: string | null // 预警抓拍图
   invalidReason: string | null // 记录有效性/失效原因
   penetrationInfo: CollateralPenetrationInfo | null
   disposalInfo: CollateralDisposalInfo | null
+  ltvHitSnapshot: LtvHitSnapshot | null
 }
 
 export type CollateralWarningEventDetail = CollateralWarningEvent &

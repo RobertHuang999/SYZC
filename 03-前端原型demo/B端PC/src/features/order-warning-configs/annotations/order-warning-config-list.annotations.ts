@@ -15,11 +15,11 @@ export const orderWarningConfigListAnnotations: PrototypeAnnotation[] = [
           {
             label: "多策略流转图",
             content: `flowchart TD
-    A["有效抵/质押订单"] -->|"一站式多策略配置"| B["订单预警综合规则包"]
+    A["有效抵押/质押/监管服务订单"] -->|"一站式多策略配置"| B["订单预警综合规则包"]
     B -->|"指标偏离触发"| C["02/02 押品预警信息 (6类告警)"]
     B -->|"勾选启用贷中风控预警"| D["02/03 贷中风控管理台账"]
     C -->|"订单结清/出库办结"| E["未处理流水自动置无效"]
-    H["监管历史规则"] -->|"只读查询/审计/资料"| I["不允许写操作或新触发"]`,
+    H["旧历史监管类型"] -->|"不进入当前数据集"| I["不展示、不映射为监管服务"]`,
           },
           {
             label: "业务定位",
@@ -48,7 +48,7 @@ export const orderWarningConfigListAnnotations: PrototypeAnnotation[] = [
     number: 2,
     kind: "交互",
     title: "多维组合检索与新增入口",
-    content: "支持规则名称、订单号、订单类型（抵押/质押/监管历史）、已启用预警项及规则状态组合筛选；监管仅用于定位历史只读规则。",
+    content: "支持规则名称、订单号、订单类型（抵押/质押/监管服务）、已启用预警项及规则状态组合筛选；旧历史“监管”不展示。",
     details: [
       {
         title: "筛选维度说明",
@@ -78,7 +78,7 @@ export const orderWarningConfigListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "已启用预警项 Tag 汇总",
-            content: "聚合展示当前订单生效中的风控策略（如【超时】【跌价】【抵质押率】），支持悬浮查看具体阈值参数。",
+            content: "聚合展示当前订单生效中的风控策略（如【跌价(L3)】【抵质押率(L3)】）；抵质押率仅展示整卡单等级，不聚合补仓/平仓双等级。",
           },
           {
             label: "预警等级分布",
@@ -94,18 +94,18 @@ export const orderWarningConfigListAnnotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "交互",
     title: "行操作控制与软删除保护",
-    content: "当前抵/质押规则提供【编辑】与【删除】操作；监管历史规则仅提供【详情】，受 R-RISK-MGR 权限控制与未处理告警联动约束。",
+    content: "抵押、质押、监管服务规则按状态提供【编辑】、【详情】与【删除】操作；旧历史“监管”不在当前列表中。",
     details: [
       {
         title: "操作与联动约束",
         items: [
           {
             label: "编辑限制",
-            content: "已失效规则禁止编辑；当前抵/质押规则编辑保存后生成新 Version 并幂等同步风控判定引擎；监管历史规则不允许写入。",
+            content: "已失效规则禁止编辑；三类当前订单规则编辑保存后生成新 Version 并幂等同步风控判定引擎。",
           },
           {
             label: "删除联动",
-            content: "当前抵/质押规则软删除后，该订单所有待处置 · 有效押品预警自动置为【已作废】，终止超时升级定时器，历史已结案 · 有效流水不受影响；监管历史规则禁止删除。",
+            content: "当前订单规则软删除后，该订单所有待处置 · 有效押品预警自动置为【已作废】，终止超时升级定时器，历史已结案 · 有效流水不受影响。",
           },
         ],
       },

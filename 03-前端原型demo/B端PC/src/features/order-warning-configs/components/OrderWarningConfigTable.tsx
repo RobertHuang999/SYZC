@@ -58,7 +58,7 @@ export function OrderWarningConfigTable({
             </TableRow>
           ) : (
             configs.map((config, index) => {
-              const actions = getOrderWarningConfigActions(config.status, config.orderType)
+              const actions = getOrderWarningConfigActions(config.status)
 
               return (
                 <TableRow key={config.configId}>

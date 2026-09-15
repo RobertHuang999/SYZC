@@ -1,4 +1,6 @@
 import type { ActiveOrderStrategy, OrderWarningConfigDetail } from "../domain/types"
+import { DEFAULT_LTV_PARAMS, buildLtvDetailFields } from "../lib/ltv-utils"
+import { getMockCurrentLtv } from "./order-options.mock"
 
 type DetailExtension = Omit<
   OrderWarningConfigDetail,
@@ -26,16 +28,10 @@ const detailExtensions: Record<string, DetailExtension> = {
       {
         key: "ltvDual",
         name: "抵/质押率双控预警",
-        fields: [
-          {
-            label: "补仓线 LTV",
-            value: "75.00 % · 解除方式：补仓、部分结清",
-          },
-          {
-            label: "平仓线 LTV",
-            value: "85.00 % · 解除方式：平仓、部分结清",
-          },
-        ],
+        fields: buildLtvDetailFields(
+          DEFAULT_LTV_PARAMS,
+          getMockCurrentLtv("PO202608-01")
+        ),
         severityLevelId: "sl-l3",
         notifyChannels: ["短信", "邮件"],
         notifyTargets: ["张风控", "王主管"],
@@ -55,7 +51,7 @@ const detailExtensions: Record<string, DetailExtension> = {
       },
     ],
     disabledStrategies: [
-      "解抵/质押超时监控：未启用",
+      "订单履约超时监控：未启用",
       "盘点账实差异告警：未启用",
       "贷中风控模型预警：未启用",
     ],
@@ -83,13 +79,13 @@ const detailExtensions: Record<string, DetailExtension> = {
       },
       {
         key: "timeout",
-        name: "解抵/质押/监管超时监控（历史快照）",
+        name: "监管服务超时监控",
         fields: [],
         timeoutRows: [
           {
             rowId: "batch-steel-800",
             batchId: "batch-steel-800",
-            warningType: "解监管超时",
+            warningType: "监管服务超时",
             qrCode: "QR-ST-20260810-001",
             goodsLabel: "大宗钢材 / HRB400 / 800吨",
             pledgedAt: "2026-08-10 14:00",
@@ -121,13 +117,13 @@ const detailExtensions: Record<string, DetailExtension> = {
     activeStrategies: [
       {
         key: "timeout",
-        name: "解抵/质押/监管超时监控（历史快照）",
+        name: "监管服务超时监控",
         fields: [],
         timeoutRows: [
           {
             rowId: "batch-soy-1200",
             batchId: "batch-soy-1200",
-            warningType: "解监管超时",
+            warningType: "监管服务超时",
             qrCode: "QR-SOY-20260812-201",
             goodsLabel: "大豆 / 国标一等 / 1200吨",
             pledgedAt: "2026-08-12 08:00",
@@ -137,7 +133,7 @@ const detailExtensions: Record<string, DetailExtension> = {
           {
             rowId: "batch-corn-800",
             batchId: "batch-corn-800",
-            warningType: "解监管超时",
+            warningType: "监管服务超时",
             qrCode: "QR-CORN-20260812-202",
             goodsLabel: "玉米 / 二等 / 800吨",
             pledgedAt: "2026-08-12 08:30",
@@ -192,7 +188,7 @@ const detailExtensions: Record<string, DetailExtension> = {
     disabledStrategies: [
       "抵/质押率双控预警：未启用",
       "仓储巡检超期预警：未启用",
-      "解抵/质押超时监控：未启用",
+      "订单履约超时监控：未启用",
       "贷中风控模型预警：未启用",
     ],
     invalidReason: "关联订单已办结",
@@ -200,7 +196,8 @@ const detailExtensions: Record<string, DetailExtension> = {
 }
 
 function buildDefaultStrategies(
-  enabledItems: { type: string; levels: string }[]
+  enabledItems: { type: string; levels: string }[],
+  orderNo: string
 ): ActiveOrderStrategy[] {
   const strategyMap: Record<string, ActiveOrderStrategy> = {
     跌价: {
@@ -214,10 +211,7 @@ function buildDefaultStrategies(
     抵质押率: {
       key: "ltvDual",
       name: "抵/质押率双控预警",
-      fields: [
-        { label: "补仓线 LTV", value: "75.00 %" },
-        { label: "平仓线 LTV", value: "85.00 %" },
-      ],
+      fields: buildLtvDetailFields(DEFAULT_LTV_PARAMS, getMockCurrentLtv(orderNo)),
       severityLevelId: "sl-l3",
       notifyChannels: [],
       notifyTargets: ["张风控"],
@@ -231,13 +225,13 @@ function buildDefaultStrategies(
     },
     超时: {
       key: "timeout",
-      name: "解抵/质押/监管超时监控（历史快照）",
+      name: "订单履约超时监控",
       fields: [{ label: "超时配置", value: "已配置二维码超时阈值" }],
       timeoutRows: [
         {
           rowId: "batch-demo",
           batchId: "batch-demo",
-          warningType: "解抵/质押超时",
+          warningType: "解抵押超时",
           qrCode: "QR-DEMO-001",
           goodsLabel: "示例货物 / 100吨",
           pledgedAt: "2026-08-01 08:00",
@@ -271,7 +265,7 @@ function buildDefaultStrategies(
 }
 
 const allDisabledLabels = [
-  "解抵/质押超时监控：未启用",
+  "订单履约超时监控：未启用",
   "抵/质押率双控预警：未启用",
   "仓储巡检超期预警：未启用",
   "盘点账实差异告警：未启用",
@@ -288,7 +282,7 @@ export function getOrderWarningConfigDetailExtension(
   }
 
   const activeKeys = new Set(
-    buildDefaultStrategies(config.enabledItems).map((s) => s.name)
+    buildDefaultStrategies(config.enabledItems, config.orderNo).map((s) => s.name)
   )
   const disabledStrategies = allDisabledLabels.filter(
     (label) => !activeKeys.has(label.split("：")[0] ?? "")
@@ -304,7 +298,7 @@ export function getOrderWarningConfigDetailExtension(
     ownerPhone: "138****0000",
     goodsDetail: `${goodsName} / 规格 / 100吨`,
     version: 1,
-    activeStrategies: buildDefaultStrategies(config.enabledItems),
+    activeStrategies: buildDefaultStrategies(config.enabledItems, config.orderNo),
     disabledStrategies:
       disabledStrategies.length > 0
         ? disabledStrategies.slice(0, 3)

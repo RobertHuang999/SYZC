@@ -34,7 +34,7 @@ const seedData: Omit<RiskDisclosureRecord, "recordId">[] = [
     orderNo: "PO202606-99",
     ownerName: "北方化工仓储",
     warningType: "抵/质押率异常",
-    warningContent: "LTV 91.2% 超警戒线 88%",
+    warningContent: "抵/质押率 (LTV) 91.2% 超警戒线 88%",
     snapshotImageStatus: "available",
     warningTime: "2026-06-25 15:00:00",
     processedTime: "2026-06-26 09:00:00",

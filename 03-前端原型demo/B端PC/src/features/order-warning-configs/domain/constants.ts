@@ -8,7 +8,7 @@ export const DEFAULT_ORDER_WARNING_CONFIG_FILTERS: OrderWarningConfigFilters = {
   status: "全部",
 }
 
-export const ORDER_TYPE_OPTIONS = ["全部", "抵/质押", "监管"] as const
+export const ORDER_TYPE_OPTIONS = ["全部", "抵押", "质押", "监管服务"] as const
 
 export const ORDER_WARNING_CONFIG_STATUS_OPTIONS = ["全部", "生效中", "已失效"] as const
 

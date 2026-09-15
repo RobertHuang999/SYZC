@@ -44,6 +44,7 @@ export function CollateralWarningTable({
             <TableRow>
               <TableHead className="w-16">序号</TableHead>
               <TableHead className="w-[130px]">预警订单</TableHead>
+              <TableHead className="w-[100px]">订单类型</TableHead>
               <TableHead className="w-[120px]">预警类型</TableHead>
               <TableHead className="w-[110px]">预警等级</TableHead>
               <TableHead className="w-[110px]">预警来源</TableHead>
@@ -60,7 +61,7 @@ export function CollateralWarningTable({
             {events.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={12}
+                  colSpan={13}
                   className="h-32 text-center text-muted-foreground"
                 >
                   暂无数据
@@ -81,6 +82,7 @@ export function CollateralWarningTable({
                         {event.orderNo}
                       </Link>
                     </TableCell>
+                    <TableCell>{event.orderType ?? "抵押"}</TableCell>
                     <TableCell>{event.warningType}</TableCell>
                     <TableCell>
                       <SeverityLevelDisplay

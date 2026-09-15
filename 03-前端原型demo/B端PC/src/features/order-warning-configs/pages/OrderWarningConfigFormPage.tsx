@@ -17,6 +17,7 @@ import { SeverityLevelDisplay } from "@/shared/components/SeverityLevelDisplay"
 import { ENABLED_SEVERITY_LEVELS } from "@/shared/mock/severity-levels"
 import { orderWarningConfigFormAnnotations } from "../annotations/order-warning-config-form.annotations"
 import { orderWarningConfigDocuments } from "../documents/order-warning-config-documents"
+import { LtvDualStrategyFields } from "../components/LtvDualStrategyFields"
 import { TimeoutConfigTable } from "../components/TimeoutConfigTable"
 import { OrgUserSelect } from "@/shared/components/OrgUserSelect"
 import type { OrderStrategyFormState, OrderWarningStrategyKey } from "../domain/types"
@@ -24,6 +25,7 @@ import {
   buildTimeoutRowsForOrder,
   createEmptyFormValues,
   detailToFormValues,
+  getMockCurrentLtv,
   getMockOrderByNo,
   getOrderWarningConfigById,
   MOCK_ORDERS,
@@ -75,8 +77,8 @@ export function OrderWarningConfigFormPage() {
   }
 
   const pageTitle = isEdit ? `编辑订单规则 — ${form.ruleName}` : "新增订单规则"
-  const isHistoricalSupervision = existing?.orderType === "监管"
   const selectedOrder = form.orderNo ? getMockOrderByNo(form.orderNo) : undefined
+  const currentLtv = getMockCurrentLtv(form.orderNo)
   const visibleGoods =
     selectedOrder?.goodsBatches.filter((batch) => batch.goodsLabel.trim()) ?? []
 
@@ -168,25 +170,6 @@ export function OrderWarningConfigFormPage() {
     navigate("/物联网IOT与预警/预警配置/订单预警配置")
   }
 
-  if (isHistoricalSupervision && existing) {
-    return (
-      <div className="space-y-4 p-6">
-        <Link to={`/物联网IOT与预警/预警配置/订单预警配置/详情/${existing.configId}`}>
-          <Button variant="outline">
-            <ArrowLeftIcon />
-            返回详情
-          </Button>
-        </Link>
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-8 text-center">
-          <h1 className="text-xl font-semibold text-amber-950">监管订单当前关闭</h1>
-          <p className="mt-2 text-sm text-amber-900">
-            该规则属于历史监管订单配置，仅支持详情、审计和资料查看，不允许编辑或保存。
-          </p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <PrototypeAnnotationProvider
       title={`${pageTitle} · 原型批注`}
@@ -250,7 +233,7 @@ export function OrderWarningConfigFormPage() {
                       <SelectItem value="none" disabled>
                         请选择关联订单
                       </SelectItem>
-                      {MOCK_ORDERS.filter((order) => order.orderType === "抵/质押").map((order) => (
+                      {MOCK_ORDERS.map((order) => (
                         <SelectItem key={order.orderNo} value={order.orderNo}>
                           <span className="font-mono font-medium text-foreground">{order.orderNo}</span>
                           <span className="text-muted-foreground ml-1.5 text-xs">
@@ -387,59 +370,18 @@ export function OrderWarningConfigFormPage() {
                           </div>
                         )}
                         {def.key === "ltvDual" && (
-                          <>
-                            <div className="space-y-2">
-                              <Label>
-                                <span className="text-destructive font-bold mr-1">*</span>
-                                补仓线 LTV (%)
-                              </Label>
-                              <Input
-                                value={strategy.params.marginCallLtv ?? ""}
-                                placeholder="如: 70"
-                                onChange={(event) =>
-                                  updateStrategy(def.key, {
-                                    params: {
-                                      ...strategy.params,
-                                      marginCallLtv: event.target.value,
-                                    },
-                                  })
-                                }
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>
-                                <span className="text-destructive font-bold mr-1">*</span>
-                                平仓线 LTV (%)
-                              </Label>
-                              <Input
-                                value={strategy.params.closeOutLtv ?? ""}
-                                placeholder="如: 85"
-                                onChange={(event) =>
-                                  updateStrategy(def.key, {
-                                    params: {
-                                      ...strategy.params,
-                                      closeOutLtv: event.target.value,
-                                    },
-                                  })
-                                }
-                              />
-                            </div>
-                            <div className="space-y-2 md:col-span-2">
-                              <Label>解除方式</Label>
-                              <Input
-                                value={strategy.params.releaseMethod ?? ""}
-                                placeholder="如: 货值回升或补缴保证金"
-                                onChange={(event) =>
-                                  updateStrategy(def.key, {
-                                    params: {
-                                      ...strategy.params,
-                                      releaseMethod: event.target.value,
-                                    },
-                                  })
-                                }
-                              />
-                            </div>
-                          </>
+                          <LtvDualStrategyFields
+                            params={strategy.params}
+                            currentLtv={currentLtv}
+                            onChange={(patch) =>
+                              updateStrategy(def.key, {
+                                params: {
+                                  ...strategy.params,
+                                  ...patch,
+                                },
+                              })
+                            }
+                          />
                         )}
                         {def.key === "inspection" && (
                           <>

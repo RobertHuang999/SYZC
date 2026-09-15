@@ -97,7 +97,7 @@ export function CollateralWarningCard({
                 {event.orderNo}
               </h3>
               <div className="mt-0.5 text-[11px] text-gray-400 font-medium truncate">
-                {event.warningType}
+                {event.orderType ?? "抵押"} · {event.warningType}
               </div>
             </div>
           </div>

@@ -3,16 +3,17 @@ import type {
   CollateralWarningEventDetailExtension,
   CollateralOrderSnapshot,
   CollateralTriggerSnapshot,
+  LtvHitSnapshot,
 } from "../domain/types"
 
 /**
  * 结构化构建真实的押品订单与仓储位置快照（严格对齐字段清单第四章）
  */
 function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnapshot {
-  const isCustody = event.orderType === "监管"
+  const orderType = event.orderType ?? "抵押"
   if (event.warningType === "抵/质押率异常") {
     return {
-      orderType: "抵/质押",
+      orderType,
       ownerCompany: "浙江物产中大金属集团有限公司",
       cargoItems: [
         {
@@ -29,7 +30,7 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
   }
   if (event.warningType === "价格下跌") {
     return {
-      orderType: "抵/质押",
+      orderType,
       ownerCompany: "江苏国泰大宗供应链有限公司",
       cargoItems: [
         {
@@ -46,7 +47,7 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
   }
   if (event.warningType === "物联穿透告警") {
     return {
-      orderType: "抵/质押",
+      orderType,
       ownerCompany: "无锡中联仓储物流实业有限公司",
       cargoItems: [
         {
@@ -63,7 +64,7 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
   }
   if (event.warningType === "巡检异常") {
     return {
-      orderType: isCustody ? "监管" : "抵/质押",
+      orderType,
       ownerCompany: "上海远大国际贸易实业有限公司",
       cargoItems: [
         {
@@ -87,7 +88,7 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
   }
   if (event.warningType === "盘点异常") {
     return {
-      orderType: isCustody ? "监管" : "抵/质押",
+      orderType,
       ownerCompany: "山东寿光农产品现货物流有限公司",
       cargoItems: [
         {
@@ -104,7 +105,7 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
   }
   if (event.warningType === "贷中风控预警") {
     return {
-      orderType: "抵/质押",
+      orderType,
       ownerCompany: "中融泰和国际大宗贸易有限公司",
       cargoItems: [
         {
@@ -120,7 +121,7 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
     }
   }
   return {
-    orderType: isCustody ? "监管" : "抵/质押",
+    orderType,
     ownerCompany: "河南中原黄金大宗供应链有限公司",
     cargoItems: [
       {
@@ -139,6 +140,19 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
 /**
  * 结构化构建触发时刻的真实判定数据依据（严格对齐字段清单第四章：触发数据快照）
  */
+function buildLtvHitSnapshot(event: CollateralWarningEvent): LtvHitSnapshot | null {
+  if (event.warningType !== "抵/质押率异常") {
+    return null
+  }
+  return {
+    hitLine: "平仓线",
+    triggerLtv: "88.50",
+    marginCallThreshold: "75.00",
+    closeOutThreshold: "85.00",
+    allowedReleaseMethods: ["平仓", "部分结清"],
+  }
+}
+
 function buildTriggerSnapshot(event: CollateralWarningEvent): CollateralTriggerSnapshot | null {
   if (event.warningType === "物联穿透告警") {
     return null
@@ -189,17 +203,19 @@ function buildTriggerSnapshot(event: CollateralWarningEvent): CollateralTriggerS
     }
   }
   if (
-    event.warningType === "解抵/质押超时" ||
-    event.warningType === "解抵/质押/监管超时"
+    event.warningType === "解抵/质押超时"
   ) {
     return {
-      metricName: event.orderType === "监管" ? "监管业务存续期限" : "抵/质押业务存续期限",
+      metricName:
+        event.orderType === "监管服务"
+          ? "监管服务存续期限"
+          : "抵押/质押业务存续期限",
       triggerValue: "逾期 15 天",
       thresholdValue: "约定期限: 2026-06-01",
       deviation:
-        event.orderType === "监管"
-          ? "监管期满未办理解除或展期"
-          : "抵/质押期限届满未办理解押或展期",
+        event.orderType === "监管服务"
+          ? "监管服务期限届满未办理续期或结案"
+          : "抵押/质押期限届满未办理解押或展期",
       ruleVersion: "Version 1 (v1.0)",
     }
   }
@@ -257,5 +273,6 @@ export function getCollateralWarningDetailExtension(
               : null,
         }
       : null,
+    ltvHitSnapshot: buildLtvHitSnapshot(event),
   }
 }

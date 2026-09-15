@@ -5,6 +5,7 @@ import type {
 import { ORDER_STRATEGY_DEFINITIONS, MOCK_ORDERS } from "./detail-utils"
 import { orderWarningConfigsMock } from "../mock/order-warning-configs.mock"
 import { validateTimeoutRows } from "./timeout-config-utils"
+import { extractLtvParams, parseReleaseMethodsParam } from "./ltv-utils"
 
 function validateStrategy(
   key: OrderWarningStrategyKey,
@@ -29,13 +30,19 @@ function validateStrategy(
   }
 
   if (key === "ltvDual") {
-    const marginCall = Number(strategy.params.marginCallLtv)
-    const closeOut = Number(strategy.params.closeOutLtv)
+    const ltvParams = extractLtvParams(strategy.params)
+    const marginCall = Number(ltvParams.marginCallLtv)
+    const closeOut = Number(ltvParams.closeOutLtv)
     if (!Number.isFinite(marginCall) || !Number.isFinite(closeOut)) {
       return "请填写完整的抵/质押率阈值"
     }
     if (closeOut <= marginCall) return "平仓线必须高于补仓线"
-    if (!strategy.params.releaseMethod?.trim()) return "请选择抵/质押率解除方式"
+    if (parseReleaseMethodsParam(ltvParams.marginCallReleaseMethods).length === 0) {
+      return "请选择补仓线解除方式"
+    }
+    if (parseReleaseMethodsParam(ltvParams.closeOutReleaseMethods).length === 0) {
+      return "请选择平仓线解除方式"
+    }
   }
 
   if (key === "inspection") {
@@ -68,10 +75,6 @@ export function validateOrderWarningConfig(
 
   const order = MOCK_ORDERS.find((item) => item.orderNo === values.orderNo)
   if (!order) return "关联订单不存在或已失效"
-  if (order.orderType === "监管") {
-    return "监管订单当前关闭，历史规则仅供审计，不允许新增、编辑或保存"
-  }
-
   const duplicateOrder = orderWarningConfigsMock.some(
     (config) =>
       config.configId !== editingConfigId &&

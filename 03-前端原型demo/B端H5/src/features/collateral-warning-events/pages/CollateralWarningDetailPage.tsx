@@ -63,8 +63,7 @@ export function CollateralWarningDetailPage() {
   }
 
   const isPenetration = event.warningSource === "物联穿透" || Boolean(event.deviceEventId)
-  const isHistoricalReadOnly =
-    event.warningSource === "历史" || event.orderType === "监管"
+  const isHistoricalReadOnly = event.warningSource === "历史"
   const isClosed = event.warningStatus === WARNING_STATUS.CLOSED_VALID
   const isInvalid = event.warningStatus === WARNING_STATUS.OPEN_INVALID
 
@@ -96,7 +95,7 @@ export function CollateralWarningDetailPage() {
           >
             {isHistoricalReadOnly && (
               <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900">
-                历史监管记录 · 只读。当前监管订单已关闭，本记录仅支持详情、审计和资料查看，不提供解除、公示或其他业务写操作。
+                本记录为历史归档，仅支持详情、审计和资料查看，不提供业务写操作。
               </div>
             )}
             <SectionCard
@@ -131,6 +130,13 @@ export function CollateralWarningDetailPage() {
                     <Copy className="size-3" />
                   </button>
                 </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="w-24 shrink-0 text-gray-500">订单类型:</span>
+                <span className="flex-1 text-right font-semibold text-indigo-700">
+                  {event.orderType ?? "抵押"}
+                </span>
               </div>
 
               <div className="flex items-center justify-between">
@@ -182,6 +188,19 @@ export function CollateralWarningDetailPage() {
                   {event.warningContent}
                 </p>
               </div>
+
+              {event.ltvHitSnapshot && (
+                <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50/80 p-2.5 text-xs text-amber-950">
+                  <div className="font-semibold">抵/质押率 (LTV) 命中快照</div>
+                  <div className="mt-1.5 space-y-1">
+                    <div>命中线：{event.ltvHitSnapshot.hitLine}</div>
+                    <div>触发时抵/质押率 (LTV)：{event.ltvHitSnapshot.triggerLtv}%</div>
+                    <div>
+                      可用解除方式：{event.ltvHitSnapshot.allowedReleaseMethods.join("、")}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {event.snapshotImageStatus === "available" && (
                 <div className="mt-1 flex items-center justify-between rounded-xl bg-blue-50/70 p-2.5 text-xs text-blue-900 border border-blue-100">

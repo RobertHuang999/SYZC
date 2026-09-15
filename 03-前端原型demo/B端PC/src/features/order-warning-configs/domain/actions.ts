@@ -1,4 +1,4 @@
-import type { OrderWarningConfigStatus, OrderType } from "./types"
+import type { OrderWarningConfigStatus } from "./types"
 
 export const ORDER_WARNING_CONFIG_STATUS_BADGE_CLASS: Record<
   OrderWarningConfigStatus,
@@ -11,12 +11,8 @@ export const ORDER_WARNING_CONFIG_STATUS_BADGE_CLASS: Record<
 export type OrderWarningConfigAction = "edit" | "detail" | "delete"
 
 export function getOrderWarningConfigActions(
-  status: OrderWarningConfigStatus,
-  orderType?: OrderType
+  status: OrderWarningConfigStatus
 ): OrderWarningConfigAction[] {
-  if (orderType === "监管") {
-    return ["detail"]
-  }
   return status === "生效中" ? ["edit", "detail", "delete"] : ["detail", "delete"]
 }
 

@@ -25,7 +25,7 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "业务范围",
-            content: "涵盖抵/质押物价值下跌、质押率突破警戒线、解抵/质押超时、盘点巡检缺失、贷中模型拒绝及物理安防入侵穿透告警。",
+            content: "涵盖抵押/质押物价值下跌、质押率突破警戒线、抵押/质押/监管服务超时、盘点巡检缺失、贷中模型拒绝及物理安防入侵穿透告警。",
           },
         ],
       },
@@ -57,7 +57,7 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "预警类型（7类）",
-            content: "价格下跌、抵/质押率异常、解抵/质押超时、盘点异常、巡检异常、贷中风控预警、物联穿透告警；支持多选 OR 匹配。",
+            content: "价格下跌、抵/质押率异常、解抵/质押超时、盘点异常、巡检异常、贷中风控预警、物联穿透告警；支持多选 OR 匹配。订单类型统一为抵押、质押、监管服务。",
           },
           {
             label: "预警来源",
@@ -108,7 +108,7 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "字段",
     title: "表格字段、快照与展示格式",
-    content: "展示订单号、抵/质押物信息、预警类型、预警等级快照、固定模板预警内容、状态与公示标记。",
+    content: "展示订单号、订单类型（抵押/质押/监管服务）、抵/质押物信息、预警类型、预警等级快照、固定模板预警内容、状态与公示标记。",
     details: [
       {
         title: "关键列说明",
@@ -116,6 +116,10 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
           {
             label: "订单号 / 抵质押物",
             content: "展示订单业务编号及抵质押物【品类-规格-数量单位】，支持点击穿透跳转订单详情。",
+          },
+          {
+            label: "订单类型",
+            content: "展示触发快照中的订单类型，仅允许抵押、质押、监管服务；旧历史“监管”不展示，也不映射为“监管服务”。",
           },
           {
             label: "预警等级",
@@ -146,7 +150,7 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "商业类 · 待处置 · 有效",
-            content: "展示【解除预警】按钮，点击跳转至【融资监管 → 抵质押订单】详情页，引导用户在单据内完成追加担保或解押审批。",
+            content: "展示【解除预警】按钮；抵/质押率类先弹出 ReleasePromptDialog 展示命中线与可用解除方式（R13e），确认后跳转【融资监管 → 抵质押订单】详情页办理。",
           },
           {
             label: "物联穿透类 · 待处置 · 有效",

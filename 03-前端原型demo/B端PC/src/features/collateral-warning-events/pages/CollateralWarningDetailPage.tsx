@@ -79,7 +79,7 @@ export function CollateralWarningDetailPage() {
   const showPenetration = event.penetrationInfo !== null
   const showDisposal = event.warningStatus === WARNING_STATUS.CLOSED_VALID
   const showInvalid = event.warningStatus === WARNING_STATUS.OPEN_INVALID
-  const isHistoricalReadOnly = event.warningSource === "历史" || event.orderType === "监管"
+  const isHistoricalReadOnly = event.warningSource === "历史"
   const deviceEventId =
     event.penetrationInfo?.relatedEventId ?? event.deviceEventId ?? "evt-017"
   const returnRoute = `/物联网IOT与预警/预警信息/押品预警信息/详情/${event.eventId}`
@@ -142,9 +142,7 @@ export function CollateralWarningDetailPage() {
 
         {isHistoricalReadOnly && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            {event.orderType === "监管"
-              ? "监管订单当前关闭，本记录仅支持详情、审计和资料查看，不提供解除、公示或其他写操作。"
-              : "本记录为历史归档，仅支持详情、审计和资料查看，不提供业务写操作。"}
+            本记录为历史归档，仅支持详情、审计和资料查看，不提供业务写操作。
           </div>
         )}
 
@@ -155,6 +153,7 @@ export function CollateralWarningDetailPage() {
               <span className="font-mono">{event.eventId}</span>
             </DetailField>
             <DetailField label="预警订单">{event.orderNo}</DetailField>
+            <DetailField label="订单类型">{event.orderType ?? event.orderSnapshot.orderType}</DetailField>
             <DetailField label="预警类型">{event.warningType}</DetailField>
             <DetailField label="预警等级">
               <SeverityLevelDisplay
@@ -218,6 +217,35 @@ export function CollateralWarningDetailPage() {
                 {event.warningContent}
               </div>
             </div>
+            {event.ltvHitSnapshot && (
+              <div className="col-span-full rounded-lg border border-amber-200 bg-amber-50/50 p-3 text-sm">
+                <div className="font-medium text-amber-900">
+                  抵/质押率 (LTV) 命中快照
+                </div>
+                <div className="mt-2 grid gap-2 md:grid-cols-2">
+                  <div>
+                    <span className="text-muted-foreground">命中线：</span>
+                    {event.ltvHitSnapshot.hitLine}
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">触发时抵/质押率 (LTV)：</span>
+                    {event.ltvHitSnapshot.triggerLtv}%
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">补仓线阈值：</span>
+                    {event.ltvHitSnapshot.marginCallThreshold}%
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">平仓线阈值：</span>
+                    {event.ltvHitSnapshot.closeOutThreshold}%
+                  </div>
+                  <div className="md:col-span-2">
+                    <span className="text-muted-foreground">可用解除方式（R13e）：</span>
+                    {event.ltvHitSnapshot.allowedReleaseMethods.join("、")}
+                  </div>
+                </div>
+              </div>
+            )}
             <DetailField label="预警时间">
               <DateTimeText value={event.warningTime} plain />
             </DetailField>
@@ -369,6 +397,7 @@ export function CollateralWarningDetailPage() {
       <ReleasePromptDialog
         open={releaseDialogOpen}
         orderNo={event.orderNo}
+        ltvHitSnapshot={event.ltvHitSnapshot}
         onOpenChange={setReleaseDialogOpen}
         onConfirm={() => {
           setReleaseDialogOpen(false)

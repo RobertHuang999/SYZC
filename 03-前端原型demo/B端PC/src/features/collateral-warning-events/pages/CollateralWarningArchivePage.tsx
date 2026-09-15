@@ -141,7 +141,6 @@ export function CollateralWarningArchivePage() {
                   <SelectItem value="抵/质押率异常">抵/质押率异常</SelectItem>
                   <SelectItem value="盘点异常">盘点异常</SelectItem>
                   <SelectItem value="巡检异常">巡检异常</SelectItem>
-                  <SelectItem value="解抵/质押/监管超时">解抵/质押/监管超时</SelectItem>
                 </SelectContent>
               </Select>
             </div>

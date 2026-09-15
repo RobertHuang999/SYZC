@@ -59,11 +59,11 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警订单 (orderNo)",
-            content: "发生预警的抵押或质押订单编号（如 PO202608-01），只读展示，支持跨模块跳转至抵质押业务单据办理页；历史监管订单仅允许详情、审计和资料查看。",
+            content: "发生预警的抵押、质押或监管服务订单编号（如 PO202608-01），只读展示，支持跨模块跳转至对应业务单据办理页；旧历史“监管”不在当前详情中展示。",
           },
           {
             label: "预警类型 (warningType)",
-            content: "6.2 版本收敛的 7 大预警类型之一（解抵/质押超时、价格下跌、盘点异常、巡检异常、抵/质押率异常、贷中风控预警、物联穿透告警）；旧“解抵/质押/监管超时”仅作为历史归档兼容类型。",
+            content: "6.2 版本收敛的 7 大预警类型之一（解抵/质押超时、价格下跌、盘点异常、巡检异常、抵/质押率异常、贷中风控预警、物联穿透告警）；不再展示旧复合类型“解抵/质押/监管超时”。",
           },
           {
             label: "预警等级 (severityLevel)",
@@ -79,7 +79,7 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警状态 (warningStatus)",
-            content: "待处置 · 有效、已结案 · 有效、已作废；当单据货物全部出库、解押完成或规则删除后自动更新为已作废。",
+            content: "待处置 · 有效、已结案 · 有效、已作废；当订单办结/出库、监管服务结案或规则删除后自动更新为已作废。",
           },
           {
             label: "失效原因 (invalidReason)",
@@ -143,7 +143,8 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
 • 实际触发值：88.50%
 • 规则预警阈值：85.00% (平仓线) / 75.00% (预警补仓线)
 • 超标判定结果：超出平仓警戒线 +3.50%
-• 标准模板：订单抵/质押率异常！触发【{补仓线/平仓线}】，LTV {值}%，贷款余额 {额} 元，质物价值 {值} 元`,
+• 抵/质押率 (LTV) 命中快照 (ltvHitSnapshot)：命中线、触发时抵/质押率 (LTV)、阈值、可用解除方式（R13e）
+• 标准模板：订单抵/质押率异常！触发【{补仓线/平仓线}】，当前抵/质押率 (LTV) {值}%，贷款余额 {额} 元，质物价值 {值} 元`,
           },
           {
             label: "③ 价格下跌",
@@ -170,14 +171,13 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
 • 标准模板：巡检异常！【{巡检人}】未按时巡检，请及时核查处理！`,
           },
           {
-            label: "⑥ 解抵/质押超时",
-            content: `• 监控指标项：抵/质押业务存续期限
+            label: "⑥ 解抵押/解质押/监管服务超时",
+            content: `• 监控指标项：订单履约/监管服务期限
 • 实际触发值：逾期 15 天
 • 规则预警阈值：约定期限: 2026-06-01
-• 超标判定结果：抵/质押期限届满未办理解押或展期
+• 超标判定结果：抵押/质押未完成解押，或监管服务未完成结案
 • 标准模板：
-  - 当前：当前抵/质押物 {品类}-{规格}（{数量}{单位}）未在 {日期} 完成解抵/质押！（阈值{天}天）
-  - 历史监管兼容：当前监管物 {品类}-{规格}（{数量}{单位}）未在 {日期} 完成解监管！（仅历史展示）`,
+  - 当前：当前{订单类型}订单的{品类}-{规格}（{数量}{单位}）未在 {日期} 完成约定期限内的办结！（阈值{天}天）`,
           },
           {
             label: "⑦ 特殊类 · 物联穿透告警",
@@ -192,8 +192,8 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
         title: "风控公式与参数快照",
         items: [
           {
-            label: "质押率（LTV）计算公式",
-            content: `LTV = 贷款余额 ÷ 押品实时总市值
+            label: "抵/质押率 (LTV) 计算公式",
+            content: `抵/质押率 (LTV) = 贷款余额 ÷ 押品实时总市值
 其中：押品实时总市值 = 押品在库数量 × 当前市场估值单价
 预警条件：
 • 警戒线预警：LTV ≥ 预警线（如 75%）
@@ -246,7 +246,7 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "空间重合匹配原则",
-            content: "仅当处于抵押中或质押中状态且物理空间完全重合（同仓同库区同货位）的设备高危告警才触发押品穿透告警；历史监管订单不参与新穿透。",
+            content: "仅当设备物理空间与当前有效抵押、质押或监管服务订单完全重合（同仓同库区同货位）时，设备高危告警才触发押品穿透告警；旧历史“监管”订单不参与新穿透。",
           },
         ],
       },
@@ -313,7 +313,7 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "商业类 · 待处置 · 有效",
-            content: "展示【解除预警】，点击弹出引导对话框并跳转对应抵质押订单信息页进行处置。",
+            content: "展示【解除预警】；抵/质押率类 ReleasePromptDialog 展示命中线与可用解除方式（R13e），确认后跳转对应抵质押订单信息页办理。",
           },
           {
             label: "物联类 · 待处置 · 有效",

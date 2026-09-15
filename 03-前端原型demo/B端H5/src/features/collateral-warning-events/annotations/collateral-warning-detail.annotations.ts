@@ -58,11 +58,11 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警类型 (warningType)",
-            content: "6.2 当前收敛的 7 大预警类型之一（解抵/质押超时、价格下跌、盘点异常、巡检异常、抵/质押率异常、贷中风控预警、物联穿透告警）；旧“解抵/质押/监管超时”仅作为历史监管归档兼容类型。",
+            content: "6.2 当前收敛的 7 大预警类型之一（解抵/质押超时、价格下跌、盘点异常、巡检异常、抵/质押率异常、贷中风控预警、物联穿透告警）；不再展示旧复合类型“解抵/质押/监管超时”。",
           },
           {
             label: "预警等级",
-            content: "03/01 预警等级字典快照（如 L4 严重风险 / L5 紧急危险），展示对应彩色色块与等级编码。",
+            content: "03/01 预警等级字典快照（如 L3 关注 / L5 紧急危险），展示对应彩色色块与等级编码；LTV 子项整卡单等级（如 PO202608-01 示例为 L3）。",
           },
           {
             label: "来源渠道 (warningSource)",
@@ -94,7 +94,7 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
     number: 3,
     kind: "规则",
     title: "预警事实与风控计算公式",
-    content: "展示参数化预警内容（含触发指标、实际值与阈值对比）、7 大当前类型判定标准及 LTV/跌价计算模型；历史监管记录仅展示不可变快照。",
+    content: "展示参数化预警内容（含触发指标、实际值与阈值对比）、7 大当前类型判定标准及 LTV/跌价计算模型；订单类型仅展示抵押、质押、监管服务。",
     details: [
       {
         title: "字段来源机制",
@@ -105,7 +105,11 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警内容内嵌判定数据",
-            content: "监控指标项、实际触发值、规则预警阈值、超标判定结果已内嵌拼接至 `warningContent` 标准模板文本，详情页不再单独展示结构化快照区块。",
+            content: "监控指标项、实际触发值、规则预警阈值、超标判定结果已内嵌拼接至 `warningContent` 标准模板文本。",
+          },
+          {
+            label: "抵/质押率 (LTV) 命中快照 (ltvHitSnapshot · R13e)",
+            content: "仅抵/质押率异常展示：命中线（补仓线/平仓线）、触发时抵/质押率 (LTV)、可用解除方式；与 PC 端解除引导规则一致。",
           },
         ],
       },
@@ -121,7 +125,7 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
 5. 巡检异常：例行巡检时效 / 计划时限
 6. 业务超时：存续期限 / 约定期限
 7. 物联穿透：现场传感器物理异常联动
-历史监管兼容：监管存续期限/解监管超时，仅可查看历史快照，不产生新流水`,
+订单类型：抵押 / 质押 / 监管服务；旧历史“监管”不展示、不映射`,
           },
         ],
       },

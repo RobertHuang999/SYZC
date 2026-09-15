@@ -21,6 +21,7 @@ import { collateralWarningDocuments } from "../documents/collateral-warning-docu
 
 import { useNavigate } from "react-router-dom"
 import { ReleasePromptDialog } from "../components/ReleasePromptDialog"
+import { getCollateralWarningById } from "../lib/detail-utils"
 import { normalizeWarningStatusFilter } from "../domain/status"
 
 const PC_COLLATERAL_WARNING_FILTER_KEY = "SYZC_PC_COLLATERAL_WARNING_FILTERS"
@@ -176,6 +177,11 @@ export function CollateralWarningListPage() {
         <ReleasePromptDialog
           open={releaseTarget !== null}
           orderNo={releaseTarget?.orderNo}
+          ltvHitSnapshot={
+            releaseTarget
+              ? getCollateralWarningById(releaseTarget.eventId)?.ltvHitSnapshot
+              : null
+          }
           onOpenChange={(open) => {
             if (!open) setReleaseTarget(null)
           }}

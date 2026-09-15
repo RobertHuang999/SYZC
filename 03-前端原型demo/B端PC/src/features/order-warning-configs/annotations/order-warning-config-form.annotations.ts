@@ -15,7 +15,7 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           {
             label: "逐条保存流转图",
             content: `flowchart TD
-    A["选择有效抵/质押订单"] --> B["带出订单物料与货主信息"]
+    A["选择有效抵押/质押/监管服务订单"] --> B["带出订单类型、物料与货主信息"]
     B --> C["展示 6 大策略配置卡片"]
     C --> D["按需开启 Switch 并配置阈值/等级/通知人"]
     D --> E["点击单卡片「保存该策略」"]
@@ -48,8 +48,8 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
             content: "已配置过有效规则的订单在选择下拉中置灰不可再选，保证 1:1 实体映射。",
           },
           {
-            label: "监管历史规则限制",
-            content: "新增候选仅返回有效抵/质押订单；监管订单当前关闭，历史监管规则仅可查看详情、审计和资料，旧编辑地址进入只读提示页。",
+            label: "订单类型口径",
+            content: "新增候选返回有效抵押、质押、监管服务订单；旧历史“监管”不进入候选、不展示，也不映射为“监管服务”。",
           },
           {
             label: "带出字段清单",
@@ -83,8 +83,8 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
             content: "保存某策略 Switch=OFF 时，若其为最后 1 项已启用策略则阻断并提示【至少保留 1 项有效风控策略】。",
           },
           {
-            label: "抵质押率双等级 (R18)",
-            content: "抵/质押率卡片需分别指定补仓线等级与平仓线等级，平仓线严重度 sort_order 必须大于等于补仓线。",
+            label: "抵质押率双阈值 · 表格布局 · 单等级 (R09/R10/R12a/R13d/R13e)",
+            content: "只读展示当前订单抵/质押率 (LTV)；无法计算时在 `—` 下方紧邻 LTV_UNAVAILABLE_HINT（DZY-R08a）。触发条件：「若超过 X% 时触发预警（不含等于）」；底部 LTV_FOOTER_HINT；整卡单等级。",
           },
           {
             label: "通知渠道（notify_channels）",

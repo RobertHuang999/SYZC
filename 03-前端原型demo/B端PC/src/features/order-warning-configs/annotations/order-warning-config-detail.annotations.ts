@@ -16,7 +16,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
             label: "订单风控多策略流转图",
             content: `flowchart TD
     A["订单预警综合配置 (1:1 绑定订单)"] --> B["01 价格下跌 (跌价% + 等级)"]
-    A --> C["02 抵/质押率 (补仓线/平仓线双等级)"]
+    A --> C["02 抵/质押率 (双阈值 + 分线解除 + 单等级)"]
     A --> D["03 超时预警 (到期提前天数 + 节点超时)"]
     A --> E["04 盘点异常 (账实差% + 现场复核)"]
     A --> F["05 巡检超期 (巡检周期 + 告警)"]
@@ -25,7 +25,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "页头操作",
-            content: "当前抵/质押规则按状态提供【返回】、【编辑】与【删除】；监管历史规则仅提供【返回】，只读查看详情、审计和资料。",
+            content: "抵押、质押、监管服务规则按状态提供【返回】、【编辑】与【删除】；旧历史“监管”不在当前列表中。",
           },
         ],
       },
@@ -44,7 +44,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "订单类型 (order_type)",
-            content: "【抵押】【质押】为当前可运营类型；【监管】仅用于历史快照兼容，不进入新增候选且不提供写操作。",
+            content: "订单类型枚举仅为【抵押】【质押】【监管服务】；旧历史【监管】不展示、不进入新增候选，也不映射为【监管服务】。",
           },
           {
             label: "押品物料明细 (materials)",
@@ -67,7 +67,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "01 超时预警",
-            content: "展示解押/监管到期提前预警天数及多行节点超时配置表格；二维码/批次、成功时间按整列有值才展示，某行无值时显示「—」。",
+            content: "展示解抵押/解质押/监管服务超时天数及多行节点配置表格；二维码/批次、成功时间按整列有值才展示，某行无值时显示「—」。",
           },
           {
             label: "02 价格下跌预警",
@@ -83,7 +83,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "05 抵/质押率预警",
-            content: "双阈值模型：补仓线（如 LTV >= 75% 触发中危）与平仓线（如 LTV >= 85% 触发高危）。",
+            content: "双阈值模型：若超过 X% 时触发预警（不含等于）；补仓/平仓分线解除方式；整卡单等级。无法计算当前率时详情不展示该参考字段（DZY-R08a）。R13d/R13e 同前。",
           },
           {
             label: "06 贷中风控预警",
@@ -103,18 +103,18 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "交互",
     title: "页头操作与权限控制",
-    content: "当前抵/质押规则支持编辑与软删除；监管历史规则仅只读，禁止编辑、删除和保存。",
+    content: "当前抵押、质押、监管服务规则支持编辑与软删除；旧历史“监管”不在当前数据集。",
     details: [
       {
         title: "权限与约束",
         items: [
           {
             label: "操作权限",
-            content: "具备 R-RISK-MGR 权限人员可编辑和删除当前抵/质押配置；监管历史规则不开放写操作。",
+            content: "具备 R-RISK-MGR 权限人员可编辑和删除当前三类订单配置。",
           },
           {
             label: "删除联动",
-            content: "当前抵/质押规则删除后，历史已触发的待处置 · 有效预警流水自动流转为【已作废】；监管历史规则不允许删除。",
+            content: "当前订单规则删除后，历史已触发的待处置 · 有效预警流水自动流转为【已作废】。",
           },
         ],
       },

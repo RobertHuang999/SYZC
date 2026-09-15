@@ -8,16 +8,24 @@ const DETAIL_OVERRIDES: Record<
   Partial<CollateralWarningEventDetailExtension>
 > = {
   "cw-001": {
-    orderType: "抵/质押",
-    ruleName: "订单抵/质押率超平仓线监控",
-    triggerSnapshot: "触发线: 平仓线(85.0%)；实际质押率: 88.5%；贷款余额: ¥4,314,375；质物价值: ¥4,875,000",
+    orderType: "质押",
+    ruleName: "PO1002大宗综合风控",
+    triggerSnapshot:
+      "命中线: 平仓线 | 触发抵/质押率 (LTV): 88.50% | 阈值: 85.00% | 可用解除: 平仓、部分结清",
     snapshotImageUrl: "snapshot-cw-001.jpg",
     invalidReason: null,
     penetrationInfo: null,
     disposalInfo: null,
+    ltvHitSnapshot: {
+      hitLine: "平仓线",
+      triggerLtv: "88.50",
+      marginCallThreshold: "75.00",
+      closeOutThreshold: "85.00",
+      allowedReleaseMethods: ["平仓", "部分结清"],
+    },
   },
   "cw-002": {
-    orderType: "抵/质押",
+    orderType: "质押",
     ruleName: "智能挂锁剪杆破坏预警",
     triggerSnapshot: "位置: 一号钢材仓+A库01分区；设备名称: 智能挂锁-A01；触发预警: 锁杆被剪",
     snapshotImageUrl: "snapshot-cw-002.jpg",
@@ -32,7 +40,7 @@ const DETAIL_OVERRIDES: Record<
     disposalInfo: null,
   },
   "cw-003": {
-    orderType: "抵/质押",
+    orderType: "抵押",
     ruleName: "大宗金属质押价格下跌预警",
     triggerSnapshot: "跌幅 -12.8% / 阈值 -12.0% / 基准价 68,200 元/吨",
     snapshotImageUrl: "snapshot-cw-003.jpg",
@@ -46,7 +54,7 @@ const DETAIL_OVERRIDES: Record<
     },
   },
   "cw-004": {
-    orderType: "抵/质押",
+    orderType: "抵押",
     ruleName: "农产品菜籽油现货价格下行预警",
     triggerSnapshot: "跌幅 -6.5% / 预警阈值 -6.0% / 基准价 8,200 元/吨",
     snapshotImageUrl: null,
@@ -59,7 +67,7 @@ const DETAIL_OVERRIDES: Record<
     },
   },
   "cw-006": {
-    orderType: "抵/质押",
+    orderType: "质押",
     ruleName: "仓库例行盘点账实差异监控",
     triggerSnapshot: "盘点差异 2.3% / 阈值 2.0%",
     snapshotImageUrl: null,
@@ -68,18 +76,9 @@ const DETAIL_OVERRIDES: Record<
     disposalInfo: null,
   },
   "cw-007": {
-    orderType: "抵/质押",
+    orderType: "抵押",
     ruleName: "贷中大数据风控决策模型",
     triggerSnapshot: "模型名称: 借款人司法诉讼与涉诉高风险模型；模型分数: 82.5；预警描述: 借款主体新增被执行人记录",
-    snapshotImageUrl: null,
-    invalidReason: null,
-    penetrationInfo: null,
-    disposalInfo: null,
-  },
-  "cw-008": {
-    orderType: "监管",
-    ruleName: "监管到期未解监管预警（历史快照）",
-    triggerSnapshot: "监管到期日: 2026年08月25日；超时天数: 3天（历史快照）",
     snapshotImageUrl: null,
     invalidReason: null,
     penetrationInfo: null,
@@ -109,10 +108,20 @@ function getRealTriggerSnapshot(event: CollateralWarningEvent): string | null {
   if (event.warningType === "解抵/质押超时") {
     return "抵/质押业务存续期限: 逾期 15 天 | 约定期限: 2026-06-01 | 抵/质押期限届满未办理解押或展期"
   }
-  if (event.warningType === "解抵/质押/监管超时") {
-    return "监管业务存续期限: 逾期 15 天 | 约定期限: 2026-06-01 | 监管期满未办理解除或展期（历史快照）"
-  }
   return "业务指标超出预设风控阈值，触发规则审计快照"
+}
+
+function buildLtvHitSnapshot(event: CollateralWarningEvent) {
+  if (event.warningType !== "抵/质押率异常") {
+    return null
+  }
+  return {
+    hitLine: "平仓线" as const,
+    triggerLtv: "88.50",
+    marginCallThreshold: "75.00",
+    closeOutThreshold: "85.00",
+    allowedReleaseMethods: ["平仓", "部分结清"],
+  }
 }
 
 function buildDefaultExtension(
@@ -123,7 +132,7 @@ function buildDefaultExtension(
   const isInvalid = event.warningStatus === "OPEN_INVALID"
 
   return {
-    orderType: event.orderType ?? "抵/质押",
+    orderType: event.orderType ?? "抵押",
     ruleName: event.ruleName || (isIot ? "智能挂锁防拆规则" : `${event.warningType}监控规则`),
     triggerSnapshot: getRealTriggerSnapshot(event),
     snapshotImageUrl:
@@ -154,6 +163,7 @@ function buildDefaultExtension(
               : null,
         }
       : null,
+    ltvHitSnapshot: buildLtvHitSnapshot(event),
   }
 }
 

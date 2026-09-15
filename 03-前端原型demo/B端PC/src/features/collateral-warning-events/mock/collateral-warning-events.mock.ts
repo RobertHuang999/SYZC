@@ -8,16 +8,18 @@ const l5 = getSeverityLevelByCode("L5")!
 
 // 严格对齐 PC 端 7 个预警大类、所有状态、所有来源渠道与抓拍场景
 const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
-  // 1. 抵/质押率异常 (L4 · 订单配置触发 · 未公示 · 有抓拍图)
+  // 1. 抵/质押率异常 (L3 · 订单配置触发 · 命中平仓线 · 未公示 · 有抓拍图)
   {
     orderNo: "PO202608-01",
+    orderType: "质押",
     warningType: "抵/质押率异常",
-    severityLevelId: l4.severityLevelId,
-    severityCode: l4.severityCode,
-    severityName: l4.severityName,
-    severityColor: l4.severityColor,
+    severityLevelId: l3.severityLevelId,
+    severityCode: l3.severityCode,
+    severityName: l3.severityName,
+    severityColor: l3.severityColor,
     warningSource: "订单配置触发",
-    warningContent: "订单抵/质押率异常！本次触发平仓线，发生预警时订单抵/质押率为88.5%，贷款余额为4,314,375元，质物价值为4,875,000元（预警阈值85.0%）",
+    warningContent:
+      "订单抵/质押率异常！触发【平仓线】，当前抵/质押率 (LTV) 88.50%，贷款余额 4,314,375.00 元，质物价值 4,875,000.00 元（阈值 85.00%）",
     snapshotImageStatus: "available",
     warningTime: "2026-08-20 09:15:00",
     processedTime: null,
@@ -29,6 +31,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
   // 2. 物联穿透告警 (L5 · 物联穿透 · 关联设备事件 · 有抓拍图)
   {
     orderNo: "PO202608-01",
+    orderType: "质押",
     warningType: "物联穿透告警",
     severityLevelId: l5.severityLevelId,
     severityCode: l5.severityCode,
@@ -47,6 +50,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
   // 3. 价格下跌 (L4 · 订单配置触发 · 已结案 · 有效 · 未公示 · 支持批量公示)
   {
     orderNo: "PO202607-12",
+    orderType: "抵押",
     warningType: "价格下跌",
     severityLevelId: l4.severityLevelId,
     severityCode: l4.severityCode,
@@ -65,6 +69,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
   // 4. 价格下跌 (L3 · 订单配置触发 · 已公示)
   {
     orderNo: "PO202608-18",
+    orderType: "抵押",
     warningType: "价格下跌",
     severityLevelId: l3.severityLevelId,
     severityCode: l3.severityCode,
@@ -83,6 +88,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
   // 5. 巡检异常 (L3 · 订单配置触发 · 抓拍失败 · 待处置有效)
   {
     orderNo: "PO202608-88",
+    orderType: "监管服务",
     warningType: "巡检异常",
     severityLevelId: l3.severityLevelId,
     severityCode: l3.severityCode,
@@ -101,6 +107,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
   // 6. 盘点异常 (L2 · 订单配置触发 · 已作废 · 附带 invalidReason)
   {
     orderNo: "PO202606-99",
+    orderType: "质押",
     warningType: "盘点异常",
     severityLevelId: l2.severityLevelId,
     severityCode: l2.severityCode,
@@ -119,6 +126,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
   // 7. 贷中风控预警 (L4 · 订单配置触发 · 大数据模型)
   {
     orderNo: "PO202608-33",
+    orderType: "抵押",
     warningType: "贷中风控预警",
     severityLevelId: l4.severityLevelId,
     severityCode: l4.severityCode,
@@ -137,6 +145,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
   // 8. 物联穿透告警 (L5 · 物联穿透 · 人体入侵)
   {
     orderNo: "PO202608-66",
+    orderType: "质押",
     warningType: "物联穿透告警",
     severityLevelId: l5.severityLevelId,
     severityCode: l5.severityCode,
@@ -155,6 +164,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
   // 9. 物联穿透告警 (L4 · 物联穿透 · 门禁超时)
   {
     orderNo: "PO202608-77",
+    orderType: "监管服务",
     warningType: "物联穿透告警",
     severityLevelId: l4.severityLevelId,
     severityCode: l4.severityCode,
@@ -173,6 +183,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
   // 10. 物联穿透告警 (L3 · 物联穿透 · 库温超标 · 已结案 · 有效 · 未公示)
   {
     orderNo: "PO202607-88",
+    orderType: "监管服务",
     warningType: "物联穿透告警",
     severityLevelId: l3.severityLevelId,
     severityCode: l3.severityCode,
@@ -230,6 +241,7 @@ function buildGeneratedEvents(): CollateralWarningEvent[] {
     generated.push({
       eventId: `col-gen-${String(index + 12).padStart(3, "0")}`,
       orderNo,
+      orderType: (["抵押", "质押", "监管服务"] as const)[index % 3],
       warningType: type,
       severityLevelId: level.severityLevelId,
       severityCode: level.severityCode,
@@ -284,25 +296,6 @@ export const collateralWarningEventsMock: CollateralWarningEvent[] = [
  * 历史割接存量预警归档数据集（6.1 及存量历史五类硬件、旧订单规则产生的只读归档记录）
  */
 export const archivedCollateralWarningEventsMock: CollateralWarningEvent[] = [
-  {
-    eventId: "arch-010",
-    orderNo: "PO202608-55",
-    orderType: "监管",
-    warningType: "解抵/质押/监管超时",
-    severityLevelId: l3.severityLevelId,
-    severityCode: l3.severityCode,
-    severityName: l3.severityName,
-    severityColor: l3.severityColor,
-    warningSource: "历史",
-    warningContent: "【历史归档】监管物 热轧卷板 Q235B（1,250.00吨）未在 2026年08月25日 完成解监管，历史规则已停止触发",
-    snapshotImageStatus: "none",
-    warningTime: "2026-08-25 09:00:00",
-    processedTime: null,
-    publicityStatus: "未公示",
-    processedBy: null,
-    warningStatus: "OPEN_VALID",
-    deviceEventId: null,
-  },
   {
     eventId: "arch-001",
     orderNo: "PO202606-20",
@@ -392,24 +385,6 @@ export const archivedCollateralWarningEventsMock: CollateralWarningEvent[] = [
     processedBy: "仓库管理员（粮油区）",
     warningStatus: "CLOSED_VALID",
     deviceEventId: "evt-legacy-002",
-  },
-  {
-    eventId: "arch-006",
-    orderNo: "PO202603-25",
-    warningType: "解抵/质押/监管超时",
-    severityLevelId: l3.severityLevelId,
-    severityCode: l3.severityCode,
-    severityName: l3.severityName,
-    severityColor: l3.severityColor,
-    warningSource: "历史",
-    warningContent: "【历史归档】质押到期未解押已超 15 天，已按逾期展期协议重新签署并归档",
-    snapshotImageStatus: "none",
-    warningTime: "2026-03-25 09:00:00",
-    processedTime: "2026-03-26 14:00:00",
-    publicityStatus: "未公示",
-    processedBy: "赵商务（业务一部）",
-    warningStatus: "CLOSED_VALID",
-    deviceEventId: null,
   },
   {
     eventId: "arch-007",

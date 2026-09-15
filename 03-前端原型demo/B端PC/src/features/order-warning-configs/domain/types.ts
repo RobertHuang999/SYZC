@@ -9,7 +9,7 @@ export const ORDER_WARNING_ITEM_TYPES = [
 
 export type OrderWarningItemType = (typeof ORDER_WARNING_ITEM_TYPES)[number]
 
-export type OrderType = "抵/质押" | "监管"
+export type OrderType = "抵押" | "质押" | "监管服务"
 
 export type OrderWarningConfigStatus = "生效中" | "已失效"
 
@@ -48,7 +48,7 @@ export type OrderWarningStrategyKey =
   | "inventoryDiff"
   | "midLoan"
 
-export type TimeoutWarningType = "解抵/质押超时" | "解监管超时"
+export type TimeoutWarningType = "解抵押超时" | "解质押超时" | "监管服务超时"
 
 export type OrderGoodsBatch = {
   batchId: string

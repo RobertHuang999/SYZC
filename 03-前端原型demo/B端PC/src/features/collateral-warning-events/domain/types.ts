@@ -8,11 +8,11 @@ export const COLLATERAL_WARNING_TYPES = [
   "物联穿透告警",
 ] as const
 
-export const ARCHIVED_COLLATERAL_WARNING_TYPES = ["解抵/质押/监管超时"] as const
-
 export type CollateralWarningType =
-  | (typeof COLLATERAL_WARNING_TYPES)[number]
-  | (typeof ARCHIVED_COLLATERAL_WARNING_TYPES)[number]
+  (typeof COLLATERAL_WARNING_TYPES)[number]
+
+export const ORDER_TYPE_OPTIONS = ["抵押", "质押", "监管服务"] as const
+export type OrderType = (typeof ORDER_TYPE_OPTIONS)[number]
 
 export const WARNING_SOURCES = [
   "订单配置触发",
@@ -43,7 +43,7 @@ export type WarningStatus =
 export type CollateralWarningEvent = {
   eventId: string
   orderNo: string
-  orderType?: "抵/质押" | "监管"
+  orderType?: OrderType
   warningType: CollateralWarningType
   severityLevelId: string
   severityCode: string
@@ -116,7 +116,7 @@ export type CollateralCargoSnapshot = {
 }
 
 export type CollateralOrderSnapshot = {
-  orderType: "抵/质押" | "监管"
+  orderType: OrderType
   ownerCompany: string // 货主企业名称
   cargoItems: CollateralCargoSnapshot[] // 货物、数量与库位的逐项快照
   collateralValue: string // 质物评估货值
@@ -131,8 +131,17 @@ export type CollateralTriggerSnapshot = {
   ruleVersion: string // 判定规则版本
 }
 
+/** 抵/质押率异常命中快照（R13c/R13e） */
+export type LtvHitSnapshot = {
+  hitLine: "补仓线" | "平仓线"
+  triggerLtv: string
+  marginCallThreshold: string
+  closeOutThreshold: string
+  allowedReleaseMethods: string[]
+}
+
 export type CollateralWarningEventDetailExtension = {
-  orderType: "抵/质押" | "监管"
+  orderType: OrderType
   ruleName: string
   version: number // 乐观锁版本号，对齐字段清单第四章 Version
   orderSnapshot: CollateralOrderSnapshot
@@ -141,6 +150,7 @@ export type CollateralWarningEventDetailExtension = {
   invalidReason: string | null
   penetrationInfo: CollateralPenetrationInfo | null
   disposalInfo: CollateralDisposalInfo | null
+  ltvHitSnapshot: LtvHitSnapshot | null
 }
 
 export type CollateralWarningEventDetail = CollateralWarningEvent &

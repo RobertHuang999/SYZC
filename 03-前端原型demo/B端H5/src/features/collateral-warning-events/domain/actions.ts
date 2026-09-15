@@ -6,7 +6,7 @@ import type {
 import { WARNING_STATUS } from "./types"
 
 function isHistoricalReadOnly(event: CollateralWarningEvent): boolean {
-  return event.warningSource === "历史" || event.orderType === "监管"
+  return event.warningSource === "历史"
 }
 
 export function getRowActions(event: CollateralWarningEvent): CollateralRowAction[] {
