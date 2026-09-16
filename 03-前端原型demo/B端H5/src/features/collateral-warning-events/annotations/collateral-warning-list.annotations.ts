@@ -56,6 +56,10 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
         title: "筛选条件与逻辑",
         items: [
           {
+            label: "顶部搜索框（keyword）",
+            content: "placeholder「请输入预警订单号」；仅对预警订单号 (order_no) 做模糊匹配，不支持按预警内容、货品名称检索；与字段清单筛选区「预警订单」口径一致。",
+          },
+          {
             label: "预警类型（7类）",
             content: "价格下跌、抵/质押率异常、解抵/质押超时、盘点异常、巡检异常、贷中风控预警、物联穿透告警；支持多选 OR 匹配。订单类型统一为抵押、质押、监管服务。",
           },

@@ -18,6 +18,7 @@ import { ENABLED_SEVERITY_LEVELS } from "@/shared/mock/severity-levels"
 import { orderWarningConfigFormAnnotations } from "../annotations/order-warning-config-form.annotations"
 import { orderWarningConfigDocuments } from "../documents/order-warning-config-documents"
 import { LtvDualStrategyFields } from "../components/LtvDualStrategyFields"
+import { InspectionConfigTable } from "../components/InspectionConfigTable"
 import { TimeoutConfigTable } from "../components/TimeoutConfigTable"
 import { OrgUserSelect } from "@/shared/components/OrgUserSelect"
 import type { OrderStrategyFormState, OrderWarningStrategyKey } from "../domain/types"
@@ -194,7 +195,7 @@ export function OrderWarningConfigFormPage() {
         <PrototypeAnnotationTarget annotationIds={["order-warning-config-form-order"]}>
           <Card>
             <CardHeader>
-              <CardTitle>基础识别</CardTitle>
+              <CardTitle>基本信息</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
@@ -384,44 +385,12 @@ export function OrderWarningConfigFormPage() {
                           />
                         )}
                         {def.key === "inspection" && (
-                          <>
-                            <div className="space-y-2">
-                              <Label>
-                                <span className="text-destructive font-bold mr-1">*</span>
-                                巡检人
-                              </Label>
-                              <Input
-                                value={strategy.params.inspector ?? ""}
-                                placeholder="如: 孙巡检"
-                                onChange={(event) =>
-                                  updateStrategy(def.key, {
-                                    params: {
-                                      ...strategy.params,
-                                      inspector: event.target.value,
-                                    },
-                                  })
-                                }
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>
-                                <span className="text-destructive font-bold mr-1">*</span>
-                                巡检周期（天）
-                              </Label>
-                              <Input
-                                value={strategy.params.cycleDays ?? ""}
-                                placeholder="如: 7"
-                                onChange={(event) =>
-                                  updateStrategy(def.key, {
-                                    params: {
-                                      ...strategy.params,
-                                      cycleDays: event.target.value,
-                                    },
-                                  })
-                                }
-                              />
-                            </div>
-                          </>
+                          <InspectionConfigTable
+                            rows={strategy.inspectionRows}
+                            onChange={(rows) =>
+                              updateStrategy(def.key, { inspectionRows: rows })
+                            }
+                          />
                         )}
                         {def.key === "timeout" && (
                           <TimeoutConfigTable

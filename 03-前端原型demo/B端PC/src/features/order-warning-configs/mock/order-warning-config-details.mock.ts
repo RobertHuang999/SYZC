@@ -43,7 +43,19 @@ const detailExtensions: Record<string, DetailExtension> = {
         fields: [
           {
             label: "巡检人配置",
-            value: "现场监管员-刘强（每 7 天超期预警）",
+            value: "孙巡检(仓管部)（每 7 天超期预警）；李四(仓管部)（每 14 天超期预警）",
+          },
+        ],
+        inspectionRows: [
+          {
+            rowId: "insp-1",
+            inspector: "孙巡检(仓管部)",
+            cycleDays: "7",
+          },
+          {
+            rowId: "insp-2",
+            inspector: "李四(仓管部)",
+            cycleDays: "14",
           },
         ],
         severityLevelId: "sl-l2",
@@ -71,7 +83,14 @@ const detailExtensions: Record<string, DetailExtension> = {
         fields: [
           {
             label: "巡检人配置",
-            value: "仓储巡检员-周敏（每 14 天超期预警）",
+            value: "孙巡检(仓管部)（每 14 天超期预警）",
+          },
+        ],
+        inspectionRows: [
+          {
+            rowId: "insp-1",
+            inspector: "孙巡检(仓管部)",
+            cycleDays: "14",
           },
         ],
         severityLevelId: "sl-l3",
@@ -219,7 +238,19 @@ function buildDefaultStrategies(
     巡检: {
       key: "inspection",
       name: "仓储巡检超期预警",
-      fields: [{ label: "巡检人配置", value: "现场监管员（每 7 天）" }],
+      fields: [
+        {
+          label: "巡检人配置",
+          value: "孙巡检(仓管部)（每 7 天超期预警）",
+        },
+      ],
+      inspectionRows: [
+        {
+          rowId: "insp-1",
+          inspector: "孙巡检(仓管部)",
+          cycleDays: "7",
+        },
+      ],
       severityLevelId: "sl-l2",
       notifyTargets: ["仓储主管"],
     },

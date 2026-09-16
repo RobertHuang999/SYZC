@@ -4,6 +4,7 @@ import type {
 } from "../domain/types"
 import { ORDER_STRATEGY_DEFINITIONS, MOCK_ORDERS } from "./detail-utils"
 import { orderWarningConfigsMock } from "../mock/order-warning-configs.mock"
+import { validateInspectionRows } from "./inspection-config-utils"
 import { validateTimeoutRows } from "./timeout-config-utils"
 import { extractLtvParams, parseReleaseMethodsParam } from "./ltv-utils"
 
@@ -46,9 +47,8 @@ function validateStrategy(
   }
 
   if (key === "inspection") {
-    if (!strategy.params.inspector?.trim()) return "请填写巡检人"
-    const cycleDays = Number(strategy.params.cycleDays)
-    if (!Number.isInteger(cycleDays) || cycleDays <= 0) return "巡检周期必须为正整数"
+    const inspectionError = validateInspectionRows(strategy.inspectionRows)
+    if (inspectionError) return inspectionError
   }
 
   if (key === "timeout") {

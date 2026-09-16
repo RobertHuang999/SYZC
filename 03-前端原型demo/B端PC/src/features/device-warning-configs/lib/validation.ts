@@ -48,6 +48,19 @@ export function validateDeviceWarningConfig(
     return "仅针对新设备仅适用于设备上线子类型"
   }
 
+  if (values.newDeviceOnly) {
+    const duplicateGlobalRule = deviceWarningConfigsMock.some(
+      (config) =>
+        config.configId !== editingConfigId &&
+        config.status !== "已失效" &&
+        config.warningType === values.warningType &&
+        config.deviceScope.includes("仅针对新设备")
+    )
+    if (duplicateGlobalRule) {
+      return "该类型全局新设备规则已存在，请编辑或删除后重建"
+    }
+  }
+
   const duplicateScope = deviceWarningConfigsMock.some((config) => {
     if (config.configId === editingConfigId || config.status === "已失效") return false
     const sameScope = config.deviceScope === values.selectedDevices.trim()

@@ -87,7 +87,7 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "全局新设备 (R05/R13)",
-            content: "每预警大类仅允许 1 条生效中的全局新设备规则；勾选后隐藏设备选择与升级预警配置。",
+            content: "每预警大类仅允许 1 条有效全局新设备规则（含生效中、停用；创建时即校验 R05）；勾选后隐藏设备选择与升级预警配置。",
           },
         ],
       },

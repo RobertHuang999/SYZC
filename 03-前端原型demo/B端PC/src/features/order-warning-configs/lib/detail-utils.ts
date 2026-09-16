@@ -14,6 +14,10 @@ import type {
   TimeoutConfigRow,
 } from "../domain/types"
 import {
+  createDefaultInspectionRows,
+  parseInspectionRowsFromDetailFields,
+} from "./inspection-config-utils"
+import {
   createTimeoutRowsFromBatches,
   formatTimeoutRowsForDetail,
 } from "./timeout-config-utils"
@@ -41,7 +45,7 @@ export const ORDER_STRATEGY_DEFINITIONS: {
   {
     key: "inspection",
     name: "仓储巡检超期预警",
-    defaultParams: { inspector: "现场监管员-刘强", cycleDays: "7" },
+    defaultParams: {},
   },
   {
     key: "timeout",
@@ -89,7 +93,8 @@ export function getDetailHeaderActions(
 function createDefaultStrategyState(
   enabled = false,
   params: Record<string, string> = {},
-  timeoutRows: TimeoutConfigRow[] = []
+  timeoutRows: TimeoutConfigRow[] = [],
+  inspectionRows = createDefaultInspectionRows()
 ): OrderStrategyFormState {
   return {
     enabled,
@@ -102,6 +107,7 @@ function createDefaultStrategyState(
     upgradeTargets: [],
     params,
     timeoutRows,
+    inspectionRows,
   }
 }
 
@@ -151,6 +157,11 @@ export function detailToFormValues(
           : []
         if (def.key === "timeout" && active.timeoutRows) {
           acc[def.key].timeoutRows = active.timeoutRows
+        }
+        if (def.key === "inspection") {
+          acc[def.key].inspectionRows =
+            active.inspectionRows ??
+            parseInspectionRowsFromDetailFields(active.fields)
         }
         if (def.key === "ltvDual") {
           acc[def.key].params = {

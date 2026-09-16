@@ -60,6 +60,8 @@ type OrgUserSelectProps = {
   placeholder?: string
   disabled?: boolean
   className?: string
+  maxSelection?: number
+  showSelectedTags?: boolean
 }
 
 export function OrgUserSelect({
@@ -68,6 +70,8 @@ export function OrgUserSelect({
   placeholder = "请按组织架构选择用户",
   disabled = false,
   className,
+  maxSelection,
+  showSelectedTags = true,
 }: OrgUserSelectProps) {
   const [open, setOpen] = useState(false)
   const [selectedDeptId, setSelectedDeptId] = useState<string>("all")
@@ -103,6 +107,10 @@ export function OrgUserSelect({
     const isSelected = value.some((v) => v === userDisplay || userDisplay.includes(v) || v.includes(userDisplay.replace(/\(.*\)/, "")))
     if (isSelected) {
       onChange(value.filter((v) => v !== userDisplay && !userDisplay.includes(v) && !v.includes(userDisplay.replace(/\(.*\)/, ""))))
+    } else if (maxSelection === 1) {
+      onChange([userDisplay])
+    } else if (maxSelection !== undefined && value.length >= maxSelection) {
+      return
     } else {
       onChange([...value, userDisplay])
     }
@@ -119,19 +127,29 @@ export function OrgUserSelect({
 
   const toggleDepartment = (dept: OrgDepartment) => {
     if (disabled) return
+    if (maxSelection === 1) {
+      const firstUser = dept.users[0]
+      if (firstUser) {
+        toggleUser(firstUser.fullDisplay)
+      }
+      return
+    }
     const allDeptUsersSelected = dept.users.every((u) => isUserSelected(u.fullDisplay))
     if (allDeptUsersSelected) {
-      // Remove all users in this department
       const userDisplays = new Set(dept.users.map((u) => u.fullDisplay))
       const userNames = new Set(dept.users.map((u) => u.name))
       onChange(
         value.filter((v) => !userDisplays.has(v) && !userNames.has(v))
       )
     } else {
-      // Add all missing users
       const newItems = dept.users
         .map((u) => u.fullDisplay)
         .filter((display) => !isUserSelected(display))
+      if (maxSelection !== undefined) {
+        const remaining = maxSelection - value.length
+        onChange([...value, ...newItems.slice(0, Math.max(0, remaining))])
+        return
+      }
       onChange([...value, ...newItems])
     }
   }
@@ -328,7 +346,7 @@ export function OrgUserSelect({
       </Popover>
 
       {/* Selected tags preview */}
-      {value.length > 0 && (
+      {showSelectedTags && value.length > 0 && (
         <div className="flex flex-wrap gap-1.5 pt-1">
           {value.map((display) => (
             <span

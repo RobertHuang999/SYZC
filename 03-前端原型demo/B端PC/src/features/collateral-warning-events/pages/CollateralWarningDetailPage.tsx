@@ -217,35 +217,6 @@ export function CollateralWarningDetailPage() {
                 {event.warningContent}
               </div>
             </div>
-            {event.ltvHitSnapshot && (
-              <div className="col-span-full rounded-lg border border-amber-200 bg-amber-50/50 p-3 text-sm">
-                <div className="font-medium text-amber-900">
-                  抵/质押率 (LTV) 命中快照
-                </div>
-                <div className="mt-2 grid gap-2 md:grid-cols-2">
-                  <div>
-                    <span className="text-muted-foreground">命中线：</span>
-                    {event.ltvHitSnapshot.hitLine}
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">触发时抵/质押率 (LTV)：</span>
-                    {event.ltvHitSnapshot.triggerLtv}%
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">补仓线阈值：</span>
-                    {event.ltvHitSnapshot.marginCallThreshold}%
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">平仓线阈值：</span>
-                    {event.ltvHitSnapshot.closeOutThreshold}%
-                  </div>
-                  <div className="md:col-span-2">
-                    <span className="text-muted-foreground">可用解除方式（R13e）：</span>
-                    {event.ltvHitSnapshot.allowedReleaseMethods.join("、")}
-                  </div>
-                </div>
-              </div>
-            )}
             <DetailField label="预警时间">
               <DateTimeText value={event.warningTime} plain />
             </DetailField>

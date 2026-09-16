@@ -243,7 +243,7 @@ export function CollateralWarningListPage() {
                 <div className="relative flex-1">
                   <input
                     type="text"
-                    placeholder="请输入预警订单号/预警内容/货品"
+                    placeholder="请输入预警订单号"
                     className="w-full rounded-xl bg-[#f4f5f7] py-2 pl-3.5 pr-8 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:bg-white"
                     value={appliedFilters.keyword}
                     onChange={(event) => {

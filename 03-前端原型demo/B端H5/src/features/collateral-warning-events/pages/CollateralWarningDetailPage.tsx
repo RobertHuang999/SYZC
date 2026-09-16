@@ -189,19 +189,6 @@ export function CollateralWarningDetailPage() {
                 </p>
               </div>
 
-              {event.ltvHitSnapshot && (
-                <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50/80 p-2.5 text-xs text-amber-950">
-                  <div className="font-semibold">抵/质押率 (LTV) 命中快照</div>
-                  <div className="mt-1.5 space-y-1">
-                    <div>命中线：{event.ltvHitSnapshot.hitLine}</div>
-                    <div>触发时抵/质押率 (LTV)：{event.ltvHitSnapshot.triggerLtv}%</div>
-                    <div>
-                      可用解除方式：{event.ltvHitSnapshot.allowedReleaseMethods.join("、")}
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {event.snapshotImageStatus === "available" && (
                 <div className="mt-1 flex items-center justify-between rounded-xl bg-blue-50/70 p-2.5 text-xs text-blue-900 border border-blue-100">
                   <div className="flex items-center gap-1.5">

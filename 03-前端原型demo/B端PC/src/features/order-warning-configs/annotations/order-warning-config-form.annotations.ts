@@ -90,6 +90,10 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
             label: "通知渠道（notify_channels）",
             content: "各策略子项独立配置，选填复选框组：短信、邮件；预警命中时 H5「押品预警信息」入口自动展示待处置红点，无需配置；短信/邮件需同时配置通知对象并勾选渠道后才会下发；与 03/02 设备预警配置口径一致。",
           },
+          {
+            label: "仓储巡检超期 · 动态表格 (R17)",
+            content: "策略 3 卡片内嵌 InspectionConfigTable：按组织架构级联选择巡检人（每行单选 1 人，可添加多行），每人独立配置巡检周期（天）；至少 1 组有效配置且巡检人不可重复；巡检执行人与预警通知对象职责分离；与盘点作业完全解耦。",
+          },
         ],
       },
     ],

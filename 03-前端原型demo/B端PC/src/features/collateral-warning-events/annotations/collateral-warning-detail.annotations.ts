@@ -143,7 +143,8 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
 • 实际触发值：88.50%
 • 规则预警阈值：85.00% (平仓线) / 75.00% (预警补仓线)
 • 超标判定结果：超出平仓警戒线 +3.50%
-• 抵/质押率 (LTV) 命中快照 (ltvHitSnapshot)：命中线、触发时抵/质押率 (LTV)、阈值、可用解除方式（R13e）
+• 详情页不单独展示 LTV 命中快照卡片；命中线与阈值见「预警内容」与「触发判定数据快照」四列表
+• ltvHitSnapshot 后台持久化，仅供列表/详情「解除预警」引导弹窗（ReleasePromptDialog · R13e）使用
 • 标准模板：订单抵/质押率异常！触发【{补仓线/平仓线}】，当前抵/质押率 (LTV) {值}%，贷款余额 {额} 元，质物价值 {值} 元`,
           },
           {

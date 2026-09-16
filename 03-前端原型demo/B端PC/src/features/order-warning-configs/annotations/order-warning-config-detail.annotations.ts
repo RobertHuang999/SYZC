@@ -36,7 +36,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "order-warning-config-detail-base",
     number: 2,
     kind: "字段",
-    title: "基础识别与订单主体信息清单",
+    title: "基本信息与订单主体信息清单",
     content: "展示规则 UUID、规则名称、关联订单编号、订单业务类型、借款货主企业、联系电话与押品物料明细。",
     details: [
       {
@@ -79,7 +79,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "04 巡检超期预警",
-            content: "展示巡检周期（如每 7 天一次）及超期 T 天未打卡告警规则。",
+            content: "以只读表格展示巡检人配置多行快照：序号 / 巡检人（组织架构人员，如孙巡检(仓管部)）/ 巡检周期（如每 7 天超期预警）；允许不同责任人独立周期；超期未巡检分别触发，完成对应巡检后解除；与盘点解耦（R17）。",
           },
           {
             label: "05 抵/质押率预警",

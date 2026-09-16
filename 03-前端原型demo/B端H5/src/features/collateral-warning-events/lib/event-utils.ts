@@ -13,11 +13,7 @@ export function filterCollateralWarningEvents(
 
   return events
     .filter((event) => {
-      if (
-        keyword &&
-        !event.orderNo.toLowerCase().includes(keyword) &&
-        !event.warningContent.toLowerCase().includes(keyword)
-      ) {
+      if (keyword && !event.orderNo.toLowerCase().includes(keyword)) {
         return false
       }
 

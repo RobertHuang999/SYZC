@@ -110,7 +110,7 @@ export function OrderWarningConfigDetailPage() {
         </PrototypeAnnotationTarget>
 
         <PrototypeAnnotationTarget annotationIds={["order-warning-config-detail-base"]}>
-          <DetailSection title="基础识别">
+          <DetailSection title="基本信息">
             <DetailField label="规则 ID">{config.ruleUuid}</DetailField>
             <DetailField label="规则名称">{config.ruleName}</DetailField>
             <DetailField label="关联订单">
@@ -132,6 +132,7 @@ export function OrderWarningConfigDetailPage() {
             {config.activeStrategies.map((strategy, index) => {
               const severity = getSeverityLevelById(strategy.severityLevelId)
               const timeoutRows = strategy.timeoutRows ?? []
+              const inspectionRows = strategy.inspectionRows ?? []
               const showQrCodeColumn = timeoutRows.some((row) => row.qrCode.trim())
               const showPledgedAtColumn = timeoutRows.some((row) => row.pledgedAt.trim())
 
@@ -149,7 +150,7 @@ export function OrderWarningConfigDetailPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    {timeoutRows.length > 0 ? (
+                    {timeoutRows.length > 0 && (
                       <div className="space-y-2">
                         <DetailField label="超时配置列表">
                           <div className="overflow-x-auto rounded-lg border">
@@ -192,13 +193,42 @@ export function OrderWarningConfigDetailPage() {
                           </div>
                         </DetailField>
                       </div>
-                    ) : (
+                    )}
+                    {inspectionRows.length > 0 && (
+                      <div className="space-y-2">
+                        <DetailField label="巡检人配置">
+                          <div className="overflow-x-auto rounded-lg border">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead className="w-12">序号</TableHead>
+                                  <TableHead>巡检人</TableHead>
+                                  <TableHead>巡检周期</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {inspectionRows.map((row, rowIndex) => (
+                                  <TableRow key={row.rowId}>
+                                    <TableCell className="text-muted-foreground">
+                                      {rowIndex + 1}
+                                    </TableCell>
+                                    <TableCell>{row.inspector}</TableCell>
+                                    <TableCell>每 {row.cycleDays} 天超期预警</TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </DetailField>
+                      </div>
+                    )}
+                    {timeoutRows.length === 0 &&
+                      inspectionRows.length === 0 &&
                       strategy.fields.map((field) => (
                         <DetailField key={field.label} label={field.label}>
                           {field.value}
                         </DetailField>
-                      ))
-                    )}
+                      ))}
                     <DetailField label="预警等级">
                       {severity ? (
                         <SeverityLevelDisplay

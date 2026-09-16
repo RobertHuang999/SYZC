@@ -557,7 +557,7 @@ export function DeviceWarningConfigFormPage() {
                       仅针对新设备（全局监听）
                     </Label>
                     <p className="text-xs text-muted-foreground">
-                      勾选后后续所有新接入当前类型的设备将自动套用本规则，无需手动在下方绑定具体设备（R05/R14）。
+                      勾选后后续所有新接入当前类型的设备将自动套用本规则，无需手动在下方绑定具体设备；同一大类仅允许 1 条有效全局规则（含停用，R05/R14）。
                     </p>
                   </div>
                 </div>

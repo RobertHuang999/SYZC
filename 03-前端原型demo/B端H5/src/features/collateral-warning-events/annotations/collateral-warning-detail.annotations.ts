@@ -108,8 +108,8 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
             content: "监控指标项、实际触发值、规则预警阈值、超标判定结果已内嵌拼接至 `warningContent` 标准模板文本。",
           },
           {
-            label: "抵/质押率 (LTV) 命中快照 (ltvHitSnapshot · R13e)",
-            content: "仅抵/质押率异常展示：命中线（补仓线/平仓线）、触发时抵/质押率 (LTV)、可用解除方式；与 PC 端解除引导规则一致。",
+            label: "LTV 命中快照 (ltvHitSnapshot · R13e)",
+            content: "详情页不单独展示；命中线与阈值见预警内容与触发快照四列表。ltvHitSnapshot 仅供「解除预警」引导弹窗使用，与 PC 端一致。",
           },
         ],
       },

@@ -69,11 +69,18 @@ export type TimeoutConfigRow = {
   expectedTriggerAt: string | null
 }
 
+export type InspectionConfigRow = {
+  rowId: string
+  inspector: string
+  cycleDays: string
+}
+
 export type ActiveOrderStrategy = {
   key: OrderWarningStrategyKey
   name: string
   fields: { label: string; value: string }[]
   timeoutRows?: TimeoutConfigRow[]
+  inspectionRows?: InspectionConfigRow[]
   severityLevelId: string
   notifyChannels?: string[]
   notifyTargets?: string[]
@@ -105,6 +112,7 @@ export type OrderStrategyFormState = {
   upgradeTargets: string[]
   params: Record<string, string>
   timeoutRows: TimeoutConfigRow[]
+  inspectionRows: InspectionConfigRow[]
 }
 
 export type OrderWarningConfigFormValues = {
