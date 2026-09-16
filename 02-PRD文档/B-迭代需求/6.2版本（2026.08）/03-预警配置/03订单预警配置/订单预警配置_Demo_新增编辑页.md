@@ -64,7 +64,7 @@
 [Switch ON/OFF]  策略 N：{名称}  [ 收起/展开 ▼▲ ]
   └─ 策略专属参数字段
   └─ 预警等级（SelectWithSearch，提交 severity_level_id）
-  └─ 通知渠道（CheckboxGroup：`短信`/`邮件`，选填；系统小角标自动更新）
+  └─ 通知渠道（CheckboxGroup：`短信`/`邮件`，选填；H5 待处置红点自动展示，外部通知须配置对象并勾选渠道）
   └─ 预警对象（多选，R19）
   └─ 升级预警（Checkbox + 天数 + 对象，R20）
   └─ [ 保存该策略 ]  ● 未保存 / ✓ 已保存

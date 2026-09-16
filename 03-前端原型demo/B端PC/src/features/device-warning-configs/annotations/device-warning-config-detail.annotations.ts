@@ -132,7 +132,7 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "通知渠道",
-            content: "支持短信、邮件多选组合推送；系统小角标在预警命中时自动更新。",
+            content: "支持短信、邮件多选组合推送；预警命中时 H5「设备预警信息」入口自动展示待处置红点；未配置通知对象或未勾选渠道时不下发外部通知。",
           },
           {
             label: "超时升级梯队",

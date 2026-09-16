@@ -507,7 +507,7 @@ export function OrderWarningConfigFormPage() {
                         <div className="space-y-2 md:col-span-2">
                           <Label>通知渠道（选填）</Label>
                           <p className="text-xs text-muted-foreground">
-                            预警命中时系统自动更新预警对象系统小角标；短信/邮件按需勾选。
+                            预警命中时，H5「押品预警信息」入口自动展示待处置红点，无需配置；短信/邮件需配置通知对象并勾选渠道后才会下发。
                           </p>
                           <div className="flex flex-wrap gap-4">
                             {NOTIFY_CHANNEL_OPTIONS.map((channel) => (

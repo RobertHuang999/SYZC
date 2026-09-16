@@ -88,7 +88,7 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "通知渠道（notify_channels）",
-            content: "各策略子项独立配置，选填复选框组：短信、邮件；预警命中时系统自动更新预警对象系统小角标，小角标不可配置；与 03/02 设备预警配置口径一致。",
+            content: "各策略子项独立配置，选填复选框组：短信、邮件；预警命中时 H5「押品预警信息」入口自动展示待处置红点，无需配置；短信/邮件需同时配置通知对象并勾选渠道后才会下发；与 03/02 设备预警配置口径一致。",
           },
         ],
       },

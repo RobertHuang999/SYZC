@@ -91,7 +91,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "通知渠道展示",
-            content: "各已启用子项独立展示短信/邮件勾选结果，未配置外部渠道时展示「—」；系统小角标不在此配置。",
+            content: "各已启用子项独立展示短信/邮件勾选结果，未配置外部渠道时展示「—」；H5「押品预警信息」待处置红点不在此配置，预警命中时自动展示。",
           },
         ],
       },

@@ -126,14 +126,14 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     number: 5,
     kind: "规则",
     title: "通知渠道与超时升级表单",
-    content: "多选通知渠道、选择预警对象，并支持配置超时升级天数与升级对象。",
+    content: "多选通知渠道、选择预警对象，并支持配置超时升级天数与升级对象；H5 待处置红点自动展示，外部通知须配置对象并勾选渠道。",
     details: [
       {
         title: "通知与升级约束",
         items: [
           {
-            label: "预警对象与渠道必选",
-            content: "按需选择短信、邮件等外部通知渠道；系统小角标自动更新，至少指定一位预警接收人。",
+            label: "H5 红点与外部通知",
+            content: "预警命中时 H5「设备预警信息」入口自动展示待处置红点，无需配置；短信/邮件需同时配置通知对象并勾选渠道后才会下发。",
           },
           {
             label: "超时升级天数 (escalation_days)",
