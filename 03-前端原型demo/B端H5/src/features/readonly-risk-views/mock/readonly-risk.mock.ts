@@ -109,6 +109,7 @@ const riskDisclosureRecords: ReadonlyRiskRecord[] = [
     id: "pub-h5-cw004",
     title: "菜籽油现货价格下调超 6.5%，货值从 8,200,000 元跌至 7,667,000 元",
     subtitle: "PO202608-18 · 价格下跌",
+    warningType: "价格下跌",
     status: "已公示",
     statusTone: "success",
     summary: [
@@ -134,6 +135,7 @@ const riskDisclosureRecords: ReadonlyRiskRecord[] = [
     id: "pub-seed-001",
     title: "货值下跌超12%，铜精矿较基准价 -12.8%",
     subtitle: "PO202607-12 · 价格下跌",
+    warningType: "价格下跌",
     status: "已公示",
     statusTone: "success",
     summary: [
@@ -160,6 +162,7 @@ const riskDisclosureRecords: ReadonlyRiskRecord[] = [
     id: "pub-seed-002",
     title: "计划巡检超时 48h，责任人未到场",
     subtitle: "PO202607-08 · 巡检异常",
+    warningType: "巡检异常",
     status: "已公示",
     statusTone: "success",
     summary: [
@@ -186,6 +189,7 @@ const riskDisclosureRecords: ReadonlyRiskRecord[] = [
     id: "pub-seed-004",
     title: "贷中风控拒绝风险公示",
     subtitle: "PO202608-105 · 张明",
+    warningType: "贷中风控预警",
     status: "已公示",
     statusTone: "success",
     summary: [
@@ -227,12 +231,13 @@ export function buildReadonlyRiskRecordFromPublishForm(
 ): ReadonlyRiskRecord {
   const event = getCollateralWarningById(form.sourceWarningId)
   const publishedAt = new Date().toISOString().slice(0, 19).replace("T", " ")
-  const warningType = event?.warningType ?? "价格下跌"
+  const warningType = form.warningType || event?.warningType || "价格下跌"
 
   return {
     id: recordId,
     title: form.disclosureTitle,
     subtitle: `${event?.orderType ?? "抵押"} · ${form.orderNo}`,
+    warningType,
     status: "已公示",
     statusTone: "success",
     summary: [

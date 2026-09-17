@@ -16,8 +16,10 @@ export function filterRiskDisclosureRecords(
       }
 
       if (
-        filters.warningType !== "全部" &&
-        record.warningType !== filters.warningType
+        filters.warningType.trim() &&
+        !record.warningType
+          .toLowerCase()
+          .includes(filters.warningType.trim().toLowerCase())
       ) {
         return false
       }

@@ -48,7 +48,7 @@ export type DisclosureStatusFilter = "全部" | "已公示" | "已取消"
 
 export type RiskDisclosureFilters = {
   ruleName: string
-  warningType: "全部" | RiskDisclosureWarningType
+  warningType: string
   orderNo: string
   ownerName: string
   disclosureStatus: DisclosureStatusFilter

@@ -2,7 +2,7 @@ import type { RiskDisclosureFilters } from "./types"
 
 export const DEFAULT_FILTERS: RiskDisclosureFilters = {
   ruleName: "",
-  warningType: "全部",
+  warningType: "",
   orderNo: "",
   ownerName: "",
   disclosureStatus: "已公示",

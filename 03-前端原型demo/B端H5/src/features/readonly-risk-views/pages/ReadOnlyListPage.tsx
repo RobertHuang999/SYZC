@@ -35,6 +35,7 @@ function SummaryValue({ field }: { field: ReadonlyRiskRecord["summary"][number] 
 export function ReadOnlyListPage({ module }: { module: ReadonlyRiskModule }) {
   const meta = getReadonlyRiskModuleMeta(module)
   const [keyword, setKeyword] = useState("")
+  const [warningTypeKeyword, setWarningTypeKeyword] = useState("")
   const [status, setStatus] = useState(
     module === "risk-disclosure" ? "已公示" : "全部"
   )
@@ -45,12 +46,21 @@ export function ReadOnlyListPage({ module }: { module: ReadonlyRiskModule }) {
   )
   const filteredRecords = useMemo(() => {
     const normalized = keyword.trim().toLowerCase()
-    return records.filter(
-      (record) =>
+    const normalizedWarningType = warningTypeKeyword.trim().toLowerCase()
+    return records.filter((record) => {
+      const recordWarningType =
+        record.warningType ??
+        record.summary.find((field) => field.label === "预警类型")?.value ??
+        ""
+
+      return (
         (status === "全部" || record.status === status) &&
-        (!normalized || record.searchText.toLowerCase().includes(normalized))
-    )
-  }, [keyword, records, status])
+        (!normalized || record.searchText.toLowerCase().includes(normalized)) &&
+        (!normalizedWarningType ||
+          recordWarningType.toLowerCase().includes(normalizedWarningType))
+      )
+    })
+  }, [keyword, records, status, warningTypeKeyword])
 
   return (
     <MobileShell>
@@ -76,7 +86,11 @@ export function ReadOnlyListPage({ module }: { module: ReadonlyRiskModule }) {
                 <input
                   value={keyword}
                   onChange={(event) => setKeyword(event.target.value)}
-                  placeholder="搜索关键词"
+                  placeholder={
+                    module === "risk-disclosure"
+                      ? "搜索订单号、标题或货主"
+                      : "搜索关键词"
+                  }
                   className="w-full rounded-xl bg-[#f4f5f7] py-2.5 pl-9 pr-3 text-xs text-gray-900 placeholder:text-gray-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
@@ -93,6 +107,15 @@ export function ReadOnlyListPage({ module }: { module: ReadonlyRiskModule }) {
                 ))}
               </select>
             </div>
+            {module === "risk-disclosure" && (
+              <input
+                value={warningTypeKeyword}
+                onChange={(event) => setWarningTypeKeyword(event.target.value)}
+                placeholder="模糊匹配预警类型"
+                className="w-full rounded-xl bg-[#f4f5f7] px-3 py-2.5 text-xs text-gray-900 placeholder:text-gray-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500/20"
+                aria-label="预警类型筛选"
+              />
+            )}
           </div>
         </PrototypeAnnotationTarget>
 

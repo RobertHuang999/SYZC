@@ -43,7 +43,7 @@ export const riskDisclosureListAnnotations: PrototypeAnnotation[] = [
     number: 2,
     kind: "交互",
     title: "公示信息检索与多维筛选",
-    content: "支持公示标题、订单编号、借款货主主体、规则名称、公示状态与公示时间范围组合检索。",
+    content: "支持规则名称、预警类型、订单编号、货主名称、公示状态组合检索；预警类型为模糊匹配，因公示确认页允许自定义编辑类型文案。",
     details: [
       {
         title: "筛选维度说明",
@@ -51,6 +51,10 @@ export const riskDisclosureListAnnotations: PrototypeAnnotation[] = [
           {
             label: "公示状态",
             content: "全部、已公示、已取消；默认展示已公示记录。",
+          },
+          {
+            label: "预警类型模糊匹配",
+            content: "单行文本输入框，支持关键字模糊检索；公示确认页可编辑预警类型，故列表筛选用模糊匹配而非下拉枚举。",
           },
           {
             label: "订单/货主模糊匹配",

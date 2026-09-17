@@ -13,10 +13,7 @@ import {
   DEFAULT_FILTERS,
   DISCLOSURE_STATUS_FILTER_OPTIONS,
 } from "../domain/constants"
-import {
-  RISK_DISCLOSURE_WARNING_TYPES,
-  type RiskDisclosureFilters,
-} from "../domain/types"
+import type { RiskDisclosureFilters } from "../domain/types"
 import { WarningFilterHeader } from "@/components/business/WarningListPrimitives"
 
 type RiskDisclosureFiltersProps = {
@@ -60,27 +57,13 @@ export function RiskDisclosureFiltersPanel({
 
           <div className="space-y-2">
             <Label>预警类型</Label>
-            <Select
+            <Input
+              placeholder="模糊匹配预警类型"
               value={value.warningType}
-              onValueChange={(nextValue) =>
-                onChange({
-                  ...value,
-                  warningType: nextValue as RiskDisclosureFilters["warningType"],
-                })
+              onChange={(event) =>
+                onChange({ ...value, warningType: event.target.value })
               }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="全部">全部</SelectItem>
-                {RISK_DISCLOSURE_WARNING_TYPES.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           </div>
 
           <div className="space-y-2">
