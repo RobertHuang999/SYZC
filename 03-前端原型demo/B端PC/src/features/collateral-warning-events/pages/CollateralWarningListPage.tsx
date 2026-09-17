@@ -29,6 +29,7 @@ import { getCollateralWarningById } from "../lib/detail-utils"
 import { canSelectForBatchPublish } from "../domain/actions"
 
 const PC_COLLATERAL_WARNING_FILTER_KEY = "SYZC_PC_COLLATERAL_WARNING_FILTERS"
+const PC_COLLATERAL_WARNING_PAGE_KEY = "SYZC_PC_COLLATERAL_WARNING_PAGE"
 
 function loadCachedPcCollateralFilters(): CollateralWarningFilters {
   try {
@@ -38,8 +39,6 @@ function loadCachedPcCollateralFilters(): CollateralWarningFilters {
       return {
         ...DEFAULT_FILTERS,
         ...cached,
-        // 进入列表始终以「待处置 · 有效」为默认（F01），不沿用 session 中的状态筛选
-        warningStatus: DEFAULT_FILTERS.warningStatus,
       }
     }
   } catch {}
@@ -49,6 +48,23 @@ function loadCachedPcCollateralFilters(): CollateralWarningFilters {
 function saveCachedPcCollateralFilters(filters: CollateralWarningFilters) {
   try {
     sessionStorage.setItem(PC_COLLATERAL_WARNING_FILTER_KEY, JSON.stringify(filters))
+  } catch {}
+}
+
+function loadCachedPcCollateralPage(): number {
+  try {
+    const raw = sessionStorage.getItem(PC_COLLATERAL_WARNING_PAGE_KEY)
+    if (raw) {
+      const parsed = parseInt(raw, 10)
+      if (!Number.isNaN(parsed) && parsed > 0) return parsed
+    }
+  } catch {}
+  return 1
+}
+
+function saveCachedPcCollateralPage(p: number) {
+  try {
+    sessionStorage.setItem(PC_COLLATERAL_WARNING_PAGE_KEY, String(p))
   } catch {}
 }
 
@@ -64,7 +80,7 @@ export function CollateralWarningListPage() {
     useState<CollateralWarningFilters>(loadCachedPcCollateralFilters)
   const [appliedFilters, setAppliedFilters] =
     useState<CollateralWarningFilters>(loadCachedPcCollateralFilters)
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState<number>(loadCachedPcCollateralPage)
   const [pageSize, setPageSize] = useState(PAGE_SIZE)
   const [releaseTarget, setReleaseTarget] = useState<CollateralWarningEvent | null>(null)
   const [selectedEventIds, setSelectedEventIds] = useState<Set<string>>(
@@ -121,6 +137,7 @@ export function CollateralWarningListPage() {
     setAppliedFilters(draftFilters)
     saveCachedPcCollateralFilters(draftFilters)
     setPage(1)
+    saveCachedPcCollateralPage(1)
     setSelectedEventIds(new Set())
   }
 
@@ -129,6 +146,7 @@ export function CollateralWarningListPage() {
     setAppliedFilters(DEFAULT_FILTERS)
     saveCachedPcCollateralFilters(DEFAULT_FILTERS)
     setPage(1)
+    saveCachedPcCollateralPage(1)
     setSelectedEventIds(new Set())
   }
 
@@ -248,10 +266,14 @@ export function CollateralWarningListPage() {
               total={filteredEvents.length}
               page={currentPage}
               pageSize={pageSize}
-              onPageChange={setPage}
+              onPageChange={(nextPage) => {
+                setPage(nextPage)
+                saveCachedPcCollateralPage(nextPage)
+              }}
               onPageSizeChange={(size) => {
                 setPageSize(size)
                 setPage(1)
+                saveCachedPcCollateralPage(1)
               }}
             />
           </PrototypeAnnotationTarget>

@@ -20,7 +20,12 @@ import {
   mergePublishSubmitPayload,
   validatePublishForm,
 } from "../domain/publish-form"
-import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
+import {
+  PrototypeAnnotationProvider,
+  PrototypeAnnotationTarget,
+} from "@/shared/annotations/PrototypeAnnotationLayer"
+import { collateralWarningDetailAnnotations } from "@/features/collateral-warning-events/annotations/collateral-warning-detail.annotations"
+import { collateralWarningDocuments } from "@/features/collateral-warning-events/documents/collateral-warning-documents"
 
 export function RiskDisclosurePublishPage() {
   const { warnId } = useParams()
@@ -85,6 +90,10 @@ export function RiskDisclosurePublishPage() {
     ) {
       return
     }
+    if (window.history.length > 1) {
+      navigate(-1)
+      return
+    }
     navigate(
       event
         ? getCollateralWarningDetailPath(event.eventId)
@@ -119,57 +128,63 @@ export function RiskDisclosurePublishPage() {
   }
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {isRepublish ? "重新公示信息确认" : "风险公示信息确认"}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            保留字段标题并反显预警内容；除订单号外均可编辑后提交公示。
-          </p>
+    <PrototypeAnnotationProvider
+      title="风险公示信息确认 · 原型批注"
+      annotations={collateralWarningDetailAnnotations}
+      documents={collateralWarningDocuments}
+    >
+      <div className="space-y-4 p-6">
+        <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {isRepublish ? "重新公示信息确认" : "风险公示信息确认"}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              保留字段标题并反显预警内容；除订单号外均可编辑后提交公示。
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={handleLeave}>
+              <ArrowLeftIcon />
+              返回预警列表
+            </Button>
+            <Button onClick={handleSubmit}>确认公示</Button>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+
+        <div className="rounded-lg border border-blue-200 bg-blue-50/70 px-4 py-3 text-sm text-blue-900">
+          来源预警：{event.eventId} · {event.orderNo} · 已结案 · 有效
+          {isRepublish ? " · 重新公示" : " · 未公示"}
+        </div>
+
+        <PrototypeAnnotationTarget annotationIds={["collateral-warning-detail-disposal"]}>
+          <CollateralWarningPublishFormContent
+            event={event}
+            draft={draft}
+            errors={errors}
+            onDraftChange={updateDraft}
+            onPreviewImage={setPreviewImage}
+          />
+        </PrototypeAnnotationTarget>
+
+        <div className="flex justify-end gap-2 border-t pt-4">
           <Button variant="outline" onClick={handleLeave}>
-            <ArrowLeftIcon />
-            返回预警列表
+            取消
           </Button>
           <Button onClick={handleSubmit}>确认公示</Button>
         </div>
-      </div>
 
-      <div className="rounded-lg border border-blue-200 bg-blue-50/70 px-4 py-3 text-sm text-blue-900">
-        来源预警：{event.eventId} · {event.orderNo} · 已结案 · 有效
-        {isRepublish ? " · 重新公示" : " · 未公示"}
-      </div>
-
-      <PrototypeAnnotationTarget annotationIds={["collateral-warning-detail-disposal"]}>
-        <CollateralWarningPublishFormContent
-          event={event}
-          draft={draft}
-          errors={errors}
-          onDraftChange={updateDraft}
-          onPreviewImage={setPreviewImage}
+        <SnapshotImageModal
+          data={previewImage}
+          onClose={() => setPreviewImage(null)}
         />
-      </PrototypeAnnotationTarget>
 
-      <div className="flex justify-end gap-2 border-t pt-4">
-        <Button variant="outline" onClick={handleLeave}>
-          取消
-        </Button>
-        <Button onClick={handleSubmit}>确认公示</Button>
+        {toastMessage && (
+          <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
+            {toastMessage}
+          </div>
+        )}
       </div>
-
-      <SnapshotImageModal
-        data={previewImage}
-        onClose={() => setPreviewImage(null)}
-      />
-
-      {toastMessage && (
-        <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
-          {toastMessage}
-        </div>
-      )}
-    </div>
+    </PrototypeAnnotationProvider>
   )
 }

@@ -57,11 +57,15 @@ export function CollateralWarningPublishPage() {
     ) {
       return
     }
-    if (id) {
-      navigate(`/m/supervision/order-warnings/${id}`)
+    if (window.history.length > 1) {
+      navigate(-1)
       return
     }
-    navigate(-1)
+    if (id) {
+      navigate(`/m/supervision/order-warnings/${id}`, { replace: true })
+      return
+    }
+    navigate("/m/supervision/order-warnings", { replace: true })
   }
 
   const handleSubmit = () => {

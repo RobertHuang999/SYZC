@@ -19,7 +19,12 @@ import {
   mergePublishSubmitPayload,
   validatePublishForm,
 } from "@/features/risk-disclosure/domain/publish-form"
-import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
+import {
+  PrototypeAnnotationProvider,
+  PrototypeAnnotationTarget,
+} from "@/shared/annotations/PrototypeAnnotationLayer"
+import { collateralWarningDetailAnnotations } from "../annotations/collateral-warning-detail.annotations"
+import { collateralWarningDocuments } from "../documents/collateral-warning-documents"
 
 type BatchPublishNavigationState = {
   warnIds?: string[]
@@ -177,7 +182,12 @@ export function CollateralWarningBatchPublishPage() {
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <PrototypeAnnotationProvider
+      title="批量公示信息确认 · 原型批注"
+      annotations={collateralWarningDetailAnnotations}
+      documents={collateralWarningDocuments}
+    >
+      <div className="space-y-4 p-6">
       <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -306,5 +316,6 @@ export function CollateralWarningBatchPublishPage() {
         </div>
       ) : null}
     </div>
+    </PrototypeAnnotationProvider>
   )
 }

@@ -556,7 +556,11 @@ export function PrototypeAnnotationTarget({
   className?: string
   markerPosition?: "top-left" | "top-right"
 }) {
-  const context = useAnnotationContext()
+  const context = useContext(AnnotationContext)
+  if (!context) {
+    return <div className={className}>{children}</div>
+  }
+
   const annotations = annotationIds
     .map((id) => context.annotations.find((annotation) => annotation.id === id))
     .filter((annotation): annotation is PrototypeAnnotation => Boolean(annotation))
@@ -1742,7 +1746,7 @@ function useAnnotationContext() {
   const context = useContext(AnnotationContext)
   if (!context) {
     throw new Error(
-      "PrototypeAnnotationTarget must be used inside PrototypeAnnotationProvider"
+      "useAnnotationContext must be used inside PrototypeAnnotationProvider"
     )
   }
   return context

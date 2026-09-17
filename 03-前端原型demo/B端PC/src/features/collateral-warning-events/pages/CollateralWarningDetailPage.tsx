@@ -69,12 +69,19 @@ export function CollateralWarningDetailPage() {
 
             <div className="flex flex-wrap gap-2">
               {headerActions.includes("back") && (
-                <Link to="/物联网IOT与预警/预警信息/押品预警信息">
-                  <Button variant="outline">
-                    <ArrowLeftIcon />
-                    返回
-                  </Button>
-                </Link>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (window.history.length > 1) {
+                      navigate(-1)
+                    } else {
+                      navigate("/物联网IOT与预警/预警信息/押品预警信息")
+                    }
+                  }}
+                >
+                  <ArrowLeftIcon />
+                  返回
+                </Button>
               )}
               {headerActions.includes("release") && (
                 <Button onClick={() => setReleaseDialogOpen(true)}>

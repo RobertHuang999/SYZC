@@ -58,8 +58,6 @@ function loadCachedCollateralFilters(): CollateralWarningFilters {
       return {
         ...DEFAULT_FILTERS,
         ...cached,
-        // 进入列表始终以「待处置 · 有效」为默认（F01），不沿用 session 中的状态筛选
-        warningStatus: DEFAULT_FILTERS.warningStatus,
       }
     }
   } catch {}

@@ -42,7 +42,14 @@ export function CollateralWarningFiltersPanel({
 }: CollateralWarningFiltersProps) {
   const [warningTypeOpen, setWarningTypeOpen] = useState(false)
   const [severityOpen, setSeverityOpen] = useState(false)
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(() => {
+    return Boolean(
+      value.warningStatus !== DEFAULT_FILTERS.warningStatus ||
+      value.publicityStatus !== DEFAULT_FILTERS.publicityStatus ||
+      value.warningTimeStart !== DEFAULT_FILTERS.warningTimeStart ||
+      value.warningTimeEnd !== DEFAULT_FILTERS.warningTimeEnd
+    )
+  })
 
   const warningTypeLabel = useMemo(() => {
     if (value.warningTypes.length === 0) {

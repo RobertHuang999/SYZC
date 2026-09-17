@@ -45,6 +45,7 @@ export function DeviceWarningEventDetailPage() {
     <MobileShell>
       <NavBar
         title={event.ruleName}
+        backTo="/m/iot/device-warning-events"
         right={
           <button
             type="button"
@@ -271,7 +272,7 @@ export function DeviceWarningEventDetailPage() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => navigate(-1)}
+                onClick={() => navigate("/m/iot/device-warning-events")}
                 className="rounded-xl bg-gray-100 px-4 py-2.5 text-xs font-semibold text-gray-700 active:bg-gray-200 cursor-pointer"
               >
                 返回列表
