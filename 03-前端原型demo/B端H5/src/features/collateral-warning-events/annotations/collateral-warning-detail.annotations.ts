@@ -17,7 +17,7 @@ export const collateralWarningDetailH5Annotations: PrototypeAnnotation[] = [
             content: `flowchart TD
     A["商业规则命中 / IoT事件穿透"] --> B["待处置 · 有效"]
     B -->|"单据补仓 / 物联核销"| C["已结案 · 有效"]
-    B -->|"订单结清 / 规则失效"| D["已作废"]
+    B -->|"阈值重算置换 / 订单结清 / 规则失效"| D["已作废"]
     C -->|"高危审核通过"| E["风险公示"]`,
           },
         ],

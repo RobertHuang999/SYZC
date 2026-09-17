@@ -249,7 +249,11 @@ export function getCollateralWarningDetailExtension(
       event.snapshotImageStatus === "available"
         ? `snapshot-${event.eventId}.jpg`
         : null,
-    invalidReason: isInvalid ? "关联订单预警配置已失效或删除（规则版本注销）" : null,
+    invalidReason: isInvalid
+      ? event.warningType === "价格下跌"
+        ? "预警配置阈值调整重算置换（旧阈值 10% 已作废，已生成新预警流水）（C11）"
+        : "关联订单预警配置已失效或删除（规则版本注销）"
+      : null,
     penetrationInfo: isIot
       ? {
           triggerDevice: "智能挂锁-A01 (A库挂锁位)",

@@ -123,6 +123,25 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_INVALID",
     deviceEventId: null,
   },
+  // 6b. 价格下跌预警 (L3 · 订单配置触发 · 已作废 · 阈值从 10% 调整为 20% 重算置换)
+  {
+    orderNo: "PO202608-01",
+    orderType: "质押",
+    warningType: "价格下跌",
+    severityLevelId: l3.severityLevelId,
+    severityCode: l3.severityCode,
+    severityName: l3.severityName,
+    severityColor: l3.severityColor,
+    warningSource: "订单配置触发",
+    warningContent: "抵/质押物价值下跌！货值已下跌 12.80%（旧预警阈值 10.00%），因风控策略调整重算置换已置为无效",
+    snapshotImageStatus: "none",
+    warningTime: "2026-08-20 10:15:00",
+    processedTime: null,
+    publicityStatus: "未公示",
+    processedBy: null,
+    warningStatus: "OPEN_INVALID",
+    deviceEventId: null,
+  },
   // 7. 贷中风控预警 (L4 · 订单配置触发 · 大数据模型)
   {
     orderNo: "PO202608-33",
