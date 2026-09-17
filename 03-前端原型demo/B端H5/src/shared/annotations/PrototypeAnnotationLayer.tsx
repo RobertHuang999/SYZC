@@ -507,8 +507,30 @@ export const PROTOTYPE_NAV_GROUPS: PrototypeNavGroup[] = [
   {
     label: "风控预警",
     items: [
-      { title: "押品预警列表", path: "/m/supervision/order-warnings", icon: "⚠️" },
-      { title: "设备预警列表", path: "/m/iot/device-warning-events", icon: "📡" },
+      {
+        title: "押品预警列表",
+        path: "/m/supervision/order-warnings",
+        icon: "⚠️",
+        matchPrefixes: ["/m/supervision/order-warnings"],
+      },
+      {
+        title: "设备预警列表",
+        path: "/m/iot/device-warning-events",
+        icon: "📡",
+        matchPrefixes: ["/m/iot/device-warning-events"],
+      },
+      {
+        title: "贷中风控管理",
+        path: "/m/risk/mid-loan",
+        icon: "📈",
+        matchPrefixes: ["/m/risk/mid-loan"],
+      },
+      {
+        title: "风险公示",
+        path: "/m/risk/disclosures",
+        icon: "🛡️",
+        matchPrefixes: ["/m/risk/disclosures"],
+      },
     ],
   },
   {
