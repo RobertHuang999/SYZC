@@ -16,17 +16,67 @@ const annotationContent: Record<ReadonlyRiskModule, {
     detailContent: "详情固化订单识别信息、执行资格、最近执行状态和智风控异步执行历史。",
   },
   "risk-disclosure": {
-    listTitle: "风险公示移动端只读台账",
-    listContent: "移动端风险公示菜单仅提供台账查询与快照详情；首次确认、取消公示与重新公示在押品预警路径（/m/supervision/order-warnings）完成。",
-    filterContent: "按公示标题与内容摘要、订单号、公示状态检索；预警类型单独提供模糊匹配输入框（公示确认页可编辑类型文案，故不做下拉枚举）；台账菜单不提供写操作。",
-    rowContent: "列表展示预警类型、公示标题与内容摘要、最近一次公示时间与最新操作人，点击进入与 PC 对齐的快照详情。",
-    detailContent: "详情按公示状态 + 公示信息/处置信息快照分区展示，字段与 PC 风险公示详情、押品侧公示详情一致；台账入口只读，不提供取消/重新公示按钮。",
+    listTitle: "风险公示移动端台账",
+    listContent: "移动端风险公示菜单提供台账查询、快照详情与公示管理；首次公示与批量公示仍从押品预警路径（/m/supervision/order-warnings）发起。",
+    filterContent: "列表固定仅展示已公示记录（RISK-PUB-ST02）；筛选区为「搜索字段下拉 + 关键词输入」，先选规则名称/订单号/货主/预警类型，再对所选字段做模糊匹配；不提供公示时间日期范围筛选项。",
+    rowContent: "卡片头部展示预警订单号与公示状态；灰底摘要区展示预警类型与公示内容；底部展示公示时间、操作人与「详情 ▸」入口，样式对齐押品预警卡片。",
+    detailContent: "详情按公示状态 + 公示信息/处置信息快照分区展示；底部操作区与 PC/押品侧一致，已公示展示【取消公示】【重新公示】，已取消展示【重新公示】。",
   },
 }
 
 function createAnnotations(module: ReadonlyRiskModule): PrototypeAnnotation[] {
   const content = annotationContent[module]
   const prefix = `h5-${module}`
+  const detailAnnotations: PrototypeAnnotation[] =
+    module === "risk-disclosure"
+      ? [
+          {
+            id: "h5-risk-disclosure-detail-actions",
+            targetId: "h5-risk-disclosure-detail-actions",
+            number: 5,
+            kind: "交互",
+            title: "详情底部操作区",
+            content:
+              "与 PC 风险公示详情、押品侧公示详情对齐：已公示展示【重新公示】【取消公示】；已取消仅展示【重新公示】。重新公示跳转押品预警公示确认页（republish=true）。",
+            details: [
+              {
+                title: "按钮呈现",
+                items: [
+                  {
+                    label: "重新公示",
+                    content: "需存在关联押品预警 ID；跳转 /m/supervision/order-warnings/:id/publish 并携带 republish 状态。",
+                  },
+                  {
+                    label: "取消公示",
+                    content: "仅最新状态=已公示时展示；需 R-RISK-MGR 权限（原型 Mock 不校验）。",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: "h5-risk-disclosure-detail-cancel",
+            targetId: "h5-risk-disclosure-detail-cancel",
+            number: 6,
+            kind: "交互",
+            title: "取消公示 Bottom Sheet",
+            content:
+              "固定合规文案 + 取消说明必填（1~200 字）；提交成功后状态变为已取消，写入操作记录并 Toast 提示。",
+            details: [
+              {
+                title: "校验规则",
+                items: [
+                  {
+                    label: "RISK-PUB-C02/C03",
+                    content: "说明为空时【确认取消】禁用；成功后列表默认筛选将不再展示该记录。",
+                  },
+                ],
+              },
+            ],
+          },
+        ]
+      : []
+
   return [
     {
       id: `${prefix}-list-page`,
@@ -50,14 +100,14 @@ function createAnnotations(module: ReadonlyRiskModule): PrototypeAnnotation[] {
       targetId: `${prefix}-list-filter`,
       number: 2,
       kind: "交互",
-      title: "移动端查询与状态筛选",
+      title: "移动端字段检索",
       content: content.filterContent,
       details: [
         {
           title: "查询行为",
           items: [
-            { label: "关键词", content: "关键词、预警类型与状态按 AND 组合；清空输入立即恢复当前状态筛选结果。" },
-            { label: "只读约束", content: "列表和筛选区域不出现新增、编辑、启停、删除或执行按钮。" },
+            { label: "字段 + 关键词", content: "下拉选择搜索字段（规则名称/订单号/货主/预警类型），输入框仅对所选字段模糊匹配；列表数据源固定为已公示；不含公示时间日期范围筛选。" },
+            { label: "列表约束", content: "列表和筛选区域不出现新增、批量发起或删除按钮；写操作集中在详情底部操作区。" },
           ],
         },
       ],
@@ -81,21 +131,28 @@ function createAnnotations(module: ReadonlyRiskModule): PrototypeAnnotation[] {
     },
     {
       id: `${prefix}-detail`,
-      targetId: `${prefix}-detail`,
+      targetId: module === "risk-disclosure" ? "h5-risk-disclosure-detail" : `${prefix}-detail`,
       number: 4,
       kind: "字段",
-      title: "只读详情与不可变边界",
+      title: module === "risk-disclosure" ? "快照详情与不可变边界" : "只读详情与不可变边界",
       content: content.detailContent,
       details: [
         {
           title: "详情内容",
           items: [
             { label: "展示范围", content: content.detailContent },
-            { label: "交互边界", content: "支持返回列表与分区折叠；不改变业务状态、不写入 Mock 数据。" },
+            {
+              label: "交互边界",
+              content:
+                module === "risk-disclosure"
+                  ? "支持返回列表；取消/重新公示写入 Mock 状态与操作记录，不回写押品预警原始事实。"
+                  : "支持返回列表与分区折叠；不改变业务状态、不写入 Mock 数据。",
+            },
           ],
         },
       ],
     },
+    ...detailAnnotations,
   ]
 }
 

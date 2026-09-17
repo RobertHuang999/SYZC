@@ -1,18 +1,7 @@
-import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  DEFAULT_FILTERS,
-  DISCLOSURE_STATUS_FILTER_OPTIONS,
-} from "../domain/constants"
+import { DEFAULT_FILTERS } from "../domain/constants"
 import type { RiskDisclosureFilters } from "../domain/types"
 import { WarningFilterHeader } from "@/components/business/WarningListPrimitives"
 
@@ -29,14 +18,10 @@ export function RiskDisclosureFiltersPanel({
   onSearch,
   onReset,
 }: RiskDisclosureFiltersProps) {
-  const [expanded, setExpanded] = useState(false)
-
   return (
     <Card>
       <CardContent className="space-y-4 pt-4">
         <WarningFilterHeader
-          expanded={expanded}
-          onToggle={() => setExpanded((current) => !current)}
           onReset={() => {
             onChange({ ...DEFAULT_FILTERS })
             onReset()
@@ -51,17 +36,6 @@ export function RiskDisclosureFiltersPanel({
               value={value.ruleName}
               onChange={(event) =>
                 onChange({ ...value, ruleName: event.target.value })
-              }
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>预警类型</Label>
-            <Input
-              placeholder="模糊匹配预警类型"
-              value={value.warningType}
-              onChange={(event) =>
-                onChange({ ...value, warningType: event.target.value })
               }
             />
           </div>
@@ -88,34 +62,20 @@ export function RiskDisclosureFiltersPanel({
             />
           </div>
 
-          {expanded && (
           <div className="space-y-2">
-            <Label>状态</Label>
-            <Select
-              value={value.disclosureStatus}
-              onValueChange={(nextValue) =>
-                onChange({
-                  ...value,
-                  disclosureStatus:
-                    nextValue as RiskDisclosureFilters["disclosureStatus"],
-                })
+            <Label>预警类型</Label>
+            <Input
+              placeholder="模糊匹配预警类型"
+              value={value.warningType}
+              onChange={(event) =>
+                onChange({ ...value, warningType: event.target.value })
               }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DISCLOSURE_STATUS_FILTER_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           </div>
-          )}
         </div>
-
+        <p className="text-xs text-muted-foreground">
+          列表固定展示已公示记录；以上条件按 AND 组合模糊匹配；不含公示时间日期范围筛选。
+        </p>
       </CardContent>
     </Card>
   )

@@ -44,14 +44,11 @@ export type RiskDisclosureRecord = {
   lastOperator: string
 }
 
-export type DisclosureStatusFilter = "全部" | "已公示" | "已取消"
-
 export type RiskDisclosureFilters = {
   ruleName: string
-  warningType: string
   orderNo: string
   ownerName: string
-  disclosureStatus: DisclosureStatusFilter
+  warningType: string
 }
 
 export type OriginalWarningSnapshot = {

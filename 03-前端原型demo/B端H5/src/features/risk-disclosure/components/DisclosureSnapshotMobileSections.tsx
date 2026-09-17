@@ -5,16 +5,22 @@ type DisclosureSnapshotMobileSectionsProps = {
   orderNo: string
   snapshot: RiskDisclosurePublishDraft
   showReleaseMethod: boolean
+  allExpanded?: boolean
 }
 
 export function DisclosureSnapshotMobileSections({
   orderNo,
   snapshot,
   showReleaseMethod,
+  allExpanded = true,
 }: DisclosureSnapshotMobileSectionsProps) {
   return (
     <>
-      <SectionCard title="公示信息" indicatorColor="#1875f0">
+      <SectionCard
+        title="公示信息"
+        indicatorColor="#1875f0"
+        collapsed={!allExpanded}
+      >
         <div className="space-y-2 text-xs">
           <FieldRow label="订单号" value={orderNo} mono />
           <FieldRow label="预警时间" value={snapshot.warningTime} mono />
@@ -33,7 +39,11 @@ export function DisclosureSnapshotMobileSections({
         </div>
       </SectionCard>
 
-      <SectionCard title="处置信息" indicatorColor="#00a870">
+      <SectionCard
+        title="处置信息"
+        indicatorColor="#00a870"
+        collapsed={!allExpanded}
+      >
         <div className="space-y-2 text-xs">
           <FieldRow label="处理人" value={snapshot.processedBy} />
           {showReleaseMethod ? (

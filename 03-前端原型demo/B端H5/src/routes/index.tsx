@@ -22,6 +22,7 @@ import { WorkspacePage } from "@/pages/WorkspacePage"
 import { ReadOnlyListPage } from "@/features/readonly-risk-views/pages/ReadOnlyListPage"
 import { ReadOnlyDetailPage } from "@/features/readonly-risk-views/pages/ReadOnlyDetailPage"
 import { RiskDisclosureLedgerDetailPage } from "@/features/risk-disclosure/pages/RiskDisclosureLedgerDetailPage"
+import { RiskDisclosureListPage } from "@/features/risk-disclosure/pages/RiskDisclosureListPage"
 
 export function AppRoutes() {
   return (
@@ -94,16 +95,13 @@ export function AppRoutes() {
 
       <Route
         path="/m/risk/mid-loan"
-        element={<ReadOnlyListPage module="mid-loan" />}
+        element={<ReadOnlyListPage />}
       />
       <Route
         path="/m/risk/mid-loan/:id"
-        element={<ReadOnlyDetailPage module="mid-loan" />}
+        element={<ReadOnlyDetailPage />}
       />
-      <Route
-        path="/m/risk/disclosures"
-        element={<ReadOnlyListPage module="risk-disclosure" />}
-      />
+      <Route path="/m/risk/disclosures" element={<RiskDisclosureListPage />} />
       <Route
         path="/m/risk/disclosures/:id"
         element={<RiskDisclosureLedgerDetailPage />}

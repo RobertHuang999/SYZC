@@ -22,6 +22,8 @@ export type ReadonlyRiskRecord = {
   status: string
   statusTone: ReadonlyStatusTone
   warningType?: string
+  ruleName?: string
+  ownerName?: string
   summary: ReadonlyField[]
   sections: ReadonlySection[]
   searchText: string

@@ -1,12 +1,12 @@
+import { useMemo, useState } from "react"
 import { Search, ShieldCheck } from "lucide-react"
 import { Link } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
-import { getReadonlyRiskModuleMeta } from "../config"
+import { MID_LOAN_MODULE_META } from "../config"
 import { READONLY_RISK_RECORDS } from "../mock/readonly-risk.mock"
-import type { ReadonlyRiskModule, ReadonlyRiskRecord, ReadonlyStatusTone } from "../types"
-import { useMemo, useState } from "react"
+import type { ReadonlyRiskRecord, ReadonlyStatusTone } from "../types"
 
 const TONE_CLASS: Record<ReadonlyStatusTone, string> = {
   success: "border-emerald-200 bg-emerald-50 text-emerald-700",
@@ -32,39 +32,27 @@ function SummaryValue({ field }: { field: ReadonlyRiskRecord["summary"][number] 
   )
 }
 
-export function ReadOnlyListPage({ module }: { module: ReadonlyRiskModule }) {
-  const meta = getReadonlyRiskModuleMeta(module)
+export function ReadOnlyListPage() {
+  const meta = MID_LOAN_MODULE_META
   const [keyword, setKeyword] = useState("")
-  const [warningTypeKeyword, setWarningTypeKeyword] = useState("")
-  const [status, setStatus] = useState(
-    module === "risk-disclosure" ? "已公示" : "全部"
-  )
-  const records = READONLY_RISK_RECORDS[module]
+  const [status, setStatus] = useState("全部")
+  const records = READONLY_RISK_RECORDS["mid-loan"]
   const statuses = useMemo(
     () => ["全部", ...Array.from(new Set(records.map((record) => record.status)))],
     [records]
   )
   const filteredRecords = useMemo(() => {
     const normalized = keyword.trim().toLowerCase()
-    const normalizedWarningType = warningTypeKeyword.trim().toLowerCase()
-    return records.filter((record) => {
-      const recordWarningType =
-        record.warningType ??
-        record.summary.find((field) => field.label === "预警类型")?.value ??
-        ""
-
-      return (
+    return records.filter(
+      (record) =>
         (status === "全部" || record.status === status) &&
-        (!normalized || record.searchText.toLowerCase().includes(normalized)) &&
-        (!normalizedWarningType ||
-          recordWarningType.toLowerCase().includes(normalizedWarningType))
-      )
-    })
-  }, [keyword, records, status, warningTypeKeyword])
+        (!normalized || record.searchText.toLowerCase().includes(normalized))
+    )
+  }, [keyword, records, status])
 
   return (
     <MobileShell>
-      <PrototypeAnnotationTarget annotationIds={[`h5-${module}-list-page`]}>
+      <PrototypeAnnotationTarget annotationIds={["h5-mid-loan-list-page"]}>
         <NavBar
           title={meta.title}
           right={
@@ -77,7 +65,7 @@ export function ReadOnlyListPage({ module }: { module: ReadonlyRiskModule }) {
       </PrototypeAnnotationTarget>
 
       <div className="flex flex-1 min-h-0 flex-col bg-[#f4f6f8]">
-        <PrototypeAnnotationTarget annotationIds={[`h5-${module}-list-filter`]}>
+        <PrototypeAnnotationTarget annotationIds={["h5-mid-loan-list-filter"]}>
           <div className="shrink-0 space-y-2 border-b border-gray-200/80 bg-white px-3.5 py-2.5">
             <p className="text-[11px] text-gray-500">{meta.subtitle}</p>
             <div className="flex items-center gap-2">
@@ -86,11 +74,7 @@ export function ReadOnlyListPage({ module }: { module: ReadonlyRiskModule }) {
                 <input
                   value={keyword}
                   onChange={(event) => setKeyword(event.target.value)}
-                  placeholder={
-                    module === "risk-disclosure"
-                      ? "搜索订单号、标题或货主"
-                      : "搜索关键词"
-                  }
+                  placeholder="搜索关键词"
                   className="w-full rounded-xl bg-[#f4f5f7] py-2.5 pl-9 pr-3 text-xs text-gray-900 placeholder:text-gray-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
@@ -107,15 +91,6 @@ export function ReadOnlyListPage({ module }: { module: ReadonlyRiskModule }) {
                 ))}
               </select>
             </div>
-            {module === "risk-disclosure" && (
-              <input
-                value={warningTypeKeyword}
-                onChange={(event) => setWarningTypeKeyword(event.target.value)}
-                placeholder="模糊匹配预警类型"
-                className="w-full rounded-xl bg-[#f4f5f7] px-3 py-2.5 text-xs text-gray-900 placeholder:text-gray-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500/20"
-                aria-label="预警类型筛选"
-              />
-            )}
           </div>
         </PrototypeAnnotationTarget>
 
@@ -130,7 +105,7 @@ export function ReadOnlyListPage({ module }: { module: ReadonlyRiskModule }) {
               {meta.emptyText}
             </div>
           ) : (
-            <PrototypeAnnotationTarget annotationIds={[`h5-${module}-list-row`]}>
+            <PrototypeAnnotationTarget annotationIds={["h5-mid-loan-list-row"]}>
               <div className="space-y-3">
                 {filteredRecords.map((record) => (
                   <Link

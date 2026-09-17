@@ -1,17 +1,13 @@
 import { useMemo, useState } from "react"
 import { ChevronDown, ChevronUp, ShieldCheck } from "lucide-react"
-import { useLocation, useNavigate, useParams } from "react-router-dom"
-import type { RiskDisclosurePublishForm } from "@/features/risk-disclosure/domain/publish-form"
+import { useNavigate, useParams } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import { SectionCard } from "@/components/ui/SectionCard"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
-import { getReadonlyRiskModuleMeta } from "../config"
-import {
-  buildReadonlyRiskRecordFromPublishForm,
-  getReadonlyRiskRecord,
-} from "../mock/readonly-risk.mock"
-import type { ReadonlyRiskModule, ReadonlyStatusTone } from "../types"
+import { MID_LOAN_MODULE_META } from "../config"
+import { getReadonlyRiskRecord } from "../mock/readonly-risk.mock"
+import type { ReadonlyStatusTone } from "../types"
 
 const TONE_CLASS: Record<ReadonlyStatusTone, string> = {
   success: "border-emerald-200 bg-emerald-50 text-emerald-700",
@@ -31,27 +27,14 @@ function FieldValue({ tone, value }: { tone?: ReadonlyStatusTone; value: string 
   )
 }
 
-type PublishNavigationState = {
-  fromPublish?: boolean
-  publishForm?: RiskDisclosurePublishForm
-}
-
-export function ReadOnlyDetailPage({ module }: { module: ReadonlyRiskModule }) {
+export function ReadOnlyDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const location = useLocation()
   const navigate = useNavigate()
-  const meta = getReadonlyRiskModuleMeta(module)
-  const navigationState = location.state as PublishNavigationState | null
-  const record = useMemo(() => {
-    if (
-      module === "risk-disclosure" &&
-      id?.startsWith("pub-new-") &&
-      navigationState?.publishForm
-    ) {
-      return buildReadonlyRiskRecordFromPublishForm(id, navigationState.publishForm)
-    }
-    return getReadonlyRiskRecord(module, id)
-  }, [id, module, navigationState?.publishForm])
+  const meta = MID_LOAN_MODULE_META
+  const record = useMemo(
+    () => getReadonlyRiskRecord("mid-loan", id),
+    [id]
+  )
   const [allExpanded, setAllExpanded] = useState(true)
 
   if (!record) {
@@ -74,7 +57,7 @@ export function ReadOnlyDetailPage({ module }: { module: ReadonlyRiskModule }) {
 
   return (
     <MobileShell>
-      <PrototypeAnnotationTarget annotationIds={[`h5-${module}-detail`]}>
+      <PrototypeAnnotationTarget annotationIds={["h5-mid-loan-detail"]}>
         <NavBar
           title={`${meta.title}详情`}
           backTo={meta.listPath}
@@ -107,7 +90,7 @@ export function ReadOnlyDetailPage({ module }: { module: ReadonlyRiskModule }) {
           </div>
 
           {record.sections.map((section, index) => (
-            <PrototypeAnnotationTarget key={section.title} annotationIds={[`h5-${module}-detail`]}>
+            <PrototypeAnnotationTarget key={section.title} annotationIds={["h5-mid-loan-detail"]}>
               <SectionCard
                 title={section.title}
                 indicatorColor={index === 0 ? "#1875f0" : index === 1 ? "#f57c00" : "#00a870"}
@@ -115,7 +98,10 @@ export function ReadOnlyDetailPage({ module }: { module: ReadonlyRiskModule }) {
               >
                 <div className="space-y-2 text-xs">
                   {section.fields.map((field) => (
-                    <div key={field.label} className="flex items-start justify-between gap-3 border-b border-gray-50 py-1.5 last:border-0">
+                    <div
+                      key={field.label}
+                      className="flex items-start justify-between gap-3 border-b border-gray-50 py-1.5 last:border-0"
+                    >
                       <span className="w-24 shrink-0 text-gray-500">{field.label}</span>
                       <FieldValue tone={field.tone} value={field.value} />
                     </div>

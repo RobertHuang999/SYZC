@@ -489,11 +489,10 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     secondaryCategory: "风控",
     name: "风险公示",
     originPath: "项目监管-预警管理-风险公示",
-    description: "查看已完成处置的有效风险公示记录及不可变快照，移动端仅支持只读查询。",
-    buttons: ["查看页面", "查看详情"],
+    description: "查看已完成处置的有效风险公示记录及不可变快照，详情支持取消/重新公示。",
+    buttons: ["查看页面", "查看详情", "取消公示", "重新公示"],
     dataPermission: "订单数据权限与公示标签页权限",
     customRoute: "/m/risk/disclosures",
-    badge: "只读",
     iconType: "ShieldCheck",
   },
   // =================== 2. 工作台 - 结算 ===================

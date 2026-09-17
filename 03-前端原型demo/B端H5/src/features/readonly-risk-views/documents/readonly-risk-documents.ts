@@ -18,7 +18,7 @@ function createDocuments(
       title: "主 PRD",
       content: prd,
       category: "PRD需求规格",
-      badge: "最新基准版 V2.1",
+      badge: "最新基准版 V2.6",
     },
     {
       id: `${prefix}-fields`,

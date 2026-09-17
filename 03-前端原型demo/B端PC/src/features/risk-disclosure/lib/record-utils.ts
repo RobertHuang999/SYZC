@@ -6,6 +6,10 @@ export function filterRiskDisclosureRecords(
 ): RiskDisclosureRecord[] {
   return records
     .filter((record) => {
+      if (record.disclosureStatus !== "已公示") {
+        return false
+      }
+
       if (
         filters.ruleName.trim() &&
         !record.ruleName
@@ -38,13 +42,6 @@ export function filterRiskDisclosureRecords(
         !record.ownerName
           .toLowerCase()
           .includes(filters.ownerName.trim().toLowerCase())
-      ) {
-        return false
-      }
-
-      if (
-        filters.disclosureStatus !== "全部" &&
-        record.disclosureStatus !== filters.disclosureStatus
       ) {
         return false
       }

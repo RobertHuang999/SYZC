@@ -1,23 +1,32 @@
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { ShieldAlert } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
-import { SectionCard } from "@/components/ui/SectionCard"
-import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
+import { Toast } from "@/components/ui/Toast"
+import { getRepublishConfirmPath } from "@/features/collateral-warning-events/lib/publish-navigation"
 import {
   buildPublishDraftFromWarning,
   isAutoReleaseWarning,
 } from "@/features/collateral-warning-events/domain/publish-draft"
 import { getCollateralWarningById } from "@/features/collateral-warning-events/lib/detail-utils"
 import { getReadonlyRiskRecord } from "@/features/readonly-risk-views/mock/readonly-risk.mock"
-import { DisclosureSnapshotMobileSections } from "../components/DisclosureSnapshotMobileSections"
-import { resolveSourceWarningId } from "../lib/ledger-detail-utils"
+import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
+import { RiskDisclosureDetailContent } from "../components/RiskDisclosureDetailContent"
+import {
+  buildLedgerDisclosureMeta,
+  CANCEL_CONFIRM_MESSAGE,
+  resolveSourceWarningId,
+  type LedgerDisclosureMeta,
+} from "../lib/ledger-detail-utils"
 
 const LIST_PATH = "/m/risk/disclosures"
 
 function buildFallbackSnapshot(record: NonNullable<ReturnType<typeof getReadonlyRiskRecord>>) {
   const warningType =
-    record.summary.find((item) => item.label === "预警类型")?.value ?? "—"
+    record.warningType ??
+    record.summary.find((item) => item.label === "预警类型")?.value ??
+    "—"
   const warningTime =
     record.summary.find((item) => item.label === "预警时间")?.value ?? "—"
   const processedBy =
@@ -60,12 +69,39 @@ export function RiskDisclosureLedgerDetailPage() {
     return record ? buildFallbackSnapshot(record) : null
   }, [record, sourceEvent])
 
-  if (!record || !snapshot) {
+  const initialMeta = useMemo(
+    () => (record ? buildLedgerDisclosureMeta(record) : null),
+    [record]
+  )
+  const [meta, setMeta] = useState<LedgerDisclosureMeta | null>(initialMeta)
+  const [allExpanded, setAllExpanded] = useState(true)
+  const [cancelOpen, setCancelOpen] = useState(false)
+  const [cancelReason, setCancelReason] = useState("")
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    setMeta(initialMeta)
+  }, [initialMeta])
+
+  const showToast = (message: string) => {
+    setToastMessage(message)
+    window.setTimeout(() => setToastMessage(null), 2500)
+  }
+
+  if (!record || !snapshot || !meta) {
     return (
       <MobileShell>
         <NavBar title="风险公示详情" onBack={() => navigate(LIST_PATH)} />
-        <div className="flex flex-1 items-center justify-center p-6 text-center text-sm text-gray-500">
-          未找到对应的风险公示记录
+        <div className="flex flex-1 flex-col items-center justify-center p-6 text-center text-sm text-gray-500">
+          <ShieldAlert className="mb-2 size-12 text-gray-300" />
+          <p>未找到对应的风险公示记录</p>
+          <button
+            type="button"
+            onClick={() => navigate(LIST_PATH)}
+            className="mt-4 cursor-pointer rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white"
+          >
+            返回列表
+          </button>
         </div>
       </MobileShell>
     )
@@ -78,74 +114,162 @@ export function RiskDisclosureLedgerDetailPage() {
   const showReleaseMethod = sourceEvent
     ? isAutoReleaseWarning(sourceEvent)
     : snapshot.processedBy.includes("系统")
-  const statusField = record.summary.find((item) => item.label === "公示状态")
-  const disclosureTime =
-    record.summary.find((item) => item.label === "最近一次公示时间")?.value ??
-    record.summary.find((item) => item.label === "公示时间")?.value ??
-    "—"
-  const operator =
-    record.summary.find((item) => item.label === "最新操作人")?.value ?? "—"
+  const canCancel = meta.disclosureStatus === "已公示"
+  const canRepublish =
+    (meta.disclosureStatus === "已公示" || meta.disclosureStatus === "已取消") &&
+    Boolean(sourceWarningId)
+  const sourceLabel = sourceEvent
+    ? `来源押品预警：${sourceEvent.eventId} · ${sourceEvent.orderNo}`
+    : null
 
   return (
     <MobileShell>
       <PrototypeAnnotationTarget annotationIds={["h5-risk-disclosure-detail"]}>
-        <NavBar title="风险公示详情" onBack={() => navigate(LIST_PATH)} />
+        <NavBar
+          title={`${orderNo} 公示详情`}
+          onBack={() => navigate(LIST_PATH)}
+          right={
+            <button
+              type="button"
+              onClick={() => setAllExpanded((current) => !current)}
+              className="cursor-pointer text-xs font-medium text-blue-600 active:opacity-70"
+            >
+              {allExpanded ? "全部收起" : "全部展开"}
+            </button>
+          }
+        />
       </PrototypeAnnotationTarget>
 
-      <div className="flex flex-1 flex-col min-h-0 overflow-hidden bg-[#f4f6f8]">
-        <div className="flex-1 min-h-0 space-y-3 overflow-y-auto px-3.5 py-3 pb-6 overscroll-contain">
-          {sourceEvent ? (
-            <div className="rounded-xl border border-blue-200 bg-blue-50/80 px-3 py-2.5 text-xs text-blue-900">
-              来源押品预警：{sourceEvent.eventId} · {sourceEvent.orderNo}
-            </div>
-          ) : null}
-
-          <SectionCard title="公示状态" indicatorColor="#f97316">
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between gap-3">
-                <span className="text-gray-500">公示状态</span>
-                <span className="font-semibold text-emerald-700">
-                  {statusField?.value ?? record.status}
-                </span>
-              </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-gray-500">公示时间</span>
-                <span className="font-mono text-gray-800">{disclosureTime}</span>
-              </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-gray-500">操作人</span>
-                <span className="text-gray-800">{operator}</span>
-              </div>
-            </div>
-          </SectionCard>
-
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[#f4f6f8]">
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3.5 py-3 pb-6 overscroll-contain">
           <PrototypeAnnotationTarget annotationIds={["h5-risk-disclosure-detail"]}>
-            <DisclosureSnapshotMobileSections
+            <RiskDisclosureDetailContent
               orderNo={orderNo}
+              sourceLabel={sourceLabel}
+              meta={meta}
               snapshot={snapshot}
               showReleaseMethod={showReleaseMethod}
+              allExpanded={allExpanded}
+              onCopyOrderNo={(value) => {
+                navigator.clipboard?.writeText(value)
+                showToast(`已复制: ${value}`)
+              }}
             />
           </PrototypeAnnotationTarget>
-
-          <SectionCard title="操作记录" indicatorColor="#6366f1">
-            <div className="space-y-2 text-xs">
-              {record.sections
-                .filter((section) => section.title.includes("操作") || section.title.includes("审计"))
-                .flatMap((section) =>
-                  section.fields.map((field) => (
-                    <div
-                      key={`${section.title}-${field.label}`}
-                      className="rounded-xl border border-gray-100 bg-white p-2.5"
-                    >
-                      <div className="font-semibold text-gray-900">{field.label}</div>
-                      <div className="mt-1 text-gray-700">{field.value}</div>
-                    </div>
-                  ))
-                )}
-            </div>
-          </SectionCard>
         </div>
+
+        {(canRepublish || canCancel) && (
+          <PrototypeAnnotationTarget annotationIds={["h5-risk-disclosure-detail-actions"]}>
+            <div className="border-t border-gray-200/90 bg-white px-4 py-3 shadow-lg">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => navigate(LIST_PATH)}
+                  className="cursor-pointer rounded-xl bg-gray-100 px-4 py-2.5 text-xs font-semibold text-gray-700 active:bg-gray-200"
+                >
+                  返回列表
+                </button>
+
+                {canRepublish && sourceWarningId ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(getRepublishConfirmPath(sourceWarningId), {
+                        state: { republish: true },
+                      })
+                    }
+                    className="flex-1 cursor-pointer rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-xs active:bg-blue-700"
+                  >
+                    重新公示 ▸
+                  </button>
+                ) : null}
+
+                {canCancel ? (
+                  <button
+                    type="button"
+                    onClick={() => setCancelOpen(true)}
+                    className="flex-1 cursor-pointer rounded-xl bg-orange-600 py-2.5 text-xs font-bold text-white shadow-xs active:bg-orange-700"
+                  >
+                    取消公示 ▸
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </PrototypeAnnotationTarget>
+        )}
       </div>
+
+      {cancelOpen ? (
+        <PrototypeAnnotationTarget annotationIds={["h5-risk-disclosure-detail-cancel"]}>
+          <div className="fixed inset-0 z-50 flex items-end bg-black/40 p-4">
+            <div className="w-full rounded-2xl bg-white p-4 shadow-xl">
+              <h2 className="text-sm font-bold text-gray-900">取消风险公示</h2>
+              <p className="mt-2 text-xs leading-relaxed text-gray-600">
+                {CANCEL_CONFIRM_MESSAGE}
+              </p>
+              <textarea
+                className="mt-3 w-full rounded-xl border border-gray-200 px-3 py-2 text-xs"
+                rows={4}
+                maxLength={200}
+                value={cancelReason}
+                placeholder="请填写取消公示原因（必填，不超过 200 字）"
+                onChange={(event) => setCancelReason(event.target.value)}
+              />
+              <p className="mt-1 text-right text-[11px] text-gray-400">
+                {cancelReason.length}/200
+              </p>
+              <div className="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCancelOpen(false)}
+                  className="flex-1 rounded-xl bg-gray-100 py-2.5 text-xs font-semibold text-gray-700"
+                >
+                  关闭
+                </button>
+                <button
+                  type="button"
+                  disabled={!cancelReason.trim()}
+                  onClick={() => {
+                    const operatedAt = new Date()
+                      .toISOString()
+                      .slice(0, 19)
+                      .replace("T", " ")
+                    const reason = cancelReason.trim()
+                    setMeta((current) =>
+                      current
+                        ? {
+                            ...current,
+                            disclosureStatus: "已取消",
+                            cancelReason: reason,
+                            lastOperator: "当前用户（森云科技）",
+                            lastDisclosureTime: operatedAt,
+                            operationHistory: [
+                              {
+                                action: "取消公示",
+                                operator: "当前用户（森云科技）",
+                                operatedAt,
+                                remark: reason,
+                              },
+                              ...current.operationHistory,
+                            ],
+                          }
+                        : current
+                    )
+                    setCancelOpen(false)
+                    setCancelReason("")
+                    showToast(`已取消公示 — ${orderNo}`)
+                  }}
+                  className="flex-1 rounded-xl bg-rose-600 py-2.5 text-xs font-semibold text-white disabled:opacity-50"
+                >
+                  确认取消
+                </button>
+              </div>
+            </div>
+          </div>
+        </PrototypeAnnotationTarget>
+      ) : null}
+
+      <Toast message={toastMessage} />
     </MobileShell>
   )
 }
