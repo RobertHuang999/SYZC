@@ -1,8 +1,33 @@
 import type {
   CollateralWarningEvent,
   CollateralWarningFilters,
+  WarningStatus,
 } from "../domain/types"
 import { mapStatusFilterToValue } from "../domain/status"
+
+/** 列表排序：未结案（待处置 · 有效）优先，同状态内按预警时间倒序 */
+const WARNING_STATUS_SORT_PRIORITY: Record<WarningStatus, number> = {
+  OPEN_VALID: 0,
+  OPEN_INVALID: 1,
+  CLOSED_VALID: 2,
+}
+
+function compareByStatusThenTime(
+  a: CollateralWarningEvent,
+  b: CollateralWarningEvent
+): number {
+  const statusDiff =
+    WARNING_STATUS_SORT_PRIORITY[a.warningStatus] -
+    WARNING_STATUS_SORT_PRIORITY[b.warningStatus]
+  if (statusDiff !== 0) {
+    return statusDiff
+  }
+
+  return (
+    new Date(b.warningTime.replace(" ", "T")).getTime() -
+    new Date(a.warningTime.replace(" ", "T")).getTime()
+  )
+}
 
 export function filterCollateralWarningEvents(
   events: CollateralWarningEvent[],
@@ -69,11 +94,7 @@ export function filterCollateralWarningEvents(
 
       return true
     })
-    .sort(
-      (a, b) =>
-        new Date(b.warningTime.replace(" ", "T")).getTime() -
-        new Date(a.warningTime.replace(" ", "T")).getTime()
-    )
+    .sort(compareByStatusThenTime)
 }
 
 export function paginateEvents<T>(

@@ -1,3 +1,5 @@
+import { getCollateralWarningById } from "@/features/collateral-warning-events/lib/detail-utils"
+import type { RiskDisclosurePublishForm } from "@/features/risk-disclosure/domain/publish-form"
 import type { ReadonlyRiskModule, ReadonlyRiskRecord } from "../types"
 
 const midLoanRecords: ReadonlyRiskRecord[] = [
@@ -104,69 +106,81 @@ const midLoanRecords: ReadonlyRiskRecord[] = [
 
 const riskDisclosureRecords: ReadonlyRiskRecord[] = [
   {
-    id: "pub-seed-001",
-    title: "铜精矿货值下跌风险公示",
-    subtitle: "PO202607-12 · 华东钢材贸易",
+    id: "pub-h5-cw004",
+    title: "菜籽油现货价格下调超 6.5%，货值从 8,200,000 元跌至 7,667,000 元",
+    subtitle: "PO202608-18 · 价格下跌",
     status: "已公示",
     statusTone: "success",
     summary: [
       { label: "预警类型", value: "价格下跌" },
-      { label: "预警时间", value: "2026-07-29 16:30" },
-      { label: "处理人", value: "王风控（森云科技）" },
+      {
+        label: "公示标题与内容摘要",
+        value: "菜籽油现货价格下调超 6.5%，货值从 8,200,000 元跌至 7,667,000 元",
+      },
+      { label: "最近一次公示时间", value: "2026-08-17 09:30:00" },
+      { label: "最新操作人", value: "合规专员（森云科技）" },
     ],
     sections: [
       {
-        title: "公示快照",
+        title: "操作记录",
         fields: [
-          { label: "订单号", value: "PO202607-12" },
-          { label: "货主", value: "华东钢材贸易" },
-          { label: "风险内容", value: "货值下跌超12%，铜精矿较基准价 -12.8%" },
-          { label: "公示状态", value: "已公示", tone: "success" },
-          { label: "首次公示时间", value: "2026-07-31 14:20:00" },
-        ],
-      },
-      {
-        title: "审计时间轴",
-        fields: [
-          { label: "首次公示", value: "合规专员（森云科技） · 2026-07-31 14:20:00" },
-          { label: "原预警处置", value: "王风控（森云科技） · 2026-07-30 09:15:00" },
-          { label: "快照边界", value: "公示副本独立保存，原预警后续变更不回写" },
+          { label: "首次公示", value: "合规专员（森云科技） · 2026-08-17 09:30:00" },
         ],
       },
     ],
-    searchText: "pub-seed-001 铜精矿货值下跌风险公示 PO202607-12 华东钢材贸易 价格下跌 已公示",
+    searchText: "pub-h5-cw004 cw-004 PO202608-18 价格下跌 已公示",
+  },
+  {
+    id: "pub-seed-001",
+    title: "货值下跌超12%，铜精矿较基准价 -12.8%",
+    subtitle: "PO202607-12 · 价格下跌",
+    status: "已公示",
+    statusTone: "success",
+    summary: [
+      { label: "预警类型", value: "价格下跌" },
+      {
+        label: "公示标题与内容摘要",
+        value: "货值下跌超12%，铜精矿较基准价 -12.8%",
+      },
+      { label: "最近一次公示时间", value: "2026-07-31 14:20:00" },
+      { label: "最新操作人", value: "合规专员（森云科技）" },
+    ],
+    sections: [
+      {
+        title: "操作记录",
+        fields: [
+          { label: "首次公示", value: "合规专员（森云科技） · 2026-07-31 14:20:00" },
+          { label: "原预警处置", value: "王风控（森云科技） · 2026-07-30 09:15:00" },
+        ],
+      },
+    ],
+    searchText: "pub-seed-001 铜精矿货值下跌 PO202607-12 价格下跌 已公示",
   },
   {
     id: "pub-seed-002",
-    title: "巡检超时风险公示",
-    subtitle: "PO202607-08 · 鑫源粮油集团",
+    title: "计划巡检超时 48h，责任人未到场",
+    subtitle: "PO202607-08 · 巡检异常",
     status: "已公示",
     statusTone: "success",
     summary: [
       { label: "预警类型", value: "巡检异常" },
-      { label: "预警时间", value: "2026-07-28 08:00" },
-      { label: "处理人", value: "李监管（华东仓储）" },
+      {
+        label: "公示标题与内容摘要",
+        value: "计划巡检超时 48h，责任人未到场",
+      },
+      { label: "最近一次公示时间", value: "2026-07-30 10:00:00" },
+      { label: "最新操作人", value: "合规专员（森云科技）" },
     ],
     sections: [
       {
-        title: "公示快照",
-        fields: [
-          { label: "订单号", value: "PO202607-08" },
-          { label: "货主", value: "鑫源粮油集团" },
-          { label: "风险内容", value: "计划巡检超时 48h，责任人未到场" },
-          { label: "公示状态", value: "已公示", tone: "success" },
-          { label: "首次公示时间", value: "2026-07-30 10:00:00" },
-        ],
-      },
-      {
-        title: "审计时间轴",
+        title: "操作记录",
         fields: [
           { label: "首次公示", value: "合规专员（森云科技） · 2026-07-30 10:00:00" },
           { label: "原预警处置", value: "李监管（华东仓储） · 2026-07-29 11:30:00" },
         ],
       },
     ],
-    searchText: "pub-seed-002 巡检超时风险公示 PO202607-08 鑫源粮油集团 巡检异常 已公示",
+    searchText: "pub-seed-002 巡检超时 PO202607-08 鑫源粮油集团 巡检异常 已公示",
   },
   {
     id: "pub-seed-004",
@@ -205,6 +219,53 @@ const riskDisclosureRecords: ReadonlyRiskRecord[] = [
 export const READONLY_RISK_RECORDS: Record<ReadonlyRiskModule, ReadonlyRiskRecord[]> = {
   "mid-loan": midLoanRecords,
   "risk-disclosure": riskDisclosureRecords,
+}
+
+export function buildReadonlyRiskRecordFromPublishForm(
+  recordId: string,
+  form: RiskDisclosurePublishForm
+): ReadonlyRiskRecord {
+  const event = getCollateralWarningById(form.sourceWarningId)
+  const publishedAt = new Date().toISOString().slice(0, 19).replace("T", " ")
+  const warningType = event?.warningType ?? "价格下跌"
+
+  return {
+    id: recordId,
+    title: form.disclosureTitle,
+    subtitle: `${event?.orderType ?? "抵押"} · ${form.orderNo}`,
+    status: "已公示",
+    statusTone: "success",
+    summary: [
+      { label: "预警订单", value: form.orderNo },
+      { label: "预警类型", value: warningType },
+      { label: "公示时间", value: publishedAt },
+    ],
+    sections: [
+      {
+        title: "公示内容",
+        fields: [
+          { label: "公示标题", value: form.disclosureTitle },
+          { label: "对外公示内容", value: form.disclosureContent },
+          { label: "公示状态", value: "已公示", tone: "success" },
+          { label: "公示时间", value: publishedAt },
+        ],
+      },
+      {
+        title: "原预警快照",
+        fields: [
+          { label: "预警类型", value: warningType },
+          { label: "预警描述", value: form.warningDescription },
+          { label: "预警时间", value: form.warningTime },
+          { label: "解除时间", value: form.releaseTime },
+          { label: "处理人", value: form.processedBy },
+          { label: "情况说明", value: form.situationDescription || "—" },
+          { label: "位置", value: form.location || "—" },
+          { label: "设备名称", value: form.deviceName || "—" },
+        ],
+      },
+    ],
+    searchText: `${recordId} ${form.orderNo} ${warningType} 已公示`,
+  }
 }
 
 export function getReadonlyRiskRecord(

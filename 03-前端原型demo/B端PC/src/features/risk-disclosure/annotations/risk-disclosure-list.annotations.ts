@@ -66,14 +66,14 @@ export const riskDisclosureListAnnotations: PrototypeAnnotation[] = [
     number: 3,
     kind: "字段",
     title: "表格字段与公示状态定义",
-    content: "展示公示标题、关联订单、借款主体、规则名称、公示状态 Tag、公示时间与最近操作人。",
+    content: "对齐 V2.1 台账列：序号、预警订单号、预警类型、公示标题与内容摘要、现场抓拍图、最近一次公示时间、最新操作人、公示状态与详情入口。",
     details: [
       {
         title: "列定义与展示规范",
         items: [
           {
-            label: "公示标题 / 内容",
-            content: "由系统模板自动拼接（如【关于 PO202608-01 订单押品跌价违约的风险公示】），支持点击进入详情。",
+            label: "公示标题与内容摘要",
+            content: "取发布快照中的预警描述或合规编辑后的对外摘要文案；列表不单独展示货主、核销处理时间/处理人列。",
           },
           {
             label: "公示状态 Tag",

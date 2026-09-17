@@ -35,7 +35,9 @@ function SummaryValue({ field }: { field: ReadonlyRiskRecord["summary"][number] 
 export function ReadOnlyListPage({ module }: { module: ReadonlyRiskModule }) {
   const meta = getReadonlyRiskModuleMeta(module)
   const [keyword, setKeyword] = useState("")
-  const [status, setStatus] = useState("全部")
+  const [status, setStatus] = useState(
+    module === "risk-disclosure" ? "已公示" : "全部"
+  )
   const records = READONLY_RISK_RECORDS[module]
   const statuses = useMemo(
     () => ["全部", ...Array.from(new Set(records.map((record) => record.status)))],

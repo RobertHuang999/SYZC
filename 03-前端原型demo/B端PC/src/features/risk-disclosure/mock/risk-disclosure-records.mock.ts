@@ -2,6 +2,22 @@ import type { RiskDisclosureRecord } from "../domain/types"
 
 const seedData: Omit<RiskDisclosureRecord, "recordId">[] = [
   {
+    sourceWarningId: "cw-004",
+    ruleName: "价格下跌风控规则",
+    orderNo: "PO202608-18",
+    ownerName: "华东钢材贸易",
+    warningType: "价格下跌",
+    warningContent: "菜籽油现货价格下调超 6.5%，货值从 8,200,000 元跌至 7,667,000 元",
+    snapshotImageStatus: "none",
+    warningTime: "2026-08-16 11:20:00",
+    processedTime: "2026-08-16 16:40:00",
+    processedBy: "李风控（风控部）",
+    disclosureStatus: "已公示",
+    lastDisclosureTime: "2026-08-17 09:30:00",
+    lastOperator: "合规专员（森云科技）",
+  },
+  {
+    sourceWarningId: "cw-003",
     ruleName: "LTV平仓线监控",
     orderNo: "PO202607-12",
     ownerName: "华东钢材贸易",
@@ -58,6 +74,7 @@ const seedData: Omit<RiskDisclosureRecord, "recordId">[] = [
     lastOperator: "合规专员（森云科技）",
   },
   {
+    sourceWarningId: "cw-002",
     ruleName: "挂锁破坏穿透",
     orderNo: "PO202608-01",
     ownerName: "华东钢材贸易",

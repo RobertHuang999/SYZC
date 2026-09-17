@@ -7,7 +7,7 @@ export const riskDisclosureDetailAnnotations: PrototypeAnnotation[] = [
     number: 1,
     kind: "页面",
     title: "风险公示详情与撤回管理 · 司法存证全流程",
-    content: "展示公示事实全文、关联订单与原预警快照，支持风控主管录入理由后取消公示并全链路审计留痕。",
+    content: "展示公示状态、独立快照字段（预警/处置分区）与操作记录；支持风控主管录入理由后取消公示并全链路审计留痕。双入口（押品预警 / 风险公示台账）详情字段一致。",
     details: [
       {
         title: "公示流转与权限控制",
@@ -39,19 +39,23 @@ export const riskDisclosureDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "risk-disclosure-detail-info",
     number: 2,
     kind: "字段",
-    title: "公示核心信息与正文事实",
-    content: "展示公示标题、订单号、货主企业名称、规则名称、当前状态、发布时间、操作人与公示全文。",
+    title: "公示状态与快照字段分区",
+    content: "公示状态区展示状态、公示时间、操作人与取消说明；快照区按「公示信息 / 处置信息」两卡片展示独立副本字段，不再使用合成的「公示标题/公示内容」块。",
     details: [
       {
         title: "字段说明",
         items: [
           {
-            label: "公示正文内容",
-            content: "结构化展现订单发生跌价、逾期或物联异常的具体数值与处置结论（多行长文本排版）。",
+            label: "公示信息快照",
+            content: "订单号（只读）、预警时间、预警类型、位置、设备名称、预警描述、预警抓拍图；来源于发布时固化副本，可按合规要求在确认页编辑后落账。",
+          },
+          {
+            label: "处置信息快照",
+            content: "处理人、解除方式（自动解除类展示）、解除时间、情况说明、现场照片、解除预警抓拍图。",
           },
           {
             label: "取消说明（若有）",
-            content: "若记录状态为【已取消】，在基本信息中回显取消时填写的详细申诉/核实理由。",
+            content: "若记录状态为【已取消】，在公示状态区回显取消时填写的 1~200 字合规说明。",
           },
         ],
       },
@@ -62,8 +66,8 @@ export const riskDisclosureDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "risk-disclosure-detail-snapshot",
     number: 3,
     kind: "规则",
-    title: "原预警快照数据固化",
-    content: "不可变固化原押品预警的预警类型、内容、预警时间、处置人、处置时间与原始抓拍图。",
+    title: "独立快照解耦与不可回写",
+    content: "公示详情展示的是发布时生成的独立快照副本；取消公示或重新公示均不回写押品预警原始事实。",
     details: [
       {
         title: "不可变审计",

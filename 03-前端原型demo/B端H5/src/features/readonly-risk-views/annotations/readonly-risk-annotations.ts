@@ -17,10 +17,10 @@ const annotationContent: Record<ReadonlyRiskModule, {
   },
   "risk-disclosure": {
     listTitle: "风险公示移动端只读台账",
-    listContent: "移动端只查看已生成的风险公示记录；首次确认、批量公示和取消公示均在 PC 端完成。",
-    filterContent: "按公示标题、订单号、货主、预警类型和公示状态检索，不提供写操作。",
-    rowContent: "列表展示公示标题、订单、预警类型、处理时间与公示状态，点击进入不可变快照详情。",
-    detailContent: "详情展示公示副本、原预警事实、快照边界和操作时间轴，不提供取消入口。",
+    listContent: "移动端风险公示菜单仅提供台账查询与快照详情；首次确认、取消公示与重新公示在押品预警路径（/m/supervision/order-warnings）完成。",
+    filterContent: "按公示标题与内容摘要、订单号、预警类型和公示状态检索；台账菜单不提供写操作。",
+    rowContent: "列表展示预警类型、公示标题与内容摘要、最近一次公示时间与最新操作人，点击进入与 PC 对齐的快照详情。",
+    detailContent: "详情按公示状态 + 公示信息/处置信息快照分区展示，字段与 PC 风险公示详情、押品侧公示详情一致；台账入口只读，不提供取消/重新公示按钮。",
   },
 }
 

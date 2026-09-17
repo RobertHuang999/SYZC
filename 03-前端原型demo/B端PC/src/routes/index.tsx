@@ -6,10 +6,13 @@ import { DeviceWarningEventReleasePage } from "@/features/device-warning-events/
 import { CollateralWarningListPage } from "@/features/collateral-warning-events/pages/CollateralWarningListPage"
 import { CollateralWarningArchivePage } from "@/features/collateral-warning-events/pages/CollateralWarningArchivePage"
 import { CollateralWarningDetailPage } from "@/features/collateral-warning-events/pages/CollateralWarningDetailPage"
+import { CollateralWarningDisclosureDetailPage } from "@/features/collateral-warning-events/pages/CollateralWarningDisclosureDetailPage"
+import { CollateralWarningBatchPublishPage } from "@/features/collateral-warning-events/pages/CollateralWarningBatchPublishPage"
 import { MidLoanRiskListPage } from "@/features/mid-loan-risk-control/pages/MidLoanRiskListPage"
 import { MidLoanRiskDetailPage } from "@/features/mid-loan-risk-control/pages/MidLoanRiskDetailPage"
 import { RiskDisclosureListPage } from "@/features/risk-disclosure/pages/RiskDisclosureListPage"
 import { RiskDisclosureDetailPage } from "@/features/risk-disclosure/pages/RiskDisclosureDetailPage"
+import { RiskDisclosurePublishPage } from "@/features/risk-disclosure/pages/RiskDisclosurePublishPage"
 import { SeverityLevelListPage } from "@/features/severity-levels/pages/SeverityLevelListPage"
 import { SeverityLevelDetailPage } from "@/features/severity-levels/pages/SeverityLevelDetailPage"
 import { SeverityLevelFormPage } from "@/features/severity-levels/pages/SeverityLevelFormPage"
@@ -75,6 +78,18 @@ export function AppRoutes() {
           path="物联网IOT与预警/预警信息/押品预警信息/详情/:id"
           element={<CollateralWarningDetailPage />}
         />
+        <Route
+          path="物联网IOT与预警/预警信息/押品预警信息/批量公示确认"
+          element={<CollateralWarningBatchPublishPage />}
+        />
+        <Route
+          path="物联网IOT与预警/预警信息/押品预警信息/公示确认/:warnId"
+          element={<RiskDisclosurePublishPage />}
+        />
+        <Route
+          path="物联网IOT与预警/预警信息/押品预警信息/公示详情/:warnId"
+          element={<CollateralWarningDisclosureDetailPage />}
+        />
 
         <Route
           path="物联网IOT与预警/预警信息/贷中风控管理"
@@ -86,6 +101,10 @@ export function AppRoutes() {
         />
 
         <Route path="物联网IOT与预警/预警信息/风险公示" element={<RiskDisclosureListPage />} />
+        <Route
+          path="物联网IOT与预警/预警信息/风险公示/确认/:warnId"
+          element={<RiskDisclosurePublishPage />}
+        />
         <Route
           path="物联网IOT与预警/预警信息/风险公示/详情/:id"
           element={<RiskDisclosureDetailPage />}

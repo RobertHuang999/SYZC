@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useLocation, useNavigate } from "react-router-dom"
 import { Filter, Layers, Search, ShieldAlert, X } from "lucide-react"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
@@ -9,11 +10,15 @@ import {
   type DropdownOption,
 } from "@/components/ui/DropdownFilterPill"
 import { DrawerField, FilterDrawer } from "@/components/ui/FilterDrawer"
-import { PublishConfirmDialog } from "@/components/ui/PublishConfirmDialog"
 import { Toast } from "@/components/ui/Toast"
+import {
+  getBatchPublishConfirmPath,
+  resolvePublishNavigation,
+} from "../lib/publish-navigation"
+import { BatchPublishConfirmSheet } from "../components/BatchPublishConfirmSheet"
 import { daysBetween } from "@/shared/lib/date-utils"
 import { ENABLED_SEVERITY_LEVELS } from "@/shared/mock/severity-levels"
-import { canBatchSelect } from "../domain/actions"
+import { canSelectForBatchPublish } from "../domain/actions"
 import {
   DEFAULT_FILTERS,
   PUBLICITY_STATUS_FILTER_OPTIONS,
@@ -22,7 +27,6 @@ import {
 } from "../domain/constants"
 import {
   COLLATERAL_WARNING_TYPES,
-  type CollateralWarningEvent,
   type CollateralWarningFilters,
   type CollateralWarningType,
   type PublicityStatus,
@@ -30,14 +34,21 @@ import {
   type WarningStatusFilter,
 } from "../domain/types"
 import { CollateralWarningCard } from "../components/CollateralWarningCard"
+import { ReleasePromptSheet } from "../components/ReleasePromptSheet"
+import type { CollateralWarningEvent } from "../domain/types"
+import { getCollateralWarningById } from "../lib/detail-utils"
 import {
   filterCollateralWarningEvents,
   hasBatchPublishCandidates,
 } from "../lib/event-utils"
 import { collateralWarningEventsMock } from "../mock/collateral-warning-events.mock"
-import { normalizeWarningStatusFilter } from "../domain/status"
 
 const COLLATERAL_WARNING_FILTER_STORAGE_KEY = "SYZC_H5_COLLATERAL_WARNING_FILTERS"
+
+type BatchPublishReturnState = {
+  batchPublishedIds?: string[]
+  batchPublishCount?: number
+}
 
 function loadCachedCollateralFilters(): CollateralWarningFilters {
   try {
@@ -47,7 +58,8 @@ function loadCachedCollateralFilters(): CollateralWarningFilters {
       return {
         ...DEFAULT_FILTERS,
         ...cached,
-        warningStatus: normalizeWarningStatusFilter(cached.warningStatus),
+        // 进入列表始终以「待处置 · 有效」为默认（F01），不沿用 session 中的状态筛选
+        warningStatus: DEFAULT_FILTERS.warningStatus,
       }
     }
   } catch {}
@@ -61,6 +73,8 @@ function saveCachedCollateralFilters(filters: CollateralWarningFilters) {
 }
 
 export function CollateralWarningListPage() {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [draftFilters, setDraftFilters] =
     useState<CollateralWarningFilters>(loadCachedCollateralFilters)
   const [appliedFilters, setAppliedFilters] =
@@ -68,15 +82,23 @@ export function CollateralWarningListPage() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [batchMode, setBatchMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [publishTargets, setPublishTargets] = useState<
-    CollateralWarningEvent[] | null
-  >(null)
-  const [toastMessage, setToastMessage] = useState<string | null>(null)
-
-  const filteredEvents = useMemo(
-    () => filterCollateralWarningEvents(collateralWarningEventsMock, appliedFilters),
-    [appliedFilters]
+  const [batchConfirmOpen, setBatchConfirmOpen] = useState(false)
+  const [publishedEventIds, setPublishedEventIds] = useState<Set<string>>(
+    () => new Set()
   )
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [releaseTarget, setReleaseTarget] = useState<CollateralWarningEvent | null>(
+    null
+  )
+
+  const filteredEvents = useMemo(() => {
+    const eventsWithPublishState = collateralWarningEventsMock.map((event) =>
+      publishedEventIds.has(event.eventId)
+        ? { ...event, publicityStatus: "已公示" as const }
+        : event
+    )
+    return filterCollateralWarningEvents(eventsWithPublishState, appliedFilters)
+  }, [appliedFilters, publishedEventIds])
 
   const batchPublishEnabled = useMemo(
     () => hasBatchPublishCandidates(filteredEvents),
@@ -166,6 +188,10 @@ export function CollateralWarningListPage() {
   }
 
   const toggleSelect = (eventId: string) => {
+    const event = filteredEvents.find((item) => item.eventId === eventId)
+    if (!event || !canSelectForBatchPublish(event)) {
+      return
+    }
     setSelectedIds((current) =>
       current.includes(eventId)
         ? current.filter((id) => id !== eventId)
@@ -173,13 +199,62 @@ export function CollateralWarningListPage() {
     )
   }
 
-  const selectedEvents = filteredEvents.filter((event) =>
-    selectedIds.includes(event.eventId)
+  const selectedEvents = useMemo(
+    () =>
+      filteredEvents.filter(
+        (event) =>
+          selectedIds.includes(event.eventId) &&
+          canSelectForBatchPublish(event)
+      ),
+    [filteredEvents, selectedIds]
   )
+
+  useEffect(() => {
+    setSelectedIds((current) => {
+      const next = current.filter((eventId) => {
+        const event = filteredEvents.find((item) => item.eventId === eventId)
+        return event ? canSelectForBatchPublish(event) : false
+      })
+      return next.length === current.length ? current : next
+    })
+  }, [filteredEvents])
+
+  const markPublished = (eventIds: string[]) => {
+    setPublishedEventIds((current) => {
+      const next = new Set(current)
+      eventIds.forEach((id) => next.add(id))
+      return next
+    })
+    setSelectedIds((current) =>
+      current.filter((id) => !eventIds.includes(id))
+    )
+  }
+
+  useEffect(() => {
+    const returnState = location.state as BatchPublishReturnState | null
+    if (!returnState?.batchPublishedIds?.length) {
+      return
+    }
+
+    markPublished(returnState.batchPublishedIds)
+    setBatchMode(false)
+    showToast(
+      `成功公示 ${returnState.batchPublishCount ?? returnState.batchPublishedIds.length} 笔，失败 0 笔`
+    )
+    navigate(location.pathname, { replace: true, state: null })
+  }, [location.pathname, location.state, navigate])
 
   const exitBatchMode = () => {
     setBatchMode(false)
     setSelectedIds([])
+    setBatchConfirmOpen(false)
+  }
+
+  const handleBatchPublishConfirm = () => {
+    setBatchConfirmOpen(false)
+    navigate(getBatchPublishConfirmPath(), {
+      state: { warnIds: selectedEvents.map((event) => event.eventId) },
+    })
   }
 
   // 计算【更多筛选】抽屉生效项数量（预警等级、时间等）
@@ -327,7 +402,7 @@ export function CollateralWarningListPage() {
                 type="button"
                 onClick={() => {
                   const selectableCandidates = filteredEvents
-                    .filter(canBatchSelect)
+                    .filter(canSelectForBatchPublish)
                     .map((item) => item.eventId)
                   setSelectedIds(selectableCandidates)
                 }}
@@ -371,9 +446,12 @@ export function CollateralWarningListPage() {
                     event={event}
                     batchMode={batchMode}
                     selected={selectedIds.includes(event.eventId)}
-                    selectable={canBatchSelect(event)}
+                    selectable={canSelectForBatchPublish(event)}
                     onToggleSelect={toggleSelect}
-                    onPublish={(target) => setPublishTargets([target])}
+                    onPublish={(target) => {
+                      navigate(resolvePublishNavigation(target).path)
+                    }}
+                    onRelease={(target) => setReleaseTarget(target)}
                     onPermissionDenied={() =>
                       showToast("您暂无该订单对应项目的管理权限，无法跳转办理")
                     }
@@ -392,10 +470,10 @@ export function CollateralWarningListPage() {
             <button
               type="button"
               className="w-full rounded-2xl bg-blue-600 py-3 text-sm font-bold text-white shadow-md active:bg-blue-700 disabled:opacity-40 disabled:shadow-none"
-              disabled={selectedIds.length === 0}
-              onClick={() => setPublishTargets(selectedEvents)}
+              disabled={selectedEvents.length === 0}
+              onClick={() => setBatchConfirmOpen(true)}
             >
-              下一步：确认公示 ({selectedIds.length} 条)
+              下一步：确认公示 ({selectedEvents.length} 条)
             </button>
           </div>
         )}
@@ -470,16 +548,31 @@ export function CollateralWarningListPage() {
         </DrawerField>
       </FilterDrawer>
 
-      {/* 公示确认弹窗 */}
-      <PublishConfirmDialog
-        open={publishTargets !== null}
-        events={publishTargets ?? []}
-        onClose={() => setPublishTargets(null)}
+      <ReleasePromptSheet
+        open={releaseTarget !== null}
+        orderNo={releaseTarget?.orderNo}
+        ltvHitSnapshot={
+          releaseTarget
+            ? getCollateralWarningById(releaseTarget.eventId)?.ltvHitSnapshot
+            : null
+        }
+        onClose={() => setReleaseTarget(null)}
         onConfirm={() => {
-          setPublishTargets(null)
-          exitBatchMode()
-          showToast("风险公示提交成功，已向资金方发布存证通知")
+          const target = releaseTarget
+          setReleaseTarget(null)
+          if (target) {
+            navigate(
+              `/m/finance/pledge-orders?order=${target.orderNo}&warn_id=${target.eventId}`
+            )
+          }
         }}
+      />
+
+      <BatchPublishConfirmSheet
+        open={batchConfirmOpen}
+        events={selectedEvents}
+        onClose={() => setBatchConfirmOpen(false)}
+        onConfirm={handleBatchPublishConfirm}
       />
 
       <Toast message={toastMessage} />

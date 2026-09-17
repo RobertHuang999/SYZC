@@ -25,7 +25,12 @@ export const WARNING_STATUS_FILTER_OPTIONS = [
   "已结案 · 有效",
 ] as const
 
-export const PUBLICITY_STATUS_FILTER_OPTIONS = ["全部", "未公示", "已公示"] as const
+export const PUBLICITY_STATUS_FILTER_OPTIONS = [
+  "全部",
+  "未公示",
+  "已公示",
+  "已取消",
+] as const
 
 export const WARNING_SOURCE_FILTER_OPTIONS = [
   "全部",

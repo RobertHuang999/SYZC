@@ -1,6 +1,9 @@
 import { Navigate, Route, Routes } from "react-router-dom"
 import { CollateralWarningDetailPage } from "@/features/collateral-warning-events/pages/CollateralWarningDetailPage"
 import { CollateralWarningListPage } from "@/features/collateral-warning-events/pages/CollateralWarningListPage"
+import { CollateralWarningPublishPage } from "@/features/collateral-warning-events/pages/CollateralWarningPublishPage"
+import { CollateralWarningBatchPublishPage } from "@/features/collateral-warning-events/pages/CollateralWarningBatchPublishPage"
+import { CollateralWarningDisclosureDetailPage } from "@/features/collateral-warning-events/pages/CollateralWarningDisclosureDetailPage"
 import { DeviceWarningEventDetailPage } from "@/features/device-warning-events/pages/DeviceWarningEventDetailPage"
 import { DeviceWarningEventListPage } from "@/features/device-warning-events/pages/DeviceWarningEventListPage"
 import { DeviceWarningEventReleasePage } from "@/features/device-warning-events/pages/DeviceWarningEventReleasePage"
@@ -16,8 +19,9 @@ import { PledgeOrderPlaceholderPage } from "@/pages/PledgeOrderPlaceholderPage"
 import { ProfilePage } from "@/pages/ProfilePage"
 import { TasksManagementPage } from "@/pages/TasksManagementPage"
 import { WorkspacePage } from "@/pages/WorkspacePage"
-import { ReadOnlyDetailPage } from "@/features/readonly-risk-views/pages/ReadOnlyDetailPage"
 import { ReadOnlyListPage } from "@/features/readonly-risk-views/pages/ReadOnlyListPage"
+import { ReadOnlyDetailPage } from "@/features/readonly-risk-views/pages/ReadOnlyDetailPage"
+import { RiskDisclosureLedgerDetailPage } from "@/features/risk-disclosure/pages/RiskDisclosureLedgerDetailPage"
 
 export function AppRoutes() {
   return (
@@ -59,8 +63,20 @@ export function AppRoutes() {
         element={<CollateralWarningListPage />}
       />
       <Route
+        path="/m/supervision/order-warnings/batch-publish"
+        element={<CollateralWarningBatchPublishPage />}
+      />
+      <Route
         path="/m/supervision/order-warnings/:id"
         element={<CollateralWarningDetailPage />}
+      />
+      <Route
+        path="/m/supervision/order-warnings/:id/publish"
+        element={<CollateralWarningPublishPage />}
+      />
+      <Route
+        path="/m/supervision/order-warnings/:id/disclosure"
+        element={<CollateralWarningDisclosureDetailPage />}
       />
 
       <Route
@@ -90,7 +106,7 @@ export function AppRoutes() {
       />
       <Route
         path="/m/risk/disclosures/:id"
-        element={<ReadOnlyDetailPage module="risk-disclosure" />}
+        element={<RiskDisclosureLedgerDetailPage />}
       />
 
       <Route

@@ -218,6 +218,26 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "CLOSED_VALID",
     deviceEventId: "evt-010",
   },
+  // 11. 物联穿透 · 已结案 · 有效 · 已取消公示（PUB-TC01 / RISK-PUB-C06）
+  {
+    orderNo: "PO202606-20",
+    orderType: "抵押",
+    warningType: "物联穿透告警",
+    severityLevelId: l4.severityLevelId,
+    severityCode: l4.severityCode,
+    severityName: l4.severityName,
+    severityColor: l4.severityColor,
+    warningSource: "物联穿透",
+    warningContent:
+      "位置：G15沈海高速段；设备名称：车载GPS追踪器-GPS09；触发预警：偏离既定物流轨迹超 5 公里！",
+    snapshotImageStatus: "none",
+    warningTime: "2026-06-15 14:00:00",
+    processedTime: "2026-06-15 15:20:00",
+    publicityStatus: "已取消",
+    processedBy: "物流监管员（外部专员）",
+    warningStatus: "CLOSED_VALID",
+    deviceEventId: "evt-012",
+  },
 ]
 const extraOrders = [
   "PO202608-22",
@@ -298,6 +318,7 @@ const seedEventIds = [
   "cw-009",
   "cw-010",
   "cw-011",
+  "cw-012",
 ]
 
 /**

@@ -27,21 +27,17 @@ export function RiskDisclosureTable({
 }: RiskDisclosureTableProps) {
   return (
     <div className="overflow-visible rounded-md border bg-card">
-      <Table className="min-w-[1420px]">
+      <Table className="min-w-[1180px]">
         <TableHeader>
           <TableRow>
             <TableHead className="w-16">序号</TableHead>
-            <TableHead className="w-[120px]">预警订单</TableHead>
-            <TableHead className="w-[120px]">货主</TableHead>
+            <TableHead className="w-[120px]">预警订单号</TableHead>
             <TableHead className="w-[120px]">预警类型</TableHead>
-            <TableHead className="w-[200px]">预警内容</TableHead>
-            <TableHead className="w-16 text-center">抓拍</TableHead>
-            <TableHead className="w-[110px]">预警时间</TableHead>
-            <TableHead className="w-[110px]">处理时间</TableHead>
-            <TableHead className="w-[120px]">处理人</TableHead>
+            <TableHead className="w-[240px]">公示标题与内容摘要</TableHead>
+            <TableHead className="w-16 text-center">现场抓拍图</TableHead>
+            <TableHead className="w-[130px]">最近一次公示时间</TableHead>
+            <TableHead className="w-[120px]">最新操作人</TableHead>
             <TableHead className="w-[90px]">公示状态</TableHead>
-            <TableHead className="w-[120px]">公示时间</TableHead>
-            <TableHead className="w-[120px]">操作人</TableHead>
             <TableHead className="w-[80px] min-w-[80px]">操作</TableHead>
           </TableRow>
         </TableHeader>
@@ -49,7 +45,7 @@ export function RiskDisclosureTable({
           {records.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={13}
+                colSpan={9}
                 className="h-32 text-center text-muted-foreground"
               >
                 暂无数据
@@ -67,19 +63,11 @@ export function RiskDisclosureTable({
                     {record.orderNo}
                   </Link>
                 </TableCell>
-                <TableCell>
-                  <HoverOverflowText
-                    className="max-w-[120px]"
-                    ariaLabel={`货主：${record.ownerName}`}
-                  >
-                    {record.ownerName}
-                  </HoverOverflowText>
-                </TableCell>
                 <TableCell>{record.warningType}</TableCell>
                 <TableCell>
                   <HoverOverflowText
-                    className="max-w-[200px]"
-                    ariaLabel={`预警内容：${record.warningContent}`}
+                    className="max-w-[240px]"
+                    ariaLabel={`公示标题与内容摘要：${record.warningContent}`}
                   >
                     {record.warningContent}
                   </HoverOverflowText>
@@ -91,17 +79,16 @@ export function RiskDisclosureTable({
                       aria-label="查看大图"
                     />
                   ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <span className="text-muted-foreground">无抓拍图</span>
                   )}
                 </TableCell>
-                <TableCell>{formatDateTime(record.warningTime)}</TableCell>
-                <TableCell>{formatDateTime(record.processedTime)}</TableCell>
+                <TableCell>{formatDateTime(record.lastDisclosureTime)}</TableCell>
                 <TableCell>
                   <HoverOverflowText
                     className="max-w-[120px]"
-                    ariaLabel={`处理人：${record.processedBy}`}
+                    ariaLabel={`最新操作人：${record.lastOperator}`}
                   >
-                    {record.processedBy}
+                    {record.lastOperator}
                   </HoverOverflowText>
                 </TableCell>
                 <TableCell>
@@ -113,15 +100,6 @@ export function RiskDisclosureTable({
                   >
                     {record.disclosureStatus}
                   </Badge>
-                </TableCell>
-                <TableCell>{formatDateTime(record.lastDisclosureTime)}</TableCell>
-                <TableCell>
-                  <HoverOverflowText
-                    className="max-w-[120px]"
-                    ariaLabel={`操作人：${record.lastOperator}`}
-                  >
-                    {record.lastOperator}
-                  </HoverOverflowText>
                 </TableCell>
                 <TableCell>
                   <Link

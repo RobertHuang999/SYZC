@@ -88,19 +88,27 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
     targetId: "collateral-warning-toolbar",
     number: 3,
     kind: "交互",
-    title: "批量风险公示与数据导出",
-    content: "支持对已结案 · 有效且未公示的预警记录进行批量公示操作，以及筛选结果全量导出。",
+    title: "批量风险公示",
+    content: "NavBar「批量公示」进入勾选模式；仅【已结案 · 有效且未公示】卡片可勾选，【已公示】复选框禁用。",
     details: [
       {
         title: "操作规则与权限控制",
         items: [
           {
-            label: "批量公示风险",
-            content: "仅当当前筛选结果中包含【已结案 · 有效且未公示】的数据时按钮激活；点击弹出批量公示确认框并展示候选记录数。",
+            label: "复选框准入 (RISK-PUB-B01/B02)",
+            content: "仅【已结案 · 有效】且【未公示】、有效抵/质押订单可勾选；【已公示】行展示禁用复选框且不可选中；待处置、已作废、监管服务、历史兼容行不可选。已选集合在公示状态变化后自动剔除不可选项。",
           },
           {
-            label: "导出数据",
-            content: "导出当前筛选条件匹配的全部押品预警数据，包含订单号、品类规格、预警类型、等级、处置状态与时间戳。",
+            label: "批量公示确认",
+            content: "底栏「下一步：确认公示」→ Bottom Sheet 展示候选清单 →「去编辑公示内容」进入批量公示确认页（订单 Pill 切换 + 单条同款表单 + 上一条/下一条），全部校验通过后「提交全部公示」。",
+          },
+          {
+            label: "批量公示流转图",
+            content: `flowchart LR
+    A["NavBar 批量公示 · 勾选候选"] --> B["Bottom Sheet 确认清单"]
+    B --> C["批量公示确认页 · 逐条编辑快照"]
+    C --> D["提交全部 · 服务端逐条复核 B03"]
+    D --> E["逐条独立落库 B04 · Toast 汇总 B05"]`,
           },
           {
             label: "权限控制",
@@ -166,7 +174,7 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "商业/穿透类 · 已结案 · 有效",
-            content: "若尚未公示，展示【公示风险】操作；若已公示则仅保留只读【详情】入口。",
+            content: "未公示且抵/质押订单展示【公示风险】；已公示/已取消展示【查看公示】；监管服务不展示公示入口。",
           },
           {
             label: "已作废",

@@ -35,7 +35,19 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
   let currentAnnotations: PrototypeAnnotation[] = []
   let currentDocuments: PrototypeDocument[] = []
 
-  if (location.pathname.startsWith("/m/supervision/order-warnings/")) {
+  if (location.pathname.endsWith("/batch-publish")) {
+    pageTitle = "押品预警 · 批量公示确认 · 移动端 PRD 标注"
+    currentAnnotations = collateralWarningListAnnotations
+    currentDocuments = collateralWarningDocuments
+  } else if (location.pathname.endsWith("/publish")) {
+    pageTitle = "押品预警 · 公示确认 · 移动端 PRD 标注"
+    currentAnnotations = collateralWarningDetailH5Annotations
+    currentDocuments = collateralWarningDocuments
+  } else if (location.pathname.endsWith("/disclosure")) {
+    pageTitle = "押品预警 · 公示详情 · 移动端 PRD 标注"
+    currentAnnotations = collateralWarningDetailH5Annotations
+    currentDocuments = collateralWarningDocuments
+  } else if (location.pathname.startsWith("/m/supervision/order-warnings/")) {
     pageTitle = "押品预警详情 · 移动端交互与 PRD 标注"
     currentAnnotations = collateralWarningDetailH5Annotations
     currentDocuments = collateralWarningDocuments

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { ImageIcon } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { HoverOverflowText } from "@/components/business/HoverOverflowText"
@@ -14,7 +14,12 @@ import {
 import { SeverityLevelDisplay } from "@/shared/components/SeverityLevelDisplay"
 import { TableDateTimeCell, TableProcessedInfoCell } from "@/shared/components/TableCells"
 import { SnapshotImageModal, type SnapshotPreviewData } from "@/shared/components/SnapshotImageModal"
-import { getRowActions } from "../domain/actions"
+import {
+  canSelectForBatchPublish,
+  getPublishActionLabel,
+  getRowActions,
+  isAlreadyPublishedForBatch,
+} from "../domain/actions"
 import type { CollateralWarningEvent } from "../domain/types"
 import { CollateralWarningStatusBadge } from "./CollateralWarningStatusBadge"
 
@@ -22,6 +27,8 @@ type CollateralWarningTableProps = {
   events: CollateralWarningEvent[]
   page: number
   pageSize: number
+  selectedEventIds: Set<string>
+  onSelectedEventIdsChange: (ids: Set<string>) => void
   onPublish: (event: CollateralWarningEvent) => void
   onRelease: (event: CollateralWarningEvent) => void
 }
@@ -30,18 +37,57 @@ export function CollateralWarningTable({
   events,
   page,
   pageSize,
+  selectedEventIds,
+  onSelectedEventIdsChange,
   onPublish,
   onRelease,
 }: CollateralWarningTableProps) {
   const navigate = useNavigate()
   const [previewImage, setPreviewImage] = useState<SnapshotPreviewData | null>(null)
 
+  const selectableOnPage = useMemo(
+    () => events.filter(canSelectForBatchPublish),
+    [events]
+  )
+  const allSelectableChecked =
+    selectableOnPage.length > 0 &&
+    selectableOnPage.every((event) => selectedEventIds.has(event.eventId))
+
+  const toggleAllOnPage = () => {
+    const next = new Set(selectedEventIds)
+    if (allSelectableChecked) {
+      selectableOnPage.forEach((event) => next.delete(event.eventId))
+    } else {
+      selectableOnPage.forEach((event) => next.add(event.eventId))
+    }
+    onSelectedEventIdsChange(next)
+  }
+
+  const toggleOne = (event: CollateralWarningEvent) => {
+    const next = new Set(selectedEventIds)
+    if (next.has(event.eventId)) {
+      next.delete(event.eventId)
+    } else {
+      next.add(event.eventId)
+    }
+    onSelectedEventIdsChange(next)
+  }
+
   return (
     <>
       <div className="overflow-visible rounded-md border bg-card">
-        <Table className="min-w-[1320px]">
+        <Table className="min-w-[1360px]">
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12">
+                <input
+                  type="checkbox"
+                  aria-label="全选当前页可批量公示预警"
+                  checked={allSelectableChecked}
+                  disabled={selectableOnPage.length === 0}
+                  onChange={toggleAllOnPage}
+                />
+              </TableHead>
               <TableHead className="w-16">序号</TableHead>
               <TableHead className="w-[130px]">预警订单</TableHead>
               <TableHead className="w-[100px]">订单类型</TableHead>
@@ -61,7 +107,7 @@ export function CollateralWarningTable({
             {events.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={13}
+                  colSpan={14}
                   className="h-32 text-center text-muted-foreground"
                 >
                   暂无数据
@@ -70,9 +116,32 @@ export function CollateralWarningTable({
             ) : (
               events.map((event, index) => {
                 const actions = getRowActions(event)
+                const selectable = canSelectForBatchPublish(event)
+                const alreadyPublished = isAlreadyPublishedForBatch(event)
 
                 return (
                   <TableRow key={event.eventId}>
+                    <TableCell>
+                      {selectable ? (
+                        <input
+                          type="checkbox"
+                          aria-label={`选择 ${event.orderNo}`}
+                          checked={selectedEventIds.has(event.eventId)}
+                          onChange={() => toggleOne(event)}
+                        />
+                      ) : alreadyPublished ? (
+                        <input
+                          type="checkbox"
+                          aria-label={`${event.orderNo} 已公示，不可批量勾选`}
+                          checked={false}
+                          disabled
+                          title="已公示，不可参与批量公示"
+                          className="cursor-not-allowed opacity-40"
+                        />
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell>{(page - 1) * pageSize + index + 1}</TableCell>
                     <TableCell>
                       <Link
@@ -144,8 +213,10 @@ export function CollateralWarningTable({
                       <span
                         className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium ${
                           event.publicityStatus === "已公示"
-                            ? "bg-purple-50 text-purple-700 border border-purple-200"
-                            : "bg-amber-50 text-amber-700 border border-amber-200"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : event.publicityStatus === "已取消"
+                              ? "bg-gray-100 text-gray-600 border border-gray-200"
+                              : "bg-amber-50 text-amber-700 border border-amber-200"
                         }`}
                       >
                         {event.publicityStatus}
@@ -179,7 +250,7 @@ export function CollateralWarningTable({
                               )
                             }}
                           >
-                            看设备
+                            查看设备事件
                           </Button>
                         )}
                         {actions.includes("publish") && (
@@ -189,7 +260,7 @@ export function CollateralWarningTable({
                             className="h-auto p-0"
                             onClick={() => onPublish(event)}
                           >
-                            公示风险
+                            {getPublishActionLabel(event)}
                           </Button>
                         )}
                         <Link

@@ -6,7 +6,11 @@ import { useNavigate } from "react-router-dom"
 import { ImagePreviewModal } from "@/components/ui/ImagePreviewModal"
 import { formatDateTime } from "@/shared/lib/date-utils"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
-import { getRowActions } from "../domain/actions"
+import {
+  getPublishActionLabel,
+  getRowActions,
+  isAlreadyPublishedForBatch,
+} from "../domain/actions"
 import type { CollateralWarningEvent } from "../domain/types"
 import { CollateralWarningStatusBadge } from "./CollateralWarningStatusBadge"
 
@@ -17,6 +21,7 @@ type CollateralWarningCardProps = {
   selectable?: boolean
   onToggleSelect?: (eventId: string) => void
   onPublish?: (event: CollateralWarningEvent) => void
+  onRelease?: (event: CollateralWarningEvent) => void
   onPermissionDenied?: () => void
 }
 
@@ -27,12 +32,14 @@ export function CollateralWarningCard({
   selectable = false,
   onToggleSelect,
   onPublish,
+  onRelease,
   onPermissionDenied,
 }: CollateralWarningCardProps) {
   const navigate = useNavigate()
   const [imagePreviewOpen, setImagePreviewOpen] = useState(false)
 
   const actions = getRowActions(event)
+  const publishedLocked = batchMode && isAlreadyPublishedForBatch(event)
 
   const handleAction = (action: (typeof actions)[number]) => {
     switch (action) {
@@ -44,9 +51,7 @@ export function CollateralWarningCard({
           onPermissionDenied?.()
           return
         }
-        navigate(
-          `/m/finance/pledge-orders?order=${event.orderNo}&warn_id=${event.eventId}`
-        )
+        onRelease?.(event)
         break
       case "viewDevice":
         navigate(
@@ -85,9 +90,18 @@ export function CollateralWarningCard({
             {batchMode && (
               <input
                 type="checkbox"
-                className="size-4 shrink-0 rounded border-gray-300 text-blue-600 accent-blue-600"
+                className={`size-4 shrink-0 rounded border-gray-300 text-blue-600 accent-blue-600 ${
+                  !selectable ? "cursor-not-allowed opacity-40" : ""
+                }`}
                 checked={selected}
                 disabled={!selectable}
+                title={
+                  publishedLocked
+                    ? "已公示，不可重复勾选"
+                    : !selectable
+                      ? "仅已结案 · 有效且未公示可勾选"
+                      : undefined
+                }
                 onChange={() => onToggleSelect?.(event.eventId)}
                 onClick={(e) => e.stopPropagation()}
               />
@@ -220,7 +234,7 @@ export function CollateralWarningCard({
                   onClick={() => handleAction("publish")}
                   className="text-xs font-semibold text-[#f57c00] active:opacity-70 cursor-pointer hover:underline"
                 >
-                  公示风险 ▸
+                  {getPublishActionLabel(event)} ▸
                 </button>
               )}
 

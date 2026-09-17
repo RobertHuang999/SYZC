@@ -27,6 +27,7 @@ export type SnapshotImageStatus = "available" | "none" | "failed"
 
 export type RiskDisclosureRecord = {
   recordId: string
+  sourceWarningId?: string
   ruleName: string
   orderNo: string
   orderType?: "抵/质押" | "监管"

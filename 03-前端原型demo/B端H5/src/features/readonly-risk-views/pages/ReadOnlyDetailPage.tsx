@@ -1,12 +1,16 @@
 import { useMemo, useState } from "react"
 import { ChevronDown, ChevronUp, ShieldCheck } from "lucide-react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
+import type { RiskDisclosurePublishForm } from "@/features/risk-disclosure/domain/publish-form"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import { SectionCard } from "@/components/ui/SectionCard"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { getReadonlyRiskModuleMeta } from "../config"
-import { getReadonlyRiskRecord } from "../mock/readonly-risk.mock"
+import {
+  buildReadonlyRiskRecordFromPublishForm,
+  getReadonlyRiskRecord,
+} from "../mock/readonly-risk.mock"
 import type { ReadonlyRiskModule, ReadonlyStatusTone } from "../types"
 
 const TONE_CLASS: Record<ReadonlyStatusTone, string> = {
@@ -27,11 +31,27 @@ function FieldValue({ tone, value }: { tone?: ReadonlyStatusTone; value: string 
   )
 }
 
+type PublishNavigationState = {
+  fromPublish?: boolean
+  publishForm?: RiskDisclosurePublishForm
+}
+
 export function ReadOnlyDetailPage({ module }: { module: ReadonlyRiskModule }) {
   const { id } = useParams<{ id: string }>()
+  const location = useLocation()
   const navigate = useNavigate()
   const meta = getReadonlyRiskModuleMeta(module)
-  const record = useMemo(() => getReadonlyRiskRecord(module, id), [id, module])
+  const navigationState = location.state as PublishNavigationState | null
+  const record = useMemo(() => {
+    if (
+      module === "risk-disclosure" &&
+      id?.startsWith("pub-new-") &&
+      navigationState?.publishForm
+    ) {
+      return buildReadonlyRiskRecordFromPublishForm(id, navigationState.publishForm)
+    }
+    return getReadonlyRiskRecord(module, id)
+  }, [id, module, navigationState?.publishForm])
   const [allExpanded, setAllExpanded] = useState(true)
 
   if (!record) {

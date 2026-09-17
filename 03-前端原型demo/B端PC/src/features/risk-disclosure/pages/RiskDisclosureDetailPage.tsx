@@ -1,6 +1,10 @@
-import { useMemo, useState } from "react"
-import { Link, useParams } from "react-router-dom"
-import { ArrowLeftIcon, ImageIcon } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
+import { getCollateralWarningById } from "@/features/collateral-warning-events/lib/detail-utils"
+import { getRepublishConfirmPath } from "@/features/collateral-warning-events/lib/publish-navigation"
+import { DisclosureSnapshotViewContent } from "@/shared/components/DisclosureSnapshotViewContent"
+import type { RiskDisclosurePublishForm } from "../domain/publish-form"
+import { ArrowLeftIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -25,30 +29,114 @@ import {
   DetailSection,
   formatEmptyValue,
 } from "@/shared/components/DetailSection"
-import { DISCLOSURE_STATUS_BADGE_CLASS } from "../domain/constants"
-import { getRiskDisclosureById } from "../lib/detail-utils"
-
 import { PrototypeAnnotationProvider, PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { riskDisclosureDetailAnnotations } from "../annotations/risk-disclosure-detail.annotations"
 import { riskDisclosureDocuments } from "../documents/risk-disclosure-documents"
+import { DISCLOSURE_STATUS_BADGE_CLASS } from "../domain/constants"
+import type { RiskDisclosureRecordDetail } from "../domain/types"
+import { getRiskDisclosureById } from "../lib/detail-utils"
+import {
+  getPublishedSnapshotForRecord,
+  resolveShowReleaseMethod,
+} from "../lib/disclosure-snapshot-utils"
 
 const CANCEL_CONFIRM_MESSAGE =
   "您正在操作取消风险公示，确认后风险公示列表将取消显示当前操作的风险内容，点击确认按钮后生效。"
 
+type PublishNavigationState = {
+  fromPublish?: boolean
+  publishForm?: RiskDisclosurePublishForm
+}
+
+function buildRecordFromPublishForm(
+  recordId: string,
+  form: RiskDisclosurePublishForm
+): RiskDisclosureRecordDetail {
+  const event = getCollateralWarningById(form.sourceWarningId)
+  const publishedAt = new Date().toISOString().slice(0, 19).replace("T", " ")
+
+  return {
+    recordId,
+    sourceWarningId: form.sourceWarningId,
+    ruleName: event?.ruleName ?? "未命名规则",
+    orderNo: form.orderNo,
+    ownerName: event?.orderSnapshot.ownerCompany ?? "—",
+    warningType: (event?.warningType ??
+      "价格下跌") as RiskDisclosureRecordDetail["warningType"],
+    warningContent: form.warningDescription,
+    snapshotImageStatus:
+      form.warningSnapshotImages.length > 0 ? "available" : "none",
+    warningTime: form.warningTime,
+    processedTime: form.releaseTime,
+    processedBy: form.processedBy,
+    disclosureStatus: "已公示",
+    lastDisclosureTime: publishedAt,
+    lastOperator: "当前用户（森云科技）",
+    disclosureTitle: `${form.warningType} — ${form.orderNo}`,
+    disclosureContent: form.warningDescription,
+    originalWarning: {
+      warningType: event?.warningType ?? form.warningType,
+      warningContent: form.warningDescription,
+      warningTime: form.warningTime,
+      processedTime: form.releaseTime,
+      processedBy: form.processedBy,
+      snapshotImageStatus:
+        form.warningSnapshotImages.length > 0 ? "available" : "none",
+    },
+    operationHistory: [
+      {
+        action: "首次公示",
+        operator: "当前用户（森云科技）",
+        operatedAt: publishedAt,
+        remark: "由押品预警公示确认页提交",
+      },
+    ],
+    cancelReason: null,
+  }
+}
+
 export function RiskDisclosureDetailPage() {
   const { id } = useParams()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const navigationState = location.state as PublishNavigationState | null
   const [cancelOpen, setCancelOpen] = useState(false)
   const [cancelReason, setCancelReason] = useState("")
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
-  const record = useMemo(() => getRiskDisclosureById(id), [id])
+  const initialRecord = useMemo(() => {
+    if (id?.startsWith("pub-new-") && navigationState?.publishForm) {
+      return buildRecordFromPublishForm(id, navigationState.publishForm)
+    }
+    return getRiskDisclosureById(id)
+  }, [id, navigationState?.publishForm])
+
+  const [record, setRecord] = useState(initialRecord)
+
+  useEffect(() => {
+    setRecord(initialRecord)
+  }, [initialRecord])
+
+  const sourceWarningId =
+    navigationState?.publishForm?.sourceWarningId ?? record?.sourceWarningId
+  const sourceEvent = useMemo(
+    () => (sourceWarningId ? getCollateralWarningById(sourceWarningId) : null),
+    [sourceWarningId]
+  )
+  const publishSnapshot = useMemo(
+    () =>
+      record
+        ? getPublishedSnapshotForRecord(record, navigationState?.publishForm)
+        : null,
+    [navigationState?.publishForm, record]
+  )
 
   const showToast = (message: string) => {
     setToastMessage(message)
     window.setTimeout(() => setToastMessage(null), 2500)
   }
 
-  if (!record) {
+  if (!record || !publishSnapshot) {
     return (
       <div className="space-y-4 p-6">
         <Link to="/物联网IOT与预警/预警信息/风险公示">
@@ -64,8 +152,16 @@ export function RiskDisclosureDetailPage() {
     )
   }
 
-  const isHistoricalReadOnly = record.isHistorical || record.orderType === "监管"
+  const isHistoricalReadOnly =
+    ("isHistorical" in record && record.isHistorical) ||
+    ("orderType" in record && record.orderType === "监管")
   const canCancel = record.disclosureStatus === "已公示" && !isHistoricalReadOnly
+  const canRepublish =
+    (record.disclosureStatus === "已公示" ||
+      record.disclosureStatus === "已取消") &&
+    !isHistoricalReadOnly &&
+    Boolean(sourceWarningId)
+  const showReleaseMethod = resolveShowReleaseMethod(record, sourceWarningId)
 
   return (
     <PrototypeAnnotationProvider
@@ -78,7 +174,7 @@ export function RiskDisclosureDetailPage() {
           <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-2xl font-semibold tracking-tight">
-                {record.disclosureTitle}
+                风险公示详情
               </h1>
               <Badge
                 variant="outline"
@@ -97,14 +193,26 @@ export function RiskDisclosureDetailPage() {
               <Link to="/物联网IOT与预警/预警信息/风险公示">
                 <Button variant="outline">
                   <ArrowLeftIcon />
-                  返回
+                  返回列表
                 </Button>
               </Link>
-              {canCancel && (
+              {canRepublish && sourceWarningId ? (
+                <Button
+                  variant="secondary"
+                  onClick={() =>
+                    navigate(getRepublishConfirmPath(sourceWarningId), {
+                      state: { republish: true },
+                    })
+                  }
+                >
+                  重新公示
+                </Button>
+              ) : null}
+              {canCancel ? (
                 <Button variant="destructive" onClick={() => setCancelOpen(true)}>
                   取消公示
                 </Button>
-              )}
+              ) : null}
             </div>
           </div>
         </PrototypeAnnotationTarget>
@@ -115,12 +223,14 @@ export function RiskDisclosureDetailPage() {
           </div>
         )}
 
+        {sourceEvent ? (
+          <div className="rounded-lg border border-blue-200 bg-blue-50/70 px-4 py-3 text-sm text-blue-900">
+            来源押品预警：{sourceEvent.eventId} · {sourceEvent.orderNo} · 已结案 · 有效
+          </div>
+        ) : null}
+
         <PrototypeAnnotationTarget annotationIds={["risk-disclosure-detail-info"]}>
-          <DetailSection title="公示信息">
-            <DetailField label="公示标题">{record.disclosureTitle}</DetailField>
-            <DetailField label="预警订单">{record.orderNo}</DetailField>
-            <DetailField label="货主">{record.ownerName}</DetailField>
-            <DetailField label="规则名称">{record.ruleName}</DetailField>
+          <DetailSection title="公示状态">
             <DetailField label="公示状态">
               <Badge
                 variant="outline"
@@ -135,52 +245,27 @@ export function RiskDisclosureDetailPage() {
             <DetailField label="操作人">
               {formatEmptyValue(record.lastOperator)}
             </DetailField>
-            <DetailField label="公示内容">
-              <p className="whitespace-pre-wrap">{record.disclosureContent}</p>
-            </DetailField>
-            {record.cancelReason && (
+            {record.cancelReason ? (
               <DetailField label="取消说明">{record.cancelReason}</DetailField>
-            )}
+            ) : null}
           </DetailSection>
         </PrototypeAnnotationTarget>
 
         <PrototypeAnnotationTarget annotationIds={["risk-disclosure-detail-snapshot"]}>
-          <DetailSection title="原预警快照">
-            <DetailField label="预警类型">
-              {record.originalWarning.warningType}
-            </DetailField>
-            <DetailField label="预警内容">
-              {record.originalWarning.warningContent}
-            </DetailField>
-            <DetailField label="预警时间">
-              {record.originalWarning.warningTime}
-            </DetailField>
-            <DetailField label="处理时间">
-              {record.originalWarning.processedTime}
-            </DetailField>
-            <DetailField label="处理人">
-              {record.originalWarning.processedBy}
-            </DetailField>
-            <DetailField label="预警抓拍">
-              {record.originalWarning.snapshotImageStatus === "available" ? (
-                <span className="inline-flex items-center gap-1 text-primary">
-                  <ImageIcon className="size-4" />
-                  查看原预警抓拍
-                </span>
-              ) : (
-                "—"
-              )}
-            </DetailField>
-          </DetailSection>
+          <DisclosureSnapshotViewContent
+            orderNo={record.orderNo}
+            snapshot={publishSnapshot}
+            showReleaseMethod={showReleaseMethod}
+          />
         </PrototypeAnnotationTarget>
 
         <PrototypeAnnotationTarget annotationIds={["risk-disclosure-detail-history"]}>
-          <DetailSection title="操作历史">
+          <DetailSection title="操作记录">
             <div className="overflow-x-auto rounded-lg border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>操作</TableHead>
+                    <TableHead>操作类型</TableHead>
                     <TableHead>操作人</TableHead>
                     <TableHead>操作时间</TableHead>
                     <TableHead>备注</TableHead>
@@ -225,12 +310,37 @@ export function RiskDisclosureDetailPage() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setCancelOpen(false)}>
-                取消
+                关闭
               </Button>
               <Button
                 variant="destructive"
                 disabled={!cancelReason.trim()}
                 onClick={() => {
+                  const operatedAt = new Date()
+                    .toISOString()
+                    .slice(0, 19)
+                    .replace("T", " ")
+                  const reason = cancelReason.trim()
+                  setRecord((current) =>
+                    current
+                      ? {
+                          ...current,
+                          disclosureStatus: "已取消",
+                          cancelReason: reason,
+                          lastOperator: "当前用户（森云科技）",
+                          lastDisclosureTime: operatedAt,
+                          operationHistory: [
+                            {
+                              action: "取消公示",
+                              operator: "当前用户（森云科技）",
+                              operatedAt,
+                              remark: reason,
+                            },
+                            ...current.operationHistory,
+                          ],
+                        }
+                      : current
+                  )
                   setCancelOpen(false)
                   setCancelReason("")
                   showToast(`已取消公示 — ${record.orderNo}`)
@@ -242,11 +352,11 @@ export function RiskDisclosureDetailPage() {
           </DialogContent>
         </Dialog>
 
-        {toastMessage && (
+        {toastMessage ? (
           <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
             {toastMessage}
           </div>
-        )}
+        ) : null}
       </div>
     </PrototypeAnnotationProvider>
   )

@@ -29,7 +29,7 @@ export type WarningSource =
 
 export type SnapshotImageStatus = "available" | "none" | "failed"
 
-export type PublicityStatus = "未公示" | "已公示"
+export type PublicityStatus = "未公示" | "已公示" | "已取消"
 
 export const WARNING_STATUS = {
   OPEN_VALID: "OPEN_VALID",
@@ -66,7 +66,7 @@ export type WarningStatusFilter =
   | "已作废"
   | "已结案 · 有效"
 
-export type PublicityStatusFilter = "全部" | "未公示" | "已公示"
+export type PublicityStatusFilter = "全部" | PublicityStatus
 
 export type WarningSourceFilter = "全部" | WarningSource
 
