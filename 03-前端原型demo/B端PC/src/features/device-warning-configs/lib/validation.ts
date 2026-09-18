@@ -117,7 +117,9 @@ export function validateDeviceWarningConfig(
     }
   }
 
-  if (values.notifyTargets.length === 0) return "请选择预警对象"
+  if (values.notifyChannels.length > 0 && values.notifyTargets.length === 0) {
+    return "请选择预警对象"
+  }
 
   const dispositionEffects = resolveDispositionEffects(values.dispositionMode)
 
@@ -135,7 +137,7 @@ export function validateDeviceWarningConfig(
   if (dispositionEffects.hideUpgrade && values.upgradeEnabled) {
     return `「${DISPOSITION_MODE_LABELS.RECORD_ONLY}」处置策略不允许配置升级预警`
   }
-  if (values.upgradeEnabled) {
+  if (values.notifyChannels.length > 0 && values.upgradeEnabled) {
     const days = Number(values.upgradeDays)
     if (!Number.isInteger(days) || days <= 0) return "升级预警天数必须为正整数"
     if (values.upgradeTargets.length === 0) return "请选择升级预警对象"

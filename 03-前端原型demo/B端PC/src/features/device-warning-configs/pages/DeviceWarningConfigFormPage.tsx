@@ -125,6 +125,7 @@ export function DeviceWarningConfigFormPage() {
   const recommendedDisposition = getRecommendedDisposition(form.warningSubTypes)
   const dispositionEffects = resolveDispositionEffects(form.dispositionMode)
   const hideUpgradeSection = isGlobalNewDevice || dispositionEffects.hideUpgrade
+  const hasExternalNotifyChannel = form.notifyChannels.length > 0
   const dispositionDeviates = isDispositionDeviatingFromRecommendation(
     form.warningSubTypes,
     form.dispositionMode
@@ -241,12 +242,25 @@ export function DeviceWarningConfigFormPage() {
 
   const toggleChannel = (channel: string) => {
     setDirty(true)
-    setForm((current) => ({
-      ...current,
-      notifyChannels: current.notifyChannels.includes(channel)
+    setForm((current) => {
+      const nextChannels = current.notifyChannels.includes(channel)
         ? current.notifyChannels.filter((item) => item !== channel)
-        : [...current.notifyChannels, channel],
-    }))
+        : [...current.notifyChannels, channel]
+      const clearingExternal = nextChannels.length === 0
+
+      return {
+        ...current,
+        notifyChannels: nextChannels,
+        ...(clearingExternal
+          ? {
+              notifyTargets: [],
+              upgradeEnabled: false,
+              upgradeDays: "0",
+              upgradeTargets: [],
+            }
+          : {}),
+      }
+    })
   }
 
   const performSave = () => {
@@ -855,7 +869,7 @@ export function DeviceWarningConfigFormPage() {
               <div className="space-y-2">
                 <Label>通知渠道（选填）</Label>
                 <p className="text-xs text-muted-foreground">
-                  预警命中时，H5「设备预警信息」入口自动展示待处置红点，无需配置；短信/邮件需配置通知对象并勾选渠道后才会下发。
+                  预警命中时，移动端「设备预警信息」入口自动展示待处置红点，无需配置；短信/邮件需配置通知对象并勾选渠道后才会下发。
                 </p>
                 <div className="flex flex-wrap gap-4">
                   {NOTIFY_CHANNEL_OPTIONS.map((channel) => (
@@ -870,18 +884,20 @@ export function DeviceWarningConfigFormPage() {
                   ))}
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>
-                  <span className="text-destructive font-bold mr-1">*</span>
-                  预警通知对象（按组织架构选择）
-                </Label>
-                <OrgUserSelect
-                  value={form.notifyTargets}
-                  onChange={(targets) => updateForm({ notifyTargets: targets })}
-                  placeholder="点击按部门组织架构选择预警接收人"
-                />
-              </div>
-              {!hideUpgradeSection && (
+              {hasExternalNotifyChannel && (
+                <div className="space-y-2">
+                  <Label>
+                    <span className="text-destructive font-bold mr-1">*</span>
+                    预警通知对象（按组织架构选择）
+                  </Label>
+                  <OrgUserSelect
+                    value={form.notifyTargets}
+                    onChange={(targets) => updateForm({ notifyTargets: targets })}
+                    placeholder="点击按部门组织架构选择预警接收人"
+                  />
+                </div>
+              )}
+              {hasExternalNotifyChannel && !hideUpgradeSection && (
                 <>
                   <div className="flex items-center gap-2 pt-2 border-t">
                     <input
@@ -894,7 +910,7 @@ export function DeviceWarningConfigFormPage() {
                       className="size-4 rounded border-gray-300 text-primary"
                     />
                     <Label htmlFor="upgradeEnabled" className="cursor-pointer font-medium">
-                      启用升级预警（长时间未处置时逐级上报）
+                      启用升级预警（长时间未处置时，将通过短信逐级上报）
                     </Label>
                   </div>
                   {form.upgradeEnabled && (

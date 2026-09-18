@@ -122,10 +122,21 @@ export function OrderWarningConfigFormPage() {
 
   const toggleStrategyChannel = (key: OrderWarningStrategyKey, channel: string) => {
     const strategy = form.strategies[key]
+    const nextChannels = strategy.notifyChannels.includes(channel)
+      ? strategy.notifyChannels.filter((item) => item !== channel)
+      : [...strategy.notifyChannels, channel]
+    const clearingExternal = nextChannels.length === 0
+
     updateStrategy(key, {
-      notifyChannels: strategy.notifyChannels.includes(channel)
-        ? strategy.notifyChannels.filter((item) => item !== channel)
-        : [...strategy.notifyChannels, channel],
+      notifyChannels: nextChannels,
+      ...(clearingExternal
+        ? {
+            notifyTargets: [],
+            upgradeEnabled: false,
+            upgradeDays: "0",
+            upgradeTargets: [],
+          }
+        : {}),
     })
   }
 
@@ -287,6 +298,7 @@ export function OrderWarningConfigFormPage() {
             <CardContent className="space-y-4">
               {ORDER_STRATEGY_DEFINITIONS.map((def, index) => {
                 const strategy = form.strategies[def.key]
+                const hasExternalNotifyChannel = strategy.notifyChannels.length > 0
 
                 return (
                   <div key={def.key} className="rounded-lg border p-4">
@@ -476,7 +488,7 @@ export function OrderWarningConfigFormPage() {
                         <div className="space-y-2 md:col-span-2">
                           <Label>通知渠道（选填）</Label>
                           <p className="text-xs text-muted-foreground">
-                            预警命中时，H5「押品预警信息」入口自动展示待处置红点，无需配置；短信/邮件需配置通知对象并勾选渠道后才会下发。
+                            预警命中时，移动端「押品预警信息」入口自动展示待处置红点，无需配置；短信/邮件需配置通知对象并勾选渠道后才会下发。
                           </p>
                           <div className="flex flex-wrap gap-4">
                             {NOTIFY_CHANNEL_OPTIONS.map((channel) => (
@@ -492,38 +504,42 @@ export function OrderWarningConfigFormPage() {
                           </div>
                         </div>
 
-                        <div className="space-y-2 md:col-span-2">
-                          <Label>
-                            <span className="text-destructive font-bold mr-1">*</span>
-                            预警通知对象（按组织架构选择）
-                          </Label>
-                          <OrgUserSelect
-                            value={strategy.notifyTargets}
-                            onChange={(targets) =>
-                              updateStrategy(def.key, { notifyTargets: targets })
-                            }
-                            placeholder="点击按部门组织架构选择预警接收人"
-                          />
-                        </div>
+                        {hasExternalNotifyChannel && (
+                          <div className="space-y-2 md:col-span-2">
+                            <Label>
+                              <span className="text-destructive font-bold mr-1">*</span>
+                              预警通知对象（按组织架构选择）
+                            </Label>
+                            <OrgUserSelect
+                              value={strategy.notifyTargets}
+                              onChange={(targets) =>
+                                updateStrategy(def.key, { notifyTargets: targets })
+                              }
+                              placeholder="点击按部门组织架构选择预警接收人"
+                            />
+                          </div>
+                        )}
 
-                        <div className="flex items-center gap-2 md:col-span-2 pt-2 border-t">
-                          <input
-                            id={`upgrade-${def.key}`}
-                            type="checkbox"
-                            checked={strategy.upgradeEnabled}
-                            onChange={(event) =>
-                              updateStrategy(def.key, {
-                                upgradeEnabled: event.target.checked,
-                              })
-                            }
-                            className="size-4 rounded border-gray-300 text-primary"
-                          />
-                          <Label htmlFor={`upgrade-${def.key}`} className="cursor-pointer font-medium">
-                            启用升级预警（未及时处理时逐级上报）
-                          </Label>
-                        </div>
+                        {hasExternalNotifyChannel && (
+                          <div className="flex items-center gap-2 md:col-span-2 pt-2 border-t">
+                            <input
+                              id={`upgrade-${def.key}`}
+                              type="checkbox"
+                              checked={strategy.upgradeEnabled}
+                              onChange={(event) =>
+                                updateStrategy(def.key, {
+                                  upgradeEnabled: event.target.checked,
+                                })
+                              }
+                              className="size-4 rounded border-gray-300 text-primary"
+                            />
+                            <Label htmlFor={`upgrade-${def.key}`} className="cursor-pointer font-medium">
+                              启用升级预警（长时间未处置时，将通过短信逐级上报）
+                            </Label>
+                          </div>
+                        )}
 
-                        {strategy.upgradeEnabled && (
+                        {hasExternalNotifyChannel && strategy.upgradeEnabled && (
                           <div className="grid gap-4 md:grid-cols-2 md:col-span-2 rounded-lg border bg-muted/20 p-4">
                             <div className="space-y-2">
                               <Label>

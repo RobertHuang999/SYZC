@@ -15,9 +15,11 @@ function validateStrategy(
   const strategy = values.strategies[key]
   if (!strategy.enabled) return null
   if (!strategy.severityLevelId) return "每个已启用策略都必须选择预警等级"
-  if (strategy.notifyTargets.length === 0) return `${key}策略请选择预警对象`
+  if (strategy.notifyChannels.length > 0 && strategy.notifyTargets.length === 0) {
+    return `${key}策略请选择预警对象`
+  }
 
-  if (strategy.upgradeEnabled) {
+  if (strategy.notifyChannels.length > 0 && strategy.upgradeEnabled) {
     const days = Number(strategy.upgradeDays)
     if (!Number.isInteger(days) || days <= 0) return `${key}策略升级天数必须为正整数`
     if (strategy.upgradeTargets.length === 0) return `${key}策略请选择升级对象`
