@@ -127,6 +127,19 @@ const kindOptions: Array<AnnotationKind | "全部"> = [
   "待确认",
 ]
 
+function hasMarkdownFormatting(content: string) {
+  return (
+    content.includes("|") ||
+    content.includes("```") ||
+    content.includes("###") ||
+    content.includes("##") ||
+    content.includes("- ") ||
+    content.includes("* ") ||
+    content.includes("**") ||
+    (content.includes("\n") && (content.includes("：") || content.includes(":")))
+  )
+}
+
 function AnnotationItemContent({ content }: { content: string }) {
   if (isMermaidCode(content)) {
     return (
@@ -134,6 +147,99 @@ function AnnotationItemContent({ content }: { content: string }) {
         chart={content}
         className="my-1 border-0 bg-transparent p-0 shadow-none hover:shadow-none"
       />
+    )
+  }
+
+  if (hasMarkdownFormatting(content)) {
+    return (
+      <div className="prose prose-slate max-w-none text-xs leading-relaxed dark:prose-invert">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            code({ className, children, ...props }) {
+              const match = /language-(\w+)/.exec(className || "")
+              const isMermaid = match && match[1] === "mermaid"
+              if (isMermaid) {
+                return (
+                  <div className="my-2 not-prose">
+                    <MermaidDiagram chart={String(children).replace(/\n$/, "")} />
+                  </div>
+                )
+              }
+              return (
+                <code
+                  className={`rounded bg-muted px-1 py-0.5 font-mono text-[11px] text-foreground ${className ?? ""}`}
+                  {...props}
+                >
+                  {children}
+                </code>
+              )
+            },
+            pre({ children }) {
+              return <div className="not-prose my-1.5">{children}</div>
+            },
+            table({ children }) {
+              return (
+                <div className="my-2 overflow-x-auto rounded-md border border-border/80 bg-background/80 shadow-2xs">
+                  <table className="w-full text-left text-[11.5px] border-collapse">
+                    {children}
+                  </table>
+                </div>
+              )
+            },
+            thead({ children }) {
+              return <thead className="bg-muted/70 border-b border-border/80">{children}</thead>
+            },
+            th({ children }) {
+              return (
+                <th className="px-2.5 py-1.5 font-semibold text-foreground text-[11px] whitespace-nowrap bg-muted/50">
+                  {children}
+                </th>
+              )
+            },
+            td({ children }) {
+              return (
+                <td className="px-2.5 py-1.5 border-b border-border/40 text-muted-foreground text-[11px] leading-normal align-top">
+                  {children}
+                </td>
+              )
+            },
+            tr({ children }) {
+              return <tr className="hover:bg-muted/30 transition-colors">{children}</tr>
+            },
+            blockquote({ children }) {
+              return (
+                <blockquote className="my-1.5 border-l-2 border-primary/50 bg-muted/20 py-1 px-2.5 text-muted-foreground text-[11px] rounded-r">
+                  {children}
+                </blockquote>
+              )
+            },
+            h1({ children }) {
+              return <h1 className="mt-2.5 mb-1 text-sm font-bold text-foreground border-b pb-1">{children}</h1>
+            },
+            h2({ children }) {
+              return <h2 className="mt-2 mb-1 text-[13px] font-semibold text-foreground">{children}</h2>
+            },
+            h3({ children }) {
+              return <h3 className="mt-2 mb-1 text-xs font-semibold text-foreground flex items-center gap-1">{children}</h3>
+            },
+            ul({ children }) {
+              return <ul className="my-1 list-disc pl-4 space-y-0.5 text-muted-foreground text-[11.5px]">{children}</ul>
+            },
+            ol({ children }) {
+              return <ol className="my-1 list-decimal pl-4 space-y-0.5 text-muted-foreground text-[11.5px]">{children}</ol>
+            },
+            li({ children }) {
+              return <li className="leading-snug">{children}</li>
+            },
+            p({ children }) {
+              return <p className="my-1 text-muted-foreground leading-snug">{children}</p>
+            },
+          }}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
     )
   }
 

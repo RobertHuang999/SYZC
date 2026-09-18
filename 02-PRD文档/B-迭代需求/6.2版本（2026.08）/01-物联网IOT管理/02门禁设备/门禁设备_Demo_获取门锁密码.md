@@ -23,7 +23,7 @@
 
 ```typescript
 // 列表行 handler · 挂锁
-const needApproval = await matchUnlockApprovalConfig(device)
+const needApproval = await 匹配开锁审批配置(device)
 if (needApproval) {
   openUnlockApplySubmitDialog({ deviceType: '挂锁门禁', ...context })
   return
@@ -51,7 +51,7 @@ openGetLockPasswordDialog(context) // 本文档组件
 
 | 字段 | 控件 | 必填 | 规格 |
 | :--- | :--- | :---: | :--- |
-| 事由 | `Select` | 是 | 出库 / 入库 / 移库 / 参观 / 其他 |
+| 事由 | `下拉选择框` | 是 | 出库 / 入库 / 移库 / 参观 / 其他 |
 | 备注 | `Textarea` | 否 | 最多 50 字 |
 
 底部 helper：「密码将以短信形式发送至您绑定的手机号，请凭此密码前往设备开锁，同时可在【我的申请记录】查看凭证。」
@@ -72,7 +72,7 @@ openGetLockPasswordDialog(context) // 本文档组件
 | 标题 | 「开锁凭证已生成」 |
 | 引导说明 | 临时密码已短信发送至绑定手机号，请凭此密码前往设备开锁，也可点击下方按钮查看详情 |
 | 结果摘要 | 申请单号 / 申请状态=已通过 / 凭证状态=已下发 |
-| 主按钮 | **查看申请详情** → Deep link `?tab=unlock-applies&applyNo=xxx` |
+| 主按钮 | **查看申请详情** → 详情直达链接 `?tab=unlock-applies&applyNo=xxx` |
 | 次按钮 | 返回设备列表 |
 
 > 挂锁凭证通过/免审后固定为【已下发】状态，取消有效期，无已过期状态；明文可在「我的申请记录」详情凭证区展示与复制。
@@ -85,8 +85,8 @@ openGetLockPasswordDialog(context) // 本文档组件
 | :--- | :--- |
 | 事由未选 | 字段红字阻断 |
 | 备注超 50 字 | 字段红字阻断 |
-| 未绑定手机号 | 提交阻断 + Toast |
-| 设备已有在途/生效凭证 | 提交阻断 + Toast「设备已有生效中凭证/在途申请，请等待处理完成」 |
+| 未绑定手机号 | 提交阻断 + 轻量浮窗提示 |
+| 设备已有在途/生效凭证 | 提交阻断 + 浮窗提示：「设备已有生效中凭证/在途申请，请等待处理完成」 |
 | 60 秒重复 | 「请求过于频繁，请稍后再试」 |
 
 ---

@@ -25,7 +25,7 @@
 ## 2. 入口路由（与需审批互斥）
 
 ```typescript
-const needApproval = await matchUnlockApprovalConfig(device)
+const needApproval = await 匹配开锁审批配置(device)
 if (needApproval) {
   openUnlockApplySubmitDialog({ deviceType: '人脸门禁', ...context })
   return
@@ -44,9 +44,9 @@ openGetAccessPasswordDialog(context) // 本文档组件
 
 | 字段 | 控件 | 必填 | 规格 |
 | :--- | :--- | :---: | :--- |
-| 事由 | `Select` | 是 | 出库 / 入库 / 移库 / 参观 / 其他 |
+| 事由 | `下拉选择框` | 是 | 出库 / 入库 / 移库 / 参观 / 其他 |
 | 有效期 | `datetime-local` ×2 | 是 | 开始 ≤ 结束；跨度 ≤ 24h |
-| 开锁次数 | `InputNumber` + Stepper | 是 | 1~100 整数，默认 1 |
+| 开锁次数 | `文本输入框Number` + Stepper | 是 | 1~100 整数，默认 1 |
 | 备注 | `Textarea` | 否 | 最多 50 字 |
 
 底部 helper：「最长有效期 24 小时；超过有效期凭证自动失效；请在【我的申请记录】查看密码」。
@@ -67,7 +67,7 @@ openGetAccessPasswordDialog(context) // 本文档组件
 | 标题 | 「开锁凭证已生成」 |
 | 引导说明 | 临时密码已生成，请点击下方按钮在详情页查看（人脸门禁不下发短信） |
 | 结果摘要 | 申请单号 / 申请状态=已通过 / 凭证状态=已下发 |
-| 主按钮 | **查看申请详情** → Deep link |
+| 主按钮 | **查看申请详情** → 详情直达链接 |
 | 次按钮 | 返回设备列表 |
 
 **禁止在弹窗内渲染**：密码明文、短信发送状态。
