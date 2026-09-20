@@ -39,14 +39,14 @@ export const deviceWarningReleaseH5Annotations: PrototypeAnnotation[] = [
     number: 2,
     kind: "交互",
     title: "处置说明录入与现场拍照",
-    content: "录入 10~200 字符情况说明、现场拍照上传（最多 10 张）并调用摄像头联动抓拍。",
+    content: "录入 1～200 字情况说明、现场拍照上传（最多 10 张，选填）并调用摄像头联动抓拍。",
     details: [
       {
         title: "表单与校验",
         items: [
           {
             label: "情况说明（必填）",
-            content: "多行文本输入，少于 10 字提示「情况说明不能少于 10 个字符」，不可为空。",
+            content: "多行文本输入，必填 1～200 字，禁止全空格；为空提示请填写现场情况说明，超限提示不可超过 200 字。",
           },
           {
             label: "现场拍照上传",

@@ -626,12 +626,6 @@ export const PROTOTYPE_NAV_GROUPS: PrototypeNavGroup[] = [
         matchPrefixes: ["/m/iot/device-warning-events"],
       },
       {
-        title: "贷中风控管理",
-        path: "/m/risk/mid-loan",
-        icon: "📈",
-        matchPrefixes: ["/m/risk/mid-loan"],
-      },
-      {
         title: "风险公示",
         path: "/m/risk/disclosures",
         icon: "🛡️",

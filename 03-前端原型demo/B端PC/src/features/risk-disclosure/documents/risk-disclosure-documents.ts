@@ -1,7 +1,7 @@
 import type { PrototypeDocument } from "@/shared/annotations/PrototypeAnnotationLayer"
-import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/05-风控/09-风险信息-风险公示/风险公示主PRD.md?raw"
-import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/05-风控/09-风险信息-风险公示/风险公示字段清单.md?raw"
-import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/05-风控/09-风险信息-风险公示/风险公示业务规则规格.md?raw"
+import prdMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/02-预警信息/04风险公示/风险公示主PRD.md?raw"
+import fieldsMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/02-预警信息/04风险公示/风险公示字段清单.md?raw"
+import rulesMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/02-预警信息/04风险公示/风险公示业务规则规格.md?raw"
 
 export const riskDisclosureDocuments: PrototypeDocument[] = [
   {

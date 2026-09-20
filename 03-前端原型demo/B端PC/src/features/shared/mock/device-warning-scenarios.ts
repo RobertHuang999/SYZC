@@ -178,7 +178,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     severityLevelId: "sl-l4",
     deviceScope: "已选 6 台 GPS",
     warningSubTypes: ["进围栏", "出围栏"],
-    dispositionMode: "AUTO_RECOVER",
+    dispositionMode: "ACTION_REQUIRED",
     triggerCondition: "进围栏/出围栏",
         status: "生效中",
     linkedEventIds: ["evt-014"],

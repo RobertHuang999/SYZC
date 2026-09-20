@@ -93,10 +93,13 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
     pageTitle = "开锁审批 · 移动端交互与 PRD 标注"
     currentAnnotations = unlockApplyAuditH5ListAnnotations
     currentDocuments = unlockApplyAuditH5Documents
-  } else if (location.pathname.startsWith("/m/risk/mid-loan")) {
-    pageTitle = "贷中风控管理 · 移动端交互与 PRD 标注"
-    currentAnnotations = readonlyRiskAnnotations["mid-loan"]
-    currentDocuments = readonlyRiskDocuments["mid-loan"]
+  } else if (
+    location.pathname.startsWith("/m/risk/mid-loan") ||
+    location.pathname === "/m/module/ws-risk-in-loan"
+  ) {
+    pageTitle = "贷中风控管理"
+    currentAnnotations = []
+    currentDocuments = []
   } else if (location.pathname.startsWith("/m/risk/disclosures")) {
     pageTitle = "风险公示 · 移动端交互与 PRD 标注"
     currentAnnotations = readonlyRiskAnnotations["risk-disclosure"]

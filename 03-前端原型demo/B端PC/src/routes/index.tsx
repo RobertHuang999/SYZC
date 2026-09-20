@@ -8,8 +8,6 @@ import { CollateralWarningArchivePage } from "@/features/collateral-warning-even
 import { CollateralWarningDetailPage } from "@/features/collateral-warning-events/pages/CollateralWarningDetailPage"
 import { CollateralWarningDisclosureDetailPage } from "@/features/collateral-warning-events/pages/CollateralWarningDisclosureDetailPage"
 import { CollateralWarningBatchPublishPage } from "@/features/collateral-warning-events/pages/CollateralWarningBatchPublishPage"
-import { MidLoanRiskListPage } from "@/features/mid-loan-risk-control/pages/MidLoanRiskListPage"
-import { MidLoanRiskDetailPage } from "@/features/mid-loan-risk-control/pages/MidLoanRiskDetailPage"
 import { RiskDisclosureListPage } from "@/features/risk-disclosure/pages/RiskDisclosureListPage"
 import { RiskDisclosureDetailPage } from "@/features/risk-disclosure/pages/RiskDisclosureDetailPage"
 import { RiskDisclosurePublishPage } from "@/features/risk-disclosure/pages/RiskDisclosurePublishPage"
@@ -89,15 +87,6 @@ export function AppRoutes() {
         <Route
           path="物联网IOT与预警/预警信息/押品预警信息/公示详情/:warnId"
           element={<CollateralWarningDisclosureDetailPage />}
-        />
-
-        <Route
-          path="物联网IOT与预警/预警信息/贷中风控管理"
-          element={<MidLoanRiskListPage />}
-        />
-        <Route
-          path="物联网IOT与预警/预警信息/贷中风控管理/详情/:id"
-          element={<MidLoanRiskDetailPage />}
         />
 
         <Route path="物联网IOT与预警/预警信息/风险公示" element={<RiskDisclosureListPage />} />

@@ -19,10 +19,12 @@ import { PledgeOrderPlaceholderPage } from "@/pages/PledgeOrderPlaceholderPage"
 import { ProfilePage } from "@/pages/ProfilePage"
 import { TasksManagementPage } from "@/pages/TasksManagementPage"
 import { WorkspacePage } from "@/pages/WorkspacePage"
-import { ReadOnlyListPage } from "@/features/readonly-risk-views/pages/ReadOnlyListPage"
-import { ReadOnlyDetailPage } from "@/features/readonly-risk-views/pages/ReadOnlyDetailPage"
+import { PrototypeEmptyPage } from "@/pages/PrototypeEmptyPage"
+import { MOBILE_MENU_ITEMS } from "@/data/mobileMenuData"
 import { RiskDisclosureLedgerDetailPage } from "@/features/risk-disclosure/pages/RiskDisclosureLedgerDetailPage"
 import { RiskDisclosureListPage } from "@/features/risk-disclosure/pages/RiskDisclosureListPage"
+
+const midLoanMenuItem = MOBILE_MENU_ITEMS.find((item) => item.id === "ws-risk-in-loan")
 
 export function AppRoutes() {
   return (
@@ -95,11 +97,23 @@ export function AppRoutes() {
 
       <Route
         path="/m/risk/mid-loan"
-        element={<ReadOnlyListPage />}
+        element={
+          <PrototypeEmptyPage
+            title="贷中风控管理"
+            menuItem={midLoanMenuItem}
+            backTo="/m/workspace"
+          />
+        }
       />
       <Route
         path="/m/risk/mid-loan/:id"
-        element={<ReadOnlyDetailPage />}
+        element={
+          <PrototypeEmptyPage
+            title="贷中风控管理"
+            menuItem={midLoanMenuItem}
+            backTo="/m/workspace"
+          />
+        }
       />
       <Route path="/m/risk/disclosures" element={<RiskDisclosureListPage />} />
       <Route

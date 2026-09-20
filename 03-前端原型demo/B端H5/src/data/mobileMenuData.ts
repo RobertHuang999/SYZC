@@ -479,8 +479,6 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     description: "平台主动式安全防御中枢。多维侦测设备断线、押品跌价、违规作业，并按风险等级推送责任人排查。",
     buttons: ["查看页面", "查看详情", "执行风控模型", "批量执行"],
     dataPermission: "订单数据权限",
-    customRoute: "/m/risk/mid-loan",
-    badge: "只读",
     iconType: "Activity",
   },
   {

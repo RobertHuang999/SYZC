@@ -13,8 +13,20 @@ const implementedExactRoutes = new Set<string>([
   "/系统参考/功能与数据权限",
 ])
 
+const unimplementedRoutePrefixes = [
+  "/物联网IOT与预警/预警信息/贷中风控管理",
+] as const
+
 export function isImplementedRoute(pathname: string): boolean {
   const currentPath = decodeURIComponent(pathname).replace(/\/$/, "") || "/"
+
+  if (
+    unimplementedRoutePrefixes.some(
+      (prefix) => currentPath === prefix || currentPath.startsWith(`${prefix}/`),
+    )
+  ) {
+    return false
+  }
 
   if (implementedExactRoutes.has(currentPath)) {
     return true

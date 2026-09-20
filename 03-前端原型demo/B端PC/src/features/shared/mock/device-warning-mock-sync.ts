@@ -43,7 +43,7 @@ export function inferDispositionModeFromEvent(
   }
 
   if (event.warningType === "设备GPS预警") {
-    return "AUTO_RECOVER"
+    return "ACTION_REQUIRED"
   }
 
   return "ACTION_REQUIRED"

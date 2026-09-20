@@ -249,8 +249,11 @@ export function DeviceWarningConfigDetailPage() {
         <ConfigConfirmDialog
           open={pendingAction === "disable"}
           title="确认停用"
-          description="停用后将暂停事件监听，确认停用？"
+          description="停用后将暂停匹配新事件，存量未处理流水不置作废。请录入停用原因。"
           confirmLabel="确认停用"
+          reasonRequired
+          reasonLabel="停用原因"
+          reasonPlaceholder="请输入停用原因（1～200 字）"
           onOpenChange={(open) => {
             if (!open) setPendingAction(null)
           }}
@@ -271,9 +274,12 @@ export function DeviceWarningConfigDetailPage() {
         <ConfigConfirmDialog
           open={pendingAction === "delete"}
           title="确认删除"
-          description="删除后不可恢复，关联未处理预警将置为无效，确认删除？"
+          description="删除后该规则产生的未处理预警将全部置为已作废。请录入删除理由。"
           confirmLabel="确认删除"
           destructive
+          reasonRequired
+          reasonLabel="删除理由"
+          reasonPlaceholder="请输入删除理由（1～200 字）"
           onOpenChange={(open) => {
             if (!open) setPendingAction(null)
           }}

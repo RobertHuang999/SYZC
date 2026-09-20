@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { WarningListPagination } from "@/components/business/WarningListPrimitives"
 import { DEFAULT_DEVICE_WARNING_CONFIG_FILTERS, PAGE_SIZE } from "../domain/constants"
@@ -35,6 +35,7 @@ export function DeviceWarningConfigListPage() {
   const [pageSize, setPageSize] = useState(PAGE_SIZE)
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const ignoreRowActionsUntilRef = useRef(0)
 
   const filteredConfigs = useMemo(
     () => filterDeviceWarningConfigs(configs, appliedFilters),
@@ -65,6 +66,9 @@ export function DeviceWarningConfigListPage() {
   }
 
   const handleAction = (action: DeviceWarningConfigAction, config: DeviceWarningConfig) => {
+    if (Date.now() < ignoreRowActionsUntilRef.current) {
+      return
+    }
     switch (action) {
       case "edit":
         navigate(`/物联网IOT与预警/预警配置/设备预警配置/编辑/${config.configId}`)
@@ -111,6 +115,7 @@ export function DeviceWarningConfigListPage() {
       showToast("删除成功")
     }
 
+    ignoreRowActionsUntilRef.current = Date.now() + 300
     setPendingAction(null)
   }
 
@@ -172,11 +177,18 @@ export function DeviceWarningConfigListPage() {
           title={pendingAction?.action === "disable" ? "确认停用" : "确认删除"}
           description={
             pendingAction?.action === "disable"
-              ? "停用后将暂停事件监听，确认停用？"
-              : "删除后不可恢复，关联未处理预警将置为无效，确认删除？"
+              ? "停用后将暂停匹配新事件，存量未处理流水不置作废。请录入停用原因。"
+              : "删除后该规则产生的未处理预警将全部置为已作废。请录入删除理由。"
           }
           confirmLabel={pendingAction?.action === "disable" ? "确认停用" : "确认删除"}
           destructive={pendingAction?.action === "delete"}
+          reasonRequired
+          reasonLabel={pendingAction?.action === "disable" ? "停用原因" : "删除理由"}
+          reasonPlaceholder={
+            pendingAction?.action === "disable"
+              ? "请输入停用原因（1～200 字）"
+              : "请输入删除理由（1～200 字）"
+          }
           onOpenChange={(open) => {
             if (!open) {
               setPendingAction(null)

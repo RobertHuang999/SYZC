@@ -83,11 +83,11 @@ export const deviceWarningReleaseAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "情况说明（必填）",
-            content: "文本域输入，限制 10~500 字符；实时校验字数，少于 10 字提示【情况说明不能少于 10 个字符】。",
+            content: "多行文本输入框，必填 1～200 字，禁止全空格；为空提示请填写情况说明，超限提示不可超过 200 字。",
           },
           {
             label: "现场照片上传",
-            content: "支持上传 JPG/PNG 格式，单个文件≤10MB，最多 5 张；支持图片预览、删除与重新上传。",
+            content: "选填。支持 JPG/JPEG/PNG，单张 ≤5MB，最多 10 张；支持图片预览、删除与重新上传。",
           },
           {
             label: "解除抓拍（联动）",

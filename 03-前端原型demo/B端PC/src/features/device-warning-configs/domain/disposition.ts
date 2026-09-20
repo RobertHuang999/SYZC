@@ -46,26 +46,17 @@ const SENSOR_SUB_TYPES = [
   "氧气异常",
 ] as const
 
-/** GPS 围栏/限速类 · R03 GPS 正常/回到合法状态 */
-const GPS_AUTO_RECOVER_SUB_TYPES = [
-  "进围栏",
-  "出围栏",
-  "普通限速",
-  "怠速滞留",
-  "路线偏离",
-] as const
-
 /**
  * R15c 白名单：仅下列子类型存在 02/01 R03 明确恢复信号，允许「恢复自动结案」。
+ * GPS 进/出围栏、普通限速、怠速滞留、路线偏离、非法拆除：三方不提供恢复自动结案回调，禁止 AUTO_RECOVER。
  * 其余子类型禁止 AUTO_RECOVER，避免落账后无 R03/R04 闭环。
  */
 export const AUTO_RECOVER_ALLOWED_SUB_TYPES = [
   ...SENSOR_SUB_TYPES,
   "设备离线",
-  ...GPS_AUTO_RECOVER_SUB_TYPES,
 ] as const
 
-/** 安防/破坏/图像/事务类 · 系统推荐人工解除 */
+/** 安防/破坏/图像/事务/GPS 行车类 · 系统推荐人工解除 */
 const ACTION_REQUIRED_SUB_TYPES = [
   "拆壳",
   "锁舌被卡",
@@ -77,6 +68,11 @@ const ACTION_REQUIRED_SUB_TYPES = [
   "行人入侵",
   "车辆入侵",
   "物品形态变化",
+  "进围栏",
+  "出围栏",
+  "普通限速",
+  "怠速滞留",
+  "路线偏离",
   "非法拆除",
   "密码错误",
   "电量低于20%",
@@ -268,34 +264,34 @@ export const SUB_TYPE_DISPOSITION_BY_CATEGORY: Record<
   },
   设备GPS预警: {
     进围栏: {
-      recommended: "AUTO_RECOVER",
-      autoRecoverAllowed: true,
-      r03Signal: "GPS 回到围栏合法状态",
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（三方不提供恢复自动结案回调）",
     },
     出围栏: {
-      recommended: "AUTO_RECOVER",
-      autoRecoverAllowed: true,
-      r03Signal: "GPS 回到围栏合法状态",
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（三方不提供恢复自动结案回调）",
     },
     普通限速: {
-      recommended: "AUTO_RECOVER",
-      autoRecoverAllowed: true,
-      r03Signal: "GPS 速度恢复正常",
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（三方不提供恢复自动结案回调）",
     },
     怠速滞留: {
-      recommended: "AUTO_RECOVER",
-      autoRecoverAllowed: true,
-      r03Signal: "GPS 滞留条件解除",
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（三方不提供恢复自动结案回调）",
     },
     路线偏离: {
-      recommended: "AUTO_RECOVER",
-      autoRecoverAllowed: true,
-      r03Signal: "GPS 回到规划路线",
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（三方不提供恢复自动结案回调）",
     },
     非法拆除: {
       recommended: "ACTION_REQUIRED",
       autoRecoverAllowed: false,
-      r03Signal: "无（须人工核查）",
+      r03Signal: "无（安防破坏类；三方不提供恢复自动结案回调）",
     },
     设备离线: {
       recommended: "AUTO_RECOVER",
