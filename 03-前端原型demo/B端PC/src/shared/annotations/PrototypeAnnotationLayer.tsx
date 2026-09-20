@@ -38,6 +38,7 @@ import {
 import { createPortal } from "react-dom"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import rehypeRaw from "rehype-raw"
 import { cn } from "@/lib/utils"
 import { isMermaidCode, MermaidDiagram } from "@/shared/components/MermaidDiagram"
 import type { PrototypeDocument } from "@/shared/components/DocumentViewerModal"
@@ -99,6 +100,7 @@ function AnnotationItemContent({ content }: { content: string }) {
       <div className="prose prose-slate max-w-none text-xs leading-relaxed dark:prose-invert">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw]}
           components={{
             code({ className, children, ...props }) {
               const match = /language-(\w+)/.exec(className || "")
@@ -1767,6 +1769,7 @@ function DocumentContentRenderer({
       >
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw]}
           components={{
             code({ className, children, ...props }) {
               const match = /language-(\w+)/.exec(className || "")

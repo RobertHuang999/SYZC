@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import rehypeRaw from "rehype-raw"
 import { BookOpenIcon, CheckIcon, CopyIcon, FileTextIcon, LayersIcon, XIcon } from "lucide-react"
 import { MermaidDiagram } from "./MermaidDiagram"
 
@@ -130,6 +131,7 @@ export function DocumentViewerModal({
             <article className="prose prose-slate max-w-none text-sm leading-relaxed dark:prose-invert">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
                 components={{
                   code({ className, children, ...props }) {
                     const match = /language-(\w+)/.exec(className || "")

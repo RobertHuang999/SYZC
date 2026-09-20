@@ -35,6 +35,7 @@ import {
 } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import rehypeRaw from "rehype-raw"
 import { useLocation, useNavigate } from "react-router-dom"
 import { isMermaidCode, MermaidDiagram } from "@/shared/components/MermaidDiagram"
 import type {
@@ -155,6 +156,7 @@ function AnnotationItemContent({ content }: { content: string }) {
       <div className="prose prose-slate max-w-none text-xs leading-relaxed dark:prose-invert">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw]}
           components={{
             code({ className, children, ...props }) {
               const match = /language-(\w+)/.exec(className || "")
@@ -1942,6 +1944,7 @@ function DocumentTabContent({
       >
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw]}
           components={{
             code({ className, children, ...props }) {
               const match = /language-(\w+)/.exec(className || "")
