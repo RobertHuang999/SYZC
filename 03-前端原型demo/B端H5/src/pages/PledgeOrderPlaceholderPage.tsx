@@ -21,7 +21,7 @@ export function PledgeOrderPlaceholderPage() {
         </div>
         <h1 className="mt-4 text-xl font-bold text-gray-900">解除预警 · 情况说明</h1>
         <p className="mt-3 max-w-xs text-sm leading-relaxed text-gray-600">
-          R31 专用跳转页：用户在此填写情况说明并解除预警（R32），非押品模块内弹窗。
+          抵质押订单跳转页：用户在此填写情况说明并解除预警，非押品模块内弹窗。
         </p>
         <div className="mt-6 w-full max-w-xs rounded-2xl border border-gray-200 bg-white p-4 text-left text-sm text-gray-700 shadow-sm">
           <div>订单号：{orderNo}</div>

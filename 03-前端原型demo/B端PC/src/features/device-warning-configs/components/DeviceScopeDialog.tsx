@@ -97,7 +97,7 @@ export function DeviceScopeDialog({
                 仅针对新设备（全局监听模式）
               </div>
               <p className="leading-relaxed text-muted-foreground">
-                当前规则勾选了【仅针对新设备】。根据业务规则（R05/R14），该策略作为全局监听基线，无需指定具体的存量设备列表。
+                当前规则勾选了【仅针对新设备】。该策略作为全局监听基线，无需指定具体的存量设备列表。
               </p>
               <p className="leading-relaxed text-muted-foreground">
                 未来任何新注册入库且类型为【{config.warningType}】的硬件设备上线时，系统将自动套用本告警策略进行全天候监控。

@@ -349,7 +349,7 @@ export function validateAutoRecoverDisposition(
   if (ineligible.length === 0) {
     return null
   }
-  return `子类型「${ineligible.join("、")}」无 02/01 R03 自动恢复信号，不可选择「${DISPOSITION_MODE_LABELS.AUTO_RECOVER}」（R15c）`
+  return `子类型「${ineligible.join("、")}」无自动恢复信号，不可选择「${DISPOSITION_MODE_LABELS.AUTO_RECOVER}」`
 }
 
 /** 单个子类型的系统推荐（非强制，用户可改；AUTO_RECOVER 仍受 R15c 白名单约束） */
@@ -436,7 +436,7 @@ export function getDispositionDeviationMessage(
   if (mode === "AUTO_RECOVER") {
     const ineligible = getAutoRecoverIneligibleSubTypes(normalized)
     if (ineligible.length > 0) {
-      return `子类型「${ineligible.join("、")}」无 R03 恢复信号，不可选「${selectedLabel}」（R15c）`
+      return `子类型「${ineligible.join("、")}」无恢复信号，不可选「${selectedLabel}」`
     }
   }
 

@@ -529,7 +529,7 @@ export function DeviceWarningConfigFormPage() {
                     v{form.version ?? existing?.version ?? 1}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    本次保存成功后 Version +1，既有未处理预警流水不回写（C08）。
+                    本次保存成功后 Version +1，既有未处理预警流水不回写。
                   </p>
                 </div>
               )}

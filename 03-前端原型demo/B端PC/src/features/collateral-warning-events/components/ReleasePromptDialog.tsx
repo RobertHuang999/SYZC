@@ -51,7 +51,7 @@ export function ReleasePromptDialog({
                 （触发时抵/质押率 (LTV) {ltvHitSnapshot.triggerLtv}%）
               </p>
               <p className="mt-2 text-muted-foreground">
-                订单侧仅展示以下解除方式（R13e）：
+                订单侧仅展示以下解除方式：
               </p>
               <p className="mt-1 font-medium">
                 {ltvHitSnapshot.allowedReleaseMethods.join("、")}

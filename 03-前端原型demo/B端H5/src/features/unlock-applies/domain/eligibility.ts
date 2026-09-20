@@ -28,7 +28,7 @@ export function getUnlockApprovalDecision(
       canProcess: false,
       isApplicant: true,
       isAssignedApprover,
-      reason: "申请人本人不得审批自己的开锁申请（P06）",
+      reason: "申请人本人不得审批自己的开锁申请",
     }
   }
   if (!isAssignedApprover) {

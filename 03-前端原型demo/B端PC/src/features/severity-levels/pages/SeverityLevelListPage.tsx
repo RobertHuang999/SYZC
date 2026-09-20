@@ -121,14 +121,14 @@ export function SeverityLevelListPage() {
           }}
           onConfirm={(record) => {
             if (records.length <= 2) {
-              showToast("删除被阻断：租户至少保留 2 档预警等级（R08）")
+              showToast("删除被阻断：租户至少保留 2 档预警等级")
               return
             }
 
             const referenceCount = getActiveReferenceCount(record)
             if (referenceCount > 0) {
               showToast(
-                `删除被阻断：该等级已被 ${referenceCount} 条生效规则引用，请先解绑或改为停用（R09）`
+                `删除被阻断：该等级已被 ${referenceCount} 条生效规则引用，请先解绑或改为停用`
               )
               return
             }

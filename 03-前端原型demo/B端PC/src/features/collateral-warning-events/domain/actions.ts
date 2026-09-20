@@ -87,7 +87,7 @@ export function isAlreadyPublishedForBatch(
 }
 
 export const BATCH_PUBLISH_CONFIRM_MESSAGE =
-  "确认进入批量公示编辑？下一步将逐条展示与单条「公示风险」相同的公示确认表单，可分别编辑后一次性提交；每条仍独立落库（RISK-PUB-B04），已公示过的记录不会进入候选。"
+  "确认进入批量公示编辑？下一步将逐条展示与单条「公示风险」相同的公示确认表单，可分别编辑后一次性提交；每条仍独立落库，已公示过的记录不会进入候选。"
 
 export function getDetailHeaderActions(
   event: CollateralWarningEvent

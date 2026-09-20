@@ -6,7 +6,7 @@ export const LTV_RELEASE_METHOD_OPTIONS = ["补仓", "平仓", "部分结清"] a
 export type LtvReleaseMethod = (typeof LTV_RELEASE_METHOD_OPTIONS)[number]
 
 export const LTV_FOOTER_HINT =
-  "任一条线满足上述条件即产生预警，解除方式取被命中那组的配置；若补仓线与平仓线同时满足，按平仓线认定（R13d）。"
+  "任一条线满足上述条件即产生预警，解除方式取被命中那组的配置；若补仓线与平仓线同时满足，按平仓线认定。"
 
 /** 当前率无法计算时，紧挨「当前订单抵/质押率 (LTV)：—」展示 */
 export const LTV_UNAVAILABLE_HINT =
@@ -18,7 +18,7 @@ export function formatLtvTriggerRuleText(threshold: string | undefined): string 
 }
 
 export const LTV_HIT_RULE_HINT =
-  "同时命中补仓线与平仓线时认定为平仓线（R13d）；解除时仅展示命中线解除方式（R13e）。"
+  "同时命中补仓线与平仓线时认定为平仓线；解除时仅展示命中线解除方式。"
 
 export type LtvStrategyParams = {
   marginCallLtv: string

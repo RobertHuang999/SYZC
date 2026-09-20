@@ -43,7 +43,7 @@ export function ReleasePromptSheet({
                 <span className="font-semibold">{ltvHitSnapshot.hitLine}</span>
                 （触发时 LTV {ltvHitSnapshot.triggerLtv}%）
               </p>
-              <p className="mt-2 text-gray-600">订单侧仅展示以下解除方式（R13e）：</p>
+              <p className="mt-2 text-gray-600">订单侧仅展示以下解除方式：</p>
               <p className="mt-1 font-medium">
                 {ltvHitSnapshot.allowedReleaseMethods.join("、")}
               </p>

@@ -210,7 +210,7 @@ export function LtvDualStrategyFields({
                   }
                 />
                 {marginSelected.length === 0 && (
-                  <p className="mt-1 text-xs text-destructive">请至少选择 1 项（R12a）</p>
+                  <p className="mt-1 text-xs text-destructive">请至少选择 1 项</p>
                 )}
               </TableCell>
             </TableRow>
@@ -235,7 +235,7 @@ export function LtvDualStrategyFields({
                   }
                 />
                 {closeSelected.length === 0 && (
-                  <p className="mt-1 text-xs text-destructive">请至少选择 1 项（R12a）</p>
+                  <p className="mt-1 text-xs text-destructive">请至少选择 1 项</p>
                 )}
               </TableCell>
             </TableRow>
@@ -246,7 +246,7 @@ export function LtvDualStrategyFields({
       <div className="md:col-span-2 space-y-1 text-xs text-muted-foreground">
         <p>{LTV_FOOTER_HINT}</p>
         {closeOutInvalid && (
-          <p className="text-destructive">平仓线须高于补仓线（R09）</p>
+          <p className="text-destructive">平仓线须高于补仓线</p>
         )}
       </div>
     </>

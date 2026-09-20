@@ -163,7 +163,7 @@ export function ApprovalNodeEditor({ nodes, onChange }: ApprovalNodeEditorProps)
         添加审批节点
       </Button>
       <p className="text-xs text-muted-foreground">
-        至少 1 个节点；同一节点不可混选人员与角色（R27）
+        至少 1 个节点；同一节点不可混选人员与角色
       </p>
     </div>
   )
