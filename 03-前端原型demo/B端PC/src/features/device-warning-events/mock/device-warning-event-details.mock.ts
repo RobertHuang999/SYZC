@@ -12,7 +12,6 @@ import {
   formatDispositionSnapshotLabel,
   resolveDispositionEffects,
 } from "../../device-warning-configs/domain/disposition"
-
 type DeviceWarningEventDetailOverride = Omit<
   Partial<DeviceWarningEventDetailExtension>,
   "ruleConfigSnapshot"
@@ -24,7 +23,6 @@ const DETAIL_OVERRIDES: Record<string, DeviceWarningEventDetailOverride> = {
   "evt-001": {
     eventUuid: "evt-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     warningSubType: "温度异常",
-    warehouseDetail: "一号钢材仓 / A库 / 01分区",
     deviceCode: "DEV-IOT-0003",
     ruleConfigSnapshot: {
       monitorThreshold: "温度 > 35.0 ℃ 或 < -5.0 ℃",
@@ -35,7 +33,6 @@ const DETAIL_OVERRIDES: Record<string, DeviceWarningEventDetailOverride> = {
   "evt-002": {
     eventUuid: "evt-b2c3d4e5-f6a7-8901-bcde-f12345678901",
     warningSubType: "行人入侵",
-    warehouseDetail: "一号钢材仓 / B库 / 监控区",
     deviceCode: "DEV-CAM-0001",
     ruleConfigSnapshot: {
       monitorThreshold: "行人入侵/车辆入侵",
@@ -62,7 +59,6 @@ const DETAIL_OVERRIDES: Record<string, DeviceWarningEventDetailOverride> = {
   "evt-007": {
     eventUuid: "evt-c3d4e5f6-a7b8-9012-cdef-123456789012",
     warningSubType: "烟感异常",
-    warehouseDetail: "四号化工仓 / D库 / 危化区",
     deviceCode: "DEV-IOT-0103",
     invalidReason: "关联规则已删除",
     ruleConfigSnapshot: {
@@ -98,7 +94,6 @@ const DETAIL_OVERRIDES: Record<string, DeviceWarningEventDetailOverride> = {
   "evt-015": {
     eventUuid: "evt-e5f6a7b8-c9d0-1234-ef01-345678901234",
     warningSubType: "密码错误",
-    warehouseDetail: "一号钢材仓 / 主入口 / 门禁区",
     deviceCode: "DEV-FACE-0001",
     ruleConfigSnapshot: {
       monitorThreshold: "密码错误",
@@ -194,7 +189,6 @@ function buildDefaultDetail(
   return {
     eventUuid: `${event.eventId}-0000-0000-0000-${event.eventId.replace("evt-", "").padStart(12, "0")}`,
     warningSubType,
-    warehouseDetail: `${event.warehouseName} / ${event.location.replace("·", " / ")}`,
     deviceCode: `DEV-${event.deviceName.replace(/\s/g, "-")}`,
     invalidReason:
       event.warningStatus === WARNING_STATUS.OPEN_INVALID

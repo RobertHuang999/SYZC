@@ -15,10 +15,10 @@ import { deviceWarningDetailAnnotations } from "../annotations/device-warning-de
 import { deviceWarningDocuments } from "../documents/device-warning-documents"
 import { SnapshotImageModal, type SnapshotPreviewData } from "@/shared/components/SnapshotImageModal"
 import {
-  formatDetailWarningContent,
   formatEmptyValue,
   getDeviceWarningEventById,
 } from "../lib/detail-utils"
+import { resolveEventLocationParts } from "../lib/event-utils"
 
 export function DeviceWarningEventDetailPage() {
   const { id } = useParams()
@@ -55,7 +55,7 @@ export function DeviceWarningEventDetailPage() {
     )
   }
 
-  const warningContent = formatDetailWarningContent(event)
+  const locationParts = resolveEventLocationParts(event)
   const isClosed = event.warningStatus === WARNING_STATUS.CLOSED_VALID
   const showReleaseMaterials =
     isClosed &&
@@ -119,16 +119,12 @@ export function DeviceWarningEventDetailPage() {
 
         <PrototypeAnnotationTarget annotationIds={["device-warning-detail-facts"]}>
           <DetailSection title="触发事实与位置">
-            <DetailField label="所属仓库">{event.warehouseDetail}</DetailField>
+            <DetailField label="所属仓库">{locationParts.warehouse}</DetailField>
+            <DetailField label="位置">{locationParts.locationPath}</DetailField>
             <DetailField label="关联设备">
               {event.deviceName} ({event.deviceCode})
             </DetailField>
-            <div className="col-span-full space-y-1">
-              <div className="detail-field-label">预警内容</div>
-              <div className="rounded-lg border bg-muted/20 p-3 text-sm leading-relaxed text-foreground">
-                {warningContent}
-              </div>
-            </div>
+            <DetailField label="预警内容">{event.triggerSummary}</DetailField>
             <DetailField label="预警时间">
               <DateTimeText value={event.warningTime} plain />
             </DetailField>
@@ -142,7 +138,7 @@ export function DeviceWarningEventDetailPage() {
                       title: `预警触发现场抓拍图 — ${event.ruleName}`,
                       desc: `关联设备：${event.deviceName} (${event.deviceCode}) | 预警时间：${event.warningTime}`,
                       time: event.warningTime,
-                      location: `${event.warehouseDetail}`,
+                      location: locationParts.fullLocation,
                     })
                   }
                 >
@@ -188,7 +184,7 @@ export function DeviceWarningEventDetailPage() {
                           title: `现场核实照片凭证 — ${photo}`,
                           desc: `事件流水：${event.eventUuid} | 规则：${event.ruleName}`,
                           time: event.processedTime || event.warningTime,
-                          location: event.warehouseDetail,
+                          location: locationParts.fullLocation,
                         })
                       }
                       className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs text-foreground hover:border-primary/50 hover:bg-muted/40 transition-colors cursor-pointer"
@@ -212,7 +208,7 @@ export function DeviceWarningEventDetailPage() {
                       title: `解除核销监控抓拍图 — ${event.ruleName}`,
                       desc: `核销人：${event.processedBy} | 解除时间：${event.processedTime}`,
                       time: event.processedTime || event.warningTime,
-                      location: event.warehouseDetail,
+                      location: locationParts.fullLocation,
                     })
                   }
                 >

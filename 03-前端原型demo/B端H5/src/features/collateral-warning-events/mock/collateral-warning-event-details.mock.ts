@@ -2,6 +2,10 @@ import type {
   CollateralWarningEvent,
   CollateralWarningEventDetailExtension,
 } from "../domain/types"
+import {
+  buildIotPenetrationInfo,
+  resolveIotPenetrationSnapshot,
+} from "../lib/iot-penetration-utils"
 
 const DETAIL_OVERRIDES: Record<
   string,
@@ -27,16 +31,13 @@ const DETAIL_OVERRIDES: Record<
   "cw-002": {
     orderType: "质押",
     ruleName: "智能挂锁剪杆破坏预警",
-    triggerSnapshot: "位置: 一号钢材仓+A库01分区；设备名称: 智能挂锁-A01；触发预警: 锁杆被剪",
+    triggerSnapshot: null,
     snapshotImageUrl: "snapshot-cw-002.jpg",
     invalidReason: null,
-    penetrationInfo: {
-      triggerDevice: "智能挂锁-A01（DEV-LOCK-0001）",
-      physicalSubType: "锁杆被剪",
-      triggerLocation: "一号钢材仓 / A库 / 01分区",
-      relatedEventNo: "DEV-2026082001",
-      relatedEventId: "dev-evt-2026082001",
-    },
+    penetrationInfo: buildIotPenetrationInfo(
+      "dev-evt-2026082001",
+      resolveIotPenetrationSnapshot("dev-evt-2026082001") ?? undefined
+    ),
     disposalInfo: null,
   },
   "cw-003": {
@@ -142,13 +143,10 @@ function buildDefaultExtension(
     invalidReason: isInvalid ? "关联订单预警配置已注销或删除" : null,
     penetrationInfo:
       isIot && event.deviceEventId
-        ? {
-            triggerDevice: "智能挂锁-A01 (A库挂锁位)",
-            physicalSubType: "剪杆破坏",
-            triggerLocation: "一号钢材仓 / A库 / 01分区",
-            relatedEventNo: `DEV-${event.eventId}`,
-            relatedEventId: event.deviceEventId,
-          }
+        ? buildIotPenetrationInfo(
+            event.deviceEventId,
+            resolveIotPenetrationSnapshot(event.deviceEventId) ?? undefined
+          )
         : null,
     disposalInfo: isClosed
       ? {

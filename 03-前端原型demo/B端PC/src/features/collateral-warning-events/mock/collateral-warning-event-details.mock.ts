@@ -5,6 +5,10 @@ import type {
   CollateralTriggerSnapshot,
   LtvHitSnapshot,
 } from "../domain/types"
+import {
+  buildIotPenetrationInfo,
+  resolveIotPenetrationSnapshot,
+} from "../lib/iot-penetration-utils"
 
 /**
  * 结构化构建真实的押品订单与仓储位置快照（严格对齐字段清单第四章）
@@ -254,16 +258,13 @@ export function getCollateralWarningDetailExtension(
         ? "预警配置阈值调整重算置换（旧阈值 10% 已作废，已生成新预警流水）"
         : "关联订单预警配置已失效或删除（规则版本注销）"
       : null,
-    penetrationInfo: isIot
-      ? {
-          triggerDevice: "智能挂锁-A01 (A库挂锁位)",
-          physicalSubType: "剪杆破坏",
-          triggerLocation:
-            orderSnapshot.cargoItems[0]?.storageLocation || "仓储监管现场",
-          relatedEventNo: "DEV-2026082001",
-          relatedEventId: event.deviceEventId ?? "evt-017",
-        }
-      : null,
+    penetrationInfo:
+      isIot && event.deviceEventId
+        ? buildIotPenetrationInfo(
+            event.deviceEventId,
+            resolveIotPenetrationSnapshot(event.deviceEventId) ?? undefined
+          )
+        : null,
     disposalInfo: isClosed
       ? {
           situationDescription:

@@ -104,7 +104,7 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     number: 3,
     kind: "字段",
     title: "预警卡片字段",
-    content: "卡片展示规则名称、等级、状态、设备、仓库、预警内容、抓拍入口与预警时间。",
+    content: "卡片展示规则名称、等级、状态、设备、系统仓库(仓/库房/分区)、用户手录位置、触发内容、抓拍入口与预警时间。",
     documentRefs: {
       fields: {
         section: "一、基础识别与列表业务字段",

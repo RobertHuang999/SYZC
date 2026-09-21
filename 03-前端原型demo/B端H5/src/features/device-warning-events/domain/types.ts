@@ -19,8 +19,13 @@ export type DeviceWarningEvent = {
   severityColor: string
   deviceName: string
   deviceCode: string
+  /** 系统引用：仓库 + 库房 + 分区拼接快照 */
+  warehouseDetail: string
+  /** 用户手动录入的安装/触发位置描述 */
   location: string
-  warningContent: string
+  /** 触发事实与数值对比摘要 */
+  triggerSummary: string
+  /** 所属仓库（一级），用于筛选与数据权限 */
   warehouseName: string
   snapshotImageStatus: "available" | "none" | "failed"
   warningTime: string

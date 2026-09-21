@@ -26,7 +26,7 @@ export function getDeviceWarningEventById(
 }
 
 export function formatDetailWarningContent(event: DeviceWarningEventDetail): string {
-  return `位置：${event.warehouseDetail}；设备：${event.deviceName}(${event.deviceCode})；触发：${event.triggerSummary}`
+  return event.triggerSummary
 }
 
 export function formatEmptyValue(value: string | null | undefined): string {

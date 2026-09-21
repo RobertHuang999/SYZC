@@ -4,8 +4,29 @@ import type {
 } from "../domain/types"
 import { mapStatusFilterToValue } from "../domain/status"
 
+export type EventLocationParts = {
+  warehouse: string
+  locationPath: string
+  fullLocation: string
+}
+
+/** 解析仓库与位置：仓库为系统引用拼接，位置为用户手动录入 */
+export function resolveEventLocationParts(
+  event: Pick<DeviceWarningEvent, "warehouseDetail" | "location">
+): EventLocationParts {
+  const warehouse = event.warehouseDetail
+  const locationPath = event.location
+
+  return {
+    warehouse,
+    locationPath,
+    fullLocation: locationPath ? `${warehouse} / ${locationPath}` : warehouse,
+  }
+}
+
 export function formatWarningContent(event: DeviceWarningEvent): string {
-  return `位置：${event.location}；设备：${event.deviceName}；触发内容：${event.triggerSummary}`
+  const { warehouse, locationPath } = resolveEventLocationParts(event)
+  return `仓库：${warehouse}；位置：${locationPath}；触发内容：${event.triggerSummary}`
 }
 
 export function formatWarningTime(value: string): string {

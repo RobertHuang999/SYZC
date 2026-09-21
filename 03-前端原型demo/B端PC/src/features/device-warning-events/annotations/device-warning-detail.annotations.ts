@@ -78,8 +78,12 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
         title: "字段与安全控制",
         items: [
           {
-            label: "所属仓库 / 库区",
-            content: "格式如【一号钢材仓 · B库区】；按用户管辖仓库进行 P02 数据权限严格过滤，越权访问返回 403。",
+            label: "所属仓库",
+            content: "引用系统仓库台账，按「仓库 / 库房 / 分区」三级拼接展示（如 一号钢材仓 / A库 / 01分区）；筛选与 P02 数据权限仍按一级仓库名称隔离。",
+          },
+          {
+            label: "位置",
+            content: "设备台账中用户手动录入的安装位置描述（如 H01货架东侧），与列表「预警内容」中的位置段口径一致。",
           },
           {
             label: "关联设备",
@@ -87,7 +91,7 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警内容",
-            content: "规则引擎根据厂商回调 payload 自动拼装的标准事实描述：【位置】+【设备】+【触发事实与数值】。",
+            content: "触发事实与数值对比摘要（如库温超标 38℃ / 阈值 30℃），与列表「预警内容」中的触发内容段一致。",
           },
           {
             label: "预警抓拍图",

@@ -102,7 +102,10 @@ export type CollateralDetailHeaderAction =
 export type CollateralPenetrationInfo = {
   triggerDevice: string
   physicalSubType: string
+  /** 系统引用：仓库 / 库房 / 分区 */
   triggerLocation: string
+  /** 设备台账用户手录安装位置 */
+  installLocation: string
   relatedEventNo: string
   relatedEventId: string
 }

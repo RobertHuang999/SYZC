@@ -10,6 +10,7 @@ import { formatDateTime } from "@/shared/lib/date-utils"
 import { canManualRelease } from "../domain/actions"
 import { DEVICE_WARNING_STATUS_LABELS } from "../domain/types"
 import { getDeviceWarningById } from "../mock/device-warning-events.mock"
+import { resolveEventLocationParts } from "../lib/event-utils"
 
 export function DeviceWarningEventDetailPage() {
   const { id } = useParams()
@@ -40,6 +41,7 @@ export function DeviceWarningEventDetailPage() {
   const releaseAllowed = canManualRelease(event)
   const isClosed = event.warningStatus === "CLOSED_VALID"
   const isOpenValid = event.warningStatus === "OPEN_VALID"
+  const locationParts = resolveEventLocationParts(event)
 
   return (
     <MobileShell>
@@ -116,7 +118,14 @@ export function DeviceWarningEventDetailPage() {
                 <div className="flex items-center justify-between">
                   <span className="w-24 shrink-0 text-gray-500">所属仓库:</span>
                   <span className="flex-1 text-right text-gray-800">
-                    {event.warehouseName}（{event.location}）
+                    {locationParts.warehouse}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="w-24 shrink-0 text-gray-500">位置:</span>
+                  <span className="flex-1 text-right text-gray-800">
+                    {locationParts.locationPath}
                   </span>
                 </div>
 
@@ -130,7 +139,7 @@ export function DeviceWarningEventDetailPage() {
                 <div className="border-t border-gray-100/80 pt-2">
                   <span className="text-gray-500">预警内容:</span>
                   <p className="mt-1 rounded-xl bg-slate-50 p-2.5 leading-relaxed text-gray-800 border border-slate-100/90 font-normal">
-                    {event.warningContent}
+                    {event.triggerSummary}
                   </p>
                 </div>
 

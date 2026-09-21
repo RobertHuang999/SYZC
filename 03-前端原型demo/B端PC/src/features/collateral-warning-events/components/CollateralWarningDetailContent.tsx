@@ -168,6 +168,12 @@ export function CollateralWarningDetailContent({
       {showPenetration && event.penetrationInfo ? (
         <PrototypeAnnotationTarget annotationIds={["collateral-warning-detail-penetration"]}>
           <DetailSection title="穿透信息">
+            <DetailField label="所属仓库">
+              {event.penetrationInfo.triggerLocation}
+            </DetailField>
+            <DetailField label="位置">
+              {event.penetrationInfo.installLocation}
+            </DetailField>
             <DetailField label="触发设备名称">
               {event.penetrationInfo.triggerDevice}
             </DetailField>
@@ -175,9 +181,6 @@ export function CollateralWarningDetailContent({
               <span className="font-semibold text-destructive">
                 {event.penetrationInfo.physicalSubType}
               </span>
-            </DetailField>
-            <DetailField label="触发现场位置">
-              {event.penetrationInfo.triggerLocation}
             </DetailField>
             <p className="col-span-full mt-1 text-xs text-muted-foreground">
               💡 说明：物联穿透告警为底层设备异常自动联动生成，须在【设备预警信息】现场核销后自动解除；本页面无人工解除预警入口。

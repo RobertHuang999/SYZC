@@ -29,6 +29,9 @@ export type DeviceWarningEvent = {
   severityColor: string
   warningType: WarningType
   subType?: string
+  /** 系统引用：仓库 + 库房 + 分区拼接快照 */
+  warehouseDetail: string
+  /** 用户手动录入的安装/触发位置描述 */
   location: string
   deviceName: string
   triggerSummary: string
@@ -37,6 +40,7 @@ export type DeviceWarningEvent = {
   processedTime: string | null
   processedBy: string | null
   warningStatus: WarningStatus
+  /** 所属仓库（一级），用于筛选与数据权限 */
   warehouseName: string
   /** 触发时规则处置策略快照 */
   dispositionMode: DispositionMode
@@ -74,7 +78,6 @@ export type ReleaseMaterialSnapshot = {
 export type DeviceWarningEventDetailExtension = {
   eventUuid: string
   warningSubType: string
-  warehouseDetail: string
   deviceCode: string
   invalidReason: string | null
   ruleConfigSnapshot: RuleConfigSnapshot

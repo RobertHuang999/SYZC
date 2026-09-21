@@ -83,12 +83,20 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
         title: "现场核查要点",
         items: [
           {
-            label: "所属仓库 / 库区",
-            content: "格式如【一号钢材仓 · B库区】；严格基于 P02 管辖仓库数据权限控制。",
+            label: "所属仓库",
+            content: "引用系统仓库台账，按「仓库 / 库房 / 分区」三级拼接展示；筛选与 P02 仍按一级仓库名称隔离。",
+          },
+          {
+            label: "位置",
+            content: "设备台账中用户手动录入的安装位置描述，与 PC 端列表/详情口径一致。",
           },
           {
             label: "关联设备",
             content: "设备名称与编号（如 CAM-01 / DEV-2026-0881）。",
+          },
+          {
+            label: "预警内容",
+            content: "触发事实与数值对比摘要（如 库温超标 38℃ / 阈值 30℃），与 PC 端 triggerSummary 字段一致。",
           },
           {
             label: "抓拍凭证调阅",

@@ -169,6 +169,19 @@ export function CollateralWarningDetailContent({
         >
           <div className="space-y-2 text-xs">
             <div className="flex items-center justify-between">
+              <span className="w-24 shrink-0 text-gray-500">所属仓库:</span>
+              <span className="flex-1 text-right text-gray-800">
+                {event.penetrationInfo?.triggerLocation ||
+                  "一号钢材仓 / A库 / 01分区"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="w-24 shrink-0 text-gray-500">位置:</span>
+              <span className="flex-1 text-right text-gray-800">
+                {event.penetrationInfo?.installLocation || "—"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
               <span className="w-24 shrink-0 text-gray-500">触发设备名称:</span>
               <span className="flex-1 text-right font-medium text-gray-900">
                 {event.penetrationInfo?.triggerDevice || "智能挂锁-A01"}
@@ -178,13 +191,6 @@ export function CollateralWarningDetailContent({
               <span className="w-24 shrink-0 text-gray-500">物理事件子类型:</span>
               <span className="flex-1 text-right font-semibold text-rose-700">
                 {event.penetrationInfo?.physicalSubType || "剪杆/拆壳破坏"}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="w-24 shrink-0 text-gray-500">触发位置:</span>
-              <span className="flex-1 text-right text-gray-800">
-                {event.penetrationInfo?.triggerLocation ||
-                  "一号钢材仓 / A库 / 01分区"}
               </span>
             </div>
           </div>

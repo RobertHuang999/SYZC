@@ -7,6 +7,7 @@ import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotat
 import { canManualRelease } from "../domain/actions"
 import { DEVICE_WARNING_STATUS_LABELS } from "../domain/types"
 import type { DeviceWarningEvent } from "../domain/types"
+import { resolveEventLocationParts } from "../lib/event-utils"
 
 type DeviceWarningCardProps = {
   event: DeviceWarningEvent
@@ -17,6 +18,7 @@ export function DeviceWarningCard({ event }: DeviceWarningCardProps) {
   const [imagePreviewOpen, setImagePreviewOpen] = useState(false)
 
   const releaseAllowed = canManualRelease(event)
+  const locationParts = resolveEventLocationParts(event)
 
   return (
     <>
@@ -66,14 +68,21 @@ export function DeviceWarningCard({ event }: DeviceWarningCardProps) {
           <div className="flex items-center justify-between text-[11px] gap-2">
             <span className="w-16 shrink-0 text-gray-400">所属仓库:</span>
             <span className="flex-1 text-right font-medium text-gray-800 truncate">
-              {event.warehouseName || event.location}
+              {locationParts.warehouse}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between text-[11px] gap-2">
+            <span className="w-16 shrink-0 text-gray-400">位置:</span>
+            <span className="flex-1 text-right font-medium text-gray-800 truncate">
+              {locationParts.locationPath}
             </span>
           </div>
 
           <div className="flex items-start justify-between text-[11px] gap-2 leading-relaxed">
             <span className="w-16 shrink-0 text-gray-400">预警内容:</span>
             <span className="flex-1 text-left font-medium text-gray-800 line-clamp-2">
-              {event.warningContent}
+              {event.triggerSummary}
             </span>
           </div>
 

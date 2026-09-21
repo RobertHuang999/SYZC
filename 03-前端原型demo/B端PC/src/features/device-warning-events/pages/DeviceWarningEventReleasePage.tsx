@@ -15,9 +15,9 @@ import {
   type ReleaseFormErrors,
 } from "../domain/release-validation"
 import {
-  formatDetailWarningContent,
   getDeviceWarningEventById,
 } from "../lib/detail-utils"
+import { resolveEventLocationParts } from "../lib/event-utils"
 import {
   getReleaseBackPath,
   isReleaseNavigationState,
@@ -155,7 +155,7 @@ export function DeviceWarningEventReleasePage() {
     return null
   }
 
-  const warningContent = formatDetailWarningContent(event)
+  const locationParts = resolveEventLocationParts(event)
   const hintText = getReleaseHintText()
 
   return (
@@ -206,11 +206,12 @@ export function DeviceWarningEventReleasePage() {
         </PrototypeAnnotationTarget>
 
         <DetailSection title="触发事实">
-          <DetailField label="所属仓库">{event.warehouseDetail}</DetailField>
+          <DetailField label="所属仓库">{locationParts.warehouse}</DetailField>
+          <DetailField label="位置">{locationParts.locationPath}</DetailField>
           <DetailField label="关联设备">
             {event.deviceName} ({event.deviceCode})
           </DetailField>
-          <DetailField label="预警内容">{warningContent}</DetailField>
+          <DetailField label="预警内容">{event.triggerSummary}</DetailField>
           <DetailField label="预警抓拍图">
             {event.snapshotImageStatus === "available" ? (
               <Button variant="link" className="h-auto p-0">

@@ -1,5 +1,9 @@
 import { getSeverityLevelByCode } from "@/shared/mock/severity-levels"
 import type { CollateralWarningEvent } from "../domain/types"
+import {
+  formatIotPenetrationWarningContent,
+  IOT_PENETRATION_DEVICE_SNAPSHOTS,
+} from "../lib/iot-penetration-utils"
 
 const l2 = getSeverityLevelByCode("L2")!
 const l3 = getSeverityLevelByCode("L3")!
@@ -40,7 +44,9 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     severityName: l5.severityName,
     severityColor: l5.severityColor,
     warningSource: "物联穿透",
-    warningContent: "位置：一号钢材仓+A库01分区；设备名称：智能挂锁-A01；触发预警：锁杆被剪。请及时现场核查！",
+    warningContent: formatIotPenetrationWarningContent(
+      IOT_PENETRATION_DEVICE_SNAPSHOTS["dev-evt-2026082001"]
+    ),
     snapshotImageStatus: "available",
     warningTime: "2026-08-20 14:20:00",
     processedTime: null,
@@ -171,7 +177,9 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     severityName: l5.severityName,
     severityColor: l5.severityColor,
     warningSource: "物联穿透",
-    warningContent: "位置：一号钢材仓+B库；设备名称：AI高清夜视摄像头-CAM1；触发预警：夜间闭库期间检测到人员滞留闯入！",
+    warningContent: formatIotPenetrationWarningContent(
+      IOT_PENETRATION_DEVICE_SNAPSHOTS["evt-002"]
+    ),
     snapshotImageStatus: "available",
     warningTime: "2026-08-20 13:05:00",
     processedTime: null,
@@ -191,7 +199,9 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     severityName: l4.severityName,
     severityColor: l4.severityColor,
     warningSource: "物联穿透",
-    warningContent: "位置：三号冷链仓+B库主门；设备名称：门禁控制器-B02；触发预警：门禁开启超30分钟未恢复！",
+    warningContent: formatIotPenetrationWarningContent(
+      IOT_PENETRATION_DEVICE_SNAPSHOTS["dev-evt-2026081502"]
+    ),
     snapshotImageStatus: "none",
     warningTime: "2026-08-15 09:45:00",
     processedTime: null,
@@ -211,7 +221,9 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     severityName: l3.severityName,
     severityColor: l3.severityColor,
     warningSource: "物联穿透",
-    warningContent: "位置：三号冷链仓+C库冷藏区；设备名称：温湿度传感器-C11；触发预警：库温达到 8.2℃（阈值 5.0℃）！",
+    warningContent: formatIotPenetrationWarningContent(
+      IOT_PENETRATION_DEVICE_SNAPSHOTS["dev-evt-2026070101"]
+    ),
     snapshotImageStatus: "available",
     warningTime: "2026-07-01 18:10:00",
     processedTime: "2026-07-01 19:30:00",
@@ -235,14 +247,16 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     severityName: l4.severityName,
     severityColor: l4.severityColor,
     warningSource: "物联穿透",
-    warningContent: "位置：G15沈海高速段；设备名称：车载GPS追踪器-GPS09；触发预警：偏离既定物流轨迹超 5 公里！",
+    warningContent: formatIotPenetrationWarningContent(
+      IOT_PENETRATION_DEVICE_SNAPSHOTS["dev-evt-2026081901"]
+    ),
     snapshotImageStatus: "none",
     warningTime: "2026-06-15 14:00:00",
     processedTime: "2026-06-15 15:20:00",
     publicityStatus: "已取消",
     processedBy: "物流监管员（外部专员）",
     warningStatus: "CLOSED_VALID",
-    deviceEventId: "evt-012",
+    deviceEventId: "dev-evt-2026081901",
     disposalInfo: {
       situationDescription: "因前方道路施工临时绕行，现已回归主航线，确认货物铅封完好。",
       sitePhotos: [],

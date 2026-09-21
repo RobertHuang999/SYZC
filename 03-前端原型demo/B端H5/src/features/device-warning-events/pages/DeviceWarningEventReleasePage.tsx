@@ -21,11 +21,13 @@ import {
   validatePhoto,
 } from "../domain/release-validation"
 import { getDeviceWarningById } from "../mock/device-warning-events.mock"
+import { resolveEventLocationParts } from "../lib/event-utils"
 
 export function DeviceWarningEventReleasePage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const event = getDeviceWarningById(id)
+  const locationParts = event ? resolveEventLocationParts(event) : null
   const [situation, setSituation] = useState("")
   const [photoNames, setPhotoNames] = useState<string[]>([])
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -152,9 +154,17 @@ export function DeviceWarningEventReleasePage() {
               </div>
 
               <div className="mt-2.5 rounded-xl bg-slate-50 p-2.5 text-xs text-gray-700 space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">所属位置：</span>
-                  <span className="font-medium text-gray-800">{event.location}</span>
+                <div className="flex justify-between gap-3">
+                  <span className="text-gray-400 shrink-0">所属仓库：</span>
+                  <span className="font-medium text-gray-800 text-right">
+                    {locationParts?.warehouse}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-gray-400 shrink-0">位置：</span>
+                  <span className="font-medium text-gray-800 text-right">
+                    {locationParts?.locationPath}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">报警设备：</span>

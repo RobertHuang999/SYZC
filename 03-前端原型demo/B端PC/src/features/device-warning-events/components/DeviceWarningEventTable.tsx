@@ -16,7 +16,7 @@ import { TableDateTimeCell, TableProcessedInfoCell } from "@/shared/components/T
 import { SnapshotImageModal, type SnapshotPreviewData } from "@/shared/components/SnapshotImageModal"
 import { getRowActions, canSelectForBatchRelease } from "../domain/actions"
 import type { DeviceWarningEvent } from "../domain/types"
-import { formatWarningContent } from "../lib/event-utils"
+import { formatWarningContent, resolveEventLocationParts } from "../lib/event-utils"
 import { WarningStatusBadge } from "./WarningStatusBadge"
 
 type DeviceWarningEventTableProps = {
@@ -85,7 +85,7 @@ export function DeviceWarningEventTable({
               <TableHead className="w-[140px]">规则名称</TableHead>
               <TableHead className="w-[110px]">预警等级</TableHead>
               <TableHead className="w-[120px]">预警类型</TableHead>
-              <TableHead className="w-[200px]">预警内容/设备</TableHead>
+              <TableHead className="w-[200px]">预警内容</TableHead>
               <TableHead className="w-16 text-center">抓拍</TableHead>
               <TableHead className="w-[130px]">预警时间</TableHead>
               <TableHead className="w-[140px]">处理信息</TableHead>
@@ -184,7 +184,7 @@ function DeviceWarningEventRow({
       <TableCell>
         <HoverOverflowText
           className="max-w-[200px]"
-          ariaLabel={`预警内容/设备：${content}`}
+          ariaLabel={`预警内容：${content}`}
         >
           {content}
         </HoverOverflowText>
@@ -198,7 +198,7 @@ function DeviceWarningEventRow({
                 title: `现场监控抓拍图 — ${event.ruleName}`,
                 desc: `设备：${event.deviceName} | 预警时间：${event.warningTime}`,
                 time: event.warningTime,
-                location: `${event.warehouseName} / ${event.location}`,
+                location: resolveEventLocationParts(event).fullLocation,
               })
             }
             className="inline-flex items-center justify-center p-1 rounded hover:bg-muted text-primary cursor-pointer transition-colors"
