@@ -53,7 +53,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: "evt-017",
   },
-  // 3. 价格下跌 (L4 · 订单配置触发 · 已结案 · 有效 · 未公示 · 支持批量公示)
+  // 3. 价格下跌 (L4 · 订单配置触发 · 已结案 · 未公示 · 支持批量公示)
   {
     orderNo: "PO202607-12",
     orderType: "抵押",
@@ -209,7 +209,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "OPEN_VALID",
     deviceEventId: "evt-009",
   },
-  // 10. 物联穿透告警 (L3 · 物联穿透 · 库温超标 · 已结案 · 有效 · 未公示)
+  // 10. 物联穿透告警 (L3 · 物联穿透 · 库温超标 · 已结案 · 未公示)
   {
     orderNo: "PO202607-88",
     orderType: "监管服务",
@@ -230,7 +230,7 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
     warningStatus: "CLOSED_VALID",
     deviceEventId: "evt-010",
   },
-  // 11. 物联穿透 · 已结案 · 有效 · 已取消公示（PUB-TC01 / RISK-PUB-C06）
+  // 11. 物联穿透 · 已结案 · 已取消公示（PUB-TC01 / RISK-PUB-C06）
   {
     orderNo: "PO202606-20",
     orderType: "抵押",

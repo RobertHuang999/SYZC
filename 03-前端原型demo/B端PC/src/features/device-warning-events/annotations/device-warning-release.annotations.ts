@@ -7,7 +7,7 @@ export const deviceWarningReleaseAnnotations: PrototypeAnnotation[] = [
     number: 1,
     kind: "页面",
     title: "解除处置全流程闭环",
-    content: "对待处置 · 有效的单条设备告警录入现场处置凭证与核实说明，完成该条流水归档解除。",
+    content: "对待处置的单条设备告警录入现场处置凭证与核实说明，完成该条流水归档解除。",
     details: [
       {
         title: "解除处置业务流转图",
@@ -18,7 +18,7 @@ export const deviceWarningReleaseAnnotations: PrototypeAnnotation[] = [
     A["列表/详情发起"] --> B["二次确认"]
     B --> C["录入材料 + 联动抓拍"]
     C --> D["提交乐观锁校验"]
-    D -->|"校验成功"| E["归档该条流水为已结案 · 有效"]
+    D -->|"校验成功"| E["归档该条流水为已结案"]
     E --> F["发布 DeviceEventReleased"]
     F --> G["取消该条升级定时任务"]`,
           },
@@ -33,7 +33,7 @@ export const deviceWarningReleaseAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "前置状态校验",
-            content: "仅【待处置 · 有效】且预警配置允许人工解除的事件方可进入；已结案 · 有效或仅自动恢复类型直接拦截并引导返回。",
+            content: "仅【待处置】且预警配置允许人工解除的事件方可进入；已结案或仅自动恢复类型直接拦截并引导返回。",
           },
           {
             label: "操作权限",

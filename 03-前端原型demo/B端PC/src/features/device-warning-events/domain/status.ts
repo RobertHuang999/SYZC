@@ -11,9 +11,9 @@ export type WarningStatus =
 
 /** 信息侧：流水处置进度 + 有效性（与配置侧「结案路径」词表解耦） */
 export const WARNING_STATUS_LABELS: Record<WarningStatus, string> = {
-  [WARNING_STATUS.OPEN_VALID]: "待处置 · 有效",
+  [WARNING_STATUS.OPEN_VALID]: "待处置",
   [WARNING_STATUS.OPEN_INVALID]: "已作废",
-  [WARNING_STATUS.CLOSED_VALID]: "已结案 · 有效",
+  [WARNING_STATUS.CLOSED_VALID]: "已结案",
 }
 
 export const WARNING_STATUS_FILTER_OPTIONS = [
@@ -54,5 +54,24 @@ export function mapStatusFilterToValue(
       return WARNING_STATUS.CLOSED_VALID
     default:
       return "ALL"
+  }
+}
+
+/** 将旧版设备预警筛选缓存迁移到统一状态词表。 */
+export function normalizeWarningStatusFilter(
+  value: unknown
+): WarningStatusFilter {
+  switch (value) {
+    case "待处置 · 有效":
+      return WARNING_STATUS_LABELS[WARNING_STATUS.OPEN_VALID]
+    case "已结案 · 有效":
+      return WARNING_STATUS_LABELS[WARNING_STATUS.CLOSED_VALID]
+    case "全部":
+    case WARNING_STATUS_LABELS[WARNING_STATUS.OPEN_VALID]:
+    case WARNING_STATUS_LABELS[WARNING_STATUS.OPEN_INVALID]:
+    case WARNING_STATUS_LABELS[WARNING_STATUS.CLOSED_VALID]:
+      return value
+    default:
+      return WARNING_STATUS_LABELS[WARNING_STATUS.OPEN_VALID]
   }
 }

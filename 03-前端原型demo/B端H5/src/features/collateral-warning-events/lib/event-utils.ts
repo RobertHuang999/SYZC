@@ -5,7 +5,7 @@ import type {
 } from "../domain/types"
 import { mapStatusFilterToValue } from "../domain/status"
 
-/** 列表排序：未结案（待处置 · 有效）优先，同状态内按预警时间倒序 */
+/** 列表排序：未结案（待处置）优先，同状态内按预警时间倒序 */
 const WARNING_STATUS_SORT_PRIORITY: Record<WarningStatus, number> = {
   OPEN_VALID: 0,
   OPEN_INVALID: 1,

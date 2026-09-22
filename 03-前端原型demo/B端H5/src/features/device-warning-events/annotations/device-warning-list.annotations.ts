@@ -44,7 +44,7 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "状态边界",
-            content: "待处置 · 有效、已作废、已结案 · 有效；不存在频次聚合或 timeline。",
+            content: "待处置、已作废、已结案；不存在频次聚合或 timeline。",
           },
         ],
       },
@@ -80,7 +80,7 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "预警状态 / 类型 / 仓库",
-            content: "顶部胶囊快速筛选；预警状态默认待处置 · 有效，预警类型使用两栏级联多选。",
+            content: "顶部胶囊快速筛选；预警状态默认待处置，预警类型使用两栏级联多选。",
           },
           {
             label: "预警类型级联",
@@ -149,7 +149,7 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "规则",
     title: "卡片行操作矩阵",
-    content: "详情对所有状态可用；解除仅对待处置 · 有效且 manualReleaseAllowed（R14'）的事件展示。",
+    content: "详情对所有状态可用；解除仅对待处置且 manualReleaseAllowed（R14'）的事件展示。",
     documentRefs: {
       fields: {
         section: "一、基础识别与列表业务字段",
@@ -172,11 +172,11 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
         title: "操作矩阵",
         items: [
           {
-            label: "待处置 · 有效",
+            label: "待处置",
             content: "展示详情与解除（R14' 人工解除档）；AUTO_RECOVER/RECORD_ONLY 仅详情。",
           },
           {
-            label: "已作废 / 已结案 · 有效",
+            label: "已作废 / 已结案",
             content: "仅展示详情，不可再次解除。",
           },
         ],

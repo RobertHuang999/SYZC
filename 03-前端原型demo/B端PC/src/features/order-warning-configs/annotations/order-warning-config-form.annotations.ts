@@ -69,14 +69,14 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     number: 3,
     kind: "规则",
     title: "六大风控策略卡片字段清单与独立校验",
-    content: "各子策略卡片拥有独立开关、阈值输入、03/01 预警等级选择与独立通知/升级矩阵，底部「保存该策略」独立提交。",
+    content: "各子策略卡片拥有独立开关、阈值输入、03/01 预警等级选择与独立通知/升级矩阵；底部操作区含「取消修改」「关闭并停用」「保存该策略」。",
     details: [
       {
         title: "卡片校验与业务规格清单",
         items: [
           {
             label: "子项启用必填校验",
-            content: "保存某策略且 Switch=ON 时，其对应的预警等级必须选择、预警对象至少指定一人。",
+            content: "保存某策略且 Switch=ON 时，其对应的预警等级必须选择；预警通知对象为选填，勾选短信/邮件后可选配接收人。",
           },
           {
             label: "最少启用策略约束 (R07a)",
@@ -88,7 +88,15 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "通知渠道（notify_channels）",
-            content: "各策略子项独立配置，选填复选框组：短信、邮件；预警命中时移动端「押品预警信息」入口自动展示待处置红点，无需配置；仅勾选短信/邮件后才展示「预警通知对象」与「启用升级预警」；外部通知须同时配置对象并勾选渠道后才会下发；升级督办仅短信逐级上报；与 03/02 设备预警配置口径一致。",
+            content: "各策略子项独立配置，选填复选框组：短信、邮件；预警命中时移动端「押品预警信息」入口自动展示待处置红点，无需配置；仅勾选短信/邮件后才展示「预警通知对象（选填）」与「启用升级预警」。",
+          },
+          {
+            label: "预警通知对象选填 (ORD-R19)",
+            content: "勾选短信/邮件后展示 OrgUserSelect，标签无必填星号；保存时不校验对象是否为空；未配置对象则对应外部渠道不下发。",
+          },
+          {
+            label: "升级文案与渠道联动 (ORD-R21)",
+            content: "buildUpgradeWarningLabel(notify_channels) 动态生成 Checkbox 文案，如「启用升级预警（长时间未处置时，将通过短信、邮件逐级上报）」；勾选/取消渠道时文案即时刷新；升级下发渠道与 notify_channels 一致。",
           },
           {
             label: "仓储巡检超期 · 动态表格 (R17)",
@@ -104,7 +112,7 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "交互",
     title: "离开拦截与单策略保存反馈",
-    content: "页头仅提供取消返回；各策略卡片独立保存，成功后停留当前页；存在未保存卡片修改时离开弹出确认。",
+    content: "页头「取消」返回列表；各策略卡片独立保存，脏态时展示「取消修改」，已保存启用态展示「关闭并停用」（destructive，位于保存左侧）；存在未保存卡片修改时离开弹出确认。",
     details: [
       {
         title: "保存与联动",
@@ -120,6 +128,14 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           {
             label: "升级策略动态调度与补发 (R20a/R24a)",
             content: "开启升级或修改升级天数保存后，系统即时根据原预警首次触发时间重算升级状态，超期立即补发升级预警通知；关闭升级时自动清除排队中的升级任务。",
+          },
+          {
+            label: "卡片级取消修改",
+            content: "单策略卡片字段或开关变更后标记「● 未保存」；底部操作区：[取消修改] [关闭并停用] [保存该策略]。点击「取消修改」将该卡片恢复至 baseline 快照，不弹窗、不离开页面。",
+          },
+          {
+            label: "关闭并停用该策略 (ORD-R07a / ORD-C01a)",
+            content: "仅对已保存为启用态（savedStrategies=ON）的策略卡片，在底部操作区「保存该策略」左侧展示 destructive 按钮「关闭并停用」。点击后若其为最后 1 项已启用策略则 ORD-R07a 阻断；否则弹出二次确认（说明停止判定、流水作废、升级终止，不向用户展示规则编号），确认后自动以 Switch=OFF 提交保存，后端级联 ORD-C01a，卡片折叠为 OFF。",
           },
           {
             label: "脏数据离开拦截",

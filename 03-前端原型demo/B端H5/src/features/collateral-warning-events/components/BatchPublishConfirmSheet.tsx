@@ -29,7 +29,7 @@ export function BatchPublishConfirmSheet({
               {BATCH_PUBLISH_CONFIRM_MESSAGE}
             </p>
             <p className="mt-2 text-xs font-medium text-gray-800">
-              已选 {events.length} 条已结案 · 有效且未公示的预警
+              已选 {events.length} 条已结案且未公示的预警
             </p>
           </div>
 

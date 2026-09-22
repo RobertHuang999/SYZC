@@ -40,7 +40,7 @@ export function getDetailHeaderActions(
 }
 
 export const RELEASE_CONFIRM_MESSAGE =
-  "确认解除该条预警？提交后状态将变为「已结案 · 有效」，并同步取消相关升级任务。"
+  "确认解除该条预警？提交后状态将变为「已结案」，并同步取消相关升级任务。"
 
 export const BATCH_RELEASE_CONFIRM_MESSAGE =
-  "确认批量解除所选预警？提交后每条记录独立归档为「已结案 · 有效」，并同步取消相关升级任务。"
+  "确认批量解除所选预警？提交后每条记录独立归档为「已结案」，并同步取消相关升级任务。"

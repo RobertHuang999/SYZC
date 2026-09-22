@@ -33,7 +33,7 @@ export type SnapshotImageStatus = "available" | "none" | "failed"
 // 严格对齐字段清单：未公示、已公示、已取消
 export type PublicityStatus = "未公示" | "已公示" | "已取消"
 
-// 预警状态统一为信息侧词表：待处置 · 有效、已作废、已结案 · 有效
+// 预警状态统一为信息侧词表：待处置、已作废、已结案
 export const WARNING_STATUS = {
   OPEN_VALID: "OPEN_VALID",
   OPEN_INVALID: "OPEN_INVALID",
@@ -68,9 +68,9 @@ export type CollateralWarningEvent = {
 
 export type WarningStatusFilter =
   | "全部"
-  | "待处置 · 有效"
+  | "待处置"
   | "已作废"
-  | "已结案 · 有效"
+  | "已结案"
 
 export type PublicityStatusFilter = "全部" | PublicityStatus
 

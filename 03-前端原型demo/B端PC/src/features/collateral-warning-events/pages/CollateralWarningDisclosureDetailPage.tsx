@@ -208,7 +208,7 @@ export function CollateralWarningDisclosureDetailPage() {
         </PrototypeAnnotationTarget>
 
         <div className="rounded-lg border border-blue-200 bg-blue-50/70 px-4 py-3 text-sm text-blue-900">
-          来源押品预警：{event.eventId} · {event.orderNo} · 已结案 · 有效
+          来源押品预警：{event.eventId} · {event.orderNo} · 已结案
         </div>
 
         <PrototypeAnnotationTarget annotationIds={["risk-disclosure-detail-info"]}>

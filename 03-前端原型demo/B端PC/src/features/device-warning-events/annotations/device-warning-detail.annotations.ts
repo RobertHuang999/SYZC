@@ -16,12 +16,12 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
             label: "状态流转图",
             content: `flowchart TD
     V["厂商预过滤回调"] --> B["待处置·有效 (逐条落账 R01)"]
-    B -->|"人工解除/自动恢复"| C["已结案 · 有效"]
+    B -->|"人工解除/自动恢复"| C["已结案"]
     B -->|"规则删除/设备解绑"| D["已作废 (终态只读)"]`,
           },
           {
             label: "业务定位",
-            content: "页面承载单条独立流水的全部只读事实与快照；待处置 · 有效且支持人工处置的类型可由此发起解除，其余状态仅供穿透溯源。",
+            content: "页面承载单条独立流水的全部只读事实与快照；待处置且支持人工处置的类型可由此发起解除，其余状态仅供穿透溯源。",
           },
         ],
       },
@@ -179,11 +179,11 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
         title: "状态 × 动作矩阵",
         items: [
           {
-            label: "待处置 · 有效",
+            label: "待处置",
             content: "快照 disposition_mode=ACTION_REQUIRED（R14'）时展示【解除预警】；恢复自动结案/触发即结案隐藏解除按钮。",
           },
           {
-            label: "已作废 / 已结案 · 有效",
+            label: "已作废 / 已结案",
             content: "仅展示【返回】，不提供再次解除入口；再次超标将产生新的独立流水。",
           },
           {

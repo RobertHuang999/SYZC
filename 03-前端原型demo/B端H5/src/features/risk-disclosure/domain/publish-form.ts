@@ -34,7 +34,7 @@ export function canEnterPublishFlow(
   if (event.warningStatus !== WARNING_STATUS.CLOSED_VALID) {
     return {
       allowed: false,
-      message: "仅【已结案 · 有效】的预警可发起风险公示",
+      message: "仅【已结案】的预警可发起风险公示",
     }
   }
 

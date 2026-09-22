@@ -3,6 +3,14 @@ import { Link, useNavigate, useParams } from "react-router-dom"
 import { ArrowLeftIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -24,6 +32,8 @@ import { OrgUserSelect } from "@/shared/components/OrgUserSelect"
 import type { OrderStrategyFormState, OrderWarningStrategyKey } from "../domain/types"
 import {
   buildTimeoutRowsForOrder,
+  cloneFormStrategies,
+  cloneStrategyState,
   createEmptyFormValues,
   detailToFormValues,
   getMockCurrentLtv,
@@ -33,7 +43,10 @@ import {
   ORDER_STRATEGY_DEFINITIONS,
 } from "../lib/detail-utils"
 import { validateStrategySave } from "../lib/validation"
-import { NOTIFY_CHANNEL_OPTIONS } from "../domain/constants"
+import {
+  buildUpgradeWarningLabel,
+  NOTIFY_CHANNEL_OPTIONS,
+} from "../domain/constants"
 
 export function OrderWarningConfigFormPage() {
   const { id } = useParams()
@@ -45,8 +58,14 @@ export function OrderWarningConfigFormPage() {
     [id, isEdit]
   )
 
-  const [form, setForm] = useState(() =>
-    existing ? detailToFormValues(existing) : createEmptyFormValues()
+  const initialForm = useMemo(
+    () => (existing ? detailToFormValues(existing) : createEmptyFormValues()),
+    [existing]
+  )
+
+  const [form, setForm] = useState(initialForm)
+  const [baselineStrategies, setBaselineStrategies] = useState(() =>
+    cloneFormStrategies(initialForm.strategies)
   )
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [savedStrategies, setSavedStrategies] = useState<
@@ -60,6 +79,10 @@ export function OrderWarningConfigFormPage() {
   const [dirtyStrategies, setDirtyStrategies] = useState<
     Partial<Record<OrderWarningStrategyKey, boolean>>
   >({})
+  const [disableTarget, setDisableTarget] = useState<{
+    key: OrderWarningStrategyKey
+    name: string
+  } | null>(null)
 
   if (isEdit && !existing) {
     return (
@@ -140,26 +163,56 @@ export function OrderWarningConfigFormPage() {
     })
   }
 
-  const handleSaveStrategy = (key: OrderWarningStrategyKey, strategyName: string) => {
-    const persistedEnabledKeys = ORDER_STRATEGY_DEFINITIONS.filter(
-      (def) => savedStrategies[def.key]
-    ).map((def) => def.key)
+  const getPersistedEnabledKeys = () =>
+    ORDER_STRATEGY_DEFINITIONS.filter((def) => savedStrategies[def.key]).map(
+      (def) => def.key
+    )
+
+  const commitStrategySave = (
+    key: OrderWarningStrategyKey,
+    strategyName: string,
+    options?: {
+      strategyPatch?: Partial<OrderStrategyFormState>
+      successMessage?: string
+    }
+  ) => {
+    const strategyPatch = options?.strategyPatch
+    const nextStrategy = strategyPatch
+      ? { ...form.strategies[key], ...strategyPatch }
+      : form.strategies[key]
+    const nextForm = strategyPatch
+      ? {
+          ...form,
+          strategies: {
+            ...form.strategies,
+            [key]: nextStrategy,
+          },
+        }
+      : form
 
     const validationError = validateStrategySave(
       key,
-      form,
+      nextForm,
       id,
-      isEdit ? persistedEnabledKeys : undefined
+      isEdit ? getPersistedEnabledKeys() : undefined
     )
     if (validationError) {
       setToastMessage(validationError)
       window.setTimeout(() => setToastMessage(null), 3000)
-      return
+      return false
     }
 
+    const savedStrategy = cloneStrategyState(nextStrategy)
+    if (strategyPatch) {
+      setForm(nextForm)
+    }
+    setBaselineStrategies((current) => ({
+      ...current,
+      [key]: savedStrategy,
+    }))
     setSavedStrategies((current) => ({
       ...current,
-      [key]: form.strategies[key].enabled,
+      [key]: savedStrategy.enabled,
     }))
     setDirtyStrategies((current) => ({ ...current, [key]: false }))
     if (form.version !== null) {
@@ -170,7 +223,53 @@ export function OrderWarningConfigFormPage() {
     } else {
       setForm((current) => ({ ...current, version: 1 }))
     }
-    setToastMessage(`${strategyName}保存成功`)
+    setToastMessage(options?.successMessage ?? `${strategyName}保存成功`)
+    window.setTimeout(() => setToastMessage(null), 2500)
+    return true
+  }
+
+  const handleSaveStrategy = (key: OrderWarningStrategyKey, strategyName: string) => {
+    commitStrategySave(key, strategyName)
+  }
+
+  const handleRequestDisableStrategy = (
+    key: OrderWarningStrategyKey,
+    strategyName: string
+  ) => {
+    const persistedEnabledKeys = getPersistedEnabledKeys()
+    if (!persistedEnabledKeys.includes(key)) {
+      return
+    }
+    if (persistedEnabledKeys.length <= 1) {
+      setToastMessage("综合预警规则必须至少保留 1 项有效开启的策略")
+      window.setTimeout(() => setToastMessage(null), 3000)
+      return
+    }
+    setDisableTarget({ key, name: strategyName })
+  }
+
+  const handleConfirmDisableStrategy = () => {
+    if (!disableTarget) {
+      return
+    }
+    commitStrategySave(disableTarget.key, disableTarget.name, {
+      strategyPatch: { enabled: false, expanded: false },
+      successMessage: `${disableTarget.name}已关闭并停用`,
+    })
+    setDisableTarget(null)
+  }
+
+  const handleCancelStrategy = (key: OrderWarningStrategyKey, strategyName: string) => {
+    const baseline = baselineStrategies[key]
+    setForm((current) => ({
+      ...current,
+      strategies: {
+        ...current.strategies,
+        [key]: cloneStrategyState(baseline),
+      },
+    }))
+    setDirtyStrategies((current) => ({ ...current, [key]: false }))
+    setToastMessage(`${strategyName}已恢复至上次保存内容`)
     window.setTimeout(() => setToastMessage(null), 2500)
   }
 
@@ -488,7 +587,7 @@ export function OrderWarningConfigFormPage() {
                         <div className="space-y-2 md:col-span-2">
                           <Label>通知渠道（选填）</Label>
                           <p className="text-xs text-muted-foreground">
-                            预警命中时，移动端「押品预警信息」入口自动展示待处置红点，无需配置；短信/邮件需配置通知对象并勾选渠道后才会下发。
+                            预警命中时，移动端「押品预警信息」入口自动展示待处置红点，无需配置；勾选短信/邮件后可选填通知对象，并按所选渠道下发。
                           </p>
                           <div className="flex flex-wrap gap-4">
                             {NOTIFY_CHANNEL_OPTIONS.map((channel) => (
@@ -506,10 +605,7 @@ export function OrderWarningConfigFormPage() {
 
                         {hasExternalNotifyChannel && (
                           <div className="space-y-2 md:col-span-2">
-                            <Label>
-                              <span className="text-destructive font-bold mr-1">*</span>
-                              预警通知对象（按组织架构选择）
-                            </Label>
+                            <Label>预警通知对象（按组织架构选择，选填）</Label>
                             <OrgUserSelect
                               value={strategy.notifyTargets}
                               onChange={(targets) =>
@@ -534,7 +630,7 @@ export function OrderWarningConfigFormPage() {
                               className="size-4 rounded border-gray-300 text-primary"
                             />
                             <Label htmlFor={`upgrade-${def.key}`} className="cursor-pointer font-medium">
-                              启用升级预警（长时间未处置时，将通过短信逐级上报）
+                              {buildUpgradeWarningLabel(strategy.notifyChannels)}
                             </Label>
                           </div>
                         )}
@@ -582,12 +678,37 @@ export function OrderWarningConfigFormPage() {
                                 ? "✓ 已保存"
                                 : ""}
                           </span>
-                          <Button
-                            size="sm"
-                            onClick={() => handleSaveStrategy(def.key, def.name)}
-                          >
-                            保存该策略
-                          </Button>
+                          <div className="flex flex-wrap gap-2">
+                            {dirtyStrategies[def.key] && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  handleCancelStrategy(def.key, def.name)
+                                }
+                              >
+                                取消修改
+                              </Button>
+                            )}
+                            {savedStrategies[def.key] === true && (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="destructive"
+                                onClick={() =>
+                                  handleRequestDisableStrategy(def.key, def.name)
+                                }
+                              >
+                                关闭并停用
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              onClick={() => handleSaveStrategy(def.key, def.name)}
+                            >
+                              保存该策略
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -597,6 +718,30 @@ export function OrderWarningConfigFormPage() {
             </CardContent>
           </Card>
         </PrototypeAnnotationTarget>
+
+        <Dialog
+          open={disableTarget !== null}
+          onOpenChange={(open) => {
+            if (!open) setDisableTarget(null)
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>关闭并停用该策略</DialogTitle>
+              <DialogDescription>
+                关闭后将停止「{disableTarget?.name}」的风控判定，该策略下未处理的预警流水将自动作废，相关升级任务同步终止。此操作保存后立即生效。
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDisableTarget(null)}>
+                取消
+              </Button>
+              <Button variant="destructive" onClick={handleConfirmDisableStrategy}>
+                确认关闭并停用
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {toastMessage && (
           <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">

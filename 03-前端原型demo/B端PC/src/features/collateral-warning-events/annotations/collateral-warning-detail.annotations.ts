@@ -15,8 +15,8 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "业务流转图",
             content: `flowchart TD
-    A["商业风控引擎计算 / 物联穿透联动"] --> B["待处置 · 有效"]
-    B -->|"商业类: 补仓/解押/还款"| C["已结案 · 有效"]
+    A["商业风控引擎计算 / 物联穿透联动"] --> B["待处置"]
+    B -->|"商业类: 补仓/解押/还款"| C["已结案"]
     B -->|"穿透类: 设备台账现场核销"| C
     B -->|"阈值重算置换 / 订单结清 / 规则删除"| D["已作废 (终态只读)"]
     C -->|"高危且满足披露条件"| E["风险公示"]`,
@@ -79,7 +79,7 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警状态 (warningStatus)",
-            content: "待处置 · 有效、已结案 · 有效、已作废；当预警配置阈值调整重算置换、订单办结/出库、监管服务结案或规则删除后自动更新为已作废。",
+            content: "待处置、已结案、已作废；当预警配置阈值调整重算置换、订单办结/出库、监管服务结案或规则删除后自动更新为已作废。",
           },
           {
             label: "失效原因 (invalidReason)",
@@ -244,7 +244,7 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "禁止直接人工解除",
-            content: "物联穿透告警禁止在押品详情页人工点击解除；必须前往设备预警详情页核销物理隐患，由系统发布 DeviceEventReleased 事件联动回写已结案 · 有效。",
+            content: "物联穿透告警禁止在押品详情页人工点击解除；必须前往设备预警详情页核销物理隐患，由系统发布 DeviceEventReleased 事件联动回写已结案。",
           },
           {
             label: "空间重合匹配原则",
@@ -260,14 +260,14 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
     number: 5,
     kind: "字段",
     title: "处置记录、留痕与风险公示",
-    content: "展示已结案 · 有效状态下的核销时间、责任人、情况说明、现场核验照片凭证与联动抓拍图。",
+    content: "展示已结案状态下的核销时间、责任人、情况说明、现场核验照片凭证与联动抓拍图。",
     details: [
       {
         title: "核心字段定义与留痕凭据",
         items: [
           {
             label: "处理时间 (processedTime)",
-            content: "预警完成人工解除核销或底层设备联动核销的时间（YYYY-MM-DD HH:mm:ss）；待处置 · 有效状态下显示为空。",
+            content: "预警完成人工解除核销或底层设备联动核销的时间（YYYY-MM-DD HH:mm:ss）；待处置状态下显示为空。",
           },
           {
             label: "处理人 (processedBy)",
@@ -292,7 +292,7 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "公示风险流程",
-            content: "已结案 · 有效记录行操作始终展示【公示风险】。未公示跳转押品侧「公示确认页」预填快照字段（仅订单号只读）；已公示/已取消跳转押品侧「公示详情页」，支持取消公示与重新公示。不跳转风险公示菜单。",
+            content: "已结案记录行操作始终展示【公示风险】。未公示跳转押品侧「公示确认页」预填快照字段（仅订单号只读）；已公示/已取消跳转押品侧「公示详情页」，支持取消公示与重新公示。不跳转风险公示菜单。",
           },
           {
             label: "快照字段",
@@ -314,15 +314,15 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
         title: "动作矩阵",
         items: [
           {
-            label: "商业类 · 待处置 · 有效",
+            label: "商业类 · 待处置",
             content: "展示【解除预警】；抵/质押率类 ReleasePromptDialog 展示命中线与可用解除方式（R13e），确认后跳转对应抵质押订单信息页办理。",
           },
           {
-            label: "物联类 · 待处置 · 有效",
+            label: "物联类 · 待处置",
             content: "展示【查看设备事件】，点击跳转设备预警详情页查看物理事实与现场核销。",
           },
           {
-            label: "已结案 · 有效 · 未公示",
+            label: "已结案 · 未公示",
             content: "展示【公示风险】，具备 R-RISK-MGR 权限人员可点击发起单条风险公示。",
           },
         ],

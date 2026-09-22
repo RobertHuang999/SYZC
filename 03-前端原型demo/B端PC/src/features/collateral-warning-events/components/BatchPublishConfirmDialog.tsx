@@ -36,7 +36,7 @@ export function BatchPublishConfirmDialog({
             <DialogDescription>
               {BATCH_PUBLISH_CONFIRM_MESSAGE}
               <span className="mt-2 block text-foreground">
-                已选 {events.length} 条已结案 · 有效且从未公示的预警。
+                已选 {events.length} 条已结案且从未公示的预警。
               </span>
             </DialogDescription>
           </DialogHeader>

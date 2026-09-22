@@ -76,7 +76,7 @@ export function BatchReleaseConfirmDialog({
                 <DialogDescription>
                   {BATCH_RELEASE_CONFIRM_MESSAGE}
                   <span className="mt-2 block text-foreground">
-                    已选 {events.length} 条待处置 · 有效且支持人工解除的预警。
+                    已选 {events.length} 条待处置且支持人工解除的预警。
                   </span>
                 </DialogDescription>
               </DialogHeader>

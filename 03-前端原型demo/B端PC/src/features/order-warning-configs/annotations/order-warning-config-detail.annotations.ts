@@ -91,7 +91,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "通知渠道展示",
-            content: "各已启用子项独立展示短信/邮件勾选结果，未配置外部渠道时展示「—」；移动端「押品预警信息」待处置红点不在此配置，预警命中时自动展示；升级督办通知仅通过短信下发。",
+            content: "各已启用子项独立展示短信/邮件勾选结果，未配置外部渠道时展示「—」；移动端「押品预警信息」待处置红点不在此配置，预警命中时自动展示；升级督办下发渠道与配置页已选 notify_channels 一致（ORD-R21）。",
           },
         ],
       },
@@ -114,7 +114,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "删除联动",
-            content: "当前订单规则删除后，历史已触发的待处置 · 有效预警流水自动流转为【已作废】。",
+            content: "当前订单规则删除后，历史已触发的待处置预警流水自动流转为【已作废】。",
           },
         ],
       },

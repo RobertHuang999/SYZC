@@ -99,7 +99,7 @@ export function CollateralWarningCard({
                   publishedLocked
                     ? "已公示，不可重复勾选"
                     : !selectable
-                      ? "仅已结案 · 有效且未公示可勾选"
+                      ? "仅已结案且未公示可勾选"
                       : undefined
                 }
                 onChange={() => onToggleSelect?.(event.eventId)}

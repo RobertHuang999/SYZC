@@ -135,7 +135,7 @@ export function ReleaseMaterialForm({
       </div>
 
       <div className="rounded-lg border border-dashed bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-        确认解除后该条预警将归档为「已结案 · 有效」，并同步取消相关升级任务。
+        确认解除后该条预警将归档为「已结案」，并同步取消相关升级任务。
       </div>
 
       <input type="hidden" name="version" value={version} readOnly />

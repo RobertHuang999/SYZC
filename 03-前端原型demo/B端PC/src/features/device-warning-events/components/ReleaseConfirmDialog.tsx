@@ -93,7 +93,7 @@ export function ReleaseConfirmDialog({
               <DialogHeader>
                 <DialogTitle>填写解除说明</DialogTitle>
                 <DialogDescription>
-                  请填写现场核实情况，提交后该条预警将归档为「已结案 · 有效」。
+                  请填写现场核实情况，提交后该条预警将归档为「已结案」。
                 </DialogDescription>
               </DialogHeader>
               {event && (

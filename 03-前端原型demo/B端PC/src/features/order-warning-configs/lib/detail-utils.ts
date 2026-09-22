@@ -111,6 +111,32 @@ function createDefaultStrategyState(
   }
 }
 
+export function cloneStrategyState(
+  strategy: OrderStrategyFormState
+): OrderStrategyFormState {
+  return {
+    ...strategy,
+    notifyChannels: [...strategy.notifyChannels],
+    notifyTargets: [...strategy.notifyTargets],
+    upgradeTargets: [...strategy.upgradeTargets],
+    params: { ...strategy.params },
+    timeoutRows: strategy.timeoutRows.map((row) => ({ ...row })),
+    inspectionRows: strategy.inspectionRows.map((row) => ({ ...row })),
+  }
+}
+
+export function cloneFormStrategies(
+  strategies: Record<OrderWarningStrategyKey, OrderStrategyFormState>
+): Record<OrderWarningStrategyKey, OrderStrategyFormState> {
+  return ORDER_STRATEGY_DEFINITIONS.reduce(
+    (acc, def) => {
+      acc[def.key] = cloneStrategyState(strategies[def.key])
+      return acc
+    },
+    {} as Record<OrderWarningStrategyKey, OrderStrategyFormState>
+  )
+}
+
 export function createEmptyFormValues(): OrderWarningConfigFormValues {
   const strategies = ORDER_STRATEGY_DEFINITIONS.reduce(
     (acc, def) => {

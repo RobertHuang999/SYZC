@@ -27,6 +27,7 @@ import {
 import { ReleasePromptDialog } from "../components/ReleasePromptDialog"
 import { getCollateralWarningById } from "../lib/detail-utils"
 import { canSelectForBatchPublish } from "../domain/actions"
+import { normalizeWarningStatusFilter } from "../domain/status"
 
 const PC_COLLATERAL_WARNING_FILTER_KEY = "SYZC_PC_COLLATERAL_WARNING_FILTERS"
 const PC_COLLATERAL_WARNING_PAGE_KEY = "SYZC_PC_COLLATERAL_WARNING_PAGE"
@@ -39,6 +40,7 @@ function loadCachedPcCollateralFilters(): CollateralWarningFilters {
       return {
         ...DEFAULT_FILTERS,
         ...cached,
+        warningStatus: normalizeWarningStatusFilter(cached.warningStatus),
       }
     }
   } catch {}
@@ -239,7 +241,7 @@ export function CollateralWarningListPage() {
                 </span>
               ) : (
                 <span className="text-xs text-muted-foreground">
-                  勾选已结案 · 有效且未公示的记录后可用
+                  勾选已结案且未公示的记录后可用
                 </span>
               )}
             </div>

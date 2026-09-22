@@ -68,7 +68,7 @@ export const USECASE_SCENARIOS = [
 
 /**
  * 精编用例记录（18 条，覆盖三态 + Demo ASCII 5 行）
- * 默认筛选「待处置 · 有效」下，前 5 条按预警时间倒序对齐 ASCII。
+ * 默认筛选「待处置」下，前 5 条按预警时间倒序对齐 ASCII。
  */
 const rawDeviceWarningEventUseCases: RawDeviceWarningEvent[] = [
   {

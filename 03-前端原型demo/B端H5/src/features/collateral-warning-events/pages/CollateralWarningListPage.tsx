@@ -42,6 +42,7 @@ import {
   hasBatchPublishCandidates,
 } from "../lib/event-utils"
 import { collateralWarningEventsMock } from "../mock/collateral-warning-events.mock"
+import { normalizeWarningStatusFilter } from "../domain/status"
 
 const COLLATERAL_WARNING_FILTER_STORAGE_KEY = "SYZC_H5_COLLATERAL_WARNING_FILTERS"
 
@@ -58,6 +59,7 @@ function loadCachedCollateralFilters(): CollateralWarningFilters {
       return {
         ...DEFAULT_FILTERS,
         ...cached,
+        warningStatus: normalizeWarningStatusFilter(cached.warningStatus),
       }
     }
   } catch {}
@@ -393,7 +395,7 @@ export function CollateralWarningListPage() {
               <div className="flex items-center gap-1.5">
                 <Layers className="size-4 text-amber-600" />
                 <span>
-                  已选择 <strong className="text-amber-700">{selectedIds.length}</strong> 条 · 仅“已结案 · 有效且未公示”可勾选
+                  已选择 <strong className="text-amber-700">{selectedIds.length}</strong> 条 · 仅“已结案且未公示”可勾选
                 </span>
               </div>
               <button

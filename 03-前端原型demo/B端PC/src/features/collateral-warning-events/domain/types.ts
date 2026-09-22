@@ -62,9 +62,9 @@ export type CollateralWarningEvent = {
 
 export type WarningStatusFilter =
   | "全部"
-  | "待处置 · 有效"
+  | "待处置"
   | "已作废"
-  | "已结案 · 有效"
+  | "已结案"
 
 export type PublicityStatusFilter = "全部" | PublicityStatus
 

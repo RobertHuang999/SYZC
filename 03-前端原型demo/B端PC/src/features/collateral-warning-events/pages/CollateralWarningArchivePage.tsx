@@ -179,8 +179,8 @@ export function CollateralWarningArchivePage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="全部">全部状态</SelectItem>
-                  <SelectItem value="待处置 · 有效">待处置 · 有效</SelectItem>
-                  <SelectItem value="已结案 · 有效">已结案 · 有效</SelectItem>
+                  <SelectItem value="待处置">待处置</SelectItem>
+                  <SelectItem value="已结案">已结案</SelectItem>
                   <SelectItem value="已作废">已作废</SelectItem>
                 </SelectContent>
               </Select>

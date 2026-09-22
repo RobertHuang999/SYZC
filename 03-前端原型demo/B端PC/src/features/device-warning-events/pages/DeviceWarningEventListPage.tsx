@@ -7,7 +7,7 @@ import { DeviceWarningEventFiltersPanel } from "../components/DeviceWarningEvent
 import { DeviceWarningEventTable } from "../components/DeviceWarningEventTable"
 import { ReleaseConfirmDialog } from "../components/ReleaseConfirmDialog"
 import { BatchReleaseConfirmDialog } from "../components/BatchReleaseConfirmDialog"
-import { WARNING_STATUS } from "../domain/status"
+import { normalizeWarningStatusFilter, WARNING_STATUS } from "../domain/status"
 import { canSelectForBatchRelease } from "../domain/actions"
 import {
   filterDeviceWarningEvents,
@@ -26,7 +26,14 @@ const PC_DEVICE_WARNING_FILTER_KEY = "SYZC_PC_DEVICE_WARNING_FILTERS"
 function loadCachedPcDeviceFilters(): DeviceWarningEventFilters {
   try {
     const raw = sessionStorage.getItem(PC_DEVICE_WARNING_FILTER_KEY)
-    if (raw) return JSON.parse(raw)
+    if (raw) {
+      const cached = JSON.parse(raw) as Partial<DeviceWarningEventFilters>
+      return {
+        ...DEFAULT_FILTERS,
+        ...cached,
+        warningStatus: normalizeWarningStatusFilter(cached.warningStatus),
+      }
+    }
   } catch {}
   return DEFAULT_FILTERS
 }

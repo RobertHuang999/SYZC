@@ -8,7 +8,7 @@ export const DEFAULT_FILTERS: CollateralWarningFilters = {
   warningTypes: [],
   severityLevelIds: [],
   warningSource: "全部",
-  warningStatus: "待处置 · 有效",
+  warningStatus: "待处置",
   publicityStatus: "全部",
   warningTimeStart: defaultRange.start,
   warningTimeEnd: defaultRange.end,
@@ -20,9 +20,9 @@ export const TOTAL_MOCK_COUNT = 56
 
 export const WARNING_STATUS_FILTER_OPTIONS = [
   "全部",
-  "待处置 · 有效",
+  "待处置",
   "已作废",
-  "已结案 · 有效",
+  "已结案",
 ] as const
 
 export const PUBLICITY_STATUS_FILTER_OPTIONS = [

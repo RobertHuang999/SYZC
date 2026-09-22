@@ -306,7 +306,7 @@ export function DeviceWarningEventReleasePage() {
               • 预警规则：<strong>{event.ruleName}</strong><br />
               • 关联设备：{event.deviceName}<br />
               • 预警时间：{formatDateTime(event.warningTime)}<br />
-              • 归档说明：提交后该条流水将变为「已结案 · 有效」，并记录您的处置签名。
+              • 归档说明：提交后该条流水将变为「已结案」，并记录您的处置签名。
             </p>
             <div className="flex gap-2 pt-2">
               <button
