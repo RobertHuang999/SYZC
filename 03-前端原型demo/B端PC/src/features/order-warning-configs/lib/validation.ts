@@ -56,7 +56,10 @@ function validateStrategy(
     if (timeoutError) return timeoutError
   }
 
-  if (key === "midLoan" && !strategy.params.modelVersion?.trim()) {
+  if (
+    key === "midLoan" &&
+    !(strategy.params.modelName?.trim() || strategy.params.modelVersion?.trim())
+  ) {
     return "请选择贷中风控模型"
   }
 

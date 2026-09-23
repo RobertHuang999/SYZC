@@ -212,6 +212,44 @@ const detailExtensions: Record<string, DetailExtension> = {
     ],
     invalidReason: "关联订单已办结",
   },
+  "owc-009": {
+    ruleUuid: "rule-ord-loan-009",
+    orderCustomer: "无锡中联钢材有限公司",
+    ownerName: "钱一",
+    ownerPhone: "135****6688",
+    goodsDetail: "螺纹钢 / HRB400 / 1500吨",
+    version: 1,
+    activeStrategies: [
+      {
+        key: "midLoan",
+        name: "贷中风控模型预警",
+        fields: [
+          { label: "风控模型", value: "仓单尽调产品-版本1" },
+          {
+            label: "输入项映射",
+            value:
+              "货主法定代表人姓名、货主法定代表人手机号、货主法定代表人身份证号、货主企业名称、货主企业联系电话、货主统一社会信用代码",
+          },
+          {
+            label: "预警触发条件",
+            value: "产品评分 < 60 分 或 产品额度 <= 100 万元 或 结果 = 拒绝",
+          },
+        ],
+        severityLevelId: "sl-l3",
+        notifyChannels: ["短信", "邮件"],
+        notifyTargets: ["张风控", "王经理"],
+        upgradeStrategy: "持续未解除 3 天后 ➔ 升级通知 风控总监-赵总",
+      },
+    ],
+    disabledStrategies: [
+      "订单履约超时监控：未启用",
+      "价格下跌监控：未启用",
+      "抵/质押率双控预警：未启用",
+      "仓储巡检超期预警：未启用",
+      "盘点账实差异告警：未启用",
+    ],
+    invalidReason: null,
+  },
 }
 
 function buildDefaultStrategies(
@@ -284,7 +322,18 @@ function buildDefaultStrategies(
     贷中: {
       key: "midLoan",
       name: "贷中风控模型预警",
-      fields: [{ label: "模型参数", value: "默认风控模型 v2" }],
+      fields: [
+        { label: "风控模型", value: "仓单尽调产品-版本1" },
+        {
+          label: "输入项映射",
+          value:
+            "法人姓名、法人手机号、法人身份证号、货主企业名称、企业电话、统一社会信用代码",
+        },
+        {
+          label: "预警触发条件",
+          value: "产品评分 < 60 分 或 决策结果 = 拒绝",
+        },
+      ],
       severityLevelId: "sl-l3",
       notifyTargets: ["风控专员"],
     },

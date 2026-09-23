@@ -60,7 +60,22 @@ export const ORDER_STRATEGY_DEFINITIONS: {
   {
     key: "midLoan",
     name: "贷中风控模型预警",
-    defaultParams: { modelVersion: "默认风控模型 v2" },
+    defaultParams: {
+      modelName: "仓单尽调产品-版本1",
+      inputPersonName: "person_legal",
+      inputPersonPhone: "phone_legal",
+      inputPersonIdCard: "idcard_legal",
+      inputEnterpriseName: "ent_owner",
+      inputEnterprisePhone: "ent_phone_owner",
+      inputEnterpriseCreditCode: "ent_uscc_owner",
+      outputScoreMin: "",
+      outputScoreOp: "<",
+      outputScoreMax: "60",
+      outputQuotaMin: "",
+      outputQuotaOp: "<=",
+      outputQuotaMax: "",
+      outputResult: "拒绝",
+    },
   },
 ]
 
@@ -193,6 +208,14 @@ export function detailToFormValues(
           acc[def.key].params = {
             ...acc[def.key].params,
             ...parseLtvParamsFromDetailFields(active.fields),
+          }
+        }
+        if (def.key === "midLoan") {
+          const modelVal = active.fields.find(
+            (f) => f.label === "风控模型" || f.label === "模型参数"
+          )?.value
+          if (modelVal) {
+            acc[def.key].params.modelName = modelVal
           }
         }
       }

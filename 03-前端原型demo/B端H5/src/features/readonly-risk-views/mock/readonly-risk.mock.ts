@@ -73,7 +73,7 @@ const midLoanRecords: ReadonlyRiskRecord[] = [
     status: "触发预警",
     statusTone: "danger",
     summary: [
-      { label: "风控模型", value: "智风控-司法舆情模型V1" },
+      { label: "风控模型", value: "仓单尽调产品-版本1" },
       { label: "最近状态", value: "触发预警", tone: "danger" },
       { label: "预警次数", value: "1 次" },
     ],
@@ -93,12 +93,12 @@ const midLoanRecords: ReadonlyRiskRecord[] = [
         fields: [
           { label: "提交时间", value: "2026-08-12 14:00:00" },
           { label: "模型分数", value: "42 分", tone: "danger" },
-          { label: "结果", value: "模型评分低于阈值，已联动生成押品预警" },
+          { label: "结果", value: "模型评分低于阈值(60分)，已联动生成押品预警" },
           { label: "智风控任务号", value: "ZFK-20260812005" },
         ],
       },
     ],
-    searchText: "mid-005 PO202608-104 张明 仓单 触发预警 42",
+    searchText: "mid-005 PO202608-104 张明 仓单 仓单尽调产品 触发预警 42",
   },
 ]
 

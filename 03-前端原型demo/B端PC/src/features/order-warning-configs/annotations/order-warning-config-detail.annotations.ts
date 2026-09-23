@@ -87,7 +87,8 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "06 贷中风控预警",
-            content: "展示绑定的智风控模型名称及模型拒绝时的告警策略，并联动贷中台账。",
+            content:
+              "展示绑定的风控模型（如仓单尽调产品-版本1）、入参映射数据项（法人、企业名称及统一代码等）以及预警触发判定条件（评分/额度阈值及拒绝结果），并联动贷中台账。",
           },
           {
             label: "通知渠道展示",

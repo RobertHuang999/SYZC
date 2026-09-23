@@ -28,6 +28,7 @@ import { orderWarningConfigDocuments } from "../documents/order-warning-config-d
 import { LtvDualStrategyFields } from "../components/LtvDualStrategyFields"
 import { InspectionConfigTable } from "../components/InspectionConfigTable"
 import { TimeoutConfigTable } from "../components/TimeoutConfigTable"
+import { MidLoanModelStrategyFields } from "../components/MidLoanModelStrategyFields"
 import { OrgUserSelect } from "@/shared/components/OrgUserSelect"
 import type { OrderStrategyFormState, OrderWarningStrategyKey } from "../domain/types"
 import {
@@ -519,21 +520,17 @@ export function OrderWarningConfigFormPage() {
                           </div>
                         )}
                         {def.key === "midLoan" && (
-                          <div className="space-y-2 md:col-span-2">
-                            <Label>模型参数</Label>
-                            <Input
-                              value={strategy.params.modelVersion ?? ""}
-                              placeholder="如: 风控模型 v2.4"
-                              onChange={(event) =>
-                                updateStrategy(def.key, {
-                                  params: {
-                                    ...strategy.params,
-                                    modelVersion: event.target.value,
-                                  },
-                                })
-                              }
-                            />
-                          </div>
+                          <MidLoanModelStrategyFields
+                            params={strategy.params}
+                            onChange={(patch) =>
+                              updateStrategy(def.key, {
+                                params: {
+                                  ...strategy.params,
+                                  ...patch,
+                                },
+                              })
+                            }
+                          />
                         )}
 
                         <div className="space-y-2">
