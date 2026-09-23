@@ -1,6 +1,10 @@
 import type { ActiveOrderStrategy, OrderWarningConfigDetail } from "../domain/types"
-import { DEFAULT_LTV_PARAMS, buildLtvDetailFields } from "../lib/ltv-utils"
-import { getMockCurrentLtv } from "./order-options.mock"
+import {
+  DEFAULT_LTV_PARAMS,
+  LTV_DUAL_STRATEGY_NAME,
+  buildLtvDetailFields,
+} from "../lib/ltv-utils"
+import { getMockCurrentLtv, getMockOrderByNo } from "./order-options.mock"
 
 type DetailExtension = Omit<
   OrderWarningConfigDetail,
@@ -27,10 +31,11 @@ const detailExtensions: Record<string, DetailExtension> = {
       },
       {
         key: "ltvDual",
-        name: "抵/质押率双控预警",
+        name: LTV_DUAL_STRATEGY_NAME,
         fields: buildLtvDetailFields(
           DEFAULT_LTV_PARAMS,
-          getMockCurrentLtv("PO202608-01")
+          getMockCurrentLtv("PO202608-01"),
+          getMockOrderByNo("PO202608-01")?.orderType ?? ""
         ),
         severityLevelId: "sl-l3",
         notifyChannels: ["短信", "邮件"],
@@ -120,7 +125,7 @@ const detailExtensions: Record<string, DetailExtension> = {
     ],
     disabledStrategies: [
       "价格下跌监控：未启用",
-      "抵/质押率双控预警：未启用",
+      `${LTV_DUAL_STRATEGY_NAME}：未启用`,
       "盘点账实差异告警：未启用",
       "贷中风控模型预警：未启用",
     ],
@@ -174,7 +179,7 @@ const detailExtensions: Record<string, DetailExtension> = {
     ],
     disabledStrategies: [
       "价格下跌监控：未启用",
-      "抵/质押率双控预警：未启用",
+      `${LTV_DUAL_STRATEGY_NAME}：未启用`,
       "仓储巡检超期预警：未启用",
       "贷中风控模型预警：未启用",
     ],
@@ -205,7 +210,7 @@ const detailExtensions: Record<string, DetailExtension> = {
       },
     ],
     disabledStrategies: [
-      "抵/质押率双控预警：未启用",
+      `${LTV_DUAL_STRATEGY_NAME}：未启用`,
       "仓储巡检超期预警：未启用",
       "订单履约超时监控：未启用",
       "贷中风控模型预警：未启用",
@@ -244,7 +249,7 @@ const detailExtensions: Record<string, DetailExtension> = {
     disabledStrategies: [
       "订单履约超时监控：未启用",
       "价格下跌监控：未启用",
-      "抵/质押率双控预警：未启用",
+      `${LTV_DUAL_STRATEGY_NAME}：未启用`,
       "仓储巡检超期预警：未启用",
       "盘点账实差异告警：未启用",
     ],
@@ -265,10 +270,14 @@ function buildDefaultStrategies(
       notifyChannels: [],
       notifyTargets: ["张风控"],
     },
-    抵质押率: {
+    监管业务率: {
       key: "ltvDual",
-      name: "抵/质押率双控预警",
-      fields: buildLtvDetailFields(DEFAULT_LTV_PARAMS, getMockCurrentLtv(orderNo)),
+      name: LTV_DUAL_STRATEGY_NAME,
+      fields: buildLtvDetailFields(
+        DEFAULT_LTV_PARAMS,
+        getMockCurrentLtv(orderNo),
+        getMockOrderByNo(orderNo)?.orderType ?? ""
+      ),
       severityLevelId: "sl-l3",
       notifyChannels: [],
       notifyTargets: ["张风控"],
@@ -346,7 +355,7 @@ function buildDefaultStrategies(
 
 const allDisabledLabels = [
   "订单履约超时监控：未启用",
-  "抵/质押率双控预警：未启用",
+  `${LTV_DUAL_STRATEGY_NAME}：未启用`,
   "仓储巡检超期预警：未启用",
   "盘点账实差异告警：未启用",
   "贷中风控模型预警：未启用",

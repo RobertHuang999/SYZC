@@ -1,5 +1,7 @@
-import { Camera, Copy } from "lucide-react"
+import { useState } from "react"
+import { Camera, Copy, Image as ImageIcon } from "lucide-react"
 import { SectionCard } from "@/components/ui/SectionCard"
+import { PhotoGalleryModal } from "@/components/ui/PhotoGalleryModal"
 import { formatDateTime } from "@/shared/lib/date-utils"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import type { CollateralWarningEventDetail } from "../domain/types"
@@ -28,6 +30,7 @@ export function CollateralWarningDetailContent({
   const situationDescription =
     event.disposalInfo?.situationDescription ?? ""
   const sitePhotos = event.disposalInfo?.sitePhotos ?? []
+  const [vendorGalleryOpen, setVendorGalleryOpen] = useState(false)
 
   return (
     <>
@@ -131,24 +134,50 @@ export function CollateralWarningDetailContent({
               </p>
             </div>
 
+            {event.vendorSitePhotos.length > 0 && (
+              <div className="mt-1 flex items-center justify-between rounded-xl border border-indigo-100 bg-indigo-50/70 p-2.5 text-xs text-indigo-900">
+                <div className="flex items-center gap-1.5">
+                  <ImageIcon className="size-4 text-indigo-600" />
+                  <span>
+                    现场照片（厂商自动回传 {event.vendorSitePhotos.length} 张）
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setVendorGalleryOpen(true)}
+                  className="rounded-lg bg-indigo-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-2xs active:bg-indigo-700 cursor-pointer"
+                >
+                  查看照片
+                </button>
+              </div>
+            )}
+
             {event.snapshotImageStatus === "available" && onPreviewImage ? (
               <div className="mt-1 flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50/70 p-2.5 text-xs text-blue-900">
                 <div className="flex items-center gap-1.5">
                   <Camera className="size-4 text-blue-600" />
-                  <span>现场监控抓拍图已留痕存证</span>
+                  <span>预警抓拍（监控主动抓拍）</span>
                 </div>
                 <button
                   type="button"
                   onClick={onPreviewImage}
                   className="rounded-lg bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-2xs active:bg-blue-700 cursor-pointer"
                 >
-                  查看抓拍
+                  查看照片
                 </button>
               </div>
             ) : null}
           </div>
         </SectionCard>
       </PrototypeAnnotationTarget>
+
+      <PhotoGalleryModal
+        open={vendorGalleryOpen}
+        title={`${event.orderNo} · 现场照片`}
+        subTitle={`厂商自动回传 · ${formatDateTime(event.warningTime)}`}
+        photos={event.vendorSitePhotos}
+        onClose={() => setVendorGalleryOpen(false)}
+      />
 
       {isPenetration ? (
         <SectionCard

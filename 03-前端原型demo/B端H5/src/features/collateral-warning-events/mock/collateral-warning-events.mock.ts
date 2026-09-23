@@ -4,6 +4,8 @@ import {
   formatIotPenetrationWarningContent,
   IOT_PENETRATION_DEVICE_SNAPSHOTS,
 } from "../lib/iot-penetration-utils"
+import { formatLtvTriggerRatePhrase } from "../lib/ltv-content-utils"
+import { inferCollateralVendorSitePhotos } from "../lib/vendor-site-photos"
 
 const l2 = getSeverityLevelByCode("L2")!
 const l3 = getSeverityLevelByCode("L3")!
@@ -11,20 +13,19 @@ const l4 = getSeverityLevelByCode("L4")!
 const l5 = getSeverityLevelByCode("L5")!
 
 // 当前实时链路严格对齐 PC 端 7 个预警大类；设备具体异常保留在物联穿透事实中。
-const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
-  // 1. 抵/质押率异常 (L3 · 订单配置触发 · 命中平仓线 · 未公示 · 有抓拍图)
+const seedEvents: Omit<CollateralWarningEvent, "eventId" | "vendorSitePhotos">[] = [
+  // 1. 监管业务率异常 (L3 · 订单配置触发 · 命中平仓线 · 未公示 · 有抓拍图)
   {
     orderNo: "PO202608-01",
     orderType: "质押",
     ruleName: "PO1002大宗综合风控",
-    warningType: "抵/质押率异常",
+    warningType: "监管业务率异常",
     severityLevelId: l3.severityLevelId,
     severityCode: l3.severityCode,
     severityName: l3.severityName,
     severityColor: l3.severityColor,
     warningSource: "订单配置触发",
-    warningContent:
-      "订单抵/质押率异常！触发【平仓线】，当前抵/质押率 (LTV) 88.50%，贷款余额 4,314,375.00 元，质物价值 4,875,000.00 元（阈值 85.00%）",
+    warningContent: `订单监管业务率异常！触发【平仓线】，${formatLtvTriggerRatePhrase("质押", "88.50%")}，贷款余额 4,314,375.00 元，质物价值 4,875,000.00 元（阈值 85.00%）`,
     snapshotImageStatus: "available",
     warningTime: "2026-08-20 09:15:00",
     processedTime: null,
@@ -339,18 +340,18 @@ const seedEvents: Omit<CollateralWarningEvent, "eventId">[] = [
       releaseSnapshotImage: null,
     },
   },
-  // 15. 抵/质押率异常
+  // 15. 监管业务率异常
   {
     orderNo: "PO202608-204",
     orderType: "质押",
     ruleName: "LTV补仓线监控",
-    warningType: "抵/质押率异常",
+    warningType: "监管业务率异常",
     severityLevelId: l3.severityLevelId,
     severityCode: l3.severityCode,
     severityName: l3.severityName,
     severityColor: l3.severityColor,
     warningSource: "订单配置触发",
-    warningContent: "订单抵/质押率异常！触发【补仓线】，当前 LTV 86.20%（阈值 85.00%）",
+    warningContent: `订单监管业务率异常！触发【补仓线】，${formatLtvTriggerRatePhrase("质押", "86.20%")}（阈值 85.00%）`,
     snapshotImageStatus: "available",
     warningTime: "2026-08-06 11:10:00",
     processedTime: "2026-08-07 10:00:00",
@@ -436,16 +437,32 @@ const seedEventIds = [
   "cw-018",
 ]
 
-export const collateralWarningEventsMock: CollateralWarningEvent[] =
-  seedEvents.map((event, index) => ({
+function enrichCollateralEvent<
+  T extends Omit<CollateralWarningEvent, "vendorSitePhotos">,
+>(event: T): T & Pick<CollateralWarningEvent, "vendorSitePhotos"> {
+  return {
     ...event,
-    eventId: seedEventIds[index] ?? `col-seed-${String(index + 1).padStart(3, "0")}`,
-  }))
+    vendorSitePhotos: inferCollateralVendorSitePhotos(event),
+  }
+}
 
-const archivedEvents: Omit<CollateralWarningEvent, "eventId">[] = []
+export const collateralWarningEventsMock: CollateralWarningEvent[] =
+  seedEvents.map((event, index) =>
+    enrichCollateralEvent({
+      ...event,
+      eventId: seedEventIds[index] ?? `col-seed-${String(index + 1).padStart(3, "0")}`,
+    })
+  )
+
+const archivedEvents: Omit<
+  CollateralWarningEvent,
+  "eventId" | "vendorSitePhotos"
+>[] = []
 
 export const collateralWarningArchiveEventsMock: CollateralWarningEvent[] =
-  archivedEvents.map((event, index) => ({
-    ...event,
-    eventId: ["cw-008"][index] ?? `col-archive-${String(index + 1).padStart(3, "0")}`,
-  }))
+  archivedEvents.map((event, index) =>
+    enrichCollateralEvent({
+      ...event,
+      eventId: ["cw-008"][index] ?? `col-archive-${String(index + 1).padStart(3, "0")}`,
+    })
+  )

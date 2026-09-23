@@ -83,8 +83,8 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
             content: "保存某策略 Switch=OFF 时，若其为最后 1 项已启用策略则阻断并提示【至少保留 1 项有效风控策略】。",
           },
           {
-            label: "抵质押率双阈值 · 表格布局 · 单等级 (R09/R10/R12a/R13d/R13e)",
-            content: "只读展示当前订单抵/质押率 (LTV)；无法计算时在 `—` 下方紧邻 LTV_UNAVAILABLE_HINT（DZY-R08a）。触发条件：「若超过 X% 时触发预警（不含等于）」；底部 LTV_FOOTER_HINT；整卡单等级。",
+            label: "监管业务率双阈值 · 表格布局 · 单等级 (R09/R10/R12a/R13d/R13e)",
+            content: "适用抵押、质押、监管服务三类订单。只读展示当前订单率：抵押→抵押率、质押→质押率、监管服务→监管业务率（getLtvRateLabel）；无法计算时在 `—` 下方按订单类型动态展示 getLtvUnavailableHint(orderType)（DZY-R08a）。触发条件：「若 {rateLabel} 超过 X% 时触发预警（不含等于）」；底部 LTV_FOOTER_HINT；整卡单等级。",
           },
           {
             label: "通知渠道（notify_channels）",
@@ -127,7 +127,7 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "阈值修改即时重算与流水置换 (C07)",
-            content: "修改策略阈值（跌价比例、超时天数、巡检周期、抵质押率阈值）保存成功后，系统立即触发实时指标重算：若仍命中新阈值且存在未解除预警，旧流水置为「已作废」（原因：预警配置阈值调整重算置换）并生成新流水推送；若不命中则保留旧流水并进入新一轮判断。",
+            content: "修改策略阈值（跌价比例、超时天数、巡检周期、监管业务率阈值）保存成功后，系统立即触发实时指标重算：若仍命中新阈值且存在未解除预警，旧流水置为「已作废」（原因：预警配置阈值调整重算置换）并生成新流水推送；若不命中则保留旧流水并进入新一轮判断。",
           },
           {
             label: "升级策略动态调度与补发 (R20a/R24a)",

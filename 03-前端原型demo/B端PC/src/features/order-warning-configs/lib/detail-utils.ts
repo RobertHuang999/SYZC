@@ -23,6 +23,7 @@ import {
 } from "./timeout-config-utils"
 import {
   DEFAULT_LTV_PARAMS,
+  LTV_DUAL_STRATEGY_NAME,
   buildLtvDetailFields,
   parseLtvParamsFromDetailFields,
 } from "./ltv-utils"
@@ -39,7 +40,7 @@ export const ORDER_STRATEGY_DEFINITIONS: {
   },
   {
     key: "ltvDual",
-    name: "抵/质押率双控预警",
+    name: LTV_DUAL_STRATEGY_NAME,
     defaultParams: { ...DEFAULT_LTV_PARAMS },
   },
   {

@@ -13,12 +13,18 @@ import { PrototypeAnnotationProvider, PrototypeAnnotationTarget } from "@/shared
 import { collateralWarningDetailAnnotations } from "../annotations/collateral-warning-detail.annotations"
 import { collateralWarningDocuments } from "../documents/collateral-warning-documents"
 import { SnapshotImageModal, type SnapshotPreviewData } from "@/shared/components/SnapshotImageModal"
+import {
+  PhotoGalleryModal,
+  type PhotoGalleryPreviewData,
+} from "@/shared/components/PhotoGalleryModal"
 
 export function CollateralWarningDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [releaseDialogOpen, setReleaseDialogOpen] = useState(false)
   const [previewImage, setPreviewImage] = useState<SnapshotPreviewData | null>(null)
+  const [previewVendorPhotos, setPreviewVendorPhotos] =
+    useState<PhotoGalleryPreviewData | null>(null)
 
   const event = useMemo(() => getCollateralWarningById(id), [id])
   const headerActions = useMemo(
@@ -118,17 +124,31 @@ export function CollateralWarningDetailPage() {
         <CollateralWarningDetailContent
           event={event}
           onPreviewImage={setPreviewImage}
+          onPreviewVendorPhotos={(photos, initialIndex) =>
+            setPreviewVendorPhotos({
+              title: `现场照片 — 订单 ${event.orderNo}`,
+              desc: `厂商自动回传 · 触发时间：${event.warningTime}`,
+              photos,
+              initialIndex,
+            })
+          }
         />
 
         <ReleasePromptDialog
           open={releaseDialogOpen}
           orderNo={event.orderNo}
+          orderType={event.orderType}
           ltvHitSnapshot={event.ltvHitSnapshot}
           onOpenChange={setReleaseDialogOpen}
           onConfirm={() => {
             setReleaseDialogOpen(false)
             navigate(orderProcessRoute)
           }}
+        />
+
+        <PhotoGalleryModal
+          data={previewVendorPhotos}
+          onClose={() => setPreviewVendorPhotos(null)}
         />
 
         <SnapshotImageModal

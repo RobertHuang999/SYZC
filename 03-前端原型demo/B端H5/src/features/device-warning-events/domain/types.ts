@@ -27,6 +27,8 @@ export type DeviceWarningEvent = {
   triggerSummary: string
   /** 所属仓库（一级），用于筛选与数据权限 */
   warehouseName: string
+  /** 告警触发时设备厂商自动回传的现场照片（可能多张，与监控主动抓拍区分） */
+  vendorSitePhotos: string[]
   snapshotImageStatus: "available" | "none" | "failed"
   warningTime: string
   warningStatus: DeviceWarningStatus

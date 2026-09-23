@@ -485,6 +485,7 @@ export function OrderWarningConfigFormPage() {
                         {def.key === "ltvDual" && (
                           <LtvDualStrategyFields
                             params={strategy.params}
+                            orderType={form.orderType}
                             currentLtv={currentLtv}
                             onChange={(patch) =>
                               updateStrategy(def.key, {

@@ -34,7 +34,7 @@ function validateStrategy(
     const marginCall = Number(ltvParams.marginCallLtv)
     const closeOut = Number(ltvParams.closeOutLtv)
     if (!Number.isFinite(marginCall) || !Number.isFinite(closeOut)) {
-      return "请填写完整的抵/质押率阈值"
+      return "请填写完整的监管业务率阈值"
     }
     if (closeOut <= marginCall) return "平仓线必须高于补仓线"
     if (parseReleaseMethodsParam(ltvParams.marginCallReleaseMethods).length === 0) {

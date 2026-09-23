@@ -33,11 +33,13 @@ function formatCargoSummary(cargoItem: CollateralCargoSnapshot): string {
 type CollateralWarningDetailContentProps = {
   event: CollateralWarningEventDetail
   onPreviewImage?: (data: SnapshotPreviewData) => void
+  onPreviewVendorPhotos?: (photos: string[], initialIndex?: number) => void
 }
 
 export function CollateralWarningDetailContent({
   event,
   onPreviewImage,
+  onPreviewVendorPhotos,
 }: CollateralWarningDetailContentProps) {
   const showPenetration = event.penetrationInfo !== null
   const showDisposal = event.warningStatus === WARNING_STATUS.CLOSED_VALID
@@ -126,6 +128,33 @@ export function CollateralWarningDetailContent({
             </div>
           </div>
 
+          <DetailField label="现场照片">
+            {event.vendorSitePhotos.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  设备厂商在告警触发时自动回传，可能包含多张；与下方监控主动抓拍区分。
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {event.vendorSitePhotos.map((photo, index) => (
+                    <button
+                      key={photo}
+                      type="button"
+                      onClick={() =>
+                        onPreviewVendorPhotos?.(event.vendorSitePhotos, index)
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50/60 px-3 py-1.5 text-xs text-indigo-800 hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer"
+                    >
+                      <ImageIcon className="size-3.5" />
+                      <span>{photo}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <span className="text-sm text-muted-foreground">无厂商回传现场照片</span>
+            )}
+          </DetailField>
+
           <DetailField label="预警时间">
             <DateTimeText value={event.warningTime} plain />
           </DetailField>
@@ -144,7 +173,7 @@ export function CollateralWarningDetailContent({
                 className="h-auto cursor-pointer p-0 text-primary hover:underline"
               >
                 <ImageIcon className="size-3.5" />
-                <span>查看现场监控抓拍图</span>
+                <span>查看照片</span>
               </button>
             ) : event.snapshotImageStatus === "failed" ? (
               <span className="text-xs text-destructive">

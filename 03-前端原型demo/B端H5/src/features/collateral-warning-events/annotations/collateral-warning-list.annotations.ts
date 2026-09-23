@@ -61,7 +61,7 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警类型（7类）",
-            content: "价格下跌、抵/质押率异常、解抵/质押超时、盘点异常、巡检异常、贷中风控预警、物联穿透告警；支持多选 OR 匹配。订单类型统一为抵押、质押、监管服务。",
+            content: "价格下跌、监管业务率异常、解抵/质押超时、盘点异常、巡检异常、贷中风控预警、物联穿透告警；支持多选 OR 匹配。订单类型统一为抵押、质押、监管服务。",
           },
           {
             label: "预警来源",
@@ -96,7 +96,7 @@ export const collateralWarningListAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "复选框准入 (RISK-PUB-B01/B02)",
-            content: "仅【已结案】且【未公示】、有效抵/质押订单可勾选；【已公示】行展示禁用复选框且不可选中；待处置、已作废、监管服务、历史兼容行不可选。已选集合在公示状态变化后自动剔除不可选项。",
+            content: "仅【已结案】且【未公示】、抵押/质押订单可勾选（监管服务订单不支持风险公示，RISK-PUB 门控）；【已公示】行展示禁用复选框；待处置、已作废、历史兼容行不可选。已选集合在公示状态变化后自动剔除不可选项。",
           },
           {
             label: "批量公示确认",

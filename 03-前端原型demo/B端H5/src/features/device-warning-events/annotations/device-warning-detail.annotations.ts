@@ -99,8 +99,12 @@ export const deviceWarningDetailH5Annotations: PrototypeAnnotation[] = [
             content: "触发事实与数值对比摘要（如 库温超标 38℃ / 阈值 30℃），与 PC 端 triggerSummary 字段一致。",
           },
           {
-            label: "抓拍凭证调阅",
-            content: "支持点击抓拍缩略图放大查看高清防篡改水印大图，辅助现场人员确认异常事实。",
+            label: "现场照片 (vendorSitePhotos)",
+            content: "位于预警内容下方；设备厂商在告警触发时自动回传，可能有多张，支持轮播预览。与监控主动抓拍及核销人工上传照片区分。",
+          },
+          {
+            label: "预警抓拍图 (snapshotImageStatus)",
+            content: "系统产生预警时主动调用摄像头抓拍的监控画面；支持点击放大查看高清防篡改水印大图。",
           },
         ],
       },

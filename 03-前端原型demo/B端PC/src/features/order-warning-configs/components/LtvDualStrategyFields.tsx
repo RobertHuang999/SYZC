@@ -7,12 +7,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import type { OrderType } from "../domain/types"
 import {
-  LTV_DISPLAY_LABEL,
   LTV_FOOTER_HINT,
-  LTV_UNAVAILABLE_HINT,
   LTV_RELEASE_METHOD_OPTIONS,
   formatLtvPercent,
+  getLtvRateLabel,
+  getLtvUnavailableHint,
   parseReleaseMethodsParam,
   serializeReleaseMethods,
   toggleReleaseMethod,
@@ -21,6 +22,7 @@ import {
 
 type LtvDualStrategyFieldsProps = {
   params: Record<string, string>
+  orderType: OrderType | ""
   currentLtv?: string | null
   onChange: (patch: Record<string, string>) => void
 }
@@ -91,10 +93,12 @@ function LtvScaleBar({
 }
 
 function LtvTriggerConditionInput({
+  rateLabel,
   value,
   placeholder,
   onChange,
 }: {
+  rateLabel: string
   value: string
   placeholder: string
   onChange: (value: string) => void
@@ -102,7 +106,7 @@ function LtvTriggerConditionInput({
   return (
     <div className="space-y-1 text-sm leading-snug">
       <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-muted-foreground">
-        <span>若 {LTV_DISPLAY_LABEL} 超过</span>
+        <span>若 {rateLabel} 超过</span>
         <Input
           className="h-8 w-[4.5rem]"
           value={value}
@@ -141,9 +145,12 @@ function ReleaseMethodCell({
 
 export function LtvDualStrategyFields({
   params,
+  orderType,
   currentLtv,
   onChange,
 }: LtvDualStrategyFieldsProps) {
+  const rateLabel = getLtvRateLabel(orderType)
+  const unavailableHint = getLtvUnavailableHint(orderType)
   const marginSelected = parseReleaseMethodsParam(params.marginCallReleaseMethods)
   const closeSelected = parseReleaseMethodsParam(params.closeOutReleaseMethods)
   const marginCall = Number(params.marginCallLtv)
@@ -159,14 +166,14 @@ export function LtvDualStrategyFields({
     <>
       <div className="md:col-span-2 space-y-1 text-sm">
         <div>
-          <span className="text-muted-foreground">当前订单{LTV_DISPLAY_LABEL}：</span>
+          <span className="text-muted-foreground">当前订单{rateLabel}：</span>
           <span className="font-medium text-foreground">
             {currentLtv ? formatLtvPercent(currentLtv) : "—"}
           </span>
         </div>
         {!currentLtv && (
           <p className="text-xs text-muted-foreground leading-relaxed">
-            {LTV_UNAVAILABLE_HINT}
+            {unavailableHint}
           </p>
         )}
       </div>
@@ -193,6 +200,7 @@ export function LtvDualStrategyFields({
               <TableCell className="font-medium">补仓线</TableCell>
               <TableCell>
                 <LtvTriggerConditionInput
+                  rateLabel={rateLabel}
                   value={params.marginCallLtv ?? ""}
                   placeholder="75"
                   onChange={(value) => onChange({ marginCallLtv: value })}
@@ -218,6 +226,7 @@ export function LtvDualStrategyFields({
               <TableCell className="font-medium">平仓线</TableCell>
               <TableCell>
                 <LtvTriggerConditionInput
+                  rateLabel={rateLabel}
                   value={params.closeOutLtv ?? ""}
                   placeholder="85"
                   onChange={(value) => onChange({ closeOutLtv: value })}

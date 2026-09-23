@@ -3,7 +3,7 @@ export const RISK_DISCLOSURE_WARNING_TYPES = [
   "价格下跌",
   "盘点异常",
   "巡检异常",
-  "抵/质押率异常",
+  "监管业务率异常",
   "贷中风控预警",
   "物联穿透告警",
 ] as const

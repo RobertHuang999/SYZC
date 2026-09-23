@@ -6,6 +6,7 @@ import {
   buildIotPenetrationInfo,
   resolveIotPenetrationSnapshot,
 } from "../lib/iot-penetration-utils"
+import { getLtvRateLabel } from "@/shared/lib/ltv-rate-label"
 
 const DETAIL_OVERRIDES: Record<
   string,
@@ -15,7 +16,7 @@ const DETAIL_OVERRIDES: Record<
     orderType: "质押",
     ruleName: "PO1002大宗综合风控",
     triggerSnapshot:
-      "命中线: 平仓线 | 触发抵/质押率 (LTV): 88.50% | 阈值: 85.00% | 可用解除: 平仓、部分结清",
+      "命中线: 平仓线 | 触发质押率: 88.50% | 阈值: 85.00% | 可用解除: 平仓、部分结清",
     snapshotImageUrl: "snapshot-cw-001.jpg",
     invalidReason: null,
     penetrationInfo: null,
@@ -91,8 +92,9 @@ function getRealTriggerSnapshot(event: CollateralWarningEvent): string | null {
   if (event.warningSource === "物联穿透" || Boolean(event.deviceEventId)) {
     return null
   }
-  if (event.warningType === "抵/质押率异常") {
-    return "当前抵/质押率: 88.50% | 平仓警戒线: 85.00% | 超出平仓线: +3.50%"
+  if (event.warningType === "监管业务率异常") {
+    const rateLabel = getLtvRateLabel(event.orderType ?? "抵押")
+    return `当前${rateLabel}: 88.50% | 平仓警戒线: 85.00% | 超出平仓线: +3.50%`
   }
   if (event.warningType === "价格下跌") {
     return "现货结算价跌幅: -12.80% | 预警阈值: -12.00% | 超跌: -0.80%"
@@ -113,7 +115,7 @@ function getRealTriggerSnapshot(event: CollateralWarningEvent): string | null {
 }
 
 function buildLtvHitSnapshot(event: CollateralWarningEvent) {
-  if (event.warningType !== "抵/质押率异常") {
+  if (event.warningType !== "监管业务率异常") {
     return null
   }
   return {

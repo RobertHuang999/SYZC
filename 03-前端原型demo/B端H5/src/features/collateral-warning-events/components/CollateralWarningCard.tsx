@@ -1,9 +1,8 @@
 import { useState } from "react"
-import {
-  Camera,
-} from "lucide-react"
+import { Camera, Image as ImageIcon } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { ImagePreviewModal } from "@/components/ui/ImagePreviewModal"
+import { PhotoGalleryModal } from "@/components/ui/PhotoGalleryModal"
 import { formatDateTime } from "@/shared/lib/date-utils"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import {
@@ -37,6 +36,7 @@ export function CollateralWarningCard({
 }: CollateralWarningCardProps) {
   const navigate = useNavigate()
   const [imagePreviewOpen, setImagePreviewOpen] = useState(false)
+  const [vendorGalleryOpen, setVendorGalleryOpen] = useState(false)
 
   const actions = getRowActions(event)
   const publishedLocked = batchMode && isAlreadyPublishedForBatch(event)
@@ -138,15 +138,37 @@ export function CollateralWarningCard({
 
           <div className="flex items-start justify-between text-[11px] gap-2 leading-relaxed">
             <span className="w-16 shrink-0 text-gray-400">预警内容:</span>
-            <span className="flex-1 text-left font-medium text-gray-800 line-clamp-2">
+            <span className="flex-1 text-right font-medium text-gray-800 line-clamp-2">
               {event.warningContent}
             </span>
           </div>
 
-          {/* 现场抓拍图 */}
+          {event.vendorSitePhotos.length > 0 && (
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="w-16 shrink-0 text-gray-400">现场照片:</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setVendorGalleryOpen(true)
+                }}
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:underline cursor-pointer"
+              >
+                <ImageIcon className="size-3.5" />
+                <span>查看照片</span>
+              </button>
+            </div>
+          )}
+
           {event.snapshotImageStatus === "available" && (
-            <div className="flex items-center justify-between border-t border-slate-200/60 pt-1.5 text-[11px]">
-              <span className="text-gray-400">预警抓拍:</span>
+            <div
+              className={`flex items-center justify-between text-[11px] ${
+                event.vendorSitePhotos.length > 0
+                  ? "border-t border-slate-200/60 pt-1.5"
+                  : ""
+              }`}
+            >
+              <span className="w-16 shrink-0 text-gray-400">预警抓拍:</span>
               <button
                 type="button"
                 onClick={(e) => {
@@ -156,7 +178,7 @@ export function CollateralWarningCard({
                 className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:underline cursor-pointer"
               >
                 <Camera className="size-3.5" />
-                <span>查看现场抓拍图</span>
+                <span>查看照片</span>
               </button>
             </div>
           )}
@@ -250,11 +272,18 @@ export function CollateralWarningCard({
         )}
       </article>
 
-      {/* 预警抓拍图弹窗 */}
+      <PhotoGalleryModal
+        open={vendorGalleryOpen}
+        title={`${event.orderNo} · 现场照片`}
+        subTitle={`厂商自动回传 · ${formatDateTime(event.warningTime)}`}
+        photos={event.vendorSitePhotos}
+        onClose={() => setVendorGalleryOpen(false)}
+      />
+
       <ImagePreviewModal
         open={imagePreviewOpen}
         title={`${event.orderNo} · 预警抓拍图`}
-        subTitle={formatDateTime(event.warningTime)}
+        subTitle={`监控主动抓拍 · ${formatDateTime(event.warningTime)}`}
         imageUrl={`mock-snapshot-${event.eventId}`}
         onClose={() => setImagePreviewOpen(false)}
       />

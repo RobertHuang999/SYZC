@@ -7,5 +7,12 @@ export function getOverlayRoot(element: HTMLElement | null): HTMLElement {
     }
     current = current.parentElement
   }
-  return document.body
+  return resolveOverlayRoot()
+}
+
+/** 全局查找移动端浮层挂载根节点（供 Portal 弹层使用） */
+export function resolveOverlayRoot(): HTMLElement {
+  return (
+    document.querySelector<HTMLElement>("[data-overlay-root]") ?? document.body
+  )
 }

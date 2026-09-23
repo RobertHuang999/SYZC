@@ -104,7 +104,7 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
     number: 3,
     kind: "字段",
     title: "预警卡片字段",
-    content: "卡片展示规则名称、等级、状态、设备、系统仓库(仓/库房/分区)、用户手录位置、触发内容、抓拍入口与预警时间。",
+    content: "卡片展示规则名称、等级、状态、设备、系统仓库(仓/库房/分区)、用户手录位置、触发内容、厂商回传现场照片、监控主动抓拍入口与预警时间。",
     documentRefs: {
       fields: {
         section: "一、基础识别与列表业务字段",
@@ -133,6 +133,16 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
           {
             label: "预警时间",
             content: "单条流水触发时间 warningTime，同时作为升级计时起点。",
+          },
+          {
+            label: "现场照片 (vendorSitePhotos)",
+            content:
+              "告警触发时设备厂商硬件自动回传的现场照片，可能有多张；布局位于「预警内容」下方。与「预警抓拍」（系统主动调摄像头抓拍）及核销时人工上传的现场照片区分。",
+          },
+          {
+            label: "预警抓拍 (snapshotImageStatus)",
+            content:
+              "系统产生预警时主动调用同库区摄像头抓拍的监控画面；有图时展示「查看照片」入口。",
           },
           {
             label: "数值型预警示例",

@@ -63,7 +63,7 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
           },
           {
             label: "预警类型 (warningType)",
-            content: "6.2 版本收敛的 7 大预警类型之一（解抵/质押超时、价格下跌、盘点异常、巡检异常、抵/质押率异常、贷中风控预警、物联穿透告警）；不再展示旧复合类型“解抵/质押/监管超时”。",
+            content: "6.2 版本收敛的 7 大预警类型之一（解抵/质押超时、价格下跌、盘点异常、巡检异常、监管业务率异常、贷中风控预警、物联穿透告警）；不再展示旧复合类型“解抵/质押/监管超时”。",
           },
           {
             label: "预警等级 (severityLevel)",
@@ -138,14 +138,14 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
 • 标准模板：模型：【{模型名}】；分数：【{分数或--}】；描述：【{结果描述}】`,
           },
           {
-            label: "② 抵/质押率异常",
-            content: `• 监控指标项：当前抵/质押率 (LTV)
+            label: "② 监管业务率异常",
+            content: `• 预警类型固定为「监管业务率异常」（7 大类枚举）；监控指标项随订单类型：抵押→抵押率、质押→质押率、监管服务→监管业务率（getLtvRateLabel）
 • 实际触发值：88.50%
 • 规则预警阈值：85.00% (平仓线) / 75.00% (预警补仓线)
 • 超标判定结果：超出平仓警戒线 +3.50%
 • 详情页不单独展示 LTV 命中快照卡片；命中线与阈值见「预警内容」与「触发判定数据快照」四列表
 • ltvHitSnapshot 后台持久化，仅供列表/详情「解除预警」引导弹窗（ReleasePromptDialog · R13e）使用
-• 标准模板：订单抵/质押率异常！触发【{补仓线/平仓线}】，当前抵/质押率 (LTV) {值}%，贷款余额 {额} 元，质物价值 {值} 元`,
+• 标准模板：订单监管业务率异常！触发【{补仓线/平仓线}】，当前{抵押率|质押率|监管业务率} {值}%，贷款余额 {额} 元，质物价值 {值} 元`,
           },
           {
             label: "③ 价格下跌",
@@ -194,8 +194,8 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
         title: "风控公式与参数快照",
         items: [
           {
-            label: "抵/质押率 (LTV) 计算公式",
-            content: `抵/质押率 (LTV) = 贷款余额 ÷ 押品实时总市值
+            label: "率指标计算公式（按订单类型展示名不同）",
+            content: `抵押率 / 质押率 / 监管业务率 = 贷款余额 ÷ 押品实时总市值
 其中：押品实时总市值 = 押品在库数量 × 当前市场估值单价
 预警条件：
 • 警戒线预警：LTV ≥ 预警线（如 75%）
@@ -315,7 +315,7 @@ export const collateralWarningDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "商业类 · 待处置",
-            content: "展示【解除预警】；抵/质押率类 ReleasePromptDialog 展示命中线与可用解除方式（R13e），确认后跳转对应抵质押订单信息页办理。",
+            content: "展示【解除预警】；监管业务率类 ReleasePromptDialog 展示命中线与可用解除方式（R13e），确认后跳转对应订单信息页办理。",
           },
           {
             label: "物联类 · 待处置",

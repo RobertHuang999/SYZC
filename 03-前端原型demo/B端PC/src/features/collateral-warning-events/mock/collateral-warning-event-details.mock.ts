@@ -9,13 +9,14 @@ import {
   buildIotPenetrationInfo,
   resolveIotPenetrationSnapshot,
 } from "../lib/iot-penetration-utils"
+import { formatLtvMetricName } from "../lib/ltv-content-utils"
 
 /**
  * 结构化构建真实的押品订单与仓储位置快照（严格对齐字段清单第四章）
  */
 function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnapshot {
   const orderType = event.orderType ?? "抵押"
-  if (event.warningType === "抵/质押率异常") {
+  if (event.warningType === "监管业务率异常") {
     return {
       orderType,
       ownerCompany: "浙江物产中大金属集团有限公司",
@@ -145,7 +146,7 @@ function buildOrderSnapshot(event: CollateralWarningEvent): CollateralOrderSnaps
  * 结构化构建触发时刻的真实判定数据依据（严格对齐字段清单第四章：触发数据快照）
  */
 function buildLtvHitSnapshot(event: CollateralWarningEvent): LtvHitSnapshot | null {
-  if (event.warningType !== "抵/质押率异常") {
+  if (event.warningType !== "监管业务率异常") {
     return null
   }
   return {
@@ -161,9 +162,10 @@ function buildTriggerSnapshot(event: CollateralWarningEvent): CollateralTriggerS
   if (event.warningType === "物联穿透告警") {
     return null
   }
-  if (event.warningType === "抵/质押率异常") {
+  if (event.warningType === "监管业务率异常") {
+    const orderType = event.orderType ?? "抵押"
     return {
-      metricName: "当前抵/质押率 (LTV)",
+      metricName: formatLtvMetricName(orderType),
       triggerValue: "88.50%",
       thresholdValue: "85.00% (平仓线)",
       deviation: "超出平仓警戒线 +3.50%",

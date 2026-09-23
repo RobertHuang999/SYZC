@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react"
-import { Camera, Cpu } from "lucide-react"
+import { Camera, Cpu, Image as ImageIcon } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import { ImagePreviewModal } from "@/components/ui/ImagePreviewModal"
+import { PhotoGalleryModal } from "@/components/ui/PhotoGalleryModal"
 import { SectionCard } from "@/components/ui/SectionCard"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { formatDateTime } from "@/shared/lib/date-utils"
@@ -17,6 +18,7 @@ export function DeviceWarningEventDetailPage() {
   const navigate = useNavigate()
   const event = useMemo(() => getDeviceWarningById(id), [id])
   const [imagePreviewOpen, setImagePreviewOpen] = useState(false)
+  const [vendorGalleryOpen, setVendorGalleryOpen] = useState(false)
   const [allExpanded, setAllExpanded] = useState(true)
 
   if (!event) {
@@ -143,18 +145,36 @@ export function DeviceWarningEventDetailPage() {
                   </p>
                 </div>
 
+                {event.vendorSitePhotos.length > 0 && (
+                  <div className="mt-1 flex items-center justify-between rounded-xl bg-indigo-50/70 p-2.5 text-xs text-indigo-900 border border-indigo-100">
+                    <div className="flex items-center gap-1.5">
+                      <ImageIcon className="size-4 text-indigo-600" />
+                      <span>
+                        现场照片（厂商自动回传 {event.vendorSitePhotos.length} 张）
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setVendorGalleryOpen(true)}
+                      className="rounded-lg bg-indigo-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-2xs active:bg-indigo-700 cursor-pointer"
+                    >
+                      查看照片
+                    </button>
+                  </div>
+                )}
+
                 {event.snapshotImageStatus === "available" && (
                   <div className="mt-1 flex items-center justify-between rounded-xl bg-blue-50/70 p-2.5 text-xs text-blue-900 border border-blue-100">
                     <div className="flex items-center gap-1.5">
                       <Camera className="size-4 text-blue-600" />
-                      <span>现场监控抓拍图已捕获</span>
+                      <span>预警抓拍（监控主动抓拍）</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => setImagePreviewOpen(true)}
                       className="rounded-lg bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-2xs active:bg-blue-700 cursor-pointer"
                     >
-                      查看抓拍
+                      查看照片
                     </button>
                   </div>
                 )}
@@ -311,10 +331,18 @@ export function DeviceWarningEventDetailPage() {
         </PrototypeAnnotationTarget>
       </div>
 
+      <PhotoGalleryModal
+        open={vendorGalleryOpen}
+        title={`${event.deviceName} · 现场照片`}
+        subTitle={`厂商自动回传 · ${formatDateTime(event.warningTime)}`}
+        photos={event.vendorSitePhotos}
+        onClose={() => setVendorGalleryOpen(false)}
+      />
+
       <ImagePreviewModal
         open={imagePreviewOpen}
-        title={`${event.deviceName} · 现场抓拍图`}
-        subTitle={formatDateTime(event.warningTime)}
+        title={`${event.deviceName} · 预警抓拍图`}
+        subTitle={`监控主动抓拍 · ${formatDateTime(event.warningTime)}`}
         imageUrl={`mock-snapshot-${event.eventId}`}
         onClose={() => setImagePreviewOpen(false)}
       />

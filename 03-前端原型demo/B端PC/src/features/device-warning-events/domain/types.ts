@@ -35,6 +35,8 @@ export type DeviceWarningEvent = {
   location: string
   deviceName: string
   triggerSummary: string
+  /** 告警触发时设备厂商自动回传的现场照片（可能多张，与监控主动抓拍区分） */
+  vendorSitePhotos: string[]
   snapshotImageStatus: SnapshotImageStatus
   warningTime: string
   processedTime: string | null

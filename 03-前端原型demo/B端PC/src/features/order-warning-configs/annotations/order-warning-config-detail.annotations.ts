@@ -16,7 +16,7 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
             label: "订单风控多策略流转图",
             content: `flowchart TD
     A["订单预警综合配置 (1:1 绑定订单)"] --> B["01 价格下跌 (跌价% + 等级)"]
-    A --> C["02 抵/质押率 (双阈值 + 分线解除 + 单等级)"]
+    A --> C["02 监管业务率双控 (双阈值 + 分线解除 + 单等级)"]
     A --> D["03 超时预警 (到期提前天数 + 节点超时)"]
     A --> E["04 盘点异常 (账实差% + 现场复核)"]
     A --> F["05 巡检超期 (巡检周期 + 告警)"]
@@ -82,8 +82,8 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
             content: "以只读表格展示巡检人配置多行快照：序号 / 巡检人（组织架构人员，如孙巡检(仓管部)）/ 巡检周期（如每 7 天超期预警）；允许不同责任人独立周期；超期未巡检分别触发，完成对应巡检后解除；与盘点解耦（R17）。",
           },
           {
-            label: "05 抵/质押率预警",
-            content: "双阈值模型：若超过 X% 时触发预警（不含等于）；补仓/平仓分线解除方式；整卡单等级。无法计算当前率时详情不展示该参考字段（DZY-R08a）。R13d/R13e 同前。",
+            label: "02 监管业务率双控预警",
+            content: "双阈值模型：若超过 X% 时触发预警（不含等于）；补仓/平仓分线解除方式；整卡单等级。只读率展示名随订单类型（getLtvRateLabel）；无法计算当前率时详情不展示该参考字段（DZY-R08a）。R13d/R13e 同前。",
           },
           {
             label: "06 贷中风控预警",

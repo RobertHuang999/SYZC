@@ -14,7 +14,7 @@ const orderWarningConfigSeeds: OrderWarningConfigSeed[] = [
     ownerGoodsSummary: "张三/电解铜",
     enabledItems: [
       { type: "跌价", levels: "L3" },
-      { type: "抵质押率", levels: "L3" },
+      { type: "监管业务率", levels: "L3" },
       { type: "巡检", levels: "L2" },
     ],
     status: "生效中",
@@ -41,7 +41,7 @@ const orderWarningConfigSeeds: OrderWarningConfigSeed[] = [
     ownerGoodsSummary: "王五/电解铝",
     enabledItems: [
       { type: "跌价", levels: "L4" },
-      { type: "抵质押率", levels: "L4" },
+      { type: "监管业务率", levels: "L4" },
       { type: "贷中", levels: "L3" },
     ],
     status: "生效中",
@@ -81,7 +81,7 @@ const orderWarningConfigSeeds: OrderWarningConfigSeed[] = [
     ownerGoodsSummary: "周八/甲醇",
     enabledItems: [
       { type: "跌价", levels: "L3" },
-      { type: "抵质押率", levels: "L4" },
+      { type: "监管业务率", levels: "L4" },
       { type: "贷中", levels: "L4" },
     ],
     status: "生效中",
@@ -144,7 +144,7 @@ const orderWarningConfigSeeds: OrderWarningConfigSeed[] = [
     ownerGoodsSummary: "李三/铜板",
     enabledItems: [
       { type: "跌价", levels: "L3" },
-      { type: "抵质押率", levels: "L3" },
+      { type: "监管业务率", levels: "L3" },
       { type: "超时", levels: "L2" },
     ],
     status: "生效中",

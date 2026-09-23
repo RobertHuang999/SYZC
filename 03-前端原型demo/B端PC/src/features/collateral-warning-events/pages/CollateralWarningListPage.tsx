@@ -284,6 +284,7 @@ export function CollateralWarningListPage() {
         <ReleasePromptDialog
           open={releaseTarget !== null}
           orderNo={releaseTarget?.orderNo}
+          orderType={releaseTarget?.orderType}
           ltvHitSnapshot={
             releaseTarget
               ? getCollateralWarningById(releaseTarget.eventId)?.ltvHitSnapshot

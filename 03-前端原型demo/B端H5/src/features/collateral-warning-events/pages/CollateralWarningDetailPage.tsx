@@ -165,6 +165,7 @@ export function CollateralWarningDetailPage() {
       <ReleasePromptSheet
         open={releaseSheetOpen}
         orderNo={event.orderNo}
+        orderType={event.orderType}
         ltvHitSnapshot={event.ltvHitSnapshot}
         onClose={() => setReleaseSheetOpen(false)}
         onConfirm={() => {

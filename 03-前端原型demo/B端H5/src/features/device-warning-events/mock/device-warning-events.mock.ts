@@ -1,4 +1,5 @@
 import { getSeverityLevelByCode } from "@/shared/mock/severity-levels"
+import { inferVendorSitePhotos } from "../lib/vendor-site-photos"
 import type { DeviceWarningEvent } from "../domain/types"
 
 function severity(code: string) {
@@ -20,7 +21,7 @@ function systemWarehousePath(
   return `${warehouse} / ${room} / ${zone}`
 }
 
-export const deviceWarningEventsMock: DeviceWarningEvent[] = [
+const rawDeviceWarningEventsMock: Omit<DeviceWarningEvent, "vendorSitePhotos">[] = [
   {
     eventId: "dev-evt-2026082001",
     ruleName: "挂锁剪杆破坏",
@@ -352,6 +353,12 @@ export const deviceWarningEventsMock: DeviceWarningEvent[] = [
     },
   },
 ]
+
+export const deviceWarningEventsMock: DeviceWarningEvent[] =
+  rawDeviceWarningEventsMock.map((event) => ({
+    ...event,
+    vendorSitePhotos: inferVendorSitePhotos(event),
+  }))
 
 export function getDeviceWarningById(
   eventId: string | undefined

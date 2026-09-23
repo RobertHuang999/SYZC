@@ -1,4 +1,7 @@
+import { useEffect, useState } from "react"
+import { createPortal } from "react-dom"
 import { Camera, X } from "lucide-react"
+import { resolveOverlayRoot } from "@/shared/lib/overlay-root"
 
 type ImagePreviewModalProps = {
   open: boolean
@@ -15,21 +18,31 @@ export function ImagePreviewModal({
   imageUrl,
   onClose,
 }: ImagePreviewModalProps) {
-  if (!open) return null
+  const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null)
 
-  return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
-      {/* 遮罩 */}
+  useEffect(() => {
+    if (!open) return
+    setPortalRoot(resolveOverlayRoot())
+  }, [open])
+
+  if (!open || !portalRoot) return null
+
+  return createPortal(
+    <div
+      className="absolute inset-0 z-[120] flex items-center justify-center p-4"
+      onClick={(e) => e.stopPropagation()}
+    >
       <button
         type="button"
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm touch-none"
         aria-label="关闭预览"
         onClick={onClose}
       />
 
-      {/* 弹窗内容 */}
-      <div className="relative z-10 w-full max-w-[360px] overflow-hidden rounded-2xl bg-gray-900 shadow-2xl border border-gray-800">
-        {/* 顶部标题与关闭 */}
+      <div
+        className="relative z-10 w-full max-w-[360px] overflow-hidden rounded-2xl border border-gray-800 bg-gray-900 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3 text-white">
           <div className="flex items-center gap-2">
             <Camera className="size-4 text-blue-400" />
@@ -49,20 +62,18 @@ export function ImagePreviewModal({
           </button>
         </div>
 
-        {/* 图片区域 */}
         <div className="relative flex min-h-[220px] items-center justify-center bg-black/60 p-3">
           {imageUrl ? (
-            <div className="relative overflow-hidden rounded-lg border border-gray-700 bg-gray-800 w-full flex flex-col items-center">
-              {/* 模拟摄像头画面 */}
-              <div className="w-full h-48 bg-gradient-to-br from-slate-800 via-slate-700 to-zinc-900 flex flex-col items-center justify-center text-center p-4 text-white">
-                <Camera className="size-10 text-cyan-400 mb-2 animate-pulse" />
-                <div className="text-xs font-mono text-cyan-300 font-semibold">
+            <div className="relative flex w-full flex-col items-center overflow-hidden rounded-lg border border-gray-700 bg-gray-800">
+              <div className="flex h-48 w-full flex-col items-center justify-center bg-gradient-to-br from-slate-800 via-slate-700 to-zinc-900 p-4 text-center text-white">
+                <Camera className="mb-2 size-10 animate-pulse text-cyan-400" />
+                <div className="text-xs font-semibold font-mono text-cyan-300">
                   CAM_LIVE_SNAPSHOT_HD
                 </div>
-                <div className="text-[11px] text-gray-400 mt-1">
+                <div className="mt-1 text-[11px] text-gray-400">
                   {title} · 实时抓拍存证
                 </div>
-                <div className="mt-3 inline-flex items-center gap-1 rounded bg-black/50 px-2 py-0.5 text-[10px] text-emerald-400 font-mono">
+                <div className="mt-3 inline-flex items-center gap-1 rounded bg-black/50 px-2 py-0.5 font-mono text-[10px] text-emerald-400">
                   ● REC · 防伪哈希校验通过
                 </div>
               </div>
@@ -74,8 +85,7 @@ export function ImagePreviewModal({
           )}
         </div>
 
-        {/* 底部信息 */}
-        <div className="bg-gray-900 px-4 py-2.5 text-center text-[11px] text-gray-400 border-t border-gray-800 flex items-center justify-between">
+        <div className="flex items-center justify-between border-t border-gray-800 bg-gray-900 px-4 py-2.5 text-[11px] text-gray-400">
           <span>分辨率: 1920x1080 · H.265</span>
           <button
             type="button"
@@ -86,6 +96,7 @@ export function ImagePreviewModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    portalRoot
   )
 }

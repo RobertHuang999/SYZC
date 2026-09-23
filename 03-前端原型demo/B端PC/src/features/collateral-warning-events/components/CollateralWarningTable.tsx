@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { ImageIcon } from "lucide-react"
+import { ImageIcon, ImagesIcon } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { HoverOverflowText } from "@/components/business/HoverOverflowText"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,10 @@ import {
 import { SeverityLevelDisplay } from "@/shared/components/SeverityLevelDisplay"
 import { TableDateTimeCell, TableProcessedInfoCell } from "@/shared/components/TableCells"
 import { SnapshotImageModal, type SnapshotPreviewData } from "@/shared/components/SnapshotImageModal"
+import {
+  PhotoGalleryModal,
+  type PhotoGalleryPreviewData,
+} from "@/shared/components/PhotoGalleryModal"
 import {
   canSelectForBatchPublish,
   getPublishActionLabel,
@@ -44,6 +48,8 @@ export function CollateralWarningTable({
 }: CollateralWarningTableProps) {
   const navigate = useNavigate()
   const [previewImage, setPreviewImage] = useState<SnapshotPreviewData | null>(null)
+  const [previewVendorPhotos, setPreviewVendorPhotos] =
+    useState<PhotoGalleryPreviewData | null>(null)
 
   const selectableOnPage = useMemo(
     () => events.filter(canSelectForBatchPublish),
@@ -95,7 +101,8 @@ export function CollateralWarningTable({
               <TableHead className="w-[110px]">预警等级</TableHead>
               <TableHead className="w-[110px]">预警来源</TableHead>
               <TableHead className="w-[210px]">预警内容</TableHead>
-              <TableHead className="w-16 text-center">抓拍</TableHead>
+              <TableHead className="w-16 text-center">现场照片</TableHead>
+              <TableHead className="w-16 text-center">预警抓拍</TableHead>
               <TableHead className="w-[130px]">预警时间</TableHead>
               <TableHead className="w-[140px]">处理信息</TableHead>
               <TableHead className="w-[90px]">是否公示</TableHead>
@@ -107,7 +114,7 @@ export function CollateralWarningTable({
             {events.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={14}
+                  colSpan={15}
                   className="h-32 text-center text-muted-foreground"
                 >
                   暂无数据
@@ -180,19 +187,42 @@ export function CollateralWarningTable({
                       </HoverOverflowText>
                     </TableCell>
                     <TableCell className="text-center">
+                      {event.vendorSitePhotos.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPreviewVendorPhotos({
+                              title: `现场照片 — 订单 ${event.orderNo}`,
+                              desc: `厂商自动回传 · 触发类型：${event.warningType} | 触发时间：${event.warningTime}`,
+                              photos: event.vendorSitePhotos,
+                            })
+                          }
+                          className="inline-flex items-center justify-center gap-0.5 p-1 rounded hover:bg-muted text-indigo-600 cursor-pointer transition-colors"
+                          title={`查看厂商回传现场照片（${event.vendorSitePhotos.length}张）`}
+                        >
+                          <ImagesIcon className="size-4" />
+                          <span className="text-[10px] font-medium">
+                            {event.vendorSitePhotos.length}
+                          </span>
+                        </button>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
                       {event.snapshotImageStatus === "available" ? (
                         <button
                           type="button"
                           onClick={() =>
                             setPreviewImage({
-                              title: `预警触发监控抓拍图 — 订单 ${event.orderNo}`,
-                              desc: `触发类型：${event.warningType} | 触发时间：${event.warningTime}`,
+                              title: `预警抓拍图 — 订单 ${event.orderNo}`,
+                              desc: `监控主动抓拍 · 触发类型：${event.warningType} | 触发时间：${event.warningTime}`,
                               time: event.warningTime,
                               location: "质押货位监控区",
                             })
                           }
                           className="inline-flex items-center justify-center p-1 rounded hover:bg-muted text-primary cursor-pointer transition-colors"
-                          title="查看抓拍大图"
+                          title="查看监控抓拍大图"
                         >
                           <ImageIcon className="size-4" />
                         </button>
@@ -278,6 +308,11 @@ export function CollateralWarningTable({
           </TableBody>
         </Table>
       </div>
+
+      <PhotoGalleryModal
+        data={previewVendorPhotos}
+        onClose={() => setPreviewVendorPhotos(null)}
+      />
 
       <SnapshotImageModal
         data={previewImage}

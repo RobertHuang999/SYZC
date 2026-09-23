@@ -8,11 +8,13 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { AlertCircleIcon } from "lucide-react"
-import type { LtvHitSnapshot } from "../domain/types"
+import type { LtvHitSnapshot, OrderType } from "../domain/types"
+import { getLtvRateLabel } from "@/shared/lib/ltv-rate-label"
 
 type ReleasePromptDialogProps = {
   open: boolean
   orderNo?: string
+  orderType?: OrderType
   ltvHitSnapshot?: LtvHitSnapshot | null
   onOpenChange: (open: boolean) => void
   onConfirm: () => void
@@ -21,6 +23,7 @@ type ReleasePromptDialogProps = {
 export function ReleasePromptDialog({
   open,
   orderNo,
+  orderType,
   ltvHitSnapshot,
   onOpenChange,
   onConfirm,
@@ -42,13 +45,13 @@ export function ReleasePromptDialog({
         <div className="space-y-3 text-sm text-muted-foreground">
           <p>
             该预警为商业类规则触发{orderNo ? `（订单：${orderNo}）` : ""}
-            ，需前往对应的抵押/质押订单业务流程中完成处置。
+            ，需前往对应的抵押、质押或监管服务订单业务流程中完成处置。
           </p>
           {isLtv && (
             <div className="rounded-lg border bg-muted/30 p-3 text-foreground">
               <p>
                 本次命中：<span className="font-medium">{ltvHitSnapshot.hitLine}</span>
-                （触发时抵/质押率 (LTV) {ltvHitSnapshot.triggerLtv}%）
+                （触发时{getLtvRateLabel(orderType ?? "")} {ltvHitSnapshot.triggerLtv}%）
               </p>
               <p className="mt-2 text-muted-foreground">
                 订单侧仅展示以下解除方式：

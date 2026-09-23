@@ -15,6 +15,10 @@ import { deviceWarningDetailAnnotations } from "../annotations/device-warning-de
 import { deviceWarningDocuments } from "../documents/device-warning-documents"
 import { SnapshotImageModal, type SnapshotPreviewData } from "@/shared/components/SnapshotImageModal"
 import {
+  PhotoGalleryModal,
+  type PhotoGalleryPreviewData,
+} from "@/shared/components/PhotoGalleryModal"
+import {
   formatEmptyValue,
   getDeviceWarningEventById,
 } from "../lib/detail-utils"
@@ -28,6 +32,8 @@ export function DeviceWarningEventDetailPage() {
     useState<DeviceWarningEventDetail | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [previewImage, setPreviewImage] = useState<SnapshotPreviewData | null>(null)
+  const [previewVendorPhotos, setPreviewVendorPhotos] =
+    useState<PhotoGalleryPreviewData | null>(null)
 
   const event = useMemo(() => getDeviceWarningEventById(id), [id])
   const returnRoute = useMemo(() => {
@@ -125,6 +131,37 @@ export function DeviceWarningEventDetailPage() {
               {event.deviceName} ({event.deviceCode})
             </DetailField>
             <DetailField label="预警内容">{event.triggerSummary}</DetailField>
+            <DetailField label="现场照片">
+              {event.vendorSitePhotos.length > 0 ? (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">
+                    设备厂商在告警触发时自动回传，可能包含多张；与下方监控主动抓拍区分。
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {event.vendorSitePhotos.map((photo, index) => (
+                      <button
+                        key={photo}
+                        type="button"
+                        onClick={() =>
+                          setPreviewVendorPhotos({
+                            title: `现场照片 — ${event.ruleName}`,
+                            desc: `厂商自动回传 · 关联设备：${event.deviceName} (${event.deviceCode})`,
+                            photos: event.vendorSitePhotos,
+                            initialIndex: index,
+                          })
+                        }
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50/60 px-3 py-1.5 text-xs text-indigo-800 hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer"
+                      >
+                        <ImageIcon className="size-3.5" />
+                        <span>{photo}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <span className="text-sm text-muted-foreground">无厂商回传现场照片</span>
+              )}
+            </DetailField>
             <DetailField label="预警时间">
               <DateTimeText value={event.warningTime} plain />
             </DetailField>
@@ -143,7 +180,7 @@ export function DeviceWarningEventDetailPage() {
                   }
                 >
                   <ImageIcon className="size-4 mr-1" />
-                  查看触发抓拍大图
+                  查看照片
                 </Button>
               ) : event.snapshotImageStatus === "failed" ? (
                 <span className="text-destructive text-sm">抓拍失败</span>
@@ -247,6 +284,11 @@ export function DeviceWarningEventDetailPage() {
             setToastMessage(`解除成功 — ${target.ruleName}`)
             navigate(returnRoute)
           }}
+        />
+
+        <PhotoGalleryModal
+          data={previewVendorPhotos}
+          onClose={() => setPreviewVendorPhotos(null)}
         />
 
         <SnapshotImageModal

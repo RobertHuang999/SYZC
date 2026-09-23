@@ -3,7 +3,7 @@ export const COLLATERAL_WARNING_TYPES = [
   "价格下跌",
   "盘点异常",
   "巡检异常",
-  "抵/质押率异常",
+  "监管业务率异常",
   "贷中风控预警",
   "物联穿透告警",
 ] as const
@@ -51,6 +51,8 @@ export type CollateralWarningEvent = {
   severityColor: string
   warningSource: WarningSource
   warningContent: string
+  /** 告警触发时设备厂商自动回传的现场照片（物联穿透继承设备侧，可能多张） */
+  vendorSitePhotos: string[]
   snapshotImageStatus: SnapshotImageStatus
   warningTime: string
   processedTime: string | null
@@ -134,7 +136,7 @@ export type CollateralTriggerSnapshot = {
   ruleVersion: string // 判定规则版本
 }
 
-/** 抵/质押率异常命中快照（R13c/R13e） */
+/** 监管业务率异常命中快照（R13c/R13e） */
 export type LtvHitSnapshot = {
   hitLine: "补仓线" | "平仓线"
   triggerLtv: string

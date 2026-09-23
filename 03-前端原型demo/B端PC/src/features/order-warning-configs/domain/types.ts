@@ -3,7 +3,7 @@ export const ORDER_WARNING_ITEM_TYPES = [
   "跌价",
   "盘点",
   "巡检",
-  "抵质押率",
+  "监管业务率",
   "贷中",
 ] as const
 

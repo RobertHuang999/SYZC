@@ -21,6 +21,6 @@ export const ORDER_WARNING_ITEM_BADGE_CLASS: Record<string, string> = {
   跌价: "border-rose-200 bg-rose-50 text-rose-700",
   盘点: "border-violet-200 bg-violet-50 text-violet-700",
   巡检: "border-blue-200 bg-blue-50 text-blue-700",
-  抵质押率: "border-amber-200 bg-amber-50 text-amber-700",
+  监管业务率: "border-amber-200 bg-amber-50 text-amber-700",
   贷中: "border-teal-200 bg-teal-50 text-teal-700",
 }
