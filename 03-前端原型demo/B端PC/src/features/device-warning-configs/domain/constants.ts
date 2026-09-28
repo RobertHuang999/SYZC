@@ -18,7 +18,7 @@ export const DEVICE_WARNING_CONFIG_STATUS_OPTIONS = [
 
 export const PAGE_SIZE = 10
 
-/** 附录 A · 线上枚举（2026-09-07 对齐） */
+/** 附录 A · 与业务规则规格 V4.5 对齐（2026-09-28） */
 export const DEVICE_WARNING_SUB_TYPES: Record<string, string[]> = {
   "设备图像识别预警": [
     "行人入侵",
