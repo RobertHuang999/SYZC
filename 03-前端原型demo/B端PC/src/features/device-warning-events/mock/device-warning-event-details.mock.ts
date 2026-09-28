@@ -127,7 +127,15 @@ const DETAIL_OVERRIDES: Record<string, DeviceWarningEventDetailOverride> = {
     ruleConfigSnapshot: {
       monitorThreshold: "设备离线",
       ruleVersion: 1,
-      upgradeStrategy: "—",
+      upgradeStrategy: "持续未解除 1 天后 ➔ 运维主管(设备部)",
+    },
+  },
+  "evt-020": {
+    warningSubType: "设备离线",
+    ruleConfigSnapshot: {
+      monitorThreshold: "设备离线",
+      ruleVersion: 1,
+      upgradeStrategy: "持续未解除 1 天后 ➔ 库区值班员(仓储部)",
     },
   },
   "evt-013": {

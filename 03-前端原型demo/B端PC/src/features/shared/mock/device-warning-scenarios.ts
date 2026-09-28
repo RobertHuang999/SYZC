@@ -74,6 +74,12 @@ export function formatMetricTriggerCondition(
   return `${threshold.label} < ${threshold.min} ${threshold.unit} 或 > ${threshold.max} ${threshold.unit}`
 }
 
+/**
+ * 配置规则 ↔ 精编流水对照（02/01 usecase · enrichDeviceWarningEvent）：
+ * dwc-010 GPS设备离线 ↔ evt-008（人工解除）
+ * dwc-018 挂锁设备离线 ↔ evt-020（恢复自动）
+ * dwc-006 传感器离线 ↔ evt-004（恢复自动）
+ */
 export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
   {
     configId: "dwc-001",
@@ -142,7 +148,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     severityLevelId: "sl-l3",
     deviceScope: "已选 3 台传感器",
     warningSubTypes: ["设备离线"],
-    dispositionMode: "ACTION_REQUIRED",
+    dispositionMode: "AUTO_RECOVER",
     triggerCondition: "设备离线",
         status: "已失效",
     linkedEventIds: ["evt-004"],
@@ -190,7 +196,7 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     severityLevelId: "sl-l3",
     deviceScope: "已选 4 台 GPS",
     warningSubTypes: ["设备离线"],
-    dispositionMode: "AUTO_RECOVER",
+    dispositionMode: "ACTION_REQUIRED",
     triggerCondition: "设备离线",
         status: "生效中",
     linkedEventIds: ["evt-008"],
@@ -278,6 +284,18 @@ export const DEVICE_WARNING_RULE_SCENARIOS: DeviceWarningRuleScenario[] = [
     triggerCondition: formatMetricTriggerCondition("二氧化碳异常"),
     status: "生效中",
     linkedEventIds: ["evt-019"],
+  },
+  {
+    configId: "dwc-018",
+    ruleName: "挂锁设备离线",
+    warningType: "智能挂锁预警",
+    severityLevelId: "sl-l3",
+    deviceScope: "已选 15 把挂锁",
+    warningSubTypes: ["设备离线"],
+    dispositionMode: "AUTO_RECOVER",
+    triggerCondition: "设备离线",
+    status: "生效中",
+    linkedEventIds: ["evt-020"],
   },
 ]
 

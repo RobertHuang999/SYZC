@@ -125,7 +125,8 @@ export function validateDeviceWarningConfig(
 
   const autoRecoverError = validateAutoRecoverDisposition(
     normalizedSubTypes,
-    values.dispositionMode
+    values.dispositionMode,
+    values.warningType
   )
   if (autoRecoverError) {
     return autoRecoverError

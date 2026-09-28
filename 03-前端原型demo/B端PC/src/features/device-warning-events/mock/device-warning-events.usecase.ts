@@ -67,7 +67,7 @@ export const USECASE_SCENARIOS = [
 ] as const
 
 /**
- * 精编用例记录（18 条，覆盖三态 + Demo ASCII 5 行）
+ * 精编用例记录（19 条，覆盖三态 + Demo ASCII 5 行；含挂锁/GPS 设备离线与配置 dwc-018/dwc-010 联动）
  * 默认筛选「待处置」下，前 5 条按预警时间倒序对齐 ASCII。
  */
 const rawDeviceWarningEventUseCases: RawDeviceWarningEvent[] = [
@@ -376,6 +376,23 @@ const rawDeviceWarningEventUseCases: RawDeviceWarningEvent[] = [
     warningStatus: WARNING_STATUS.OPEN_VALID,
     warehouseName: USECASE_WAREHOUSES.WH_A,
     version: 4,
+  },
+  {
+    eventId: "evt-020",
+    ruleName: "挂锁设备离线",
+    ...USECASE_SEVERITY.L3,
+    warningType: "智能挂锁预警",
+    warehouseDetail: systemWarehousePath(USECASE_WAREHOUSES.WH_E, "监管区", "2号垛位"),
+    location: "2号垛位挂锁位",
+    deviceName: "LK02",
+    triggerSummary: "设备离线",
+    snapshotImageStatus: "available",
+    warningTime: "2026-08-20 05:40:00",
+    processedTime: null,
+    processedBy: null,
+    warningStatus: WARNING_STATUS.OPEN_VALID,
+    warehouseName: USECASE_WAREHOUSES.WH_E,
+    version: 1,
   },
   {
     eventId: "evt-018",

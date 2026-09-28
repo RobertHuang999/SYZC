@@ -217,6 +217,11 @@ export const deviceWarningListAnnotations: PrototypeAnnotation[] = [
             content:
               "每条厂商事件独立落账生成全局唯一 Event ID，禁止频次累加、合并覆盖或频次抽屉；同设备同指标再次越限独立生成新行记录。",
           },
+          {
+            label: "离线 Mock 与 03/02 规则对照",
+            content:
+              "精编流水：evt-008 GPS设备离线（dwc-010 · 人工解除 · 可勾选解除）；evt-020 挂锁设备离线（dwc-018 · 恢复自动 · 仅详情）；evt-004 传感器离线（dwc-006 · 恢复自动 · 仅详情）。GPS 整类禁恢复自动结案（03/02 附录 A V5.1）。",
+          },
         ],
       },
     ],

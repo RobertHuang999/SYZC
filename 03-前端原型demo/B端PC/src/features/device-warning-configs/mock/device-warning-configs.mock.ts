@@ -95,7 +95,9 @@ function buildExtraConfigs(): DeviceWarningConfig[] {
       warningType: sample.warningType,
       subTypes: sample.subTypes,
       severityLevelId: severityCycle[index % severityCycle.length],
-      dispositionMode: sample.dispositionMode ?? getRecommendedDisposition(subTypes),
+      dispositionMode:
+        sample.dispositionMode ??
+        getRecommendedDisposition(subTypes, sample.warningType),
       deviceScope: subTypes.includes("设备上线")
         ? "仅针对新设备（全局监听）"
         : `已选 ${3 + (index % 10)} 台设备`,

@@ -30,7 +30,7 @@ function cloneWithIndex(index: number, template: DeviceWarningEvent): DeviceWarn
   return enrichDeviceWarningEvent(raw)
 }
 
-/** 列表页 Mock：精编用例 18 条 + 扩展至 Demo 要求的 128 条 */
+/** 列表页 Mock：精编用例 19 条 + 扩展至 Demo 要求的 128 条 */
 export const deviceWarningEventsMock: DeviceWarningEvent[] = Array.from(
   { length: TOTAL_MOCK_COUNT },
   (_, index) => {

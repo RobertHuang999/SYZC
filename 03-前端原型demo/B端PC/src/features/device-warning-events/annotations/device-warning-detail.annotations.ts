@@ -149,7 +149,7 @@ export const deviceWarningDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "处置策略快照 (disposition_mode)",
-            content: "固化触发时刻规则处置策略：触发即结案 / 人工解除结案 / 恢复自动结案；决定详情是否展示「解除预警」入口（R14'：仅人工解除档=有）。",
+            content: "固化触发时刻规则处置策略：触发即结案 / 人工解除结案 / 恢复自动结案；决定详情是否展示「解除预警」入口（DEV-C01：仅人工解除档=有）。**设备GPS预警**流水快照均为人工解除或触发即结案（03/02 V5.1 禁恢复自动结案），GPS 离线待处置须人工解除。",
           },
           {
             label: "监控阈值快照",

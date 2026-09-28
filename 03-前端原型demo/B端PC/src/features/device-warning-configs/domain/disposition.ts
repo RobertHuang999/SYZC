@@ -47,9 +47,8 @@ const SENSOR_SUB_TYPES = [
 ] as const
 
 /**
- * R15c 白名单：仅下列子类型存在 02/01 R03 明确恢复信号，允许「恢复自动结案」。
- * GPS 进/出围栏、普通限速、怠速滞留、路线偏离、非法拆除：三方不提供恢复自动结案回调，禁止 AUTO_RECOVER。
- * 其余子类型禁止 AUTO_RECOVER，避免落账后无 R03/R04 闭环。
+ * R15c 白名单（子类型名级 · 须结合预警大类矩阵）：温湿度/气体及非 GPS 类「设备离线」等存在 02/01 R03 恢复信号。
+ * **设备GPS预警整类**禁止 AUTO_RECOVER（三方全子类型无恢复回调），以 SUB_TYPE_DISPOSITION_BY_CATEGORY 为准。
  */
 export const AUTO_RECOVER_ALLOWED_SUB_TYPES = [
   ...SENSOR_SUB_TYPES,
@@ -84,7 +83,7 @@ export type SubTypeDispositionCapability = {
   r03Signal: string
 }
 
-/** 附录 A · 子类型 × disposition 能力（与 constants.ts 枚举对齐） */
+/** 附录 A V5.1 · 子类型 × disposition 能力（与 constants.ts 枚举对齐；GPS 整类禁 AUTO_RECOVER） */
 export const SUB_TYPE_DISPOSITION_BY_CATEGORY: Record<
   string,
   Record<string, SubTypeDispositionCapability>
@@ -214,6 +213,11 @@ export const SUB_TYPE_DISPOSITION_BY_CATEGORY: Record<
       autoRecoverAllowed: false,
       r03Signal: "无（不与开锁配对结案）",
     },
+    设备离线: {
+      recommended: "AUTO_RECOVER",
+      autoRecoverAllowed: true,
+      r03Signal: "设备重新上线",
+    },
     设备上线: {
       recommended: "RECORD_ONLY",
       autoRecoverAllowed: false,
@@ -294,9 +298,9 @@ export const SUB_TYPE_DISPOSITION_BY_CATEGORY: Record<
       r03Signal: "无（安防破坏类；三方不提供恢复自动结案回调）",
     },
     设备离线: {
-      recommended: "AUTO_RECOVER",
-      autoRecoverAllowed: true,
-      r03Signal: "设备重新上线",
+      recommended: "ACTION_REQUIRED",
+      autoRecoverAllowed: false,
+      r03Signal: "无（三方不提供恢复自动结案回调）",
     },
     设备上线: {
       recommended: "RECORD_ONLY",
@@ -311,41 +315,67 @@ export const SUB_TYPE_DISPOSITION_BY_CATEGORY: Record<
   },
 }
 
-export function isAutoRecoverAllowedForSubType(subType: string): boolean {
-  return (AUTO_RECOVER_ALLOWED_SUB_TYPES as readonly string[]).includes(
-    subType.trim()
-  )
+export function getSubTypeDispositionCapability(
+  warningType: string,
+  subType: string
+): SubTypeDispositionCapability | undefined {
+  const normalized = subType.trim()
+  return SUB_TYPE_DISPOSITION_BY_CATEGORY[warningType]?.[normalized]
+}
+
+export function isAutoRecoverAllowedForSubType(
+  subType: string,
+  warningType?: string
+): boolean {
+  const normalized = subType.trim()
+  if (warningType) {
+    const cap = getSubTypeDispositionCapability(warningType, normalized)
+    if (cap) {
+      return cap.autoRecoverAllowed
+    }
+  }
+  return (AUTO_RECOVER_ALLOWED_SUB_TYPES as readonly string[]).includes(normalized)
 }
 
 /** 所选子类型中不允许 AUTO_RECOVER 的项（R15c） */
-export function getAutoRecoverIneligibleSubTypes(subTypes: string[]): string[] {
+export function getAutoRecoverIneligibleSubTypes(
+  subTypes: string[],
+  warningType?: string
+): string[] {
   return subTypes
     .map((item) => item.trim())
     .filter(Boolean)
-    .filter((subType) => !isAutoRecoverAllowedForSubType(subType))
+    .filter((subType) => !isAutoRecoverAllowedForSubType(subType, warningType))
 }
 
 /** @deprecated 使用 getAutoRecoverIneligibleSubTypes */
-export function getAutoRecoverForbiddenSubTypes(subTypes: string[]): string[] {
-  return getAutoRecoverIneligibleSubTypes(subTypes)
+export function getAutoRecoverForbiddenSubTypes(
+  subTypes: string[],
+  warningType?: string
+): string[] {
+  return getAutoRecoverIneligibleSubTypes(subTypes, warningType)
 }
 
-export function canSelectAutoRecoverDisposition(subTypes: string[]): boolean {
+export function canSelectAutoRecoverDisposition(
+  subTypes: string[],
+  warningType?: string
+): boolean {
   const normalized = subTypes.map((item) => item.trim()).filter(Boolean)
   if (normalized.length === 0) {
     return false
   }
-  return getAutoRecoverIneligibleSubTypes(normalized).length === 0
+  return getAutoRecoverIneligibleSubTypes(normalized, warningType).length === 0
 }
 
 export function validateAutoRecoverDisposition(
   subTypes: string[],
-  mode: DispositionMode
+  mode: DispositionMode,
+  warningType?: string
 ): string | null {
   if (mode !== "AUTO_RECOVER") {
     return null
   }
-  const ineligible = getAutoRecoverIneligibleSubTypes(subTypes)
+  const ineligible = getAutoRecoverIneligibleSubTypes(subTypes, warningType)
   if (ineligible.length === 0) {
     return null
   }
@@ -353,12 +383,21 @@ export function validateAutoRecoverDisposition(
 }
 
 /** 单个子类型的系统推荐（非强制，用户可改；AUTO_RECOVER 仍受 R15c 白名单约束） */
-export function getRecommendedDispositionForSubType(subType: string): DispositionMode {
+export function getRecommendedDispositionForSubType(
+  subType: string,
+  warningType?: string
+): DispositionMode {
   const normalized = subType.trim()
+  if (warningType) {
+    const cap = getSubTypeDispositionCapability(warningType, normalized)
+    if (cap) {
+      return cap.recommended
+    }
+  }
   if ((NOTIFY_SUB_TYPES as readonly string[]).includes(normalized)) {
     return "RECORD_ONLY"
   }
-  if (isAutoRecoverAllowedForSubType(normalized)) {
+  if (isAutoRecoverAllowedForSubType(normalized, warningType)) {
     return "AUTO_RECOVER"
   }
   if ((ACTION_REQUIRED_SUB_TYPES as readonly string[]).includes(normalized)) {
@@ -368,16 +407,21 @@ export function getRecommendedDispositionForSubType(subType: string): Dispositio
 }
 
 /** 多选子类型时的规则级推荐默认 */
-export function getRecommendedDisposition(subTypes: string[]): DispositionMode {
+export function getRecommendedDisposition(
+  subTypes: string[],
+  warningType?: string
+): DispositionMode {
   const normalized = subTypes.map((item) => item.trim()).filter(Boolean)
   if (normalized.length === 0) {
     return "ACTION_REQUIRED"
   }
   if (normalized.length === 1) {
-    return getRecommendedDispositionForSubType(normalized[0])
+    return getRecommendedDispositionForSubType(normalized[0], warningType)
   }
 
-  const recommendations = normalized.map(getRecommendedDispositionForSubType)
+  const recommendations = normalized.map((subType) =>
+    getRecommendedDispositionForSubType(subType, warningType)
+  )
   const allSame = recommendations.every((mode) => mode === recommendations[0])
   if (allSame) {
     return recommendations[0]
@@ -390,7 +434,11 @@ export function getRecommendedDisposition(subTypes: string[]): DispositionMode {
   ) {
     return "RECORD_ONLY"
   }
-  if (normalized.every(isAutoRecoverAllowedForSubType)) {
+  if (
+    normalized.every((subType) =>
+      isAutoRecoverAllowedForSubType(subType, warningType)
+    )
+  ) {
     return "AUTO_RECOVER"
   }
   return "ACTION_REQUIRED"
@@ -398,21 +446,23 @@ export function getRecommendedDisposition(subTypes: string[]): DispositionMode {
 
 export function isDispositionDeviatingFromRecommendation(
   subTypes: string[],
-  mode: DispositionMode
+  mode: DispositionMode,
+  warningType?: string
 ): boolean {
   const normalized = subTypes.map((item) => item.trim()).filter(Boolean)
   if (normalized.length === 0) {
     return false
   }
-  return mode !== getRecommendedDisposition(normalized)
+  return mode !== getRecommendedDisposition(normalized, warningType)
 }
 
 export function getDispositionDeviationMessage(
   subTypes: string[],
-  mode: DispositionMode
+  mode: DispositionMode,
+  warningType?: string
 ): string {
   const normalized = subTypes.map((item) => item.trim()).filter(Boolean)
-  const recommended = getRecommendedDisposition(normalized)
+  const recommended = getRecommendedDisposition(normalized, warningType)
   const subTypeText = normalized.join("、")
   const recommendedLabel = DISPOSITION_MODE_LABELS[recommended]
   const selectedLabel = DISPOSITION_MODE_LABELS[mode]
@@ -428,13 +478,15 @@ export function getDispositionDeviationMessage(
 
   if (
     mode === "ACTION_REQUIRED" &&
-    normalized.every(isAutoRecoverAllowedForSubType)
+    normalized.every((subType) =>
+      isAutoRecoverAllowedForSubType(subType, warningType)
+    )
   ) {
     return `子类型「${subTypeText}」系统推荐「${recommendedLabel}」。选择「${selectedLabel}」后须人工解除结案，请确认仍按此策略保存。`
   }
 
   if (mode === "AUTO_RECOVER") {
-    const ineligible = getAutoRecoverIneligibleSubTypes(normalized)
+    const ineligible = getAutoRecoverIneligibleSubTypes(normalized, warningType)
     if (ineligible.length > 0) {
       return `子类型「${ineligible.join("、")}」无恢复信号，不可选「${selectedLabel}」`
     }
@@ -458,8 +510,13 @@ export function formatDispositionSnapshotLabel(mode: DispositionMode): string {
 }
 
 /** 子类型 chip 展示：系统推荐（非能力上限） */
-export function formatRecommendedDispositionHint(subType: string): string {
-  return DISPOSITION_MODE_SHORT_LABELS[getRecommendedDispositionForSubType(subType)]
+export function formatRecommendedDispositionHint(
+  subType: string,
+  warningType?: string
+): string {
+  return DISPOSITION_MODE_SHORT_LABELS[
+    getRecommendedDispositionForSubType(subType, warningType)
+  ]
 }
 
 /** @deprecated 使用 formatRecommendedDispositionHint */

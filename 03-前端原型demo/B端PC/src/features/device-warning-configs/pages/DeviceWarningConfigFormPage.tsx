@@ -122,15 +122,22 @@ export function DeviceWarningConfigFormPage() {
 
   const hasOnlineSubTypeOnly =
     form.warningSubTypes.length === 1 && isDeviceOnlineSubType(form.warningSubTypes[0] ?? "")
-  const recommendedDisposition = getRecommendedDisposition(form.warningSubTypes)
+  const recommendedDisposition = getRecommendedDisposition(
+    form.warningSubTypes,
+    form.warningType
+  )
   const dispositionEffects = resolveDispositionEffects(form.dispositionMode)
   const hideUpgradeSection = isGlobalNewDevice || dispositionEffects.hideUpgrade
   const hasExternalNotifyChannel = form.notifyChannels.length > 0
   const dispositionDeviates = isDispositionDeviatingFromRecommendation(
     form.warningSubTypes,
-    form.dispositionMode
+    form.dispositionMode,
+    form.warningType
   )
-  const autoRecoverSelectable = canSelectAutoRecoverDisposition(form.warningSubTypes)
+  const autoRecoverSelectable = canSelectAutoRecoverDisposition(
+    form.warningSubTypes,
+    form.warningType
+  )
 
   const updateMetricThreshold = (
     metric: keyof DeviceWarningConfigFormValues["metricThresholds"],
@@ -175,7 +182,7 @@ export function DeviceWarningConfigFormPage() {
     setDirty(true)
     const available = DEVICE_WARNING_SUB_TYPES[type] || []
     const defaultSubs = available.length > 0 ? [available[0]] : []
-    const dispositionMode = getRecommendedDisposition(defaultSubs)
+    const dispositionMode = getRecommendedDisposition(defaultSubs, type)
 
     setForm((current) => ({
       ...current,
@@ -377,7 +384,10 @@ export function DeviceWarningConfigFormPage() {
                 <div className="flex flex-wrap gap-2 pt-1">
                   {(DEVICE_WARNING_SUB_TYPES[form.warningType] || []).map((subType) => {
                     const isSelected = form.warningSubTypes.includes(subType)
-                    const recommendationHint = formatRecommendedDispositionHint(subType)
+                    const recommendationHint = formatRecommendedDispositionHint(
+                      subType,
+                      form.warningType
+                    )
                     return (
                       <button
                         key={subType}
@@ -964,7 +974,8 @@ export function DeviceWarningConfigFormPage() {
           title="确认处置策略"
           description={getDispositionDeviationMessage(
             form.warningSubTypes,
-            form.dispositionMode
+            form.dispositionMode,
+            form.warningType
           )}
           confirmLabel="确认保存"
           onOpenChange={setDispositionConfirmOpen}

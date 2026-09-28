@@ -58,7 +58,7 @@ export function inferDispositionModeFromEvent(
 
   const subType = extractSubTypeFromSummary(event.triggerSummary)
   if (subType) {
-    return getRecommendedDisposition([subType])
+    return getRecommendedDisposition([subType], event.warningType)
   }
 
   if (

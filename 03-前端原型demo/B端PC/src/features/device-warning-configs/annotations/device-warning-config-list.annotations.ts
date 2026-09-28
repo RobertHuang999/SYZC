@@ -93,7 +93,7 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
 | **序号** | 整数；系统生成 | 按当前列表页排序从 1 开始 | 翻页后重新计算；非持久化主键 |
 | **规则名称** | 单行文本输入框 | 最多 50 个字符；租户内唯一 | 点击查看详情；支持模糊检索 |
 | **预警类型** | 下拉枚举 | 设备图像识别预警 / 设备物联预警 / 智能挂锁预警 / 人脸门禁预警 / 设备GPS预警 | 编辑页只读（R06）；联动子类型与可选设备 |
-| **处置策略** | 单选卡片组 | 触发即结案 / 人工解除结案 / 恢复自动结案 | 遵循 R15 / R15c 白名单；GPS 围栏/限速/怠速/偏离/拆除禁配恢复自动结案 |
+| **处置策略** | 单选卡片组 | 触发即结案 / 人工解除结案 / 恢复自动结案 | 遵循 R15 / R15c 白名单；**设备GPS预警**全部子类型禁配恢复自动结案 |
 | **预警等级** | 下拉单选 | 读取 03/01 已启用等级（2~20 档）；展示编码、名称与色块 | 提交等级唯一标识；修改后对新触发预警生效 |
 | **关联设备范围** | 设备穿梭框多选 | 展示设备类型、系统内名称及绑定仓库/位置；或「仅针对新设备」 | 未勾选全局新设备时必填（R08）；同设备同子类型唯一（R04） |
 | **触发条件摘要** | 数字输入框（最低阈值 / 最高阈值合并） | 数值型合并为 \`[最低值, 最高值]\`；事件型展示事件描述 | 仅持续型数值子类型有区间；厂商预过滤，平台不配防抖 |
@@ -131,9 +131,18 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
     ],
   },
   {
+    id: "device-warning-config-list-mock-crosswalk",
+    targetId: "device-warning-config-table",
+    number: 5,
+    kind: "规则",
+    title: "Mock 与 02/01 流水联动（离线/GPS）",
+    content: "列表 Mock 与共享 scenarios 一致：挂锁设备离线 dwc-018（恢复自动）→ evt-020；GPS设备离线 dwc-010（人工解除）→ evt-008；传感器离线 dwc-006（恢复自动）→ evt-004。",
+    details: [],
+  },
+  {
     id: "device-warning-config-pagination",
     targetId: "device-warning-config-pagination",
-    number: 5,
+    number: 6,
     kind: "交互",
     title: "分页与页容量设置",
     content: "标准分页组件，支持 10/20/50 条每页切换。",
