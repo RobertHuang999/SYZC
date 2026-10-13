@@ -14,6 +14,7 @@ type DropdownFilterPillProps = {
   options: DropdownOption[]
   onChange: (value: string) => void
   renderLabel?: (value: string) => string
+  theme?: "orange" | "blue"
 }
 
 type MenuPosition = {
@@ -28,6 +29,7 @@ export function DropdownFilterPill({
   options,
   onChange,
   renderLabel,
+  theme = "orange",
 }: DropdownFilterPillProps) {
   const [open, setOpen] = useState(false)
   const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null)
@@ -42,6 +44,16 @@ export function DropdownFilterPill({
     : isSelected
       ? selectedOption?.label || value
       : label
+
+  const isOrange = theme === "orange"
+  const activeBtnClass = isOrange
+    ? "bg-orange-50 text-orange-600 font-semibold border border-orange-200"
+    : "bg-blue-50 text-blue-600 font-semibold border border-blue-200"
+
+  const activeIconClass = isOrange ? "text-orange-600" : "text-blue-600"
+  const activeItemClass = isOrange
+    ? "bg-orange-50 font-bold text-orange-600"
+    : "bg-blue-50 font-bold text-blue-600"
 
   const updateMenuPosition = useCallback(() => {
     const trigger = triggerRef.current
@@ -99,14 +111,14 @@ export function DropdownFilterPill({
         onClick={toggleOpen}
         className={`flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
           isSelected
-            ? "bg-blue-50 text-blue-600 font-semibold border border-blue-200"
-            : "bg-[#f4f5f7] text-gray-700 hover:bg-gray-200 active:bg-gray-200"
+            ? activeBtnClass
+            : "bg-[#232D39]/5 text-[#232D39]/70 hover:bg-[#232D39]/10 active:bg-[#232D39]/10"
         }`}
       >
         <span className="max-w-[85px] truncate">{displayLabel}</span>
         <ChevronDown
-          className={`size-3 text-gray-400 transition-transform ${
-            open ? "rotate-180 text-blue-600" : ""
+          className={`size-3 text-[#232D39]/40 transition-transform ${
+            open ? `rotate-180 ${activeIconClass}` : ""
           }`}
         />
       </button>
@@ -144,13 +156,13 @@ export function DropdownFilterPill({
                     }}
                     className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors ${
                       active
-                        ? "bg-blue-50 font-bold text-blue-600"
+                        ? activeItemClass
                         : "text-gray-700 hover:bg-gray-50 active:bg-gray-100"
                     }`}
                   >
                     <span className="truncate">{option.label}</span>
                     {active && (
-                      <Check className="size-3.5 text-blue-600 shrink-0 ml-1" />
+                      <Check className={`size-3.5 shrink-0 ml-1 ${activeIconClass}`} />
                     )}
                   </button>
                 )

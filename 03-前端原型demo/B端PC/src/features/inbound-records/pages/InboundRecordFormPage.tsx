@@ -17,9 +17,11 @@ import { InboundBasicInfoSection } from "../components/InboundBasicInfoSection"
 import { InboundFormSummaryBar } from "../components/InboundFormSummaryBar"
 import { InboundGoodsSection } from "../components/InboundGoodsSection"
 import { RelatedOrderPickerDialog } from "../components/RelatedOrderPickerDialog"
-import { RELATED_ORDER_DIALOG_TITLE } from "../domain/form-constants"
+import { OwnerVerifyDialog } from "../components/OwnerVerifyDialog"
+import { ApprovalFlowSelectDialog } from "../components/ApprovalFlowSelectDialog"
+import { ImageViewerModal } from "../components/ImageViewerModal"
 import { INBOUND_FORM_MESSAGES } from "@prototype/shared/inbound/form-messages"
-import { INBOUND_APPLY_LIST_PATH } from "../domain/constants"
+import { INBOUND_RECORD_LIST_PATH } from "../domain/constants"
 import type { InboundFormState } from "../domain/form-types"
 import { inboundRecordDocuments } from "../documents/inbound-record-documents"
 import { inboundRecordFormAnnotations } from "../annotations/inbound-record-form.annotations"
@@ -34,6 +36,12 @@ import {
   FORM_WAREHOUSES,
   getRelatedOrdersByType,
 } from "../mock/inbound-form.mock"
+import {
+  inboundAppliesMock,
+  inboundRecordsMock,
+  CURRENT_USER_NAME,
+  CURRENT_USER_ORG,
+} from "../mock/inbound-records.mock"
 
 export function InboundRecordFormPage() {
   const navigate = useNavigate()
@@ -45,6 +53,14 @@ export function InboundRecordFormPage() {
   const [toast, setToast] = useState<string | null>(null)
   const [highlightGoodsId, setHighlightGoodsId] = useState<string | null>(null)
 
+  // 选项 A：完整还原两大业务确认弹窗
+  const [ownerVerifyOpen, setOwnerVerifyOpen] = useState(false)
+  const [flowSelectOpen, setFlowSelectOpen] = useState(false)
+  const [submitLoading, setSubmitLoading] = useState(false)
+
+  // 图片全屏大图预览弹窗
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
+
   const totals = useMemo(() => calcFormTotals(form.goodsLines), [form.goodsLines])
 
   const patchForm = (patch: Partial<InboundFormState>) => {
@@ -53,7 +69,7 @@ export function InboundRecordFormPage() {
 
   const showToast = (message: string) => {
     setToast(message)
-    window.setTimeout(() => setToast(null), 2600)
+    window.setTimeout(() => setToast(null), 2800)
   }
 
   const handleCancel = () => {
@@ -64,19 +80,32 @@ export function InboundRecordFormPage() {
     navigate(-1)
   }
 
+  // 营业执照 OCR 拍照模拟识别
   const handleOcr = () => {
-    patchForm({
-      ownerType: "企业货主",
-      ownerName: "四川华西大宗商品供应链管理有限公司",
-      ownerIdentifier: "91510100MA6289B51X",
-      contactPhone: "028-87654321",
-    })
-    showToast("营业执照 OCR 拍照识别成功：已自动填入公司全称与统一信用代码")
+    showToast("正在进行营业执照 OCR 图像识别...")
+    window.setTimeout(() => {
+      patchForm({
+        ownerType: "企业货主",
+        ownerName: "四川华西大宗商品供应链管理有限公司",
+        ownerIdentifier: "91510100MA6289B51X",
+        contactPhone: "028-87654321",
+      })
+      showToast("营业执照 OCR 识别成功：已自动回填企业全称与统一社会信用代码")
+    }, 500)
   }
 
-  const handleSubmit = () => {
+  // 点击「提交审核」首先进行表单完整度校验
+  const handleStartSubmit = () => {
     if (!form.inboundDate) {
       showToast("请填写入库日期")
+      return
+    }
+    if (new Date(form.inboundDate).getTime() > Date.now()) {
+      showToast("入库日期不能大于当前时间")
+      return
+    }
+    if (!form.ownerType) {
+      showToast("请选择货主类型")
       return
     }
     if (!form.ownerName.trim()) {
@@ -114,7 +143,7 @@ export function InboundRecordFormPage() {
     const badLine = findFirstUnstackedLine(form.goodsLines)
     if (badLine) {
       setHighlightGoodsId(badLine.id)
-      showToast(`货品还有未堆放数量，请完成全部堆放后再提交`)
+      showToast(`货品存在未堆放数量，请完成全部堆放后再提交`)
       return
     }
 
@@ -130,24 +159,114 @@ export function InboundRecordFormPage() {
         showToast("请输入正确的身份证号码（18位）")
         return
       }
+      if (form.ownerIdentifier.length < 11) {
+        showToast("请输入正确的货主手机号码（11位）")
+        return
+      }
     } else if (form.ownerType === "企业货主") {
       if (form.ownerIdentifier.length < 18) {
-        showToast("请输入正确的公司统一社会信用编码（18位）")
+        showToast("请输入正确的公司统一社会信用代码（18位）")
         return
       }
     }
 
-    // 现网逻辑：直接进行基础信息校验后提交
-    showToast("提交审核成功，入库申请已进入审批流程！")
-    window.setTimeout(() => {
-      navigate(INBOUND_APPLY_LIST_PATH)
-    }, 800)
+    // 表单校验全部通过，步骤 1：打开【货主信息确认弹窗】
+    setOwnerVerifyOpen(true)
   }
 
-  const relatedTitle =
-    form.inboundType === "抵押入库" || form.inboundType === "质押入库"
-      ? RELATED_ORDER_DIALOG_TITLE[form.inboundType]
-      : "选择关联单"
+  // 步骤 2：货主信息及验证码核验通过，打开【流程确认弹窗】
+  const handleOwnerVerifySuccess = () => {
+    setOwnerVerifyOpen(false)
+    setFlowSelectOpen(true)
+  }
+
+  // 步骤 3：选择审批流程并完成最终提交
+  const handleFlowConfirm = (_flowId: string) => {
+    setSubmitLoading(true)
+
+    window.setTimeout(() => {
+      setSubmitLoading(false)
+      setFlowSelectOpen(false)
+
+      const newApplyOrderNo = `SQ-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(
+        Math.random() * 9000 + 1000
+      )}`
+
+      // 组装新申请并加入前端 Mock 列表，状态为 0 (待审核)
+      const firstLine = form.goodsLines[0]
+      const newApplyRow = {
+        id: `apply-${Date.now()}`,
+        orderNo: newApplyOrderNo,
+        inboundTime: form.inboundDate,
+        ownerName: form.ownerName,
+        ownerType: form.ownerType === "企业货主" ? ("2" as const) : ("1" as const),
+        ownerIdentifierMasked:
+          form.ownerType === "个人货主"
+            ? form.ownerIdentifier.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2")
+            : form.ownerIdentifier,
+        ownerMobile: form.ownerType === "个人货主" ? form.ownerIdentifier : form.contactPhone,
+        ownerNo: form.ownerType === "企业货主" ? form.ownerIdentifier : form.idCardNo,
+        cateName: firstLine?.category || "大宗商品",
+        typeName: firstLine?.variety || "品类",
+        concatAttrValue: firstLine?.spec || "标准规格",
+        goodsSpec: firstLine
+          ? `${firstLine.category}-${firstLine.variety}-${firstLine.spec}`
+          : "大宗商品",
+        amount: totals.goodsTotal,
+        unit: firstLine?.measureUnit || "吨",
+        inboundType:
+          form.inboundType === "质押入库"
+            ? "PLEDGE"
+            : form.inboundType === "抵押入库"
+            ? "MORTGAGE"
+            : form.inboundType === "监管服务入库"
+            ? "SUPERVISION_SERVICE"
+            : "NORMAL",
+        inboundTypeLabel: form.inboundType || "普通入库",
+        repoName: FORM_WAREHOUSES.find((w) => w.id === form.warehouseId)?.name || "默认仓库",
+        houseName: "1号库房, 2号库房",
+        operator: "当前制单人(仓储作业部)",
+        createByName: "当前制单人",
+        createOrgName: "仓储监管一部",
+        createByUserId: "USER-CURRENT",
+        checkStatus: 0 as const, // 待审核
+        fromSource: "1",
+      }
+      inboundAppliesMock.unshift(newApplyRow)
+
+      // 同步插入到入库记录 Mock 列表最前列
+      inboundRecordsMock.unshift({
+        id: `inbound-${Date.now()}`,
+        orderNo: newApplyOrderNo,
+        ownerName: form.ownerName,
+        ownerType: form.ownerType === "企业货主" ? "2" : "1",
+        ownerIdentifierMasked:
+          form.ownerType === "个人货主"
+            ? form.ownerIdentifier.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2")
+            : form.ownerIdentifier,
+        inboundType: form.inboundType || "普通入库",
+        inboundDate: form.inboundDate,
+        warehouseName: FORM_WAREHOUSES.find((w) => w.id === form.warehouseId)?.name || "默认仓库",
+        houseName: "1号库房",
+        relatedOrderNo: form.relatedOrderNo || null,
+        goodsNames: form.goodsLines.map((g) => `${g.category}-${g.variety}-${g.spec}`),
+        inboundQuantity: totals.goodsTotal,
+        unit: firstLine?.measureUnit || "吨",
+        creatorDisplay: `${CURRENT_USER_NAME}(${CURRENT_USER_ORG})`,
+        createByName: CURRENT_USER_NAME,
+        createOrgName: CURRENT_USER_ORG,
+        createdAt: form.inboundDate,
+        checkStatus: 2,
+      })
+
+      showToast(`提交审核成功！入库申请单号 ${newApplyOrderNo} 已进入审批流程。`)
+
+      // 平滑跳转至入库记录台账
+      window.setTimeout(() => {
+        navigate(INBOUND_RECORD_LIST_PATH)
+      }, 1000)
+    }, 600)
+  }
 
   return (
     <PrototypeAnnotationProvider
@@ -155,40 +274,40 @@ export function InboundRecordFormPage() {
       documents={inboundRecordDocuments}
       annotations={inboundRecordFormAnnotations}
     >
-      <div className="flex min-h-full flex-col">
+      <div className="flex min-h-full flex-col bg-muted/10">
         <div className="flex-1 space-y-4 p-6 pb-4">
           <PrototypeAnnotationTarget annotationIds={["inbound-form-page"]}>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight">新增入库</h1>
-                <p className="text-sm text-muted-foreground">
-                  支持普通/质押/抵押/仓单/监管服务入库；货品三级规格联动与多库位理货堆放分配
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground">新增入库</h1>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  支持普通/质押/抵押/仓单/监管服务入库；货品三级联动与多库位理货堆放分配
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
                   取 消
                 </Button>
-                <Button type="button" size="sm" onClick={handleSubmit}>
+                <Button type="button" size="sm" onClick={handleStartSubmit}>
                   提交审核
                 </Button>
               </div>
             </div>
           </PrototypeAnnotationTarget>
 
+          {/* 基础信息卡片 */}
           <PrototypeAnnotationTarget annotationIds={["inbound-form-basic"]}>
             <InboundBasicInfoSection
               form={form}
               expanded={basicExpanded}
               onToggle={() => setBasicExpanded((v) => !v)}
               onChange={patchForm}
-              onCancel={handleCancel}
-              onSubmit={handleSubmit}
               onPickRelatedOrder={() => setRelatedOpen(true)}
               onOcrHint={handleOcr}
             />
           </PrototypeAnnotationTarget>
 
+          {/* 货品明细卡片 */}
           <PrototypeAnnotationTarget annotationIds={["inbound-form-goods"]}>
             <InboundGoodsSection
               form={form}
@@ -197,7 +316,7 @@ export function InboundRecordFormPage() {
               onToggle={() => setGoodsExpanded((v) => !v)}
               onAddGoods={() => {
                 if (!form.warehouseId || form.storeroomIds.length === 0) {
-                  showToast("请先选择入库仓库与库房")
+                  showToast("请先在基础信息中选择入库仓库与库房")
                   return
                 }
                 patchForm({
@@ -219,11 +338,13 @@ export function InboundRecordFormPage() {
                   goodsLines: form.goodsLines.filter((l) => l.id !== lineId),
                 })
               }}
+              onPreviewImage={(url) => setPreviewImageUrl(url)}
             />
           </PrototypeAnnotationTarget>
         </div>
 
-        <div className="flex flex-col gap-4 border-t pt-4">
+        {/* 底部合计栏（对齐源码 store-apply-info.vue total-tip，仅保留合计信息提示） */}
+        <div className="sticky bottom-0 z-20 border-t bg-card/95 px-6 py-3 backdrop-blur shadow-xs">
           <InboundFormSummaryBar
             categoryCount={totals.categoryCount}
             goodsTotal={totals.goodsTotal}
@@ -231,20 +352,37 @@ export function InboundRecordFormPage() {
             noStackTotal={totals.noStackTotal}
             variant="footer"
           />
-          <div className="flex justify-end gap-3 pb-8">
-            <Button type="button" variant="outline" onClick={handleCancel}>
-              取消返回
-            </Button>
-            <Button type="button" onClick={handleSubmit}>
-              提交入库申请
-            </Button>
-          </div>
         </div>
+
+        {/* 步骤 1：货主信息确认弹窗 */}
+        <OwnerVerifyDialog
+          open={ownerVerifyOpen}
+          isNewOwner={form.isNewOwner}
+          ownerType={form.ownerType}
+          ownerName={form.ownerName}
+          ownerIdentifier={form.ownerIdentifier}
+          contactPhone={form.contactPhone}
+          idCardNo={form.idCardNo}
+          onOpenChange={setOwnerVerifyOpen}
+          onBack={() => setOwnerVerifyOpen(false)}
+          onConfirm={handleOwnerVerifySuccess}
+          onSendSmsHint={(phone) => showToast(`验证码已模拟发送至 ${phone}，演示请输入 123456`)}
+        />
+
+        {/* 步骤 2：流程确认对话框 */}
+        <ApprovalFlowSelectDialog
+          open={flowSelectOpen}
+          loading={submitLoading}
+          onOpenChange={setFlowSelectOpen}
+          onCancel={() => setFlowSelectOpen(false)}
+          onConfirm={handleFlowConfirm}
+        />
 
         {/* 关联单据选择弹窗 */}
         <RelatedOrderPickerDialog
           open={relatedOpen}
-          title={relatedTitle}
+          inboundType={form.inboundType}
+          currentOwnerName={form.ownerName}
           rows={getRelatedOrdersByType(form.inboundType)}
           onOpenChange={setRelatedOpen}
           onSelect={(order) => {
@@ -252,9 +390,13 @@ export function InboundRecordFormPage() {
               relatedOrderNo: order.orderNo,
               relatedOrderLabel: `${order.orderNo} · ${order.ownerName}`,
               ownerName: order.ownerName,
-              ownerType: "企业货主",
-              warehouseId: FORM_WAREHOUSES[0].id,
+              ownerType: order.ownerType,
+              ownerIdentifier: order.ownerIdentifier,
+              idCardNo: order.idCardNo || "",
+              contactPhone: order.contactPhone || "",
+              warehouseId: order.warehouseId || form.warehouseId || FORM_WAREHOUSES[0].id,
             })
+            showToast(`已成功关联${order.orderType}【${order.orderNo}】，自动反显货主信息及${order.ownerType === "个人货主" ? "身份证号" : "统一代码"}`)
             setRelatedOpen(false)
           }}
         />
@@ -285,8 +427,16 @@ export function InboundRecordFormPage() {
           </DialogContent>
         </Dialog>
 
+        {/* 图片预览弹窗 */}
+        <ImageViewerModal
+          open={previewImageUrl !== null}
+          images={previewImageUrl ? [previewImageUrl] : []}
+          initialIndex={0}
+          onClose={() => setPreviewImageUrl(null)}
+        />
+
         {toast ? (
-          <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-foreground px-4 py-3 text-xs text-background shadow-lg">
+          <div className="fixed right-6 bottom-16 z-50 rounded-lg border bg-foreground px-4 py-3 text-xs text-background shadow-lg">
             {toast}
           </div>
         ) : null}

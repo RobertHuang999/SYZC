@@ -146,6 +146,7 @@ const actionLabels: Record<string, string> = {
 const PAGE_TAB_TITLE_OVERRIDES: Record<string, string> = {
   "/仓储/入库管理/入库申请/新增": "新增入库",
   "/仓储/入库管理/入库记录/新增": "新增入库",
+  "/仓储/出库管理/出库记录/新增": "新增出库",
 }
 
 function inboundDetailTabTitle(pathname: string): string | undefined {
@@ -155,6 +156,9 @@ function inboundDetailTabTitle(pathname: string): string | undefined {
     decoded.includes("/仓储/入库管理/入库申请/详情/")
   ) {
     return "入库单详情"
+  }
+  if (decoded.includes("/仓储/出库管理/出库记录/详情/")) {
+    return "出库单详情"
   }
   return undefined
 }

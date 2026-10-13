@@ -9,7 +9,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
@@ -18,18 +17,29 @@ import { InboundTypeSelect } from "./InboundTypeSelect"
 import { OwnerNameSearchSelect } from "./OwnerNameSearchSelect"
 import { StoreroomMultiSelect } from "./StoreroomMultiSelect"
 import type { InboundFormState, OwnerType } from "../domain/form-types"
-import {
-  FORM_STOREROOMS,
-  FORM_WAREHOUSES,
-} from "../mock/inbound-form.mock"
+import { FORM_STOREROOMS, FORM_WAREHOUSES } from "../mock/inbound-form.mock"
+
+function maskPhoneNumber(phone?: string): string {
+  if (!phone) return ""
+  if (phone.length === 11) {
+    return `${phone.slice(0, 3)}****${phone.slice(-4)}`
+  }
+  return phone
+}
+
+function maskIdCardNo(idCard?: string): string {
+  if (!idCard) return ""
+  if (idCard.length >= 10) {
+    return `${idCard.slice(0, 6)}****${idCard.slice(-4)}`
+  }
+  return idCard
+}
 
 type InboundBasicInfoSectionProps = {
   form: InboundFormState
   expanded: boolean
   onToggle: () => void
   onChange: (patch: Partial<InboundFormState>) => void
-  onCancel: () => void
-  onSubmit: () => void
   onPickRelatedOrder: () => void
   onOcrHint?: () => void
 }
@@ -39,15 +49,15 @@ export function InboundBasicInfoSection({
   expanded,
   onToggle,
   onChange,
-  onCancel,
-  onSubmit,
   onPickRelatedOrder,
   onOcrHint,
 }: InboundBasicInfoSectionProps) {
   const isEnterprise = form.ownerType === "企业货主"
   const isPersonal = form.ownerType === "个人货主"
   const needsRelated =
-    form.inboundType === "质押入库" || form.inboundType === "抵押入库"
+    form.inboundType === "质押入库" ||
+    form.inboundType === "抵押入库" ||
+    form.inboundType === "监管服务入库"
 
   const storeroomOptions = FORM_STOREROOMS.filter(
     (room) => !form.warehouseId || room.warehouseId === form.warehouseId
@@ -63,40 +73,39 @@ export function InboundBasicInfoSection({
   }
 
   return (
-    <Card>
-      <div className="flex items-center justify-between border-b px-4 py-3">
+    <Card className="shadow-xs">
+      <div className="flex items-center justify-between border-b px-5 py-3">
         <button
           type="button"
-          className="flex items-center gap-2 text-sm font-medium"
+          className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors"
           onClick={onToggle}
         >
           {expanded ? (
-            <ChevronUpIcon className="size-4" />
+            <ChevronUpIcon className="size-4 text-primary" />
           ) : (
-            <ChevronDownIcon className="size-4" />
+            <ChevronDownIcon className="size-4 text-muted-foreground" />
           )}
           基础信息
         </button>
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={onCancel}>
-            取消
-          </Button>
-          <Button type="button" size="sm" onClick={onSubmit}>
-            提交审核
-          </Button>
-        </div>
       </div>
+
       {expanded ? (
-        <CardContent className="space-y-4 pt-4">
-          <div className="grid gap-4 lg:grid-cols-4">
+        <CardContent className="space-y-4 pt-5 pb-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {/* 1. 入库日期（禁止选未来时间，对齐源码 disabledDate） */}
             <Field label="入库日期" required>
               <Input
-                value={form.inboundDate}
-                onChange={(event) =>
-                  onChange({ inboundDate: event.target.value })
-                }
+                type="datetime-local"
+                max={new Date().toISOString().slice(0, 16)}
+                value={form.inboundDate ? form.inboundDate.replace(" ", "T").slice(0, 16) : ""}
+                onChange={(event) => {
+                  const val = event.target.value.replace("T", " ")
+                  onChange({ inboundDate: val ? `${val}:00` : "" })
+                }}
               />
             </Field>
+
+            {/* 2. 货主类型 */}
             <Field label="货主类型" required>
               <Select
                 value={form.ownerType || undefined}
@@ -113,7 +122,18 @@ export function InboundBasicInfoSection({
                 }}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="请选择货主类型" />
+                  <span
+                    className={cn(
+                      "flex-1 text-left text-xs font-medium",
+                      !form.ownerType && "text-muted-foreground"
+                    )}
+                  >
+                    {form.ownerType
+                      ? form.ownerType === "企业货主"
+                        ? "企业"
+                        : "个人"
+                      : "请选择货主类型"}
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
                   {OWNER_TYPES.map((type) => (
@@ -124,131 +144,161 @@ export function InboundBasicInfoSection({
                 </SelectContent>
               </Select>
             </Field>
+
+            {/* 3. 货主名称 */}
             <Field label="货主名称" required>
-              <div className="flex gap-1">
+              <div className="flex gap-1.5">
                 <div className="min-w-0 flex-1">
                   <OwnerNameSearchSelect
                     ownerType={form.ownerType}
                     ownerName={form.ownerName}
                     ownerIdentifier={form.ownerIdentifier}
-                    disabled={!form.ownerType}
-                    onSelect={(selection) => onChange(selection)}
+                    onSelect={(selection) => {
+                      const targetType =
+                        form.ownerType || selection.ownerType || "企业货主"
+                      onChange({
+                        ownerType: targetType,
+                        ownerName: selection.ownerName,
+                        ownerIdentifier: selection.ownerIdentifier,
+                        idCardNo: selection.idCardNo,
+                        contactPhone: selection.contactPhone,
+                        isNewOwner: selection.isNewOwner,
+                      })
+                    }}
                   />
                 </div>
-                {isEnterprise ? (
+                {(!form.ownerType || isEnterprise) ? (
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
-                    className="shrink-0"
+                    className="shrink-0 text-primary border-primary/30 hover:bg-primary/5"
+                    title="营业执照 OCR 拍照识别（自动回填）"
                     aria-label="证照识别"
                     onClick={onOcrHint}
                   >
-                    <CameraIcon className="size-4 text-primary" />
+                    <CameraIcon className="size-4" />
                   </Button>
                 ) : null}
               </div>
             </Field>
 
-            {isEnterprise ? (
-              <Field label="货主标识" required>
-                <Input
-                  placeholder="请输入公司统一社会信用代码"
-                  value={form.ownerIdentifier}
-                  onChange={(event) =>
-                    onChange({ ownerIdentifier: event.target.value })
-                  }
-                />
-              </Field>
-            ) : isPersonal ? (
-              <Field label="货主标识" required>
-                <Input
-                  placeholder="请输入手机号码"
-                  value={form.ownerIdentifier}
-                  onChange={(event) =>
-                    onChange({ ownerIdentifier: event.target.value })
-                  }
-                />
-              </Field>
-            ) : (
-              <Field label="入库类型" required>
-                <InboundTypeSelect
-                  value={form.inboundType}
-                  onChange={(inboundType) =>
-                    onChange({
-                      inboundType,
-                      relatedOrderNo: "",
-                      relatedOrderLabel: "",
-                    })
-                  }
-                />
-              </Field>
-            )}
+            {/* 4. 货主标识（反显时置灰不可修改，个人手机号脱敏） */}
+            <Field
+              label="货主标识"
+              required
+            >
+              <Input
+                placeholder={
+                  !form.ownerType
+                    ? "请先选择货主类型"
+                    : !form.isNewOwner && form.ownerName
+                    ? "系统档案反显，不可修改"
+                    : isEnterprise
+                    ? "请输入统一社会信用代码"
+                    : "请输入手机号码"
+                }
+                value={
+                  isPersonal && !form.isNewOwner && Boolean(form.ownerName)
+                    ? maskPhoneNumber(form.ownerIdentifier)
+                    : form.ownerIdentifier
+                }
+                disabled={!form.ownerType || (!form.isNewOwner && Boolean(form.ownerName))}
+                maxLength={isPersonal ? 11 : 18}
+                className={cn(
+                  "font-mono",
+                  (!form.ownerType || (!form.isNewOwner && Boolean(form.ownerName))) &&
+                    "bg-muted/60 text-muted-foreground cursor-not-allowed select-none"
+                )}
+                onChange={(event) =>
+                  onChange({ ownerIdentifier: event.target.value.trim() })
+                }
+              />
+            </Field>
 
-            {isEnterprise ? (
-              <Field label="联系电话" required>
-                <Input
-                  placeholder="请输入联系电话"
-                  value={form.contactPhone}
-                  onChange={(event) =>
-                    onChange({ contactPhone: event.target.value })
-                  }
-                />
-              </Field>
-            ) : isPersonal ? (
+            {/* 5. 补充身份核验：个人身份证号（脱敏反显置灰） / 企业联系电话 */}
+            {isPersonal ? (
               <Field label="身份证号" required>
                 <Input
-                  placeholder="请输入货主身份证号"
-                  value={form.idCardNo}
-                  onChange={(event) => onChange({ idCardNo: event.target.value })}
+                  placeholder={
+                    !form.isNewOwner && form.ownerName
+                      ? "系统档案反显，不可修改"
+                      : "请输入货主身份证号"
+                  }
+                  value={
+                    !form.isNewOwner && Boolean(form.ownerName)
+                      ? maskIdCardNo(form.idCardNo)
+                      : form.idCardNo
+                  }
+                  disabled={!form.isNewOwner && Boolean(form.ownerName)}
+                  maxLength={18}
+                  className={cn(
+                    "font-mono",
+                    !form.isNewOwner &&
+                      Boolean(form.ownerName) &&
+                      "bg-muted/60 text-muted-foreground cursor-not-allowed select-none"
+                  )}
+                  onChange={(event) => onChange({ idCardNo: event.target.value.trim() })}
                 />
               </Field>
-            ) : (
-              <Field label="入库仓库" required>
-                <WarehouseSelect
-                  value={form.warehouseId}
-                  onChange={(warehouseId) =>
-                    onChange({ warehouseId, storeroomIds: [] })
+            ) : isEnterprise ? (
+              <Field label="联系电话" required>
+                <Input
+                  placeholder={
+                    !form.isNewOwner && form.ownerName
+                      ? "系统档案反显，不可修改"
+                      : "请输入企业联系电话"
+                  }
+                  value={
+                    !form.isNewOwner && Boolean(form.ownerName)
+                      ? maskPhoneNumber(form.contactPhone)
+                      : form.contactPhone
+                  }
+                  disabled={!form.isNewOwner && Boolean(form.ownerName)}
+                  className={cn(
+                    "font-mono",
+                    !form.isNewOwner &&
+                      Boolean(form.ownerName) &&
+                      "bg-muted/60 text-muted-foreground cursor-not-allowed select-none"
+                  )}
+                  onChange={(event) =>
+                    onChange({ contactPhone: event.target.value.trim() })
                   }
                 />
               </Field>
-            )}
-
-            {isEnterprise || isPersonal ? (
-              <Field label="入库类型" required>
-                <InboundTypeSelect
-                  value={form.inboundType}
-                  onChange={(inboundType) =>
-                    onChange({
-                      inboundType,
-                      relatedOrderNo: "",
-                      relatedOrderLabel: "",
-                    })
-                  }
-                />
-              </Field>
             ) : (
-              <Field label="入库库房" required>
-                <StoreroomMultiSelect
-                  options={storeroomOptions}
-                  selected={form.storeroomIds}
-                  onToggle={toggleStoreroom}
-                  disabled={!form.warehouseId}
-                />
+              <Field label="联系方式">
+                <Input placeholder="请先选择货主类型" disabled className="bg-muted/60 text-muted-foreground cursor-not-allowed" />
               </Field>
             )}
 
-            {needsRelated && (isEnterprise || isPersonal) ? (
+            {/* 6. 入库类型 */}
+            <Field label="入库类型" required>
+              <InboundTypeSelect
+                value={form.inboundType}
+                onChange={(inboundType) =>
+                  onChange({
+                    inboundType,
+                    relatedOrderNo: "",
+                    relatedOrderLabel: "",
+                  })
+                }
+              />
+            </Field>
+
+            {/* 7. 关联单号（当选质押/抵押/监管服务时展示，否则放仓库） */}
+            {needsRelated ? (
               <Field label="关联单号" required>
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-9 w-full justify-start font-normal"
+                  className="h-9 w-full justify-start text-xs font-normal"
                   onClick={onPickRelatedOrder}
                 >
                   {form.relatedOrderLabel ||
                     (form.inboundType === "质押入库" ||
-                    form.inboundType === "抵押入库"
+                    form.inboundType === "抵押入库" ||
+                    form.inboundType === "监管服务入库"
                       ? RELATED_ORDER_PLACEHOLDER[form.inboundType]
                       : null) ||
                     "请选择关联单号"}
@@ -256,37 +306,38 @@ export function InboundBasicInfoSection({
               </Field>
             ) : null}
 
-            {isEnterprise || isPersonal ? (
-              <Field label="入库仓库" required>
-                <WarehouseSelect
-                  value={form.warehouseId}
-                  onChange={(warehouseId) =>
-                    onChange({ warehouseId, storeroomIds: [] })
-                  }
-                />
-              </Field>
-            ) : null}
+            {/* 8. 入库仓库 */}
+            <Field label="入库仓库" required>
+              <WarehouseSelect
+                value={form.warehouseId}
+                onChange={(warehouseId) =>
+                  onChange({ warehouseId, storeroomIds: [] })
+                }
+              />
+            </Field>
 
-            {isEnterprise || isPersonal ? (
-              <Field label="入库库房" required>
-                <StoreroomMultiSelect
-                  options={storeroomOptions}
-                  selected={form.storeroomIds}
-                  onToggle={toggleStoreroom}
-                  disabled={!form.warehouseId}
-                />
-              </Field>
-            ) : null}
+            {/* 9. 入库库房 */}
+            <Field label="入库库房" required>
+              <StoreroomMultiSelect
+                options={storeroomOptions}
+                selected={form.storeroomIds}
+                onToggle={toggleStoreroom}
+                disabled={!form.warehouseId}
+              />
+            </Field>
           </div>
 
+          {/* 10. 备注信息 */}
           <Field label="备注">
             <Textarea
-              placeholder="请输入备注"
+              placeholder="请输入备注说明（最多 140 字）"
               maxLength={140}
+              className="resize-none"
+              rows={3}
               value={form.remark}
               onChange={(event) => onChange({ remark: event.target.value })}
             />
-            <p className="text-right text-xs text-muted-foreground">
+            <p className="text-right text-xs text-muted-foreground mt-1">
               {form.remark.length}/140
             </p>
           </Field>
@@ -308,8 +359,8 @@ function Field({
   className?: string
 }) {
   return (
-    <div className={cn("space-y-2", className)}>
-      <Label>
+    <div className={cn("space-y-1.5", className)}>
+      <Label className="text-xs font-medium text-foreground">
         {required ? <span className="text-destructive">* </span> : null}
         {label}
       </Label>
@@ -325,10 +376,19 @@ function WarehouseSelect({
   value: string
   onChange: (id: string) => void
 }) {
+  const currentWarehouse = FORM_WAREHOUSES.find((wh) => wh.id === value)
+
   return (
     <Select value={value || undefined} onValueChange={(v) => v && onChange(v)}>
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="请选择仓库" />
+        <span
+          className={cn(
+            "flex-1 text-left text-xs font-medium truncate",
+            !currentWarehouse && "text-muted-foreground"
+          )}
+        >
+          {currentWarehouse ? currentWarehouse.name : "请选择仓库"}
+        </span>
       </SelectTrigger>
       <SelectContent>
         {FORM_WAREHOUSES.map((wh) => (
@@ -340,4 +400,3 @@ function WarehouseSelect({
     </Select>
   )
 }
-

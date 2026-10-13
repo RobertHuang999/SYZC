@@ -42,6 +42,9 @@ import { InboundApplyListPage } from "@/features/inbound-records/pages/InboundAp
 import { InboundRecordListPage } from "@/features/inbound-records/pages/InboundRecordListPage"
 import { InboundRecordFormPage } from "@/features/inbound-records/pages/InboundRecordFormPage"
 import { InboundRecordDetailPage } from "@/features/inbound-records/pages/InboundRecordDetailPage"
+import { OutboundRecordListPage } from "@/features/outbound-records/pages/OutboundRecordListPage"
+import { OutboundRecordFormPage } from "@/features/outbound-records/pages/OutboundRecordFormPage"
+import { OutboundRecordDetailPage } from "@/features/outbound-records/pages/OutboundRecordDetailPage"
 import { getAllMenuPaths, topModules } from "@/config/navigation"
 import { isImplementedRoute } from "@/config/implemented-routes"
 import { Navigate, Route, Routes } from "react-router-dom"
@@ -291,6 +294,20 @@ export function AppRoutes() {
         <Route
           path="仓储/入库管理/入库记录/详情/:id"
           element={<InboundRecordDetailPage />}
+        />
+
+        {/* 仓储 - 出库管理（出库记录） */}
+        <Route
+          path="仓储/出库管理/出库记录"
+          element={<OutboundRecordListPage />}
+        />
+        <Route
+          path="仓储/出库管理/出库记录/新增"
+          element={<OutboundRecordFormPage />}
+        />
+        <Route
+          path="仓储/出库管理/出库记录/详情/:id"
+          element={<OutboundRecordDetailPage />}
         />
 
         {placeholderPaths.map((menuPath) => (

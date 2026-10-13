@@ -15,7 +15,7 @@ import { CURRENT_USER_ID } from "../mock/inbound-records.mock"
 import { splitDateTime, splitOrderNoForDisplay } from "../lib/list-utils"
 
 const STICKY_ACTION_CLASS =
-  "sticky right-0 z-10 border-l border-border/60 bg-muted/35 shadow-[-6px_0_12px_-8px_rgba(0,0,0,0.12)]"
+  "sticky right-0 z-20 border-l border-border/80 shadow-[-8px_0_16px_-4px_rgba(0,0,0,0.08)] backdrop-blur-md"
 
 type InboundApplyTableProps = {
   data: InboundApply[]
@@ -84,7 +84,13 @@ export function InboundApplyTable({
             <TableHead className="w-[130px]">操作人</TableHead>
             <TableHead className="w-[95px]">撤销时间</TableHead>
             <TableHead className="w-[85px] text-center">状态</TableHead>
-            <TableHead className={cn("w-[120px]", STICKY_ACTION_CLASS, "bg-muted/40 text-center")}>
+            <TableHead
+              className={cn(
+                "w-[160px] text-center",
+                STICKY_ACTION_CLASS,
+                "bg-slate-100/95 dark:bg-slate-800/95 font-semibold text-foreground/90"
+              )}
+            >
               操作
             </TableHead>
           </TableRow>
@@ -165,13 +171,19 @@ export function InboundApplyTable({
                   <TableCell className="text-center">
                     <StatusBadge status={row.checkStatus} />
                   </TableCell>
-                  <TableCell className={cn(STICKY_ACTION_CLASS, "text-center")}>
-                    <div className="flex items-center justify-center gap-1">
+                  <TableCell
+                    className={cn(
+                      STICKY_ACTION_CLASS,
+                      "bg-slate-50/95 dark:bg-slate-900/95 group-hover:bg-slate-100/95 dark:group-hover:bg-slate-850/95 transition-colors text-center py-2"
+                    )}
+                  >
+                    <div className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-muted/65 dark:bg-muted/40 p-1 shadow-2xs backdrop-blur-xs whitespace-nowrap">
                       {canRevoke && (
                         <Button
+                          type="button"
                           variant="ghost"
                           size="sm"
-                          className="h-7 px-1.5 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          className="h-7 px-2 text-xs font-medium rounded-md text-destructive bg-destructive/10 hover:bg-destructive/20 active:bg-destructive/25 transition-all shadow-2xs"
                           onClick={() => onRevoke(row)}
                         >
                           撤销申请
@@ -179,9 +191,10 @@ export function InboundApplyTable({
                       )}
                       <Link to={inboundApplyDetailPath(row.id)}>
                         <Button
+                          type="button"
                           variant="ghost"
                           size="sm"
-                          className="h-7 px-1.5 text-xs text-primary hover:underline"
+                          className="h-7 px-2.5 text-xs font-medium rounded-md text-primary bg-primary/10 hover:bg-primary/20 active:bg-primary/25 transition-all shadow-2xs"
                         >
                           查看详情
                         </Button>

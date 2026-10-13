@@ -12,7 +12,6 @@ import { ExportRecordsDialog } from "../components/ExportRecordsDialog"
 import { PdfViewerDialog } from "../components/PdfViewerDialog"
 import {
   DEFAULT_INBOUND_RECORD_FILTERS,
-  INBOUND_APPLY_LIST_PATH,
   INBOUND_RECORD_ADD_PATH,
   PAGE_SIZE,
 } from "../domain/constants"
@@ -94,27 +93,7 @@ export function InboundRecordListPage() {
       <div className="space-y-4 p-6">
         <PrototypeAnnotationTarget annotationIds={["inbound-record-page"]}>
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-semibold tracking-tight">入库管理</h1>
-              <div className="inline-flex rounded-lg border bg-muted/40 p-0.5 text-xs">
-                <button
-                  type="button"
-                  className="rounded-md px-3 py-1 font-medium text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={() => navigate(INBOUND_APPLY_LIST_PATH)}
-                >
-                  入库申请
-                </button>
-                <button
-                  type="button"
-                  className="rounded-md bg-background px-3 py-1 font-medium text-foreground shadow-sm"
-                >
-                  入库记录
-                </button>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              注：根据现网规范，侧边栏菜单已隐藏「入库申请」，通过上方分段器可无缝切换
-            </p>
+            <h1 className="text-2xl font-semibold tracking-tight">入库记录</h1>
           </div>
         </PrototypeAnnotationTarget>
 

@@ -139,6 +139,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     description: "执行“先解押、后发货”的硬控逻辑。联动AI防窜货监控，验证提货人身份，装车出场后实时冲减数字仓单与底层账务。",
     buttons: ["查看页面", "出库", "查看详情", "单据下载", "下载记录", "操作记录", "出库撤销"],
     dataPermission: "可见数据根据当前登录账号的角色的仓库权限决定",
+    customRoute: "/m/workspace/outbound-records",
     iconType: "ArrowUpFromLine",
   },
   {
@@ -661,6 +662,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "账号赋予的仓库权限",
     remark: "优化页面",
     badge: "优化",
+    customRoute: "/m/outbound/initiate",
     iconType: "ArrowUpFromLine",
   },
   {

@@ -24,7 +24,7 @@ import {
 } from "../lib/list-utils"
 
 const STICKY_ACTION_CLASS =
-  "sticky right-0 z-10 border-l border-border/60 bg-muted/35 shadow-[-6px_0_12px_-8px_rgba(0,0,0,0.12)]"
+  "sticky right-0 z-20 border-l border-border/80 shadow-[-8px_0_16px_-4px_rgba(0,0,0,0.08)] backdrop-blur-md"
 
 type InboundRecordTableProps = {
   data: InboundRecord[]
@@ -41,20 +41,26 @@ export function InboundRecordTable({
 }: InboundRecordTableProps) {
   return (
     <div className="overflow-x-auto rounded-md border bg-card">
-      <Table className="min-w-[1040px] table-fixed">
+      <Table className="min-w-[1240px] table-fixed">
         <TableHeader>
           <TableRow className="bg-muted/40 hover:bg-muted/40">
-            <TableHead className="w-12">序号</TableHead>
-            <TableHead className="w-[108px]">入库单号</TableHead>
-            <TableHead className="w-[118px]">货主名称/标识</TableHead>
+            <TableHead className="w-14 text-center">序号</TableHead>
+            <TableHead className="w-[120px]">入库单号</TableHead>
+            <TableHead className="w-[130px]">货主名称/标识</TableHead>
             <TableHead className="w-[96px]">入库类型</TableHead>
-            <TableHead className="w-[88px]">入库日期</TableHead>
-            <TableHead className="w-[88px]">仓库名称</TableHead>
-            <TableHead className="w-[108px]">关联单号</TableHead>
-            <TableHead className="w-[136px]">货物名称</TableHead>
-            <TableHead className="w-[72px] text-right">入库数量</TableHead>
-            <TableHead className="w-[168px]">制单人</TableHead>
-            <TableHead className={cn("w-[108px]", STICKY_ACTION_CLASS, "bg-muted/40")}>
+            <TableHead className="w-[100px]">入库日期</TableHead>
+            <TableHead className="w-[100px]">仓库名称</TableHead>
+            <TableHead className="w-[110px]">关联单号</TableHead>
+            <TableHead className="w-[140px]">货物名称</TableHead>
+            <TableHead className="w-[84px] text-right">入库数量</TableHead>
+            <TableHead className="w-[140px]">制单人</TableHead>
+            <TableHead
+              className={cn(
+                "w-[236px] text-center",
+                STICKY_ACTION_CLASS,
+                "bg-slate-100/95 dark:bg-slate-800/95 font-semibold text-foreground/90"
+              )}
+            >
               操作
             </TableHead>
           </TableRow>
@@ -80,8 +86,8 @@ export function InboundRecordTable({
                   : null
 
               return (
-                <TableRow key={row.id} className="group align-top">
-                  <TableCell className="text-muted-foreground">
+                <TableRow key={row.id} className="group hover:bg-muted/30 transition-colors">
+                  <TableCell className="text-center text-muted-foreground">
                     {(page - 1) * pageSize + index + 1}
                   </TableCell>
                   <TableCell>
@@ -92,7 +98,7 @@ export function InboundRecordTable({
                       <span className="line-clamp-2 font-medium text-foreground">
                         {row.ownerName}
                       </span>
-                      <span className="text-muted-foreground">
+                      <span className="text-muted-foreground font-mono">
                         {row.ownerIdentifierMasked}
                       </span>
                     </div>
@@ -119,12 +125,12 @@ export function InboundRecordTable({
                   <TableCell>
                     <GoodsNamesCell goodsNames={row.goodsNames} />
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-xs">
+                  <TableCell className="text-right tabular-nums text-xs font-mono font-medium">
                     {formatInboundQuantity(row.inboundQuantity)}
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-0.5 text-xs leading-snug">
-                      <span className="line-clamp-2">{row.creatorDisplay}</span>
+                      <span className="line-clamp-2 text-foreground">{row.creatorDisplay}</span>
                       <DateTimeStack
                         date={createdParts.date}
                         time={createdParts.time}
@@ -135,7 +141,7 @@ export function InboundRecordTable({
                   <TableCell
                     className={cn(
                       STICKY_ACTION_CLASS,
-                      "bg-card group-hover:bg-muted/30"
+                      "bg-slate-50/95 dark:bg-slate-900/95 group-hover:bg-slate-100/95 dark:group-hover:bg-slate-850/95 transition-colors text-center py-2"
                     )}
                   >
                     <RowActions row={row} onAction={onAction} />
@@ -260,28 +266,32 @@ function RowActions({
   row: InboundRecord
   onAction: (action: InboundRecordRowAction, item: InboundRecord) => void
 }) {
-  const linkClass =
-    "inline-flex text-sm leading-none text-primary hover:underline whitespace-nowrap"
-
   return (
-    <div className="flex max-w-[100px] flex-wrap content-start gap-x-2 gap-y-1.5 py-0.5">
-      <Link to={inboundRecordDetailPath(row.id)} className={linkClass}>
-        查看详情
+    <div className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-muted/65 dark:bg-muted/40 p-1 shadow-2xs backdrop-blur-xs whitespace-nowrap">
+      <Link to={inboundRecordDetailPath(row.id)}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2.5 text-xs font-medium rounded-md text-primary bg-primary/10 hover:bg-primary/20 active:bg-primary/25 transition-all shadow-2xs"
+        >
+          查看详情
+        </Button>
       </Link>
       <Button
         type="button"
-        variant="link"
+        variant="ghost"
         size="sm"
-        className="h-auto p-0 text-sm leading-none whitespace-nowrap"
+        className="h-7 px-2.5 text-xs font-medium rounded-md text-foreground/80 hover:text-foreground bg-background/90 hover:bg-background active:bg-muted/80 transition-all border border-border/50 shadow-2xs"
         onClick={() => onAction("downloadExcel", row)}
       >
         下载记录
       </Button>
       <Button
         type="button"
-        variant="link"
+        variant="ghost"
         size="sm"
-        className="h-auto p-0 text-sm leading-none whitespace-nowrap"
+        className="h-7 px-2.5 text-xs font-medium rounded-md text-foreground/80 hover:text-foreground bg-background/90 hover:bg-background active:bg-muted/80 transition-all border border-border/50 shadow-2xs"
         onClick={() => onAction("downloadPdf", row)}
       >
         单据下载

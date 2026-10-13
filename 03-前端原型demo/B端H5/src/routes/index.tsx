@@ -31,6 +31,12 @@ import { InboundRecordListPage } from "@/features/inbound-records/pages/InboundR
 import { InboundInitiateGoodsPage } from "@/features/inbound-records/pages/InboundInitiateGoodsPage"
 import { InboundInitiatePage } from "@/features/inbound-records/pages/InboundInitiatePage"
 import { InboundRecordDetailPage } from "@/features/inbound-records/pages/InboundRecordDetailPage"
+import {
+  OutboundRecordListPage,
+  OutboundRecordDetailPage,
+  OutboundInitiatePage,
+  OutboundInitiateGoodsPage,
+} from "@/features/outbound-records"
 
 const midLoanMenuItem = MOBILE_MENU_ITEMS.find((item) => item.id === "ws-risk-in-loan")
 
@@ -93,6 +99,14 @@ export function AppRoutes() {
       />
       <Route path="/m/inbound/initiate" element={<InboundInitiatePage />} />
       <Route path="/m/inbound/initiate/goods" element={<InboundInitiateGoodsPage />} />
+
+      <Route path="/m/workspace/outbound-records" element={<OutboundRecordListPage />} />
+      <Route
+        path="/m/workspace/outbound-records/:id"
+        element={<OutboundRecordDetailPage />}
+      />
+      <Route path="/m/outbound/initiate" element={<OutboundInitiatePage />} />
+      <Route path="/m/outbound/initiate/goods" element={<OutboundInitiateGoodsPage />} />
 
       <Route path="/m/module/:moduleId" element={<GenericModulePage />} />
 

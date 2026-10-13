@@ -35,6 +35,12 @@ import {
 } from "@/features/inbound-records/annotations/inbound-record.annotations"
 import { inboundRecordH5Documents } from "@/features/inbound-records/documents/inbound-record-documents"
 import {
+  outboundH5DetailAnnotations,
+  outboundH5InitiateAnnotations,
+  outboundH5ListAnnotations,
+} from "@/features/outbound-records/annotations/outbound-record.annotations"
+import { outboundRecordH5Documents } from "@/features/outbound-records/documents/outbound-record-documents"
+import {
   PrototypeAnnotationProvider,
   type PrototypeAnnotation,
   type PrototypeDocument,
@@ -128,6 +134,18 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
     pageTitle = "入库发起 · 移动端交互与 PRD 标注"
     currentAnnotations = inboundH5InitiateAnnotations
     currentDocuments = inboundRecordH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/outbound-records/")) {
+    pageTitle = "出库单详情 · 移动端交互与 PRD 标注"
+    currentAnnotations = outboundH5DetailAnnotations
+    currentDocuments = outboundRecordH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/outbound-records")) {
+    pageTitle = "出库管理 · 移动端交互与 PRD 标注"
+    currentAnnotations = outboundH5ListAnnotations
+    currentDocuments = outboundRecordH5Documents
+  } else if (location.pathname.startsWith("/m/outbound/initiate")) {
+    pageTitle = "出库发起 · 移动端交互与 PRD 标注"
+    currentAnnotations = outboundH5InitiateAnnotations
+    currentDocuments = outboundRecordH5Documents
   } else if (
     location.pathname.startsWith("/m/workspace/config/warehouse-management") ||
     location.pathname.startsWith("/m/workspace/config/new-warehouse") ||

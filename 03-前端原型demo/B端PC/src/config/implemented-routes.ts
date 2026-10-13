@@ -21,11 +21,14 @@ const implementedExactRoutes = new Set<string>([
   "/仓储/入库管理/入库申请/新增",
   "/仓储/入库管理/入库记录",
   "/仓储/入库管理/入库记录/新增",
+  "/仓储/出库管理/出库记录",
+  "/仓储/出库管理/出库记录/新增",
 ])
 
-const implementedInboundDetailPrefixes = [
+const implementedDetailPrefixes = [
   "/仓储/入库管理/入库记录/详情/",
   "/仓储/入库管理/入库申请/详情/",
+  "/仓储/出库管理/出库记录/详情/",
 ]
 
 const unimplementedRoutePrefixes = [
@@ -47,7 +50,7 @@ export function isImplementedRoute(pathname: string): boolean {
     return true
   }
 
-  if (implementedInboundDetailPrefixes.some((prefix) => currentPath.startsWith(prefix))) {
+  if (implementedDetailPrefixes.some((prefix) => currentPath.startsWith(prefix))) {
     return true
   }
 

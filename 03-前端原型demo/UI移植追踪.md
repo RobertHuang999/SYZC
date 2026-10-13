@@ -2,7 +2,8 @@
 
 > **目标**：在 **不改动业务功能与逻辑** 的前提下，用 SYZC 技术栈（React + TS + Tailwind）重做 UI，**仅替换当前为 `PrototypeEmptyPage` 的入口**。  
 > **行为真源优先级**：`11yuanma/wrl-agency-*` 现网交互与字段 > 已有 PRD 三件套（冲突须登记差异后再定稿）。  
-> **验收**：占位路由变为 `implemented-routes` / H5 `customRoute`；核心链路可点通；标注挂载对应 PRD（有则挂，无则移植后补三件套）。
+> **验收**：占位路由变为 `implemented-routes` / H5 `customRoute`；核心链路可点通；标注挂载对应 PRD（有则挂，无则移植后补三件套）。  
+> **布局**：移植 UI 时必须对齐 [`原型页面布局速查.md`](./原型页面布局速查.md) 与 `样式规范- PC端/`、`样式规范- H5端/`（[`AGENTS.md`](../AGENTS.md) 4.1.1）。
 
 ---
 

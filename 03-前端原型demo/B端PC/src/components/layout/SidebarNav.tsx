@@ -32,10 +32,6 @@ const groupIcons: Record<string, LucideIcon> = {
   "功能入口": Home,
 }
 
-function buildDefaultOpenGroups(groups: ReturnType<typeof getSidebarGroups>) {
-  return Object.fromEntries(groups.map((group) => [group.id, true]))
-}
-
 function isSidebarItemActive(itemPath: string, currentPath: string): boolean {
   if (currentPath === itemPath || currentPath.startsWith(`${itemPath}/`)) {
     return true
@@ -51,35 +47,52 @@ function isSidebarItemActive(itemPath: string, currentPath: string): boolean {
   return false
 }
 
+function buildAccordionOpenGroups(
+  groups: ReturnType<typeof getSidebarGroups>,
+  currentPath: string,
+): Record<string, boolean> {
+  const activeGroup = groups.find((group) =>
+    group.items.some((item) => isSidebarItemActive(item.path, currentPath)),
+  )
+  const openId = activeGroup?.id ?? groups[0]?.id
+  return Object.fromEntries(groups.map((group) => [group.id, group.id === openId]))
+}
+
 export function SidebarNav({ activeModule }: SidebarNavProps) {
   const { pathname } = useLocation()
   const [collapsed, setCollapsed] = useState(false)
   const currentPath = decodeURIComponent(pathname)
   const sidebarGroups = getSidebarGroups(activeModule)
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => buildDefaultOpenGroups(sidebarGroups))
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
+    buildAccordionOpenGroups(sidebarGroups, currentPath),
+  )
 
   useEffect(() => {
-    setOpenGroups(buildDefaultOpenGroups(getSidebarGroups(activeModule)))
-  }, [activeModule.id])
+    setOpenGroups(buildAccordionOpenGroups(getSidebarGroups(activeModule), currentPath))
+  }, [activeModule.id, currentPath])
+
+  const setOnlyGroupOpen = (groupId: string) => {
+    setOpenGroups(Object.fromEntries(sidebarGroups.map((group) => [group.id, group.id === groupId])))
+  }
 
   const toggleGroup = (groupId: string) => {
     if (collapsed) {
       setCollapsed(false)
-      setOpenGroups((current) => ({ ...current, [groupId]: true }))
+      setOnlyGroupOpen(groupId)
       return
     }
 
-    setOpenGroups((current) => ({ ...current, [groupId]: !current[groupId] }))
+    setOpenGroups((current) => {
+      if (current[groupId]) {
+        return { ...current, [groupId]: false }
+      }
+      return Object.fromEntries(sidebarGroups.map((group) => [group.id, group.id === groupId]))
+    })
   }
 
   return (
     <aside className={cn("sidebar", collapsed && "is-collapsed")}>
       <nav className="sidebar-nav" aria-label="主导航">
-        <button className={cn("sidebar-item", collapsed && "is-collapsed")} type="button">
-          <Home size={16} strokeWidth={1.7} />
-          {!collapsed && <span>首页</span>}
-        </button>
-
         {sidebarGroups.map((group) => {
           const groupActive = group.items.some((item) => isSidebarItemActive(item.path, currentPath))
           const GroupIcon = groupIcons[group.id] ?? Boxes

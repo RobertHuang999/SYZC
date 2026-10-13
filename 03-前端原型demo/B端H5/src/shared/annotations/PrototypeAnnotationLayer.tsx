@@ -690,7 +690,7 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
   const [autoScale, setAutoScale] = useState(1)
   const [manualScale, setManualScale] = useState(1)
   // 无机壳纯屏模式（Frameless）：隐藏外壳黑边框、iOS 状态栏与灵动岛、底部小黑条，纯净展示页面
-  const [isFrameless, setIsFrameless] = useState(false)
+  const [isFrameless, setIsFrameless] = useState(true)
   // 分类大类的展开/收起状态（默认全部展开，key 为 group.label）
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
 

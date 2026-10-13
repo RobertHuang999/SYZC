@@ -50,8 +50,16 @@ export type InboundFormState = {
 export type RelatedOrderOption = {
   id: string
   orderNo: string
+  orderType: string
   ownerName: string
+  ownerType: OwnerType
+  ownerIdentifier: string
   ownerIdentifierMasked: string
+  idCardNo?: string
+  contactPhone?: string
   goodsSummary: string[]
-  mortgageTime: string
+  businessTime: string
+  warehouseId?: string
+  warehouseName?: string
+  amountSummary?: string
 }
