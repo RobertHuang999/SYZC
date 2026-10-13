@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils"
 import { formatDateTime } from "@/shared/lib/date-utils"
 
 type DateTimeTextProps = {
@@ -22,7 +23,12 @@ export function DateTimeText({
 
   if (!stacked) {
     return (
-      <span className={`${plain ? "" : "font-mono tabular-nums text-[13px]"} ${className}`}>
+      <span
+        className={cn(
+          plain ? "" : "font-mono text-[13px] tabular-nums",
+          className
+        )}
+      >
         {formatted}
       </span>
     )
@@ -31,18 +37,40 @@ export function DateTimeText({
   const [datePart, timePart] = formatted.trim().split(/\s+/, 2)
   if (!timePart) {
     return (
-      <span className={`${plain ? "" : "font-mono tabular-nums text-xs"} ${className}`}>
+      <span
+        className={cn(
+          plain ? "text-sm" : "font-mono text-xs tabular-nums",
+          className
+        )}
+      >
         {formatted}
       </span>
     )
   }
 
-  return (
-    <span className={`flex flex-col leading-tight ${plain ? "" : "font-mono tabular-nums"} ${className}`}>
-      <span className={plain ? "" : "text-xs text-foreground"}>{datePart}</span>
-      <span className={plain ? "mt-0.5" : "mt-0.5 text-[11px] text-muted-foreground"}>
-        {timePart}
+  if (plain) {
+    return (
+      <span
+        className={cn(
+          "inline-flex flex-col gap-1 whitespace-nowrap text-sm tabular-nums leading-none",
+          className
+        )}
+      >
+        <span className="text-foreground">{datePart}</span>
+        <span className="text-muted-foreground">{timePart}</span>
       </span>
+    )
+  }
+
+  return (
+    <span
+      className={cn(
+        "inline-flex flex-col gap-0.5 font-mono tabular-nums leading-none",
+        className
+      )}
+    >
+      <span className="text-xs text-foreground">{datePart}</span>
+      <span className="text-[11px] text-muted-foreground">{timePart}</span>
     </span>
   )
 }

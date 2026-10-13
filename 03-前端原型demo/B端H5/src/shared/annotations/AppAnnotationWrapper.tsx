@@ -23,6 +23,18 @@ import { deviceManagementHubAnnotations } from "@/pages/device-management.annota
 import { readonlyRiskAnnotations } from "@/features/readonly-risk-views/annotations/readonly-risk-annotations"
 import { readonlyRiskDocuments } from "@/features/readonly-risk-views/documents/readonly-risk-documents"
 import {
+  warehouseH5DetailAnnotations,
+  warehouseH5ListAnnotations,
+  warehouseH5FormAnnotations,
+} from "@/features/warehouse-management/annotations/warehouse-management.annotations"
+import { warehouseManagementH5Documents } from "@/features/warehouse-management/documents/warehouse-management-documents"
+import {
+  inboundH5DetailAnnotations,
+  inboundH5InitiateAnnotations,
+  inboundH5ListAnnotations,
+} from "@/features/inbound-records/annotations/inbound-record.annotations"
+import { inboundRecordH5Documents } from "@/features/inbound-records/documents/inbound-record-documents"
+import {
   PrototypeAnnotationProvider,
   type PrototypeAnnotation,
   type PrototypeDocument,
@@ -104,6 +116,38 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
     pageTitle = "风险公示 · 移动端交互与 PRD 标注"
     currentAnnotations = readonlyRiskAnnotations["risk-disclosure"]
     currentDocuments = readonlyRiskDocuments["risk-disclosure"]
+  } else if (location.pathname.startsWith("/m/workspace/inbound-records/")) {
+    pageTitle = "入库详情 · 移动端交互与 PRD 标注"
+    currentAnnotations = inboundH5DetailAnnotations
+    currentDocuments = inboundRecordH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/inbound-records")) {
+    pageTitle = "入库管理 · 移动端交互与 PRD 标注"
+    currentAnnotations = inboundH5ListAnnotations
+    currentDocuments = inboundRecordH5Documents
+  } else if (location.pathname.startsWith("/m/inbound/initiate")) {
+    pageTitle = "入库发起 · 移动端交互与 PRD 标注"
+    currentAnnotations = inboundH5InitiateAnnotations
+    currentDocuments = inboundRecordH5Documents
+  } else if (
+    location.pathname.startsWith("/m/workspace/config/warehouse-management") ||
+    location.pathname.startsWith("/m/workspace/config/new-warehouse") ||
+    location.pathname.startsWith("/m/config/warehouses")
+  ) {
+    const isNewWarehouse =
+      location.pathname === "/m/workspace/config/new-warehouse" ||
+      location.pathname === "/m/config/warehouses/new"
+    const isList =
+      location.pathname === "/m/workspace/config/warehouse-management" ||
+      location.pathname === "/m/config/warehouses"
+    pageTitle = isNewWarehouse
+      ? "新增仓库 · 移动端交互与 PRD 标注"
+      : "仓库管理 · 移动端交互与 PRD 标注"
+    currentAnnotations = isNewWarehouse
+      ? warehouseH5FormAnnotations
+      : isList
+        ? warehouseH5ListAnnotations
+        : warehouseH5DetailAnnotations
+    currentDocuments = warehouseManagementH5Documents
   } else {
     pageTitle = "森云·可信供应链数字中枢 · 移动端原型"
     currentAnnotations = [

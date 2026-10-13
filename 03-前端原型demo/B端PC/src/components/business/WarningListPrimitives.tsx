@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -30,6 +31,7 @@ type WarningFilterHeaderProps = {
   onSearch: () => void
   onAdd?: () => void
   addLabel?: string
+  extraActions?: ReactNode
 }
 
 export function WarningFilterHeader({
@@ -39,6 +41,7 @@ export function WarningFilterHeader({
   onSearch,
   onAdd,
   addLabel,
+  extraActions,
 }: WarningFilterHeaderProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
@@ -66,6 +69,7 @@ export function WarningFilterHeader({
             {addLabel ?? "新增"}
           </Button>
         )}
+        {extraActions}
         {onReset && (
           <Button type="button" variant="outline" size="sm" onClick={onReset}>
             <RotateCcwIcon className="size-4" />

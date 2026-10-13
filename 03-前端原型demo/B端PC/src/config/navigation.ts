@@ -27,6 +27,7 @@ export type BreadcrumbItem = {
 
 export const topModules: TopModule[] = [
   { id: "home", label: "工作中心", path: "/工作中心/审批中心" },
+  { id: "user-center", label: "用户中心", path: "/用户中心/合作方管理/合作方档案" },
   { id: "storage", label: "仓储", path: "/仓储/库存查询/存货管理" },
   { id: "finance", label: "融资/监管", path: "/融资/监管/融资管理/客户融资需求线索" },
   { id: "trade", label: "交易", path: "/交易/采购管理/采购需求管理" },
@@ -54,12 +55,58 @@ const migrationSidebarGroup: SidebarGroup = {
   ],
 }
 
+const configSidebarGroupsWith63: SidebarGroup[] = (
+  generatedSidebarGroupsByModule["config"] ?? []
+).map((group) => {
+  if (group.id === "货品规格管理" || group.label === "货品规格管理") {
+    const items = [...group.items]
+    const hasFieldPool = items.some((item) => item.label === "入库收集项配置")
+    if (!hasFieldPool) {
+      const goodsIndex = items.findIndex((item) => item.label === "货品管理")
+      const insertIndex = goodsIndex >= 0 ? goodsIndex + 1 : items.length
+      items.splice(insertIndex, 0, {
+        label: "入库收集项配置",
+        path: "/配置管理/货品规格管理/入库收集项配置",
+      })
+      return {
+        ...group,
+        items,
+      }
+    }
+  }
+
+  return group
+})
+
 const sidebarGroupsByModule: Record<string, SidebarGroup[]> = {
   ...generatedSidebarGroupsByModule,
+  "user-center": [
+    {
+      id: "partner-management",
+      label: "合作方管理",
+      items: [
+        {
+          label: "合作方档案",
+          path: "/用户中心/合作方管理/合作方档案",
+        },
+      ],
+    },
+    {
+      id: "synergy-spec",
+      label: "业务协同与说明",
+      items: [
+        {
+          label: "存量业务单据协同",
+          path: "/用户中心/业务协同/存量业务单据协同",
+        },
+      ],
+    },
+  ],
   "device-warning": [
     ...(generatedSidebarGroupsByModule["device-warning"] ?? []),
     migrationSidebarGroup,
   ],
+  config: configSidebarGroupsWith63,
 }
 
 const decodePath = (pathname: string) => {
@@ -77,6 +124,7 @@ export function isSystemReferencePath(pathname: string) {
 
 const modulePrefixes: Record<string, string> = {
   home: "/工作中心",
+  "user-center": "/用户中心",
   storage: "/仓储",
   finance: "/融资/监管",
   trade: "/交易",
@@ -92,6 +140,23 @@ const actionLabels: Record<string, string> = {
   新增: "新增",
   编辑: "编辑",
   解除: "解除",
+}
+
+/** 顶栏 Tab 文案覆盖（与线上一致的产品命名） */
+const PAGE_TAB_TITLE_OVERRIDES: Record<string, string> = {
+  "/仓储/入库管理/入库申请/新增": "新增入库",
+  "/仓储/入库管理/入库记录/新增": "新增入库",
+}
+
+function inboundDetailTabTitle(pathname: string): string | undefined {
+  const decoded = decodeURIComponent(pathname)
+  if (
+    decoded.includes("/仓储/入库管理/入库记录/详情/") ||
+    decoded.includes("/仓储/入库管理/入库申请/详情/")
+  ) {
+    return "入库单详情"
+  }
+  return undefined
 }
 
 export function getActiveTopModule(pathname: string): TopModule {
@@ -214,6 +279,12 @@ export function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
 }
 
 export function getPageTabTitle(pathname: string) {
+  const currentPath = decodePath(pathname).replace(/\/$/, "")
+  const detailTitle = inboundDetailTabTitle(currentPath)
+  if (detailTitle) return detailTitle
+  const override = PAGE_TAB_TITLE_OVERRIDES[currentPath]
+  if (override) return override
+
   const breadcrumbs = getBreadcrumbs(pathname)
   const last = breadcrumbs.at(-1)
   const previous = breadcrumbs.at(-2)

@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom"
+import { Navigate, Route, Routes, useParams } from "react-router-dom"
 import { CollateralWarningDetailPage } from "@/features/collateral-warning-events/pages/CollateralWarningDetailPage"
 import { CollateralWarningListPage } from "@/features/collateral-warning-events/pages/CollateralWarningListPage"
 import { CollateralWarningPublishPage } from "@/features/collateral-warning-events/pages/CollateralWarningPublishPage"
@@ -23,8 +23,36 @@ import { PrototypeEmptyPage } from "@/pages/PrototypeEmptyPage"
 import { MOBILE_MENU_ITEMS } from "@/data/mobileMenuData"
 import { RiskDisclosureLedgerDetailPage } from "@/features/risk-disclosure/pages/RiskDisclosureLedgerDetailPage"
 import { RiskDisclosureListPage } from "@/features/risk-disclosure/pages/RiskDisclosureListPage"
+import { WarehouseListPage } from "@/features/warehouse-management/pages/WarehouseListPage"
+import { WarehouseFormPage } from "@/features/warehouse-management/pages/WarehouseFormPage"
+import { WarehouseDetailPage } from "@/features/warehouse-management/pages/WarehouseDetailPage"
+import { WarehouseEditPage } from "@/features/warehouse-management/pages/WarehouseEditPage"
+import { InboundRecordListPage } from "@/features/inbound-records/pages/InboundRecordListPage"
+import { InboundInitiateGoodsPage } from "@/features/inbound-records/pages/InboundInitiateGoodsPage"
+import { InboundInitiatePage } from "@/features/inbound-records/pages/InboundInitiatePage"
+import { InboundRecordDetailPage } from "@/features/inbound-records/pages/InboundRecordDetailPage"
 
 const midLoanMenuItem = MOBILE_MENU_ITEMS.find((item) => item.id === "ws-risk-in-loan")
+
+function LegacyWarehouseDetailRedirect() {
+  const { id } = useParams()
+  return (
+    <Navigate
+      to={`/m/workspace/config/warehouse-management/${id ?? ""}`}
+      replace
+    />
+  )
+}
+
+function LegacyWarehouseEditRedirect() {
+  const { id } = useParams()
+  return (
+    <Navigate
+      to={`/m/workspace/config/warehouse-management/${id ?? ""}/edit`}
+      replace
+    />
+  )
+}
 
 export function AppRoutes() {
   return (
@@ -58,7 +86,48 @@ export function AppRoutes() {
       <Route path="/m/device-management" element={<DeviceManagementPage />} />
       <Route path="/m/access-control-devices" element={<AccessControlDeviceListPage />} />
 
+      <Route path="/m/workspace/inbound-records" element={<InboundRecordListPage />} />
+      <Route
+        path="/m/workspace/inbound-records/:id"
+        element={<InboundRecordDetailPage />}
+      />
+      <Route path="/m/inbound/initiate" element={<InboundInitiatePage />} />
+      <Route path="/m/inbound/initiate/goods" element={<InboundInitiateGoodsPage />} />
+
       <Route path="/m/module/:moduleId" element={<GenericModulePage />} />
+
+      <Route
+        path="/m/workspace/config/warehouse-management"
+        element={<WarehouseListPage />}
+      />
+      <Route
+        path="/m/workspace/config/new-warehouse"
+        element={<WarehouseFormPage />}
+      />
+      <Route
+        path="/m/workspace/config/warehouse-management/:id/edit"
+        element={<WarehouseEditPage />}
+      />
+      <Route
+        path="/m/workspace/config/warehouse-management/:id"
+        element={<WarehouseDetailPage />}
+      />
+      <Route
+        path="/m/config/warehouses"
+        element={<Navigate to="/m/workspace/config/warehouse-management" replace />}
+      />
+      <Route
+        path="/m/config/warehouses/new"
+        element={<Navigate to="/m/workspace/config/new-warehouse" replace />}
+      />
+      <Route
+        path="/m/config/warehouses/:id/edit"
+        element={<LegacyWarehouseEditRedirect />}
+      />
+      <Route
+        path="/m/config/warehouses/:id"
+        element={<LegacyWarehouseDetailRedirect />}
+      />
 
       {/* 6. 高保真风控预警专属流转页 */}
       <Route

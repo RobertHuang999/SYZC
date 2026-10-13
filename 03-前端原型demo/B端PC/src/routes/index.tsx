@@ -31,6 +31,17 @@ import { UnlockApplyDetailPage } from "@/features/unlock-applies/pages/UnlockApp
 import { AccessControlDeviceListPage } from "@/features/access-control-devices/pages/AccessControlDeviceListPage"
 import { MigrationSchemePage } from "@/features/migration-schemes/pages/MigrationSchemePage"
 import { PermissionReferencePage } from "@/features/permission-reference/pages/PermissionReferencePage"
+import { PartnerArchiveListPage } from "@/features/partner-archives/pages/PartnerArchiveListPage"
+import { PartnerArchiveDetailPage } from "@/features/partner-archives/pages/PartnerArchiveDetailPage"
+import { PartnerArchiveFormPage } from "@/features/partner-archives/pages/PartnerArchiveFormPage"
+import { PlatformBasicConfigPage } from "@/features/platform-basic-config/pages/PlatformBasicConfigPage"
+import { WarehouseListPage } from "@/features/warehouse-management/pages/WarehouseListPage"
+import { WarehouseDetailPage } from "@/features/warehouse-management/pages/WarehouseDetailPage"
+import { WarehouseFormPage } from "@/features/warehouse-management/pages/WarehouseFormPage"
+import { InboundApplyListPage } from "@/features/inbound-records/pages/InboundApplyListPage"
+import { InboundRecordListPage } from "@/features/inbound-records/pages/InboundRecordListPage"
+import { InboundRecordFormPage } from "@/features/inbound-records/pages/InboundRecordFormPage"
+import { InboundRecordDetailPage } from "@/features/inbound-records/pages/InboundRecordDetailPage"
 import { getAllMenuPaths, topModules } from "@/config/navigation"
 import { isImplementedRoute } from "@/config/implemented-routes"
 import { Navigate, Route, Routes } from "react-router-dom"
@@ -216,6 +227,70 @@ export function AppRoutes() {
         <Route
           path="物联网IOT与预警/物联网IOT管理/门禁设备"
           element={<AccessControlDeviceListPage />}
+        />
+
+        {/* 6.3 版本 · 用户中心板块 (01 合作方档案 & 03 存量业务协同) */}
+        <Route path="用户中心/合作方管理/合作方档案" element={<PartnerArchiveListPage />} />
+        <Route
+          path="用户中心/合作方管理/合作方档案/详情/:id"
+          element={<PartnerArchiveDetailPage />}
+        />
+        <Route
+          path="用户中心/合作方管理/合作方档案/新增"
+          element={<PartnerArchiveFormPage />}
+        />
+        <Route
+          path="用户中心/合作方管理/合作方档案/编辑/:id"
+          element={<PartnerArchiveFormPage />}
+        />
+
+        <Route
+          path="配置管理/平台管理/基础配置"
+          element={<PlatformBasicConfigPage />}
+        />
+
+        <Route
+          path="配置管理/仓库管理/仓库管理"
+          element={<WarehouseListPage />}
+        />
+        <Route
+          path="配置管理/仓库管理/添加仓库"
+          element={<WarehouseFormPage />}
+        />
+        <Route
+          path="配置管理/仓库管理/仓库/:id"
+          element={<WarehouseFormPage />}
+        />
+        <Route
+          path="配置管理/仓库管理/仓库管理/详情/:id"
+          element={<WarehouseDetailPage />}
+        />
+
+        {/* 仓储 - 入库管理（入库申请 + 入库记录） */}
+        <Route
+          path="仓储/入库管理/入库申请"
+          element={<InboundApplyListPage />}
+        />
+        <Route
+          path="仓储/入库管理/入库申请/新增"
+          element={<InboundRecordFormPage />}
+        />
+        <Route
+          path="仓储/入库管理/入库申请/详情/:id"
+          element={<InboundRecordDetailPage />}
+        />
+
+        <Route
+          path="仓储/入库管理/入库记录"
+          element={<InboundRecordListPage />}
+        />
+        <Route
+          path="仓储/入库管理/入库记录/新增"
+          element={<InboundRecordFormPage />}
+        />
+        <Route
+          path="仓储/入库管理/入库记录/详情/:id"
+          element={<InboundRecordDetailPage />}
         />
 
         {placeholderPaths.map((menuPath) => (

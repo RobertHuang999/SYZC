@@ -36,6 +36,21 @@ function buildDefaultOpenGroups(groups: ReturnType<typeof getSidebarGroups>) {
   return Object.fromEntries(groups.map((group) => [group.id, true]))
 }
 
+function isSidebarItemActive(itemPath: string, currentPath: string): boolean {
+  if (currentPath === itemPath || currentPath.startsWith(`${itemPath}/`)) {
+    return true
+  }
+  if (itemPath === "/配置管理/仓库管理/仓库管理") {
+    if (
+      currentPath.startsWith("/配置管理/仓库管理/添加仓库") ||
+      currentPath.startsWith("/配置管理/仓库管理/仓库/")
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
 export function SidebarNav({ activeModule }: SidebarNavProps) {
   const { pathname } = useLocation()
   const [collapsed, setCollapsed] = useState(false)
@@ -66,7 +81,7 @@ export function SidebarNav({ activeModule }: SidebarNavProps) {
         </button>
 
         {sidebarGroups.map((group) => {
-          const groupActive = group.items.some((item) => currentPath === item.path || currentPath.startsWith(`${item.path}/`))
+          const groupActive = group.items.some((item) => isSidebarItemActive(item.path, currentPath))
           const GroupIcon = groupIcons[group.id] ?? Boxes
 
           const isOpen = openGroups[group.id] ?? false
@@ -94,7 +109,7 @@ export function SidebarNav({ activeModule }: SidebarNavProps) {
                       className={({ isActive }) =>
                         cn(
                           "sidebar-item sidebar-subitem",
-                          (isActive || currentPath === item.path || currentPath.startsWith(`${item.path}/`)) && "is-active",
+                          (isActive || isSidebarItemActive(item.path, currentPath)) && "is-active",
                         )
                       }
                     >

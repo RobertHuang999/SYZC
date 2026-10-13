@@ -1,0 +1,99 @@
+import { useMemo } from "react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { partnerArchivesMock } from "../mock/partner-archives.mock"
+import {
+  ROLE_STATUS_LABELS,
+  ROLE_TYPE_LABELS,
+  type PartnerSubject,
+  type RoleType,
+} from "../domain/types"
+import { cn } from "@/lib/utils"
+
+export type PartnerSelectorValue = {
+  partnerId: string
+  partnerNo: string
+  name: string
+  idNumberMasked: string
+  subjectType: PartnerSubject["subjectType"]
+  roleType: RoleType
+  roleStatus: PartnerSubject["roles"][number]["roleStatus"]
+  subjectStatus: PartnerSubject["status"]
+}
+
+type PartnerArchiveSelectorProps = {
+  roleType?: RoleType
+  value?: string
+  onChange: (payload: PartnerSelectorValue | null) => void
+  placeholder?: string
+  className?: string
+}
+
+/** 字段清单 §5.2：默认过滤主体正常且引用角色正常 */
+function toSelectablePartners(roleType: RoleType): PartnerSubject[] {
+  return partnerArchivesMock.filter(
+    (item) =>
+      item.status === "NORMAL" &&
+      item.roles.some(
+        (role) => role.roleType === roleType && role.roleStatus === "NORMAL"
+      )
+  )
+}
+
+export function PartnerArchiveSelector({
+  roleType = "OWNER",
+  value,
+  onChange,
+  placeholder = "请选择合作方主体",
+  className,
+}: PartnerArchiveSelectorProps) {
+  const options = useMemo(() => toSelectablePartners(roleType), [roleType])
+
+  return (
+    <Select
+      value={value ?? ""}
+      onValueChange={(next) => {
+        if (!next) {
+          onChange(null)
+          return
+        }
+        const item = options.find((row) => row.id === next)
+        if (!item) {
+          onChange(null)
+          return
+        }
+        const role = item.roles.find((r) => r.roleType === roleType)!
+        onChange({
+          partnerId: item.id,
+          partnerNo: item.partnerNo,
+          name: item.name,
+          idNumberMasked: item.idNumberMasked,
+          subjectType: item.subjectType,
+          roleType,
+          roleStatus: role.roleStatus,
+          subjectStatus: item.status,
+        })
+      }}
+    >
+      <SelectTrigger className={cn("w-full", className)}>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((item) => {
+          const role = item.roles.find((r) => r.roleType === roleType)!
+          return (
+            <SelectItem key={item.id} value={item.id}>
+              {item.name} · {item.idNumberMasked} · {ROLE_TYPE_LABELS[roleType]}·
+              {ROLE_STATUS_LABELS[role.roleStatus]}
+            </SelectItem>
+          )
+        })}
+      </SelectContent>
+    </Select>
+  )
+}

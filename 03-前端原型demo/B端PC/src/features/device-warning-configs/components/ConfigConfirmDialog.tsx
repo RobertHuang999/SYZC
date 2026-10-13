@@ -21,7 +21,7 @@ type ConfigConfirmDialogProps = {
   reasonLabel?: string
   reasonPlaceholder?: string
   onOpenChange: (open: boolean) => void
-  onConfirm: () => void
+  onConfirm: (reason?: string) => void
 }
 
 const REASON_MAX_LENGTH = 200
@@ -54,7 +54,7 @@ export function ConfigConfirmDialog({
     if (confirmDisabled) {
       return
     }
-    onConfirm()
+    onConfirm(reasonRequired ? reason.trim() : undefined)
   }
 
   return (

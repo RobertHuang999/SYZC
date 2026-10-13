@@ -1,0 +1,82 @@
+import type { MobileInboundRecord } from "../domain/types"
+
+/** 与 PC 台账 / shared CANONICAL_APPROVED_ROWS 单号对齐 */
+export const mobileInboundRecordsMock: MobileInboundRecord[] = [
+  {
+    id: "m-inbound-1",
+    orderNo: "2108438504322834433",
+    ownerName: "乐富",
+    ownerIdentifierMasked: "187****8900",
+    inboundType: "普通入库",
+    inboundDate: "2026-06-03 10:12:08",
+    warehouseName: "海霸王仓库",
+    goodsSummary: "冻货-鸡翅-四川-特级-2025",
+    quantityLabel: "1 公斤",
+    flowStatus: "APPROVED",
+    creatorDisplay: "lxy(四川享宇科技有限公司)",
+    createdAt: "2026-06-03 10:12:36",
+    pcDetailId: "inbound-1",
+  },
+  {
+    id: "m-inbound-2",
+    orderNo: "2108429012345678901",
+    ownerName: "源保李",
+    ownerIdentifierMasked: "185****7112",
+    inboundType: "抵押入库",
+    inboundDate: "2026-06-02 16:25:10",
+    warehouseName: "海霸王仓库",
+    goodsSummary: "有色金属-电解铜-1号标准 等 2 种",
+    quantityLabel: "52.6 吨",
+    flowStatus: "PROCESSING",
+    creatorDisplay: "黄k(卡皮银行)",
+    createdAt: "2026-06-02 16:26:01",
+  },
+  {
+    id: "m-inbound-3",
+    orderNo: "2059897000077811713",
+    ownerName: "李爱",
+    ownerIdentifierMasked: "133****0027",
+    inboundType: "普通入库",
+    inboundDate: "2026-05-28 15:15:39",
+    warehouseName: "海霸王仓库-冻库1审核",
+    goodsSummary: "冻货-牛肉-36个月",
+    quantityLabel: "182.33 公斤",
+    flowStatus: "APPROVED",
+    creatorDisplay: "lxy(四川享宇科技有限公司)",
+    createdAt: "2026-05-28 15:18:12",
+    pcDetailId: "inbound-3",
+  },
+  {
+    id: "m-inbound-4",
+    orderNo: "2108400111222333444",
+    ownerName: "电解铜贸易",
+    ownerIdentifierMasked: "91510100MA6XXXXXX",
+    inboundType: "质押入库",
+    inboundDate: "2026-05-20 09:30:00",
+    warehouseName: "干粮仓库",
+    goodsSummary: "钢材-热轧卷板-Q235B-3.0mm",
+    quantityLabel: "120 吨",
+    flowStatus: "REJECTED",
+    creatorDisplay: "王监管(华东仓储运营中心)",
+    createdAt: "2026-05-20 09:31:44",
+  },
+  {
+    id: "m-inbound-5",
+    orderNo: "2108399988776655443",
+    ownerName: "成都锦城冷链",
+    ownerIdentifierMasked: "91510104MA62XXXXX",
+    inboundType: "监管服务入库",
+    inboundDate: "2026-05-18 14:02:11",
+    warehouseName: "生鲜仓库",
+    goodsSummary: "冻货-鸡腿-四川",
+    quantityLabel: "860 公斤",
+    flowStatus: "WITHDRAWN",
+    creatorDisplay: "张三(森云监管服务有限公司)",
+    createdAt: "2026-05-18 14:03:00",
+  },
+]
+
+export function getMobileInboundById(id: string | undefined) {
+  if (!id) return undefined
+  return mobileInboundRecordsMock.find((row) => row.id === id)
+}

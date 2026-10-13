@@ -2,14 +2,19 @@
 import { DateTimeText } from "./DateTimeText"
 import { formatDateTime } from "@/shared/lib/date-utils"
 
-/** 标准表格日期时间单元格：默认分两行展示，plain 模式与预警等级使用同款正文。 */
+/** 标准表格日期时间单元格：默认分两行（mono）；plain 为单行正文；stackedPlain 为两行正文（列表日期列推荐）。 */
 export function TableDateTimeCell({
   value,
   plain = false,
+  stackedPlain = false,
 }: {
   value?: string | null
   plain?: boolean
+  stackedPlain?: boolean
 }) {
+  if (stackedPlain) {
+    return <DateTimeText value={value} stacked plain />
+  }
   return <DateTimeText value={value} stacked={!plain} plain={plain} />
 }
 
