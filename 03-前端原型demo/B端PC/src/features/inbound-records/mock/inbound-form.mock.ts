@@ -7,7 +7,10 @@ export type OwnerSearchRecord = {
   ownerIdentifier: string
   identifierMasked: string
   contactPhone?: string
+  /** 完整身份证号（表单提交与校验） */
   idCardNo?: string
+  /** 列表/表单脱敏展示（字段清单：隐藏中间 8 位） */
+  idCardMasked?: string
 }
 
 export function formatOwnerSearchLabel(name: string, identifierMasked: string) {
@@ -24,6 +27,7 @@ export const OWNER_SEARCH_RECORDS: OwnerSearchRecord[] = [
     identifierMasked: "185****7112",
     contactPhone: "18512347112",
     idCardNo: "420101199003073328",
+    idCardMasked: "420101****3328",
   },
   {
     id: "owner-zy",
@@ -33,6 +37,7 @@ export const OWNER_SEARCH_RECORDS: OwnerSearchRecord[] = [
     identifierMasked: "133****0001",
     contactPhone: "13308000001",
     idCardNo: "510104198510123328",
+    idCardMasked: "510104****3328",
   },
   {
     id: "owner-li-ai",
@@ -42,6 +47,7 @@ export const OWNER_SEARCH_RECORDS: OwnerSearchRecord[] = [
     identifierMasked: "133****0027",
     contactPhone: "13308000027",
     idCardNo: "510101199208151234",
+    idCardMasked: "510101****1234",
   },
   {
     id: "owner-wh",
@@ -51,6 +57,7 @@ export const OWNER_SEARCH_RECORDS: OwnerSearchRecord[] = [
     identifierMasked: "139****2345",
     contactPhone: "13910012345",
     idCardNo: "110101198606201518",
+    idCardMasked: "110101****1518",
   },
   {
     id: "owner-hx",
@@ -85,6 +92,45 @@ export const OWNER_SEARCH_RECORDS: OwnerSearchRecord[] = [
     contactPhone: "021-68886666",
   },
 ]
+
+/** 按货主名称精确匹配系统档案（用于表单反显脱敏） */
+export function findOwnerSearchRecord(
+  ownerType: OwnerType | "",
+  ownerName: string
+): OwnerSearchRecord | undefined {
+  const name = ownerName.trim()
+  if (!name) return undefined
+  const sameName = OWNER_SEARCH_RECORDS.filter((record) => record.name === name)
+  if (sameName.length === 0) return undefined
+  if (ownerType) {
+    return sameName.find((record) => record.ownerType === ownerType) ?? sameName[0]
+  }
+  return sameName[0]
+}
+
+/** 货主标识（手机号/统一代码）反查档案，用于身份证号等字段反显兜底 */
+export function findOwnerSearchRecordByIdentifier(
+  identifier: string
+): OwnerSearchRecord | undefined {
+  const key = identifier.trim()
+  if (!key) return undefined
+  return OWNER_SEARCH_RECORDS.find(
+    (record) => record.ownerIdentifier === key || record.contactPhone === key
+  )
+}
+
+export function resolveOwnerSearchRecord(input: {
+  ownerType?: OwnerType | ""
+  ownerName?: string
+  ownerIdentifier?: string
+}): OwnerSearchRecord | undefined {
+  const byName = findOwnerSearchRecord(
+    input.ownerType ?? "",
+    input.ownerName ?? ""
+  )
+  if (byName) return byName
+  return findOwnerSearchRecordByIdentifier(input.ownerIdentifier ?? "")
+}
 
 export function filterOwnerSearchRecords(
   ownerType: OwnerType | "",
@@ -140,7 +186,7 @@ export const FORM_STOREROOMS: FormStoreroomOption[] = [
   { id: "sr-2", warehouseId: "wh-1", name: "2号高位重型库房", auditTag: "审核" },
   { id: "sr-3", warehouseId: "wh-1", name: "3号露天堆场", auditTag: "免审" },
   { id: "sr-4", warehouseId: "wh-2", name: "A区精密恒温库", auditTag: "审核" },
-  { id: "sr-5", warehouseId: "wh-2", name: "B区通用工业库", auditTag: "审核" },
+  { id: "sr-5", warehouseId: "wh-2", name: "B区通用工业库", auditTag: "免审" },
   { id: "sr-6", warehouseId: "wh-3", name: "冷链1号深冷库", auditTag: "审核" },
 ]
 

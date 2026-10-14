@@ -84,7 +84,7 @@ export function PartnerArchiveTable({
                           {item.name}
                         </Link>
                       </HoverOverflowText>
-                      <span className="font-mono text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground tabular-nums">
                         {item.idNumberMasked}
                       </span>
                     </div>

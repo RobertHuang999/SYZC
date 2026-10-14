@@ -56,7 +56,7 @@ export function CollateralWarningDetailContent({
       <PrototypeAnnotationTarget annotationIds={["collateral-warning-detail-base"]}>
         <DetailSection title="基本信息">
           <DetailField label="事件 ID">
-            <span className="font-mono">{event.eventId}</span>
+            <span className="font-medium">{event.eventId}</span>
           </DetailField>
           <DetailField label="预警订单">{event.orderNo}</DetailField>
           <DetailField label="订单类型">

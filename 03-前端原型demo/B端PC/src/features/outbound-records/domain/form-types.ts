@@ -21,6 +21,9 @@ export interface OutboundFormState {
   pickupName: string
   pickupIdCardNo: string
   pickupPhone: string
+  pickupIdentity?: string
+  pickupOperator?: string
   plateNo: string
   sitePhotos: string[]
 }
+

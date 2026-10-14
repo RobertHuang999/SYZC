@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import type { OwnerType } from "../domain/form-types"
 import {
   filterOwnerSearchRecords,
+  findOwnerSearchRecord,
   OWNER_SEARCH_RECORDS,
   type OwnerSearchRecord,
 } from "../mock/inbound-form.mock"
@@ -19,11 +20,11 @@ function maskIdCardNo(idCard?: string): string {
 
 export type OwnerNameSelection = {
   ownerName: string
-  ownerType: OwnerType
-  ownerIdentifier: string
-  contactPhone: string
-  idCardNo: string
-  isNewOwner: boolean
+  ownerType?: OwnerType
+  ownerIdentifier?: string
+  contactPhone?: string
+  idCardNo?: string
+  isNewOwner?: boolean
 }
 
 type OwnerNameSearchSelectProps = {
@@ -73,7 +74,7 @@ export function OwnerNameSearchSelect({
   const handleSelectRecord = (record: OwnerSearchRecord) => {
     setKeyword(record.name)
     onSelect({
-      ownerName: record.name,
+      ownerName: record.name.trim(),
       ownerType: record.ownerType,
       ownerIdentifier: record.ownerIdentifier,
       contactPhone: record.contactPhone ?? record.ownerIdentifier,
@@ -104,17 +105,28 @@ export function OwnerNameSearchSelect({
         idCardNo: exactMatch.idCardNo ?? "",
         isNewOwner: false,
       })
-    } else {
-      const fallbackType = ownerType || "企业货主"
+      return
+    }
+
+    const fallbackType = ownerType || "企业货主"
+    if (!val.trim()) {
       onSelect({
-        ownerName: val,
+        ownerName: "",
         ownerType: fallbackType,
         ownerIdentifier: "",
         contactPhone: "",
         idCardNo: "",
-        isNewOwner: true,
+        isNewOwner: false,
       })
+      return
     }
+
+    // 输入过程中仅标记新货主与名称，勿清空已选存量货主带出的标识/身份证号（避免脱敏反显被抹掉）
+    onSelect({
+      ownerName: val,
+      ownerType: fallbackType,
+      isNewOwner: true,
+    })
   }
 
   const placeholder =
@@ -141,6 +153,14 @@ export function OwnerNameSearchSelect({
               e.preventDefault()
               handleSelectRecord(options[0])
             }
+          }}
+          onBlur={() => {
+            window.setTimeout(() => {
+              const archive = findOwnerSearchRecord(ownerType, keyword)
+              if (archive) {
+                handleSelectRecord(archive)
+              }
+            }, 150)
           }}
         />
         <button
@@ -180,6 +200,7 @@ export function OwnerNameSearchSelect({
                         "flex w-full items-center justify-between px-3 py-2 text-left hover:bg-muted/70 transition-colors",
                         selected && "bg-primary/10 text-primary font-medium"
                       )}
+                      onMouseDown={(event) => event.preventDefault()}
                       onClick={() => handleSelectRecord(record)}
                     >
                       <div className="flex items-center gap-2 min-w-0">
@@ -204,7 +225,7 @@ export function OwnerNameSearchSelect({
                               {record.ownerType === "企业货主" ? "企业" : "个人"}
                             </span>
                           </div>
-                          <p className="text-[11px] text-muted-foreground font-mono truncate">
+                          <p className="text-[11px] text-muted-foreground truncate">
                             {record.ownerType === "个人货主"
                               ? `手机:${record.identifierMasked} · 身份证:${maskIdCardNo(record.idCardNo) || "无"}`
                               : `税号:${record.identifierMasked}`}
@@ -232,9 +253,6 @@ export function OwnerNameSearchSelect({
                   onSelect({
                     ownerName: keyword.trim(),
                     ownerType: fallbackType,
-                    ownerIdentifier: "",
-                    contactPhone: "",
-                    idCardNo: "",
                     isNewOwner: true,
                   })
                   setOpen(false)

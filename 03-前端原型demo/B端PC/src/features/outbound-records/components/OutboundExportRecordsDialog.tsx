@@ -50,7 +50,7 @@ export function OutboundExportRecordsDialog({
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <span className="text-gray-400">出库单号：</span>
-                <span className="font-mono font-medium text-gray-800">{record.orderNo}</span>
+                <span className="font-medium text-gray-800">{record.orderNo}</span>
               </div>
               <div>
                 <span className="text-gray-400">出库类型：</span>
@@ -66,13 +66,13 @@ export function OutboundExportRecordsDialog({
               </div>
               <div>
                 <span className="text-gray-400">总出库量：</span>
-                <span className="font-mono text-gray-800">
+                <span className="text-gray-800">
                   {record.totalAmount} {record.amountUnit}
                 </span>
               </div>
               <div>
                 <span className="text-gray-400">关联单号：</span>
-                <span className="font-mono text-gray-800">{record.relatedNo || "—"}</span>
+                <span className="text-gray-800">{record.relatedNo || "—"}</span>
               </div>
             </div>
           </div>

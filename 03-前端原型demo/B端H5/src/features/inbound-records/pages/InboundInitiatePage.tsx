@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { Building2, Camera, CalendarDays, Package } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
@@ -16,7 +16,11 @@ import {
 } from "../domain/inbound-type-options"
 import type { ManualInboundType, OwnerType } from "../domain/form-types"
 import { RELATED_ORDER_DIALOG_TITLE } from "../domain/form-constants"
-import { INBOUND_INITIATE_GOODS_ROUTE, TASKS_ROUTE } from "../domain/constants"
+import {
+  INBOUND_INITIATE_GOODS_ROUTE,
+  INBOUND_INITIATE_RESUME_STATE,
+  TASKS_ROUTE,
+} from "../domain/constants"
 import {
   FORM_WAREHOUSES,
   FORM_STOREROOMS,
@@ -29,6 +33,7 @@ import {
 } from "../lib/inbound-form-utils"
 import {
   hasSignificantBasicChange,
+  clearInboundInitiateSession,
   loadInboundInitiateForm,
   loadInboundInitiateSnapshot,
   saveInboundInitiateForm,
@@ -36,9 +41,27 @@ import {
 } from "../lib/inbound-initiate-session"
 import { validateInboundBasicStep } from "../lib/validate-inbound-basic"
 import { INBOUND_FORM_MESSAGES } from "@prototype/shared/inbound/form-messages"
+import { getStagingRegByNo } from "@prototype/shared/inbound/inbound-staging.mock"
+import {
+  formFromFormalInbound,
+  formFromStagingRegRow,
+} from "@/features/inbound-staging-reg/lib/staging-form-utils"
+import { InboundStagingSwitchSheet } from "@/features/inbound-staging-reg/components/InboundStagingSwitchSheet"
+import {
+  INBOUND_STAGING_FORM_ROUTE,
+  INBOUND_STAGING_FORM_RESUME,
+} from "@/features/inbound-staging-reg/domain/constants"
+import {
+  clearInboundStagingSession,
+  saveInboundStagingForm,
+  saveStagingEditId,
+} from "@/features/inbound-staging-reg/lib/inbound-staging-session"
 
 export function InboundInitiatePage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
+  const sourceRegId = searchParams.get("sourceRegId")
   const dateInputRef = useRef<HTMLInputElement>(null)
   const [form, setForm] = useState(createInitialFormState)
   const [relatedOpen, setRelatedOpen] = useState(false)
@@ -48,11 +71,20 @@ export function InboundInitiatePage() {
   const [leaveOpen, setLeaveOpen] = useState(false)
   const [ownerDropdown, setOwnerDropdown] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [stagingSwitchOpen, setStagingSwitchOpen] = useState(false)
 
   useEffect(() => {
-    const saved = loadInboundInitiateForm()
-    if (saved) setForm(saved)
-  }, [])
+    const resume = (
+      location.state as { resumeInboundDraft?: boolean } | null
+    )?.resumeInboundDraft
+    if (resume) {
+      const saved = loadInboundInitiateForm()
+      if (saved) setForm(saved)
+      return
+    }
+    clearInboundInitiateSession()
+    setForm(createInitialFormState())
+  }, [location.key, location.state])
 
   const patch = (p: Partial<typeof form>) => setForm((prev) => ({ ...prev, ...p }))
 
@@ -60,6 +92,21 @@ export function InboundInitiatePage() {
     setToast(msg)
     window.setTimeout(() => setToast(null), 2600)
   }
+
+  useEffect(() => {
+    if (!sourceRegId) return
+    const reg = getStagingRegByNo(sourceRegId)
+    if (!reg) return
+    if (reg.status !== "待补全") {
+      showToast(`登记单 ${sourceRegId} 已非待补全，无法预填`)
+      return
+    }
+    const prefill = formFromStagingRegRow(reg)
+    setForm(prefill)
+    saveInboundInitiateForm(prefill)
+    showToast(`已加载暂存 ${sourceRegId} 预填`)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅 sourceRegId 变化时预填
+  }, [sourceRegId])
 
   const typeCode = inboundTypeNameToCode(form.inboundType)
   const isNormal = typeCode === "NORMAL"
@@ -117,7 +164,10 @@ export function InboundInitiatePage() {
     }
     saveInboundInitiateForm(nextForm)
     saveInboundInitiateSnapshot(nextForm)
-    navigate(INBOUND_INITIATE_GOODS_ROUTE)
+    const goodsPath = sourceRegId
+      ? `${INBOUND_INITIATE_GOODS_ROUTE}?sourceRegId=${encodeURIComponent(sourceRegId)}`
+      : INBOUND_INITIATE_GOODS_ROUTE
+    navigate(goodsPath, { state: INBOUND_INITIATE_RESUME_STATE })
   }
 
   const handleBack = () => {
@@ -137,13 +187,27 @@ export function InboundInitiatePage() {
 
   return (
     <MobileShell>
-      <div className="flex min-h-0 flex-1 flex-col bg-gradient-to-b from-orange-50/80 to-[#F2F3F7]">
+      <div className="flex min-h-0 flex-1 flex-col bg-gradient-to-b from-blue-50/80 to-[#F2F3F7]">
         <PrototypeAnnotationTarget annotationIds={["inbound-h5-initiate"]}>
           <NavBar title="入库单填写" onBack={handleBack} />
         </PrototypeAnnotationTarget>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-8">
           <NativeInboundStepBar current={0} />
+
+          {sourceRegId ? (
+            <div className="mb-3 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-900">
+              暂存转正预填 · {sourceRegId}（P10：提交成功回写登记单【已转正式】）
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="mb-3 w-full rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900"
+              onClick={() => setStagingSwitchOpen(true)}
+            >
+              切换为【入库暂存登记】通道（P09 现场极速备忘）
+            </button>
+          )}
 
           <NativeInfoCard
             title="货主信息"
@@ -164,7 +228,7 @@ export function InboundInitiatePage() {
                       type="button"
                       className={`flex h-[26px] w-14 items-center justify-center rounded-md text-sm ${
                         active
-                          ? "bg-orange-50 text-orange-600"
+                          ? "bg-blue-50 text-blue-600"
                           : "bg-[#232D39]/5 text-[#232D39]/60"
                       }`}
                       onClick={() => setOwnerType(value)}
@@ -323,7 +387,7 @@ export function InboundInitiatePage() {
                   {needRelated ? (
                     <button
                       type="button"
-                      className="text-sm text-orange-600"
+                      className="text-sm text-blue-600"
                       onClick={() => setRelatedOpen(true)}
                     >
                       {form.relatedOrderNo || "选择单号"}
@@ -392,7 +456,7 @@ export function InboundInitiatePage() {
 
           <button
             type="button"
-            className="mt-4 flex h-[52px] w-full items-center justify-center rounded-lg bg-orange-600 text-base font-medium text-white active:bg-orange-700"
+            className="mt-4 flex h-[52px] w-full items-center justify-center rounded-lg bg-blue-600 text-base font-medium text-white active:bg-blue-700"
             onClick={goNext}
           >
             下一步
@@ -454,6 +518,22 @@ export function InboundInitiatePage() {
         }}
       />
 
+      <InboundStagingSwitchSheet
+        open={stagingSwitchOpen}
+        onClose={() => setStagingSwitchOpen(false)}
+        onNavigateBlank={() => {
+          setStagingSwitchOpen(false)
+          clearInboundStagingSession()
+          navigate(INBOUND_STAGING_FORM_ROUTE)
+        }}
+        onNavigateWithCopy={() => {
+          setStagingSwitchOpen(false)
+          saveStagingEditId(null)
+          saveInboundStagingForm(formFromFormalInbound(form))
+          navigate(INBOUND_STAGING_FORM_ROUTE, { state: INBOUND_STAGING_FORM_RESUME })
+        }}
+      />
+
       {leaveOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
           <div className="w-full max-w-sm rounded-xl bg-white p-4">
@@ -469,8 +549,11 @@ export function InboundInitiatePage() {
               </button>
               <button
                 type="button"
-                className="flex-1 rounded-lg bg-orange-600 py-2 text-sm text-white"
-                onClick={() => navigate(TASKS_ROUTE)}
+                className="flex-1 rounded-lg bg-blue-600 py-2 text-sm text-white"
+                onClick={() => {
+                  clearInboundInitiateSession()
+                  navigate(TASKS_ROUTE)
+                }}
               >
                 离开
               </button>

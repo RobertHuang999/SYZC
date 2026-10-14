@@ -33,7 +33,7 @@ export function MobileDownSelectSheet({
                 <button
                   type="button"
                   className={`block w-full border-b border-gray-50 px-4 py-3.5 text-left text-sm ${
-                    active ? "font-medium text-orange-600" : "text-[#232D39]"
+                    active ? "font-medium text-blue-600" : "text-[#232D39]"
                   }`}
                   onClick={() => {
                     onSelect(opt)

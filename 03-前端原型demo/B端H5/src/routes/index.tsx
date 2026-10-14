@@ -31,6 +31,10 @@ import { InboundRecordListPage } from "@/features/inbound-records/pages/InboundR
 import { InboundInitiateGoodsPage } from "@/features/inbound-records/pages/InboundInitiateGoodsPage"
 import { InboundInitiatePage } from "@/features/inbound-records/pages/InboundInitiatePage"
 import { InboundRecordDetailPage } from "@/features/inbound-records/pages/InboundRecordDetailPage"
+import { InboundStagingListPage } from "@/features/inbound-staging-reg/pages/InboundStagingListPage"
+import { InboundStagingDetailPage } from "@/features/inbound-staging-reg/pages/InboundStagingDetailPage"
+import { InboundStagingFormPage } from "@/features/inbound-staging-reg/pages/InboundStagingFormPage"
+import { InboundStagingGoodsPage } from "@/features/inbound-staging-reg/pages/InboundStagingGoodsPage"
 import {
   OutboundRecordListPage,
   OutboundRecordDetailPage,
@@ -99,6 +103,14 @@ export function AppRoutes() {
       />
       <Route path="/m/inbound/initiate" element={<InboundInitiatePage />} />
       <Route path="/m/inbound/initiate/goods" element={<InboundInitiateGoodsPage />} />
+
+      <Route path="/m/workspace/inbound-staging" element={<InboundStagingListPage />} />
+      <Route path="/m/inbound/staging/reg" element={<InboundStagingFormPage />} />
+      <Route path="/m/inbound/staging/reg/goods" element={<InboundStagingGoodsPage />} />
+      <Route
+        path="/m/workspace/inbound-staging/:id"
+        element={<InboundStagingDetailPage />}
+      />
 
       <Route path="/m/workspace/outbound-records" element={<OutboundRecordListPage />} />
       <Route

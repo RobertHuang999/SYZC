@@ -32,7 +32,7 @@ export function MobileStoreroomMultiSheet({
       <div className="max-h-[70vh] rounded-t-2xl bg-white pb-safe">
         <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
           <span className="text-sm font-medium">{title}</span>
-          <button type="button" className="text-sm text-orange-600" onClick={onClose}>
+          <button type="button" className="text-sm text-blue-600" onClick={onClose}>
             完成
           </button>
         </div>
@@ -48,7 +48,7 @@ export function MobileStoreroomMultiSheet({
                 >
                   <span
                     className={`flex size-5 items-center justify-center rounded border ${
-                      checked ? "border-orange-600 bg-orange-600 text-white" : "border-gray-300"
+                      checked ? "border-blue-600 bg-blue-600 text-white" : "border-gray-300"
                     }`}
                   >
                     {checked ? "✓" : ""}

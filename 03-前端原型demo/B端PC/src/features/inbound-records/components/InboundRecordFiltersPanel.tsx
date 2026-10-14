@@ -16,11 +16,8 @@ import {
   INBOUND_TYPE_FILTER_OPTIONS,
 } from "../domain/constants"
 import type { InboundRecordFilters } from "../domain/types"
-import {
-  inboundCreatorFilterOptions,
-  inboundGoodsSpecFilterOptions,
-  inboundWarehouseFilterOptions,
-} from "../mock/inbound-records.mock"
+import { inboundCreatorFilterOptions } from "../mock/inbound-records.mock"
+import { InboundCascadeFilterSelect } from "./InboundCascadeFilterSelect"
 
 type InboundRecordFiltersPanelProps = {
   value: InboundRecordFilters
@@ -102,24 +99,14 @@ export function InboundRecordFiltersPanel({
           </FilterField>
 
           <FilterField label="仓库名称">
-            <Select
-              value={value.warehouseName}
-              onValueChange={(next) => {
-                if (!next) return
-                onChange({ ...value, warehouseName: next })
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="请选择仓库" />
-              </SelectTrigger>
-              <SelectContent>
-                {inboundWarehouseFilterOptions.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option === "全部" ? "全部仓库" : option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <InboundCascadeFilterSelect
+              variant="warehouse"
+              selectedKeys={value.warehouseCascadeKeys}
+              onChange={(warehouseCascadeKeys) =>
+                onChange({ ...value, warehouseCascadeKeys })
+              }
+              placeholder="全部仓库"
+            />
           </FilterField>
 
           {expanded && (
@@ -138,24 +125,14 @@ export function InboundRecordFiltersPanel({
               </FilterField>
 
               <FilterField label="货品名称">
-                <Select
-                  value={value.goodsSpec}
-                  onValueChange={(next) => {
-                    if (!next) return
-                    onChange({ ...value, goodsSpec: next })
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="请选择货品" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {inboundGoodsSpecFilterOptions.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option === "全部" ? "全部货品" : option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <InboundCascadeFilterSelect
+                  variant="goods"
+                  selectedKeys={value.goodsCascadeKeys}
+                  onChange={(goodsCascadeKeys) =>
+                    onChange({ ...value, goodsCascadeKeys })
+                  }
+                  placeholder="全部货品"
+                />
               </FilterField>
 
               <FilterField label="制单人">

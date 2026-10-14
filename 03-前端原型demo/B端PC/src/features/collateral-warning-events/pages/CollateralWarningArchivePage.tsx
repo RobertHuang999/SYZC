@@ -218,7 +218,7 @@ export function CollateralWarningArchivePage() {
                   <TableCell className="text-xs text-muted-foreground">
                     {(currentPage - 1) * pageSize + index + 1}
                   </TableCell>
-                  <TableCell className="font-mono text-xs font-medium text-blue-600">
+                  <TableCell className="text-xs font-medium text-blue-600">
                     {event.orderNo}
                   </TableCell>
                   <TableCell className="text-xs font-medium">{event.warningType}</TableCell>

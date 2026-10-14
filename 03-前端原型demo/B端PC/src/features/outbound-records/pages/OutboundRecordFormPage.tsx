@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -14,6 +13,10 @@ import {
   PrototypeAnnotationProvider,
   PrototypeAnnotationTarget,
 } from "@/shared/annotations/PrototypeAnnotationLayer"
+import {
+  ApprovalFlowSelectDialog,
+  OUTBOUND_APPROVAL_FLOWS,
+} from "@/features/inbound-records/components/ApprovalFlowSelectDialog"
 import { outboundRecordDocuments } from "../documents/outbound-record-documents"
 import { outboundRecordFormAnnotations } from "../annotations/outbound-record-form.annotations"
 import { OutboundBasicInfoSection } from "../components/OutboundBasicInfoSection"
@@ -21,6 +24,7 @@ import { OutboundGoodsPickerModal } from "../components/OutboundGoodsPickerModal
 import { OutboundGoodsSection } from "../components/OutboundGoodsSection"
 import { OutboundPickupInfoSection } from "../components/OutboundPickupInfoSection"
 import { OutboundFormSummaryBar } from "../components/OutboundFormSummaryBar"
+import { OutboundSubmitConfirmDialog } from "../components/OutboundSubmitConfirmDialog"
 import { ImageViewerModal } from "../components/ImageViewerModal"
 import { OUTBOUND_RECORD_LIST_PATH } from "../domain/constants"
 import type { OutboundFormState } from "../domain/form-types"
@@ -37,17 +41,19 @@ import {
   CURRENT_USER_ORG,
   outboundRecordsMock,
 } from "../mock/outbound-records.mock"
+import { addDeliveryOrderFromOutbound } from "@/features/delivery-orders/mock/delivery-orders.mock"
 
 export function OutboundRecordFormPage() {
   const navigate = useNavigate()
   const [form, setForm] = useState<OutboundFormState>(() => createInitialFormState())
 
-  // 折叠状态
+  const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false)
+  const [flowSelectOpen, setFlowSelectOpen] = useState(false)
+
   const [basicExpanded, setBasicExpanded] = useState(true)
   const [goodsExpanded, setGoodsExpanded] = useState(true)
   const [pickupExpanded, setPickupExpanded] = useState(true)
 
-  // 弹窗状态
   const [leaveOpen, setLeaveOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
@@ -71,7 +77,6 @@ export function OutboundRecordFormPage() {
     setForm((prev) => ({ ...prev, ...p }))
   }
 
-  // 尝试返回或取消
   const handleCancel = () => {
     if (formHasDirtyFields(form)) {
       setLeaveOpen(true)
@@ -80,7 +85,6 @@ export function OutboundRecordFormPage() {
     navigate(OUTBOUND_RECORD_LIST_PATH)
   }
 
-  // 点击添加货品
   const handleOpenGoodsPicker = () => {
     if (!form.ownerName) {
       showToast("请输入货主名称（C01）")
@@ -89,15 +93,12 @@ export function OutboundRecordFormPage() {
     setPickerOpen(true)
   }
 
-  // 普通选货确认回填
   const handleConfirmGoodsPick = (selectedGoods: OutboundGoodsItem[]) => {
-    // 合并货品明细 (O01 / O07)
     setForm((prev) => {
       const currentList = [...prev.goodsList]
       selectedGoods.forEach((newItem) => {
         const existingIdx = currentList.findIndex((g) => g.goodsName === newItem.goodsName)
         if (existingIdx >= 0) {
-          // 同一规格货物合并位置
           currentList[existingIdx] = newItem
         } else {
           currentList.push(newItem)
@@ -108,7 +109,6 @@ export function OutboundRecordFormPage() {
     showToast(`成功添加 ${selectedGoods.length} 项货品`)
   }
 
-  // 关联单号确认带出
   const handleSelectRelatedOrder = (order: RelatedOrderItem) => {
     const convertedItems: OutboundGoodsItem[] = order.items.map((item, idx) => ({
       id: `REL-${idx + 1}`,
@@ -117,10 +117,10 @@ export function OutboundRecordFormPage() {
       specName: item.specName,
       goodsName: item.goodsName,
       extraInfo: item.extraInfo,
-      totalOutboundAmount: item.availableAmount, // 默认带出全部可用量
+      totalOutboundAmount: item.availableAmount,
       unit: item.unit,
       price: item.price,
-      selected: true, // 默认勾选
+      selected: true,
       availableAmount: item.availableAmount,
       locationPath: item.locationPath,
       warehouseName: item.warehouseName,
@@ -138,7 +138,6 @@ export function OutboundRecordFormPage() {
     showToast(`已成功带出关联单据【${order.orderNo}】项下货物信息（O02）`)
   }
 
-  // 移除普通货品行
   const handleRemoveGoodsLine = (goodsId: string) => {
     setForm((prev) => ({
       ...prev,
@@ -146,7 +145,6 @@ export function OutboundRecordFormPage() {
     }))
   }
 
-  // 关联货品行勾选切换
   const handleToggleGoodsSelect = (goodsId: string, selected: boolean) => {
     setForm((prev) => ({
       ...prev,
@@ -156,7 +154,6 @@ export function OutboundRecordFormPage() {
     }))
   }
 
-  // 关联货品出库数量修改
   const handleUpdateGoodsAmount = (goodsId: string, amount: number) => {
     setForm((prev) => ({
       ...prev,
@@ -166,20 +163,31 @@ export function OutboundRecordFormPage() {
     }))
   }
 
-  // 提交审核
   const handleSubmit = () => {
     const valResult = validateOutboundForm(form)
     if (!valResult.valid) {
       showToast(valResult.message || "表单填写有误，请核实")
       return
     }
+    setConfirmSubmitOpen(true)
+  }
 
+  const handleProceedFlowSelect = () => {
+    setConfirmSubmitOpen(false)
+    setFlowSelectOpen(true)
+  }
+
+  const handleFinalSubmit = (selectedFlowId: string) => {
     setSubmitLoading(true)
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       setSubmitLoading(false)
+      setFlowSelectOpen(false)
 
-      // 生成新出库记录并写入 Mock 数据 (模拟审批流原子完成落库归档)
+      const flowLabel =
+        OUTBOUND_APPROVAL_FLOWS.find((f) => f.id === selectedFlowId)?.name ??
+        "标准出库流程"
+
       const newId = `2061${Date.now().toString().slice(-15)}`
       const newRecord: OutboundRecord = {
         id: newId,
@@ -213,12 +221,14 @@ export function OutboundRecordFormPage() {
         createdByName: CURRENT_USER_NAME,
         createdByOrg: CURRENT_USER_ORG,
         createTime: form.outboundDate,
-        pickCompleted: false, // 新制单默认生成提货单，待提货
+        pickCompleted: false,
         pickupInfo: {
           personType: form.pickupPersonType,
           name: form.pickupName,
           idCardNo: form.pickupIdCardNo,
           phone: form.pickupPhone,
+          identity: form.pickupIdentity,
+          operatorName: form.pickupOperator,
           plateNo: form.plateNo,
           sitePhotos: form.sitePhotos,
           deviceSnapshots: [
@@ -226,7 +236,7 @@ export function OutboundRecordFormPage() {
           ],
         },
         auditRecord: {
-          flowName: `${form.type}审批流转`,
+          flowName: `${form.type}审批流转（${flowLabel}）`,
           nodes: [
             {
               id: "NEW-1",
@@ -240,7 +250,7 @@ export function OutboundRecordFormPage() {
             {
               id: "NEW-2",
               nodeName: "审批通过",
-              handlerName: "自动审批引擎",
+              handlerName: "库管主管（张明远）",
               action: "APPROVE",
               actionName: "审批通过",
               actionTime: form.outboundDate,
@@ -251,9 +261,13 @@ export function OutboundRecordFormPage() {
       }
 
       outboundRecordsMock.unshift(newRecord)
-      showToast(`出库单【${newId}】提交成功，已归档进入出库台账并生成提货单！`)
+      const newDelivery = addDeliveryOrderFromOutbound(newRecord)
+
+      showToast(
+        `出库单【${newId}】审批通过，可用库存已扣减，提货单【${newDelivery.orderNo}】已生成！`
+      )
       navigate(OUTBOUND_RECORD_LIST_PATH)
-    }, 800)
+    }, 700)
   }
 
   return (
@@ -262,35 +276,34 @@ export function OutboundRecordFormPage() {
       documents={outboundRecordDocuments}
       annotations={outboundRecordFormAnnotations}
     >
-      <div className="min-h-[calc(100vh-100px)] flex flex-col justify-between">
-        <div className="space-y-4 p-6">
-          {/* 页头打点 */}
+      <div className="flex min-h-full flex-col bg-muted/10">
+        <div className="flex-1 space-y-4 p-6 pb-4">
           <PrototypeAnnotationTarget annotationIds={["outbound-form-header"]}>
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-4">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                  新增出库
+                </h1>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  支持普通/仓单/质押/抵押出库；普通出库从可用库存选货，关联出库由业务单号带出明细并生成提货单
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
+                  取 消
+                </Button>
                 <Button
                   type="button"
-                  variant="ghost"
                   size="sm"
-                  onClick={handleCancel}
-                  className="h-8 gap-1 text-xs"
+                  onClick={handleSubmit}
+                  disabled={submitLoading}
                 >
-                  <ArrowLeft className="size-4" />
-                  返回
+                  {submitLoading ? "提交中..." : "提交审核"}
                 </Button>
-                <div>
-                  <h1 className="text-xl font-semibold tracking-tight text-gray-900">
-                    新增出库申请
-                  </h1>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    出库制单（P-CKG-010-ADD）· 先解押后发货，现场照片与设备抓拍双重存证
-                  </p>
-                </div>
               </div>
             </div>
           </PrototypeAnnotationTarget>
 
-          {/* 折叠面板 1：基础信息 */}
           <PrototypeAnnotationTarget annotationIds={["outbound-form-basic"]}>
             <OutboundBasicInfoSection
               form={form}
@@ -301,7 +314,6 @@ export function OutboundRecordFormPage() {
             />
           </PrototypeAnnotationTarget>
 
-          {/* 折叠面板 2：货品明细 */}
           <PrototypeAnnotationTarget annotationIds={["outbound-form-goods"]}>
             <OutboundGoodsSection
               type={form.type}
@@ -316,7 +328,6 @@ export function OutboundRecordFormPage() {
             />
           </PrototypeAnnotationTarget>
 
-          {/* 折叠面板 3：提货信息 */}
           <PrototypeAnnotationTarget annotationIds={["outbound-form-pickup"]}>
             <OutboundPickupInfoSection
               form={form}
@@ -328,21 +339,17 @@ export function OutboundRecordFormPage() {
           </PrototypeAnnotationTarget>
         </div>
 
-        {/* 固定底栏打点 */}
-        <PrototypeAnnotationTarget annotationIds={["outbound-form-summary"]}>
+        <div className="sticky bottom-0 z-20 border-t bg-card/95 px-6 py-3 backdrop-blur shadow-xs">
           <OutboundFormSummaryBar
             categoryCount={totals.categoryCount}
             totalAmount={totals.totalAmount}
             unit={totals.unit}
             totalValueWan={totals.totalValueWan}
-            isRelated={isRelated}
-            loading={submitLoading}
-            onCancel={handleCancel}
-            onSubmit={handleSubmit}
+            showValue={isRelated}
+            variant="footer"
           />
-        </PrototypeAnnotationTarget>
+        </div>
 
-        {/* 普通出库选货弹窗 */}
         <OutboundGoodsPickerModal
           open={pickerOpen}
           ownerName={form.ownerName}
@@ -350,53 +357,75 @@ export function OutboundRecordFormPage() {
           onConfirm={handleConfirmGoodsPick}
         />
 
-        {/* 图片大图预览 */}
         <ImageViewerModal
           url={previewImageUrl}
           onClose={() => setPreviewImageUrl(null)}
         />
 
-        {/* 未保存离开确认 Dialog */}
+        <OutboundSubmitConfirmDialog
+          open={confirmSubmitOpen}
+          onOpenChange={setConfirmSubmitOpen}
+          outboundType={form.type}
+          ownerName={form.ownerName}
+          relatedNo={form.relatedNo}
+          totalAmount={totals.totalAmount}
+          unit={totals.unit}
+          categoryCount={totals.categoryCount}
+          pickupName={form.pickupName}
+          pickupPhone={form.pickupPhone}
+          plateNo={form.plateNo}
+          warehouseName={form.warehouseName || "海霸王仓库"}
+          onBack={() => setConfirmSubmitOpen(false)}
+          onConfirm={handleProceedFlowSelect}
+        />
+
+        <ApprovalFlowSelectDialog
+          open={flowSelectOpen}
+          loading={submitLoading}
+          onOpenChange={setFlowSelectOpen}
+          onCancel={() => {
+            setFlowSelectOpen(false)
+            setConfirmSubmitOpen(true)
+          }}
+          onConfirm={handleFinalSubmit}
+          title="流程确认"
+          description={`该条【${form.type}】申请需系统审批，请选择具体流程。审批通过后将扣减可用库存并自动生成提货单。`}
+          flows={OUTBOUND_APPROVAL_FLOWS}
+          confirmLabel="确认提交审批并生成提货单"
+          noticeTitle="💡 出库审批须知："
+          noticeContent="提交后单据进入待审核状态；终审通过后系统锁定并扣减库存行，同步生成提货单供现场核销。超时请勿重复提交，可在出库申请列表查看进度。"
+        />
+
         <Dialog open={leaveOpen} onOpenChange={setLeaveOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle className="text-base font-semibold text-gray-900">
-                未保存提示
-              </DialogTitle>
-              <DialogDescription className="text-xs text-gray-600">
-                当前出库表单已有录入内容，离开后已填数据与已选货品将不予保留。确认退出吗？
+              <DialogTitle>未保存确认</DialogTitle>
+              <DialogDescription>
+                当前表单存在已编辑内容，离开将丢失未提交的数据。确定返回吗？
               </DialogDescription>
             </DialogHeader>
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLeaveOpen(false)}
-                className="text-xs"
-              >
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setLeaveOpen(false)}>
                 继续编辑
               </Button>
               <Button
                 variant="destructive"
-                size="sm"
                 onClick={() => {
                   setLeaveOpen(false)
                   navigate(OUTBOUND_RECORD_LIST_PATH)
                 }}
-                className="text-xs"
               >
-                放弃并离开
+                确定离开
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* 提示 Toast */}
-        {toastMessage && (
-          <div className="fixed bottom-16 right-6 z-50 rounded-lg bg-gray-900/90 px-4 py-2.5 text-xs text-white shadow-xl animate-in slide-in-from-bottom-2">
+        {toastMessage ? (
+          <div className="fixed right-6 bottom-16 z-50 rounded-lg border bg-foreground px-4 py-3 text-xs text-background shadow-lg">
             {toastMessage}
           </div>
-        )}
+        ) : null}
       </div>
     </PrototypeAnnotationProvider>
   )

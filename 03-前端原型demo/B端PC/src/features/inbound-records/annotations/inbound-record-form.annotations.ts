@@ -34,9 +34,10 @@ export const inboundRecordFormAnnotations: PrototypeAnnotation[] = [
     kind: "交互",
     title: "货品与 R13/R16",
     content:
-      "计量参数标签随规格模板展示（如重量）；未堆放数量红色试算；现场照片必传；提交前 R13 阻断与新货主 R03 弹窗。",
+      "选货：大类→品类→货品 SKU 三列联动（R11）；计量数量可填、单位随 SKU 只读（R11b）；收集项随 SKU。未堆放数量红色试算；现场照片必传；提交前 R13 与新货主 R03。",
     documentRefs: {
-      fields: { section: "2.1 一级货品明细", match: "计量参数", element: "row" },
+      fields: { section: "2.1 一级货品明细", match: "入库货品（SKU）", element: "row" },
+      rules: { section: "【货品 SKU 选取与三级联动】(R11)", match: "R11", element: "text" },
     },
     details: [],
   },

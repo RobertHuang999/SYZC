@@ -330,7 +330,7 @@ export function OrderWarningConfigFormPage() {
                   关联订单
                 </Label>
                 {isEdit ? (
-                  <Input value={form.orderNo} readOnly className="h-9 font-mono" />
+                  <Input value={form.orderNo} readOnly className="h-9 font-medium" />
                 ) : (
                   <Select
                     value={form.orderNo || "none"}
@@ -347,7 +347,7 @@ export function OrderWarningConfigFormPage() {
                       </SelectItem>
                       {MOCK_ORDERS.map((order) => (
                         <SelectItem key={order.orderNo} value={order.orderNo}>
-                          <span className="font-mono font-medium text-foreground">{order.orderNo}</span>
+                          <span className="font-medium text-foreground">{order.orderNo}</span>
                           <span className="text-muted-foreground ml-1.5 text-xs">
                             （{order.customer} · {order.orderType}）
                           </span>

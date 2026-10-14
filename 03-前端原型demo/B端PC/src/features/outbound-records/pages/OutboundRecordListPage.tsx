@@ -92,8 +92,11 @@ export function OutboundRecordListPage() {
       <div className="space-y-4 p-6">
         {/* 页面标题打点 */}
         <PrototypeAnnotationTarget annotationIds={["outbound-record-page"]}>
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">出库记录</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              查看与追溯存货出库历史流水，支持货品明细穿透、单据下载与记录导出
+            </p>
           </div>
         </PrototypeAnnotationTarget>
 

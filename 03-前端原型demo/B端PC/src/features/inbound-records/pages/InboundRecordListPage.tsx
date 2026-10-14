@@ -92,8 +92,11 @@ export function InboundRecordListPage() {
     >
       <div className="space-y-4 p-6">
         <PrototypeAnnotationTarget annotationIds={["inbound-record-page"]}>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <h1 className="text-2xl font-semibold tracking-tight">入库记录</h1>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">入库记录</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              查看与追溯存货入库历史流水，支持多规格货品核验、单据打印与记录导出
+            </p>
           </div>
         </PrototypeAnnotationTarget>
 

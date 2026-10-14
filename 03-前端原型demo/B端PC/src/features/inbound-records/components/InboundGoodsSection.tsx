@@ -59,7 +59,7 @@ export function InboundGoodsSection({
               <PackageOpen className="size-10 text-muted-foreground/50 mb-2" />
               <p className="text-sm font-medium text-foreground">暂无货品明细</p>
               <p className="text-xs text-muted-foreground mt-1 mb-4">
-                请点击上方「添加货品」按钮录入货品大类、规格及堆放货位
+                请点击「添加货品」，从货品管理主档选择大类、品类与规格，并分配堆放货位
               </p>
               <Button type="button" variant="outline" size="sm" onClick={onAddGoods}>
                 <PlusIcon className="mr-1 size-3.5" />

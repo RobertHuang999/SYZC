@@ -1,4 +1,5 @@
 import type { InboundRecord, InboundRecordFilters, InboundApply, InboundApplyFilters } from "../domain/types"
+import { inboundWarehouseCascadeKeyMatchesRow } from "@prototype/shared/inbound/list-filter-match"
 
 function parseDateOnly(value: string): string {
   return value.trim().split(" ")[0]?.split("T")[0] ?? ""
@@ -82,17 +83,17 @@ export function filterInboundRecords(
     ) {
       return false
     }
-    if (
-      filters.warehouseName !== "全部" &&
-      row.warehouseName !== filters.warehouseName
-    ) {
-      return false
+    if (filters.warehouseCascadeKeys.length > 0) {
+      const hit = filters.warehouseCascadeKeys.some((key) =>
+        inboundWarehouseCascadeKeyMatchesRow(key, row.warehouseName, row.houseName)
+      )
+      if (!hit) return false
     }
-    if (filters.goodsSpec !== "全部") {
-      const joined = row.goodsNames.join("，")
-      if (!joined.includes(filters.goodsSpec)) {
-        return false
-      }
+    if (filters.goodsCascadeKeys.length > 0) {
+      const hit = filters.goodsCascadeKeys.some((key) =>
+        row.goodsNames.some((name) => name === key || name.includes(key))
+      )
+      if (!hit) return false
     }
     if (filters.creator !== "全部" && row.creatorDisplay !== filters.creator) {
       return false
@@ -133,9 +134,7 @@ export function formatInboundQuantity(amount: number): string {
   return amount.toLocaleString("zh-CN", { maximumFractionDigits: 2 })
 }
 
-export function formatGoodsNamesForList(names: string[]): string {
-  return names.join("，")
-}
+export { formatGoodsNamesForList } from "../../../../../shared/inbound/inbound-list-format"
 
 export function splitDateTime(dateTimeStr: string): { date: string; time: string } {
   const parts = dateTimeStr.trim().split(" ")

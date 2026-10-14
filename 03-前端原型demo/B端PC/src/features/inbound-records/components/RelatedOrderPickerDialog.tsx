@@ -202,7 +202,7 @@ export function RelatedOrderPickerDialog({
                     <TableCell className="text-center text-muted-foreground">
                       {index + 1}
                     </TableCell>
-                    <TableCell className="font-mono font-medium text-foreground">
+                    <TableCell className="font-medium text-foreground">
                       {row.orderNo}
                     </TableCell>
                     <TableCell>
@@ -222,7 +222,7 @@ export function RelatedOrderPickerDialog({
                         {row.ownerType === "企业货主" ? "企业" : "个人"}
                       </span>
                     </TableCell>
-                    <TableCell className="font-mono text-muted-foreground">
+                    <TableCell className="text-muted-foreground">
                       {row.ownerIdentifierMasked}
                     </TableCell>
                     <TableCell className="leading-snug">
@@ -232,7 +232,7 @@ export function RelatedOrderPickerDialog({
                         </div>
                       ))}
                     </TableCell>
-                    <TableCell className="font-mono text-muted-foreground">
+                    <TableCell className="text-muted-foreground">
                       {row.businessTime}
                     </TableCell>
                     <TableCell className="text-center">

@@ -29,7 +29,7 @@ export function DropdownFilterPill({
   options,
   onChange,
   renderLabel,
-  theme = "orange",
+  theme = "blue",
 }: DropdownFilterPillProps) {
   const [open, setOpen] = useState(false)
   const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null)

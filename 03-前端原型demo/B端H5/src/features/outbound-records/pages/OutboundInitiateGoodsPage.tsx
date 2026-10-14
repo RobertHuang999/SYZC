@@ -180,14 +180,14 @@ export function OutboundInitiateGoodsPage() {
             <div className="flex items-center justify-between border-b border-[#232D39]/5 pb-2.5">
               <div className="flex items-center gap-1.5">
                 <span className="text-sm font-bold text-[#232D39]">出库货物统计</span>
-                <span className="rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-medium text-orange-600">
+                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-600">
                   {form.outboundType}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="flex items-center gap-1 rounded-lg bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-600 active:bg-orange-100"
+                  className="flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600 active:bg-blue-100"
                   onClick={() => setStockPickerOpen(true)}
                 >
                   <Plus className="size-3.5" />
@@ -217,9 +217,9 @@ export function OutboundInitiateGoodsPage() {
                   {form.warehouseName}
                 </div>
               </div>
-              <div className="rounded-lg bg-orange-50/50 p-2 border border-orange-100">
-                <div className="text-[11px] text-orange-700/70">合计出库量</div>
-                <div className="mt-0.5 text-sm font-bold text-orange-600">
+              <div className="rounded-lg bg-blue-50/50 p-2 border border-blue-100">
+                <div className="text-[11px] text-blue-700/70">合计出库量</div>
+                <div className="mt-0.5 text-sm font-bold text-blue-600">
                   {totals.weight.toLocaleString()} 吨
                 </div>
               </div>
@@ -243,7 +243,7 @@ export function OutboundInitiateGoodsPage() {
                     key={item.id}
                     className={`rounded-xl bg-white shadow-sm border transition-all overflow-hidden ${
                       item.selected
-                        ? "border-orange-200"
+                        ? "border-blue-200"
                         : "border-[#232D39]/10 opacity-75"
                     }`}
                   >
@@ -255,7 +255,7 @@ export function OutboundInitiateGoodsPage() {
                           onClick={() => handleToggleSelect(item.id)}
                           className={`flex size-5 items-center justify-center rounded border transition-colors ${
                             item.selected
-                              ? "border-orange-600 bg-orange-600 text-white"
+                              ? "border-blue-600 bg-blue-600 text-white"
                               : "border-[#232D39]/30 bg-white"
                           }`}
                         >
@@ -354,10 +354,10 @@ export function OutboundInitiateGoodsPage() {
               </div>
               <div className="flex items-baseline gap-0.5">
                 <span className="text-xs text-[#232D39]/80 font-medium">合计:</span>
-                <span className="text-base font-bold text-orange-600">
+                <span className="text-base font-bold text-blue-600">
                   {totals.weight.toLocaleString()}
                 </span>
-                <span className="text-xs font-medium text-orange-600">吨</span>
+                <span className="text-xs font-medium text-blue-600">吨</span>
               </div>
             </div>
 
@@ -373,7 +373,7 @@ export function OutboundInitiateGoodsPage() {
                 type="button"
                 disabled={totals.selectedCount === 0}
                 onClick={handleSubmit}
-                className="h-10 px-6 rounded-xl bg-orange-600 text-xs font-medium text-white shadow-md shadow-orange-500/20 active:bg-orange-700 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center"
+                className="h-10 px-6 rounded-xl bg-blue-600 text-xs font-medium text-white shadow-md shadow-blue-500/20 active:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center"
               >
                 提交出库申请
               </button>
@@ -417,7 +417,7 @@ export function OutboundInitiateGoodsPage() {
                     </div>
                     <button
                       type="button"
-                      className="rounded-lg bg-orange-50 px-3 py-1 text-xs font-medium text-orange-600"
+                      className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600"
                     >
                       添加
                     </button>
@@ -439,7 +439,7 @@ export function OutboundInitiateGoodsPage() {
                 出库申请提交成功
               </h3>
               <p className="mt-1 text-xs text-[#232D39]/60">
-                单据编号: <span className="font-mono font-bold text-[#232D39]">{createdOrderNo}</span>
+                单据编号: <span className="font-bold text-[#232D39]">{createdOrderNo}</span>
               </p>
               <div className="my-3 rounded-xl bg-[#232D39]/5 p-2.5 text-left text-xs space-y-1 text-[#232D39]/70">
                 <div>货主主体: {form.owner.name}</div>
@@ -451,7 +451,7 @@ export function OutboundInitiateGoodsPage() {
                 <button
                   type="button"
                   onClick={() => navigate(OUTBOUND_MGR_ROUTE)}
-                  className="w-full rounded-xl bg-orange-600 py-2.5 text-xs font-medium text-white active:bg-orange-700"
+                  className="w-full rounded-xl bg-blue-600 py-2.5 text-xs font-medium text-white active:bg-blue-700"
                 >
                   查看出库记录列表
                 </button>

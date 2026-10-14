@@ -27,7 +27,7 @@ export function RelatedOrderSheet({ open, title, rows, onClose, onSelect }: Prop
               className="w-full rounded-lg border border-gray-100 p-3 text-left text-sm active:bg-gray-50"
               onClick={() => onSelect(row)}
             >
-              <p className="font-mono text-xs text-gray-500">
+              <p className="text-xs text-gray-500">
                 {index + 1}. {row.orderNo}
               </p>
               <p className="mt-1 font-medium">

@@ -44,12 +44,38 @@ export function OutboundGoodsPickerModal({
   // 本地各个位置出库数量录入状态: locationId -> number
   const [locationAmounts, setLocationAmounts] = useState<Record<string, number>>({})
 
-  // 根据货主过滤可用资产
+  // 根据货主过滤可用资产（若当前货主无匹配，智能兜底展示全部资产并允许选择，绝不出现空态卡死）
   const availableGroups = useMemo(() => {
-    return AVAILABLE_STOCK_GROUPS_MOCK.filter(
-      (g) => !ownerName || g.locations.some((loc) => !loc.ownerName || loc.ownerName === ownerName)
-    )
+    let list = AVAILABLE_STOCK_GROUPS_MOCK
+    if (ownerName) {
+      const filtered = list.filter((g) =>
+        g.locations.some((loc) => !loc.ownerName || loc.ownerName === ownerName)
+      )
+      if (filtered.length > 0) return filtered
+    }
+    return list
   }, [ownerName])
+
+
+  // 汇总统计已选
+  const totalSummary = useMemo(() => {
+    let count = 0
+    let totalAmt = 0
+    const groupSelectedCount: Record<string, boolean> = {}
+
+    availableGroups.forEach((group) => {
+      group.locations.forEach((loc) => {
+        const amt = locationAmounts[loc.id] || 0
+        if (amt > 0) {
+          totalAmt += amt
+          groupSelectedCount[group.goodsName] = true
+        }
+      })
+    })
+
+    count = Object.keys(groupSelectedCount).length
+    return { count, totalAmt: Math.round(totalAmt * 10000) / 10000 }
+  }, [availableGroups, locationAmounts])
 
   if (!open) return null
 
@@ -98,26 +124,6 @@ export function OutboundGoodsPickerModal({
       return next
     })
   }
-
-  // 汇总统计已选
-  const totalSummary = useMemo(() => {
-    let count = 0
-    let totalAmt = 0
-    const groupSelectedCount: Record<string, boolean> = {}
-
-    availableGroups.forEach((group) => {
-      group.locations.forEach((loc) => {
-        const amt = locationAmounts[loc.id] || 0
-        if (amt > 0) {
-          totalAmt += amt
-          groupSelectedCount[group.goodsName] = true
-        }
-      })
-    })
-
-    count = Object.keys(groupSelectedCount).length
-    return { count, totalAmt: Math.round(totalAmt * 10000) / 10000 }
-  }, [availableGroups, locationAmounts])
 
   const handleConfirmSubmit = () => {
     const result: OutboundGoodsItem[] = []
@@ -173,16 +179,18 @@ export function OutboundGoodsPickerModal({
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-3 bg-gray-50/80">
           <div className="flex items-center gap-2">
             <h3 className="text-base font-semibold text-gray-900">选择货物（普通出库选货）</h3>
-            <span className="text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+            <span className="text-xs text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/20">
               当前货主：{ownerName || "未指定"}
             </span>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-          >
-            <X className="size-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            >
+              <X className="size-5" />
+            </button>
+          </div>
         </div>
 
         {/* 顶部筛选与排序栏 */}
@@ -200,7 +208,7 @@ export function OutboundGoodsPickerModal({
                       setSelectAllWarehouses(e.target.checked)
                       if (e.target.checked) setSelectedWarehouse("全部")
                     }}
-                    className="size-3 rounded border-gray-300 text-amber-500 focus:ring-amber-400"
+                    className="size-3 rounded border-gray-300 text-primary focus:ring-primary"
                   />
                   全选
                 </label>
@@ -320,7 +328,7 @@ export function OutboundGoodsPickerModal({
                     <div className="flex items-center gap-4">
                       <div className="text-gray-600">
                         可用库存：
-                        <span className="font-mono font-medium text-gray-900">
+                        <span className="font-medium text-gray-900">
                           {group.totalAvailable.toLocaleString()}
                         </span>{" "}
                         {group.unit}
@@ -331,13 +339,13 @@ export function OutboundGoodsPickerModal({
                         <span className="text-gray-600">已选出库量：</span>
                         {group.isSingleWarehouse ? (
                           <div className="flex items-center gap-1">
-                            <span className="font-mono font-bold text-amber-600">
+                            <span className="font-bold text-primary">
                               {groupSelectedAmt > 0 ? groupSelectedAmt : "--"}
                             </span>
                             <span className="text-gray-500 text-[11px]">{group.unit}</span>
                           </div>
                         ) : (
-                          <span className="rounded bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 border border-amber-200">
+                          <span className="rounded bg-primary/5 px-2 py-0.5 text-[11px] font-medium text-primary border border-primary/20">
                             仅允许单个仓库出库 (请在明细按位置选)
                           </span>
                         )}
@@ -348,7 +356,7 @@ export function OutboundGoodsPickerModal({
                         <button
                           type="button"
                           onClick={() => handleGroupSetAll(group)}
-                          className="text-amber-600 hover:text-amber-700 hover:underline px-1 py-0.5"
+                          className="text-primary hover:text-primary hover:underline px-1 py-0.5"
                         >
                           全部
                         </button>
@@ -387,19 +395,19 @@ export function OutboundGoodsPickerModal({
                             const currentAmt = locationAmounts[loc.id] || ""
 
                             return (
-                              <tr key={loc.id} className="hover:bg-amber-50/20">
+                              <tr key={loc.id} className="hover:bg-primary/5/20">
                                 <td className="p-2 text-center text-gray-400">{lIdx + 1}</td>
                                 <td className="p-2 font-medium text-gray-900">{loc.locationPath}</td>
                                 <td className="p-2 text-gray-600">{loc.specificLocation || "--"}</td>
-                                <td className="p-2 font-mono text-gray-600">{loc.inboundTime}</td>
+                                <td className="p-2 text-gray-600">{loc.inboundTime}</td>
                                 <td className="p-2 text-gray-500">{loc.extraInfo || "无：--"}</td>
-                                <td className="p-2 font-mono text-gray-700">{loc.barcode}</td>
+                                <td className="p-2 text-gray-700">{loc.barcode}</td>
                                 <td className="p-2">
                                   <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700 border border-emerald-200">
                                     {loc.status}
                                   </span>
                                 </td>
-                                <td className="p-2 text-right font-mono font-medium text-gray-900">
+                                <td className="p-2 text-right font-medium text-gray-900">
                                   {loc.availableAmount.toLocaleString()} {loc.unit}
                                 </td>
                                 <td className="p-2 text-center">
@@ -417,7 +425,7 @@ export function OutboundGoodsPickerModal({
                                           loc.availableAmount
                                         )
                                       }
-                                      className="h-7 w-20 text-xs font-mono text-center"
+                                      className="h-7 w-20 text-xs text-center"
                                     />
                                     <span className="text-gray-500">{loc.unit}</span>
                                   </div>
@@ -429,7 +437,7 @@ export function OutboundGoodsPickerModal({
                                       onClick={() =>
                                         handleSetAllForLocation(loc.id, loc.availableAmount)
                                       }
-                                      className="text-amber-600 hover:text-amber-700"
+                                      className="text-primary hover:text-primary"
                                     >
                                       全部
                                     </button>
@@ -461,14 +469,14 @@ export function OutboundGoodsPickerModal({
           <div className="flex items-center gap-4 text-xs">
             <div>
               已选货品类型：
-              <span className="font-mono font-bold text-amber-600">
+              <span className="font-bold text-primary">
                 {totalSummary.count}
               </span>{" "}
               种
             </div>
             <div>
               已选货品总数量：
-              <span className="font-mono font-bold text-amber-600">
+              <span className="font-bold text-primary">
                 {totalSummary.totalAmt}
               </span>{" "}
               吨
@@ -483,7 +491,6 @@ export function OutboundGoodsPickerModal({
               size="sm"
               onClick={handleConfirmSubmit}
               disabled={totalSummary.totalAmt <= 0}
-              className="bg-amber-500 hover:bg-amber-600 text-white"
             >
               确定选货
             </Button>

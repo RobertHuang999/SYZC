@@ -41,7 +41,7 @@ export function MobileQrModal({
         </button>
 
         <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
-          <QrCode className="size-5 text-orange-600" />
+          <QrCode className="size-5 text-blue-600" />
           <h3 className="text-base font-bold text-gray-900">存货条形码与二维码</h3>
         </div>
 
@@ -52,7 +52,7 @@ export function MobileQrModal({
               alt="存货二维码"
               className="size-44 rounded-lg border border-gray-200 bg-white p-2 object-contain"
             />
-            <span className="mt-3 font-mono text-sm font-semibold tracking-wider text-gray-800">
+            <span className="mt-3 text-sm font-semibold tracking-wider text-gray-800">
               {qrCodeNo}
             </span>
             <span className="mt-1 text-[11px] text-gray-400">长按可保存二维码图片</span>
@@ -61,7 +61,7 @@ export function MobileQrModal({
           <div className="mt-4 w-full space-y-1.5 rounded-xl border border-gray-100 bg-gray-50/50 p-3 text-xs">
             <div className="flex justify-between">
               <span className="text-gray-500">所属入库单：</span>
-              <span className="font-mono font-medium text-gray-800">{orderNo}</span>
+              <span className="font-medium text-gray-800">{orderNo}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">入库货物：</span>
@@ -75,7 +75,7 @@ export function MobileQrModal({
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">堆放数量：</span>
-              <span className="font-semibold text-orange-600">{quantityLabel}</span>
+              <span className="font-semibold text-blue-600">{quantityLabel}</span>
             </div>
           </div>
         </div>
@@ -91,7 +91,7 @@ export function MobileQrModal({
           </button>
           <button
             type="button"
-            className="flex-1 rounded-lg bg-orange-600 py-2.5 text-xs font-medium text-white active:bg-orange-700"
+            className="flex-1 rounded-lg bg-blue-600 py-2.5 text-xs font-medium text-white active:bg-blue-700"
             onClick={onClose}
           >
             关 闭

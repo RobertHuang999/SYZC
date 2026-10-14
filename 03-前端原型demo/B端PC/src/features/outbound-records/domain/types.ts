@@ -1,6 +1,7 @@
 export type OutboundTypeCode =
   | "NORMAL" // 普通出库
   | "RECEIPT" // 仓单出库
+  | "CD" // 仓单出库（源码兼容）
   | "PLEDGE" // 质押出库
   | "MORTGAGE" // 抵押出库
   | "TRANSFER" // 移库出库
@@ -81,8 +82,13 @@ export interface OutboundGoodsItem {
 export interface OutboundPickupInfo {
   personType: PickupPersonType
   name: string
-  idCardNo: string // 脱敏
-  phone: string // 脱敏
+  idCardNo?: string // 脱敏身份证号
+  phone?: string // 脱敏电话
+  identity?: string // 统一社会信用代码
+  unifiedSocialCreditCode?: string // 统一社会信用代码兼容别名
+  operatorName?: string // 经办人姓名
+  operatorIdCard?: string // 经办人身份证号
+  operatorPhone?: string // 经办人联系电话
   plateNo?: string
   sitePhotos: string[] // 出库现场照片
   deviceSnapshots: string[] // 设备抓拍图

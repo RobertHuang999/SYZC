@@ -6,7 +6,6 @@ import {
   Trash2,
   X,
   Eye,
-  Upload,
   CheckCircle2,
   AlertCircle,
 } from "lucide-react"
@@ -23,17 +22,25 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import type { GoodsLineForm, InboundFormState } from "../domain/form-types"
+import { FORM_PARTITIONS, FORM_STOREROOMS } from "../mock/inbound-form.mock"
 import {
-  FORM_PARTITIONS,
-  FORM_STOREROOMS,
-  GOODS_SPEC_TREE,
-} from "../mock/inbound-form.mock"
-import {
-  applySpecTemplate,
+  applyGoodsSkuById,
   formatGoodsCardTitle,
   parseQuantity,
+  resetGoodsLineForCategory,
+  resetGoodsLineForVariety,
   unstackedQuantity,
 } from "../lib/inbound-form-utils"
+import {
+  formatSkuSelectLabel,
+  formatSkuTriggerLabel,
+  formatSpecSummary,
+  getSkuById,
+  listEnabledCategories,
+  listSkus,
+  listVarieties,
+} from "../../../../../shared/goods/goods-sku-catalog"
+import { InboundCollectFields } from "./InboundCollectFields"
 
 // 模拟现场抓拍样例图
 const SAMPLE_PHOTOS = [
@@ -69,13 +76,17 @@ export function InboundGoodsLineCard({
   )
   const measureInvalid =
     measureMissing && (Boolean(showMeasureError) || hasStackedQty)
-  const categories = Array.from(new Set(GOODS_SPEC_TREE.map((g) => g.category)))
-  const varieties = GOODS_SPEC_TREE.filter((g) => g.category === line.category).map(
-    (g) => g.variety
-  )
-  const specs = GOODS_SPEC_TREE.filter(
-    (g) => g.category === line.category && g.variety === line.variety
-  ).map((g) => g.spec)
+  const categories = listEnabledCategories()
+  const varieties = line.category ? listVarieties(line.category) : []
+  const skuOptions = line.category && line.variety ? listSkus(line.category, line.variety) : []
+  const activeSku = line.skuId ? getSkuById(line.skuId) : undefined
+  const collectFields = activeSku?.inboundCollect ?? []
+  const skuTriggerLabel = activeSku
+    ? formatSkuTriggerLabel(activeSku)
+    : line.spec ||
+      (Object.keys(line.specValues).length > 0
+        ? formatSpecSummary(line.specValues)
+        : "")
 
   // 严格限定库房只能是基础信息勾选的库房
   const allowedStorerooms = FORM_STOREROOMS.filter(
@@ -175,26 +186,18 @@ export function InboundGoodsLineCard({
         </Button>
       </div>
 
-      {/* 规格与计量属性 5 列网格 */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      {/* 大类 / 品类 / 货品(SKU) / 计量 — 继承货品管理有效启用主档 (R11 / SKU-F04) */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Field label="货品大类" required>
           <Select
-            value={line.category}
+            value={line.category || undefined}
             onValueChange={(category) => {
               if (!category) return
-              const first = GOODS_SPEC_TREE.find((g) => g.category === category)
-              onChange(
-                applySpecTemplate(
-                  line,
-                  category,
-                  first?.variety ?? "",
-                  first?.spec ?? ""
-                )
-              )
+              onChange(resetGoodsLineForCategory(line, category))
             }}
           >
             <SelectTrigger className="w-full">
-              <SelectValue />
+              <SelectValue placeholder="请选择大类" />
             </SelectTrigger>
             <SelectContent>
               {categories.map((c) => (
@@ -208,18 +211,15 @@ export function InboundGoodsLineCard({
 
         <Field label="品类" required>
           <Select
-            value={line.variety}
+            value={line.variety || undefined}
+            disabled={!line.category}
             onValueChange={(variety) => {
               if (!variety) return
-              const firstSpec =
-                GOODS_SPEC_TREE.find(
-                  (g) => g.category === line.category && g.variety === variety
-                )?.spec ?? ""
-              onChange(applySpecTemplate(line, line.category, variety, firstSpec))
+              onChange(resetGoodsLineForVariety(line, line.category, variety))
             }}
           >
             <SelectTrigger className="w-full">
-              <SelectValue />
+              <SelectValue placeholder="请选择品类" />
             </SelectTrigger>
             <SelectContent>
               {varieties.map((v) => (
@@ -231,21 +231,24 @@ export function InboundGoodsLineCard({
           </Select>
         </Field>
 
-        <Field label="规格" required>
+        <Field label="货品规格" required>
           <Select
-            value={line.spec}
-            onValueChange={(spec) => {
-              if (!spec) return
-              onChange(applySpecTemplate(line, line.category, line.variety, spec))
+            value={line.skuId || undefined}
+            disabled={!line.variety}
+            onValueChange={(skuId) => {
+              if (!skuId) return
+              onChange(applyGoodsSkuById(line, skuId))
             }}
           >
             <SelectTrigger className="w-full">
-              <SelectValue />
+              <SelectValue placeholder="请选择货品">
+                {skuTriggerLabel || null}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {specs.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s}
+              {skuOptions.map((sku) => (
+                <SelectItem key={sku.skuId} value={sku.skuId}>
+                  {formatSkuSelectLabel(sku)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -258,8 +261,9 @@ export function InboundGoodsLineCard({
               type="number"
               step="0.0001"
               placeholder="0.0000"
+              disabled={!line.skuId}
               className={cn(
-                "min-w-0 flex-1 font-mono text-sm",
+                "min-w-0 flex-1 text-sm",
                 measureInvalid && "border-destructive focus-visible:ring-destructive/30"
               )}
               value={line.measureValue}
@@ -267,42 +271,31 @@ export function InboundGoodsLineCard({
                 onChange({ ...line, measureValue: event.target.value })
               }
             />
-            <Select
-              value={line.measureUnit}
-              onValueChange={(unit) => unit && onChange({ ...line, measureUnit: unit })}
+            <div
+              className="flex h-9 w-20 shrink-0 items-center justify-center rounded-md border border-input bg-muted px-2 text-sm text-muted-foreground"
+              aria-readonly
             >
-              <SelectTrigger className="w-20 shrink-0">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {(GOODS_SPEC_TREE.find(
-                  (g) =>
-                    g.category === line.category &&
-                    g.variety === line.variety &&
-                    g.spec === line.spec
-                )?.units ?? [line.measureUnit]).map((unit) => (
-                  <SelectItem key={unit} value={unit}>
-                    {unit}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {line.skuId && line.measureUnit ? line.measureUnit : "—"}
+            </div>
           </div>
           {measureInvalid ? (
             <p className="text-[11px] text-destructive">请输入入库数量</p>
           ) : null}
         </Field>
-
-        <Field label="生产批次/牌号">
-          <Input
-            placeholder="如 20260901-A"
-            value={line.extraInfo}
-            onChange={(event) =>
-              onChange({ ...line, extraInfo: event.target.value })
-            }
-          />
-        </Field>
       </div>
+
+      {line.skuId && collectFields.length > 0 ? (
+        <div className="mt-4 space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground">其他收集信息</p>
+          <InboundCollectFields
+            fields={collectFields}
+            values={line.collectValues}
+            onChange={(collectValues) => onChange({ ...line, collectValues })}
+          />
+        </div>
+      ) : line.skuId ? (
+        <p className="mt-3 text-xs text-muted-foreground">该货品未配置入库收集项</p>
+      ) : null}
 
       {/* 堆放位置区域（对齐源码 store-apply-info.vue 堆放位置） */}
       <div className="mt-5 rounded-lg border border-border/70 bg-muted/20 p-4">
@@ -346,14 +339,17 @@ export function InboundGoodsLineCard({
               </div>
             )}
 
-            {line.stackings.map((row) => (
+            {line.stackings.map((row) => {
+              const storeroomLabel =
+                allowedStorerooms.find((room) => room.id === row.storeroomId)?.name ?? ""
+              return (
               <div
                 key={row.id}
                 className="grid gap-2 rounded-md border bg-card p-2.5 shadow-2xs lg:grid-cols-[1.2fr_1fr_1.4fr_120px_36px] items-center"
               >
                 {/* 1. 库房 */}
                 <Select
-                  value={row.storeroomId}
+                  value={row.storeroomId || undefined}
                   onValueChange={(id) =>
                     id &&
                     updateStacking(row.id, {
@@ -363,7 +359,9 @@ export function InboundGoodsLineCard({
                   }
                 >
                   <SelectTrigger className="h-8.5 text-xs">
-                    <SelectValue placeholder="请选择库房" />
+                    <SelectValue placeholder="请选择库房">
+                      {storeroomLabel || null}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {allowedStorerooms.map((room) => (
@@ -376,11 +374,13 @@ export function InboundGoodsLineCard({
 
                 {/* 2. 分区 */}
                 <Select
-                  value={row.partitionId}
+                  value={row.partitionId || undefined}
                   onValueChange={(id) => id && updateStacking(row.id, { partitionId: id })}
                 >
                   <SelectTrigger className="h-8.5 text-xs">
-                    <SelectValue placeholder="请选择分区" />
+                    <SelectValue placeholder="请选择分区">
+                      {row.partitionId || null}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {(FORM_PARTITIONS[row.storeroomId] ?? []).map((p) => (
@@ -405,7 +405,7 @@ export function InboundGoodsLineCard({
                 <Input
                   type="number"
                   step="0.0001"
-                  className="h-8.5 text-xs font-mono text-right"
+                  className="h-8.5 text-xs text-right"
                   placeholder="0.0000"
                   value={row.quantity}
                   onChange={(event) =>
@@ -429,27 +429,27 @@ export function InboundGoodsLineCard({
                   <X className="size-4" />
                 </Button>
               </div>
-            ))}
+            )
+            })}
           </div>
         )}
       </div>
 
-      {/* 附件信息（现场照片 + 补充资料，对齐源码） */}
+      {/* 附件信息：左现场照片 · 右补充资料 */}
       <div className="mt-5 border-t border-border/70 pt-4">
-        <p className="text-xs font-semibold text-foreground mb-3">附件信息</p>
-        <div className="grid gap-5 md:grid-cols-2">
-          {/* 现场照片 */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
+        <p className="mb-3 text-xs font-semibold text-foreground">附件信息</p>
+        <div className="grid gap-4 md:grid-cols-2 md:gap-6">
+          {/* 左：现场照片 */}
+          <div className="min-w-0 space-y-2">
+            <div className="flex items-center justify-between gap-2">
               <Label className="text-xs">
                 <span className="text-destructive">* </span>现场照片
               </Label>
-              <span className="text-[11px] text-muted-foreground">
-                已上传 {line.sitePhotoCount}/10 张（jpg/png/jpeg）
+              <span className="shrink-0 text-[11px] text-muted-foreground">
+                {line.sitePhotoCount}/10
               </span>
             </div>
-
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex min-h-20 flex-wrap content-start gap-2">
               {Array.from({ length: line.sitePhotoCount }).map((_, pIdx) => {
                 const imgUrl = SAMPLE_PHOTOS[pIdx % SAMPLE_PHOTOS.length]
                 return (
@@ -462,10 +462,10 @@ export function InboundGoodsLineCard({
                       alt={`现场照片 ${pIdx + 1}`}
                       className="size-full object-cover"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
                       <button
                         type="button"
-                        className="text-white hover:text-primary transition-colors p-1"
+                        className="p-1 text-white hover:text-primary-foreground"
                         title="查看大图"
                         onClick={() => onPreviewImage?.(imgUrl)}
                       >
@@ -473,8 +473,8 @@ export function InboundGoodsLineCard({
                       </button>
                       <button
                         type="button"
-                        className="text-white hover:text-destructive transition-colors p-1"
-                        title="删除照片"
+                        className="p-1 text-white hover:text-destructive"
+                        title="删除"
                         onClick={() => handleRemovePhoto(pIdx)}
                       >
                         <Trash2 className="size-4" />
@@ -483,70 +483,74 @@ export function InboundGoodsLineCard({
                   </div>
                 )
               })}
-
-              {line.sitePhotoCount < 10 && (
+              {line.sitePhotoCount < 10 ? (
                 <button
                   type="button"
-                  className="flex size-20 flex-col items-center justify-center rounded-md border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-colors text-muted-foreground hover:text-primary"
+                  className="flex size-20 flex-col items-center justify-center rounded-md border border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50 hover:bg-muted/40 hover:text-primary"
                   onClick={handleAddPhoto}
                 >
                   <Plus className="size-5" />
-                  <span className="mt-1 text-[10px]">上传照片</span>
+                  <span className="mt-0.5 text-[10px]">上传</span>
                 </button>
-              )}
+              ) : null}
             </div>
+            <p className="text-[11px] text-muted-foreground">jpg / png / jpeg，最多 10 张</p>
           </div>
 
-          {/* 补充资料 */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
+          {/* 右：补充资料 */}
+          <div className="min-w-0 space-y-2 md:border-l md:border-border/60 md:pl-6">
+            <div className="flex items-center justify-between gap-2">
               <Label className="text-xs">补充资料</Label>
-              <span className="text-[11px] text-muted-foreground">
-                图片与 PDF 共计 {line.supplementCount}/10 个
+              <span className="shrink-0 text-[11px] text-muted-foreground">
+                {line.supplementCount}/10
               </span>
             </div>
-
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex min-h-20 flex-wrap content-start gap-2">
               {Array.from({ length: line.supplementCount }).map((_, docIdx) => (
                 <div
                   key={docIdx}
-                  className="group relative flex h-20 w-32 flex-col justify-between rounded-md border bg-muted/40 p-2 text-xs"
+                  className="flex size-20 flex-col items-center justify-center gap-1 rounded-md border bg-muted/40 p-1.5 text-center"
                 >
-                  <div className="flex items-center gap-1.5 text-primary">
-                    <FileText className="size-4 text-rose-500 shrink-0" />
-                    <span className="line-clamp-1 font-medium text-[11px]">
-                      过磅质检单_{docIdx + 1}.pdf
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                    <span>1.4 MB</span>
-                    <button
-                      type="button"
-                      className="text-muted-foreground hover:text-destructive"
-                      onClick={() =>
-                        onChange({
-                          ...line,
-                          supplementCount: Math.max(0, line.supplementCount - 1),
-                        })
-                      }
-                    >
-                      <Trash2 className="size-3.5" />
-                    </button>
-                  </div>
+                  <FileText className="size-5 text-rose-500" />
+                  <span className="line-clamp-2 w-full text-[10px] leading-tight text-foreground">
+                    质检单_{docIdx + 1}.pdf
+                  </span>
+                  <button
+                    type="button"
+                    className="text-[10px] text-muted-foreground hover:text-destructive"
+                    onClick={() =>
+                      onChange({
+                        ...line,
+                        supplementCount: Math.max(0, line.supplementCount - 1),
+                      })
+                    }
+                  >
+                    删除
+                  </button>
                 </div>
               ))}
-
-              {line.supplementCount < 10 && (
-                <button
-                  type="button"
-                  className="flex h-20 w-32 flex-col items-center justify-center rounded-md border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-colors text-muted-foreground hover:text-primary"
-                  onClick={handleAddSupplement}
-                >
-                  <Upload className="size-5" />
-                  <span className="mt-1 text-[10px]">上传资料/PDF</span>
-                </button>
-              )}
+              {line.supplementCount < 10 ? (
+                <>
+                  <button
+                    type="button"
+                    className="flex size-20 flex-col items-center justify-center rounded-md border border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50 hover:bg-muted/40 hover:text-primary"
+                    onClick={handleAddSupplement}
+                  >
+                    <Plus className="size-5" />
+                    <span className="mt-0.5 text-[10px]">图片</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="flex size-20 flex-col items-center justify-center rounded-md border border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50 hover:bg-muted/40 hover:text-primary"
+                    onClick={handleAddSupplement}
+                  >
+                    <FileText className="size-5" />
+                    <span className="mt-0.5 text-[10px]">PDF</span>
+                  </button>
+                </>
+              ) : null}
             </div>
+            <p className="text-[11px] text-muted-foreground">图片与 PDF 合计最多 10 个</p>
           </div>
         </div>
       </div>

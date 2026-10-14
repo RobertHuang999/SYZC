@@ -26,7 +26,7 @@ export function OutboundRecordCard({ item, onDownload }: OutboundRecordCardProps
     <div className="rounded-xl border border-[#232D39]/5 bg-white shadow-sm overflow-hidden mb-3">
       {/* 头部：单号与出库类型/状态胶囊 (对齐源码 record-item.vue) */}
       <div className="bg-[#232D39]/[0.02] px-3.5 py-2.5 flex items-center justify-between border-b border-[#232D39]/5">
-        <span className="font-mono text-xs text-[#232D39]/60">
+        <span className="text-xs text-[#232D39]/60">
           出库编号：{item.orderNo}
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -43,14 +43,14 @@ export function OutboundRecordCard({ item, onDownload }: OutboundRecordCardProps
 
       {/* 货主主体信息 */}
       <div className="px-3.5 pt-3 pb-2 flex items-start gap-2.5">
-        <div className="size-5 rounded flex items-center justify-center bg-orange-500 text-white text-[11px] font-bold shrink-0 mt-0.5 shadow-xs">
+        <div className="size-5 rounded flex items-center justify-center bg-blue-600 text-white text-[11px] font-bold shrink-0 mt-0.5 shadow-xs">
           出
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-sm font-semibold text-[#232D39] leading-snug truncate">
             {item.ownerName}
           </div>
-          <div className="font-mono text-xs text-[#232D39]/60 mt-0.5">
+          <div className="text-xs text-[#232D39]/60 mt-0.5">
             {item.ownerIdentifier}
           </div>
         </div>
@@ -67,7 +67,7 @@ export function OutboundRecordCard({ item, onDownload }: OutboundRecordCardProps
             <button
               type="button"
               onClick={() => setGoodsDetailOpen(true)}
-              className="text-orange-600 font-medium text-xs hover:underline cursor-pointer shrink-0"
+              className="text-blue-600 font-medium text-xs hover:underline cursor-pointer shrink-0"
             >
               详细
             </button>
@@ -77,13 +77,13 @@ export function OutboundRecordCard({ item, onDownload }: OutboundRecordCardProps
         <div className="flex items-center justify-between text-[#232D39]">
           <span className="text-[#232D39]/60">出库数量</span>
           <div className="flex items-center gap-1.5">
-            <span className="font-bold text-orange-600 text-sm font-mono">
+            <span className="font-bold text-blue-600 text-sm">
               {item.totalAmount.toLocaleString()} {item.amountUnit}
             </span>
             <button
               type="button"
               onClick={() => setGoodsDetailOpen(true)}
-              className="text-orange-600 font-medium text-xs hover:underline cursor-pointer shrink-0"
+              className="text-blue-600 font-medium text-xs hover:underline cursor-pointer shrink-0"
             >
               详细
             </button>
@@ -115,7 +115,7 @@ export function OutboundRecordCard({ item, onDownload }: OutboundRecordCardProps
             <Clock className="size-3 text-[#232D39]/40" />
             <span>操作时间</span>
           </div>
-          <span className="font-mono text-[#232D39]/70">
+          <span className="text-[#232D39]/70">
             {item.createTime || item.outboundTime}
           </span>
         </div>
@@ -141,7 +141,7 @@ export function OutboundRecordCard({ item, onDownload }: OutboundRecordCardProps
         </button>
         <Link
           to={`/m/workspace/outbound-records/${item.id}`}
-          className="flex items-center gap-0.5 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-medium text-orange-600 active:bg-orange-100 cursor-pointer"
+          className="flex items-center gap-0.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600 active:bg-blue-100 cursor-pointer"
         >
           <span>查看详情</span>
           <ChevronRight className="size-3" />
@@ -154,7 +154,7 @@ export function OutboundRecordCard({ item, onDownload }: OutboundRecordCardProps
           <div className="w-full max-w-xs rounded-2xl bg-white p-4 shadow-xl">
             <div className="flex items-center justify-between border-b border-[#232D39]/10 pb-2">
               <div className="flex items-center gap-1.5 text-sm font-bold text-[#232D39]">
-                <Package className="size-4 text-orange-600" />
+                <Package className="size-4 text-blue-600" />
                 <span>货物出库明细</span>
               </div>
               <button
@@ -174,7 +174,7 @@ export function OutboundRecordCard({ item, onDownload }: OutboundRecordCardProps
               </div>
               <div className="flex justify-between">
                 <span className="text-[#232D39]/60">出库数量:</span>
-                <span className="font-bold text-orange-600">
+                <span className="font-bold text-blue-600">
                   {item.totalAmount.toLocaleString()} {item.amountUnit}
                 </span>
               </div>
@@ -196,7 +196,7 @@ export function OutboundRecordCard({ item, onDownload }: OutboundRecordCardProps
             <button
               type="button"
               onClick={() => setGoodsDetailOpen(false)}
-              className="w-full rounded-xl bg-orange-600 py-2 text-xs font-medium text-white active:bg-orange-700"
+              className="w-full rounded-xl bg-blue-600 py-2 text-xs font-medium text-white active:bg-blue-700"
             >
               我知道了
             </button>

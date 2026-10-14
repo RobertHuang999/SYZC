@@ -17,12 +17,12 @@ export function NativeInboundStepBar({ current }: Props) {
           <div key={title} className="flex min-w-0 flex-1 items-start">
             <div className="flex min-w-[72px] flex-1 flex-col items-center gap-2">
               {done ? (
-                <div className="flex size-6 items-center justify-center rounded-full bg-orange-100">
-                  <Check className="size-3.5 stroke-[3] text-orange-600" />
+                <div className="flex size-6 items-center justify-center rounded-full bg-blue-100">
+                  <Check className="size-3.5 stroke-[3] text-blue-600" />
                 </div>
               ) : active ? (
-                <div className="flex size-6 items-center justify-center rounded-full bg-orange-100">
-                  <div className="size-3.5 rounded-full bg-orange-600" />
+                <div className="flex size-6 items-center justify-center rounded-full bg-blue-100">
+                  <div className="size-3.5 rounded-full bg-blue-600" />
                 </div>
               ) : (
                 <div className="flex size-6 items-center justify-center rounded-full bg-[#232D39]/20 text-xs font-medium text-white">
@@ -40,7 +40,7 @@ export function NativeInboundStepBar({ current }: Props) {
             {!isLast ? (
               <div
                 className={`mt-3 h-0.5 min-w-[24px] flex-1 ${
-                  done ? "bg-orange-600" : "bg-orange-100"
+                  done ? "bg-blue-600" : "bg-blue-100"
                 }`}
               />
             ) : null}

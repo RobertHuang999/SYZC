@@ -1,5 +1,11 @@
 import type { ReactNode } from "react"
-import { ChevronDownIcon, ChevronUpIcon, ImagePlus, Trash2, Eye } from "lucide-react"
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  Plus,
+  Trash2,
+  Eye,
+} from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -22,7 +28,7 @@ interface OutboundPickupInfoSectionProps {
   onPreviewImage: (url: string) => void
 }
 
-function Field({
+function FormItem({
   label,
   required,
   children,
@@ -35,8 +41,8 @@ function Field({
 }) {
   return (
     <div className={cn("space-y-1.5", className)}>
-      <Label className="flex items-center text-xs font-medium text-foreground">
-        {required && <span className="mr-0.5 text-destructive">*</span>}
+      <Label className="text-xs font-medium text-foreground">
+        {required ? <span className="text-destructive">* </span> : null}
         {label}
       </Label>
       {children}
@@ -69,13 +75,14 @@ export function OutboundPickupInfoSection({
     onPatch({ sitePhotos: list })
   }
 
+  const isPersonal = form.pickupPersonType === "个人"
+
   return (
     <Card className="shadow-xs">
-      {/* 头部折叠开关 */}
       <div className="flex items-center justify-between border-b px-5 py-3">
         <button
           type="button"
-          className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors cursor-pointer"
+          className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors"
           onClick={onToggle}
         >
           {expanded ? (
@@ -88,123 +95,186 @@ export function OutboundPickupInfoSection({
       </div>
 
       {expanded && (
-        <CardContent className="space-y-4 pt-5 pb-6">
+        <CardContent className="space-y-4 pt-5 pb-6 text-xs">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {/* 提货人类型 */}
-            <Field label="提货人类型" required>
+            {/* 1. 提货人类型 */}
+            <FormItem label="提货人类型:" required>
               <Select
                 value={form.pickupPersonType}
                 onValueChange={(val) =>
-                  onPatch({ pickupPersonType: val as PickupPersonType })
+                  onPatch({
+                    pickupPersonType: (val || "个人") as PickupPersonType,
+                    pickupName: "",
+                    pickupIdCardNo: "",
+                    pickupPhone: "",
+                    pickupIdentity: "",
+                    pickupOperator: "",
+                  })
                 }
               >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
+                <SelectTrigger className="h-9 text-xs w-full">
+                  <SelectValue placeholder="请选择提货人类型" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="个人">个人</SelectItem>
-                  <SelectItem value="企业">企业</SelectItem>
+                  <SelectItem value="个人" className="text-xs">个人</SelectItem>
+                  <SelectItem value="企业" className="text-xs">企业</SelectItem>
                 </SelectContent>
               </Select>
-            </Field>
+            </FormItem>
 
-            {/* 提货人姓名 */}
-            <Field label="提货人姓名" required>
-              <Input
-                placeholder="例如：张师傅"
-                value={form.pickupName}
-                onChange={(e) => onPatch({ pickupName: e.target.value })}
-              />
-            </Field>
+            {/* 个人提货人字段 */}
+            {isPersonal ? (
+              <>
+                <FormItem label="提货人姓名:" required>
+                  <Input
+                    value={form.pickupName}
+                    onChange={(e) => onPatch({ pickupName: e.target.value })}
+                    placeholder="请输入提货人名称"
+                    className="h-9 text-xs"
+                  />
+                </FormItem>
+                <FormItem label="提货人身份证号:" required>
+                  <Input
+                    value={form.pickupIdCardNo}
+                    onChange={(e) => onPatch({ pickupIdCardNo: e.target.value })}
+                    placeholder="请输入提货人身份证号"
+                    className="h-9 text-xs"
+                  />
+                </FormItem>
+                <FormItem label="提货人电话:" required>
+                  <Input
+                    maxLength={11}
+                    value={form.pickupPhone}
+                    onChange={(e) => onPatch({ pickupPhone: e.target.value })}
+                    placeholder="请输入提货人电话"
+                    className="h-9 text-xs"
+                  />
+                </FormItem>
+                <FormItem label="车牌号:">
+                  <Input
+                    value={form.plateNo}
+                    onChange={(e) => onPatch({ plateNo: e.target.value })}
+                    placeholder="请输入车牌号"
+                    className="h-9 text-xs"
+                  />
+                </FormItem>
+              </>
+            ) : (
+              /* 企业提货人字段 */
+              <>
+                <FormItem label="提货人名称:" required>
+                  <Input
+                    value={form.pickupName}
+                    onChange={(e) => onPatch({ pickupName: e.target.value })}
+                    placeholder="请输入公司名称"
+                    className="h-9 text-xs"
+                  />
+                </FormItem>
+                <FormItem label="统一社会信用编码:" required>
+                  <Input
+                    value={form.pickupIdentity}
+                    onChange={(e) => onPatch({ pickupIdentity: e.target.value })}
+                    placeholder="请输入统一社会信用编码"
+                    className="h-9 text-xs"
+                  />
+                </FormItem>
+                <FormItem label="经办人姓名:" required>
+                  <Input
+                    value={form.pickupOperator}
+                    onChange={(e) => onPatch({ pickupOperator: e.target.value })}
+                    placeholder="请输入经办人姓名"
+                    className="h-9 text-xs"
+                  />
+                </FormItem>
+                <FormItem label="经办人电话:" required>
+                  <Input
+                    maxLength={11}
+                    value={form.pickupPhone}
+                    onChange={(e) => onPatch({ pickupPhone: e.target.value })}
+                    placeholder="请输入经办人电话"
+                    className="h-9 text-xs"
+                  />
+                </FormItem>
+              </>
+            )}
 
-            {/* 提货人联系电话 */}
-            <Field label="联系电话" required>
-              <Input
-                placeholder="请输入11位提货人手机号"
-                value={form.pickupPhone}
-                onChange={(e) => onPatch({ pickupPhone: e.target.value })}
-                className="font-mono"
-              />
-            </Field>
-
-            {/* 提货人身份证号 */}
-            <Field label="证件号码" required>
-              <Input
-                placeholder="请输入18位身份证号"
-                value={form.pickupIdCardNo}
-                onChange={(e) => onPatch({ pickupIdCardNo: e.target.value })}
-                className="font-mono"
-              />
-            </Field>
-
-            {/* 提货车牌号 */}
-            <Field label="提货车牌号">
-              <Input
-                placeholder="例如：川A·88888"
-                value={form.plateNo}
-                onChange={(e) => onPatch({ plateNo: e.target.value })}
-                className="font-mono"
-              />
-            </Field>
+            {!isPersonal ? (
+              <>
+                <FormItem label="经办人身份证号" required>
+                  <Input
+                    value={form.pickupIdCardNo}
+                    onChange={(e) => onPatch({ pickupIdCardNo: e.target.value })}
+                    placeholder="请输入经办人身份证号"
+                    className="h-9 text-xs"
+                  />
+                </FormItem>
+                <FormItem label="车牌号">
+                  <Input
+                    value={form.plateNo}
+                    onChange={(e) => onPatch({ plateNo: e.target.value })}
+                    placeholder="请输入车牌号"
+                    className="h-9 text-xs"
+                  />
+                </FormItem>
+              </>
+            ) : null}
           </div>
 
-          {/* 现场照片上传与抓拍（C06 照片必传） */}
-          <div className="border-t pt-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="flex items-center text-xs font-medium text-foreground">
-                <span className="mr-0.5 text-destructive">*</span>
-                现场实物/装车照片
-                <span className="text-muted-foreground ml-2 font-normal">
-                  （至少上传 1 张，至多 10 张）
-                </span>
-              </Label>
-              <span className="text-xs text-muted-foreground font-mono">
-                已上传 {form.sitePhotos.length} / 10 张
-              </span>
-            </div>
+          {/* 照片上传区域（严格对齐老系统截图） */}
+          <div className="pt-2 space-y-1.5">
+            <Label className="text-xs font-medium text-foreground">
+              <span className="text-destructive">* </span>
+              现场照片
+            </Label>
 
-            <div className="flex flex-wrap gap-3 pt-1">
-              {form.sitePhotos.map((url, idx) => (
+            <div className="flex flex-wrap items-center gap-3">
+              {/* 已上传图片缩略图 */}
+              {form.sitePhotos.map((imgUrl, idx) => (
                 <div
                   key={idx}
-                  className="group relative size-20 overflow-hidden rounded-md border bg-muted/20"
+                  className="group relative size-20 rounded-md border overflow-hidden bg-muted/30 flex items-center justify-center shadow-xs"
                 >
                   <img
-                    src={url}
+                    src={imgUrl}
                     alt={`现场照片-${idx + 1}`}
                     className="size-full object-cover"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity">
                     <button
                       type="button"
-                      onClick={() => onPreviewImage(url)}
-                      className="rounded p-1 text-white hover:bg-white/20"
+                      onClick={() => onPreviewImage(imgUrl)}
+                      className="text-white hover:text-primary-foreground"
                       title="查看大图"
                     >
-                      <Eye className="size-3.5" />
+                      <Eye className="size-4" />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleRemovePhoto(idx)}
-                      className="rounded p-1 text-white hover:bg-destructive"
+                      className="text-white hover:text-red-400"
                       title="删除"
                     >
-                      <Trash2 className="size-3.5" />
+                      <Trash2 className="size-4" />
                     </button>
                   </div>
                 </div>
               ))}
 
+              {/* 上传按钮（当不超过10张时） */}
               {form.sitePhotos.length < 10 && (
                 <button
                   type="button"
                   onClick={handleUploadPhoto}
-                  className="flex size-20 flex-col items-center justify-center rounded-md border border-dashed border-border bg-muted/10 text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer"
+                  className="size-20 flex flex-col items-center justify-center rounded-md border border-dashed bg-muted/20 hover:bg-muted/40 text-muted-foreground transition-colors cursor-pointer select-none"
                 >
-                  <ImagePlus className="size-5 mb-1" />
-                  <span className="text-[10px]">添加照片</span>
+                  <Plus className="size-5 mb-1" />
+                  <span className="text-[11px]">请上传图片</span>
                 </button>
               )}
+            </div>
+
+            <div className="text-[11px] text-muted-foreground pt-0.5">
+              注：图片格式为 jpg、png、jpeg，大小不超过 5M，最多支持上传 10 个文件
             </div>
           </div>
         </CardContent>

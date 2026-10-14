@@ -24,7 +24,7 @@ export function ConfigAuditSection({
   return (
     <DetailSection title="系统审计">
       <DetailField label="规则 Version">
-        <span className="font-mono tabular-nums">{formatEmptyValue(version?.toString())}</span>
+        <span className="tabular-nums">{formatEmptyValue(version?.toString())}</span>
       </DetailField>
       <DetailField label="状态">{status}</DetailField>
       <DetailField label="创建人 / 创建时间">

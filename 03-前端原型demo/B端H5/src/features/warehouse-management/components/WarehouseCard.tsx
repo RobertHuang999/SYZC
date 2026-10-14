@@ -31,7 +31,7 @@ export function WarehouseCard({
         </span>
       </div>
       <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
-        <span className="flex size-7 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-700">
+        <span className="flex size-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
           {initial}
         </span>
         <span>{item.managerName}</span>
@@ -73,7 +73,7 @@ export function WarehouseCard({
         </button>
         <Link
           to={warehouseEditPath(item.id)}
-          className="ml-auto rounded-md bg-orange-600 px-3 py-1.5 font-medium text-white"
+          className="ml-auto rounded-md bg-blue-600 px-3 py-1.5 font-medium text-white"
         >
           去编辑 ▶
         </Link>

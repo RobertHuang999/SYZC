@@ -178,7 +178,7 @@ export function WarehouseFormPage({ isEditRoute = false }: WarehouseFormPageProp
       <div className="shrink-0 border-t border-gray-100 bg-white p-3">
         <button
           type="button"
-          className="w-full rounded-lg bg-orange-600 py-3 text-sm font-medium text-white"
+          className="w-full rounded-lg bg-blue-600 py-3 text-sm font-medium text-white"
           onClick={handleSave}
         >
           保存

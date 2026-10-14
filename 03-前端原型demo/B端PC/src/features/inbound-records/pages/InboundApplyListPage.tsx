@@ -32,6 +32,7 @@ import {
   paginateInboundRecords,
   sortInboundApplies,
 } from "../lib/list-utils"
+import { rollbackStagingReg } from "@/features/inbound-staging-reg/mock/inbound-staging.mock"
 import { inboundAppliesMock } from "../mock/inbound-records.mock"
 
 export function InboundApplyListPage() {
@@ -81,6 +82,28 @@ export function InboundApplyListPage() {
     setPage(1)
   }
 
+  const handleReject = (item: InboundApply) => {
+    const inMock = inboundAppliesMock.find((r) => r.id === item.id)
+    if (inMock) inMock.checkStatus = 3
+    setRows((prev) =>
+      prev.map((r) =>
+        r.id === item.id ? { ...r, checkStatus: 3 as const } : r,
+      ),
+    )
+    if (item.sourceRegId) {
+      rollbackStagingReg(
+        item.sourceRegId,
+        `正式单 ${item.orderNo} 审批驳回，暂存回退待补全（P10 Mock）`,
+      )
+      window.dispatchEvent(new CustomEvent("staging-reg-updated"))
+      showToast(
+        `已驳回 ${item.orderNo}；暂存 ${item.sourceRegId} 已回退【待补全】`,
+      )
+      return
+    }
+    showToast(`已驳回入库申请 ${item.orderNo}`)
+  }
+
   const handleConfirmRevoke = () => {
     if (!revokeTarget) return
     const now = new Date()
@@ -90,6 +113,11 @@ export function InboundApplyListPage() {
       now.getMinutes()
     ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`
 
+    const inMock = inboundAppliesMock.find((r) => r.id === revokeTarget.id)
+    if (inMock) {
+      inMock.checkStatus = 4
+      inMock.revokedTime = nowStr
+    }
     setRows((prev) =>
       prev.map((r) =>
         r.id === revokeTarget.id
@@ -101,6 +129,18 @@ export function InboundApplyListPage() {
           : r
       )
     )
+    if (revokeTarget.sourceRegId) {
+      rollbackStagingReg(
+        revokeTarget.sourceRegId,
+        `正式单 ${revokeTarget.orderNo} 申请人撤销，暂存回退待补全（P10 Mock）`,
+      )
+      window.dispatchEvent(new CustomEvent("staging-reg-updated"))
+      showToast(
+        `已撤销 ${revokeTarget.orderNo}；暂存 ${revokeTarget.sourceRegId} 已回退【待补全】`,
+      )
+      setRevokeTarget(null)
+      return
+    }
     showToast(`入库单 ${revokeTarget.orderNo} 撤销成功`)
     setRevokeTarget(null)
   }
@@ -134,14 +174,24 @@ export function InboundApplyListPage() {
             </div>
           </PrototypeAnnotationTarget>
 
-          <Button
-            type="button"
-            className="gap-1.5"
-            onClick={() => navigate(INBOUND_APPLY_ADD_PATH)}
-          >
-            <Plus className="size-4" />
-            新增入库
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-1.5"
+              onClick={() => navigate("/仓储/入库管理/入库暂存登记")}
+            >
+              入库暂存登记
+            </Button>
+            <Button
+              type="button"
+              className="gap-1.5"
+              onClick={() => navigate(INBOUND_APPLY_ADD_PATH)}
+            >
+              <Plus className="size-4" />
+              新增入库
+            </Button>
+          </div>
         </div>
 
         {/* 顶部筛选表单（对齐 store-apply.vue） */}
@@ -220,6 +270,7 @@ export function InboundApplyListPage() {
           page={currentPage}
           pageSize={pageSize}
           onRevoke={(item) => setRevokeTarget(item)}
+          onReject={handleReject}
         />
 
         {/* 分页区 */}

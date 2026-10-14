@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useMemo, useState } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import {
   Dialog,
   DialogContent,
@@ -31,6 +31,7 @@ import {
   createInitialFormState,
   findFirstUnstackedLine,
   formHasDirtyFields,
+  validateStoreroomAuditConsistency,
 } from "../lib/inbound-form-utils"
 import {
   FORM_WAREHOUSES,
@@ -42,9 +43,18 @@ import {
   CURRENT_USER_NAME,
   CURRENT_USER_ORG,
 } from "../mock/inbound-records.mock"
+import { InboundStagingSwitchDialog } from "@/features/inbound-staging-reg/components/InboundStagingSwitchDialog"
+import { INBOUND_STAGING_FORM_PATH } from "@/features/inbound-staging-reg/domain/constants"
+import {
+  getStagingRegByNo,
+  markStagingConverted,
+} from "@/features/inbound-staging-reg/mock/inbound-staging.mock"
+import { formFromStagingReg } from "@/features/inbound-staging-reg/lib/staging-form-utils"
 
 export function InboundRecordFormPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const sourceRegId = searchParams.get("sourceRegId")
   const [form, setForm] = useState<InboundFormState>(() => createInitialFormState())
   const [basicExpanded, setBasicExpanded] = useState(true)
   const [goodsExpanded, setGoodsExpanded] = useState(true)
@@ -60,6 +70,7 @@ export function InboundRecordFormPage() {
 
   // 图片全屏大图预览弹窗
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
+  const [stagingSwitchOpen, setStagingSwitchOpen] = useState(false)
 
   const totals = useMemo(() => calcFormTotals(form.goodsLines), [form.goodsLines])
 
@@ -71,6 +82,23 @@ export function InboundRecordFormPage() {
     setToast(message)
     window.setTimeout(() => setToast(null), 2800)
   }
+
+  useEffect(() => {
+    if (!sourceRegId) return
+    const reg = getStagingRegByNo(sourceRegId)
+    if (!reg) return
+    if (reg.inboundType === "仓单入库") {
+      showToast("仓单暂存请在手机端「入库发起」转正，PC 新增页不支持仓单制单")
+      return
+    }
+    if (reg.status !== "待补全") {
+      showToast(`登记单 ${sourceRegId} 已非待补全，无法再次转正预填`)
+      return
+    }
+    setForm(formFromStagingReg(reg))
+    showToast(`已加载暂存登记 ${sourceRegId} 快照预填（Mock）`)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅 sourceRegId 变化时整表预填
+  }, [sourceRegId])
 
   const handleCancel = () => {
     if (formHasDirtyFields(form)) {
@@ -125,8 +153,34 @@ export function InboundRecordFormPage() {
       return
     }
 
+    const needSystemRelated =
+      form.inboundType === "质押入库" ||
+      form.inboundType === "抵押入库" ||
+      form.inboundType === "监管服务入库"
+    if (needSystemRelated && form.relatedOrderNo.trim()) {
+      const orders = getRelatedOrdersByType(form.inboundType)
+      const matched = orders.some((o) => o.orderNo === form.relatedOrderNo.trim())
+      if (!matched) {
+        showToast("关联单号须从系统有效订单中选择，手填单号不可提交正式入库")
+        return
+      }
+    }
+
+    const storeroomAudit = validateStoreroomAuditConsistency(form.storeroomIds)
+    if (!storeroomAudit.valid) {
+      showToast(storeroomAudit.message || "所选库房属性不一致")
+      return
+    }
+
     if (form.goodsLines.length === 0) {
       showToast(INBOUND_FORM_MESSAGES.needGoods)
+      return
+    }
+
+    const missingSku = form.goodsLines.find((line) => !line.skuId)
+    if (missingSku) {
+      setHighlightGoodsId(missingSku.id)
+      showToast("请为每条货品选择大类、品类及货品规格")
       return
     }
 
@@ -231,6 +285,7 @@ export function InboundRecordFormPage() {
         createByUserId: "USER-CURRENT",
         checkStatus: 0 as const, // 待审核
         fromSource: "1",
+        sourceRegId: sourceRegId ?? null,
       }
       inboundAppliesMock.unshift(newApplyRow)
 
@@ -259,6 +314,10 @@ export function InboundRecordFormPage() {
         checkStatus: 2,
       })
 
+      if (sourceRegId) {
+        markStagingConverted(sourceRegId, newApplyOrderNo)
+      }
+
       showToast(`提交审核成功！入库申请单号 ${newApplyOrderNo} 已进入审批流程。`)
 
       // 平滑跳转至入库记录台账
@@ -285,6 +344,14 @@ export function InboundRecordFormPage() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setStagingSwitchOpen(true)}
+                >
+                  入库暂存登记
+                </Button>
                 <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
                   取 消
                 </Button>
@@ -295,6 +362,12 @@ export function InboundRecordFormPage() {
             </div>
           </PrototypeAnnotationTarget>
 
+          {sourceRegId ? (
+            <div className="rounded-md border border-sky-200 bg-sky-50 px-4 py-2 text-sm text-sky-900">
+              暂存转正预填：{sourceRegId}（正式单不展示来源暂存单号；提交成功回写登记单【已转正式】）
+            </div>
+          ) : null}
+
           {/* 基础信息卡片 */}
           <PrototypeAnnotationTarget annotationIds={["inbound-form-basic"]}>
             <InboundBasicInfoSection
@@ -304,6 +377,7 @@ export function InboundRecordFormPage() {
               onChange={patchForm}
               onPickRelatedOrder={() => setRelatedOpen(true)}
               onOcrHint={handleOcr}
+              onFormHint={showToast}
             />
           </PrototypeAnnotationTarget>
 
@@ -398,6 +472,20 @@ export function InboundRecordFormPage() {
             })
             showToast(`已成功关联${order.orderType}【${order.orderNo}】，自动反显货主信息及${order.ownerType === "个人货主" ? "身份证号" : "统一代码"}`)
             setRelatedOpen(false)
+          }}
+        />
+
+        <InboundStagingSwitchDialog
+          open={stagingSwitchOpen}
+          onClose={() => setStagingSwitchOpen(false)}
+          onNavigateBlank={() => {
+            setStagingSwitchOpen(false)
+            navigate(INBOUND_STAGING_FORM_PATH)
+          }}
+          onNavigateWithCopy={() => {
+            setStagingSwitchOpen(false)
+            navigate(INBOUND_STAGING_FORM_PATH, { state: { copyFromFormal: form } })
+            showToast("已带入当前表单至暂存登记页（Mock）")
           }}
         />
 

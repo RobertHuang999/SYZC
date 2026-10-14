@@ -215,6 +215,14 @@ PRD、ASCII、Demo 与规范文档互相引用章节时**不使用章节符**，
 
 **工程复用（PC）**：`DetailSection` / `DetailField`、`WarningFilterHeader`、`WarningListPagination`（`B端PC/src/`）；样式类 `.detail-section`、`.detail-field`（`index.css`）。
 
+### 4.1.2 全局字体与排版约束（PingFang SC 与表格防穿透）
+* **首选主字体**：PC 端与 H5 移动端原型全站统一强制使用 **`PingFang SC`（苹方）** 作为第一优先级字体栈：`"PingFang SC", -apple-system, BlinkMacSystemFont, "Microsoft YaHei", "Segoe UI", Roboto, sans-serif`。
+* **业务排版硬性禁令**：
+  * **严禁滥用 `font-mono`**：出库单号、入库单号、货主代码、流水时间、数量吨位等常规业务列一律使用苹方正文字体，禁止滥用等宽 monospace 造成视觉割裂。
+  * **业务单号完整展示原则**：列表单号列宽度必须预留充足（通常 ≥ 200px），**严禁粗暴添加 `truncate` 导致单号出现 `...` 截断**，声明 `whitespace-nowrap font-medium text-primary hover:underline` 并提供轻量复制功能。
+  * **日期时间对齐预警标杆**：列表日期时间优先采用 `<TableDateTimeCell value={...} plain />` 单行规范呈现，完整继承 PingFang SC 正文字体。
+  * **Sticky 操作列防穿透**：表格横向滚动操作列必须声明 100% 不透明实色背景与立体投影（表头 `bg-slate-100 dark:bg-slate-800`，数据行 `bg-white dark:bg-slate-900 group-hover:bg-slate-50`），严禁半透明底色导致滚动时其他列文字透出重叠。
+
 ### 4.2 原型标注标杆标准（四维一体）
 
 > 需求真源见 **4.0 节 三件套 + 衍生**；原型与标注不得脱离三件套单独演进。  

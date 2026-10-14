@@ -74,13 +74,13 @@ export function OutboundRecordDetailPage() {
 
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-sm font-bold text-gray-900">
+              <span className="text-sm font-bold text-gray-900">
                 {record.orderNo}
               </span>
               <button
                 type="button"
                 onClick={() => handleCopy(record.orderNo)}
-                className="text-gray-400 active:text-orange-600"
+                className="text-gray-400 active:text-blue-600"
                 title="复制单号"
               >
                 {copied ? (
@@ -92,10 +92,10 @@ export function OutboundRecordDetailPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-700 border border-orange-200">
+              <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 border border-blue-200">
                 {record.type}
               </span>
-              <span className="text-xs text-gray-400 font-mono">
+              <span className="text-xs text-gray-400">
                 {record.outboundTime}
               </span>
             </div>
@@ -109,19 +109,19 @@ export function OutboundRecordDetailPage() {
               <span className="font-medium text-gray-900">{record.ownerName}</span>
             </NativeFormRow>
             <NativeFormRow label="货主标识">
-              <span className="font-mono text-gray-600 text-xs">
+              <span className="text-gray-600 text-xs">
                 {record.ownerIdentifier} ({record.ownerType})
               </span>
             </NativeFormRow>
             <NativeFormRow label="出库类型">
-              <span className="font-medium text-orange-600">{record.type}</span>
+              <span className="font-medium text-blue-600">{record.type}</span>
             </NativeFormRow>
             <NativeFormRow label="监管仓库">
               <span className="text-gray-900">{record.warehouseName}</span>
             </NativeFormRow>
             {record.relatedNo && record.relatedNo !== "—" && (
               <NativeFormRow label="关联业务单">
-                <span className="font-mono font-bold text-orange-600">
+                <span className="font-bold text-blue-600">
                   {record.relatedNo}
                 </span>
               </NativeFormRow>
@@ -130,7 +130,7 @@ export function OutboundRecordDetailPage() {
               <span className="text-gray-700">{record.createdByName}</span>
             </NativeFormRow>
             <NativeFormRow label="制单时间">
-              <span className="font-mono text-gray-500 text-xs">{record.createTime}</span>
+              <span className="text-gray-500 text-xs">{record.createTime}</span>
             </NativeFormRow>
             {record.notes && (
               <div className="py-2.5 text-xs text-gray-600">
@@ -148,7 +148,7 @@ export function OutboundRecordDetailPage() {
             onClick={() => setActiveTab("goods")}
             className={`flex-1 py-3 text-center text-xs font-semibold transition-all border-b-2 ${
               activeTab === "goods"
-                ? "border-orange-600 text-orange-600"
+                ? "border-blue-600 text-blue-600"
                 : "border-transparent text-gray-500"
             }`}
           >
@@ -159,7 +159,7 @@ export function OutboundRecordDetailPage() {
             onClick={() => setActiveTab("pickup")}
             className={`flex-1 py-3 text-center text-xs font-semibold transition-all border-b-2 ${
               activeTab === "pickup"
-                ? "border-orange-600 text-orange-600"
+                ? "border-blue-600 text-blue-600"
                 : "border-transparent text-gray-500"
             }`}
           >
@@ -173,7 +173,7 @@ export function OutboundRecordDetailPage() {
                 免提货
               </span>
             ) : (
-              <span className="ml-1 rounded-full bg-orange-100 px-1 text-[9px] text-orange-700">
+              <span className="ml-1 rounded-full bg-blue-100 px-1 text-[9px] text-blue-700">
                 待提货
               </span>
             )}
@@ -183,7 +183,7 @@ export function OutboundRecordDetailPage() {
             onClick={() => setActiveTab("audit")}
             className={`flex-1 py-3 text-center text-xs font-semibold transition-all border-b-2 ${
               activeTab === "audit"
-                ? "border-orange-600 text-orange-600"
+                ? "border-blue-600 text-blue-600"
                 : "border-transparent text-gray-500"
             }`}
           >
@@ -195,9 +195,9 @@ export function OutboundRecordDetailPage() {
         {activeTab === "goods" && (
           <div className="p-3.5 space-y-2.5">
             {/* 汇总条 */}
-            <div className="flex items-center justify-between rounded-xl bg-orange-50/80 px-3.5 py-2.5 text-xs text-orange-950 border border-orange-200/60">
+            <div className="flex items-center justify-between rounded-xl bg-blue-50/80 px-3.5 py-2.5 text-xs text-blue-950 border border-blue-200/60">
               <span>出库货品总计：{record.categoryCount} 种品类</span>
-              <span className="font-bold font-mono text-sm text-orange-600">
+              <span className="font-bold text-sm text-blue-600">
                 {record.totalAmount.toLocaleString()} {record.amountUnit}
               </span>
             </div>
@@ -215,26 +215,26 @@ export function OutboundRecordDetailPage() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className="font-mono text-base font-bold text-orange-600">
+                    <span className="text-base font-bold text-blue-600">
                       {g.totalOutboundAmount}
                     </span>
                     <span className="text-[11px] text-gray-500 ml-1">{g.unit}</span>
                   </div>
                 </div>
 
-                <div className="rounded-xl bg-gray-50 p-2.5 text-[11px] text-gray-600 space-y-1 font-mono">
-                  <div className="flex justify-between font-sans">
+                <div className="rounded-xl bg-gray-50 p-2.5 text-[11px] text-gray-600 space-y-1">
+                  <div className="flex justify-between">
                     <span className="text-gray-400">库位路径：</span>
                     <span className="text-gray-800">{g.locationPath || "—"}</span>
                   </div>
                   {g.barcode && (
                     <div className="flex justify-between">
-                      <span className="text-gray-400 font-sans">货物条码：</span>
+                      <span className="text-gray-400">货物条码：</span>
                       <span className="text-gray-700">{g.barcode}</span>
                     </div>
                   )}
                   {g.beforeAmount !== undefined && g.afterAmount !== undefined && (
-                    <div className="flex justify-between border-t border-dashed border-gray-200 pt-1 font-sans">
+                    <div className="flex justify-between border-t border-dashed border-gray-200 pt-1">
                       <span className="text-gray-400">库存变动：</span>
                       <span className="text-gray-700">
                         前 {g.beforeAmount} {g.unit} → 后 {g.afterAmount} {g.unit}
@@ -261,10 +261,10 @@ export function OutboundRecordDetailPage() {
                 </p>
               </div>
             ) : !record.pickCompleted ? (
-              <div className="rounded-2xl border border-orange-200 bg-orange-50/50 p-5 text-center text-xs text-orange-800 space-y-2">
-                <Clock className="size-7 mx-auto text-orange-500" />
-                <p className="font-semibold text-orange-900">待现场提货核销</p>
-                <p className="text-[11px] text-orange-700 leading-relaxed">
+              <div className="rounded-2xl border border-blue-200 bg-blue-50/50 p-5 text-center text-xs text-blue-800 space-y-2">
+                <Clock className="size-7 mx-auto text-blue-500" />
+                <p className="font-semibold text-blue-900">待现场提货核销</p>
+                <p className="text-[11px] text-blue-700 leading-relaxed">
                   出库单已通过审批并生成提货单，提货码已下发。提货人完成装车复磅并出场核销后，将在此展示提货记录。
                 </p>
               </div>
@@ -287,20 +287,20 @@ export function OutboundRecordDetailPage() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">联系电话：</span>
-                        <span className="font-mono text-gray-800">
+                        <span className="text-gray-800">
                           {record.pickupInfo.phone}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">证件号码：</span>
-                        <span className="font-mono text-gray-800">
+                        <span className="text-gray-800">
                           {record.pickupInfo.idCardNo}
                         </span>
                       </div>
                       {record.pickupInfo.plateNo && (
                         <div className="flex justify-between">
                           <span className="text-gray-400">提货车牌：</span>
-                          <span className="font-mono font-medium text-orange-600">
+                          <span className="font-medium text-blue-600">
                             {record.pickupInfo.plateNo}
                           </span>
                         </div>
@@ -331,7 +331,7 @@ export function OutboundRecordDetailPage() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">核销出库时间：</span>
-                        <span className="font-mono text-gray-700">
+                        <span className="text-gray-700">
                           {record.pickupRecord.pickupTime}
                         </span>
                       </div>
@@ -393,7 +393,7 @@ export function OutboundRecordDetailPage() {
           <div className="p-3.5">
             <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm text-xs space-y-4">
               <div className="font-bold text-gray-900 pb-2 border-b border-gray-100 flex items-center gap-1.5">
-                <Clock className="size-4 text-orange-600" />
+                <Clock className="size-4 text-blue-600" />
                 全流程审核轨迹
               </div>
 
@@ -405,7 +405,7 @@ export function OutboundRecordDetailPage() {
                       <span className="font-semibold text-gray-900">
                         {step.nodeName}
                       </span>
-                      <span className="text-[10px] text-gray-400 font-mono">
+                      <span className="text-[10px] text-gray-400">
                         {step.actionTime}
                       </span>
                     </div>
@@ -441,7 +441,7 @@ export function OutboundRecordDetailPage() {
         <button
           type="button"
           onClick={() => setPdfModalOpen(true)}
-          className="flex items-center gap-1.5 rounded-xl bg-orange-600 px-5 py-2 text-xs font-semibold text-white shadow-md active:bg-orange-700"
+          className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold text-white shadow-md active:bg-blue-700"
         >
           <FileText className="size-3.5" />
           出库单据凭证

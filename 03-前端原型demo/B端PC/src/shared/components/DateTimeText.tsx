@@ -8,11 +8,11 @@ type DateTimeTextProps = {
   className?: string
 }
 
-/** 业务页面统一的时间展示：完整日期、秒级精度；plain 模式使用页面默认正文字体。 */
+/** 业务页面统一的时间展示：完整日期、秒级精度；继承 PingFang SC 正文字体，数字等宽对齐。 */
 export function DateTimeText({
   value,
   stacked = false,
-  plain = false,
+  plain = true,
   className = "",
 }: DateTimeTextProps) {
   const formatted = formatDateTime(value)
@@ -25,7 +25,7 @@ export function DateTimeText({
     return (
       <span
         className={cn(
-          plain ? "" : "font-mono text-[13px] tabular-nums",
+          "text-[13px] tabular-nums",
           className
         )}
       >
@@ -39,7 +39,7 @@ export function DateTimeText({
     return (
       <span
         className={cn(
-          plain ? "text-sm" : "font-mono text-xs tabular-nums",
+          "text-sm tabular-nums",
           className
         )}
       >
@@ -65,7 +65,7 @@ export function DateTimeText({
   return (
     <span
       className={cn(
-        "inline-flex flex-col gap-0.5 font-mono tabular-nums leading-none",
+        "inline-flex flex-col gap-0.5 tabular-nums leading-none",
         className
       )}
     >

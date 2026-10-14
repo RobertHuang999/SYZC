@@ -22,6 +22,7 @@ type InboundApplyTableProps = {
   page: number
   pageSize: number
   onRevoke: (item: InboundApply) => void
+  onReject?: (item: InboundApply) => void
 }
 
 function StatusBadge({ status }: { status: number }) {
@@ -66,6 +67,7 @@ export function InboundApplyTable({
   page,
   pageSize,
   onRevoke,
+  onReject,
 }: InboundApplyTableProps) {
   return (
     <div className="overflow-x-auto rounded-md border bg-card">
@@ -109,6 +111,8 @@ export function InboundApplyTable({
               const canRevoke =
                 (row.checkStatus === 0 || row.checkStatus === 1) &&
                 row.createByUserId === CURRENT_USER_ID
+              const canRejectDemo =
+                row.checkStatus === 1 && Boolean(row.sourceRegId) && onReject
 
               return (
                 <TableRow key={row.id} className="group align-top text-xs">
@@ -116,7 +120,7 @@ export function InboundApplyTable({
                     {(page - 1) * pageSize + index + 1}
                   </TableCell>
                   <TableCell>
-                    <span className="font-mono text-xs font-medium text-foreground">
+                    <span className="text-xs font-medium text-foreground">
                       {orderParts.head}
                       <span className="text-primary">{orderParts.tail}</span>
                     </span>
@@ -178,6 +182,17 @@ export function InboundApplyTable({
                     )}
                   >
                     <div className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-muted/65 dark:bg-muted/40 p-1 shadow-2xs backdrop-blur-xs whitespace-nowrap">
+                      {canRejectDemo && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs font-medium rounded-md text-rose-700 bg-rose-50 hover:bg-rose-100 transition-all shadow-2xs"
+                          onClick={() => onReject!(row)}
+                        >
+                          驳回
+                        </Button>
+                      )}
                       {canRevoke && (
                         <Button
                           type="button"

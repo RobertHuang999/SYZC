@@ -74,7 +74,7 @@ export function MobileImageModal({
               key={idx}
               type="button"
               className={`size-12 shrink-0 overflow-hidden rounded-md border-2 ${
-                idx === safeIndex ? "border-orange-500 scale-105" : "border-transparent opacity-60"
+                idx === safeIndex ? "border-blue-500 scale-105" : "border-transparent opacity-60"
               }`}
               onClick={() => setCurrentIndex(idx)}
             >

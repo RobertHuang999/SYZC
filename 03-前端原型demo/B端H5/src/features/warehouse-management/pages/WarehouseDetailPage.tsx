@@ -195,7 +195,7 @@ export function WarehouseDetailPage() {
                       <div className="mt-3 flex gap-2 border-t border-gray-100 pt-2 text-xs">
                         <button
                           type="button"
-                          className="ml-auto text-orange-600"
+                          className="ml-auto text-blue-600"
                           onClick={() => setStoreroomSheet(room)}
                         >
                           查看详情 ▶
@@ -224,7 +224,7 @@ export function WarehouseDetailPage() {
                   </p>
                   <button
                     type="button"
-                    className="mt-2 text-xs text-orange-600"
+                    className="mt-2 text-xs text-blue-600"
                     onClick={() => setPartitionSheet(part)}
                   >
                     查看详情 ▶
@@ -260,7 +260,7 @@ export function WarehouseDetailPage() {
         <div className="shrink-0 border-t border-gray-100 bg-white p-3">
           <Link
             to={`${WAREHOUSE_LIST_ROUTE}/${warehouse.id}/edit`}
-            className="block w-full rounded-lg bg-orange-600 py-3 text-center text-sm font-medium text-white"
+            className="block w-full rounded-lg bg-blue-600 py-3 text-center text-sm font-medium text-white"
           >
             编辑仓库主档
           </Link>

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import { useEffect, type ReactNode } from "react"
 import { CameraIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -9,15 +9,38 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { OWNER_TYPES, RELATED_ORDER_PLACEHOLDER } from "../domain/form-constants"
+import {
+  INBOUND_TYPE_OPTIONS,
+  OWNER_TYPES,
+  RELATED_ORDER_PLACEHOLDER,
+} from "../domain/form-constants"
 import { InboundTypeSelect } from "./InboundTypeSelect"
 import { OwnerNameSearchSelect } from "./OwnerNameSearchSelect"
 import { StoreroomMultiSelect } from "./StoreroomMultiSelect"
 import type { InboundFormState, OwnerType } from "../domain/form-types"
-import { FORM_STOREROOMS, FORM_WAREHOUSES } from "../mock/inbound-form.mock"
+import {
+  canToggleStoreroomSelection,
+  resolvePersonalOwnerIdCardMasked,
+  STOREROOM_AUDIT_CONFLICT_MESSAGE,
+} from "../lib/inbound-form-utils"
+import {
+  findOwnerSearchRecord,
+  FORM_STOREROOMS,
+  FORM_WAREHOUSES,
+  resolveOwnerSearchRecord,
+} from "../mock/inbound-form.mock"
+
+function ownerTagStaging(
+  ownerTrimmed: string,
+  matchedArchive: ReturnType<typeof resolveOwnerSearchRecord> | undefined,
+) {
+  if (!ownerTrimmed) return null
+  return matchedArchive ? "标签：档案货主" : "标签：临时待核"
+}
 
 function maskPhoneNumber(phone?: string): string {
   if (!phone) return ""
@@ -27,13 +50,6 @@ function maskPhoneNumber(phone?: string): string {
   return phone
 }
 
-function maskIdCardNo(idCard?: string): string {
-  if (!idCard) return ""
-  if (idCard.length >= 10) {
-    return `${idCard.slice(0, 6)}****${idCard.slice(-4)}`
-  }
-  return idCard
-}
 
 type InboundBasicInfoSectionProps = {
   form: InboundFormState
@@ -42,6 +58,9 @@ type InboundBasicInfoSectionProps = {
   onChange: (patch: Partial<InboundFormState>) => void
   onPickRelatedOrder: () => void
   onOcrHint?: () => void
+  onFormHint?: (message: string) => void
+  /** 暂存登记：P03 货主一体化、弱校验、关联单号选填 */
+  variant?: "formal" | "staging"
 }
 
 export function InboundBasicInfoSection({
@@ -51,7 +70,10 @@ export function InboundBasicInfoSection({
   onChange,
   onPickRelatedOrder,
   onOcrHint,
+  onFormHint,
+  variant = "formal",
 }: InboundBasicInfoSectionProps) {
+  const isStaging = variant === "staging"
   const isEnterprise = form.ownerType === "企业货主"
   const isPersonal = form.ownerType === "个人货主"
   const needsRelated =
@@ -63,8 +85,64 @@ export function InboundBasicInfoSection({
     (room) => !form.warehouseId || room.warehouseId === form.warehouseId
   )
 
+  const ownerNameTrimmed = form.ownerName.trim()
+  const matchedArchive = resolveOwnerSearchRecord({
+    ownerType: form.ownerType,
+    ownerName: ownerNameTrimmed,
+    ownerIdentifier: form.ownerIdentifier,
+  })
+  const isArchivedOwner = Boolean(matchedArchive)
+  const ownerFieldsLocked =
+    isArchivedOwner || (!form.isNewOwner && Boolean(ownerNameTrimmed))
+  const idCardMaskedDisplay =
+    resolvePersonalOwnerIdCardMasked(form, matchedArchive) ||
+    matchedArchive?.idCardMasked ||
+    ""
+  const ownerIdentifierPlain =
+    form.ownerIdentifier || matchedArchive?.ownerIdentifier || ""
+  const showPersonalIdCardEcho =
+    isPersonal &&
+    ownerFieldsLocked &&
+    Boolean(ownerNameTrimmed || ownerIdentifierPlain || matchedArchive)
+
+  // 选中存量货主：档案身份证号写入 form（提交/货主确认弹窗依赖明文 idCardNo）
+  useEffect(() => {
+    if (!matchedArchive || form.ownerType !== "个人货主") return
+
+    const patch: Partial<InboundFormState> = {}
+    if (matchedArchive.idCardNo && form.idCardNo !== matchedArchive.idCardNo) {
+      patch.idCardNo = matchedArchive.idCardNo
+    }
+    if (matchedArchive.ownerIdentifier && !form.ownerIdentifier) {
+      patch.ownerIdentifier = matchedArchive.ownerIdentifier
+    }
+    if (form.isNewOwner) {
+      patch.isNewOwner = false
+    }
+    if (Object.keys(patch).length > 0) {
+      onChange(patch)
+    }
+    // onChange 为父级 setState 包装，刻意不纳入依赖避免重复触发
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    matchedArchive?.id,
+    form.ownerType,
+    ownerNameTrimmed,
+    form.idCardNo,
+    form.ownerIdentifier,
+    form.isNewOwner,
+  ])
+
   const toggleStoreroom = (roomId: string) => {
     const exists = form.storeroomIds.includes(roomId)
+    if (
+      !isStaging &&
+      !exists &&
+      !canToggleStoreroomSelection(form.storeroomIds, roomId, storeroomOptions)
+    ) {
+      onFormHint?.(STOREROOM_AUDIT_CONFLICT_MESSAGE)
+      return
+    }
     onChange({
       storeroomIds: exists
         ? form.storeroomIds.filter((id) => id !== roomId)
@@ -91,7 +169,104 @@ export function InboundBasicInfoSection({
 
       {expanded ? (
         <CardContent className="space-y-4 pt-5 pb-6">
+          {isStaging ? (
+            <p className="rounded-md border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs text-amber-900">
+              极速收货通道：不写库存、不进审批、暂不发短信；满足日期 + 仓库 + 类型 + 数量大于 0 即可保存（P02）。
+              主表入库库房选填，暂存阶段可混选需审核与免审库房；转正提交时再执行 R06。
+            </p>
+          ) : null}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {isStaging ? (
+              <>
+                <Field label="入库日期" required>
+                  <Input
+                    type="datetime-local"
+                    max={new Date().toISOString().slice(0, 16)}
+                    value={form.inboundDate ? form.inboundDate.replace(" ", "T").slice(0, 16) : ""}
+                    onChange={(event) => {
+                      const val = event.target.value.replace("T", " ")
+                      onChange({ inboundDate: val ? `${val}:00` : "" })
+                    }}
+                  />
+                </Field>
+                <Field label="入库仓库" required>
+                  <WarehouseSelect
+                    value={form.warehouseId}
+                    onChange={(warehouseId) => onChange({ warehouseId, storeroomIds: [] })}
+                  />
+                </Field>
+                <Field label="入库类型" required>
+                  <Select
+                    value={form.inboundType || undefined}
+                    onValueChange={(value) => {
+                      if (!value) return
+                      onChange({
+                        inboundType: value as InboundFormState["inboundType"],
+                        relatedOrderNo: "",
+                        relatedOrderLabel: "",
+                      })
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="请选择入库类型" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {INBOUND_TYPE_OPTIONS.filter((o) => o.value !== "退货入库").map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field label="入库库房">
+                  <StoreroomMultiSelect
+                    options={storeroomOptions}
+                    selected={form.storeroomIds}
+                    onToggle={toggleStoreroom}
+                    disabled={!form.warehouseId}
+                    allowMixedAuditTags
+                    onAuditConflict={() => onFormHint?.(STOREROOM_AUDIT_CONFLICT_MESSAGE)}
+                  />
+                </Field>
+                {form.inboundType && form.inboundType !== "普通入库" ? (
+                  <Field label="关联单号">
+                    <div className="flex gap-1.5">
+                      <Input
+                        placeholder="可手填纸质单号或选择系统单"
+                        maxLength={50}
+                        value={form.relatedOrderNo}
+                        onChange={(e) => onChange({ relatedOrderNo: e.target.value })}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="shrink-0 text-xs"
+                        onClick={onPickRelatedOrder}
+                      >
+                        选系统单
+                      </Button>
+                    </div>
+                  </Field>
+                ) : null}
+                <Field label="货主/送货说明" className="sm:col-span-2 lg:col-span-2">
+                  <Input
+                    placeholder="档案联想或手填临时说明（最多 100 字）"
+                    maxLength={100}
+                    value={form.ownerName}
+                    onChange={(e) =>
+                      onChange({ ownerName: e.target.value, isNewOwner: true })
+                    }
+                  />
+                  {ownerTagStaging(ownerNameTrimmed, matchedArchive) ? (
+                    <span className="text-[11px] text-muted-foreground">
+                      {ownerTagStaging(ownerNameTrimmed, matchedArchive)}
+                    </span>
+                  ) : null}
+                </Field>
+              </>
+            ) : (
+              <>
             {/* 1. 入库日期（禁止选未来时间，对齐源码 disabledDate） */}
             <Field label="入库日期" required>
               <Input
@@ -154,16 +329,59 @@ export function InboundBasicInfoSection({
                     ownerName={form.ownerName}
                     ownerIdentifier={form.ownerIdentifier}
                     onSelect={(selection) => {
+                      const ownerName = selection.ownerName.trim()
                       const targetType =
                         form.ownerType || selection.ownerType || "企业货主"
-                      onChange({
+                      const archive = findOwnerSearchRecord(
+                        targetType,
+                        ownerName
+                      )
+                      const ownerIdentifierHint =
+                        selection.ownerIdentifier ??
+                        form.ownerIdentifier ??
+                        archive?.ownerIdentifier ??
+                        ""
+                      const resolvedArchive =
+                        archive ??
+                        findOwnerSearchRecord(targetType, ownerName) ??
+                        resolveOwnerSearchRecord({
+                          ownerType: targetType,
+                          ownerName,
+                          ownerIdentifier: ownerIdentifierHint,
+                        })
+
+                      const patch: Partial<InboundFormState> = {
+                        ownerName,
                         ownerType: targetType,
-                        ownerName: selection.ownerName,
-                        ownerIdentifier: selection.ownerIdentifier,
-                        idCardNo: selection.idCardNo,
-                        contactPhone: selection.contactPhone,
-                        isNewOwner: selection.isNewOwner,
-                      })
+                      }
+
+                      if (selection.ownerIdentifier !== undefined) {
+                        patch.ownerIdentifier = selection.ownerIdentifier
+                      } else if (resolvedArchive?.ownerIdentifier) {
+                        patch.ownerIdentifier = resolvedArchive.ownerIdentifier
+                      }
+
+                      if (selection.idCardNo !== undefined) {
+                        patch.idCardNo = selection.idCardNo
+                      } else if (resolvedArchive?.idCardNo) {
+                        patch.idCardNo = resolvedArchive.idCardNo
+                      }
+
+                      if (selection.contactPhone !== undefined) {
+                        patch.contactPhone = selection.contactPhone
+                      } else if (resolvedArchive?.contactPhone) {
+                        patch.contactPhone = resolvedArchive.contactPhone
+                      }
+
+                      if (selection.isNewOwner !== undefined) {
+                        patch.isNewOwner = resolvedArchive
+                          ? false
+                          : selection.isNewOwner
+                      } else if (resolvedArchive) {
+                        patch.isNewOwner = false
+                      }
+
+                      onChange(patch)
                     }}
                   />
                 </div>
@@ -192,22 +410,21 @@ export function InboundBasicInfoSection({
                 placeholder={
                   !form.ownerType
                     ? "请先选择货主类型"
-                    : !form.isNewOwner && form.ownerName
+                    : ownerFieldsLocked
                     ? "系统档案反显，不可修改"
                     : isEnterprise
                     ? "请输入统一社会信用代码"
                     : "请输入手机号码"
                 }
                 value={
-                  isPersonal && !form.isNewOwner && Boolean(form.ownerName)
-                    ? maskPhoneNumber(form.ownerIdentifier)
+                  isPersonal && ownerFieldsLocked && ownerIdentifierPlain
+                    ? maskPhoneNumber(ownerIdentifierPlain)
                     : form.ownerIdentifier
                 }
-                disabled={!form.ownerType || (!form.isNewOwner && Boolean(form.ownerName))}
+                disabled={!form.ownerType || ownerFieldsLocked}
                 maxLength={isPersonal ? 11 : 18}
                 className={cn(
-                  "font-mono",
-                  (!form.ownerType || (!form.isNewOwner && Boolean(form.ownerName))) &&
+                  (!form.ownerType || ownerFieldsLocked) &&
                     "bg-muted/60 text-muted-foreground cursor-not-allowed select-none"
                 )}
                 onChange={(event) =>
@@ -219,46 +436,48 @@ export function InboundBasicInfoSection({
             {/* 5. 补充身份核验：个人身份证号（脱敏反显置灰） / 企业联系电话 */}
             {isPersonal ? (
               <Field label="身份证号" required>
-                <Input
-                  placeholder={
-                    !form.isNewOwner && form.ownerName
-                      ? "系统档案反显，不可修改"
-                      : "请输入货主身份证号"
-                  }
-                  value={
-                    !form.isNewOwner && Boolean(form.ownerName)
-                      ? maskIdCardNo(form.idCardNo)
-                      : form.idCardNo
-                  }
-                  disabled={!form.isNewOwner && Boolean(form.ownerName)}
-                  maxLength={18}
-                  className={cn(
-                    "font-mono",
-                    !form.isNewOwner &&
-                      Boolean(form.ownerName) &&
-                      "bg-muted/60 text-muted-foreground cursor-not-allowed select-none"
-                  )}
-                  onChange={(event) => onChange({ idCardNo: event.target.value.trim() })}
-                />
+                {showPersonalIdCardEcho ? (
+                  <div
+                    aria-readonly
+                    className={cn(
+                      "flex h-8 w-full items-center rounded-lg border border-input bg-muted/60 px-2.5 text-sm select-none",
+                      idCardMaskedDisplay
+                        ? "text-foreground"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    {idCardMaskedDisplay || "系统档案暂无身份证号"}
+                  </div>
+                ) : (
+                  <Input
+                    placeholder="请输入货主身份证号"
+                    value={form.idCardNo}
+                    maxLength={18}
+                    onChange={(event) =>
+                      onChange({ idCardNo: event.target.value.trim() })
+                    }
+                  />
+                )}
               </Field>
             ) : isEnterprise ? (
               <Field label="联系电话" required>
                 <Input
                   placeholder={
-                    !form.isNewOwner && form.ownerName
+                    ownerFieldsLocked
                       ? "系统档案反显，不可修改"
                       : "请输入企业联系电话"
                   }
                   value={
-                    !form.isNewOwner && Boolean(form.ownerName)
-                      ? maskPhoneNumber(form.contactPhone)
+                    ownerFieldsLocked &&
+                    (form.contactPhone || matchedArchive?.contactPhone)
+                      ? maskPhoneNumber(
+                          form.contactPhone || matchedArchive?.contactPhone || ""
+                        )
                       : form.contactPhone
                   }
-                  disabled={!form.isNewOwner && Boolean(form.ownerName)}
+                  disabled={ownerFieldsLocked}
                   className={cn(
-                    "font-mono",
-                    !form.isNewOwner &&
-                      Boolean(form.ownerName) &&
+                    ownerFieldsLocked &&
                       "bg-muted/60 text-muted-foreground cursor-not-allowed select-none"
                   )}
                   onChange={(event) =>
@@ -323,23 +542,28 @@ export function InboundBasicInfoSection({
                 selected={form.storeroomIds}
                 onToggle={toggleStoreroom}
                 disabled={!form.warehouseId}
+                onAuditConflict={() => onFormHint?.(STOREROOM_AUDIT_CONFLICT_MESSAGE)}
               />
             </Field>
+              </>
+            )}
           </div>
 
           {/* 10. 备注信息 */}
-          <Field label="备注">
-            <Textarea
-              placeholder="请输入备注说明（最多 140 字）"
-              maxLength={140}
-              className="resize-none"
-              rows={3}
-              value={form.remark}
-              onChange={(event) => onChange({ remark: event.target.value })}
-            />
-            <p className="text-right text-xs text-muted-foreground mt-1">
-              {form.remark.length}/140
-            </p>
+          <Field label="备注" className="pb-0">
+            <div className="relative">
+              <Textarea
+                placeholder="请输入备注说明（最多 140 字）"
+                maxLength={140}
+                className="resize-none pb-7 pr-16"
+                rows={3}
+                value={form.remark}
+                onChange={(event) => onChange({ remark: event.target.value })}
+              />
+              <span className="pointer-events-none absolute bottom-2 right-2.5 select-none text-[11px] text-muted-foreground">
+                {form.remark.length}/140
+              </span>
+            </div>
           </Field>
         </CardContent>
       ) : null}

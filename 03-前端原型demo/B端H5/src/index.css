@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@theme inline {
+  --font-sans: "PingFang SC", -apple-system, BlinkMacSystemFont, "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+  --font-heading: "PingFang SC", -apple-system, BlinkMacSystemFont, "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+  --font-mono: "PingFang SC", -apple-system, BlinkMacSystemFont, "Microsoft YaHei", "Segoe UI", Roboto, monospace;
+}
+
 @utility no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -18,12 +24,21 @@
   body,
   #root {
     height: 100%;
+    font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+  }
+
+  html,
+  body,
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
   }
 
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
     font-size: 14px;
     line-height: 1.5;
     color: #1f2937;

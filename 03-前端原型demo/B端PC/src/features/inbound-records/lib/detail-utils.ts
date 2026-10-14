@@ -58,6 +58,7 @@ export function getInboundRecordDetailById(
       houseNames: record.houseName,
       relatedOrderNo: record.relatedOrderNo,
       goodsNames: record.goodsNames,
+      goodsLineItems: record.goodsLineItems,
       inboundQuantity: record.inboundQuantity,
       unit: record.unit,
       creatorDisplay: record.creatorDisplay,

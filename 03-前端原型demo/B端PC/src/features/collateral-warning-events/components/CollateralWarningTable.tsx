@@ -153,7 +153,7 @@ export function CollateralWarningTable({
                     <TableCell>
                       <Link
                         to={`/物联网IOT与预警/预警信息/押品预警信息/详情/${event.eventId}`}
-                        className="font-medium text-primary hover:underline font-mono"
+                        className="font-medium text-primary hover:underline"
                       >
                         {event.orderNo}
                       </Link>

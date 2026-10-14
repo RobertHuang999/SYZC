@@ -29,7 +29,7 @@ export function MobilePdfModal({
         {/* 标题栏 */}
         <div className="flex items-center justify-between border-b border-gray-100 p-3.5">
           <div className="flex items-center gap-1.5">
-            <FileText className="size-4 text-orange-600" />
+            <FileText className="size-4 text-blue-600" />
             <span className="text-sm font-bold text-gray-900">{title}</span>
           </div>
           <button
@@ -59,26 +59,26 @@ export function MobilePdfModal({
               <p className="mt-0.5 text-[11px] text-gray-500">入库验收确认凭证（存管备查联）</p>
             </div>
 
-            <div className="mt-3 space-y-1.5 font-mono text-[11px] text-gray-700">
+            <div className="mt-3 space-y-1.5 text-[11px] text-gray-700">
               <p className="flex justify-between">
-                <span className="text-gray-400 font-sans">单据流水：</span>
+                <span className="text-gray-400">单据流水：</span>
                 <span className="font-semibold">{orderNo}</span>
               </p>
               <p className="flex justify-between">
-                <span className="text-gray-400 font-sans">出质/存货方：</span>
-                <span className="truncate max-w-[150px] font-sans font-medium">{ownerName}</span>
+                <span className="text-gray-400">出质/存货方：</span>
+                <span className="truncate max-w-[150px] font-medium">{ownerName}</span>
               </p>
               <p className="flex justify-between">
-                <span className="text-gray-400 font-sans">监管仓库：</span>
-                <span className="font-sans">{warehouseName}</span>
+                <span className="text-gray-400">监管仓库：</span>
+                <span>{warehouseName}</span>
               </p>
               <p className="flex justify-between">
-                <span className="text-gray-400 font-sans">文件名称：</span>
-                <span className="truncate max-w-[150px] font-sans text-orange-600">{fileName}</span>
+                <span className="text-gray-400">文件名称：</span>
+                <span className="truncate max-w-[150px] text-blue-600">{fileName}</span>
               </p>
               <p className="flex justify-between">
-                <span className="text-gray-400 font-sans">防伪校验码：</span>
-                <span className="text-emerald-600 flex items-center gap-0.5 font-sans">
+                <span className="text-gray-400">防伪校验码：</span>
+                <span className="text-emerald-600 flex items-center gap-0.5">
                   <CheckCircle2 className="size-3" />
                   已数字签名（区块链可溯）
                 </span>
@@ -105,7 +105,7 @@ export function MobilePdfModal({
             </button>
             <button
               type="button"
-              className="flex items-center gap-1 rounded-lg bg-orange-600 px-3 py-1.5 text-xs font-medium text-white active:bg-orange-700"
+              className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white active:bg-blue-700"
               onClick={() => {
                 alert(`已启动下载：${fileName}`)
                 onClose()

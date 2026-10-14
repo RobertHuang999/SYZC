@@ -91,7 +91,7 @@ export function OutboundPdfDialog({
             <div className="grid grid-cols-2 gap-y-2 py-4 border-b border-gray-200">
               <div>
                 <span className="font-semibold text-gray-700">出库单号：</span>
-                <span className="font-mono text-gray-900">{record.orderNo}</span>
+                <span className="text-gray-900">{record.orderNo}</span>
               </div>
               <div>
                 <span className="font-semibold text-gray-700">出库日期：</span>
@@ -103,7 +103,7 @@ export function OutboundPdfDialog({
               </div>
               <div>
                 <span className="font-semibold text-gray-700">统一信用代码/手机号：</span>
-                <span className="font-mono text-gray-900">{record.ownerIdentifier}</span>
+                <span className="text-gray-900">{record.ownerIdentifier}</span>
               </div>
               <div>
                 <span className="font-semibold text-gray-700">出库类型：</span>
@@ -115,7 +115,7 @@ export function OutboundPdfDialog({
               </div>
               <div>
                 <span className="font-semibold text-gray-700">关联单号：</span>
-                <span className="font-mono text-gray-900">{record.relatedNo || "—"}</span>
+                <span className="text-gray-900">{record.relatedNo || "—"}</span>
               </div>
               <div>
                 <span className="font-semibold text-gray-700">制单人：</span>
@@ -144,10 +144,10 @@ export function OutboundPdfDialog({
                       <td className="border border-gray-300 p-1.5">
                         {g.locationPath || (g.locations && g.locations[0]?.locationPath) || "--"}
                       </td>
-                      <td className="border border-gray-300 p-1.5 font-mono text-center">
+                      <td className="border border-gray-300 p-1.5 text-center">
                         {g.barcode || (g.locations && g.locations[0]?.barcode) || "--"}
                       </td>
-                      <td className="border border-gray-300 p-1.5 text-right font-mono font-medium">
+                      <td className="border border-gray-300 p-1.5 text-right font-medium">
                         {g.totalOutboundAmount} {g.unit}
                       </td>
                     </tr>
@@ -156,7 +156,7 @@ export function OutboundPdfDialog({
                     <td colSpan={4} className="border border-gray-300 p-1.5 text-right">
                       合计总出库量：
                     </td>
-                    <td className="border border-gray-300 p-1.5 text-right font-mono text-amber-800">
+                    <td className="border border-gray-300 p-1.5 text-right text-amber-800">
                       {record.totalAmount} {record.amountUnit}
                     </td>
                   </tr>
@@ -179,11 +179,11 @@ export function OutboundPdfDialog({
                   </div>
                   <div>
                     <span className="text-gray-500">提货人身份证号：</span>
-                    <span className="font-mono">{record.pickupInfo.idCardNo}</span>
+                    <span>{record.pickupInfo.idCardNo}</span>
                   </div>
                   <div>
                     <span className="text-gray-500">联系电话：</span>
-                    <span className="font-mono">{record.pickupInfo.phone}</span>
+                    <span>{record.pickupInfo.phone}</span>
                   </div>
                   <div>
                     <span className="text-gray-500">车辆车牌号：</span>
@@ -203,7 +203,7 @@ export function OutboundPdfDialog({
                       <strong className="text-gray-800">[{n.nodeName}]</strong> {n.handlerName}
                       {n.comment && <span className="ml-1 text-gray-500">({n.comment})</span>}
                     </span>
-                    <span className="font-mono text-gray-500">{n.actionTime}</span>
+                    <span className="text-gray-500">{n.actionTime}</span>
                   </div>
                 ))}
               </div>

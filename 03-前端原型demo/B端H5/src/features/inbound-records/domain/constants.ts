@@ -6,6 +6,11 @@ export const INBOUND_LIST_ROUTE = "/m/workspace/inbound-records"
 export const INBOUND_INITIATE_ROUTE = "/m/inbound/initiate"
 export const INBOUND_INITIATE_GOODS_ROUTE = "/m/inbound/initiate/goods"
 
+/** 从步骤二返回步骤一时携带，允许恢复 Session 草稿（P03） */
+export const INBOUND_INITIATE_RESUME_STATE = {
+  resumeInboundDraft: true,
+} as const
+
 export function inboundDetailRoute(id: string) {
   return `/m/workspace/inbound-records/${id}`
 }

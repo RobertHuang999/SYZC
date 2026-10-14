@@ -1,5 +1,11 @@
 import type { GoodsLineForm, InboundFormState } from "../domain/form-types"
-import { GOODS_SPEC_TREE } from "../mock/inbound-form.mock"
+import {
+  formatSpecSummary,
+  getSkuById,
+  inferSkuIdFromStagingParts,
+  measureLabelFromParam,
+  type GoodsSkuRecord,
+} from "../../../../../shared/goods/goods-sku-catalog"
 
 export function nowInboundDateString(): string {
   const d = new Date()
@@ -8,15 +14,17 @@ export function nowInboundDateString(): string {
 }
 
 export function createEmptyGoodsLine(): GoodsLineForm {
-  const template = GOODS_SPEC_TREE[0]
   return {
     id: `goods-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-    category: template.category,
-    variety: template.variety,
-    spec: template.spec,
+    skuId: "",
+    category: "",
+    variety: "",
+    spec: "",
+    specValues: {},
+    collectValues: {},
     measureValue: "",
-    measureUnit: template.defaultUnit,
-    measureLabel: template.measureLabel,
+    measureUnit: "",
+    measureLabel: "计量数量",
     extraInfo: "",
     remark: "",
     stackings: [],
@@ -45,7 +53,13 @@ export function createInitialFormState(): InboundFormState {
 }
 
 export function formatGoodsCardTitle(line: GoodsLineForm): string {
-  return [line.category, line.variety, line.spec].filter(Boolean).join(" - ")
+  if (!line.category && !line.skuId) return "未选择货品"
+  const spec =
+    line.spec ||
+    (Object.keys(line.specValues).length > 0
+      ? formatSpecSummary(line.specValues)
+      : "")
+  return [line.category, line.variety, spec].filter(Boolean).join(" - ")
 }
 
 export function parseQuantity(value: string): number {
@@ -99,27 +113,86 @@ export function findFirstUnstackedLine(
   return lines.find((line) => unstackedQuantity(line) !== 0) ?? null
 }
 
-export function applySpecTemplate(
-  line: GoodsLineForm,
-  category: string,
-  variety: string,
-  spec: string
-): GoodsLineForm {
-  const template = GOODS_SPEC_TREE.find(
-    (item) =>
-      item.category === category &&
-      item.variety === variety &&
-      item.spec === spec
-  )
-  if (!template) {
-    return { ...line, category, variety, spec }
+export function applyGoodsSku(line: GoodsLineForm, sku: GoodsSkuRecord): GoodsLineForm {
+  const spec = formatSpecSummary(sku.specValues)
+  const collectValues: Record<string, string> = {}
+  for (const field of sku.inboundCollect) {
+    collectValues[field.fieldKey] = line.collectValues[field.fieldKey] ?? ""
   }
   return {
     ...line,
-    category,
-    variety,
+    skuId: sku.skuId,
+    category: sku.category,
+    variety: sku.variety,
     spec,
-    measureLabel: template.measureLabel,
-    measureUnit: template.defaultUnit,
+    specValues: { ...sku.specValues },
+    collectValues,
+    measureLabel: measureLabelFromParam(sku.measureParam),
+    measureUnit: sku.measureUnit,
+    extraInfo: "",
+  }
+}
+
+export function applyGoodsSkuById(line: GoodsLineForm, skuId: string): GoodsLineForm {
+  const sku = getSkuById(skuId)
+  if (!sku) {
+    return { ...line, skuId: "" }
+  }
+  return applyGoodsSku(line, sku)
+}
+
+export function resetGoodsLineForCategory(line: GoodsLineForm, category: string): GoodsLineForm {
+  return {
+    ...line,
+    skuId: "",
+    category,
+    variety: "",
+    spec: "",
+    specValues: {},
+    collectValues: {},
+    measureUnit: "",
+    measureLabel: "计量数量",
+    extraInfo: "",
+  }
+}
+
+export function resetGoodsLineForVariety(
+  line: GoodsLineForm,
+  category: string,
+  variety: string
+): GoodsLineForm {
+  return {
+    ...resetGoodsLineForCategory(line, category),
+    variety,
+  }
+}
+
+/** 会话里旧版 goodsLines 缺字段时补齐；无 skuId 时保留暂存带入的品类并尝试目录匹配 */
+export function normalizeGoodsLine(line: Partial<GoodsLineForm> & { id: string }): GoodsLineForm {
+  const empty = createEmptyGoodsLine()
+  const merged: GoodsLineForm = {
+    ...empty,
+    ...line,
+    id: line.id,
+    specValues: line.specValues ?? {},
+    collectValues: line.collectValues ?? {},
+    skuId: line.skuId ?? "",
+    stackings: line.stackings ?? [],
+  }
+  if (merged.skuId) {
+    return applyGoodsSkuById(merged, merged.skuId)
+  }
+  const inferred = inferSkuIdFromStagingParts(
+    merged.category,
+    merged.variety,
+    merged.spec,
+  )
+  if (inferred) {
+    return applyGoodsSkuById(merged, inferred)
+  }
+  return {
+    ...merged,
+    measureLabel: merged.measureLabel || "计量数量",
+    measureValue: merged.measureValue ?? "",
   }
 }

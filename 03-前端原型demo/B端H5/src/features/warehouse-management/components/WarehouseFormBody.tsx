@@ -61,7 +61,7 @@ function Segmented({
             onClick={() => onChange(opt.value)}
             className={`rounded-lg px-3 py-2 text-sm ${
               active
-                ? "bg-orange-600 text-white"
+                ? "bg-blue-600 text-white"
                 : "bg-gray-100 text-gray-700"
             } ${disabled ? "opacity-50" : ""}`}
           >
@@ -121,7 +121,7 @@ function OrgUserPicker({
                 <button
                   type="button"
                   className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm ${
-                    checked ? "bg-orange-50 text-orange-800" : "bg-gray-50"
+                    checked ? "bg-blue-50 text-blue-800" : "bg-gray-50"
                   }`}
                   onClick={() => toggle(user.id)}
                 >
@@ -129,7 +129,7 @@ function OrgUserPicker({
                     {user.name}
                     <span className="ml-2 text-xs text-gray-500">{user.dept}</span>
                   </span>
-                  {checked ? <span className="text-orange-600">已选</span> : null}
+                  {checked ? <span className="text-blue-600">已选</span> : null}
                 </button>
               </li>
             )
@@ -137,7 +137,7 @@ function OrgUserPicker({
         </ul>
         <button
           type="button"
-          className="mt-4 w-full rounded-lg bg-orange-600 py-2.5 text-sm font-medium text-white"
+          className="mt-4 w-full rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white"
           onClick={() => setOpen(false)}
         >
           确定
@@ -523,7 +523,7 @@ export function WarehouseFormBody({
                 type="button"
                 className={`w-full rounded-lg px-3 py-2 text-left text-sm ${
                   form.regionKey === option.key
-                    ? "bg-orange-50 text-orange-800"
+                    ? "bg-blue-50 text-blue-800"
                     : "bg-gray-50"
                 }`}
                 onClick={() => {
@@ -545,7 +545,7 @@ export function WarehouseFormBody({
               <label className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm">
                 <input
                   type="checkbox"
-                  className="size-4 accent-orange-600"
+                  className="size-4 accent-blue-600"
                   checked={form.warehouseTypes.includes(type)}
                   onChange={() => toggleWarehouseType(type)}
                 />
@@ -564,7 +564,7 @@ export function WarehouseFormBody({
         ) : null}
         <button
           type="button"
-          className="mt-4 w-full rounded-lg bg-orange-600 py-2.5 text-sm font-medium text-white"
+          className="mt-4 w-full rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white"
           onClick={() => setTypeOpen(false)}
         >
           确定
@@ -589,7 +589,7 @@ export function WarehouseFormBody({
                 type="button"
                 className={`w-full rounded-lg px-3 py-2 text-left text-sm ${
                   form.ownership === value
-                    ? "bg-orange-50 text-orange-800"
+                    ? "bg-blue-50 text-blue-800"
                     : "bg-gray-50"
                 }`}
                 onClick={() => {

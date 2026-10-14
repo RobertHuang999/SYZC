@@ -28,7 +28,7 @@ function ensureMermaidInitialized() {
       nodeBorder: "#9ca3af",
       mainBkg: "#f3f4f6",
       fontSize: "12px",
-      fontFamily: "Geist, system-ui, -apple-system, sans-serif",
+      fontFamily: '"PingFang SC", -apple-system, BlinkMacSystemFont, "Microsoft YaHei", "Segoe UI", Roboto, sans-serif',
     },
     securityLevel: "loose",
     flowchart: {

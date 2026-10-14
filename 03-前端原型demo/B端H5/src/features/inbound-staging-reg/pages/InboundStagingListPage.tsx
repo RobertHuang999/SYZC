@@ -1,0 +1,226 @@
+import { useEffect, useMemo, useState } from "react"
+import { Plus, RotateCcw, Search, X } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { MobileShell } from "@/components/layout/MobileShell"
+import { NavBar } from "@/components/layout/NavBar"
+import {
+  DropdownFilterPill,
+  type DropdownOption,
+} from "@/components/ui/DropdownFilterPill"
+import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
+import { GoodsSpecCascadePill } from "@/features/inbound-records/components/GoodsSpecCascadePill"
+import { WarehouseStoreroomCascadePill } from "@/features/inbound-records/components/WarehouseStoreroomCascadePill"
+import { INBOUND_WAREHOUSE_STOREROOM_TREE } from "@prototype/shared/inbound/filter-cascade-trees"
+import { inboundWarehouseCascadeKeyMatchesRow } from "@prototype/shared/inbound/list-filter-match"
+import { resolveStagingGoodsNames } from "@prototype/shared/inbound/staging-goods-display"
+import { INBOUND_GOODS_CASCADE_TREE } from "@/features/inbound-records/mock/inbound-goods-cascade.mock"
+import {
+  inboundStagingRegsMock,
+  type InboundStagingReg,
+  type StagingRegStatus,
+} from "@prototype/shared/inbound/inbound-staging.mock"
+import { InboundStagingRegCard } from "../components/InboundStagingRegCard"
+import {
+  H5_INBOUND_INITIATE_ROUTE,
+  INBOUND_STAGING_FORM_ROUTE,
+  inboundStagingEditQuery,
+} from "../domain/constants"
+import { H5_FILTER_BAR, H5_LIST_SCROLL } from "@/shared/h5-ui-theme"
+
+const STATUS_OPTIONS: DropdownOption[] = [
+  { label: "全部状态", value: "全部" },
+  { label: "待补全", value: "待补全" },
+  { label: "已转正式", value: "已转正式" },
+  { label: "已作废", value: "已作废" },
+]
+
+const TYPE_OPTIONS: DropdownOption[] = [
+  { label: "全部类型", value: "全部" },
+  { label: "普通入库", value: "普通入库" },
+  { label: "质押入库", value: "质押入库" },
+  { label: "抵押入库", value: "抵押入库" },
+  { label: "监管服务入库", value: "监管服务入库" },
+  { label: "仓单入库", value: "仓单入库" },
+]
+
+export function InboundStagingListPage() {
+  const navigate = useNavigate()
+  const [keyword, setKeyword] = useState("")
+  const [status, setStatus] = useState<(StagingRegStatus | "全部")>("全部")
+  const [inboundType, setInboundType] = useState("全部")
+  const [selectedWarehouseKeys, setSelectedWarehouseKeys] = useState<string[]>([])
+  const [selectedGoodsKeys, setSelectedGoodsKeys] = useState<string[]>([])
+  const [toast, setToast] = useState<string | null>(null)
+  const [mockTick, setMockTick] = useState(0)
+
+  useEffect(() => {
+    const bump = () => setMockTick((t) => t + 1)
+    window.addEventListener("focus", bump)
+    window.addEventListener("staging-reg-updated", bump)
+    return () => {
+      window.removeEventListener("focus", bump)
+      window.removeEventListener("staging-reg-updated", bump)
+    }
+  }, [])
+
+  const filtered = useMemo(() => {
+    void mockTick
+    return inboundStagingRegsMock.filter((row) => {
+      if (status !== "全部" && row.status !== status) return false
+      if (inboundType !== "全部" && row.inboundType !== inboundType) return false
+      if (selectedWarehouseKeys.length > 0) {
+        const hit = selectedWarehouseKeys.some((key) =>
+          inboundWarehouseCascadeKeyMatchesRow(key, row.warehouseName),
+        )
+        if (!hit) return false
+      }
+      const goodsNames = resolveStagingGoodsNames(row)
+      if (selectedGoodsKeys.length > 0) {
+        const hit = selectedGoodsKeys.some((key) =>
+          goodsNames.some(
+            (name) => name.includes(key) || name.startsWith(key.split("-")[0] ?? ""),
+          ),
+        )
+        if (!hit) return false
+      }
+      const q = keyword.trim().toLowerCase()
+      if (!q) return true
+      return (
+        row.regNo.toLowerCase().includes(q) ||
+        row.ownerDisplay.toLowerCase().includes(q) ||
+        row.goodsSummary.toLowerCase().includes(q) ||
+        goodsNames.some((name) => name.toLowerCase().includes(q))
+      )
+    })
+  }, [keyword, status, inboundType, selectedWarehouseKeys, selectedGoodsKeys, mockTick])
+
+  const showToast = (msg: string) => {
+    setToast(msg)
+    window.setTimeout(() => setToast(null), 2400)
+  }
+
+  const resetFilters = () => {
+    setKeyword("")
+    setStatus("全部")
+    setInboundType("全部")
+    setSelectedWarehouseKeys([])
+    setSelectedGoodsKeys([])
+  }
+
+  const handleConvert = (row: InboundStagingReg) => {
+    navigate(`${H5_INBOUND_INITIATE_ROUTE}?sourceRegId=${encodeURIComponent(row.regNo)}`)
+    showToast(`前往入库发起预填 ${row.regNo}`)
+  }
+
+  const handleEdit = (row: InboundStagingReg) => {
+    navigate(inboundStagingEditQuery(row.id))
+  }
+
+  const handleViewFormal = (row: InboundStagingReg) => {
+    showToast(`关联正式单 ${row.relatedFormalNo ?? "—"}（演示：跳转入库申请/记录详情）`)
+  }
+
+  return (
+    <MobileShell>
+      <div className="relative flex min-h-0 flex-1 flex-col bg-[#edf2f8]">
+        <PrototypeAnnotationTarget annotationIds={["inbound-staging-h5-list"]}>
+          <NavBar title="入库暂存登记" />
+        </PrototypeAnnotationTarget>
+
+        <div className={H5_FILTER_BAR}>
+          <div className="flex items-center gap-2">
+            <div className="relative min-w-0 flex-1">
+              <input
+                type="text"
+                placeholder="请输入登记单号 / 货主 / 货品"
+                className="w-full rounded-xl bg-[#f4f5f7] py-2 pl-3.5 pr-8 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-hidden focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+              />
+              {keyword ? (
+                <button
+                  type="button"
+                  onClick={() => setKeyword("")}
+                  className="absolute right-2.5 top-1/2 flex size-3.5 -translate-y-1/2 items-center justify-center rounded-full bg-gray-300 text-gray-600"
+                >
+                  <X className="size-2" />
+                </button>
+              ) : (
+                <Search className="pointer-events-none absolute right-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-400" />
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 no-scrollbar">
+            <WarehouseStoreroomCascadePill
+              tree={INBOUND_WAREHOUSE_STOREROOM_TREE}
+              selectedFullKeys={selectedWarehouseKeys}
+              onChange={setSelectedWarehouseKeys}
+            />
+            <GoodsSpecCascadePill
+              tree={INBOUND_GOODS_CASCADE_TREE}
+              selectedFullKeys={selectedGoodsKeys}
+              onChange={setSelectedGoodsKeys}
+            />
+            <DropdownFilterPill
+              label="入库类型"
+              value={inboundType}
+              options={TYPE_OPTIONS}
+              onChange={setInboundType}
+            />
+            <DropdownFilterPill
+              label="单据状态"
+              value={status}
+              options={STATUS_OPTIONS}
+              onChange={(v) => setStatus(v as StagingRegStatus | "全部")}
+            />
+          </div>
+        </div>
+
+        <div className={`${H5_LIST_SCROLL} pb-24`}>
+          {filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="mb-3 flex size-14 items-center justify-center rounded-full bg-white text-[#232D39]/20 shadow-xs">
+                <Search className="size-7" />
+              </div>
+              <p className="text-xs font-medium text-[#232D39]/60">未找到符合条件的暂存登记单</p>
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="mt-3 inline-flex items-center gap-1 rounded-md border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-600 shadow-xs"
+              >
+                <RotateCcw className="size-3" />
+                重置筛选条件
+              </button>
+            </div>
+          ) : (
+            filtered.map((row) => (
+              <InboundStagingRegCard
+                key={row.id}
+                row={row}
+                onEdit={handleEdit}
+                onConvert={handleConvert}
+                onViewFormal={handleViewFormal}
+              />
+            ))
+          )}
+        </div>
+
+        <button
+          type="button"
+          className="fixed bottom-20 right-4 flex size-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg active:bg-blue-700"
+          aria-label="新增暂存登记"
+          onClick={() => navigate(INBOUND_STAGING_FORM_ROUTE)}
+        >
+          <Plus className="size-7" />
+        </button>
+
+        {toast ? (
+          <div className="fixed bottom-16 left-1/2 z-50 -translate-x-1/2 rounded-full bg-black/80 px-4 py-1.5 text-xs text-white shadow-lg">
+            {toast}
+          </div>
+        ) : null}
+      </div>
+    </MobileShell>
+  )
+}

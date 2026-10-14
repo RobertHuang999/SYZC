@@ -3,8 +3,6 @@ import {
   inboundTypeNameToCode,
   isManualWarehouseType,
 } from "../domain/inbound-type-options"
-import { INBOUND_FORM_MESSAGES } from "@prototype/shared/inbound/form-messages"
-
 function validationPhone(mobile: string): boolean {
   const v = mobile.trim()
   if (!v) return false
@@ -58,11 +56,9 @@ export function validateInboundBasicStep(form: InboundFormState): string | null 
   if (!form.inboundType) {
     return "请选择入库类型"
   }
-  if (typeCode === "CD") {
-    return INBOUND_FORM_MESSAGES.warehouseReceiptHint
-  }
+  // 仓单入库在 PC 转正入口拦截，H5「入库发起」为仓单转正主路径（剧本 C），不在此阻断
 
-  const needRelated = typeCode !== "NORMAL" && typeCode !== null
+  const needRelated = typeCode !== "NORMAL" && typeCode !== null && typeCode !== "CD"
   if (needRelated && !form.relatedOrderNo) {
     return "请选择关联单号"
   }

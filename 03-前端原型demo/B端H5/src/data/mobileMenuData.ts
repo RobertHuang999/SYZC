@@ -131,6 +131,19 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     iconType: "ArrowDownToLine",
   },
   {
+    id: "ws-inbound-reg",
+    primaryModule: "工作台",
+    secondaryCategory: "仓储",
+    name: "入库暂存登记",
+    originPath: "货物管理～入库暂存登记",
+    description:
+      "现场卸货极速备忘：弱校验暂存、协作补录，一键预填至入库发起转正（仓单须 H5 制单）。",
+    buttons: ["查看页面", "新增登记", "编辑", "转为正式入库", "作废"],
+    dataPermission: "可见数据根据当前登录账号的角色的仓库权限决定",
+    customRoute: "/m/workspace/inbound-staging",
+    iconType: "ClipboardList",
+  },
+  {
     id: "ws-outbound-mgr",
     primaryModule: "工作台",
     secondaryCategory: "仓储",
@@ -637,6 +650,18 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
   },
 
   // =================== 3. 业务办理 - 业务发起 ===================
+  {
+    id: "biz-init-inbound-reg",
+    primaryModule: "业务办理",
+    secondaryCategory: "业务发起",
+    name: "入库暂存登记",
+    originPath: "货物管理-入库-入库暂存登记",
+    description: "现场卸货极速备忘：弱校验暂存、拍照补充，一键预填至入库发起转正。",
+    buttons: ["查看页面", "新增登记", "拍照上传", "保存暂存"],
+    dataPermission: "账号赋予的仓库权限",
+    customRoute: "/m/inbound/staging/reg",
+    iconType: "ClipboardList",
+  },
   {
     id: "biz-init-inbound",
     primaryModule: "业务办理",

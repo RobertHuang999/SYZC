@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Plus } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import { markStagingConverted } from "@prototype/shared/inbound/inbound-staging.mock"
 import { INBOUND_FORM_MESSAGES } from "@prototype/shared/inbound/form-messages"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
@@ -11,6 +12,7 @@ import { NativeInboundStepBar } from "../components/NativeInboundStepBar"
 import type { InboundFormState } from "../domain/form-types"
 import {
   INBOUND_INITIATE_ROUTE,
+  INBOUND_INITIATE_RESUME_STATE,
   INBOUND_LIST_ROUTE,
 } from "../domain/constants"
 import { EXISTING_OWNERS } from "../mock/inbound-form.mock"
@@ -18,14 +20,23 @@ import {
   calcFormTotals,
   createEmptyGoodsLine,
   findFirstUnstackedLine,
+  normalizeGoodsLine,
 } from "../lib/inbound-form-utils"
 import {
+  buildMobileDetailFromInitiateForm,
+  prependMobileInboundListItem,
+  registerMobileInboundDetailOverride,
+} from "../lib/mobile-detail-utils"
+import {
+  clearInboundInitiateSession,
   loadInboundInitiateForm,
   saveInboundInitiateForm,
 } from "../lib/inbound-initiate-session"
 
 export function InboundInitiateGoodsPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const sourceRegId = searchParams.get("sourceRegId")
   const [form, setForm] = useState<InboundFormState | null>(null)
   const [toast, setToast] = useState<string | null>(null)
 
@@ -35,7 +46,10 @@ export function InboundInitiateGoodsPage() {
       navigate(INBOUND_INITIATE_ROUTE, { replace: true })
       return
     }
-    setForm(saved)
+    setForm({
+      ...saved,
+      goodsLines: (saved.goodsLines ?? []).map((line) => normalizeGoodsLine(line)),
+    })
   }, [navigate])
 
   const patch = (p: Partial<InboundFormState>) => {
@@ -60,7 +74,10 @@ export function InboundInitiateGoodsPage() {
   if (!form) {
     return (
       <MobileShell>
-        <NavBar title="入库单填写" onBack={() => navigate(INBOUND_INITIATE_ROUTE)} />
+        <NavBar
+          title="入库单填写"
+          onBack={() => navigate(INBOUND_INITIATE_ROUTE, { state: INBOUND_INITIATE_RESUME_STATE })}
+        />
         <div className="flex flex-1 items-center justify-center text-sm text-gray-500">
           加载中…
         </div>
@@ -71,6 +88,11 @@ export function InboundInitiateGoodsPage() {
   const validateGoods = (): boolean => {
     if (form.goodsLines.length === 0) {
       showToast(INBOUND_FORM_MESSAGES.needGoods)
+      return false
+    }
+    const missingSku = form.goodsLines.find((l) => !l.skuId)
+    if (missingSku) {
+      showToast("请为每条货品选择大类、品类及货品规格")
       return false
     }
     const emptyMeasure = form.goodsLines.find((l) => l.measureValue.trim() === "")
@@ -91,7 +113,21 @@ export function InboundInitiateGoodsPage() {
   }
 
   const submitCore = () => {
-    showToast(INBOUND_FORM_MESSAGES.submitSuccess)
+    const orderNo = `${Date.now()}`.padEnd(19, "0").slice(0, 19)
+    const detail = buildMobileDetailFromInitiateForm(form, orderNo)
+    const listId = `m-inbound-${Date.now()}`
+    detail.id = listId
+    registerMobileInboundDetailOverride(listId, detail)
+    prependMobileInboundListItem(form, orderNo, listId)
+    if (sourceRegId) {
+      markStagingConverted(sourceRegId, orderNo)
+    }
+    clearInboundInitiateSession()
+    showToast(
+      sourceRegId
+        ? `${INBOUND_FORM_MESSAGES.submitSuccess}；暂存 ${sourceRegId} 已回写【已转正式】`
+        : INBOUND_FORM_MESSAGES.submitSuccess,
+    )
     window.setTimeout(() => navigate(INBOUND_LIST_ROUTE), 1200)
   }
 
@@ -108,7 +144,10 @@ export function InboundInitiateGoodsPage() {
   return (
     <MobileShell>
       <PrototypeAnnotationTarget annotationIds={["inbound-h5-initiate-goods"]}>
-        <NavBar title="入库单填写" onBack={() => navigate(INBOUND_INITIATE_ROUTE)} />
+        <NavBar
+          title="入库单填写"
+          onBack={() => navigate(INBOUND_INITIATE_ROUTE, { state: INBOUND_INITIATE_RESUME_STATE })}
+        />
       </PrototypeAnnotationTarget>
 
       <NativeInboundStepBar current={1} />
@@ -119,7 +158,7 @@ export function InboundInitiateGoodsPage() {
             <h2 className="text-base font-bold text-[#232D39]">合计信息</h2>
             <button
               type="button"
-              className="flex items-center gap-1 text-sm text-orange-600"
+              className="flex items-center gap-1 text-sm text-blue-600"
               onClick={() => {
                 if (form.storeroomIds.length === 0) {
                   showToast(INBOUND_FORM_MESSAGES.needStoreroomFirst)
@@ -170,13 +209,15 @@ export function InboundInitiateGoodsPage() {
         <button
           type="button"
           className="flex h-[44px] flex-1 items-center justify-center rounded-lg border border-[#232D39]/20 text-sm text-[#232D39]"
-          onClick={() => navigate(INBOUND_INITIATE_ROUTE)}
+          onClick={() =>
+            navigate(INBOUND_INITIATE_ROUTE, { state: INBOUND_INITIATE_RESUME_STATE })
+          }
         >
           上一步
         </button>
         <button
           type="button"
-          className="flex h-[44px] flex-[1.2] items-center justify-center rounded-lg bg-orange-600 text-sm font-medium text-white active:bg-orange-700"
+          className="flex h-[44px] flex-[1.2] items-center justify-center rounded-lg bg-blue-600 text-sm font-medium text-white active:bg-blue-700"
           onClick={handleSubmit}
         >
           提交审核

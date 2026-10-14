@@ -18,9 +18,12 @@ export type StackingRow = {
 
 export type GoodsLineForm = {
   id: string
+  skuId: string
   category: string
   variety: string
   spec: string
+  specValues: Record<string, string>
+  collectValues: Record<string, string>
   measureValue: string
   measureUnit: string
   measureLabel: string

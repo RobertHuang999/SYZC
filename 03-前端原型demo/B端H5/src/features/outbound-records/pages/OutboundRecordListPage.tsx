@@ -12,6 +12,7 @@ import { OutboundRecordCard } from "../components/OutboundRecordCard"
 import { MOBILE_OUTBOUND_TYPE_OPTIONS } from "../domain/constants"
 import type { MobileOutboundRecord } from "../domain/types"
 import { mobileOutboundRecordsMock } from "../mock/outbound-records.mock"
+import { H5_FILTER_BAR, H5_LIST_SCROLL, H5_SEARCH_INPUT } from "@/shared/h5-ui-theme"
 
 const TYPE_OPTIONS: DropdownOption[] = MOBILE_OUTBOUND_TYPE_OPTIONS.map((val) => ({
   label: val === "全部" ? "全部类型" : val,
@@ -110,7 +111,7 @@ export function OutboundRecordListPage() {
         </PrototypeAnnotationTarget>
 
         {/* 搜索与筛选栏（对齐源码 search-section + stream-filter-card 与 H5规范） */}
-        <div className="shrink-0 space-y-2 border-b border-[#232D39]/5 bg-white px-3.5 py-2.5 shadow-2xs">
+        <div className={H5_FILTER_BAR}>
           {/* 搜索框行：左侧常驻筛选漏斗 + 浅灰背景搜索条 */}
           <div className="flex items-center gap-2">
             <button
@@ -121,7 +122,7 @@ export function OutboundRecordListPage() {
             >
               <Filter className="size-4.5" />
               {activeFilterCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-orange-600 text-[9px] font-bold text-white">
+                <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white">
                   {activeFilterCount}
                 </span>
               )}
@@ -131,7 +132,7 @@ export function OutboundRecordListPage() {
               <input
                 type="text"
                 placeholder="请输入货主名称/标识"
-                className="w-full rounded-xl bg-[#232D39]/5 py-2 pl-3.5 pr-8 text-xs text-[#232D39] placeholder:text-[#232D39]/40 focus:outline-hidden focus:ring-2 focus:ring-orange-500/20 focus:bg-white transition-all"
+                className={H5_SEARCH_INPUT}
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
               />
@@ -156,34 +157,30 @@ export function OutboundRecordListPage() {
               value={selectedWarehouse}
               options={WAREHOUSE_OPTIONS}
               onChange={(val) => setSelectedWarehouse(val)}
-              theme="orange"
             />
             <DropdownFilterPill
               label="出库类型"
               value={selectedType}
               options={TYPE_OPTIONS}
               onChange={(val) => setSelectedType(val)}
-              theme="orange"
             />
             <DropdownFilterPill
               label="审核状态"
               value={selectedStatus}
               options={STATUS_OPTIONS}
               onChange={(val) => setSelectedStatus(val)}
-              theme="orange"
             />
             <DropdownFilterPill
               label="提货状态"
               value={selectedPickup}
               options={PICKUP_OPTIONS}
               onChange={(val) => setSelectedPickup(val)}
-              theme="orange"
             />
           </div>
         </div>
 
         {/* 列表内容流 */}
-        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3.5 pb-8">
+        <div className={`${H5_LIST_SCROLL} pb-8`}>
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="size-16 rounded-full bg-white flex items-center justify-center shadow-xs text-[#232D39]/20 mb-3">
@@ -193,7 +190,7 @@ export function OutboundRecordListPage() {
               <button
                 type="button"
                 onClick={resetAllFilters}
-                className="mt-3 inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-orange-600 shadow-xs border border-orange-200"
+                className="mt-3 inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-blue-600 shadow-xs border border-blue-200"
               >
                 <RotateCcw className="size-3" />
                 重置筛选条件
@@ -228,7 +225,7 @@ export function OutboundRecordListPage() {
                     onClick={() => setSelectedWarehouse(opt.value)}
                     className={`rounded-lg py-2 px-2.5 text-xs text-left truncate transition-colors ${
                       active
-                        ? "bg-orange-50 font-bold text-orange-600 border border-orange-200"
+                        ? "bg-blue-50 font-bold text-blue-600 border border-blue-200"
                         : "bg-gray-50 text-[#232D39]/80 border border-transparent"
                     }`}
                   >
@@ -250,7 +247,7 @@ export function OutboundRecordListPage() {
                     onClick={() => setSelectedType(opt.value)}
                     className={`rounded-lg py-2 px-2.5 text-xs text-left truncate transition-colors ${
                       active
-                        ? "bg-orange-50 font-bold text-orange-600 border border-orange-200"
+                        ? "bg-blue-50 font-bold text-blue-600 border border-blue-200"
                         : "bg-gray-50 text-[#232D39]/80 border border-transparent"
                     }`}
                   >
@@ -272,7 +269,7 @@ export function OutboundRecordListPage() {
                     onClick={() => setSelectedPickup(opt.value)}
                     className={`rounded-lg py-2 px-2 text-center text-xs transition-colors ${
                       active
-                        ? "bg-orange-50 font-bold text-orange-600 border border-orange-200"
+                        ? "bg-blue-50 font-bold text-blue-600 border border-blue-200"
                         : "bg-gray-50 text-[#232D39]/80 border border-transparent"
                     }`}
                   >

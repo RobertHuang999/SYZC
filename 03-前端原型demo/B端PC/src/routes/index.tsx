@@ -45,6 +45,10 @@ import { InboundRecordDetailPage } from "@/features/inbound-records/pages/Inboun
 import { OutboundRecordListPage } from "@/features/outbound-records/pages/OutboundRecordListPage"
 import { OutboundRecordFormPage } from "@/features/outbound-records/pages/OutboundRecordFormPage"
 import { OutboundRecordDetailPage } from "@/features/outbound-records/pages/OutboundRecordDetailPage"
+import { DeliveryOrderListPage } from "@/features/delivery-orders/pages/DeliveryOrderListPage"
+import { InboundStagingListPage } from "@/features/inbound-staging-reg/pages/InboundStagingListPage"
+import { InboundStagingFormPage } from "@/features/inbound-staging-reg/pages/InboundStagingFormPage"
+import { InboundStagingDetailPage } from "@/features/inbound-staging-reg/pages/InboundStagingDetailPage"
 import { getAllMenuPaths, topModules } from "@/config/navigation"
 import { isImplementedRoute } from "@/config/implemented-routes"
 import { Navigate, Route, Routes } from "react-router-dom"
@@ -295,6 +299,22 @@ export function AppRoutes() {
           path="仓储/入库管理/入库记录/详情/:id"
           element={<InboundRecordDetailPage />}
         />
+        <Route
+          path="仓储/入库管理/入库暂存登记"
+          element={<InboundStagingListPage />}
+        />
+        <Route
+          path="仓储/入库管理/入库暂存登记/新增"
+          element={<InboundStagingFormPage />}
+        />
+        <Route
+          path="仓储/入库管理/入库暂存登记/编辑/:id"
+          element={<InboundStagingFormPage />}
+        />
+        <Route
+          path="仓储/入库管理/入库暂存登记/详情/:id"
+          element={<InboundStagingDetailPage />}
+        />
 
         {/* 仓储 - 出库管理（出库记录） */}
         <Route
@@ -308,6 +328,12 @@ export function AppRoutes() {
         <Route
           path="仓储/出库管理/出库记录/详情/:id"
           element={<OutboundRecordDetailPage />}
+        />
+
+        {/* 仓储 - 提货单 */}
+        <Route
+          path="仓储/提货单"
+          element={<DeliveryOrderListPage />}
         />
 
         {placeholderPaths.map((menuPath) => (

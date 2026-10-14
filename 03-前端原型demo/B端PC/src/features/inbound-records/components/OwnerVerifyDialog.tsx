@@ -170,7 +170,7 @@ export function OwnerVerifyDialog({
 
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">货主标识：</span>
-            <span className="font-mono font-medium text-foreground">
+            <span className="font-medium text-foreground">
               {isPersonal ? maskPhone(ownerIdentifier) : ownerIdentifier || "—"}
             </span>
           </div>
@@ -178,7 +178,7 @@ export function OwnerVerifyDialog({
           {isPersonal ? (
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">身份证号：</span>
-              <span className="font-mono text-foreground">
+              <span className="text-foreground">
                 {maskIdCard(idCardNo)}
               </span>
             </div>
@@ -186,7 +186,7 @@ export function OwnerVerifyDialog({
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">联系电话：</span>
-                <span className="font-mono text-foreground">
+                <span className="text-foreground">
                   {maskPhone(contactPhone)}
                 </span>
               </div>
@@ -207,7 +207,7 @@ export function OwnerVerifyDialog({
                 <span className="text-destructive">* </span>短信验证码
               </Label>
               <span className="text-[11px] text-muted-foreground">
-                演示默认可填: <code className="font-mono font-semibold text-primary">123456</code>
+                演示默认可填: <code className="font-semibold text-primary">123456</code>
               </span>
             </div>
 
@@ -217,7 +217,7 @@ export function OwnerVerifyDialog({
                 placeholder="请输入 6 位短信验证码"
                 value={code}
                 maxLength={6}
-                className="font-mono tracking-wider"
+                className="tracking-wider"
                 onChange={(event) => {
                   setCode(event.target.value)
                   setError(null)
@@ -229,7 +229,7 @@ export function OwnerVerifyDialog({
                 variant="outline"
                 size="sm"
                 disabled={seconds > 0}
-                className="shrink-0 text-xs tabular-nums"
+                className="shrink-0 text-xs"
                 onClick={handleSendCode}
               >
                 {seconds > 0 ? `${seconds}s后重新获取` : "重新发送"}

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 import {
   Dialog,
   DialogContent,
@@ -14,9 +14,12 @@ import {
   Download,
   Video,
   Paperclip,
+  ImageIcon,
 } from "lucide-react"
+import { DetailSection } from "@/shared/components/DetailSection"
 import { ImageViewerModal } from "./ImageViewerModal"
 import { PdfViewerDialog } from "./PdfViewerDialog"
+import { cn } from "@/lib/utils"
 
 export type AttachmentDialogData = {
   goodsName: string
@@ -36,12 +39,64 @@ type InboundAttachmentDialogProps = {
   onClose: () => void
 }
 
+function AttachmentPhotoGrid({
+  photos,
+  onOpen,
+  className,
+}: {
+  photos: string[]
+  onOpen: (index: number) => void
+  className?: string
+}) {
+  return (
+    <div
+      className={cn(
+        "grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5",
+        className
+      )}
+    >
+      {photos.map((photo, idx) => (
+        <button
+          key={`${photo}-${idx}`}
+          type="button"
+          className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-[#e5e6eb] bg-[#f7f8fa] text-left outline-none ring-primary/30 transition-shadow hover:shadow-md focus-visible:ring-2"
+          onClick={() => onOpen(idx)}
+        >
+          <img
+            src={photo}
+            alt={`照片 ${idx + 1}`}
+            className="size-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+          />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-center bg-gradient-to-t from-black/55 to-transparent px-2 pb-2 pt-8 opacity-0 transition-opacity group-hover:opacity-100">
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-0.5 text-[11px] font-medium text-[#1d2129] shadow-sm">
+              <Eye className="size-3.5 text-primary" />
+              查看大图
+            </span>
+          </div>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function EmptyAttachmentHint({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex min-h-[72px] items-center justify-center rounded-lg border border-dashed border-[#e5e6eb] bg-[#f7f8fa] px-4 py-6 text-sm text-[#86909c]">
+      {children}
+    </div>
+  )
+}
+
+function sectionTitleSuffix(count: number, unit: string) {
+  if (count <= 0) return ""
+  return ` · ${count} ${unit}`
+}
+
 export function InboundAttachmentDialog({
   open,
   data,
   onClose,
 }: InboundAttachmentDialogProps) {
-  // 图片大图预览
   const [imagePreview, setImagePreview] = useState<{
     open: boolean
     images: string[]
@@ -52,7 +107,6 @@ export function InboundAttachmentDialog({
     initialIndex: 0,
   })
 
-  // PDF 预览
   const [pdfPreview, setPdfPreview] = useState<{
     open: boolean
     title: string
@@ -69,18 +123,10 @@ export function InboundAttachmentDialog({
   const scenePhotos = data.scenePhotos || []
   const supplementaryImages = data.supplementaryImages || []
   const supplementaryDocuments = data.supplementaryDocuments || []
-  const capturePhotos = data.capturePhotos || [
-    {
-      deviceName: "库区球机01-入库监控",
-      time: "2026-09-18 10:25:30",
-      url: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=400&q=80",
-    },
-    {
-      deviceName: "1号库房全景枪机",
-      time: "2026-09-18 10:26:12",
-      url: "https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=400&q=80",
-    },
-  ]
+  const capturePhotos = data.capturePhotos ?? []
+
+  const hasSupplementary =
+    supplementaryImages.length > 0 || supplementaryDocuments.length > 0
 
   const handleOpenImage = (images: string[], index: number) => {
     setImagePreview({
@@ -102,208 +148,197 @@ export function InboundAttachmentDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-        <DialogContent className="max-w-[800px] max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <div className="flex items-center gap-2">
-              <Paperclip className="size-5 text-primary" />
-              <DialogTitle>
-                附件信息
+        <DialogContent className="flex max-h-[88vh] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[720px]">
+          <DialogHeader className="shrink-0 space-y-2 border-b border-[#f0f1f3] bg-white px-6 py-5 text-left">
+            <div className="flex items-start gap-3 pr-8">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Paperclip className="size-5" />
+              </div>
+              <div className="min-w-0 flex-1 space-y-1">
+                <DialogTitle className="text-lg font-semibold leading-snug text-[#1d2129]">
+                  附件信息
+                </DialogTitle>
                 {data.goodsName ? (
-                  <span className="ml-2 text-xs font-normal text-muted-foreground">
-                    ({data.goodsName})
-                  </span>
+                  <p className="text-sm leading-relaxed text-[#86909c]">
+                    {data.goodsName}
+                  </p>
                 ) : null}
-              </DialogTitle>
+              </div>
             </div>
           </DialogHeader>
 
-          <div className="space-y-6 py-2 text-xs">
-            {/* 1. 现场图片 */}
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2 font-semibold text-foreground">
-                <Camera className="size-4 text-primary" />
-                <span>现场图片 ({scenePhotos.length} 张)：</span>
-              </div>
-
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-[#f7f8fa] px-6 py-5">
+            <DetailSection
+              title={`现场图片${sectionTitleSuffix(scenePhotos.length, "张")}`}
+            >
               {scenePhotos.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {scenePhotos.map((photo, idx) => (
-                    <div
-                      key={idx}
-                      className="group relative aspect-4/3 overflow-hidden rounded-md border bg-muted"
-                    >
-                      <img
-                        src={photo}
-                        alt={`现场照片 ${idx + 1}`}
-                        className="size-full object-cover"
-                      />
-                      <div
-                        className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => handleOpenImage(scenePhotos, idx)}
-                      >
-                        <span className="flex items-center gap-1 rounded bg-black/60 px-2 py-1 text-white text-[11px]">
-                          <Eye className="size-3.5" />
-                          查看大图
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <AttachmentPhotoGrid
+                  photos={scenePhotos}
+                  onOpen={(idx) => handleOpenImage(scenePhotos, idx)}
+                />
               ) : (
-                <p className="text-muted-foreground pl-6">暂无现场图片</p>
+                <EmptyAttachmentHint>
+                  <span className="inline-flex items-center gap-2">
+                    <Camera className="size-4 opacity-60" />
+                    暂无现场图片
+                  </span>
+                </EmptyAttachmentHint>
               )}
-            </div>
+            </DetailSection>
 
-            {/* 2. 补充资料（图片 + PDF文档） */}
-            <div className="space-y-2.5 border-t pt-4">
-              <div className="flex items-center gap-2 font-semibold text-foreground">
-                <FileText className="size-4 text-primary" />
-                <span>补充资料：</span>
-              </div>
-
-              {/* 补充图片 */}
-              {supplementaryImages.length > 0 && (
-                <div className="space-y-1.5 pl-6">
-                  <span className="text-muted-foreground">补充凭据照片：</span>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    {supplementaryImages.map((img, idx) => (
-                      <div
-                        key={idx}
-                        className="group relative aspect-4/3 overflow-hidden rounded-md border bg-muted"
-                      >
-                        <img
-                          src={img.url}
-                          alt={img.name}
-                          className="size-full object-cover"
-                        />
-                        <div
-                          className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() =>
-                            handleOpenImage(
-                              supplementaryImages.map((i) => i.url),
-                              idx
-                            )
-                          }
-                        >
-                          <span className="flex items-center gap-1 rounded bg-black/60 px-2 py-1 text-white text-[11px]">
-                            <Eye className="size-3.5" />
-                            查看大图
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 补充文档 (PDF等) */}
-              {supplementaryDocuments.length > 0 ? (
-                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 pl-6 pt-1">
-                  {supplementaryDocuments.map((doc, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between rounded-md border bg-muted/20 p-2.5 hover:bg-muted/40 transition-colors"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <FileText className="size-7 text-rose-500 shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <p className="line-clamp-1 font-medium text-foreground">
-                            {doc.name}
-                          </p>
-                          <p className="text-[11px] text-muted-foreground">
-                            {doc.size || "1.8 MB"} · PDF 文档
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0 ml-2">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 px-2 text-xs text-primary"
-                          onClick={() => handleOpenPdf(doc)}
-                        >
-                          <Eye className="mr-1 size-3.5" />
-                          预览
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 px-2 text-xs"
-                          onClick={() => {
-                            window.open(doc.url || "#", "_blank")
-                          }}
-                        >
-                          <Download className="size-3.5" />
-                        </Button>
-                      </div>
+            <DetailSection title="补充资料">
+              {!hasSupplementary ? (
+                <EmptyAttachmentHint>
+                  <span className="inline-flex items-center gap-2">
+                    <FileText className="size-4 opacity-60" />
+                    暂无补充资料
+                  </span>
+                </EmptyAttachmentHint>
+              ) : (
+                <div className="space-y-5">
+                  {supplementaryImages.length > 0 ? (
+                    <div className="space-y-2.5">
+                      <p className="text-[13px] font-medium text-[#86909c]">
+                        补充凭据照片
+                        <span className="ml-1 font-normal">
+                          ({supplementaryImages.length} 张)
+                        </span>
+                      </p>
+                      <AttachmentPhotoGrid
+                        photos={supplementaryImages.map((i) => i.url)}
+                        onOpen={(idx) =>
+                          handleOpenImage(
+                            supplementaryImages.map((i) => i.url),
+                            idx
+                          )
+                        }
+                      />
                     </div>
-                  ))}
+                  ) : null}
+
+                  {supplementaryDocuments.length > 0 ? (
+                    <div className="space-y-2.5">
+                      <p className="text-[13px] font-medium text-[#86909c]">
+                        文档附件
+                        <span className="ml-1 font-normal">
+                          ({supplementaryDocuments.length} 份)
+                        </span>
+                      </p>
+                      <ul className="space-y-2">
+                        {supplementaryDocuments.map((doc, idx) => (
+                          <li
+                            key={idx}
+                            className="flex items-center gap-3 rounded-lg border border-[#e5e6eb] bg-white p-3 transition-colors hover:border-primary/20 hover:bg-[#fafbfc]"
+                          >
+                            <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-500">
+                              <FileText className="size-5" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium text-[#1d2129]">
+                                {doc.name}
+                              </p>
+                              <p className="mt-0.5 text-xs text-[#86909c]">
+                                {doc.size || "—"} · PDF 文档
+                              </p>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-1">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-8 gap-1 px-2.5 text-xs"
+                                onClick={() => handleOpenPdf(doc)}
+                              >
+                                <Eye className="size-3.5" />
+                                预览
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-sm"
+                                className="text-[#86909c]"
+                                aria-label="下载"
+                                onClick={() => {
+                                  window.open(doc.url || "#", "_blank")
+                                }}
+                              >
+                                <Download className="size-4" />
+                              </Button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
                 </div>
-              ) : supplementaryImages.length === 0 ? (
-                <p className="text-muted-foreground pl-6">暂无补充资料</p>
-              ) : null}
-            </div>
+              )}
+            </DetailSection>
 
-            {/* 3. 设备抓拍图 */}
-            <div className="space-y-2.5 border-t pt-4">
-              <div className="flex items-center gap-2 font-semibold text-foreground">
-                <Video className="size-4 text-primary" />
-                <span>设备抓拍图 ({capturePhotos.length} 处监控设备)：</span>
-              </div>
-
+            <DetailSection
+              title={`设备抓拍${sectionTitleSuffix(capturePhotos.length, "处")}`}
+            >
               {capturePhotos.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 pl-6">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {capturePhotos.map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex flex-col overflow-hidden rounded-md border bg-card shadow-2xs"
+                      className="overflow-hidden rounded-lg border border-[#e5e6eb] bg-white shadow-sm"
                     >
-                      <div className="group relative aspect-4/3 overflow-hidden bg-muted">
+                      <button
+                        type="button"
+                        className="group relative block aspect-[16/10] w-full overflow-hidden bg-[#f2f3f5] outline-none ring-primary/30 focus-visible:ring-2"
+                        onClick={() =>
+                          handleOpenImage(
+                            capturePhotos.map((c) => c.url),
+                            idx
+                          )
+                        }
+                      >
                         <img
                           src={item.url}
                           alt={item.deviceName}
-                          className="size-full object-cover"
+                          className="size-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
                         />
-                        <div
-                          className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() =>
-                            handleOpenImage(
-                              capturePhotos.map((c) => c.url),
-                              idx
-                            )
-                          }
-                        >
-                          <Eye className="size-4 text-white" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/25">
+                          <span className="inline-flex scale-95 items-center gap-1 rounded-full bg-white/95 px-3 py-1 text-xs font-medium text-[#1d2129] opacity-0 shadow transition-all group-hover:scale-100 group-hover:opacity-100">
+                            <Eye className="size-3.5 text-primary" />
+                            查看大图
+                          </span>
                         </div>
-                      </div>
-                      <div className="p-1.5 text-[11px]">
-                        <p className="line-clamp-1 font-medium text-foreground">
-                          {item.deviceName}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground tabular-nums">
-                          {item.time}
-                        </p>
+                      </button>
+                      <div className="flex items-start gap-2 border-t border-[#f0f1f3] px-3 py-2.5">
+                        <Video className="mt-0.5 size-4 shrink-0 text-primary" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-[#1d2129]">
+                            {item.deviceName}
+                          </p>
+                          <p className="mt-0.5 text-xs text-[#86909c]">
+                            {item.time}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground pl-6">抓图失败 / 无监控设备接入</p>
+                <EmptyAttachmentHint>
+                  <span className="inline-flex items-center gap-2">
+                    <ImageIcon className="size-4 opacity-60" />
+                    抓图失败或无监控设备接入
+                  </span>
+                </EmptyAttachmentHint>
               )}
-            </div>
+            </DetailSection>
           </div>
 
-          <DialogFooter className="pt-2 border-t">
-            <Button size="sm" onClick={onClose}>
-              关 闭
+          <DialogFooter className="shrink-0 border-t border-[#f0f1f3] bg-white px-6 py-3.5 sm:justify-end">
+            <Button type="button" variant="outline" size="sm" onClick={onClose}>
+              关闭
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* 大图预览 */}
       <ImageViewerModal
         open={imagePreview.open}
         images={imagePreview.images}
@@ -311,7 +346,6 @@ export function InboundAttachmentDialog({
         onClose={() => setImagePreview((prev) => ({ ...prev, open: false }))}
       />
 
-      {/* PDF 预览 */}
       <PdfViewerDialog
         open={pdfPreview.open}
         title={pdfPreview.title}

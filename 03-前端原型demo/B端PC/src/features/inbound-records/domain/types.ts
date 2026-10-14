@@ -27,6 +27,8 @@ export type InboundApply = {
   revokedTime?: string | null
   checkStatus: 0 | 1 | 2 | 3 | 4
   fromSource: string
+  /** 6.3 暂存转正来源登记单号（仅服务端/流程关联，正式单主表不展示 REG） */
+  sourceRegId?: string | null
 }
 
 /** 入库记录列表单据（已通过归档台账，对齐 store-records.vue） */
@@ -43,6 +45,8 @@ export type InboundRecord = {
   relatedOrderNo: string | null
   /** 列表首项 + tooltip 展示全部 */
   goodsNames: string[]
+  /** 多货品各行计量；详情页按行展示，不传则均分 inboundQuantity */
+  goodsLineItems?: { name: string; amount: number; unit?: string }[]
   inboundQuantity: number
   unit: string
   creatorDisplay: string
@@ -63,8 +67,10 @@ export type InboundRecordFilters = {
   inboundDateEnd: string
   ownerKeyword: string
   inboundType: InboundTypeLabel | "全部"
-  warehouseName: string
-  goodsSpec: string
+  /** 仓库|库房 fullKey 多选；空表示全部 */
+  warehouseCascadeKeys: string[]
+  /** 大类-品类-规格 fullKey 多选；空表示全部 */
+  goodsCascadeKeys: string[]
   creator: string
   createdAtStart: string
   createdAtEnd: string

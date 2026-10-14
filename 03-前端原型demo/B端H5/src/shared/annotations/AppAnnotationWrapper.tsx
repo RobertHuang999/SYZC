@@ -35,6 +35,12 @@ import {
 } from "@/features/inbound-records/annotations/inbound-record.annotations"
 import { inboundRecordH5Documents } from "@/features/inbound-records/documents/inbound-record-documents"
 import {
+  inboundStagingH5DetailAnnotations,
+  inboundStagingH5FormAnnotations,
+  inboundStagingH5ListAnnotations,
+} from "@/features/inbound-staging-reg/annotations/inbound-staging-reg.annotations"
+import { inboundStagingRegH5Documents } from "@/features/inbound-staging-reg/documents/inbound-staging-reg-documents"
+import {
   outboundH5DetailAnnotations,
   outboundH5InitiateAnnotations,
   outboundH5ListAnnotations,
@@ -122,6 +128,18 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
     pageTitle = "风险公示 · 移动端交互与 PRD 标注"
     currentAnnotations = readonlyRiskAnnotations["risk-disclosure"]
     currentDocuments = readonlyRiskDocuments["risk-disclosure"]
+  } else if (location.pathname.startsWith("/m/inbound/staging/reg")) {
+    pageTitle = "入库暂存登记 · H5 新增 · PRD 标注"
+    currentAnnotations = inboundStagingH5FormAnnotations
+    currentDocuments = inboundStagingRegH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/inbound-staging/")) {
+    pageTitle = "入库暂存登记 · H5 详情 · PRD 标注"
+    currentAnnotations = inboundStagingH5DetailAnnotations
+    currentDocuments = inboundStagingRegH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/inbound-staging")) {
+    pageTitle = "入库暂存登记 · H5 列表 · PRD 标注"
+    currentAnnotations = inboundStagingH5ListAnnotations
+    currentDocuments = inboundStagingRegH5Documents
   } else if (location.pathname.startsWith("/m/workspace/inbound-records/")) {
     pageTitle = "入库详情 · 移动端交互与 PRD 标注"
     currentAnnotations = inboundH5DetailAnnotations

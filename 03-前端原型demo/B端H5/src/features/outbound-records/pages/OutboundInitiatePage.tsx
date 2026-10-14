@@ -253,7 +253,7 @@ export function OutboundInitiatePage() {
           {/* 1. 货主与基本信息 */}
           <NativeInfoCard
             title="货主与出库信息"
-            icon={<Building2 className="size-4 text-orange-600" />}
+            icon={<Building2 className="size-4 text-blue-600" />}
           >
             <NativeFormRow label="货主类型" required>
               <div className="flex gap-4">
@@ -265,7 +265,7 @@ export function OutboundInitiatePage() {
                       type="button"
                       className={`flex h-7 px-4 items-center justify-center rounded-lg text-xs font-medium transition-colors ${
                         active
-                          ? "bg-orange-50 text-orange-600 border border-orange-200"
+                          ? "bg-blue-50 text-blue-600 border border-blue-200"
                           : "bg-[#232D39]/5 text-[#232D39]/60 border border-transparent"
                       }`}
                       onClick={() => {
@@ -292,7 +292,7 @@ export function OutboundInitiatePage() {
             </NativeFormRow>
 
             <NativeFormRow label="货主识别码">
-              <span className="text-xs text-[#232D39]/70 font-mono">
+              <span className="text-xs text-[#232D39]/70">
                 {selectedOwner.identifier}
               </span>
             </NativeFormRow>
@@ -300,7 +300,7 @@ export function OutboundInitiatePage() {
             <NativeFormRow label="出库类型" required>
               <button
                 type="button"
-                className="flex items-center justify-end text-xs text-orange-600 font-medium active:opacity-70"
+                className="flex items-center justify-end text-xs text-blue-600 font-medium active:opacity-70"
                 onClick={() => setTypeModalOpen(true)}
               >
                 <span>{outboundType}</span>
@@ -323,7 +323,7 @@ export function OutboundInitiatePage() {
               <NativeFormRow label="关联合同/单据" required>
                 <button
                   type="button"
-                  className="flex items-center justify-end text-xs text-orange-600 font-medium active:opacity-70 text-right truncate max-w-[200px]"
+                  className="flex items-center justify-end text-xs text-blue-600 font-medium active:opacity-70 text-right truncate max-w-[200px]"
                   onClick={() => setRelatedOrderModalOpen(true)}
                 >
                   <span className="truncate">
@@ -337,21 +337,21 @@ export function OutboundInitiatePage() {
             )}
 
             {selectedRelatedOrder && outboundType !== "普通出库" && (
-              <div className="rounded-lg bg-orange-50/70 p-2.5 text-xs text-orange-800 space-y-1 mt-2">
+              <div className="rounded-lg bg-blue-50/70 p-2.5 text-xs text-blue-800 space-y-1 mt-2">
                 <div className="flex justify-between">
-                  <span className="text-orange-600/80">关联单据状态:</span>
+                  <span className="text-blue-600/80">关联单据状态:</span>
                   <span className="font-medium">
                     {selectedRelatedOrder.status}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-orange-600/80">在押监管仓库:</span>
+                  <span className="text-blue-600/80">在押监管仓库:</span>
                   <span className="font-medium">
                     {selectedRelatedOrder.warehouseName}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-orange-600/80">包含货品项数:</span>
+                  <span className="text-blue-600/80">包含货品项数:</span>
                   <span className="font-medium">
                     {selectedRelatedOrder.items.length} 种在押货品
                   </span>
@@ -363,7 +363,7 @@ export function OutboundInitiatePage() {
           {/* 2. 提货信息 */}
           <NativeInfoCard
             title="提货人信息"
-            icon={<User className="size-4 text-orange-600" />}
+            icon={<User className="size-4 text-blue-600" />}
           >
             <NativeFormRow label="提货主体" required>
               <div className="flex gap-4">
@@ -375,7 +375,7 @@ export function OutboundInitiatePage() {
                       type="button"
                       className={`flex h-7 px-4 items-center justify-center rounded-lg text-xs font-medium transition-colors ${
                         active
-                          ? "bg-orange-50 text-orange-600 border border-orange-200"
+                          ? "bg-blue-50 text-blue-600 border border-blue-200"
                           : "bg-[#232D39]/5 text-[#232D39]/60 border border-transparent"
                       }`}
                       onClick={() => setPickupPersonType(t)}
@@ -415,7 +415,7 @@ export function OutboundInitiatePage() {
                 value={pickupIdCard}
                 onChange={(e) => setPickupIdCard(e.target.value)}
                 placeholder="提货人二代身份证"
-                className="w-44 text-right text-xs text-[#232D39] outline-none placeholder:text-[#232D39]/30 font-mono"
+                className="w-44 text-right text-xs text-[#232D39] outline-none placeholder:text-[#232D39]/30"
               />
             </NativeFormRow>
 
@@ -437,7 +437,7 @@ export function OutboundInitiatePage() {
                 value={pickupPlateNo}
                 onChange={(e) => setPickupPlateNo(e.target.value)}
                 placeholder="例如：川A·88888"
-                className="w-44 text-right text-xs text-[#232D39] outline-none placeholder:text-[#232D39]/30 font-mono"
+                className="w-44 text-right text-xs text-[#232D39] outline-none placeholder:text-[#232D39]/30"
               />
             </NativeFormRow>
           </NativeInfoCard>
@@ -445,7 +445,7 @@ export function OutboundInitiatePage() {
           {/* 3. 现场核实照片 */}
           <NativeInfoCard
             title="现场照片与凭证"
-            icon={<Camera className="size-4 text-orange-600" />}
+            icon={<Camera className="size-4 text-blue-600" />}
           >
             <div className="py-2">
               <div className="flex items-center justify-between mb-2">
@@ -494,7 +494,7 @@ export function OutboundInitiatePage() {
           {/* 4. 备注说明 */}
           <NativeInfoCard
             title="出库申请备注"
-            icon={<FileText className="size-4 text-orange-600" />}
+            icon={<FileText className="size-4 text-blue-600" />}
           >
             <div className="py-2">
               <textarea
@@ -521,7 +521,7 @@ export function OutboundInitiatePage() {
             <button
               type="button"
               onClick={handleGoNext}
-              className="flex-1 h-11 rounded-xl bg-orange-600 text-sm font-medium text-white shadow-md shadow-orange-500/20 active:bg-orange-700 flex items-center justify-center gap-1"
+              className="flex-1 h-11 rounded-xl bg-blue-600 text-sm font-medium text-white shadow-md shadow-blue-500/20 active:bg-blue-700 flex items-center justify-center gap-1"
             >
               下一步：选择出库货物
               <span className="text-base leading-none">›</span>
@@ -552,7 +552,7 @@ export function OutboundInitiatePage() {
                       key={c.id}
                       className={`flex items-center justify-between p-3 rounded-xl border text-xs ${
                         selectedOwner.id === c.id
-                          ? "border-orange-500 bg-orange-50/50 text-orange-900 font-medium"
+                          ? "border-blue-500 bg-blue-50/50 text-blue-900 font-medium"
                           : "border-[#232D39]/10 active:bg-gray-50"
                       }`}
                       onClick={() => {
@@ -569,7 +569,7 @@ export function OutboundInitiatePage() {
                         </div>
                       </div>
                       {selectedOwner.id === c.id && (
-                        <Check className="size-4 text-orange-600" />
+                        <Check className="size-4 text-blue-600" />
                       )}
                     </div>
                   )
@@ -602,14 +602,14 @@ export function OutboundInitiatePage() {
                     type="button"
                     className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs ${
                       outboundType === t
-                        ? "border-orange-500 bg-orange-50 text-orange-900 font-medium"
+                        ? "border-blue-500 bg-blue-50 text-blue-900 font-medium"
                         : "border-[#232D39]/10 active:bg-gray-50"
                     }`}
                     onClick={() => handleTypeChange(t)}
                   >
                     <span>{t}</span>
                     {outboundType === t && (
-                      <Check className="size-4 text-orange-600" />
+                      <Check className="size-4 text-blue-600" />
                     )}
                   </button>
                 ))}
@@ -641,7 +641,7 @@ export function OutboundInitiatePage() {
                     type="button"
                     className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs ${
                       selectedWarehouse === w.name
-                        ? "border-orange-500 bg-orange-50 text-orange-900 font-medium"
+                        ? "border-blue-500 bg-blue-50 text-blue-900 font-medium"
                         : "border-[#232D39]/10 active:bg-gray-50"
                     }`}
                     onClick={() => {
@@ -651,7 +651,7 @@ export function OutboundInitiatePage() {
                   >
                     <span>{w.name}</span>
                     {selectedWarehouse === w.name && (
-                      <Check className="size-4 text-orange-600" />
+                      <Check className="size-4 text-blue-600" />
                     )}
                   </button>
                 ))}
@@ -684,7 +684,7 @@ export function OutboundInitiatePage() {
                     key={order.orderNo}
                     className={`p-3 rounded-xl border text-xs space-y-1.5 cursor-pointer ${
                       selectedRelatedOrder?.orderNo === order.orderNo
-                        ? "border-orange-500 bg-orange-50/50"
+                        ? "border-blue-500 bg-blue-50/50"
                         : "border-[#232D39]/10 active:bg-gray-50"
                     }`}
                     onClick={() => handleSelectRelatedOrder(order)}
@@ -693,7 +693,7 @@ export function OutboundInitiatePage() {
                       <span className="font-bold text-[#232D39]">
                         {order.orderNo}
                       </span>
-                      <span className="text-orange-600 font-medium">
+                      <span className="text-blue-600 font-medium">
                         {order.status}
                       </span>
                     </div>

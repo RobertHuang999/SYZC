@@ -146,6 +146,7 @@ const actionLabels: Record<string, string> = {
 const PAGE_TAB_TITLE_OVERRIDES: Record<string, string> = {
   "/仓储/入库管理/入库申请/新增": "新增入库",
   "/仓储/入库管理/入库记录/新增": "新增入库",
+  "/仓储/入库管理/入库暂存登记/新增": "新增暂存登记",
   "/仓储/出库管理/出库记录/新增": "新增出库",
 }
 

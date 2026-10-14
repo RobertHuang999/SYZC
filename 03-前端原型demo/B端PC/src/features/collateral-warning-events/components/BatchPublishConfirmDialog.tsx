@@ -48,7 +48,7 @@ export function BatchPublishConfirmDialog({
           <ul className="max-h-48 overflow-y-auto rounded-md border bg-muted/30 p-3 text-sm">
             {events.map((event) => (
               <li key={event.eventId} className="border-b border-border/40 py-1.5 last:border-0">
-                <span className="font-mono text-primary">{event.orderNo}</span>
+                <span className="font-medium text-primary">{event.orderNo}</span>
                 <span className="text-muted-foreground"> · </span>
                 {event.warningType}
                 <span className="text-muted-foreground"> · </span>

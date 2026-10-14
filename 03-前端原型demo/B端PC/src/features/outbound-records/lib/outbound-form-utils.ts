@@ -30,10 +30,13 @@ export function createInitialFormState(): OutboundFormState {
     pickupName: "",
     pickupIdCardNo: "",
     pickupPhone: "",
+    pickupIdentity: "",
+    pickupOperator: "",
     plateNo: "",
     sitePhotos: [],
   }
 }
+
 
 /** 实时试算合计栏 */
 export function calcFormTotals(
@@ -195,14 +198,30 @@ export function validateOutboundForm(form: OutboundFormState): ValidationResult 
   }
 
   // 提货信息校验
-  if (!form.pickupName.trim()) {
-    return { valid: false, message: "请填写提货人姓名" }
-  }
-  if (!form.pickupPhone.trim()) {
-    return { valid: false, message: "请填写提货人电话" }
-  }
-  if (form.pickupPersonType === "个人" && !form.pickupIdCardNo.trim()) {
-    return { valid: false, message: "个人提货人请填写身份证号" }
+  if (form.pickupPersonType === "个人") {
+    if (!form.pickupName.trim()) {
+      return { valid: false, message: "请填写提货人姓名" }
+    }
+    if (!form.pickupPhone.trim()) {
+      return { valid: false, message: "请填写提货人电话" }
+    }
+    if (!form.pickupIdCardNo.trim()) {
+      return { valid: false, message: "个人提货人请填写身份证号" }
+    }
+  } else {
+    // 企业提货
+    if (!form.pickupName.trim()) {
+      return { valid: false, message: "请填写提货企业名称" }
+    }
+    if (!form.pickupIdentity?.trim()) {
+      return { valid: false, message: "企业提货请填写统一社会信用代码" }
+    }
+    if (!form.pickupOperator?.trim()) {
+      return { valid: false, message: "企业提货请填写经办人姓名" }
+    }
+    if (!form.pickupPhone.trim()) {
+      return { valid: false, message: "企业提货请填写经办人电话" }
+    }
   }
 
   // C06 现场照片缺失校验

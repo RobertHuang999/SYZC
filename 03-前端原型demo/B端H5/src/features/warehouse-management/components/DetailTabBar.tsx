@@ -18,7 +18,7 @@ export function DetailTabBar({ active, onChange }: DetailTabBarProps) {
               onClick={() => onChange(tab.key)}
               className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium ${
                 isActive
-                  ? "bg-orange-600 text-white"
+                  ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700"
               }`}
             >

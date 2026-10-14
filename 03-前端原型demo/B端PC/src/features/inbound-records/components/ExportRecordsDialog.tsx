@@ -66,7 +66,7 @@ export function ExportRecordsDialog({
         <div className="space-y-3 py-2 text-sm">
           {orderNo && (
             <div className="rounded-md bg-muted/40 p-2.5 text-xs text-muted-foreground">
-              当前目标单据：<span className="font-mono font-medium text-foreground">{orderNo}</span>
+              当前目标单据：<span className="font-medium text-foreground">{orderNo}</span>
             </div>
           )}
 

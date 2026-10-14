@@ -34,7 +34,7 @@ export function RevokeConfirmDialog({
           </div>
           <DialogDescription className="pt-2 text-sm text-foreground">
             您确认要撤销货主（<span className="font-semibold">{ownerName}</span>）单号为{" "}
-            <span className="font-mono font-medium">{orderNo}</span>{" "}
+            <span className="font-medium">{orderNo}</span>{" "}
             的入库审核任务吗？
             <span className="mt-1 block text-destructive">撤销后不可恢复，请谨慎操作！</span>
           </DialogDescription>

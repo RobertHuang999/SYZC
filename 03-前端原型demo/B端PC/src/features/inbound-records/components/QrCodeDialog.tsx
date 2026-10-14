@@ -69,7 +69,7 @@ export function QrCodeDialog({
                 className="size-48 object-contain"
               />
             </div>
-            <div className="mt-3 flex items-center gap-1.5 font-mono text-sm font-semibold tracking-wider text-foreground">
+            <div className="mt-3 flex items-center gap-1.5 text-sm font-semibold tracking-wider text-foreground">
               <span>{qrCodeNo}</span>
               <Button
                 type="button"
@@ -91,7 +91,7 @@ export function QrCodeDialog({
           <div className="w-full space-y-2 rounded-lg border bg-card p-3.5 text-xs">
             <div className="flex justify-between">
               <span className="text-muted-foreground">所属入库单：</span>
-              <span className="font-mono font-medium text-foreground">{orderNo}</span>
+              <span className="font-medium text-foreground">{orderNo}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">入库货物：</span>

@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react"
-import { ChevronDownIcon, ChevronUpIcon } from "lucide-react"
+import { Calendar, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -38,7 +38,7 @@ interface OutboundBasicInfoSectionProps {
   onToggle: () => void
 }
 
-function Field({
+function FormItem({
   label,
   required,
   children,
@@ -51,8 +51,8 @@ function Field({
 }) {
   return (
     <div className={cn("space-y-1.5", className)}>
-      <Label className="flex items-center text-xs font-medium text-foreground">
-        {required && <span className="mr-0.5 text-destructive">*</span>}
+      <Label className="text-xs font-medium text-foreground">
+        {required ? <span className="text-destructive">* </span> : null}
         {label}
       </Label>
       {children}
@@ -69,17 +69,13 @@ export function OutboundBasicInfoSection({
 }: OutboundBasicInfoSectionProps) {
   const [confirmRelatedOrder, setConfirmRelatedOrder] =
     useState<RelatedOrderItem | null>(null)
+  const [showRelatedDialog, setShowRelatedDialog] = useState(false)
+  const [ownerDropdownOpen, setOwnerDropdownOpen] = useState(false)
 
   const isRelatedType =
     form.type === "仓单出库" || form.type === "质押出库" || form.type === "抵押出库"
 
-  // 根据当前货主与出库类型过滤可用的关联单据
-  const availableRelatedOrders = RELATED_ORDER_CANDIDATES.filter(
-    (item) =>
-      item.type === form.type &&
-      (!form.ownerName || item.ownerName === form.ownerName)
-  )
-
+  // 货主类型变更
   const handleOwnerTypeChange = (newType: OwnerType) => {
     onPatch({
       ownerType: newType,
@@ -92,10 +88,32 @@ export function OutboundBasicInfoSection({
     })
   }
 
-  const handleOwnerSelect = (ownerId: string) => {
-    const candidate = OWNER_CANDIDATES.find((c) => c.id === ownerId)
-    if (!candidate) return
+  // 匹配货主输入
+  const handleOwnerNameInput = (nameVal: string) => {
+    const match = OWNER_CANDIDATES.find(
+      (c) => c.name === nameVal && c.type === form.ownerType
+    )
+    if (match) {
+      onPatch({
+        ownerName: match.name,
+        ownerIdentifier: match.identifier,
+        contactPhone: match.phone,
+        ownerIdCard: match.idCard || "",
+      })
+    } else {
+      onPatch({
+        ownerName: nameVal,
+        ownerIdentifier: "",
+        contactPhone: "",
+        ownerIdCard: "",
+      })
+    }
+  }
 
+  // 选择货主候选
+  const handleOwnerSelect = (candidateId: string) => {
+    const candidate = OWNER_CANDIDATES.find((c) => c.id === candidateId)
+    if (!candidate) return
     onPatch({
       ownerName: candidate.name,
       ownerIdentifier: candidate.identifier,
@@ -104,8 +122,10 @@ export function OutboundBasicInfoSection({
       relatedNo: "",
       goodsList: [],
     })
+    setOwnerDropdownOpen(false)
   }
 
+  // 出库类型变更
   const handleTypeChange = (newType: OutboundTypeName) => {
     onPatch({
       type: newType,
@@ -114,13 +134,10 @@ export function OutboundBasicInfoSection({
     })
   }
 
-  const handleRelatedNoChange = (selectedNo: string | null) => {
-    if (!selectedNo) return
-    const found = availableRelatedOrders.find((r) => r.orderNo === selectedNo)
-    if (found) {
-      setConfirmRelatedOrder(found)
-    }
-  }
+  // 可选关联单据
+  const availableRelatedOrders = RELATED_ORDER_CANDIDATES.filter(
+    (item) => item.type === form.type
+  )
 
   const confirmFillRelated = () => {
     if (!confirmRelatedOrder) return
@@ -131,6 +148,7 @@ export function OutboundBasicInfoSection({
       ownerIdentifier: confirmRelatedOrder.ownerIdentifier,
     })
     onSelectRelatedOrder(confirmRelatedOrder)
+    setShowRelatedDialog(false)
     setConfirmRelatedOrder(null)
   }
 
@@ -139,7 +157,7 @@ export function OutboundBasicInfoSection({
       <div className="flex items-center justify-between border-b px-5 py-3">
         <button
           type="button"
-          className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors cursor-pointer"
+          className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors"
           onClick={onToggle}
         >
           {expanded ? (
@@ -152,202 +170,225 @@ export function OutboundBasicInfoSection({
       </div>
 
       {expanded && (
-        <CardContent className="space-y-4 pt-5 pb-6">
+        <CardContent className="space-y-4 pt-5 pb-6 text-xs">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {/* 1. 出库日期 */}
-            <Field label="出库日期" required>
-              <Input
-                type="datetime-local"
-                max={new Date().toISOString().slice(0, 16)}
-                value={
-                  form.outboundDate
-                    ? form.outboundDate.replace(" ", "T").slice(0, 16)
-                    : ""
-                }
-                onChange={(event) => {
-                  const val = event.target.value.replace("T", " ")
-                  onPatch({ outboundDate: val ? `${val}:00` : "" })
-                }}
-              />
-            </Field>
+            <FormItem label="出库日期" required>
+              <div className="relative">
+                <Calendar className="size-4 absolute left-2.5 top-2.5 text-muted-foreground pointer-events-none" />
+                <Input
+                  type="text"
+                  value={form.outboundDate}
+                  onChange={(e) => onPatch({ outboundDate: e.target.value })}
+                  placeholder="请选择出库日期"
+                  className="pl-8 h-9 text-xs"
+                />
+              </div>
+            </FormItem>
 
             {/* 2. 货主类型 */}
-            <Field label="货主类型" required>
+            <FormItem label="货主类型:" required>
               <Select
                 value={form.ownerType}
-                onValueChange={(val) => handleOwnerTypeChange(val as OwnerType)}
+                onValueChange={(val) => handleOwnerTypeChange((val || "个人") as OwnerType)}
               >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
+                <SelectTrigger className="h-9 text-xs w-full">
+                  <SelectValue placeholder="请选择货主类型" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="企业">企业</SelectItem>
-                  <SelectItem value="个人">个人</SelectItem>
+                  <SelectItem value="个人" className="text-xs">个人</SelectItem>
+                  <SelectItem value="企业" className="text-xs">企业</SelectItem>
                 </SelectContent>
               </Select>
-            </Field>
+            </FormItem>
 
             {/* 3. 货主名称 */}
-            <Field label="货主名称" required>
-              <Select
-                value={
-                  OWNER_CANDIDATES.find(
-                    (c) =>
-                      c.name === form.ownerName && c.type === form.ownerType
-                  )?.id || ""
-                }
-                onValueChange={(val) => handleOwnerSelect(val || "")}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="请选择货主主体" />
-                </SelectTrigger>
-                <SelectContent>
-                  {OWNER_CANDIDATES.filter((c) => c.type === form.ownerType).map(
-                    (c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                      </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
-            </Field>
+            <FormItem label="货主名称:" required>
+              <div className="relative">
+                <Input
+                  type="text"
+                  value={form.ownerName}
+                  placeholder={form.ownerType === "个人" ? "请输入货主名称" : "请输入公司全称"}
+                  onFocus={() => setOwnerDropdownOpen(true)}
+                  onChange={(e) => {
+                    handleOwnerNameInput(e.target.value)
+                    setOwnerDropdownOpen(true)
+                  }}
+                  className="h-9 text-xs"
+                />
 
-            {/* 4. 出库类型 */}
-            <Field label="出库类型" required>
+                {/* 联想候选浮层 */}
+                {ownerDropdownOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setOwnerDropdownOpen(false)}
+                    />
+                    <div className="absolute left-0 top-10 z-50 w-full rounded-md border bg-popover shadow-md max-h-52 overflow-y-auto py-1">
+                      {OWNER_CANDIDATES.filter((c) => c.type === form.ownerType).map(
+                        (c) => (
+                          <div
+                            key={c.id}
+                            className="px-3 py-1.5 hover:bg-accent cursor-pointer text-xs flex justify-between items-center"
+                            onClick={() => handleOwnerSelect(c.id)}
+                          >
+                            <span className="font-medium text-foreground">{c.name}</span>
+                            <span className="text-[11px] text-muted-foreground">{c.identifier}</span>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            </FormItem>
+
+            {/* 4 & 5. 个人 vs 企业动态列 */}
+            {form.ownerType === "个人" ? (
+              <>
+                <FormItem label="货主标识:" required>
+                  <Input
+                    disabled
+                    value={form.ownerIdentifier || (form.ownerName === "原原李" ? "185****7112" : "")}
+                    placeholder="请输入手机号码"
+                    className="h-9 text-xs border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
+                  />
+                </FormItem>
+                <FormItem label="身份证号:" required>
+                  <Input
+                    disabled
+                    value={form.ownerIdCard || (form.ownerName === "原原李" ? "420101****8682" : "")}
+                    placeholder="请输入货主身份证号"
+                    className="h-9 text-xs border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
+                  />
+                </FormItem>
+              </>
+            ) : (
+              <>
+                <FormItem label="货主标识:" required>
+                  <Input
+                    disabled
+                    value={form.ownerIdentifier || "91510100MA6XXXXXXX"}
+                    placeholder="请输入公司统一社会信用编码"
+                    className="h-9 text-xs border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
+                  />
+                </FormItem>
+                <FormItem label="联系电话:" required>
+                  <Input
+                    disabled
+                    value={form.contactPhone || "028-87654321"}
+                    placeholder="请输入联系电话"
+                    className="h-9 text-xs border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
+                  />
+                </FormItem>
+              </>
+            )}
+
+            <FormItem label="出库类型" required>
               <Select
                 value={form.type}
-                onValueChange={(val) =>
-                  handleTypeChange(val as OutboundTypeName)
-                }
+                onValueChange={(val) => handleTypeChange((val || "普通出库") as OutboundTypeName)}
               >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
+                <SelectTrigger className="h-9 text-xs w-full">
+                  <SelectValue placeholder="请选择出库类型" />
                 </SelectTrigger>
                 <SelectContent>
-                  {MANUAL_OUTBOUND_TYPE_OPTIONS.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t}
+                  {MANUAL_OUTBOUND_TYPE_OPTIONS.map((name) => (
+                    <SelectItem key={name} value={name} className="text-xs">
+                      {name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </Field>
+            </FormItem>
 
-            {/* 5. 货主标识 */}
-            <Field
-              label={
-                form.ownerType === "企业"
-                  ? "统一社会信用代码"
-                  : "身份证号 / 手机号"
-              }
-              required
-            >
-              <Input
-                readOnly
-                placeholder="选择货主后自动反显"
-                value={form.ownerIdentifier}
-                className="bg-muted/40 font-mono"
-              />
-            </Field>
-
-            {/* 6. 联系电话 */}
-            <Field label="联系电话">
-              <Input
-                readOnly
-                placeholder="自动反显"
-                value={form.contactPhone}
-                className="bg-muted/40 font-mono"
-              />
-            </Field>
-
-            {/* 7. 仓库名称 */}
-            <Field label="监管仓库" required>
-              <Input
-                readOnly={isRelatedType}
-                placeholder={
-                  isRelatedType ? "关联单据后自动带出" : "请输入监管仓库名称"
-                }
-                value={form.warehouseName}
-                onChange={(e) => onPatch({ warehouseName: e.target.value })}
-                className={isRelatedType ? "bg-muted/40" : ""}
-              />
-            </Field>
-
-            {/* 8. 关联业务单号（当类型为 仓单/质押/抵押 时必填） */}
-            {isRelatedType && (
-              <Field
-                label={`关联${
-                  form.type === "仓单出库"
-                    ? "仓单单号"
-                    : form.type === "质押出库"
-                    ? "质押单号"
-                    : "抵押单号"
-                }`}
-                required
-              >
-                <Select
-                  value={form.relatedNo}
-                  onValueChange={handleRelatedNoChange}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="请选择关联单号" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableRelatedOrders.map((r) => (
-                      <SelectItem key={r.orderNo} value={r.orderNo}>
-                        {r.orderNo} ({r.items.length}种商品 · {r.status})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            )}
-
-            {/* 9. 备注 */}
-            <Field label="出库备注" className="sm:col-span-2 lg:col-span-4">
-              <Textarea
-                placeholder="请输入出库备注说明..."
-                value={form.notes}
-                onChange={(e) => onPatch({ notes: e.target.value })}
-                rows={2}
-              />
-            </Field>
+            {isRelatedType ? (
+              <FormItem label="关联单号" required>
+                <Input
+                  readOnly
+                  value={form.relatedNo || ""}
+                  placeholder="点击选择关联单号"
+                  onClick={() => setShowRelatedDialog(true)}
+                  className="h-9 text-xs cursor-pointer bg-background hover:border-primary/50"
+                />
+              </FormItem>
+            ) : null}
           </div>
+
+          <FormItem label="备注" className="pb-0">
+            <div className="relative">
+              <Textarea
+                value={form.notes}
+                maxLength={140}
+                rows={3}
+                onChange={(e) => onPatch({ notes: e.target.value })}
+                placeholder="请输入备注"
+                className="text-xs resize-none pb-7 pr-16"
+              />
+              <span className="pointer-events-none absolute bottom-2 right-2.5 select-none text-[11px] text-muted-foreground">
+                {form.notes?.length || 0}/140
+              </span>
+            </div>
+          </FormItem>
         </CardContent>
       )}
 
-      {/* 关联单据确认填充货物弹窗 (O02) */}
-      <Dialog
-        open={confirmRelatedOrder !== null}
-        onOpenChange={(open) => !open && setConfirmRelatedOrder(null)}
-      >
-        <DialogContent>
+      {/* 关联业务单选择弹窗 (O02) */}
+      <Dialog open={showRelatedDialog} onOpenChange={setShowRelatedDialog}>
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>填充关联货物信息</DialogTitle>
-            <DialogDescription>
-              检测到已选择关联单据【{confirmRelatedOrder?.orderNo}
-              】，是否自动填充该单据下的可出库货物明细，便于快速制单？
+            <DialogTitle className="text-sm font-semibold text-foreground">
+              选择关联【{form.type}】业务单据
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              请选择本次出库所依附的业务单号，系统将自动回填质押货物明细及监管仓库：
             </DialogDescription>
           </DialogHeader>
-          <div className="rounded-md bg-muted/40 p-3 text-xs space-y-1">
-            <p>• 货主：{confirmRelatedOrder?.ownerName}</p>
-            <p>• 仓库：{confirmRelatedOrder?.warehouseName}</p>
-            <p>• 货品品类数：{confirmRelatedOrder?.items.length} 种</p>
+
+          <div className="max-h-60 overflow-y-auto space-y-2 py-2">
+            {availableRelatedOrders.map((order) => (
+              <div
+                key={order.orderNo}
+                onClick={() => setConfirmRelatedOrder(order)}
+                className={cn(
+                  "p-3 rounded-lg border text-xs cursor-pointer transition-colors",
+                  confirmRelatedOrder?.orderNo === order.orderNo
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/30"
+                )}
+              >
+                <div className="flex justify-between items-center font-medium">
+                  <span className="text-foreground">{order.orderNo}</span>
+                  <span className="text-emerald-600 font-semibold">{order.status}</span>
+                </div>
+                <div className="text-muted-foreground text-[11px] mt-1 flex justify-between">
+                  <span>货主：{order.ownerName}</span>
+                  <span>仓库：{order.warehouseName}</span>
+                </div>
+              </div>
+            ))}
           </div>
-          <DialogFooter>
+
+          <DialogFooter className="gap-2 sm:gap-0">
             <Button
               variant="outline"
+              size="sm"
               onClick={() => {
-                if (confirmRelatedOrder) {
-                  onPatch({ relatedNo: confirmRelatedOrder.orderNo })
-                }
+                setShowRelatedDialog(false)
                 setConfirmRelatedOrder(null)
               }}
+              className="text-xs"
             >
-              仅关联单号
+              取消
             </Button>
-            <Button onClick={confirmFillRelated}>确认自动填充货物</Button>
+            <Button
+              size="sm"
+              disabled={!confirmRelatedOrder}
+              onClick={confirmFillRelated}
+              className="text-xs"
+            >
+              确认带出货品
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

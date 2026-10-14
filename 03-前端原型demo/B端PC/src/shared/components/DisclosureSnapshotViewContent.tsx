@@ -49,7 +49,7 @@ export function DisclosureSnapshotViewContent({
     <>
       <DetailSection title="公示信息">
         <DetailField label="订单号">
-          <span className="font-mono">{orderNo}</span>
+          <span className="font-medium">{orderNo}</span>
         </DetailField>
         <DetailField label="预警时间">
           {formatEmptyValue(snapshot.warningTime)}

@@ -231,7 +231,7 @@ export function CollateralWarningBatchPublishPage() {
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono text-xs">{event.orderNo}</span>
+                      <span className="text-xs font-medium">{event.orderNo}</span>
                       <span className="text-[10px] text-muted-foreground">
                         {index + 1}/{events.length}
                       </span>

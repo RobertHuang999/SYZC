@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,13 @@ import {
 } from "@/components/ui/select"
 import { GitFork, Loader2 } from "lucide-react"
 
-export const INBOUND_APPROVAL_FLOWS = [
+export type ApprovalFlowOption = {
+  id: string
+  name: string
+  subName: string
+}
+
+export const INBOUND_APPROVAL_FLOWS: ApprovalFlowOption[] = [
   {
     id: "flow-001",
     name: "存货入库通用审批流程",
@@ -36,12 +42,31 @@ export const INBOUND_APPROVAL_FLOWS = [
   },
 ]
 
+export const OUTBOUND_APPROVAL_FLOWS: ApprovalFlowOption[] = [
+  {
+    id: "FLOW-01",
+    name: "标准出库流程（库管初审 + 监管风控双签）",
+    subName: "适用绝大部分常规出库申报，支持行级锁库存校验与在线签署提货单",
+  },
+  {
+    id: "FLOW-02",
+    name: "紧急出库绿色通道（站长直批 + 事后双重复核）",
+    subName: "适用于特快配送、现货临期或非质押大宗应急调度",
+  },
+]
+
 type ApprovalFlowSelectDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   onCancel: () => void
   onConfirm: (flowId: string) => void
   loading?: boolean
+  title?: string
+  description?: ReactNode
+  flows?: ApprovalFlowOption[]
+  confirmLabel?: string
+  noticeTitle?: string
+  noticeContent?: ReactNode
 }
 
 export function ApprovalFlowSelectDialog({
@@ -50,8 +75,20 @@ export function ApprovalFlowSelectDialog({
   onCancel,
   onConfirm,
   loading = false,
+  title = "流程确认",
+  description = "该条入库申请需系统审批，请选择具体流程。流程审批通过后方能正式入库并生成库存台账！",
+  flows = INBOUND_APPROVAL_FLOWS,
+  confirmLabel = "确认提交审批",
+  noticeTitle = "💡 审批须知：",
+  noticeContent = "申请提交后将自动推送至审批人待办任务中心，单据状态置为【待审核】。支持在入库申请列表中随时查看流转进度与撤销。",
 }: ApprovalFlowSelectDialogProps) {
-  const [selectedFlowId, setSelectedFlowId] = useState(INBOUND_APPROVAL_FLOWS[0].id)
+  const [selectedFlowId, setSelectedFlowId] = useState(flows[0]?.id ?? "")
+
+  useEffect(() => {
+    if (open && flows[0]?.id) {
+      setSelectedFlowId(flows[0].id)
+    }
+  }, [open, flows])
 
   const handleSubmit = () => {
     onConfirm(selectedFlowId)
@@ -63,10 +100,10 @@ export function ApprovalFlowSelectDialog({
         <DialogHeader>
           <div className="flex items-center gap-2">
             <GitFork className="size-5 text-primary" />
-            <DialogTitle>流程确认</DialogTitle>
+            <DialogTitle>{title}</DialogTitle>
           </div>
           <DialogDescription className="pt-2 text-xs text-muted-foreground leading-relaxed">
-            该条入库申请需系统审批，请选择具体流程。流程审批通过后方能正式入库并生成库存台账！
+            {description}
           </DialogDescription>
         </DialogHeader>
 
@@ -83,7 +120,7 @@ export function ApprovalFlowSelectDialog({
                 <SelectValue placeholder="请选择审批流程" />
               </SelectTrigger>
               <SelectContent>
-                {INBOUND_APPROVAL_FLOWS.map((flow) => (
+                {flows.map((flow) => (
                   <SelectItem key={flow.id} value={flow.id}>
                     <div className="flex flex-col text-left">
                       <span className="font-medium text-foreground">{flow.name}</span>
@@ -96,10 +133,8 @@ export function ApprovalFlowSelectDialog({
           </div>
 
           <div className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
-            <p className="font-medium text-foreground">💡 审批须知：</p>
-            <p className="mt-1">
-              申请提交后将自动推送至审批人待办任务中心，单据状态置为【待审核】。支持在入库申请列表中随时查看流转进度与撤销。
-            </p>
+            <p className="font-medium text-foreground">{noticeTitle}</p>
+            <p className="mt-1">{noticeContent}</p>
           </div>
         </div>
 
@@ -109,7 +144,7 @@ export function ApprovalFlowSelectDialog({
           </Button>
           <Button type="button" onClick={handleSubmit} disabled={loading}>
             {loading && <Loader2 className="mr-1.5 size-4 animate-spin" />}
-            确认提交审批
+            {confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

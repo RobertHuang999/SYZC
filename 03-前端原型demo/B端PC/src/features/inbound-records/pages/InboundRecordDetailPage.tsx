@@ -185,7 +185,7 @@ export function InboundRecordDetailPage() {
             <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-foreground">
-                  入库单号：<span className="font-mono text-base font-bold">{detail.orderNo}</span>
+                  入库单号：<span className="text-base font-bold">{detail.orderNo}</span>
                 </span>
                 <Button
                   type="button"
@@ -234,7 +234,7 @@ export function InboundRecordDetailPage() {
                     <th className="w-28 bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
                       制单时间：
                     </th>
-                    <td className="p-2.5 font-mono text-foreground">{detail.createdAt}</td>
+                    <td className="p-2.5 text-foreground">{detail.createdAt}</td>
                   </tr>
 
                   <tr className="border-b">
@@ -247,7 +247,7 @@ export function InboundRecordDetailPage() {
                     <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
                       货主标识：
                     </th>
-                    <td className="p-2.5 font-mono text-foreground">
+                    <td className="p-2.5 text-foreground">
                       {detail.ownerIdentifierMasked}
                     </td>
                   </tr>
@@ -256,7 +256,7 @@ export function InboundRecordDetailPage() {
                     <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
                       入库日期：
                     </th>
-                    <td className="p-2.5 font-mono text-foreground border-r">
+                    <td className="p-2.5 text-foreground border-r">
                       {detail.inboundDate}
                     </td>
                     <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
@@ -278,10 +278,10 @@ export function InboundRecordDetailPage() {
                     </th>
                     <td className="p-2.5 text-foreground">
                       {detail.relatedOrderNo ? (
-                        <div className="flex items-center gap-1.5 font-mono">
+                        <div className="flex items-center gap-1.5">
                           <span>{detail.relatedOrderNo}</span>
                           <span
-                            className="cursor-pointer text-primary hover:underline text-[11px] font-sans"
+                            className="cursor-pointer text-primary hover:underline text-[11px]"
                             onClick={() => setRelatedOrderModalOpen(true)}
                           >
                             【查看】
@@ -336,18 +336,18 @@ export function InboundRecordDetailPage() {
             {/* Tab 1: 入库明细（对齐源码带有两级展开表格、二维码图标与【查看附件】弹窗） */}
             {tab === "goods" && (
               <div className="space-y-4">
-                <div className="overflow-x-auto rounded-md border bg-card">
-                  <Table className="min-w-[960px]">
+                <div className="overflow-hidden rounded-md border bg-card">
+                  <Table className="table-fixed w-full">
                     <TableHeader>
                       <TableRow className="bg-muted/40 hover:bg-muted/40 text-xs">
-                        <TableHead className="w-10 text-center" />
-                        <TableHead className="w-12 text-center">序号</TableHead>
-                        <TableHead className="min-w-[180px]">入库货品</TableHead>
-                        <TableHead className="min-w-[180px]">扩展属性</TableHead>
-                        <TableHead className="w-28 text-right">总数量</TableHead>
-                        <TableHead className="min-w-[120px]">备注</TableHead>
-                        <TableHead className="w-24 text-center">存货条码</TableHead>
-                        <TableHead className="w-28 text-center">附件信息</TableHead>
+                        <TableHead className="w-9 text-center" />
+                        <TableHead className="w-10 text-center">序号</TableHead>
+                        <TableHead className="w-[22%]">入库货品</TableHead>
+                        <TableHead className="w-[22%]">其他信息</TableHead>
+                        <TableHead className="w-[11%] text-right">总数量</TableHead>
+                        <TableHead className="w-[18%]">备注</TableHead>
+                        <TableHead className="w-14 text-center">存货条码</TableHead>
+                        <TableHead className="w-[14%] text-center">附件信息</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody className="text-xs">
@@ -356,7 +356,7 @@ export function InboundRecordDetailPage() {
                         return (
                           <Fragment key={line.id}>
                             <TableRow className="align-middle hover:bg-muted/20">
-                              <TableCell className="text-center p-2">
+                              <TableCell className="align-middle text-center p-2">
                                 <button
                                   type="button"
                                   className="text-muted-foreground hover:text-foreground transition-colors p-1"
@@ -370,24 +370,32 @@ export function InboundRecordDetailPage() {
                                   )}
                                 </button>
                               </TableCell>
-                              <TableCell className="text-center text-muted-foreground">
+                              <TableCell className="align-middle text-center text-muted-foreground">
                                 {index + 1}
                               </TableCell>
-                              <TableCell>
-                                <span className="font-semibold text-foreground">{line.name}</span>
+                              <TableCell className="whitespace-normal align-middle py-2.5">
+                                <span className="line-clamp-2 font-semibold leading-snug text-foreground">
+                                  {line.name}
+                                </span>
                               </TableCell>
-                              <TableCell className="text-muted-foreground">
-                                {line.otherInfo || "--"}
+                              <TableCell className="whitespace-normal align-middle py-2.5 text-muted-foreground">
+                                <span className="line-clamp-2 leading-snug break-words">
+                                  {line.otherInfo || "--"}
+                                </span>
                               </TableCell>
-                              <TableCell className="text-right font-semibold font-mono text-primary">
-                                {line.totalQuantityLabel}
+                              <TableCell className="whitespace-normal align-middle py-2.5 text-right font-semibold text-primary">
+                                <span className="line-clamp-2 leading-snug">
+                                  {line.totalQuantityLabel}
+                                </span>
                               </TableCell>
-                              <TableCell className="text-muted-foreground">
-                                {line.remark || "--"}
+                              <TableCell className="whitespace-normal align-middle py-2.5 text-muted-foreground">
+                                <span className="line-clamp-2 leading-snug break-words">
+                                  {line.remark || "--"}
+                                </span>
                               </TableCell>
 
                               {/* 存货主条码：未通过(3)与已撤销(4)状态不展示条码，对齐源码 */}
-                              <TableCell className="text-center">
+                              <TableCell className="align-middle text-center">
                                 {detail.checkStatus !== 3 && detail.checkStatus !== 4 ? (
                                   <button
                                     type="button"
@@ -417,7 +425,7 @@ export function InboundRecordDetailPage() {
                               </TableCell>
 
                               {/* 附件信息：统一【查看附件】操作按钮（选项 A 规范） */}
-                              <TableCell className="text-center">
+                              <TableCell className="align-middle text-center">
                                 <Button
                                   type="button"
                                   variant="ghost"
@@ -429,6 +437,13 @@ export function InboundRecordDetailPage() {
                                       scenePhotos: line.scenePhotos,
                                       supplementaryImages: line.supplementaryImages,
                                       supplementaryDocuments: line.supplementaryDocuments,
+                                      capturePhotos: line.iotCaptures.map((cap) => ({
+                                        deviceName: cap.deviceName,
+                                        time: cap.capturedAt,
+                                        url:
+                                          cap.imageUrl ??
+                                          "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=400&q=80",
+                                      })),
                                     })
                                   }}
                                 >
@@ -452,32 +467,44 @@ export function InboundRecordDetailPage() {
                                       </span>
                                     </div>
 
-                                    <Table className="bg-background text-xs">
+                                    <Table className="table-fixed w-full bg-background text-xs">
                                       <TableHeader>
                                         <TableRow className="bg-muted/40 text-[11px]">
-                                          <TableHead className="w-12 text-center">序号</TableHead>
-                                          <TableHead>入库库房</TableHead>
-                                          <TableHead>入库分区</TableHead>
-                                          <TableHead>具体堆放位置</TableHead>
-                                          <TableHead className="text-right">堆放数量</TableHead>
-                                          <TableHead className="w-24 text-center">存货条码</TableHead>
+                                          <TableHead className="w-10 text-center">序号</TableHead>
+                                          <TableHead className="w-[18%]">入库库房</TableHead>
+                                          <TableHead className="w-[18%]">入库分区</TableHead>
+                                          <TableHead className="w-[28%]">具体堆放位置</TableHead>
+                                          <TableHead className="w-[18%] text-right">堆放数量</TableHead>
+                                          <TableHead className="w-14 text-center">存货条码</TableHead>
                                         </TableRow>
                                       </TableHeader>
                                       <TableBody>
                                         {line.stacks.map((stack, sIdx) => (
-                                          <TableRow key={sIdx} className="hover:bg-muted/20">
-                                            <TableCell className="text-center text-muted-foreground">
+                                          <TableRow key={sIdx} className="align-middle hover:bg-muted/20">
+                                            <TableCell className="align-middle text-center text-muted-foreground">
                                               {sIdx + 1}
                                             </TableCell>
-                                            <TableCell>{stack.storeroom}</TableCell>
-                                            <TableCell>{stack.zone}</TableCell>
-                                            <TableCell className="font-medium text-foreground">
-                                              {stack.position}
+                                            <TableCell className="whitespace-normal align-middle py-2">
+                                              <span className="line-clamp-2 leading-snug">
+                                                {stack.storeroom}
+                                              </span>
                                             </TableCell>
-                                            <TableCell className="text-right font-mono font-semibold text-primary">
-                                              {stack.quantityLabel}
+                                            <TableCell className="whitespace-normal align-middle py-2">
+                                              <span className="line-clamp-2 leading-snug">
+                                                {stack.zone}
+                                              </span>
                                             </TableCell>
-                                            <TableCell className="text-center">
+                                            <TableCell className="whitespace-normal align-middle py-2 font-medium text-foreground">
+                                              <span className="line-clamp-2 leading-snug break-words">
+                                                {stack.position}
+                                              </span>
+                                            </TableCell>
+                                            <TableCell className="whitespace-normal align-middle py-2 text-right font-semibold text-primary">
+                                              <span className="line-clamp-2 leading-snug">
+                                                {stack.quantityLabel}
+                                              </span>
+                                            </TableCell>
+                                            <TableCell className="align-middle text-center">
                                               {detail.checkStatus !== 3 && detail.checkStatus !== 4 ? (
                                                 <button
                                                   type="button"
@@ -533,7 +560,7 @@ export function InboundRecordDetailPage() {
                           <span className="font-semibold text-foreground text-sm">
                             {step.node}
                           </span>
-                          <span className="text-muted-foreground font-mono">{step.time}</span>
+                          <span className="text-muted-foreground">{step.time}</span>
                         </div>
                         <div className="flex items-center gap-3 text-muted-foreground">
                           <span>处理人：{step.actor}</span>
@@ -581,7 +608,7 @@ export function InboundRecordDetailPage() {
                               {log.afterValue}
                             </TableCell>
                             <TableCell>{log.operator}</TableCell>
-                            <TableCell className="font-mono text-muted-foreground">
+                            <TableCell className="text-muted-foreground">
                               {log.operatedAt}
                             </TableCell>
                           </TableRow>
@@ -653,7 +680,7 @@ export function InboundRecordDetailPage() {
             <div className="space-y-3 rounded-lg border bg-muted/20 p-4 text-xs">
               <div className="flex items-center justify-between border-b pb-2">
                 <span className="text-muted-foreground">关联业务单号：</span>
-                <span className="font-mono font-semibold text-primary">{detail.relatedOrderNo || "--"}</span>
+                <span className="font-semibold text-primary">{detail.relatedOrderNo || "--"}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">单据业务类型：</span>
@@ -665,11 +692,11 @@ export function InboundRecordDetailPage() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">货主识别代码：</span>
-                <span className="font-mono text-muted-foreground">{detail.ownerIdentifierMasked}</span>
+                <span className="text-muted-foreground">{detail.ownerIdentifierMasked}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">业务发生日期：</span>
-                <span className="font-mono text-foreground">{detail.inboundDate}</span>
+                <span className="text-foreground">{detail.inboundDate}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">监管执行仓库：</span>

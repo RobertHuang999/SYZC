@@ -41,7 +41,7 @@ export function PdfViewerDialog({
           </p>
 
           <div className="mt-6 flex flex-col items-center gap-2 rounded-md border bg-card p-4 text-xs text-muted-foreground">
-            <div>存证哈希：<span className="font-mono text-foreground">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span></div>
+            <div>存证哈希：<span className="text-foreground break-all">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span></div>
             <div>签名主体：四川享宇科技有限公司 电子印章中心</div>
             <div>归档状态：正式凭据生效</div>
           </div>
