@@ -1,17 +1,14 @@
 import { useEffect, useMemo, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { Clock, Copy } from "lucide-react"
+import { Link, useNavigate, useParams } from "react-router-dom"
+import { CheckCircle2, Clock, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   PrototypeAnnotationProvider,
   PrototypeAnnotationTarget,
 } from "@/shared/annotations/PrototypeAnnotationLayer"
-import {
-  DetailField,
-  DetailSection,
-  formatEmptyValue,
-} from "@/shared/components/DetailSection"
+import { StagingDetailBasicInfoTable } from "../components/StagingDetailBasicInfoTable"
 import { ConvertToFormalDialog } from "../components/ConvertToFormalDialog"
+import { StagingDetailTabsPanel } from "../components/StagingDetailTabsPanel"
 import { StagingVoidDialog } from "../components/StagingVoidDialog"
 import { inboundStagingDetailAnnotations } from "../annotations/inbound-staging-reg.annotations"
 import { inboundStagingRegDocuments } from "../documents/inbound-staging-reg-documents"
@@ -19,7 +16,9 @@ import {
   INBOUND_STAGING_LIST_PATH,
   inboundStagingEditPath,
 } from "../domain/constants"
-import { resolveStagingGoodsNames } from "@prototype/shared/inbound/staging-goods-display"
+import { resolveFormalInboundDetailPath } from "../lib/formal-record-link"
+import { buildStagingDetailGoodsRows } from "../lib/staging-detail-display"
+import { STAGING_ACTION_LABELS } from "@prototype/shared/inbound/staging-ui-labels"
 import { getStagingRegById, voidStagingReg } from "../mock/inbound-staging.mock"
 
 function statusStamp(status: string) {
@@ -34,6 +33,7 @@ function statusStamp(status: string) {
   if (status === "已转正式") {
     return (
       <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1 text-xs font-semibold text-emerald-700 shadow-2xs">
+        <CheckCircle2 className="size-3.5" />
         已转正式
       </span>
     )
@@ -42,6 +42,48 @@ function statusStamp(status: string) {
     <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-100 px-3.5 py-1 text-xs font-semibold text-gray-600 shadow-2xs">
       已作废
     </span>
+  )
+}
+
+function DetailActionBar({
+  reg,
+  onVoid,
+  onEdit,
+  onConvert,
+  onBack,
+}: {
+  reg: NonNullable<ReturnType<typeof getStagingRegById>>
+  onVoid: () => void
+  onEdit: () => void
+  onConvert: () => void
+  onBack: () => void
+}) {
+  const formalPath = resolveFormalInboundDetailPath(reg.relatedFormalNo)
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {reg.status === "待补全" ? (
+        <>
+          <Button variant="destructive" size="sm" onClick={onVoid}>
+            {STAGING_ACTION_LABELS.void}
+          </Button>
+          <Button variant="secondary" size="sm" onClick={onEdit}>
+            {STAGING_ACTION_LABELS.edit}
+          </Button>
+          <Button size="sm" onClick={onConvert}>
+            {STAGING_ACTION_LABELS.convert}
+          </Button>
+        </>
+      ) : null}
+      {reg.status === "已转正式" && formalPath ? (
+        <Button size="sm" nativeButton={false} render={<Link to={formalPath} />}>
+          {STAGING_ACTION_LABELS.viewFormal}
+        </Button>
+      ) : null}
+      <Button variant="outline" size="sm" onClick={onBack}>
+        返回列表
+      </Button>
+    </div>
   )
 }
 
@@ -64,12 +106,13 @@ export function InboundStagingDetailPage() {
     return id ? getStagingRegById(id) : undefined
   }, [id, mockTick])
 
+  const goodsRows = useMemo(() => (reg ? buildStagingDetailGoodsRows(reg) : []), [reg])
+  const formalPath = reg ? resolveFormalInboundDetailPath(reg.relatedFormalNo) : null
+
   const showToast = (msg: string) => {
     setToast(msg)
     window.setTimeout(() => setToast(null), 2600)
   }
-
-  const goodsNames = reg ? resolveStagingGoodsNames(reg) : []
 
   if (!reg) {
     return (
@@ -82,117 +125,64 @@ export function InboundStagingDetailPage() {
     )
   }
 
+  const goBack = () => navigate(INBOUND_STAGING_LIST_PATH)
+  const goEdit = () => navigate(inboundStagingEditPath(reg.id))
+
   return (
     <PrototypeAnnotationProvider
       title="入库暂存登记 · 详情"
       documents={inboundStagingRegDocuments}
       annotations={inboundStagingDetailAnnotations}
     >
-      <div className="min-h-full space-y-4 bg-muted/10 p-6 pb-24">
-        <PrototypeAnnotationTarget annotationIds={["inbound-staging-detail-page"]}>
+      <div className="min-h-full space-y-4 bg-muted/10 p-6">
           <div className="rounded-lg border bg-card p-5 shadow-xs">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-foreground">
-                  登记单号：<span className="text-base font-bold">{reg.regNo}</span>
-                </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-7 text-muted-foreground hover:text-primary"
-                  title="复制单号"
-                  onClick={() => {
-                    void navigator.clipboard.writeText(reg.regNo)
-                    showToast("已复制登记单号")
-                  }}
-                >
-                  <Copy className="size-4" />
-                </Button>
-                <div className="ml-2">{statusStamp(reg.status)}</div>
-              </div>
-              <PrototypeAnnotationTarget annotationIds={["inbound-staging-detail-actions"]}>
+              <PrototypeAnnotationTarget annotationIds={["inbound-staging-detail-page"]}>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => navigate(INBOUND_STAGING_LIST_PATH)}>
-                    返回列表
+                  <span className="text-sm font-semibold text-foreground">
+                    登记单号：
+                    <span className="text-base font-bold">{reg.regNo}</span>
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 text-muted-foreground hover:text-primary"
+                    title="复制登记单号"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(reg.regNo)
+                      showToast("已复制登记单号至剪贴板")
+                    }}
+                  >
+                    <Copy className="size-3.5" />
                   </Button>
-                  {reg.status === "待补全" ? (
-                    <>
-                      <Button variant="destructive" size="sm" onClick={() => setVoidOpen(true)}>
-                        作废单据
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => navigate(inboundStagingEditPath(reg.id))}
-                      >
-                        编辑暂存
-                      </Button>
-                      <Button size="sm" onClick={() => setConvertOpen(true)}>
-                        转为正式入库
-                      </Button>
-                    </>
-                  ) : null}
-                  {reg.status === "已转正式" ? (
-                    <Button size="sm" onClick={() => navigate("/仓储/入库管理/入库记录")}>
-                      查看正式入库单
-                    </Button>
-                  ) : null}
+                  <div className="ml-1">{statusStamp(reg.status)}</div>
                 </div>
               </PrototypeAnnotationTarget>
+
+              <PrototypeAnnotationTarget annotationIds={["inbound-staging-detail-actions"]}>
+                <DetailActionBar
+                  reg={reg}
+                  onBack={goBack}
+                  onEdit={goEdit}
+                  onConvert={() => setConvertOpen(true)}
+                  onVoid={() => setVoidOpen(true)}
+                />
+              </PrototypeAnnotationTarget>
             </div>
+
+            <PrototypeAnnotationTarget annotationIds={["inbound-staging-detail-base"]}>
+              <StagingDetailBasicInfoTable
+                reg={reg}
+                embedded
+                formalDetailPath={formalPath}
+              />
+            </PrototypeAnnotationTarget>
           </div>
 
-          <div className="mt-4 space-y-4">
-            <DetailSection title="基础信息">
-              <DetailField label="入库日期">{reg.inboundDate}</DetailField>
-              <DetailField label="入库仓库">{reg.warehouseName}</DetailField>
-              <DetailField label="入库类型">{reg.inboundType}</DetailField>
-              <DetailField label="关联单号">{formatEmptyValue(reg.relatedOrderNo)}</DetailField>
-              <DetailField label="关联正式入库单号">
-                {formatEmptyValue(reg.relatedFormalNo)}
-              </DetailField>
-              <DetailField label="货主/送货说明">
-                {reg.ownerDisplay}
-                {reg.ownerTag ? (
-                  <span className="ml-2 text-xs text-muted-foreground">[{reg.ownerTag}]</span>
-                ) : null}
-              </DetailField>
-              <DetailField label="入库库房">{formatEmptyValue(reg.storeroomName)}</DetailField>
-              <DetailField label="登记人">{reg.registrant}</DetailField>
-              <DetailField label="登记时间">{reg.registeredAt}</DetailField>
-              <DetailField label="备注">{formatEmptyValue(reg.remark)}</DetailField>
-            </DetailSection>
-
-            <DetailSection title="货品与堆放明细">
-              <DetailField label="货品摘要">
-                <div className="space-y-1.5 leading-snug">
-                  <span className="break-words">{reg.goodsSummary}</span>
-                  {goodsNames.length > 1 ? (
-                    <ul className="list-inside list-disc text-sm text-muted-foreground">
-                      {goodsNames.map((name) => (
-                        <li key={name} className="break-words">
-                          {name}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </div>
-              </DetailField>
-              <DetailField label="申报数量">
-                {reg.declaredQty.toLocaleString()} {reg.unit}
-              </DetailField>
-              <DetailField label="库位提示">{formatEmptyValue(reg.locationHint)}</DetailField>
-            </DetailSection>
-
-            <DetailSection title="生命周期与操作审计">
-              <DetailField label="版本号">v{reg.version}</DetailField>
-              {reg.voidReason ? (
-                <DetailField label="作废原因">{reg.voidReason}</DetailField>
-              ) : null}
-            </DetailSection>
-          </div>
-        </PrototypeAnnotationTarget>
+          <PrototypeAnnotationTarget annotationIds={["inbound-staging-detail-tabs"]}>
+            <StagingDetailTabsPanel reg={reg} goodsRows={goodsRows} />
+          </PrototypeAnnotationTarget>
 
         <ConvertToFormalDialog
           open={convertOpen}
@@ -202,9 +192,12 @@ export function InboundStagingDetailPage() {
             setConvertOpen(false)
             navigate(path)
           }}
-          onMobileOnly={() => {
+          onCopyMobileLink={() => showToast("已复制手机端入库发起链接")}
+          onMobileOnly={(h5Path) => {
             setConvertOpen(false)
-            showToast("仓单转正请在手机端「入库发起」完成")
+            const url = `${window.location.origin}${h5Path}`
+            void navigator.clipboard.writeText(url)
+            showToast("已复制手机端入库发起链接；仓单转正请在手机打开该链接完成")
           }}
         />
 

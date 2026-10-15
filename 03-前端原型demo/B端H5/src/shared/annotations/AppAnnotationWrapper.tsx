@@ -37,6 +37,7 @@ import { inboundRecordH5Documents } from "@/features/inbound-records/documents/i
 import {
   inboundStagingH5DetailAnnotations,
   inboundStagingH5FormAnnotations,
+  inboundStagingH5GoodsAnnotations,
   inboundStagingH5ListAnnotations,
 } from "@/features/inbound-staging-reg/annotations/inbound-staging-reg.annotations"
 import { inboundStagingRegH5Documents } from "@/features/inbound-staging-reg/documents/inbound-staging-reg-documents"
@@ -128,6 +129,10 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
     pageTitle = "风险公示 · 移动端交互与 PRD 标注"
     currentAnnotations = readonlyRiskAnnotations["risk-disclosure"]
     currentDocuments = readonlyRiskDocuments["risk-disclosure"]
+  } else if (location.pathname.startsWith("/m/inbound/staging/reg/goods")) {
+    pageTitle = "入库暂存登记 · H5 货品步 · PRD 标注"
+    currentAnnotations = inboundStagingH5GoodsAnnotations
+    currentDocuments = inboundStagingRegH5Documents
   } else if (location.pathname.startsWith("/m/inbound/staging/reg")) {
     pageTitle = "入库暂存登记 · H5 新增 · PRD 标注"
     currentAnnotations = inboundStagingH5FormAnnotations

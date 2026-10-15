@@ -195,6 +195,30 @@ export const INBOUND_APPROVED_SEEDS: InboundApprovedSeed[] = [
     creatorDisplay: "张三(森云监管服务有限公司)",
     createdAt: "2026-05-18 14:03:00",
   },
+  /** 暂存 reg-6（REG-20261014-00006）转正演示 · 已转正式稳定样例 */
+  {
+    pcId: "inbound-staging-reg6",
+    mobileId: "m-inbound-staging-reg6",
+    orderNo: "2026101015300000123",
+    ownerName: "四川华西大宗商品供应链管理有限公司",
+    ownerType: "2",
+    ownerIdentifierMasked: "91510100MA6AHXDemo",
+    inboundType: "质押入库",
+    inboundDate: "2026-10-14 07:50:00",
+    warehouseName: "青白江大宗商品监管1号仓",
+    houseName: "2号高位重型库房",
+    relatedOrderNo: "ZY20260901-0012",
+    goodsNames: ["有色-电解铜-标准阴极铜", "黑色金属-热轧卷板-Q235B"],
+    goodsLineItems: [
+      { name: "有色-电解铜-标准阴极铜", amount: 300, unit: "吨" },
+      { name: "黑色金属-热轧卷板-Q235B", amount: 200, unit: "吨" },
+    ],
+    inboundQuantity: 500,
+    unit: "吨",
+    creatorDisplay: "仓库主管-赵六(青白江监管仓)",
+    createdAt: "2026-10-14 08:05:00",
+    remark: "由暂存 REG-20261014-00006 转正（演示闭环）。",
+  },
 ]
 
 export function approvedSeedToListRow(seed: InboundApprovedSeed) {

@@ -9,6 +9,11 @@ import {
   FORM_WAREHOUSES,
   getRelatedOrdersByType,
 } from "@/features/inbound-records/mock/inbound-form.mock"
+import {
+  buildStagingFormSnapshot,
+  mapStagingSnapshotToGoodsLines,
+  type StagingSnapshotLookup,
+} from "@prototype/shared/inbound/staging-form-snapshot"
 import type { InboundFormState } from "@/features/inbound-records/domain/form-types"
 import type {
   InboundStagingReg,
@@ -53,11 +58,41 @@ export function formFromFormalInbound(form: InboundFormState): InboundFormState 
   }
 }
 
+function stagingSnapshotLookup(): StagingSnapshotLookup {
+  return {
+    storeroomLabel: (id) => FORM_STOREROOMS.find((r) => r.id === id)?.name ?? "",
+    partitionLabel: (_storeroomId, partitionId) => partitionId,
+  }
+}
+
 export function formFromStagingRegRow(reg: InboundStagingReg): InboundFormState {
   const warehouse = FORM_WAREHOUSES.find((w) => w.name === reg.warehouseName) ?? FORM_WAREHOUSES[0]
   const storeroomIds = parseStoreroomLabels(reg.storeroomName, (name) =>
     FORM_STOREROOMS.find((r) => r.warehouseId === warehouse?.id && r.name === name)?.id,
   )
+
+  if (reg.formSnapshot?.goodsLines.length) {
+    const snap = reg.formSnapshot
+    return {
+      ...createStagingInitialForm(),
+      inboundDate: reg.inboundDate,
+      inboundType: reg.inboundType as InboundFormState["inboundType"],
+      relatedOrderNo: reg.relatedOrderNo ?? "",
+      relatedOrderLabel: snap.relatedOrderLabel || relatedOrderLabelFromReg(reg),
+      ownerName: reg.ownerDisplay,
+      ownerType: (snap.ownerType as InboundFormState["ownerType"]) ||
+        (reg.ownerTag === "档案货主" ? "企业货主" : ""),
+      ownerIdentifier: snap.ownerIdentifier ?? "",
+      contactPhone: snap.contactPhone ?? "",
+      idCardNo: snap.idCardNo ?? "",
+      warehouseId: snap.warehouseId || warehouse?.id || "",
+      storeroomIds: snap.storeroomIds.length ? snap.storeroomIds : storeroomIds,
+      remark: reg.remark ?? "",
+      goodsLines: mapStagingSnapshotToGoodsLines(snap, createEmptyGoodsLine),
+      isNewOwner: snap.isNewOwner ?? reg.ownerTag !== "档案货主",
+    }
+  }
+
   const goodsLines = stagingRegToGoodsLineDrafts(reg).map((draft) => {
     const line = createEmptyGoodsLine()
     line.category = draft.category
@@ -129,6 +164,21 @@ export function buildSavePayload(form: InboundFormState, editId?: string): SaveS
       .filter((n): n is string => Boolean(n)),
   )
 
+  const formSnapshot = buildStagingFormSnapshot(
+    {
+      warehouseId: form.warehouseId,
+      storeroomIds: form.storeroomIds,
+      ownerType: form.ownerType || undefined,
+      ownerIdentifier: form.ownerIdentifier,
+      contactPhone: form.contactPhone,
+      idCardNo: form.idCardNo,
+      relatedOrderLabel: form.relatedOrderLabel,
+      isNewOwner: form.isNewOwner,
+      goodsLines: form.goodsLines,
+    },
+    stagingSnapshotLookup(),
+  )
+
   return {
     id: editId,
     inboundDate: form.inboundDate,
@@ -144,5 +194,6 @@ export function buildSavePayload(form: InboundFormState, editId?: string): SaveS
     remark: form.remark || undefined,
     locationHint: totals.noStackTotal > 0 ? "待理货定垛" : "已分配库位",
     storeroomName,
+    formSnapshot,
   }
 }

@@ -36,6 +36,10 @@ export function filterStagingRegs(
       const day = row.inboundDate.slice(0, 10)
       if (day > filters.inboundDateEnd) return false
     }
+    if (filters.registrantKeyword.trim()) {
+      const q = filters.registrantKeyword.trim().toLowerCase()
+      if (!row.registrant.toLowerCase().includes(q)) return false
+    }
     return true
   })
 }

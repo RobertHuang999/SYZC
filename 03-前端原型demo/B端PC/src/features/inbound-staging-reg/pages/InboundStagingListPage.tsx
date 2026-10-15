@@ -102,17 +102,21 @@ export function InboundStagingListPage() {
             handleSearch()
           }}
         >
-          <InboundStagingFiltersPanel
-            value={draftFilters}
-            onChange={setDraftFilters}
-            onSearch={handleSearch}
-            onReset={handleReset}
-            onAdd={() => navigate(INBOUND_STAGING_FORM_PATH)}
-          />
+          <PrototypeAnnotationTarget annotationIds={["inbound-staging-list-filter"]}>
+            <InboundStagingFiltersPanel
+              value={draftFilters}
+              onChange={setDraftFilters}
+              onSearch={handleSearch}
+              onReset={handleReset}
+              onAdd={() => navigate(INBOUND_STAGING_FORM_PATH)}
+            />
+          </PrototypeAnnotationTarget>
         </form>
 
         <div className="space-y-4">
-          <PrototypeAnnotationTarget annotationIds={["inbound-staging-list-actions"]}>
+          <PrototypeAnnotationTarget
+            annotationIds={["inbound-staging-list-table", "inbound-staging-list-actions"]}
+          >
             <InboundStagingTable
               data={pageData}
               page={currentPage}
@@ -122,16 +126,18 @@ export function InboundStagingListPage() {
             />
           </PrototypeAnnotationTarget>
 
-          <WarningListPagination
-            total={filtered.length}
-            page={currentPage}
-            pageSize={pageSize}
-            onPageChange={setPage}
-            onPageSizeChange={(size) => {
-              setPageSize(size)
-              setPage(1)
-            }}
-          />
+          <PrototypeAnnotationTarget annotationIds={["inbound-staging-list-pagination"]}>
+            <WarningListPagination
+              total={filtered.length}
+              page={currentPage}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size)
+                setPage(1)
+              }}
+            />
+          </PrototypeAnnotationTarget>
         </div>
 
         <ConvertToFormalDialog
@@ -142,9 +148,12 @@ export function InboundStagingListPage() {
             setConvertTarget(null)
             navigate(path)
           }}
-          onMobileOnly={() => {
+          onCopyMobileLink={() => showToast("已复制手机端入库发起链接")}
+          onMobileOnly={(h5Path) => {
             setConvertTarget(null)
-            showToast("仓单转正请在手机端打开「入库发起」完成操作")
+            const url = `${window.location.origin}${h5Path}`
+            void navigator.clipboard.writeText(url)
+            showToast("已复制手机端入库发起链接；仓单转正请在手机打开该链接完成")
           }}
         />
 

@@ -33,6 +33,7 @@ import {
   FORM_WAREHOUSES,
   resolveOwnerSearchRecord,
 } from "../mock/inbound-form.mock"
+import { STAGING_P01_FORM_HINT } from "@prototype/shared/inbound/staging-ui-labels"
 
 function ownerTagStaging(
   ownerTrimmed: string,
@@ -171,7 +172,7 @@ export function InboundBasicInfoSection({
         <CardContent className="space-y-4 pt-5 pb-6">
           {isStaging ? (
             <p className="rounded-md border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs text-amber-900">
-              极速收货通道：不写库存、不进审批、暂不发短信；满足日期 + 仓库 + 类型 + 数量大于 0 即可保存（P02）。
+              {STAGING_P01_FORM_HINT}
               主表入库库房选填，暂存阶段可混选需审核与免审库房；转正提交时再执行 R06。
             </p>
           ) : null}

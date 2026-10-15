@@ -19,6 +19,7 @@ type Props = {
   index: number
   line: GoodsLineForm
   form: InboundFormState
+  variant?: "formal" | "staging"
   onChange: (line: GoodsLineForm) => void
   onRemove: () => void
 }
@@ -27,9 +28,11 @@ export function InboundGoodsLineCardMobile({
   index,
   line,
   form,
+  variant = "formal",
   onChange,
   onRemove,
 }: Props) {
+  const isStaging = variant === "staging"
   const [picker, setPicker] = useState<Picker>(null)
 
   const unstacked = unstackedQuantity(line)
@@ -92,11 +95,14 @@ export function InboundGoodsLineCardMobile({
           <p
             className={
               unstacked > 0
-                ? "mt-1 text-xs font-medium text-[#EF3E3E]"
+                ? isStaging
+                  ? "mt-1 text-xs font-medium text-amber-700"
+                  : "mt-1 text-xs font-medium text-[#EF3E3E]"
                 : "mt-1 text-xs text-[#232D39]/60"
             }
           >
             未堆放数量: {unstacked.toFixed(4)} {line.measureUnit || ""}
+            {isStaging && unstacked > 0 ? "（弱提示）" : ""}
           </p>
         </div>
         <button type="button" className="shrink-0 text-[#EF3E3E]" onClick={onRemove}>
@@ -151,10 +157,13 @@ export function InboundGoodsLineCardMobile({
 
       {line.skuId && activeSku && activeSku.inboundCollect.length > 0 ? (
         <div className="mt-3 space-y-2">
-          <p className="text-xs font-medium text-[#232D39]/80">其他收集信息</p>
+          <p className="text-xs font-medium text-[#232D39]/80">
+            其他收集信息{isStaging ? "（选填）" : ""}
+          </p>
           <InboundCollectFieldsMobile
             fields={activeSku.inboundCollect}
             values={line.collectValues}
+            allOptional={isStaging}
             onChange={(collectValues) => onChange({ ...line, collectValues })}
           />
         </div>
@@ -187,7 +196,7 @@ export function InboundGoodsLineCardMobile({
             >
               <NativeFormRow
                 label="入库库房"
-                required
+                required={!isStaging}
                 showChevron
                 onClick={() => setPicker({ type: "storeroom", stackId: stack.id })}
               >
@@ -197,7 +206,7 @@ export function InboundGoodsLineCardMobile({
               </NativeFormRow>
               <NativeFormRow
                 label="入库分区"
-                required
+                required={!isStaging}
                 showChevron
                 onClick={() =>
                   stack.storeroomId && setPicker({ type: "partition", stackId: stack.id })
@@ -234,7 +243,8 @@ export function InboundGoodsLineCardMobile({
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs text-[#232D39]">
-                <span className="text-[#EF3E3E]">* </span>现场照片
+                {!isStaging ? <span className="text-[#EF3E3E]">* </span> : null}
+                现场照片{isStaging ? "（选填）" : ""}
               </span>
               <span className="text-[10px] text-[#232D39]/50">
                 已上传 {line.sitePhotoCount}/10

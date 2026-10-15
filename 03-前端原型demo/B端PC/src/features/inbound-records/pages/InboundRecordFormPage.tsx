@@ -21,6 +21,7 @@ import { OwnerVerifyDialog } from "../components/OwnerVerifyDialog"
 import { ApprovalFlowSelectDialog } from "../components/ApprovalFlowSelectDialog"
 import { ImageViewerModal } from "../components/ImageViewerModal"
 import { INBOUND_FORM_MESSAGES } from "@prototype/shared/inbound/form-messages"
+import { generateMockInboundOrderNo } from "@prototype/shared/inbound/mock-inbound-order-no"
 import { INBOUND_RECORD_LIST_PATH } from "../domain/constants"
 import type { InboundFormState } from "../domain/form-types"
 import { inboundRecordDocuments } from "../documents/inbound-record-documents"
@@ -154,9 +155,11 @@ export function InboundRecordFormPage() {
     }
 
     const needSystemRelated =
-      form.inboundType === "质押入库" ||
-      form.inboundType === "抵押入库" ||
-      form.inboundType === "监管服务入库"
+      Boolean(form.inboundType) && form.inboundType !== "普通入库"
+    if (needSystemRelated && !form.relatedOrderNo.trim()) {
+      showToast("请选择关联单号（非普通入库须绑定系统有效单据，P06）")
+      return
+    }
     if (needSystemRelated && form.relatedOrderNo.trim()) {
       const orders = getRelatedOrdersByType(form.inboundType)
       const matched = orders.some((o) => o.orderNo === form.relatedOrderNo.trim())
@@ -242,9 +245,7 @@ export function InboundRecordFormPage() {
       setSubmitLoading(false)
       setFlowSelectOpen(false)
 
-      const newApplyOrderNo = `SQ-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(
-        Math.random() * 9000 + 1000
-      )}`
+      const newApplyOrderNo = generateMockInboundOrderNo()
 
       // 组装新申请并加入前端 Mock 列表，状态为 0 (待审核)
       const firstLine = form.goodsLines[0]
@@ -524,7 +525,7 @@ export function InboundRecordFormPage() {
         />
 
         {toast ? (
-          <div className="fixed right-6 bottom-16 z-50 rounded-lg border bg-foreground px-4 py-3 text-xs text-background shadow-lg">
+          <div className="fixed right-6 bottom-6 z-50 max-w-sm rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
             {toast}
           </div>
         ) : null}

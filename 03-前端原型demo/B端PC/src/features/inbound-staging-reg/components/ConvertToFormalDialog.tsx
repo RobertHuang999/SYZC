@@ -7,8 +7,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Copy } from "lucide-react"
 import type { InboundStagingReg } from "../domain/types"
 import { resolveConvertTarget } from "../lib/convert-routing"
+import {
+  STAGING_O03_PC_CD_HINT,
+  STAGING_O03_REMINDERS,
+} from "@prototype/shared/inbound/staging-ui-labels"
 
 type Props = {
   open: boolean
@@ -16,6 +21,7 @@ type Props = {
   onClose: () => void
   onConfirmPc: (path: string) => void
   onMobileOnly: (h5Path: string) => void
+  onCopyMobileLink?: () => void
 }
 
 export function ConvertToFormalDialog({
@@ -24,6 +30,7 @@ export function ConvertToFormalDialog({
   onClose,
   onConfirmPc,
   onMobileOnly,
+  onCopyMobileLink,
 }: Props) {
   if (!reg) return null
 
@@ -42,6 +49,13 @@ export function ConvertToFormalDialog({
   const primaryLabel =
     target.kind === "mobile_only" ? "我知道了，请在手机操作" : "确认并前往正式页"
 
+  const copyMobileLink = () => {
+    if (target.kind !== "mobile_only") return
+    const url = `${window.location.origin}${target.h5Path}`
+    void navigator.clipboard.writeText(url)
+    onCopyMobileLink?.()
+  }
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-lg">
@@ -52,18 +66,29 @@ export function ConvertToFormalDialog({
           </DialogDescription>
         </DialogHeader>
         <ul className="list-disc space-y-1.5 pl-5 text-sm text-muted-foreground">
-          <li>快照将预填至正式制单页；提交成功后本单回写【已转正式】。</li>
-          <li>须补齐档案货主（R03）、库位清零（R13）、至少 1 张现场照片（R16）。</li>
+          {STAGING_O03_REMINDERS.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
           {target.kind === "mobile_only" ? (
-            <li className="font-medium text-amber-700">
-              仓单入库请在手机端打开「业务办理 → 入库发起」完成转正，PC 不提供仓单正式制单页。
-            </li>
+            <li className="font-medium text-amber-700">{STAGING_O03_PC_CD_HINT}</li>
           ) : null}
         </ul>
         {target.kind === "mobile_only" ? (
-          <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-            手机链接（Mock）：{target.h5Path}
-          </p>
+          <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+            <p className="min-w-0 flex-1 break-all">
+              手机链接（Mock）：{target.h5Path}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 shrink-0 gap-1 border-amber-300 bg-white text-amber-900 hover:bg-amber-100"
+              onClick={copyMobileLink}
+            >
+              <Copy className="size-3.5" />
+              复制链接
+            </Button>
+          </div>
         ) : null}
         <DialogFooter className="gap-2 sm:gap-0">
           <Button type="button" variant="outline" onClick={onClose}>

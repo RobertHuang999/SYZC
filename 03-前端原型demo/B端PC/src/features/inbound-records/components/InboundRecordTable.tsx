@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { TableDateTimeCell } from "@/shared/components/TableCells"
+import { InboundDocNoCell } from "./InboundDocNoCell"
 import { inboundRecordDetailPath } from "../domain/constants"
 import type { InboundRecord, InboundRecordRowAction } from "../domain/types"
 import {
@@ -79,51 +79,6 @@ function getInboundTypeBadge(type: string) {
     <Badge variant="outline" className={cn("text-[11px] px-1.5 py-0 font-normal shrink-0", badgeClass)}>
       {type}
     </Badge>
-  )
-}
-
-function OrderNoSingleRow({
-  orderNo,
-  linkTo,
-}: {
-  orderNo: string
-  linkTo?: string
-}) {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    void navigator.clipboard.writeText(orderNo)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
-  }
-
-  const textClass = "line-clamp-2 min-w-0 break-all"
-
-  return (
-    <div className="group/item flex items-start gap-1 text-sm leading-snug">
-      {linkTo ? (
-        <Link
-          to={linkTo}
-          className={cn(textClass, "text-primary hover:underline")}
-          title={orderNo}
-        >
-          {orderNo}
-        </Link>
-      ) : (
-        <span className={cn(textClass, "text-foreground")} title={orderNo}>
-          {orderNo}
-        </span>
-      )}
-      <button
-        type="button"
-        onClick={handleCopy}
-        className="opacity-0 group-hover/item:opacity-100 transition-opacity p-0.5 text-muted-foreground hover:text-foreground shrink-0 cursor-pointer"
-        title="复制单号"
-      >
-        <span className="text-xs leading-none">{copied ? "✓" : "📋"}</span>
-      </button>
-    </div>
   )
 }
 
@@ -288,7 +243,10 @@ export function InboundRecordTable({
                     {(page - 1) * pageSize + index + 1}
                   </TableCell>
                   <TableCell className={cellBase}>
-                    <OrderNoSingleRow orderNo={row.orderNo} linkTo={inboundRecordDetailPath(row.id)} />
+                    <InboundDocNoCell
+                      docNo={row.orderNo}
+                      linkTo={inboundRecordDetailPath(row.id)}
+                    />
                   </TableCell>
                   <TableCell className={cellBase}>
                     <div className="flex flex-col gap-0.5 leading-snug">
@@ -309,7 +267,7 @@ export function InboundRecordTable({
                   </TableCell>
                   <TableCell className={cn(COL.related, cellBase)}>
                     {row.relatedOrderNo ? (
-                      <OrderNoSingleRow orderNo={row.relatedOrderNo} />
+                      <InboundDocNoCell docNo={row.relatedOrderNo} />
                     ) : (
                       <span className="text-sm text-muted-foreground">—</span>
                     )}

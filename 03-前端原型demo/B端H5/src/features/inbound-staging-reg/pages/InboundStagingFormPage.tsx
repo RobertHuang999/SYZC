@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { CalendarDays, Package } from "lucide-react"
+import { Building2, CalendarDays, Package } from "lucide-react"
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
@@ -31,6 +31,7 @@ import {
   INBOUND_STAGING_GOODS_ROUTE,
   INBOUND_STAGING_LIST_ROUTE,
 } from "../domain/constants"
+import { STAGING_P01_BANNER } from "@prototype/shared/inbound/staging-ui-labels"
 
 export function InboundStagingFormPage() {
   const navigate = useNavigate()
@@ -121,10 +122,35 @@ export function InboundStagingFormPage() {
           <NativeInboundStepBar current={0} />
 
           <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-            极速通道：不写库存 · 不进审批 · 暂不发短信（P01）
+            {STAGING_P01_BANNER}
           </div>
 
-          <NativeInfoCard title="基础信息" icon={<Package className="size-5" />}>
+          <NativeInfoCard title="现场说明" icon={<Building2 className="size-5" />}>
+            <NativeFormRow label="货主/送货说明">
+              <input
+                className="w-full bg-transparent text-right text-sm outline-none placeholder:text-[#232D39]/30"
+                placeholder="档案联想或手填临时说明"
+                maxLength={100}
+                value={form.ownerName}
+                onChange={(e) => patch({ ownerName: e.target.value })}
+              />
+            </NativeFormRow>
+            <p className="px-1 pb-2 text-[11px] leading-relaxed text-[#232D39]/50">
+              暂存可手填司机/车牌；转正须选档案货主（P03 · 临时待核）
+            </p>
+            <div className="relative mt-1 rounded-lg bg-[#232D39]/5 p-3">
+              <textarea
+                className="min-h-[60px] w-full resize-none bg-transparent text-sm text-[#232D39] outline-none placeholder:text-[#232D39]/30"
+                placeholder="备注（现场卸车、月台堆放等）"
+                maxLength={140}
+                value={form.remark}
+                onChange={(e) => patch({ remark: e.target.value })}
+              />
+              <p className="text-right text-xs text-[#232D39]/30">{form.remark.length}/140</p>
+            </div>
+          </NativeInfoCard>
+
+          <NativeInfoCard title="入库信息" icon={<Package className="size-5" />}>
             <NativeFormRow
               label="入库日期"
               required
@@ -190,32 +216,11 @@ export function InboundStagingFormPage() {
                   }}
                 >
                   <span className={storeroomLabel ? "text-[#232D39]" : "text-[#232D39]/30"}>
-                    {storeroomLabel || "选填（弱规则 P03）"}
+                    {storeroomLabel || "选填（P04）"}
                   </span>
                 </NativeFormRow>
               </>
             ) : null}
-
-            <NativeFormRow label="货主/送货说明">
-              <input
-                className="w-full bg-transparent text-right text-sm outline-none placeholder:text-[#232D39]/30"
-                placeholder="司机/车牌/货主待定"
-                maxLength={100}
-                value={form.ownerName}
-                onChange={(e) => patch({ ownerName: e.target.value })}
-              />
-            </NativeFormRow>
-
-            <div className="relative mt-3 rounded-lg bg-[#232D39]/5 p-3">
-              <textarea
-                className="min-h-[60px] w-full resize-none bg-transparent text-sm text-[#232D39] outline-none placeholder:text-[#232D39]/30"
-                placeholder="备注"
-                maxLength={140}
-                value={form.remark}
-                onChange={(e) => patch({ remark: e.target.value })}
-              />
-              <p className="text-right text-xs text-[#232D39]/30">{form.remark.length}/140</p>
-            </div>
           </NativeInfoCard>
 
           <button

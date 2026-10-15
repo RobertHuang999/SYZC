@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import {
   FileText,
   MapPin,
@@ -54,6 +54,7 @@ type InboundGoodsLineCardProps = {
   index: number
   line: GoodsLineForm
   form: InboundFormState
+  variant?: "formal" | "staging"
   showMeasureError?: boolean
   onChange: (line: GoodsLineForm) => void
   onRemove: () => void
@@ -64,11 +65,16 @@ export function InboundGoodsLineCard({
   index,
   line,
   form,
+  variant = "formal",
   showMeasureError,
   onChange,
   onRemove,
   onPreviewImage,
 }: InboundGoodsLineCardProps) {
+  const isStaging = variant === "staging"
+  const [stackingOpen, setStackingOpen] = useState(
+    () => !isStaging || line.stackings.length > 0,
+  )
   const unstacked = unstackedQuantity(line)
   const measureMissing = line.measureValue.trim() === ""
   const hasStackedQty = line.stackings.some(
@@ -162,9 +168,17 @@ export function InboundGoodsLineCard({
             {formatGoodsCardTitle(line)}
           </span>
           {unstacked > 0 ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-xs font-semibold text-destructive border border-rose-200">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold border",
+                isStaging
+                  ? "bg-amber-50 text-amber-800 border-amber-200"
+                  : "bg-rose-50 text-destructive border-rose-200",
+              )}
+            >
               <AlertCircle className="size-3.5" />
               未堆放数量：{unstacked.toFixed(4)} {line.measureUnit}
+              {isStaging ? "（暂存弱提示）" : null}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
@@ -286,10 +300,13 @@ export function InboundGoodsLineCard({
 
       {line.skuId && collectFields.length > 0 ? (
         <div className="mt-4 space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground">其他收集信息</p>
+          <p className="text-xs font-semibold text-muted-foreground">
+            其他收集信息{isStaging ? "（选填）" : null}
+          </p>
           <InboundCollectFields
             fields={collectFields}
             values={line.collectValues}
+            allOptional={isStaging}
             onChange={(collectValues) => onChange({ ...line, collectValues })}
           />
         </div>
@@ -297,43 +314,77 @@ export function InboundGoodsLineCard({
         <p className="mt-3 text-xs text-muted-foreground">该货品未配置入库收集项</p>
       ) : null}
 
-      {/* 堆放位置区域（对齐源码 store-apply-info.vue 堆放位置） */}
+      {/* 堆放位置区域（暂存默认折叠 · P04） */}
       <div className="mt-5 rounded-lg border border-border/70 bg-muted/20 p-4">
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
             <MapPin className="size-4 text-primary" />
-            堆放位置 ({line.stackings.length} 个具体位置)
+            堆放位置
+            {stackingOpen || line.stackings.length > 0
+              ? ` (${line.stackings.length} 个具体位置)`
+              : "（选填）"}
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-7 gap-1 text-xs text-primary border-primary/30 hover:bg-primary/5"
-            disabled={allowedStorerooms.length === 0}
-            onClick={addStacking}
-          >
-            <Plus className="size-3.5" />
-            添加位置
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            {isStaging && !stackingOpen ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => setStackingOpen(true)}
+              >
+                展开分配库位
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 gap-1 text-xs text-primary border-primary/30 hover:bg-primary/5"
+                disabled={allowedStorerooms.length === 0}
+                onClick={() => {
+                  setStackingOpen(true)
+                  addStacking()
+                }}
+              >
+                <Plus className="size-3.5" />
+                添加位置
+              </Button>
+            )}
+          </div>
         </div>
 
-        {allowedStorerooms.length === 0 ? (
+        {isStaging && !stackingOpen && line.stackings.length === 0 ? (
+          <button
+            type="button"
+            className="w-full rounded-md border border-dashed border-amber-200 bg-amber-50/60 px-3 py-3 text-left text-xs text-amber-900 hover:bg-amber-50"
+            onClick={() => setStackingOpen(true)}
+          >
+            待理货定垛 · 点击展开分配具体库位（选填，暂存可直接保存）
+          </button>
+        ) : null}
+
+        {(!isStaging || stackingOpen || line.stackings.length > 0) &&
+        allowedStorerooms.length === 0 ? (
           <div className="rounded border border-dashed border-amber-300 bg-amber-50/50 p-3 text-center text-xs text-amber-700">
             ⚠️ 提示：请先在上方「基础信息」中选择入库仓库与库房，方可在此分配堆放货位
           </div>
-        ) : (
+        ) : (!isStaging || stackingOpen || line.stackings.length > 0) ? (
           <div className="space-y-2.5">
             {line.stackings.length > 0 && (
               <div className="hidden grid-cols-[1.2fr_1fr_1.4fr_120px_36px] gap-2.5 px-2 text-[11px] font-medium text-muted-foreground lg:grid">
                 <span>
-                  <span className="text-destructive">* </span>入库库房
+                  {!isStaging ? <span className="text-destructive">* </span> : null}
+                  入库库房
                 </span>
                 <span>
-                  <span className="text-destructive">* </span>入库分区
+                  {!isStaging ? <span className="text-destructive">* </span> : null}
+                  入库分区
                 </span>
                 <span>具体堆放位置说明</span>
                 <span className="text-right">
-                  <span className="text-destructive">* </span>堆放数量 ({line.measureUnit})
+                  {!isStaging ? <span className="text-destructive">* </span> : null}
+                  堆放数量 ({line.measureUnit})
                 </span>
                 <span />
               </div>
@@ -432,7 +483,7 @@ export function InboundGoodsLineCard({
             )
             })}
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* 附件信息：左现场照片 · 右补充资料 */}
@@ -443,7 +494,8 @@ export function InboundGoodsLineCard({
           <div className="min-w-0 space-y-2">
             <div className="flex items-center justify-between gap-2">
               <Label className="text-xs">
-                <span className="text-destructive">* </span>现场照片
+                {!isStaging ? <span className="text-destructive">* </span> : null}
+                现场照片{isStaging ? "（选填）" : null}
               </Label>
               <span className="shrink-0 text-[11px] text-muted-foreground">
                 {line.sitePhotoCount}/10

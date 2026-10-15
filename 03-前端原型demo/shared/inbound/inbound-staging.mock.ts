@@ -1,4 +1,10 @@
 import { formatInboundGoodsSummary } from "./inbound-list-format"
+import type { StagingFormSnapshot } from "./staging-form-snapshot"
+import {
+  appendStagingOperationLog,
+  operationLogEntryForSave,
+  type StagingOperationLog,
+} from "./staging-operation-logs"
 
 export type StagingRegStatus = "待补全" | "已转正式" | "已作废"
 
@@ -32,7 +38,13 @@ export interface InboundStagingReg {
   locationHint?: string
   voidReason?: string
   storeroomName?: string
+  /** 完整制单快照：SKU、堆放、收集项、影像计数等（转正无损预填） */
+  formSnapshot?: StagingFormSnapshot
+  /** 操作审计 / H5 流转时间轴 */
+  operationLogs?: StagingOperationLog[]
 }
+
+export type { StagingFormSnapshot, StagingOperationLog }
 
 /**
  * 登记单 Mock 场景索引（评审 / 自测对照《业务流程推演》第六节）
@@ -383,6 +395,13 @@ export function markStagingConverted(regNo: string, formalNo: string) {
   row.status = "已转正式"
   row.relatedFormalNo = formalNo
   row.version += 1
+  const now = new Date().toISOString().slice(0, 19).replace("T", " ")
+  appendStagingOperationLog(row, {
+    time: now,
+    actor: row.registrant,
+    action: "转为正式入库",
+    summary: `正式单已提交审核，关联单号 ${formalNo}`,
+  })
   notifyStagingRegUpdated()
   return true
 }
@@ -394,7 +413,13 @@ export function rollbackStagingReg(regNo: string, reason: string) {
   row.status = "待补全"
   row.relatedFormalNo = null
   row.version += 1
-  row.remark = reason
+  const now = new Date().toISOString().slice(0, 19).replace("T", " ")
+  appendStagingOperationLog(row, {
+    time: now,
+    actor: "系统",
+    action: "正式单终止回退",
+    summary: reason,
+  })
   notifyStagingRegUpdated()
   return true
 }
@@ -405,6 +430,13 @@ export function voidStagingReg(regNo: string, reason: string) {
   row.status = "已作废"
   row.voidReason = reason
   row.version += 1
+  const now = new Date().toISOString().slice(0, 19).replace("T", " ")
+  appendStagingOperationLog(row, {
+    time: now,
+    actor: row.registrant,
+    action: "作废单据",
+    summary: reason,
+  })
   notifyStagingRegUpdated()
   return true
 }
@@ -442,6 +474,7 @@ export type SaveStagingRegInput = {
   locationHint?: string
   storeroomName?: string
   registrant?: string
+  formSnapshot?: StagingFormSnapshot
 }
 
 export function saveStagingReg(input: SaveStagingRegInput): InboundStagingReg {
@@ -465,7 +498,15 @@ export function saveStagingReg(input: SaveStagingRegInput): InboundStagingReg {
         remark: input.remark,
         locationHint: input.locationHint,
         storeroomName: input.storeroomName,
+        formSnapshot: input.formSnapshot,
         version: existing.version + 1,
+      })
+      const log = operationLogEntryForSave(false, registrant)
+      appendStagingOperationLog(existing, {
+        time: log.time!,
+        actor: log.actor,
+        action: log.action,
+        summary: log.summary,
       })
       notifyStagingRegUpdated()
       return existing
@@ -493,7 +534,16 @@ export function saveStagingReg(input: SaveStagingRegInput): InboundStagingReg {
     remark: input.remark,
     locationHint: input.locationHint ?? "待理货定垛",
     storeroomName: input.storeroomName,
+    formSnapshot: input.formSnapshot,
+    operationLogs: [],
   }
+  const createLog = operationLogEntryForSave(true, registrant)
+  appendStagingOperationLog(row, {
+    time: createLog.time!,
+    actor: createLog.actor,
+    action: createLog.action,
+    summary: `${row.regNo} · ${createLog.summary}`,
+  })
   inboundStagingRegsMock.unshift(row)
   notifyStagingRegUpdated()
   return row

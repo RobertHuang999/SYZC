@@ -1,6 +1,7 @@
-import { Clock, User } from "lucide-react"
+import { ChevronRight, Clock, User } from "lucide-react"
 import { Link } from "react-router-dom"
 import type { InboundStagingReg } from "@prototype/shared/inbound/inbound-staging.mock"
+import { STAGING_ACTION_LABELS } from "@prototype/shared/inbound/staging-ui-labels"
 import { inboundStagingDetailPath } from "../domain/constants"
 import { H5_CARD } from "@/shared/h5-ui-theme"
 
@@ -8,6 +9,7 @@ type Props = {
   row: InboundStagingReg
   onEdit?: (row: InboundStagingReg) => void
   onConvert?: (row: InboundStagingReg) => void
+  onVoid?: (row: InboundStagingReg) => void
   onViewFormal?: (row: InboundStagingReg) => void
 }
 
@@ -33,16 +35,23 @@ function statusBadge(status: InboundStagingReg["status"]) {
   )
 }
 
-const actionLink =
-  "cursor-pointer text-xs font-medium text-blue-600 hover:text-blue-700 active:opacity-75"
+const actionBtn =
+  "shrink-0 whitespace-nowrap px-0.5 text-xs font-medium text-blue-600 active:opacity-75"
+
+function ActionSep() {
+  return <span className="shrink-0 select-none px-1 text-[10px] text-gray-300">|</span>
+}
 
 export function InboundStagingRegCard({
   row,
   onEdit,
   onConvert,
+  onVoid,
   onViewFormal,
 }: Props) {
   const ownerFirstChar = row.ownerDisplay ? row.ownerDisplay.charAt(0) : "货"
+  const pending = row.status === "待补全"
+  const converted = row.status === "已转正式"
 
   return (
     <div className={`${H5_CARD} mb-3 hover:border-blue-200 hover:shadow-sm`}>
@@ -51,24 +60,17 @@ export function InboundStagingRegCard({
         {statusBadge(row.status)}
       </div>
 
-      <div className="space-y-2.5 p-3.5">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-2">
-            <div className="flex size-5 shrink-0 items-center justify-center rounded bg-blue-600 text-[11px] font-bold text-white">
-              {ownerFirstChar}
-            </div>
-            <div className="min-w-0 truncate text-sm font-semibold text-gray-900">
-              {row.ownerDisplay}
-              {row.ownerTag ? (
-                <span className="ml-1 text-xs font-medium text-gray-500">[{row.ownerTag}]</span>
-              ) : null}
-            </div>
+      <div className="space-y-2.5 p-3.5 pb-0">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex size-5 shrink-0 items-center justify-center rounded bg-blue-600 text-[11px] font-bold text-white">
+            {ownerFirstChar}
           </div>
-          {row.status === "待补全" && onConvert ? (
-            <button type="button" className={`shrink-0 ${actionLink}`} onClick={() => onConvert(row)}>
-              转正式
-            </button>
-          ) : null}
+          <div className="min-w-0 line-clamp-2 text-sm font-semibold leading-snug text-gray-900">
+            {row.ownerDisplay}
+            {row.ownerTag ? (
+              <span className="ml-1 text-xs font-medium text-gray-500">[{row.ownerTag}]</span>
+            ) : null}
+          </div>
         </div>
 
         <div className="space-y-1.5 text-xs">
@@ -76,7 +78,7 @@ export function InboundStagingRegCard({
             <span className="shrink-0 text-gray-500">登记单号</span>
             <Link
               to={inboundStagingDetailPath(row.id)}
-              className="max-w-[65%] truncate pl-2 text-right font-medium text-blue-600"
+              className="max-w-[68%] break-all pl-2 text-right text-sm font-medium leading-snug text-blue-600"
             >
               {row.regNo}
             </Link>
@@ -84,7 +86,7 @@ export function InboundStagingRegCard({
           {row.relatedOrderNo ? (
             <div className="flex items-baseline justify-between">
               <span className="shrink-0 text-gray-500">关联单号</span>
-              <span className="max-w-[65%] truncate pl-2 text-right text-gray-900">
+              <span className="max-w-[68%] break-all pl-2 text-right text-gray-900">
                 {row.relatedOrderNo}
               </span>
             </div>
@@ -114,7 +116,7 @@ export function InboundStagingRegCard({
           {row.relatedFormalNo ? (
             <div className="flex items-baseline justify-between">
               <span className="shrink-0 text-gray-500">关联正式单</span>
-              <span className="max-w-[65%] truncate pl-2 text-right font-medium text-emerald-700">
+              <span className="max-w-[68%] break-all pl-2 text-right text-sm font-medium leading-snug text-emerald-700">
                 {row.relatedFormalNo}
               </span>
             </div>
@@ -131,20 +133,52 @@ export function InboundStagingRegCard({
             <span>登记时间: {row.registeredAt}</span>
           </div>
         </div>
+      </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-4 pt-2 text-xs font-medium">
-          {row.status === "待补全" && onEdit ? (
-            <button type="button" className={actionLink} onClick={() => onEdit(row)}>
-              编辑暂存
-            </button>
+      <div className="mt-2 border-t border-[#232D39]/5 px-3.5 py-2.5">
+        <div className="flex flex-nowrap items-center justify-end gap-0 overflow-x-auto no-scrollbar">
+          {pending && onVoid ? (
+            <>
+              <button
+                type="button"
+                className="shrink-0 whitespace-nowrap px-0.5 text-xs font-medium text-red-600 active:opacity-75"
+                onClick={() => onVoid(row)}
+              >
+                {STAGING_ACTION_LABELS.void}
+              </button>
+              <ActionSep />
+            </>
           ) : null}
-          {row.status === "已转正式" && row.relatedFormalNo && onViewFormal ? (
-            <button type="button" className={actionLink} onClick={() => onViewFormal(row)}>
-              查看正式单
-            </button>
+          {pending && onEdit ? (
+            <>
+              <button type="button" className={actionBtn} onClick={() => onEdit(row)}>
+                {STAGING_ACTION_LABELS.edit}
+              </button>
+              <ActionSep />
+            </>
           ) : null}
-          <Link to={inboundStagingDetailPath(row.id)} className={actionLink}>
-            查看详情
+          {pending && onConvert ? (
+            <>
+              <button type="button" className={actionBtn} onClick={() => onConvert(row)}>
+                {STAGING_ACTION_LABELS.convert}
+              </button>
+              <ActionSep />
+            </>
+          ) : null}
+          {converted && row.relatedFormalNo && onViewFormal ? (
+            <>
+              <button type="button" className={actionBtn} onClick={() => onViewFormal(row)}>
+                {STAGING_ACTION_LABELS.viewFormal}
+              </button>
+              <ActionSep />
+            </>
+          ) : null}
+          <Link
+            to={inboundStagingDetailPath(row.id)}
+            className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap pl-0.5 text-xs font-medium text-blue-600 active:opacity-75"
+          >
+            {STAGING_ACTION_LABELS.viewDetail}
+            <ChevronRight className="size-3.5 shrink-0" />
           </Link>
         </div>
       </div>

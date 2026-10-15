@@ -25,3 +25,23 @@ export const H5_LIST_SCROLL = "flex-1 min-h-0 space-y-3 overflow-y-auto px-3.5 p
 
 export const H5_CARD =
   "overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-xs transition-all active:scale-[0.99]"
+
+/** 列表卡片底部胶囊操作（对齐出库记录 buttons-view） */
+export const H5_PILL_SECONDARY =
+  "inline-flex items-center gap-1 rounded-full border border-[#232D39]/20 px-3 py-1.5 text-xs font-medium text-[#232D39]/80 active:bg-gray-50"
+
+export const H5_PILL_PRIMARY =
+  "inline-flex items-center gap-0.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-600 active:bg-blue-100"
+
+export const H5_PILL_ACCENT =
+  "inline-flex items-center gap-1 rounded-full border border-blue-300 bg-blue-600 px-3 py-1.5 text-xs font-medium text-white active:bg-blue-700"
+
+export const H5_PILL_DANGER =
+  "inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 active:bg-red-100"
+
+/** 详情页吸底主/次按钮（对齐入库发起、暂存货品步） */
+export const H5_DETAIL_BTN_SECONDARY =
+  "flex h-11 flex-1 items-center justify-center rounded-lg border border-[#232D39]/20 text-sm font-medium text-[#232D39] active:bg-gray-50"
+
+export const H5_DETAIL_BTN_PRIMARY =
+  "flex h-11 flex-[1.2] items-center justify-center rounded-lg bg-blue-600 text-sm font-medium text-white active:bg-blue-700"

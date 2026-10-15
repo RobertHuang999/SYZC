@@ -9,6 +9,7 @@ export type InboundStagingFilters = {
   inboundDateStart: string
   inboundDateEnd: string
   relatedFormalNo: string
+  registrantKeyword: string
 }
 
 export const DEFAULT_INBOUND_STAGING_FILTERS: InboundStagingFilters = {
@@ -20,4 +21,5 @@ export const DEFAULT_INBOUND_STAGING_FILTERS: InboundStagingFilters = {
   inboundDateStart: "",
   inboundDateEnd: "",
   relatedFormalNo: "",
+  registrantKeyword: "",
 }

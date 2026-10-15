@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react"
-import { useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
-import { INBOUND_LIST_ROUTE } from "../domain/constants"
 import { getMobileInboundDetailById } from "../lib/mobile-detail-utils"
+import { handleInboundDetailBack } from "../lib/inbound-detail-nav"
 import { InboundGoodsDetailCardMobile } from "../components/InboundGoodsDetailCardMobile"
 import { MobileQrModal } from "../components/MobileQrModal"
 import { MobileImageModal } from "../components/MobileImageModal"
@@ -14,7 +14,11 @@ type TabKey = "goods" | "audit" | "modify"
 
 export function InboundRecordDetailPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
+  const location = useLocation()
   const detail = useMemo(() => getMobileInboundDetailById(id), [id])
+
+  const handleBack = () => handleInboundDetailBack(navigate, location)
 
   const [tab, setTab] = useState<TabKey>("goods")
   const [expandedGoods, setExpandedGoods] = useState<Record<string, boolean>>({})
@@ -61,7 +65,7 @@ export function InboundRecordDetailPage() {
   if (!detail) {
     return (
       <MobileShell>
-        <NavBar title="入库详情" backTo={INBOUND_LIST_ROUTE} />
+        <NavBar title="入库详情" onBack={handleBack} />
         <div className="flex flex-1 items-center justify-center p-6 text-sm text-[#232D39]/50">
           未找到该入库单
         </div>
@@ -75,7 +79,7 @@ export function InboundRecordDetailPage() {
   return (
     <MobileShell>
       <PrototypeAnnotationTarget annotationIds={["inbound-h5-detail"]}>
-        <NavBar title="入库详情" backTo={INBOUND_LIST_ROUTE} />
+        <NavBar title="入库详情" onBack={handleBack} />
       </PrototypeAnnotationTarget>
 
       <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto bg-[#edf2f8] p-3 pb-24">

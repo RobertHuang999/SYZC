@@ -117,28 +117,28 @@ export function InboundStagingFormPage() {
     >
       <div className="flex min-h-full flex-col bg-muted/10">
         <div className="flex-1 space-y-4 p-6 pb-4">
-          <PrototypeAnnotationTarget annotationIds={["inbound-staging-form-page"]}>
-            <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <PrototypeAnnotationTarget annotationIds={["inbound-staging-form-page"]}>
               <div>
                 <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                   {isEdit ? "编辑入库暂存登记" : "新增入库暂存登记"}
                 </h1>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   与入库记录共用货品 SKU、库位与影像口径；暂存阶段弱校验保存（P02~P05）
                 </p>
               </div>
-              <PrototypeAnnotationTarget annotationIds={["inbound-staging-form-save"]}>
-                <div className="flex items-center gap-2">
-                  <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
-                    取 消
-                  </Button>
-                  <Button type="button" size="sm" onClick={handleSave}>
-                    保存登记 / 暂存
-                  </Button>
-                </div>
-              </PrototypeAnnotationTarget>
-            </div>
-          </PrototypeAnnotationTarget>
+            </PrototypeAnnotationTarget>
+            <PrototypeAnnotationTarget annotationIds={["inbound-staging-form-save"]}>
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
+                  取 消
+                </Button>
+                <Button type="button" size="sm" onClick={handleSave}>
+                  保存登记 / 暂存
+                </Button>
+              </div>
+            </PrototypeAnnotationTarget>
+          </div>
 
           <PrototypeAnnotationTarget annotationIds={["inbound-staging-form-basic"]}>
             <InboundBasicInfoSection
@@ -155,6 +155,7 @@ export function InboundStagingFormPage() {
           <PrototypeAnnotationTarget annotationIds={["inbound-staging-form-goods"]}>
           <InboundGoodsSection
             form={form}
+            variant="staging"
             expanded={goodsExpanded}
             highlightGoodsId={null}
             onToggle={() => setGoodsExpanded((v) => !v)}
@@ -178,18 +179,20 @@ export function InboundStagingFormPage() {
           </PrototypeAnnotationTarget>
         </div>
 
-        <div className="sticky bottom-0 z-20 border-t bg-card/95 px-6 py-3 shadow-xs backdrop-blur">
-          <InboundFormSummaryBar
-            categoryCount={totals.categoryCount}
-            goodsTotal={totals.goodsTotal}
-            stackedTotal={totals.stackedTotal}
-            noStackTotal={totals.noStackTotal}
-            variant="footer"
-          />
-          {totals.noStackTotal > 0 ? (
-            <p className="mt-1 text-xs text-amber-700">未堆放数量为弱提示，暂存允许直接保存（P04）</p>
-          ) : null}
-        </div>
+        <PrototypeAnnotationTarget annotationIds={["inbound-staging-form-summary"]}>
+          <div className="sticky bottom-0 z-20 border-t bg-card/95 px-6 py-3 shadow-xs backdrop-blur">
+            <InboundFormSummaryBar
+              categoryCount={totals.categoryCount}
+              goodsTotal={totals.goodsTotal}
+              stackedTotal={totals.stackedTotal}
+              noStackTotal={totals.noStackTotal}
+              variant="footer"
+            />
+            {totals.noStackTotal > 0 ? (
+              <p className="mt-1 text-xs text-amber-700">未堆放数量为弱提示，暂存允许直接保存（P04）</p>
+            ) : null}
+          </div>
+        </PrototypeAnnotationTarget>
 
         <RelatedOrderPickerDialog
           open={relatedOpen}
@@ -238,7 +241,7 @@ export function InboundStagingFormPage() {
         />
 
         {toast ? (
-          <div className="fixed right-6 bottom-16 z-50 rounded-lg border bg-foreground px-4 py-3 text-xs text-background shadow-lg">
+          <div className="fixed right-6 bottom-6 z-50 max-w-sm rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
             {toast}
           </div>
         ) : null}

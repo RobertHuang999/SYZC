@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { Plus, RotateCcw, Search, X } from "lucide-react"
+import { Filter, Plus, RotateCcw, Search, X } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
@@ -16,16 +16,42 @@ import { resolveStagingGoodsNames } from "@prototype/shared/inbound/staging-good
 import { INBOUND_GOODS_CASCADE_TREE } from "@/features/inbound-records/mock/inbound-goods-cascade.mock"
 import {
   inboundStagingRegsMock,
+  voidStagingReg,
   type InboundStagingReg,
   type StagingRegStatus,
 } from "@prototype/shared/inbound/inbound-staging.mock"
+import { ConvertToFormalSheet } from "../components/ConvertToFormalSheet"
 import { InboundStagingRegCard } from "../components/InboundStagingRegCard"
+import { StagingVoidSheet } from "../components/StagingVoidSheet"
 import {
   H5_INBOUND_INITIATE_ROUTE,
   INBOUND_STAGING_FORM_ROUTE,
   inboundStagingEditQuery,
 } from "../domain/constants"
+import {
+  InboundDateFilterModal,
+  type DateRangeDraft,
+} from "@/features/inbound-records/components/InboundDateFilterModal"
 import { H5_FILTER_BAR, H5_LIST_SCROLL } from "@/shared/h5-ui-theme"
+import { navigateToFormalInbound } from "../lib/formal-inbound-nav"
+
+const EMPTY_DATE_RANGE: DateRangeDraft = {
+  inboundStart: "",
+  inboundEnd: "",
+  createStart: "",
+  createEnd: "",
+}
+
+function dayFromDateTime(isoLike: string): string {
+  return isoLike.trim().split(" ")[0]?.split("T")[0] ?? ""
+}
+
+function withinDayRange(day: string, start: string, end: string): boolean {
+  if (!day) return false
+  if (start && day < start) return false
+  if (end && day > end) return false
+  return true
+}
 
 const STATUS_OPTIONS: DropdownOption[] = [
   { label: "全部状态", value: "全部" },
@@ -52,6 +78,11 @@ export function InboundStagingListPage() {
   const [selectedGoodsKeys, setSelectedGoodsKeys] = useState<string[]>([])
   const [toast, setToast] = useState<string | null>(null)
   const [mockTick, setMockTick] = useState(0)
+  const [convertTarget, setConvertTarget] = useState<InboundStagingReg | null>(null)
+  const [voidTarget, setVoidTarget] = useState<InboundStagingReg | null>(null)
+  const [dateFilterOpen, setDateFilterOpen] = useState(false)
+  const [dateDraft, setDateDraft] = useState<DateRangeDraft>({ ...EMPTY_DATE_RANGE })
+  const [dateApplied, setDateApplied] = useState<DateRangeDraft>({ ...EMPTY_DATE_RANGE })
 
   useEffect(() => {
     const bump = () => setMockTick((t) => t + 1)
@@ -83,6 +114,19 @@ export function InboundStagingListPage() {
         )
         if (!hit) return false
       }
+      const inboundDay = dayFromDateTime(row.inboundDate)
+      if (dateApplied.inboundStart || dateApplied.inboundEnd) {
+        if (!withinDayRange(inboundDay, dateApplied.inboundStart, dateApplied.inboundEnd)) {
+          return false
+        }
+      }
+      const registerDay = dayFromDateTime(row.registeredAt)
+      if (dateApplied.createStart || dateApplied.createEnd) {
+        if (!withinDayRange(registerDay, dateApplied.createStart, dateApplied.createEnd)) {
+          return false
+        }
+      }
+
       const q = keyword.trim().toLowerCase()
       if (!q) return true
       return (
@@ -92,7 +136,21 @@ export function InboundStagingListPage() {
         goodsNames.some((name) => name.toLowerCase().includes(q))
       )
     })
-  }, [keyword, status, inboundType, selectedWarehouseKeys, selectedGoodsKeys, mockTick])
+  }, [
+    keyword,
+    status,
+    inboundType,
+    selectedWarehouseKeys,
+    selectedGoodsKeys,
+    mockTick,
+    dateApplied,
+  ])
+
+  const dateFilterActive =
+    Boolean(dateApplied.inboundStart) ||
+    Boolean(dateApplied.inboundEnd) ||
+    Boolean(dateApplied.createStart) ||
+    Boolean(dateApplied.createEnd)
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -105,11 +163,29 @@ export function InboundStagingListPage() {
     setInboundType("全部")
     setSelectedWarehouseKeys([])
     setSelectedGoodsKeys([])
+    setDateDraft({ ...EMPTY_DATE_RANGE })
+    setDateApplied({ ...EMPTY_DATE_RANGE })
+  }
+
+  const openDateFilter = () => {
+    setDateDraft({ ...dateApplied })
+    setDateFilterOpen(true)
   }
 
   const handleConvert = (row: InboundStagingReg) => {
-    navigate(`${H5_INBOUND_INITIATE_ROUTE}?sourceRegId=${encodeURIComponent(row.regNo)}`)
-    showToast(`前往入库发起预填 ${row.regNo}`)
+    setConvertTarget(row)
+  }
+
+  const confirmConvert = () => {
+    if (!convertTarget) return
+    const regNo = convertTarget.regNo
+    setConvertTarget(null)
+    navigate(`${H5_INBOUND_INITIATE_ROUTE}?sourceRegId=${encodeURIComponent(regNo)}`)
+    showToast(`前往入库发起预填 ${regNo}`)
+  }
+
+  const handleVoid = (row: InboundStagingReg) => {
+    setVoidTarget(row)
   }
 
   const handleEdit = (row: InboundStagingReg) => {
@@ -117,7 +193,7 @@ export function InboundStagingListPage() {
   }
 
   const handleViewFormal = (row: InboundStagingReg) => {
-    showToast(`关联正式单 ${row.relatedFormalNo ?? "—"}（演示：跳转入库申请/记录详情）`)
+    navigateToFormalInbound(row.relatedFormalNo, navigate, showToast)
   }
 
   return (
@@ -129,6 +205,19 @@ export function InboundStagingListPage() {
 
         <div className={H5_FILTER_BAR}>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={openDateFilter}
+              className="relative flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-[#232D39]/50 active:bg-[#232D39]/5"
+              aria-label="更多筛选"
+            >
+              <Filter className="size-4" />
+              {dateFilterActive ? (
+                <span className="absolute -right-0.5 -top-0.5 flex size-3.5 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white">
+                  1
+                </span>
+              ) : null}
+            </button>
             <div className="relative min-w-0 flex-1">
               <input
                 type="text"
@@ -177,6 +266,7 @@ export function InboundStagingListPage() {
           </div>
         </div>
 
+        <PrototypeAnnotationTarget annotationIds={["inbound-staging-h5-list-actions"]}>
         <div className={`${H5_LIST_SCROLL} pb-24`}>
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -200,11 +290,13 @@ export function InboundStagingListPage() {
                 row={row}
                 onEdit={handleEdit}
                 onConvert={handleConvert}
+                onVoid={handleVoid}
                 onViewFormal={handleViewFormal}
               />
             ))
           )}
         </div>
+        </PrototypeAnnotationTarget>
 
         <button
           type="button"
@@ -214,6 +306,38 @@ export function InboundStagingListPage() {
         >
           <Plus className="size-7" />
         </button>
+
+        <InboundDateFilterModal
+          open={dateFilterOpen}
+          value={dateDraft}
+          onChange={setDateDraft}
+          onClose={() => setDateFilterOpen(false)}
+          onReset={() => setDateDraft({ ...EMPTY_DATE_RANGE })}
+          onConfirm={() => {
+            setDateApplied({ ...dateDraft })
+            setDateFilterOpen(false)
+          }}
+          secondaryRangeLabel="登记时间"
+        />
+
+        <ConvertToFormalSheet
+          open={Boolean(convertTarget)}
+          reg={convertTarget}
+          onClose={() => setConvertTarget(null)}
+          onConfirm={confirmConvert}
+        />
+
+        <StagingVoidSheet
+          open={Boolean(voidTarget)}
+          regNo={voidTarget?.regNo ?? ""}
+          onClose={() => setVoidTarget(null)}
+          onConfirm={(reason) => {
+            if (voidTarget) voidStagingReg(voidTarget.regNo, reason)
+            setVoidTarget(null)
+            showToast("登记单已作废")
+            setMockTick((t) => t + 1)
+          }}
+        />
 
         {toast ? (
           <div className="fixed bottom-16 left-1/2 z-50 -translate-x-1/2 rounded-full bg-black/80 px-4 py-1.5 text-xs text-white shadow-lg">

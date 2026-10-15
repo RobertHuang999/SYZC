@@ -62,6 +62,17 @@ export function InboundStagingFiltersPanel({
             />
           </FilterField>
 
+          <FilterField label="入库日期" className="lg:col-span-2">
+            <DateRangeInput
+              start={value.inboundDateStart}
+              end={value.inboundDateEnd}
+              onStartChange={(inboundDateStart) =>
+                onChange({ ...value, inboundDateStart })
+              }
+              onEndChange={(inboundDateEnd) => onChange({ ...value, inboundDateEnd })}
+            />
+          </FilterField>
+
           <FilterField label="入库类型">
             <Select
               value={value.inboundType}
@@ -95,44 +106,42 @@ export function InboundStagingFiltersPanel({
             />
           </FilterField>
 
-          <FilterField label="单据状态">
-            <Select
-              value={value.status}
-              onValueChange={(next) => {
-                if (!next) return
-                onChange({ ...value, status: next as InboundStagingFilters["status"] })
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="全部" />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FilterField>
-
           {expanded ? (
             <>
-              <FilterField label="入库日期" className="lg:col-span-2">
-                <DateRangeInput
-                  start={value.inboundDateStart}
-                  end={value.inboundDateEnd}
-                  onStartChange={(inboundDateStart) =>
-                    onChange({ ...value, inboundDateStart })
-                  }
-                  onEndChange={(inboundDateEnd) => onChange({ ...value, inboundDateEnd })}
-                />
+              <FilterField label="单据状态">
+                <Select
+                  value={value.status}
+                  onValueChange={(next) => {
+                    if (!next) return
+                    onChange({ ...value, status: next as InboundStagingFilters["status"] })
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="全部" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FilterField>
               <FilterField label="货主/送货说明">
                 <Input
                   placeholder="货主名称或临时说明"
                   value={value.ownerKeyword}
                   onChange={(e) => onChange({ ...value, ownerKeyword: e.target.value })}
+                />
+              </FilterField>
+              <FilterField label="登记人">
+                <Input
+                  placeholder="登记人姓名或工号"
+                  value={value.registrantKeyword}
+                  onChange={(e) =>
+                    onChange({ ...value, registrantKeyword: e.target.value })
+                  }
                 />
               </FilterField>
               <FilterField label="关联正式入库单号">

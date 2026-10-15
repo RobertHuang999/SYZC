@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { Copy } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
@@ -7,12 +8,23 @@ import {
   getStagingRegById,
   voidStagingReg,
 } from "@prototype/shared/inbound/inbound-staging.mock"
+import { ConvertToFormalSheet } from "../components/ConvertToFormalSheet"
+import { StagingDetailGoodsMobile } from "../components/StagingDetailGoodsMobile"
+import { StagingMobileDetailFooter } from "../components/StagingMobileDetailFooter"
+import { StagingOperationTimelineMobile } from "../components/StagingOperationTimelineMobile"
 import { StagingVoidSheet } from "../components/StagingVoidSheet"
 import {
   H5_INBOUND_INITIATE_ROUTE,
   INBOUND_STAGING_LIST_ROUTE,
   inboundStagingEditQuery,
 } from "../domain/constants"
+import { navigateToFormalInbound } from "../lib/formal-inbound-nav"
+import {
+  STAGING_DETAIL_TABS,
+  STAGING_P01_BANNER,
+} from "@prototype/shared/inbound/staging-ui-labels"
+
+type StagingDetailTab = "goods" | "audit"
 
 function statusBadge(status: string) {
   if (status === "待补全") {
@@ -43,6 +55,7 @@ export function InboundStagingDetailPage() {
   const [convertOpen, setConvertOpen] = useState(false)
   const [voidOpen, setVoidOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [tab, setTab] = useState<StagingDetailTab>("goods")
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -82,104 +95,153 @@ export function InboundStagingDetailPage() {
         <NavBar title="入库暂存详情" backTo={INBOUND_STAGING_LIST_ROUTE} />
       </PrototypeAnnotationTarget>
 
-      <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto bg-[#edf2f8] p-3 pb-28">
+      <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto bg-[#edf2f8] p-3 pb-32">
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
+          {STAGING_P01_BANNER}
+        </div>
+
         <section className="rounded-xl border border-[#232D39]/10 bg-white p-3.5 shadow-xs space-y-2.5">
           <div className="space-y-0.5">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <span className="text-xs text-[#232D39]/60">登记单号</span>
               {statusBadge(reg.status)}
             </div>
-            <p className="text-base font-bold text-[#232D39] leading-tight">{reg.regNo}</p>
+            <div className="flex items-start justify-between gap-2">
+              <p className="min-w-0 flex-1 break-all text-base font-bold text-[#232D39] leading-tight">
+                {reg.regNo}
+              </p>
+              <button
+                type="button"
+                className="flex shrink-0 items-center gap-0.5 rounded-md border border-[#232D39]/10 px-2 py-1 text-[10px] text-[#232D39]/70 active:bg-[#232D39]/5"
+                onClick={() => {
+                  void navigator.clipboard.writeText(reg.regNo)
+                  showToast("已复制登记单号")
+                }}
+              >
+                <Copy className="size-3" />
+                复制
+              </button>
+            </div>
             <p className="text-[11px] text-[#232D39]/50 pt-0.5">
-              登记人： {reg.registrant} · {reg.registeredAt}
+              登记人： {reg.registrant} {reg.registeredAt}
             </p>
           </div>
 
-          <div className="pt-2 border-t border-[#232D39]/5 space-y-1.5 text-xs">
-            <div className="flex justify-between items-baseline gap-3">
-              <span className="text-[#232D39]/60 shrink-0">货主/说明</span>
-              <span className="font-medium text-[#232D39] text-right">
+          <div className="space-y-1.5 border-t border-[#232D39]/5 pt-2 text-xs">
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="shrink-0 text-[#232D39]/60">货主/送货说明</span>
+              <span className="min-w-0 break-all text-right font-medium text-[#232D39]">
                 {reg.ownerDisplay}
                 {reg.ownerTag ? (
-                  <span className="ml-1 font-normal text-[#232D39]/50">[{reg.ownerTag}]</span>
+                  <span className="ml-1 text-[10px] font-normal text-[#232D39]/50">[{reg.ownerTag}]</span>
                 ) : null}
               </span>
             </div>
-            <div className="flex justify-between items-baseline">
-              <span className="text-[#232D39]/60 shrink-0">入库日期</span>
-              <span className="text-[#232D39] text-right">{reg.inboundDate}</span>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="shrink-0 text-[#232D39]/60">入库日期</span>
+              <span className="text-right text-[#232D39]">{reg.inboundDate}</span>
             </div>
-            <div className="flex justify-between items-baseline">
-              <span className="text-[#232D39]/60 shrink-0">入库类型</span>
-              <span className="text-[#232D39] text-right">{reg.inboundType}</span>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="shrink-0 text-[#232D39]/60">入库类型</span>
+              <span className="text-right text-[#232D39]">{reg.inboundType}</span>
             </div>
-            <div className="flex justify-between items-baseline">
-              <span className="text-[#232D39]/60 shrink-0">入库仓库</span>
-              <span className="text-[#232D39] text-right">{reg.warehouseName}</span>
-            </div>
-            {reg.relatedOrderNo ? (
-              <div className="flex justify-between items-baseline">
-                <span className="text-[#232D39]/60 shrink-0">关联单号</span>
-                <span className="text-[#232D39] text-right">{reg.relatedOrderNo}</span>
-              </div>
-            ) : null}
-            <div className="flex justify-between items-baseline">
-              <span className="text-[#232D39]/60 shrink-0">关联正式单</span>
-              <span className="text-[#232D39] text-right">{reg.relatedFormalNo ?? "—"}</span>
-            </div>
-            <div className="flex justify-between items-baseline gap-2">
-              <span className="text-[#232D39]/60 shrink-0">货品摘要</span>
-              <span className="max-w-[65%] text-right font-medium text-[#232D39]">
-                {reg.goodsSummary}
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="shrink-0 text-[#232D39]/60">入库仓库</span>
+              <span className="max-w-[210px] truncate text-right text-[#232D39]">
+                {reg.warehouseName}
               </span>
             </div>
-            <div className="flex justify-between items-baseline">
-              <span className="text-[#232D39]/60 shrink-0">申报数量</span>
-              <span className="font-medium text-[#232D39] text-right">
-                {reg.declaredQty.toLocaleString()} {reg.unit}
-              </span>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="shrink-0 text-[#232D39]/60">关联单号</span>
+              <span className="min-w-0 break-all text-right text-[#232D39]">{reg.relatedOrderNo ?? "—"}</span>
             </div>
-            {reg.locationHint ? (
-              <div className="flex justify-between items-baseline">
-                <span className="text-[#232D39]/60 shrink-0">库位提示</span>
-                <span className="text-[#232D39] text-right">{reg.locationHint}</span>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="shrink-0 text-[#232D39]/60">入库库房</span>
+              <span className="text-right text-[#232D39]">{reg.storeroomName ?? "—"}</span>
+            </div>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="shrink-0 text-[#232D39]/60">关联正式单</span>
+              {reg.relatedFormalNo ? (
+                <button
+                  type="button"
+                  className="min-w-0 break-all text-right text-sm font-medium text-blue-600 active:opacity-70"
+                  onClick={() => navigateToFormalInbound(reg.relatedFormalNo, navigate, showToast)}
+                >
+                  {reg.relatedFormalNo}
+                </button>
+              ) : (
+                <span className="text-right text-[#232D39]">—</span>
+              )}
+            </div>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="shrink-0 text-[#232D39]/60">库位提示</span>
+              <span className="text-right text-[#232D39]">{reg.locationHint ?? "—"}</span>
+            </div>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="shrink-0 text-[#232D39]/60">备注</span>
+              <span className="min-w-0 break-all text-right text-[#232D39]">{reg.remark || "—"}</span>
+            </div>
+            {reg.status === "已作废" ? (
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="shrink-0 text-[#232D39]/60">作废原因</span>
+                <span className="min-w-0 break-all text-right text-[#232D39]">
+                  {reg.voidReason?.trim() || "—"}
+                </span>
               </div>
             ) : null}
-            <div className="flex justify-between items-baseline">
-              <span className="text-[#232D39]/60 shrink-0">备注信息</span>
-              <span className="text-[#232D39] text-right max-w-[65%]">{reg.remark || "—"}</span>
-            </div>
           </div>
         </section>
+
+        <div className="flex border-b border-[#232D39]/10 bg-white px-4 pt-1 shadow-xs">
+          {(
+            [
+              ["goods", STAGING_DETAIL_TABS.goods],
+              ["audit", STAGING_DETAIL_TABS.audit],
+            ] as const
+          ).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setTab(key)}
+              className={`flex-1 py-2 text-center text-xs font-medium cursor-pointer transition-colors ${
+                tab === key
+                  ? "border-b-2 border-blue-600 font-semibold text-blue-600"
+                  : "text-[#232D39]/60"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {tab === "goods" ? <StagingDetailGoodsMobile reg={reg} embedded /> : null}
+        {tab === "audit" ? <StagingOperationTimelineMobile reg={reg} embedded /> : null}
       </div>
 
-      {reg.status === "待补全" ? (
-        <div className="fixed inset-x-0 bottom-0 z-30 space-y-2 border-t border-[#232D39]/10 bg-white p-3 pb-safe">
-          <div className="flex gap-3">
-            <button
-              type="button"
-              className="flex h-[44px] flex-1 items-center justify-center rounded-lg border border-[#232D39]/20 text-sm text-[#232D39]"
-              onClick={() => navigate(inboundStagingEditQuery(reg.id))}
-            >
-              编辑暂存
-            </button>
-            <button
-              type="button"
-              className="flex h-[44px] flex-[1.2] items-center justify-center rounded-lg bg-blue-600 text-sm font-medium text-white active:bg-blue-700"
-              onClick={() => setConvertOpen(true)}
-            >
-              转为正式入库
-            </button>
-          </div>
-          <button
-            type="button"
-            className="w-full py-1 text-center text-xs font-medium text-red-600"
-            onClick={() => setVoidOpen(true)}
-          >
-            作废单据
-          </button>
-        </div>
-      ) : null}
+      <PrototypeAnnotationTarget annotationIds={["inbound-staging-h5-detail-footer"]}>
+        {reg.status === "待补全" ? (
+          <StagingMobileDetailFooter
+            variant="pending"
+            onEdit={() => navigate(inboundStagingEditQuery(reg.id))}
+            onConvert={() => setConvertOpen(true)}
+            onVoid={() => setVoidOpen(true)}
+          />
+        ) : null}
+
+        {reg.status === "已转正式" && reg.relatedFormalNo ? (
+          <StagingMobileDetailFooter
+            variant="converted"
+            onViewFormal={() => navigateToFormalInbound(reg.relatedFormalNo, navigate, showToast)}
+          />
+        ) : null}
+      </PrototypeAnnotationTarget>
+
+      <ConvertToFormalSheet
+        open={convertOpen}
+        reg={reg}
+        onClose={() => setConvertOpen(false)}
+        onConfirm={goConvert}
+      />
 
       <StagingVoidSheet
         open={voidOpen}
@@ -196,33 +258,6 @@ export function InboundStagingDetailPage() {
       {toast ? (
         <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-black/80 px-4 py-1.5 text-xs text-white">
           {toast}
-        </div>
-      ) : null}
-
-      {convertOpen ? (
-        <div className="fixed inset-0 z-50 flex items-end bg-black/40">
-          <div className="w-full rounded-t-2xl bg-white p-4 pb-8 text-sm">
-            <p className="font-medium text-[#232D39]">转为正式入库确认</p>
-            <p className="mt-2 text-xs text-[#232D39]/60">
-              将预填至「入库发起」；提交成功后回写【已转正式】。正式单不展示 REG 单号。
-            </p>
-            <div className="mt-4 flex gap-2">
-              <button
-                type="button"
-                className="h-11 flex-1 rounded-lg border border-[#232D39]/20 text-sm"
-                onClick={() => setConvertOpen(false)}
-              >
-                取消
-              </button>
-              <button
-                type="button"
-                className="h-11 flex-1 rounded-lg bg-blue-600 text-sm font-medium text-white"
-                onClick={goConvert}
-              >
-                确认前往
-              </button>
-            </div>
-          </div>
         </div>
       ) : null}
     </MobileShell>

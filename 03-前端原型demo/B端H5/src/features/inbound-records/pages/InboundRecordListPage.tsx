@@ -164,7 +164,7 @@ export function InboundRecordListPage() {
     <MobileShell>
       <div className="relative flex min-h-0 flex-1 flex-col bg-[#edf2f8]">
         <PrototypeAnnotationTarget annotationIds={["inbound-h5-list"]}>
-          <NavBar title="入库管理" />
+          <NavBar title="入库管理" backTo="/m/workspace" />
         </PrototypeAnnotationTarget>
 
         <div className={H5_FILTER_BAR}>

@@ -98,7 +98,7 @@ export function InboundStagingGoodsPage() {
 
   return (
     <MobileShell>
-      <PrototypeAnnotationTarget annotationIds={["inbound-staging-h5-form"]}>
+      <PrototypeAnnotationTarget annotationIds={["inbound-staging-h5-goods"]}>
         <NavBar
           title="入库暂存登记"
           onBack={() => navigate(INBOUND_STAGING_FORM_ROUTE, { state: INBOUND_STAGING_FORM_RESUME })}
@@ -122,7 +122,9 @@ export function InboundStagingGoodsPage() {
           </div>
           <div className="mt-3 space-y-1 text-xs text-[#232D39]/80">
             <p>货品品类数：{totals.categoryCount}</p>
-            <p>申报总数量：{totals.goodsTotal}</p>
+            <p>货品总数量（申报）：{totals.goodsTotal}</p>
+            <p>堆放总数量：{totals.stackedTotal}</p>
+            <p className="text-amber-700">未堆放总数量：{totals.noStackTotal}</p>
           </div>
           <p className="mt-2 text-[11px] text-amber-700">暂存弱校验 P02：规格/SKU/现场照非强制</p>
         </section>
@@ -133,6 +135,7 @@ export function InboundStagingGoodsPage() {
             index={index}
             line={line}
             form={form}
+            variant="staging"
             onChange={(next) =>
               patch({
                 goodsLines: form.goodsLines.map((l) => (l.id === line.id ? next : l)),

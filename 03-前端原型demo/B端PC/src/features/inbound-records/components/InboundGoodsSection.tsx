@@ -7,6 +7,7 @@ import { InboundGoodsLineCard } from "./InboundGoodsLineCard"
 
 type InboundGoodsSectionProps = {
   form: InboundFormState
+  variant?: "formal" | "staging"
   expanded: boolean
   highlightGoodsId?: string | null
   onToggle: () => void
@@ -18,6 +19,7 @@ type InboundGoodsSectionProps = {
 
 export function InboundGoodsSection({
   form,
+  variant = "formal",
   expanded,
   highlightGoodsId,
   onToggle,
@@ -81,6 +83,7 @@ export function InboundGoodsSection({
                     index={index}
                     line={line}
                     form={form}
+                    variant={variant}
                     showMeasureError={highlightGoodsId === line.id}
                     onChange={(next) => onUpdateLine(line.id, next)}
                     onRemove={() => onRemoveLine(line.id)}

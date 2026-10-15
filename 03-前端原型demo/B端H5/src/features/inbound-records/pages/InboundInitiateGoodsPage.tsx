@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Plus } from "lucide-react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { markStagingConverted } from "@prototype/shared/inbound/inbound-staging.mock"
+import { generateMockInboundOrderNo } from "@prototype/shared/inbound/mock-inbound-order-no"
 import { INBOUND_FORM_MESSAGES } from "@prototype/shared/inbound/form-messages"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
@@ -113,7 +114,7 @@ export function InboundInitiateGoodsPage() {
   }
 
   const submitCore = () => {
-    const orderNo = `${Date.now()}`.padEnd(19, "0").slice(0, 19)
+    const orderNo = generateMockInboundOrderNo()
     const detail = buildMobileDetailFromInitiateForm(form, orderNo)
     const listId = `m-inbound-${Date.now()}`
     detail.id = listId

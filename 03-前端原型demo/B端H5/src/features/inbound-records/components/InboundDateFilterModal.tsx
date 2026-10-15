@@ -12,6 +12,8 @@ type InboundDateFilterModalProps = {
   onClose: () => void
   onReset: () => void
   onConfirm: () => void
+  /** 第二段时间范围标题，默认「制单时间」；暂存列表可传「登记时间」 */
+  secondaryRangeLabel?: string
 }
 
 function DateRangeRow({
@@ -52,6 +54,7 @@ export function InboundDateFilterModal({
   onClose,
   onReset,
   onConfirm,
+  secondaryRangeLabel = "制单时间",
 }: InboundDateFilterModalProps) {
   if (!open) return null
 
@@ -79,7 +82,7 @@ export function InboundDateFilterModal({
           onEndChange={(inboundEnd) => patch({ inboundEnd })}
         />
 
-        <p className="mb-2 mt-4 text-xs font-semibold text-[#232D39]">制单时间</p>
+        <p className="mb-2 mt-4 text-xs font-semibold text-[#232D39]">{secondaryRangeLabel}</p>
         <DateRangeRow
           start={value.createStart}
           end={value.createEnd}

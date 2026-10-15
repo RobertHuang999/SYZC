@@ -13,9 +13,11 @@ type Props = {
   fields: readonly InboundCollectFieldDef[]
   values: Record<string, string>
   onChange: (next: Record<string, string>) => void
+  /** 暂存登记：收集项全面选填 (P05) */
+  allOptional?: boolean
 }
 
-export function InboundCollectFields({ fields, values, onChange }: Props) {
+export function InboundCollectFields({ fields, values, onChange, allOptional }: Props) {
   if (fields.length === 0) return null
 
   const patch = (fieldKey: string, value: string) => {
@@ -27,8 +29,13 @@ export function InboundCollectFields({ fields, values, onChange }: Props) {
       {fields.map((field) => (
         <div key={field.fieldKey} className="space-y-1.5">
           <Label className="text-xs font-medium text-foreground">
-            {field.required ? <span className="text-destructive">* </span> : null}
+            {!allOptional && field.required ? (
+              <span className="text-destructive">* </span>
+            ) : null}
             {field.label}
+            {allOptional ? (
+              <span className="ml-1 font-normal text-muted-foreground">（选填）</span>
+            ) : null}
           </Label>
           {field.control === "select" ? (
             <Select
