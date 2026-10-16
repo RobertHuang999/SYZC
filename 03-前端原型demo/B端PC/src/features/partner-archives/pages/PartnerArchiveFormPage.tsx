@@ -29,9 +29,16 @@ import {
   SUBJECT_STATUS_BADGE_CLASS,
   SUBJECT_STATUS_LABELS,
 } from "../domain/actions"
+import {
+  CONTACT_PHONE_VERIFY_BADGE_CLASS,
+  CONTACT_PHONE_VERIFY_LABELS,
+  markContactPhoneVerified,
+  resolveContactPhoneVerified,
+} from "../lib/contact-phone-verify"
 import { getPartnerArchiveById } from "../lib/detail-utils"
 import { partnerArchivesMock } from "../mock/partner-archives.mock"
 import {
+  findIndividualOwnerAddressConflict,
   findPartnerByIdNumber,
   maskIdNumber,
   rolesAllowedForSubjectType,
@@ -67,6 +74,8 @@ export function PartnerArchiveFormPage() {
   const [name, setName] = useState(existing?.name ?? "")
   const [idNumber, setIdNumber] = useState(existing?.idNumber ?? "")
   const [contactPhone, setContactPhone] = useState(existing?.contactPhone ?? "")
+  const [agentName, setAgentName] = useState(existing?.agentName ?? "")
+  const [adjustAgentMode, setAdjustAgentMode] = useState(false)
   const [province, setProvince] = useState(existing?.certAddress.province || (isEdit ? "" : "江苏省"))
   const [city, setCity] = useState(existing?.certAddress.city || (isEdit ? "" : "南京市"))
   const [district, setDistrict] = useState(existing?.certAddress.district || (isEdit ? "" : "鼓楼区"))
@@ -80,6 +89,9 @@ export function PartnerArchiveFormPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [changeAddressDialogOpen, setChangeAddressDialogOpen] = useState(false)
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false)
+  const [verifyDialogMode, setVerifyDialogMode] = useState<
+    "CHANGE_PHONE" | "VERIFY_CONTACT"
+  >("CHANGE_PHONE")
   const [pendingChangeReason, setPendingChangeReason] = useState<string | undefined>(undefined)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -99,6 +111,12 @@ export function PartnerArchiveFormPage() {
   const isFrozenLimitedEdit = Boolean(
     isEdit && existing?.status === "FROZEN" && !isPendingCompletion
   )
+
+  const isContactPhoneVerified = Boolean(
+    isEdit && existing && resolveContactPhoneVerified(existing) === "VERIFIED"
+  )
+
+  const coreIdentityLocked = Boolean(isEdit && isContactPhoneVerified && !isPendingCompletion)
 
   useEffect(() => {
     if (isEdit) {
@@ -173,13 +191,50 @@ export function PartnerArchiveFormPage() {
     return existing.contactPhone.trim() !== contactPhone.trim()
   }, [existing, isPendingCompletion, contactPhone])
 
-  const isIndividualOwner = useMemo(() => {
-    if (!existing) return false
-    return (
-      existing.subjectType === "INDIVIDUAL" &&
-      existing.roles.some((r) => r.roleType === "OWNER")
-    )
-  }, [existing])
+  const hasAgentDiff = useMemo(() => {
+    if (!existing || subjectType !== "ENTERPRISE") {
+      return false
+    }
+    return (existing.agentName ?? "").trim() !== agentName.trim()
+  }, [existing, subjectType, agentName])
+
+  const hasIndividualOwnerRole = useMemo(() => {
+    if (existing) {
+      return existing.roles.some(
+        (role) => role.roleType === "OWNER" && role.roleStatus !== "INVALID"
+      )
+    }
+    return selectedRoles.includes("OWNER")
+  }, [existing, selectedRoles])
+
+  const isIndividualOwner = Boolean(
+    subjectType === "INDIVIDUAL" && isEdit && hasIndividualOwnerRole
+  )
+
+  const addressRequired =
+    isPendingCompletion ||
+    subjectType === "ENTERPRISE" ||
+    (subjectType === "INDIVIDUAL" && hasIndividualOwnerRole)
+
+  const buildCertAddress = () => {
+    const detail = detailAddress.trim()
+    if (!addressRequired && !detail) {
+      return {
+        province: "",
+        city: "",
+        district: "",
+        detail: "",
+        fullAddress: "",
+      }
+    }
+    return {
+      province,
+      city,
+      district,
+      detail,
+      fullAddress: `${province}${city}${district}${detail}`,
+    }
+  }
 
   const submitButtonLabel = isPendingCompletion
     ? "补全并生效"
@@ -187,16 +242,10 @@ export function PartnerArchiveFormPage() {
       ? "保存修改"
       : "保存并提交"
 
-  const doSave = (changeReason?: string) => {
-    if (subjectType === "INDIVIDUAL" && selectedRoles.includes("OWNER")) {
-      const isConflict = detailAddress.includes("玄武大道 699 号") && !existing
-      if (isConflict) {
-        setAccessWarning("已有相同证件地址，不能绑定为该个人货主")
-        setIsSubmitting(false)
-        return
-      }
-    }
-
+  const doSave = (
+    changeReason?: string,
+    options?: { verifiedOnCreate?: boolean }
+  ) => {
     const phoneChanged = Boolean(isEdit && hasPhoneDiff)
     const oldPhoneVal = existing?.contactPhone
     const now = new Date().toISOString().replace("T", " ").substring(0, 19)
@@ -219,14 +268,11 @@ export function PartnerArchiveFormPage() {
         subjectType,
         idNumber: trimmedId,
         idNumberMasked: maskIdNumber(trimmedId),
-        certAddress: {
-          province,
-          city,
-          district,
-          detail: detailAddress.trim(),
-          fullAddress: `${province}${city}${district}${detailAddress.trim()}`,
-        },
+        certAddress: buildCertAddress(),
         contactPhone: contactPhone.trim(),
+        contactPhoneVerified: options?.verifiedOnCreate ? "VERIFIED" : "UNVERIFIED",
+        contactPhoneVerifiedAt: options?.verifiedOnCreate ? now : undefined,
+        agentName: subjectType === "ENTERPRISE" ? agentName.trim() : undefined,
         status: "NORMAL",
         roles: selectedRoles.map((roleType) => ({
           roleType,
@@ -247,8 +293,10 @@ export function PartnerArchiveFormPage() {
             opTime: now,
             operator: "当前用户",
             actionType: "CREATE",
-            actionName: "人工建档",
-            detail: "通过 PA-R04a 短信二元核验后完成合作方主体建档",
+            actionName: options?.verifiedOnCreate ? "联系手机核验" : "人工建档",
+            detail: options?.verifiedOnCreate
+              ? "人工建档并短信验证成功（联系手机已验证，PA-R04c 已生效）"
+              : "人工建档保存成功（联系手机未验证，金融场景提交前须补验）",
           },
         ],
       }
@@ -258,17 +306,19 @@ export function PartnerArchiveFormPage() {
         existing.roles.some((r) => r.roleStatus === "PENDING_COMPLETION") ||
         !existing.certAddress.fullAddress
 
-      if (!isFrozenLimitedEdit) {
+      if (!isFrozenLimitedEdit && !coreIdentityLocked) {
         existing.name = name.trim()
+      }
+      if (!isPendingCompletion) {
         existing.contactPhone = contactPhone.trim()
       }
-      existing.certAddress = {
-        province,
-        city,
-        district,
-        detail: detailAddress.trim(),
-        fullAddress: `${province}${city}${district}${detailAddress.trim()}`,
+      if (!isFrozenLimitedEdit && subjectType === "ENTERPRISE") {
+        existing.agentName = agentName.trim()
       }
+      if (phoneChanged || hasAgentDiff) {
+        markContactPhoneVerified(existing)
+      }
+      existing.certAddress = buildCertAddress()
 
       if (wasPending) {
         existing.roles = existing.roles.map((r) =>
@@ -325,19 +375,26 @@ export function PartnerArchiveFormPage() {
             : isPendingCompletion
               ? "资料补全成功，角色已激活为正常"
               : "保存成功"
-        : "短信身份核验通过，合作方建档成功"
+        : options?.verifiedOnCreate
+          ? "合作方建档成功（联系手机已验证）"
+          : "合作方建档成功（联系手机未验证）"
     )
     window.setTimeout(() => navigate(PARTNER_ARCHIVE_LIST_PATH), 800)
   }
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault()
+  const validateForm = (): boolean => {
     setAccessWarning(null)
     const newErrors: Record<string, string> = {}
 
     if (!isPendingCompletion) {
+      const nameMax = subjectType === "ENTERPRISE" ? 100 : 30
       if (!name.trim()) {
         newErrors.name = "请输入主体名称"
+      } else if (name.trim().length > nameMax) {
+        newErrors.name =
+          subjectType === "ENTERPRISE"
+            ? "企业全称不超过 100 字"
+            : "姓名不超过 30 字"
       }
       if (!idNumber.trim()) {
         newErrors.idNumber =
@@ -346,6 +403,11 @@ export function PartnerArchiveFormPage() {
             : "请输入18位统一社会信用代码"
       } else if (idNumber.trim().length !== 18) {
         newErrors.idNumber = "证件号码长度必须为18位字符"
+      }
+      if (subjectType === "ENTERPRISE" && !agentName.trim()) {
+        newErrors.agentName = "请输入经办人姓名"
+      } else if (subjectType === "ENTERPRISE" && agentName.trim().length > 30) {
+        newErrors.agentName = "经办人姓名不超过 30 字"
       }
       if (!contactPhone.trim()) {
         newErrors.contactPhone =
@@ -356,23 +418,29 @@ export function PartnerArchiveFormPage() {
         newErrors.contactPhone = "请输入11位大陆标准有效手机号码（用于接收短信验证码）"
       }
     }
-    if (!province.trim() || !city.trim() || !district.trim()) {
-      newErrors.district = "请选择完整的省/市/区"
-    }
-    if (!detailAddress.trim()) {
-      newErrors.detailAddress = "请输入证件详细地址"
+    const detailTrimmed = detailAddress.trim()
+    const addressTouched = Boolean(detailTrimmed)
+    if (addressRequired || addressTouched) {
+      if (!province.trim() || !city.trim() || !district.trim()) {
+        newErrors.district = "请选择完整的省/市/区"
+      }
+      if (!detailTrimmed) {
+        newErrors.detailAddress = "请输入证件详细地址"
+      } else if (`${province}${city}${district}${detailTrimmed}`.length > 200) {
+        newErrors.detailAddress = "证件地址不超过 200 字"
+      }
     }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
-      return
+      return false
     }
 
     if (!isEdit) {
       const duplicate = findPartnerByIdNumber(partnerArchivesMock, idNumber)
       if (duplicate) {
         setAccessWarning("该主体已存在，请前往详情追加角色配置")
-        return
+        return false
       }
     }
 
@@ -381,33 +449,72 @@ export function PartnerArchiveFormPage() {
       setErrors({
         roles: `${ROLE_TYPE_LABELS[illegalRole]}不适用于当前主体类型`,
       })
-      return
+      return false
     }
 
+    if (
+      subjectType === "INDIVIDUAL" &&
+      hasIndividualOwnerRole &&
+      detailTrimmed &&
+      findIndividualOwnerAddressConflict(
+        partnerArchivesMock,
+        `${province}${city}${district}${detailTrimmed}`,
+        existing?.id
+      )
+    ) {
+      setAccessWarning("已有相同证件地址，不能绑定为该个人货主")
+      return false
+    }
+
+    return true
+  }
+
+  const proceedAfterValidation = (intent: "SAVE" | "SAVE_AND_VERIFY") => {
     setIsSubmitting(true)
 
-    // PA-R06a: 编辑态个人货主改址 Diff 阻断并弹出必填改址原因
     if (isEdit && isIndividualOwner && hasAddressDiff) {
       setChangeAddressDialogOpen(true)
       setIsSubmitting(false)
       return
     }
 
-    // 编辑态修改了手机号：触发短信二元身份核验
-    if (isEdit && hasPhoneDiff) {
+    const needsPhoneVerify =
+      isEdit &&
+      (hasPhoneDiff ||
+        (subjectType === "ENTERPRISE" &&
+          adjustAgentMode &&
+          (hasPhoneDiff || hasAgentDiff)))
+
+    if (needsPhoneVerify) {
+      setVerifyDialogMode("CHANGE_PHONE")
       setVerifyDialogOpen(true)
       setIsSubmitting(false)
       return
     }
 
-    // 新增合作方：唤起短信二元身份认证弹窗
-    if (!isEdit) {
+    if (!isEdit && intent === "SAVE_AND_VERIFY") {
+      setVerifyDialogMode("VERIFY_CONTACT")
       setVerifyDialogOpen(true)
       setIsSubmitting(false)
       return
     }
 
     doSave()
+  }
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!validateForm()) {
+      return
+    }
+    proceedAfterValidation("SAVE")
+  }
+
+  const handleSaveAndVerify = () => {
+    if (!validateForm()) {
+      return
+    }
+    proceedAfterValidation("SAVE_AND_VERIFY")
   }
 
   const handleVerifyOpenChange = (open: boolean) => {
@@ -442,6 +549,22 @@ export function PartnerArchiveFormPage() {
                   待补全
                 </Badge>
               )}
+              {isEdit && existing && (
+                <Badge
+                  variant="outline"
+                  className={
+                    CONTACT_PHONE_VERIFY_BADGE_CLASS[
+                      resolveContactPhoneVerified(existing)
+                    ]
+                  }
+                >
+                  {
+                    CONTACT_PHONE_VERIFY_LABELS[
+                      resolveContactPhoneVerified(existing)
+                    ]
+                  }
+                </Badge>
+              )}
             </div>
           </PrototypeAnnotationTarget>
           <PrototypeAnnotationTarget annotationIds={["partner-archive-form-actions"]}>
@@ -453,13 +576,23 @@ export function PartnerArchiveFormPage() {
               <Button type="submit" form="partner-archive-form" disabled={isSubmitting}>
                 {isSubmitting ? "提交中…" : submitButtonLabel}
               </Button>
+              {!isEdit && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isSubmitting}
+                  onClick={handleSaveAndVerify}
+                >
+                  {isSubmitting ? "处理中…" : "保存并验证"}
+                </Button>
+              )}
             </div>
           </PrototypeAnnotationTarget>
         </div>
 
         {isFrozenLimitedEdit && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-            主体处于冻结状态：名称与联系电话不可修改；仅允许在风控授权下纠偏证件登记地址（须过准入与改址原因）。
+            主体处于冻结状态：名称与身份标识不可修改；可以维护联系电话。证件地址仅限纠偏，须通过准入并填写改址原因。
           </div>
         )}
 
@@ -505,21 +638,27 @@ export function PartnerArchiveFormPage() {
                       <span className="text-xs text-muted-foreground">主体名称</span>
                       <p className="text-sm font-medium">{existing.name}</p>
                     </div>
+                    {existing.subjectType === "ENTERPRISE" && (
+                      <div className="space-y-1 rounded-lg border bg-muted/30 p-3">
+                        <span className="text-xs text-muted-foreground">经办人姓名</span>
+                        <p className="text-sm font-medium">{existing.agentName || "——"}</p>
+                      </div>
+                    )}
                     <div className="space-y-1 rounded-lg border bg-muted/30 p-3">
                       <span className="text-xs text-muted-foreground">
                         {existing.subjectType === "INDIVIDUAL"
-                          ? "业务联系手机"
+                          ? "手机号"
                           : "联系电话（经办人手机）"}
                       </span>
-                      <p className="text-sm font-mono font-medium">{existing.contactPhone || "——"}</p>
+                      <p className="text-sm font-medium">{existing.contactPhone || "——"}</p>
                     </div>
                     <div className="space-y-1 rounded-lg border bg-muted/30 p-3">
                       <span className="text-xs text-muted-foreground">
                         {existing.subjectType === "INDIVIDUAL"
                           ? "身份标识（公民身份证号）"
-                          : "货主标识（统一社会信用代码）"}
+                          : "统一社会信用代码"}
                       </span>
-                      <p className="text-sm font-mono font-medium">{existing.idNumber}</p>
+                      <p className="text-sm font-medium">{existing.idNumber}</p>
                     </div>
                   </div>
                 ) : (
@@ -561,7 +700,8 @@ export function PartnerArchiveFormPage() {
                       <Input
                         id="partner-name"
                         value={name}
-                        readOnly={isFrozenLimitedEdit}
+                        maxLength={subjectType === "ENTERPRISE" ? 100 : 30}
+                        readOnly={isFrozenLimitedEdit || coreIdentityLocked}
                         placeholder={
                           subjectType === "INDIVIDUAL"
                             ? "请输入居民身份证姓名"
@@ -576,7 +716,49 @@ export function PartnerArchiveFormPage() {
                       {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                     </div>
 
-                    {/* 字段 3：手机号（个人） / 联系电话（企业） */}
+                    {subjectType === "ENTERPRISE" && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <Label htmlFor="partner-agent">
+                            <span className="mr-1 font-bold text-destructive">*</span>
+                            经办人姓名
+                          </Label>
+                          {coreIdentityLocked && !adjustAgentMode && (
+                            <Button
+                              type="button"
+                              variant="link"
+                              className="h-auto px-0 text-xs"
+                              onClick={() => {
+                                setAdjustAgentMode(true)
+                                markDirty()
+                              }}
+                            >
+                              调整经办人信息
+                            </Button>
+                          )}
+                        </div>
+                        <Input
+                          id="partner-agent"
+                          value={agentName}
+                          maxLength={30}
+                          readOnly={
+                            isFrozenLimitedEdit ||
+                            (coreIdentityLocked && !adjustAgentMode)
+                          }
+                          placeholder="请输入企业业务对接人姓名"
+                          onChange={(event) => {
+                            markDirty()
+                            setAgentName(event.target.value)
+                            setErrors((prev) => ({ ...prev, agentName: "" }))
+                          }}
+                        />
+                        {errors.agentName && (
+                          <p className="text-xs text-destructive">{errors.agentName}</p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* 手机号（个人） / 联系电话（企业经办人手机） */}
                     <div className="space-y-2">
                       <Label htmlFor="partner-phone">
                         <span className="mr-1 font-bold text-destructive">*</span>
@@ -586,7 +768,11 @@ export function PartnerArchiveFormPage() {
                         id="partner-phone"
                         value={contactPhone}
                         maxLength={11}
-                        readOnly={isFrozenLimitedEdit}
+                        readOnly={
+                          subjectType === "ENTERPRISE" &&
+                          coreIdentityLocked &&
+                          !adjustAgentMode
+                        }
                         placeholder={
                           subjectType === "INDIVIDUAL"
                             ? "请输入11位手机号码"
@@ -603,11 +789,10 @@ export function PartnerArchiveFormPage() {
                       )}
                     </div>
 
-                    {/* 字段 4：身份标识（个人） / 货主标识（信用代码）（企业） */}
                     <div className="space-y-2">
                       <Label htmlFor="partner-idNumber">
                         <span className="mr-1 font-bold text-destructive">*</span>
-                        {subjectType === "INDIVIDUAL" ? "身份标识" : "货主标识（信用代码）"}
+                        {subjectType === "INDIVIDUAL" ? "身份标识" : "统一社会信用代码"}
                       </Label>
                       <Input
                         id="partner-idNumber"
@@ -618,7 +803,6 @@ export function PartnerArchiveFormPage() {
                             ? "请输入18位居民身份证号"
                             : "请输入18位统一社会信用代码"
                         }
-                        className="font-mono"
                         onChange={(event) => {
                           markDirty()
                           setIdNumber(event.target.value)
@@ -646,9 +830,14 @@ export function PartnerArchiveFormPage() {
                 <CardTitle>证件登记地址</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {subjectType === "INDIVIDUAL" && (
+                {subjectType === "INDIVIDUAL" && hasIndividualOwnerRole && (
                   <p className="text-xs text-muted-foreground">
-                    个人货主证件地址将联动统一准入核验（租户内唯一，PA-R04）。
+                    个人货主证件地址将联动统一准入核验，租户内不能与其他个人货主相同。
+                  </p>
+                )}
+                {subjectType === "INDIVIDUAL" && !hasIndividualOwnerRole && !isPendingCompletion && (
+                  <p className="text-xs text-muted-foreground">
+                    未挂接货主时，证件地址可以不填。
                   </p>
                 )}
                 <div className="grid gap-4 md:grid-cols-3">
@@ -729,7 +918,8 @@ export function PartnerArchiveFormPage() {
                   <Input
                     id="partner-detailAddress"
                     value={detailAddress}
-                    placeholder="请输入街道、门牌号等详细地址（≤200 字）"
+                    maxLength={200}
+                    placeholder="请输入街道、门牌号等详细地址（整段地址不超过 200 字）"
                     onChange={(event) => {
                       markDirty()
                       setDetailAddress(event.target.value)
@@ -748,11 +938,11 @@ export function PartnerArchiveFormPage() {
             <PrototypeAnnotationTarget annotationIds={["partner-archive-form-roles"]}>
               <Card>
                 <CardHeader>
-                  <CardTitle>初始业务角色配置</CardTitle>
+                  <CardTitle>业务角色（首次挂接）</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <p className="text-xs text-muted-foreground">
-                    仅新增建档阶段开放选填；勾选「货主」角色时，提交将即时调用统一准入核验服务。
+                    保存时将挂接所选角色；未选则仅创建主体，稍后在详情【追加角色】维护。勾选「货主」时将调用统一准入核验（PA-R04）。
                   </p>
                   <div className="flex flex-wrap gap-2 pt-1">
                     {selectableRoles.map((role) => {
@@ -791,6 +981,7 @@ export function PartnerArchiveFormPage() {
             setChangeAddressDialogOpen(false)
             if (hasPhoneDiff) {
               setPendingChangeReason(reason)
+              setVerifyDialogMode("CHANGE_PHONE")
               setVerifyDialogOpen(true)
             } else {
               doSave(reason)
@@ -800,8 +991,16 @@ export function PartnerArchiveFormPage() {
 
         <PartnerVerifyDialog
           open={verifyDialogOpen}
-          mode={isEdit && hasPhoneDiff ? "CHANGE_PHONE" : "CREATE"}
-          oldPhone={isEdit ? existing?.contactPhone : undefined}
+          mode={verifyDialogMode}
+          verifyContext={
+            verifyDialogMode === "VERIFY_CONTACT" ? "CREATE_ARCHIVE" : undefined
+          }
+          agentName={subjectType === "ENTERPRISE" ? agentName.trim() : undefined}
+          oldPhone={
+            verifyDialogMode === "CHANGE_PHONE" && isEdit
+              ? existing?.contactPhone
+              : undefined
+          }
           subjectType={subjectType}
           name={name.trim()}
           idNumber={idNumber.trim()}
@@ -812,7 +1011,10 @@ export function PartnerArchiveFormPage() {
           onConfirm={() => {
             setVerifyDialogOpen(false)
             setIsSubmitting(true)
-            doSave(pendingChangeReason)
+            doSave(
+              pendingChangeReason,
+              verifyDialogMode === "VERIFY_CONTACT" ? { verifiedOnCreate: true } : undefined
+            )
             setPendingChangeReason(undefined)
           }}
         />

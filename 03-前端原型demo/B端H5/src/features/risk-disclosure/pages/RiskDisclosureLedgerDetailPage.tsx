@@ -91,7 +91,7 @@ export function RiskDisclosureLedgerDetailPage() {
   if (!record || !snapshot || !meta) {
     return (
       <MobileShell>
-        <NavBar title="风险公示详情" onBack={() => navigate(LIST_PATH)} />
+        <NavBar title="风险公示详情" backTo={LIST_PATH} />
         <div className="flex flex-1 flex-col items-center justify-center p-6 text-center text-sm text-gray-500">
           <ShieldAlert className="mb-2 size-12 text-gray-300" />
           <p>未找到对应的风险公示记录</p>
@@ -127,7 +127,7 @@ export function RiskDisclosureLedgerDetailPage() {
       <PrototypeAnnotationTarget annotationIds={["h5-risk-disclosure-detail"]}>
         <NavBar
           title={`${orderNo} 公示详情`}
-          onBack={() => navigate(LIST_PATH)}
+          backTo={LIST_PATH}
           right={
             <button
               type="button"

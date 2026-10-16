@@ -1,4 +1,7 @@
 import type { OwnerType, RelatedOrderOption } from "../domain/form-types"
+import { partnerArchivesMock } from "@/features/partner-archives/mock/partner-archives.mock"
+import { resolveContactPhoneVerified } from "@/features/partner-archives/lib/contact-phone-verify"
+import type { ContactPhoneVerifyStatus } from "@/features/partner-archives/domain/types"
 
 export type OwnerSearchRecord = {
   id: string
@@ -11,6 +14,44 @@ export type OwnerSearchRecord = {
   idCardNo?: string
   /** 列表/表单脱敏展示（字段清单：隐藏中间 8 位） */
   idCardMasked?: string
+  /** 合作方档案主体 id（6.3 统一主数据） */
+  partnerId?: string
+  contactPhoneVerified?: ContactPhoneVerifyStatus
+}
+
+function buildPartnerOwnerSearchRecords(): OwnerSearchRecord[] {
+  return partnerArchivesMock
+    .filter((partner) =>
+      partner.roles.some(
+        (role) => role.roleType === "OWNER" && role.roleStatus === "NORMAL"
+      )
+    )
+    .map((partner) => {
+      const isEnterprise = partner.subjectType === "ENTERPRISE"
+      return {
+        id: `partner-${partner.id}`,
+        partnerId: partner.id,
+        ownerType: isEnterprise ? "企业货主" : "个人货主",
+        name: partner.name,
+        ownerIdentifier: isEnterprise ? partner.idNumber : partner.contactPhone,
+        identifierMasked: partner.idNumberMasked,
+        contactPhone: partner.contactPhone,
+        idCardNo: isEnterprise ? undefined : partner.idNumber,
+        idCardMasked: isEnterprise ? undefined : partner.idNumberMasked,
+        contactPhoneVerified: resolveContactPhoneVerified(partner),
+      }
+    })
+}
+
+/** 合作方档案优先 + 历史 Mock 货主（演示对照） */
+export function getOwnerSearchCatalog(): OwnerSearchRecord[] {
+  const partnerNames = new Set(
+    buildPartnerOwnerSearchRecords().map((record) => record.name)
+  )
+  const legacy = OWNER_SEARCH_RECORDS.filter(
+    (record) => !partnerNames.has(record.name)
+  )
+  return [...buildPartnerOwnerSearchRecords(), ...legacy]
 }
 
 export function formatOwnerSearchLabel(name: string, identifierMasked: string) {
@@ -100,7 +141,7 @@ export function findOwnerSearchRecord(
 ): OwnerSearchRecord | undefined {
   const name = ownerName.trim()
   if (!name) return undefined
-  const sameName = OWNER_SEARCH_RECORDS.filter((record) => record.name === name)
+  const sameName = getOwnerSearchCatalog().filter((record) => record.name === name)
   if (sameName.length === 0) return undefined
   if (ownerType) {
     return sameName.find((record) => record.ownerType === ownerType) ?? sameName[0]
@@ -114,7 +155,7 @@ export function findOwnerSearchRecordByIdentifier(
 ): OwnerSearchRecord | undefined {
   const key = identifier.trim()
   if (!key) return undefined
-  return OWNER_SEARCH_RECORDS.find(
+  return getOwnerSearchCatalog().find(
     (record) => record.ownerIdentifier === key || record.contactPhone === key
   )
 }
@@ -137,7 +178,7 @@ export function filterOwnerSearchRecords(
   keyword: string
 ): OwnerSearchRecord[] {
   const kw = keyword.trim().toLowerCase()
-  return OWNER_SEARCH_RECORDS.filter((record) => {
+  return getOwnerSearchCatalog().filter((record) => {
     if (ownerType && record.ownerType !== ownerType) return false
     if (!kw) return true
     const label = formatOwnerSearchLabel(

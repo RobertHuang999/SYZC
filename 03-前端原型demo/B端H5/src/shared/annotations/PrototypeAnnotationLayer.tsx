@@ -532,18 +532,21 @@ function useMobileDragScroll(containerRef: React.RefObject<HTMLDivElement | null
 
     const findScrollParent = (target: HTMLElement | null): HTMLElement | null => {
       let curr = target
+      let fallback: HTMLElement | null = null
       while (curr && curr !== el) {
         const style = window.getComputedStyle(curr)
         const overflowY = style.overflowY
-        if (
-          (overflowY === "auto" || overflowY === "scroll") &&
-          curr.scrollHeight > curr.clientHeight
-        ) {
-          return curr
+        if (overflowY === "auto" || overflowY === "scroll") {
+          if (curr.scrollHeight > curr.clientHeight) {
+            return curr
+          }
+          if (!fallback) {
+            fallback = curr
+          }
         }
         curr = curr.parentElement
       }
-      return null
+      return fallback
     }
 
     const onPointerDown = (e: PointerEvent) => {
@@ -660,6 +663,53 @@ export const PROTOTYPE_NAV_GROUPS: PrototypeNavGroup[] = [
         path: "/m/device-management",
         icon: "📷",
         matchPrefixes: ["/m/device-management", "/m/access-control-devices"],
+      },
+    ],
+  },
+  {
+    label: "仓储业务",
+    items: [
+      {
+        title: "入库管理",
+        path: "/m/workspace/inbound-records",
+        icon: "📥",
+        matchPrefixes: ["/m/workspace/inbound-records", "/m/inbound/initiate"],
+      },
+      {
+        title: "入库暂存",
+        path: "/m/workspace/inbound-staging",
+        icon: "📋",
+        matchPrefixes: ["/m/workspace/inbound-staging", "/m/inbound/staging"],
+      },
+      {
+        title: "出库管理",
+        path: "/m/workspace/outbound-records",
+        icon: "📤",
+        matchPrefixes: ["/m/workspace/outbound-records", "/m/outbound/initiate"],
+      },
+    ],
+  },
+  {
+    label: "用户与配置",
+    items: [
+      {
+        title: "合作方档案",
+        path: "/m/workspace/user-center/partner-archives",
+        icon: "🤝",
+        matchPrefixes: [
+          "/m/workspace/user-center/partner-archives",
+          "/m/partner-archives/form",
+        ],
+      },
+      {
+        title: "仓库管理",
+        path: "/m/workspace/config/warehouse-management",
+        icon: "🏭",
+        matchPrefixes: [
+          "/m/workspace/config/warehouse-management",
+          "/m/workspace/config/new-warehouse",
+          "/m/config/warehouses",
+        ],
       },
     ],
   },
@@ -1236,11 +1286,14 @@ export function PrototypeAnnotationTarget({
   annotationIds,
   children,
   className,
+  flexGrow = false,
   markerPosition = "top-right",
 }: {
   annotationIds: string[]
   children: ReactNode
   className?: string
+  /** 包裹列表/详情滚动区时为 true，避免打断 flex 高度链 */
+  flexGrow?: boolean
   markerPosition?: "top-left" | "top-right"
 }) {
   const context = useAnnotationContext()
@@ -1257,6 +1310,7 @@ export function PrototypeAnnotationTarget({
       data-prototype-target={targetId}
       className={cn(
         "relative transition-all duration-300",
+        flexGrow && "flex min-h-0 flex-1 flex-col",
         isTargetActive &&
           "ring-1 ring-rose-400/80 shadow-[0_0_0_1px_rgba(244,63,94,0.25),0_0_10px_rgba(244,63,94,0.1)] bg-rose-500/[0.03] rounded-xl dark:ring-rose-400/70 dark:bg-rose-950/20",
         className

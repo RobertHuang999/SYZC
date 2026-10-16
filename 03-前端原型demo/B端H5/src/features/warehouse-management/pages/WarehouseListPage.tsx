@@ -9,6 +9,7 @@ import {
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { warehousesMock } from "../mock/warehouses.mock"
 import type { WarehouseRecord } from "../domain/types"
+import { H5_PAGE_BODY } from "@/shared/h5-ui-theme"
 import { WAREHOUSE_QUOTA, WORKSPACE_ROUTE } from "../domain/constants"
 import { WarehouseCard } from "../components/WarehouseCard"
 import {
@@ -45,6 +46,7 @@ export function WarehouseListPage() {
   return (
     <VersionChangeProvider>
       <MobileShell>
+        <div className={H5_PAGE_BODY}>
         <PrototypeAnnotationTarget annotationIds={["wh-h5-list"]}>
           <NavBar title="仓库管理" backTo={WORKSPACE_ROUTE} />
         </PrototypeAnnotationTarget>
@@ -120,6 +122,7 @@ export function WarehouseListPage() {
               没有更多数据了
             </p>
           )}
+        </div>
         </div>
 
         {toast ? (

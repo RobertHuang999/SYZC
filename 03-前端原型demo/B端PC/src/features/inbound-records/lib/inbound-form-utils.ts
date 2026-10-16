@@ -145,6 +145,7 @@ export function createInitialFormState(): InboundFormState {
     remark: "",
     goodsLines: [],
     isNewOwner: false,
+    partnerId: "",
   }
 }
 

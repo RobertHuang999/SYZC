@@ -12,6 +12,7 @@ import {
   type RiskDisclosureSearchField,
 } from "../domain/list-filters"
 import { matchRiskDisclosureRecordByField } from "../lib/display-utils"
+import { WORKSPACE_ROUTE } from "@/features/inbound-records/domain/constants"
 
 export function RiskDisclosureListPage() {
   const records = useMemo(
@@ -41,10 +42,10 @@ export function RiskDisclosureListPage() {
   return (
     <MobileShell>
       <PrototypeAnnotationTarget annotationIds={["h5-risk-disclosure-list-page"]}>
-        <NavBar title="风险公示" />
+        <NavBar title="风险公示" backTo={WORKSPACE_ROUTE} />
       </PrototypeAnnotationTarget>
 
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <PrototypeAnnotationTarget annotationIds={["h5-risk-disclosure-list-filter"]}>
           <div className="shrink-0 border-b border-gray-200/80 bg-white px-3.5 py-2.5 shadow-2xs">
             <div className="flex items-center gap-2">

@@ -13,9 +13,11 @@ import { StagingDetailGoodsMobile } from "../components/StagingDetailGoodsMobile
 import { StagingMobileDetailFooter } from "../components/StagingMobileDetailFooter"
 import { StagingOperationTimelineMobile } from "../components/StagingOperationTimelineMobile"
 import { StagingVoidSheet } from "../components/StagingVoidSheet"
+import { H5_PAGE_BODY } from "@/shared/h5-ui-theme"
 import {
   H5_INBOUND_INITIATE_ROUTE,
   INBOUND_STAGING_LIST_ROUTE,
+  inboundStagingDetailPath,
   inboundStagingEditQuery,
 } from "../domain/constants"
 import { navigateToFormalInbound } from "../lib/formal-inbound-nav"
@@ -73,6 +75,19 @@ export function InboundStagingDetailPage() {
     return id ? getStagingRegById(id) : undefined
   }, [id, mockTick])
 
+  const formalInboundReturnTo = id
+    ? inboundStagingDetailPath(id)
+    : INBOUND_STAGING_LIST_ROUTE
+
+  const openFormalInbound = () => {
+    navigateToFormalInbound(
+      reg?.relatedFormalNo,
+      navigate,
+      showToast,
+      formalInboundReturnTo,
+    )
+  }
+
   if (!reg) {
     return (
       <MobileShell>
@@ -91,11 +106,12 @@ export function InboundStagingDetailPage() {
 
   return (
     <MobileShell>
+      <div className={H5_PAGE_BODY}>
       <PrototypeAnnotationTarget annotationIds={["inbound-staging-h5-detail"]}>
         <NavBar title="入库暂存详情" backTo={INBOUND_STAGING_LIST_ROUTE} />
       </PrototypeAnnotationTarget>
 
-      <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto bg-[#edf2f8] p-3 pb-32">
+      <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto bg-[#edf2f8] p-3 pb-32 overscroll-contain">
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
           {STAGING_P01_BANNER}
         </div>
@@ -165,7 +181,7 @@ export function InboundStagingDetailPage() {
                 <button
                   type="button"
                   className="min-w-0 break-all text-right text-sm font-medium text-blue-600 active:opacity-70"
-                  onClick={() => navigateToFormalInbound(reg.relatedFormalNo, navigate, showToast)}
+                  onClick={openFormalInbound}
                 >
                   {reg.relatedFormalNo}
                 </button>
@@ -217,6 +233,7 @@ export function InboundStagingDetailPage() {
         {tab === "goods" ? <StagingDetailGoodsMobile reg={reg} embedded /> : null}
         {tab === "audit" ? <StagingOperationTimelineMobile reg={reg} embedded /> : null}
       </div>
+      </div>
 
       <PrototypeAnnotationTarget annotationIds={["inbound-staging-h5-detail-footer"]}>
         {reg.status === "待补全" ? (
@@ -231,7 +248,7 @@ export function InboundStagingDetailPage() {
         {reg.status === "已转正式" && reg.relatedFormalNo ? (
           <StagingMobileDetailFooter
             variant="converted"
-            onViewFormal={() => navigateToFormalInbound(reg.relatedFormalNo, navigate, showToast)}
+            onViewFormal={openFormalInbound}
           />
         ) : null}
       </PrototypeAnnotationTarget>

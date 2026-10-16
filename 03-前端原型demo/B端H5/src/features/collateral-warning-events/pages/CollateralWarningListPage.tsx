@@ -270,6 +270,7 @@ export function CollateralWarningListPage() {
       <PrototypeAnnotationTarget annotationIds={["collateral-warning-page"]}>
         <NavBar
           title={batchMode ? `批量公示 (${selectedIds.length})` : "押品预警信息"}
+          backTo="/m/workspace"
           onBack={batchMode ? exitBatchMode : undefined}
           right={
             batchMode ? (
@@ -294,7 +295,7 @@ export function CollateralWarningListPage() {
         />
       </PrototypeAnnotationTarget>
 
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {/* 顶部搜索栏与下拉筛选条件 */}
         {!batchMode && (
           <PrototypeAnnotationTarget annotationIds={["collateral-warning-filter"]}>

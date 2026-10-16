@@ -16,6 +16,8 @@ export const partnerArchivesMock: PartnerSubject[] = [
       fullAddress: "江苏省南京市鼓楼区中山北路 188 号金峰大厦 1201 室",
     },
     contactPhone: "13801234567",
+    contactPhoneVerified: "VERIFIED",
+    contactPhoneVerifiedAt: "2026-09-20 11:05:44",
     status: "NORMAL",
     roles: [
       {
@@ -279,6 +281,7 @@ export const partnerArchivesMock: PartnerSubject[] = [
       fullAddress: "江苏省无锡市滨湖区金融一街 88 号阳光花园 12 栋 302 室",
     },
     contactPhone: "13766554433",
+    contactPhoneVerified: "UNVERIFIED",
     status: "NORMAL",
     roles: [
       {
@@ -436,6 +439,8 @@ export const partnerArchivesMock: PartnerSubject[] = [
       fullAddress: "江苏省无锡市梁溪区人民中路 220 号森云金融中心 28 层",
     },
     contactPhone: "13851088996",
+    agentName: "王主管",
+    contactPhoneVerified: "UNVERIFIED",
     status: "NORMAL",
     roles: [
       {
@@ -1037,6 +1042,8 @@ export const partnerArchivesMock: PartnerSubject[] = [
       fullAddress: "江苏省南京市建邺区江东中路 108 号",
     },
     contactPhone: "15800158009",
+    contactPhoneVerified: "VERIFIED",
+    contactPhoneVerifiedAt: "2026-09-25 10:00:00",
     status: "NORMAL",
     roles: [
       {

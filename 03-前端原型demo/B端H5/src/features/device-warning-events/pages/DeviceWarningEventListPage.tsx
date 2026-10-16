@@ -10,6 +10,7 @@ import { DrawerField, FilterDrawer } from "@/components/ui/FilterDrawer"
 import { WarningTypeCascadePill } from "@/components/ui/WarningTypeCascadePill"
 import { ENABLED_SEVERITY_LEVELS } from "@/shared/mock/severity-levels"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
+import { WORKSPACE_ROUTE } from "@/features/inbound-records/domain/constants"
 import {
   DEFAULT_DEVICE_WARNING_FILTERS,
   DEVICE_WARNING_STATUS_FILTER_OPTIONS,
@@ -137,7 +138,7 @@ export function DeviceWarningEventListPage() {
   return (
     <MobileShell>
       <PrototypeAnnotationTarget annotationIds={["device-warning-page"]}>
-        <NavBar title="设备预警信息" />
+        <NavBar title="设备预警信息" backTo={WORKSPACE_ROUTE} />
       </PrototypeAnnotationTarget>
 
       <PrototypeAnnotationTarget annotationIds={["device-warning-filter"]}>

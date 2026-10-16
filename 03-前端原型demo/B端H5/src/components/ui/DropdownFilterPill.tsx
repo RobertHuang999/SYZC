@@ -15,6 +15,8 @@ type DropdownFilterPillProps = {
   onChange: (value: string) => void
   renderLabel?: (value: string) => string
   theme?: "orange" | "blue"
+  /** 与 H5_FILTER_PILL_ROW 联用：单行等分，文案过长省略 */
+  compactRow?: boolean
 }
 
 type MenuPosition = {
@@ -30,6 +32,7 @@ export function DropdownFilterPill({
   onChange,
   renderLabel,
   theme = "blue",
+  compactRow = false,
 }: DropdownFilterPillProps) {
   const [open, setOpen] = useState(false)
   const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null)
@@ -104,20 +107,33 @@ export function DropdownFilterPill({
     overlayRootRef.current ?? getOverlayRoot(containerRef.current)
 
   return (
-    <div className="relative inline-block shrink-0" ref={containerRef}>
+    <div
+      className={
+        compactRow
+          ? "relative min-w-0 flex-1 basis-0"
+          : "relative max-w-full shrink-0"
+      }
+      ref={containerRef}
+    >
       <button
         ref={triggerRef}
         type="button"
         onClick={toggleOpen}
-        className={`flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
+        className={`flex items-center rounded-lg font-medium transition-all ${
+          compactRow
+            ? "w-full min-w-0 gap-0.5 px-1.5 py-1.5 text-[11px] leading-tight"
+            : "max-w-full gap-1 px-2.5 py-1.5 text-xs"
+        } ${
           isSelected
             ? activeBtnClass
             : "bg-[#232D39]/5 text-[#232D39]/70 hover:bg-[#232D39]/10 active:bg-[#232D39]/10"
         }`}
       >
-        <span className="max-w-[85px] truncate">{displayLabel}</span>
+        <span className={compactRow ? "min-w-0 flex-1 truncate text-left" : "whitespace-nowrap"}>
+          {displayLabel}
+        </span>
         <ChevronDown
-          className={`size-3 text-[#232D39]/40 transition-transform ${
+          className={`size-3 shrink-0 text-[#232D39]/40 transition-transform ${
             open ? `rotate-180 ${activeIconClass}` : ""
           }`}
         />

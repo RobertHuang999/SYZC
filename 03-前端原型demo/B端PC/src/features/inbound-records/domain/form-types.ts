@@ -51,6 +51,8 @@ export type InboundFormState = {
   remark: string
   goodsLines: GoodsLineForm[]
   isNewOwner: boolean
+  /** 合作方档案主体 id（档案货主联想选中时带入） */
+  partnerId: string
 }
 
 export type RelatedOrderOption = {

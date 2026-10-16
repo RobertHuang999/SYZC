@@ -12,6 +12,9 @@ export type RoleStatus =
 
 export type SourceType = "MANUAL" | "CLIENT_AUTH" | "DOC_SETTLEMENT" // 人工建档 | C端认证 | 单据沉淀
 
+/** 业务联系手机短信二元核验状态（与 C 端实名认证独立） */
+export type ContactPhoneVerifyStatus = "VERIFIED" | "UNVERIFIED"
+
 export interface CertAddress {
   province: string
   city: string
@@ -86,6 +89,12 @@ export interface PartnerSubject {
   idNumberMasked: string
   certAddress: CertAddress
   contactPhone: string
+  /** 联系手机核验；未填时由 source 等规则推导（见 resolveContactPhoneVerified） */
+  contactPhoneVerified?: ContactPhoneVerifyStatus
+  /** 最近一次短信核验通过时间；未验证展示 —— */
+  contactPhoneVerifiedAt?: string
+  /** 企业经办人姓名（仅企业主体） */
+  agentName?: string
   status: SubjectStatus
   roles: PartnerRoleItem[]
   source: SourceType
@@ -105,6 +114,8 @@ export interface PartnerSubject {
 export interface PartnerArchiveFilters {
   keyword: string
   contactPhone: string
+  /** 全部 / 已验证 / 未验证 */
+  contactPhoneVerified: string
   subjectType: string
   roleType: string
   subjectStatus: string

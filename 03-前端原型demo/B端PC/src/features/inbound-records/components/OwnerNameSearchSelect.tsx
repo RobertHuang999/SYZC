@@ -6,9 +6,13 @@ import type { OwnerType } from "../domain/form-types"
 import {
   filterOwnerSearchRecords,
   findOwnerSearchRecord,
-  OWNER_SEARCH_RECORDS,
+  getOwnerSearchCatalog,
   type OwnerSearchRecord,
 } from "../mock/inbound-form.mock"
+import {
+  CONTACT_PHONE_VERIFY_BADGE_CLASS,
+  CONTACT_PHONE_VERIFY_LABELS,
+} from "@/features/partner-archives/lib/contact-phone-verify"
 
 function maskIdCardNo(idCard?: string): string {
   if (!idCard) return ""
@@ -25,6 +29,8 @@ export type OwnerNameSelection = {
   contactPhone?: string
   idCardNo?: string
   isNewOwner?: boolean
+  partnerId?: string
+  contactPhoneVerified?: OwnerSearchRecord["contactPhoneVerified"]
 }
 
 type OwnerNameSearchSelectProps = {
@@ -80,6 +86,8 @@ export function OwnerNameSearchSelect({
       contactPhone: record.contactPhone ?? record.ownerIdentifier,
       idCardNo: record.idCardNo ?? "",
       isNewOwner: false,
+      partnerId: record.partnerId,
+      contactPhoneVerified: record.contactPhoneVerified,
     })
     setOpen(false)
   }
@@ -90,7 +98,7 @@ export function OwnerNameSearchSelect({
     setOpen(true)
 
     // 如果用户输入的名字完全精确匹配到某个已有货主，自动反显对应的身份证号和标识
-    const exactMatch = OWNER_SEARCH_RECORDS.find(
+    const exactMatch = getOwnerSearchCatalog().find(
       (r) =>
         (!ownerType || r.ownerType === ownerType) &&
         r.name.trim().toLowerCase() === val.trim().toLowerCase()
@@ -104,6 +112,8 @@ export function OwnerNameSearchSelect({
         contactPhone: exactMatch.contactPhone ?? exactMatch.ownerIdentifier,
         idCardNo: exactMatch.idCardNo ?? "",
         isNewOwner: false,
+        partnerId: exactMatch.partnerId,
+        contactPhoneVerified: exactMatch.contactPhoneVerified,
       })
       return
     }
@@ -117,6 +127,7 @@ export function OwnerNameSearchSelect({
         contactPhone: "",
         idCardNo: "",
         isNewOwner: false,
+        partnerId: "",
       })
       return
     }
@@ -126,6 +137,7 @@ export function OwnerNameSearchSelect({
       ownerName: val,
       ownerType: fallbackType,
       isNewOwner: true,
+      partnerId: "",
     })
   }
 
@@ -224,6 +236,22 @@ export function OwnerNameSearchSelect({
                             >
                               {record.ownerType === "企业货主" ? "企业" : "个人"}
                             </span>
+                            {record.contactPhoneVerified ? (
+                              <span
+                                className={cn(
+                                  "rounded border px-1 py-0.5 text-[10px] font-normal shrink-0",
+                                  CONTACT_PHONE_VERIFY_BADGE_CLASS[
+                                    record.contactPhoneVerified
+                                  ]
+                                )}
+                              >
+                                {
+                                  CONTACT_PHONE_VERIFY_LABELS[
+                                    record.contactPhoneVerified
+                                  ]
+                                }
+                              </span>
+                            ) : null}
                           </div>
                           <p className="text-[11px] text-muted-foreground truncate">
                             {record.ownerType === "个人货主"

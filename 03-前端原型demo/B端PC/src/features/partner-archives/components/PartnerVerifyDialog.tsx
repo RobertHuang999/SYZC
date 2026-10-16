@@ -28,8 +28,12 @@ export type PartnerVerifyDialogProps = {
   contactPhone: string
   fullAddress: string
   roles?: RoleType[]
-  mode?: "CREATE" | "CHANGE_PHONE"
+  mode?: "CREATE" | "CHANGE_PHONE" | "VERIFY_CONTACT"
+  /** 场景 3 子场景：新增建档 / 详情补验 / 入库 R03·PA-R04b */
+  verifyContext?: "CREATE_ARCHIVE" | "DETAIL_VERIFY" | "INBOUND_CREATE" | "INBOUND_SUBMIT"
+  agentName?: string
   oldPhone?: string
+  cancelLabel?: string
   onOpenChange: (open: boolean) => void
   onConfirm: () => void
 }
@@ -50,7 +54,10 @@ export function PartnerVerifyDialog({
   fullAddress,
   roles = [],
   mode = "CREATE",
+  verifyContext = "CREATE_ARCHIVE",
+  agentName,
   oldPhone,
+  cancelLabel = "返回修改",
   onOpenChange,
   onConfirm,
 }: PartnerVerifyDialogProps) {
@@ -114,13 +121,27 @@ export function PartnerVerifyDialog({
               <ShieldCheckIcon className="size-4" />
             </div>
             <DialogTitle>
-              {mode === "CHANGE_PHONE" ? "修改联系手机身份确认" : "合作方身份信息确认"}
+              {mode === "CHANGE_PHONE"
+                ? "修改联系手机身份确认"
+                : verifyContext === "INBOUND_CREATE" || verifyContext === "INBOUND_SUBMIT"
+                  ? "货主身份信息确认"
+                  : mode === "VERIFY_CONTACT"
+                    ? "验证联系手机"
+                    : "合作方身份信息确认"}
             </DialogTitle>
           </div>
           <DialogDescription>
             {mode === "CHANGE_PHONE"
               ? "检测到合作方业务联系手机号发生变更。依风控与安全要求，系统已向新手机号发送验证码，请完成二元身份核验以确认变更。"
-              : "依入库准入及风控规则（R03），新合作方建档需通过预留手机号短信二元身份核验以确保主体真实有效。"}
+              : mode === "VERIFY_CONTACT"
+                ? verifyContext === "INBOUND_SUBMIT"
+                  ? "该货主联系手机尚未验证。完成短信确认后将更新主档为「已验证」，并继续提交本入库单审核。"
+                  : verifyContext === "DETAIL_VERIFY"
+                    ? "请向当前预留的业务联系手机完成短信确认。通过后主档将更新为「已验证」，并按 PA-R04c 锁定核心身份信息。"
+                    : "请向当前预留的业务联系手机完成短信确认。通过后建档为「已验证」，姓名与身份标识将按规则锁定（PA-R04c）。"
+                : verifyContext === "INBOUND_CREATE"
+                  ? "请核对货主实名信息与联系方式，并向预留手机完成短信二元身份核验（R03）。"
+                  : "依入库准入及风控规则（R03），新合作方建档需通过预留手机号短信二元身份核验以确保主体真实有效。"}
           </DialogDescription>
         </DialogHeader>
 
@@ -145,15 +166,19 @@ export function PartnerVerifyDialog({
                 <span className="text-muted-foreground">
                   {subjectType === "INDIVIDUAL" ? "身份证号：" : "统一信用代码："}
                 </span>
-                <span className="font-mono font-medium text-foreground ml-1">{maskedId}</span>
+                <span className="font-medium text-foreground ml-1">{maskedId}</span>
               </div>
               <div>
                 <span className="text-muted-foreground">
                   {mode === "CHANGE_PHONE"
-                    ? (subjectType === "INDIVIDUAL" ? "新手机号：" : "新联系电话：")
-                    : (subjectType === "INDIVIDUAL" ? "业务手机：" : "联系电话：")}
+                    ? subjectType === "INDIVIDUAL"
+                      ? "新手机号："
+                      : "新联系电话："
+                    : subjectType === "INDIVIDUAL"
+                      ? "业务手机："
+                      : "经办人手机："}
                 </span>
-                <span className="font-mono font-medium text-foreground ml-1">{maskedPhone}</span>
+                <span className="font-medium text-foreground ml-1">{maskedPhone}</span>
                 {mode === "CHANGE_PHONE" && oldPhone && (
                   <span className="text-[11px] text-muted-foreground ml-1.5">
                     (原: {maskLoginPhone(oldPhone)})
@@ -162,16 +187,27 @@ export function PartnerVerifyDialog({
               </div>
             </div>
 
-            <div>
-              <span className="text-muted-foreground">证件登记地址：</span>
-              <span className="font-medium text-foreground ml-1 leading-relaxed">
-                {fullAddress}
-              </span>
-            </div>
+            {subjectType === "ENTERPRISE" &&
+              agentName &&
+              (mode === "VERIFY_CONTACT" || mode === "CREATE") && (
+              <div>
+                <span className="text-muted-foreground">经办人姓名：</span>
+                <span className="font-medium text-foreground ml-1">{agentName}</span>
+              </div>
+            )}
 
-            {mode === "CREATE" && roles.length > 0 && (
+            {fullAddress.trim() && (
+              <div>
+                <span className="text-muted-foreground">证件登记地址：</span>
+                <span className="font-medium text-foreground ml-1 leading-relaxed">
+                  {fullAddress}
+                </span>
+              </div>
+            )}
+
+            {(mode === "CREATE" || mode === "VERIFY_CONTACT") && roles.length > 0 && (
               <div className="flex items-center gap-1.5 pt-1 border-t">
-                <span className="text-muted-foreground">初始业务角色：</span>
+                <span className="text-muted-foreground">业务角色：</span>
                 <div className="flex flex-wrap gap-1">
                   {roles.map((r) => (
                     <Badge key={r} variant="outline" className="text-[10px] py-0 px-1.5">
@@ -191,7 +227,7 @@ export function PartnerVerifyDialog({
                 短信验证码
               </Label>
               <span className="text-muted-foreground">
-                验证码已发送至 <span className="font-mono text-foreground">{maskedPhone}</span>
+                验证码已发送至 <span className="text-foreground">{maskedPhone}</span>
               </span>
             </div>
 
@@ -208,7 +244,7 @@ export function PartnerVerifyDialog({
                     setCode(e.target.value.replace(/\D/g, ""))
                     setCodeError(null)
                   }}
-                  className="font-mono tracking-widest text-base"
+                  className="tracking-widest text-base"
                   autoFocus
                 />
               </div>
@@ -234,10 +270,20 @@ export function PartnerVerifyDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              返回修改
+              {cancelLabel}
             </Button>
             <Button type="submit">
-              {mode === "CHANGE_PHONE" ? "确认修改并生效" : "确认建档并生效"}
+              {mode === "CHANGE_PHONE"
+                ? "确认修改并生效"
+                : mode === "VERIFY_CONTACT"
+                  ? verifyContext === "INBOUND_SUBMIT"
+                    ? "确认并继续提交"
+                    : verifyContext === "DETAIL_VERIFY"
+                      ? "确认验证"
+                      : "确认验证并建档"
+                  : verifyContext === "INBOUND_CREATE"
+                    ? "确认并下一步"
+                    : "确认建档并生效"}
             </Button>
           </DialogFooter>
         </form>

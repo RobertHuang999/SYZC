@@ -14,3 +14,8 @@ All project guidelines, business architecture rules, prototype annotation standa
    - Access control passwords: Dual-path matching (`matchUnlockApprovalConfig`). Face recognition MUST NOT call SMS API (R31).
    - Approval: Self-approval forbidden (P06/R11). Unlock apply runs on a dedicated track under Other Approval.
    - IoT Penetration: Device alerts penetrate into collateral orders when `sync_to_order_warn=true`; readonly on order side and resolved via device ledger.
+5. **Language Style & Rule Referencing (大白话说人话 · 规则带全称)**:
+   - **Plain Chinese & Less English**: Use plain, easy-to-understand Chinese ("说人话"); avoid obscure jargon and unnecessary English. If English terms or acronyms are required, format as `中文通俗名（English）` (e.g., `角色权限控制（RBAC）`, `应用程序接口（API）`).
+   - **Full Rule Names**: NEVER use raw rule IDs (like `P01`, `PA-P02`, `R11`) alone. Always write full names: `【规则名称】(编号)` or `「具体规则业务说明（规则编号）」`.
+   - **No LaTeX**: Prohibit LaTeX math formulas (`$...$`) in documentation; use clear Chinese expressions instead. See `AGENTS.md` **4.0.7** & **5.3**.
+

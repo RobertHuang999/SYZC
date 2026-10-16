@@ -543,6 +543,22 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     iconType: "MinusCircle",
   },
 
+  // =================== 2. 工作台 - 用户中心 ===================
+  {
+    id: "ws-user-partner-archives",
+    primaryModule: "工作台",
+    secondaryCategory: "用户中心",
+    name: "合作方档案",
+    originPath: "用户中心-合作方管理-合作方档案",
+    description:
+      "全平台合作方主体主数据台账：维护个人/企业身份、证件地址、业务角色与主体/角色双层状态；为入库、出库、转让等业务提供统一引用与快照来源。",
+    buttons: ["查看页面", "详情", "新增合作方", "编辑", "追加角色", "冻结/解冻"],
+    dataPermission: "租户级数据隔离；可见范围由机构与菜单权限决定",
+    iconType: "Users",
+    customRoute: "/m/workspace/user-center/partner-archives",
+    badge: "新",
+  },
+
   // =================== 2. 工作台 - 配置管理 ===================
   {
     id: "ws-conf-warehouse",

@@ -25,11 +25,13 @@ import {
   saveStagingEditId,
 } from "../lib/inbound-staging-session"
 import { createStagingInitialForm, formFromStagingRegRow, validateStagingBasicStep } from "../lib/staging-form-utils"
+import { handleStackBack } from "@/shared/navigation/stack-back"
 import {
   H5_INBOUND_INITIATE_ROUTE,
   INBOUND_STAGING_FORM_RESUME,
   INBOUND_STAGING_GOODS_ROUTE,
   INBOUND_STAGING_LIST_ROUTE,
+  inboundStagingDetailPath,
 } from "../domain/constants"
 import { STAGING_P01_BANNER } from "@prototype/shared/inbound/staging-ui-labels"
 
@@ -100,12 +102,20 @@ export function InboundStagingFormPage() {
     navigate(INBOUND_STAGING_GOODS_ROUTE, { state: INBOUND_STAGING_FORM_RESUME })
   }
 
+  const formBackFallback = editId
+    ? inboundStagingDetailPath(editId)
+    : INBOUND_STAGING_LIST_ROUTE
+
+  const leaveToPrevious = () => {
+    handleStackBack(navigate, location, formBackFallback)
+  }
+
   const handleBack = () => {
     if (formHasDirtyFields(form)) {
       setLeaveOpen(true)
       return
     }
-    navigate(INBOUND_STAGING_LIST_ROUTE)
+    leaveToPrevious()
   }
 
   const datetimeLocalValue = form.inboundDate.slice(0, 16).replace(" ", "T")
@@ -295,7 +305,7 @@ export function InboundStagingFormPage() {
                 className="flex-1 rounded-lg bg-blue-600 py-2 text-sm text-white"
                 onClick={() => {
                   clearInboundStagingSession()
-                  navigate(INBOUND_STAGING_LIST_ROUTE)
+                  leaveToPrevious()
                 }}
               >
                 离开

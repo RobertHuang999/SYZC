@@ -1,4 +1,4 @@
-import type { SubjectStatus } from "../domain/types"
+import type { PartnerSubject, SubjectStatus } from "../domain/types"
 
 /** 列表/详情展示：138****5678 */
 export function maskLoginPhone(phone: string) {
@@ -15,6 +15,15 @@ export function getPartnerArchiveById(id: string | undefined) {
     return undefined
   }
   return partnerArchivesMock.find((item) => item.id === id)
+}
+
+/** 列表/详情上的冻结、解冻、追加角色写回同一份档案数据 */
+export function commitPartnerArchive(next: PartnerSubject) {
+  const index = partnerArchivesMock.findIndex((item) => item.id === next.id)
+  if (index >= 0) {
+    partnerArchivesMock[index] = next
+  }
+  return next
 }
 
 export type PartnerDetailHeaderAction =

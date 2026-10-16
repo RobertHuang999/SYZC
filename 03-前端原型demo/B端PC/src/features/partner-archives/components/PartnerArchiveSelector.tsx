@@ -10,10 +10,13 @@ import { partnerArchivesMock } from "../mock/partner-archives.mock"
 import {
   ROLE_STATUS_LABELS,
   ROLE_TYPE_LABELS,
+  type ContactPhoneVerifyStatus,
   type PartnerSubject,
   type RoleType,
 } from "../domain/types"
+import { resolveContactPhoneVerified } from "../lib/contact-phone-verify"
 import { cn } from "@/lib/utils"
+import { PARTNER_SELECTOR_DEFAULT_PLACEHOLDER } from "../lib/partner-archive-ui-labels"
 
 export type PartnerSelectorValue = {
   partnerId: string
@@ -24,6 +27,7 @@ export type PartnerSelectorValue = {
   roleType: RoleType
   roleStatus: PartnerSubject["roles"][number]["roleStatus"]
   subjectStatus: PartnerSubject["status"]
+  contactPhoneVerified: ContactPhoneVerifyStatus
 }
 
 type PartnerArchiveSelectorProps = {
@@ -49,7 +53,7 @@ export function PartnerArchiveSelector({
   roleType = "OWNER",
   value,
   onChange,
-  placeholder = "请选择合作方主体",
+  placeholder = PARTNER_SELECTOR_DEFAULT_PLACEHOLDER,
   className,
 }: PartnerArchiveSelectorProps) {
   const options = useMemo(() => toSelectablePartners(roleType), [roleType])
@@ -77,6 +81,7 @@ export function PartnerArchiveSelector({
           roleType,
           roleStatus: role.roleStatus,
           subjectStatus: item.status,
+          contactPhoneVerified: resolveContactPhoneVerified(item),
         })
       }}
     >

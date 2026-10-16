@@ -24,6 +24,7 @@ pnpm-debug.log*
 
 # IDE & Editor
 .idea/
+.obsidian/
 .vscode/*
 !.vscode/extensions.json
 *.suo

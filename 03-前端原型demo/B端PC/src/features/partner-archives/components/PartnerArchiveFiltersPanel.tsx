@@ -15,6 +15,7 @@ import {
   DEFAULT_PARTNER_ARCHIVE_FILTERS,
   PARTNER_ROLE_STATUS_FILTER_OPTIONS,
   PARTNER_ROLE_TYPE_FILTER_OPTIONS,
+  PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS,
   PARTNER_SOURCE_FILTER_OPTIONS,
   PARTNER_SUBJECT_STATUS_FILTER_OPTIONS,
   PARTNER_SUBJECT_TYPE_FILTER_OPTIONS,
@@ -171,7 +172,28 @@ export function PartnerArchiveFiltersPanel({
               </Select>
             </FilterField>
 
-            <FilterField label="手机号/联系电话">
+            <FilterField label="联系手机核验状态">
+              <Select
+                value={value.contactPhoneVerified}
+                onValueChange={(next) => {
+                  if (!next) return
+                  onChange({ ...value, contactPhoneVerified: next })
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option === "全部" ? "全部核验状态" : option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FilterField>
+
+            <FilterField label="联系手机">
               <Input
                 placeholder="11 位手机号精确匹配"
                 maxLength={11}

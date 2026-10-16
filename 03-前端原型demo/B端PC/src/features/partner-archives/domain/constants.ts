@@ -29,9 +29,16 @@ export const PARTNER_SOURCE_FILTER_OPTIONS = [
   "单据沉淀",
 ] as const
 
+export const PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS = [
+  "全部",
+  "已验证",
+  "未验证",
+] as const
+
 export const DEFAULT_PARTNER_ARCHIVE_FILTERS: PartnerArchiveFilters = {
   keyword: "",
   contactPhone: "",
+  contactPhoneVerified: "全部",
   subjectType: "全部",
   roleType: "全部",
   subjectStatus: "全部",

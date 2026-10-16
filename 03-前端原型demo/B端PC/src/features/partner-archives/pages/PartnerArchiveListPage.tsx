@@ -26,7 +26,9 @@ import {
   type PartnerSubject,
   type RoleType,
 } from "../domain/types"
+import { commitPartnerArchive } from "../lib/detail-utils"
 import { filterPartnerArchives, paginatePartnerArchives } from "../lib/list-utils"
+import { buildAppendedRole } from "../lib/partner-archive-rules"
 
 type PendingDialog = {
   action: PartnerArchivePendingAction
@@ -113,54 +115,48 @@ export function PartnerArchiveListPage() {
     const { action, partner } = pendingDialog
 
     if (action === "freeze") {
-      setDataList((prev) =>
-        prev.map((item) =>
-          item.id === partner.id
-            ? {
-                ...item,
-                status: "FROZEN",
-                auditLogs: [
-                  {
-                    id: `log-${Date.now()}`,
-                    opTime: new Date().toISOString().replace("T", " ").substring(0, 19),
-                    operator: "当前用户",
-                    actionType: "FREEZE",
-                    actionName: "冻结主体",
-                    detail: `执行主体冻结管控，原因：${reason}`,
-                  },
-                  ...item.auditLogs,
-                ],
-              }
-            : item
-        )
-      )
+      const now = new Date().toISOString().replace("T", " ").substring(0, 19)
+      const next: PartnerSubject = {
+        ...partner,
+        status: "FROZEN",
+        auditLogs: [
+          {
+            id: `log-${Date.now()}`,
+            opTime: now,
+            operator: "当前用户",
+            actionType: "FREEZE",
+            actionName: "冻结主体",
+            detail: `执行主体冻结管控，原因：${reason}`,
+          },
+          ...partner.auditLogs,
+        ],
+      }
+      commitPartnerArchive(next)
+      setDataList((prev) => prev.map((item) => (item.id === partner.id ? next : item)))
       showToast(`主体【${partner.name}】已成功冻结`)
     }
 
     if (action === "unfreeze") {
-      setDataList((prev) =>
-        prev.map((item) =>
-          item.id === partner.id
-            ? {
-                ...item,
-                status: "NORMAL",
-                auditLogs: [
-                  {
-                    id: `log-${Date.now()}`,
-                    opTime: new Date().toISOString().replace("T", " ").substring(0, 19),
-                    operator: "当前用户",
-                    actionType: "UNFREEZE",
-                    actionName: "解冻主体",
-                    detail: reason
-                      ? `解冻恢复主体正常状态，说明：${reason}`
-                      : "解冻恢复主体正常状态",
-                  },
-                  ...item.auditLogs,
-                ],
-              }
-            : item
-        )
-      )
+      const now = new Date().toISOString().replace("T", " ").substring(0, 19)
+      const next: PartnerSubject = {
+        ...partner,
+        status: "NORMAL",
+        auditLogs: [
+          {
+            id: `log-${Date.now()}`,
+            opTime: now,
+            operator: "当前用户",
+            actionType: "UNFREEZE",
+            actionName: "解冻主体",
+            detail: reason
+              ? `解冻恢复主体正常状态，说明：${reason}`
+              : "解冻恢复主体正常状态",
+          },
+          ...partner.auditLogs,
+        ],
+      }
+      commitPartnerArchive(next)
+      setDataList((prev) => prev.map((item) => (item.id === partner.id ? next : item)))
       showToast(`主体【${partner.name}】解冻审批已通过，已恢复正常`)
     }
 
@@ -168,40 +164,36 @@ export function PartnerArchiveListPage() {
     setPendingDialog(null)
   }
 
-  const handleAppendRoleConfirm = (roleType: RoleType) => {
-    if (!activePartner) {
+  const handleAppendRoleConfirm = (roleTypes: RoleType[]) => {
+    if (!activePartner || roleTypes.length === 0) {
       return
     }
-    setDataList((prev) =>
-      prev.map((item) =>
-        item.id === activePartner.id
-          ? {
-              ...item,
-              roles: [
-                ...item.roles,
-                {
-                  roleType,
-                  roleStatus: "NORMAL",
-                  sourceDocType: "人工建档",
-                  sourceDocNo: "——",
-                  roleEffectiveTime: new Date().toISOString().replace("T", " ").substring(0, 19),
-                },
-              ],
-              auditLogs: [
-                {
-                  id: `log-${Date.now()}`,
-                  opTime: new Date().toISOString().replace("T", " ").substring(0, 19),
-                  operator: "当前用户",
-                  actionType: "APPEND_ROLE",
-                  actionName: "追加业务角色",
-                  detail: `追加【${ROLE_TYPE_LABELS[roleType]}】角色，状态为正常`,
-                },
-                ...item.auditLogs,
-              ],
-            }
-          : item
-      )
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19)
+    const appended = roleTypes.map((roleType) =>
+      buildAppendedRole(activePartner, roleType, now)
     )
+    const next: PartnerSubject = {
+      ...activePartner,
+      roles: [...activePartner.roles, ...appended],
+      auditLogs: [
+        {
+          id: `log-${Date.now()}`,
+          opTime: now,
+          operator: "当前用户",
+          actionType: "APPEND_ROLE",
+          actionName: "追加业务角色",
+          detail: appended
+            .map(
+              (role) =>
+                `追加【${ROLE_TYPE_LABELS[role.roleType]}】，状态为${role.roleStatus === "PENDING_COMPLETION" ? "待补全" : "正常"}`
+            )
+            .join("；"),
+        },
+        ...activePartner.auditLogs,
+      ],
+    }
+    commitPartnerArchive(next)
+    setDataList((prev) => prev.map((item) => (item.id === activePartner.id ? next : item)))
     showToast(`已成功为【${activePartner.name}】追加业务角色`)
     setActivePartner(null)
   }

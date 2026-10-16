@@ -48,6 +48,12 @@ import {
 } from "@/features/outbound-records/annotations/outbound-record.annotations"
 import { outboundRecordH5Documents } from "@/features/outbound-records/documents/outbound-record-documents"
 import {
+  partnerArchiveH5DetailAnnotations,
+  partnerArchiveH5FormAnnotations,
+  partnerArchiveH5ListAnnotations,
+} from "@/features/partner-archives/annotations/partner-archive-h5.annotations"
+import { partnerArchiveH5Documents } from "@/features/partner-archives/documents/partner-archive-documents"
+import {
   PrototypeAnnotationProvider,
   type PrototypeAnnotation,
   type PrototypeDocument,
@@ -169,6 +175,18 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
     pageTitle = "出库发起 · 移动端交互与 PRD 标注"
     currentAnnotations = outboundH5InitiateAnnotations
     currentDocuments = outboundRecordH5Documents
+  } else if (location.pathname.startsWith("/m/partner-archives/form")) {
+    pageTitle = "合作方档案 · H5 新增/编辑 · PRD 标注"
+    currentAnnotations = partnerArchiveH5FormAnnotations
+    currentDocuments = partnerArchiveH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/user-center/partner-archives/")) {
+    pageTitle = "合作方档案 · H5 详情 · PRD 标注"
+    currentAnnotations = partnerArchiveH5DetailAnnotations
+    currentDocuments = partnerArchiveH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/user-center/partner-archives")) {
+    pageTitle = "合作方档案 · H5 列表 · PRD 标注"
+    currentAnnotations = partnerArchiveH5ListAnnotations
+    currentDocuments = partnerArchiveH5Documents
   } else if (
     location.pathname.startsWith("/m/workspace/config/warehouse-management") ||
     location.pathname.startsWith("/m/workspace/config/new-warehouse") ||

@@ -1,5 +1,7 @@
 import { useEffect, type ReactNode } from "react"
+import { Link } from "react-router-dom"
 import { CameraIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,6 +15,7 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { INBOUND_OWNER_FORM_PLACEHOLDERS } from "@prototype/shared/inbound/owner-ui-labels"
 import {
   INBOUND_TYPE_OPTIONS,
   OWNER_TYPES,
@@ -34,6 +37,11 @@ import {
   resolveOwnerSearchRecord,
 } from "../mock/inbound-form.mock"
 import { STAGING_P01_FORM_HINT } from "@prototype/shared/inbound/staging-ui-labels"
+import {
+  CONTACT_PHONE_VERIFY_BADGE_CLASS,
+  CONTACT_PHONE_VERIFY_LABELS,
+} from "@/features/partner-archives/lib/contact-phone-verify"
+import { isFinancialInboundType } from "../lib/inbound-owner-verify"
 
 function ownerTagStaging(
   ownerTrimmed: string,
@@ -119,6 +127,9 @@ export function InboundBasicInfoSection({
     }
     if (form.isNewOwner) {
       patch.isNewOwner = false
+    }
+    if (matchedArchive?.partnerId && form.partnerId !== matchedArchive.partnerId) {
+      patch.partnerId = matchedArchive.partnerId
     }
     if (Object.keys(patch).length > 0) {
       onChange(patch)
@@ -294,6 +305,7 @@ export function InboundBasicInfoSection({
                     contactPhone: "",
                     idCardNo: "",
                     isNewOwner: false,
+                    partnerId: "",
                   })
                 }}
               >
@@ -382,10 +394,55 @@ export function InboundBasicInfoSection({
                         patch.isNewOwner = false
                       }
 
+                      if (selection.partnerId !== undefined) {
+                        patch.partnerId = selection.partnerId
+                      } else if (resolvedArchive?.partnerId) {
+                        patch.partnerId = resolvedArchive.partnerId
+                      } else if (selection.isNewOwner) {
+                        patch.partnerId = ""
+                      }
+
                       onChange(patch)
                     }}
                   />
                 </div>
+                {isArchivedOwner && matchedArchive ? (
+                  <div className="col-span-full flex flex-wrap items-center gap-2 text-[11px]">
+                    <span className="text-muted-foreground">档案货主</span>
+                    {matchedArchive.contactPhoneVerified ? (
+                      <Badge
+                        variant="outline"
+                        className={
+                          CONTACT_PHONE_VERIFY_BADGE_CLASS[
+                            matchedArchive.contactPhoneVerified
+                          ]
+                        }
+                      >
+                        {
+                          CONTACT_PHONE_VERIFY_LABELS[
+                            matchedArchive.contactPhoneVerified
+                          ]
+                        }
+                      </Badge>
+                    ) : null}
+                    {matchedArchive.partnerId ? (
+                      <Link
+                        to={`/用户中心/合作方管理/合作方档案/详情/${matchedArchive.partnerId}`}
+                        className="text-primary hover:underline"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        查看货主
+                      </Link>
+                    ) : null}
+                    {matchedArchive.contactPhoneVerified === "UNVERIFIED" &&
+                    isFinancialInboundType(form.inboundType) ? (
+                      <span className="text-amber-700">
+                        提交审核时将需完成手机短信确认（PA-R04b）
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
                 {(!form.ownerType || isEnterprise) ? (
                   <Button
                     type="button"
@@ -410,12 +467,12 @@ export function InboundBasicInfoSection({
               <Input
                 placeholder={
                   !form.ownerType
-                    ? "请先选择货主类型"
+                    ? INBOUND_OWNER_FORM_PLACEHOLDERS.ownerTypeFirst
                     : ownerFieldsLocked
                     ? "系统档案反显，不可修改"
                     : isEnterprise
-                    ? "请输入统一社会信用代码"
-                    : "请输入手机号码"
+                    ? INBOUND_OWNER_FORM_PLACEHOLDERS.enterpriseCreditCode
+                    : INBOUND_OWNER_FORM_PLACEHOLDERS.personalMobile
                 }
                 value={
                   isPersonal && ownerFieldsLocked && ownerIdentifierPlain
@@ -451,7 +508,7 @@ export function InboundBasicInfoSection({
                   </div>
                 ) : (
                   <Input
-                    placeholder="请输入货主身份证号"
+                    placeholder={INBOUND_OWNER_FORM_PLACEHOLDERS.personalIdCard}
                     value={form.idCardNo}
                     maxLength={18}
                     onChange={(event) =>
@@ -466,7 +523,7 @@ export function InboundBasicInfoSection({
                   placeholder={
                     ownerFieldsLocked
                       ? "系统档案反显，不可修改"
-                      : "请输入企业联系电话"
+                      : INBOUND_OWNER_FORM_PLACEHOLDERS.enterpriseContact
                   }
                   value={
                     ownerFieldsLocked &&

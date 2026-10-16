@@ -18,6 +18,7 @@ import { InboundFormSummaryBar } from "../components/InboundFormSummaryBar"
 import { InboundGoodsSection } from "../components/InboundGoodsSection"
 import { RelatedOrderPickerDialog } from "../components/RelatedOrderPickerDialog"
 import { OwnerVerifyDialog } from "../components/OwnerVerifyDialog"
+import { markContactPhoneVerified } from "@/features/partner-archives/lib/contact-phone-verify"
 import { ApprovalFlowSelectDialog } from "../components/ApprovalFlowSelectDialog"
 import { ImageViewerModal } from "../components/ImageViewerModal"
 import { INBOUND_FORM_MESSAGES } from "@prototype/shared/inbound/form-messages"
@@ -37,7 +38,10 @@ import {
 import {
   FORM_WAREHOUSES,
   getRelatedOrdersByType,
+  resolveOwnerSearchRecord,
 } from "../mock/inbound-form.mock"
+import { needsOwnerSmsAtSubmit } from "../lib/inbound-owner-verify"
+import { partnerArchivesMock } from "@/features/partner-archives/mock/partner-archives.mock"
 import {
   inboundAppliesMock,
   inboundRecordsMock,
@@ -66,6 +70,7 @@ export function InboundRecordFormPage() {
 
   // 选项 A：完整还原两大业务确认弹窗
   const [ownerVerifyOpen, setOwnerVerifyOpen] = useState(false)
+  const [ownerVerifyRequireSms, setOwnerVerifyRequireSms] = useState(false)
   const [flowSelectOpen, setFlowSelectOpen] = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
 
@@ -227,13 +232,32 @@ export function InboundRecordFormPage() {
       }
     }
 
-    // 表单校验全部通过，步骤 1：打开【货主信息确认弹窗】
-    setOwnerVerifyOpen(true)
+    const archive = resolveOwnerSearchRecord({
+      ownerType: form.ownerType,
+      ownerName: form.ownerName,
+      ownerIdentifier: form.ownerIdentifier,
+    })
+    const needsSms = needsOwnerSmsAtSubmit(form, archive)
+
+    if (needsSms) {
+      setOwnerVerifyRequireSms(!form.isNewOwner)
+      setOwnerVerifyOpen(true)
+      return
+    }
+
+    setFlowSelectOpen(true)
   }
 
   // 步骤 2：货主信息及验证码核验通过，打开【流程确认弹窗】
   const handleOwnerVerifySuccess = () => {
     setOwnerVerifyOpen(false)
+    setOwnerVerifyRequireSms(false)
+    if (form.partnerId) {
+      const partner = partnerArchivesMock.find((item) => item.id === form.partnerId)
+      if (partner) {
+        markContactPhoneVerified(partner)
+      }
+    }
     setFlowSelectOpen(true)
   }
 
@@ -433,13 +457,20 @@ export function InboundRecordFormPage() {
         <OwnerVerifyDialog
           open={ownerVerifyOpen}
           isNewOwner={form.isNewOwner}
+          requireSmsVerification={ownerVerifyRequireSms}
           ownerType={form.ownerType}
           ownerName={form.ownerName}
           ownerIdentifier={form.ownerIdentifier}
           contactPhone={form.contactPhone}
           idCardNo={form.idCardNo}
-          onOpenChange={setOwnerVerifyOpen}
-          onBack={() => setOwnerVerifyOpen(false)}
+          onOpenChange={(open) => {
+            setOwnerVerifyOpen(open)
+            if (!open) setOwnerVerifyRequireSms(false)
+          }}
+          onBack={() => {
+            setOwnerVerifyOpen(false)
+            setOwnerVerifyRequireSms(false)
+          }}
           onConfirm={handleOwnerVerifySuccess}
           onSendSmsHint={(phone) => showToast(`验证码已模拟发送至 ${phone}，演示请输入 123456`)}
         />

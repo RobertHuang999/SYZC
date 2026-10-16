@@ -9,7 +9,7 @@ import {
 import { DrawerField, FilterDrawer } from "@/components/ui/FilterDrawer"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { OutboundRecordCard } from "../components/OutboundRecordCard"
-import { MOBILE_OUTBOUND_TYPE_OPTIONS } from "../domain/constants"
+import { MOBILE_OUTBOUND_TYPE_OPTIONS, WORKSPACE_ROUTE } from "../domain/constants"
 import type { MobileOutboundRecord } from "../domain/types"
 import { mobileOutboundRecordsMock } from "../mock/outbound-records.mock"
 import { H5_FILTER_BAR, H5_LIST_SCROLL, H5_SEARCH_INPUT } from "@/shared/h5-ui-theme"
@@ -107,7 +107,7 @@ export function OutboundRecordListPage() {
     <MobileShell>
       <div className="flex min-h-0 flex-1 flex-col bg-[#F2F3F7]">
         <PrototypeAnnotationTarget annotationIds={["outbound-h5-list"]}>
-          <NavBar title="出库管理" />
+          <NavBar title="出库管理" backTo={WORKSPACE_ROUTE} />
         </PrototypeAnnotationTarget>
 
         {/* 搜索与筛选栏（对齐源码 search-section + stream-filter-card 与 H5规范） */}

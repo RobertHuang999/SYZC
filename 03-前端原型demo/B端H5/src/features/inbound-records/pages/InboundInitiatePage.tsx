@@ -41,6 +41,10 @@ import {
 } from "../lib/inbound-initiate-session"
 import { validateInboundBasicStep } from "../lib/validate-inbound-basic"
 import { INBOUND_FORM_MESSAGES } from "@prototype/shared/inbound/form-messages"
+import {
+  INBOUND_OWNER_FORM_PLACEHOLDERS,
+  inboundOwnerNamePlaceholder,
+} from "@prototype/shared/inbound/owner-ui-labels"
 import { getStagingRegByNo } from "@prototype/shared/inbound/inbound-staging.mock"
 import {
   formFromFormalInbound,
@@ -249,7 +253,7 @@ export function InboundInitiatePage() {
                 <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
                   <input
                     className="min-w-0 flex-1 bg-transparent text-right text-sm text-[#232D39] outline-none placeholder:text-[#232D39]/30"
-                    placeholder="请填写"
+                    placeholder={inboundOwnerNamePlaceholder(form.ownerType)}
                     value={form.ownerName}
                     onChange={(e) => {
                       patch({ ownerName: e.target.value })
@@ -299,7 +303,7 @@ export function InboundInitiatePage() {
                   <input
                     maxLength={11}
                     className="w-full bg-transparent text-right text-sm outline-none placeholder:text-[#232D39]/30"
-                    placeholder="请填写手机号"
+                    placeholder={INBOUND_OWNER_FORM_PLACEHOLDERS.personalMobile}
                     value={form.ownerIdentifier}
                     onChange={(e) => patch({ ownerIdentifier: e.target.value })}
                   />
@@ -308,7 +312,7 @@ export function InboundInitiatePage() {
                   <input
                     maxLength={18}
                     className="w-full bg-transparent text-right text-sm outline-none placeholder:text-[#232D39]/30"
-                    placeholder="请输入身份证号"
+                    placeholder={INBOUND_OWNER_FORM_PLACEHOLDERS.personalIdCard}
                     value={form.idCardNo}
                     onChange={(e) => patch({ idCardNo: e.target.value })}
                   />
@@ -321,7 +325,7 @@ export function InboundInitiatePage() {
                 <NativeFormRow label="货主标识" required>
                   <input
                     className="w-full bg-transparent text-right text-sm outline-none placeholder:text-[#232D39]/30"
-                    placeholder="请输入公司统一社会信用代码"
+                    placeholder={INBOUND_OWNER_FORM_PLACEHOLDERS.enterpriseCreditCode}
                     value={form.ownerIdentifier}
                     onChange={(e) => patch({ ownerIdentifier: e.target.value })}
                   />
@@ -330,7 +334,7 @@ export function InboundInitiatePage() {
                   <input
                     maxLength={11}
                     className="w-full bg-transparent text-right text-sm outline-none placeholder:text-[#232D39]/30"
-                    placeholder="请填写"
+                    placeholder={INBOUND_OWNER_FORM_PLACEHOLDERS.enterpriseContact}
                     value={form.contactPhone}
                     onChange={(e) => patch({ contactPhone: e.target.value })}
                   />

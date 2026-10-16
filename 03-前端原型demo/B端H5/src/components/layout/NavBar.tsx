@@ -1,6 +1,7 @@
 import { ChevronLeft } from "lucide-react"
 import type { ReactNode } from "react"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
+import { handleStackBack } from "@/shared/navigation/stack-back"
 
 type NavBarProps = {
   title: string
@@ -11,6 +12,7 @@ type NavBarProps = {
 
 export function NavBar({ title, onBack, backTo, right }: NavBarProps) {
   const navigate = useNavigate()
+  const location = useLocation()
 
   const handleBack = () => {
     if (onBack) {
@@ -19,7 +21,7 @@ export function NavBar({ title, onBack, backTo, right }: NavBarProps) {
     }
 
     if (backTo) {
-      navigate(backTo)
+      handleStackBack(navigate, location, backTo)
       return
     }
 

@@ -41,6 +41,9 @@ import {
   OutboundInitiatePage,
   OutboundInitiateGoodsPage,
 } from "@/features/outbound-records"
+import { PartnerArchiveListPage } from "@/features/partner-archives/pages/PartnerArchiveListPage"
+import { PartnerArchiveDetailPage } from "@/features/partner-archives/pages/PartnerArchiveDetailPage"
+import { PartnerArchiveFormPage } from "@/features/partner-archives/pages/PartnerArchiveFormPage"
 
 const midLoanMenuItem = MOBILE_MENU_ITEMS.find((item) => item.id === "ws-risk-in-loan")
 
@@ -119,6 +122,16 @@ export function AppRoutes() {
       />
       <Route path="/m/outbound/initiate" element={<OutboundInitiatePage />} />
       <Route path="/m/outbound/initiate/goods" element={<OutboundInitiateGoodsPage />} />
+
+      <Route
+        path="/m/workspace/user-center/partner-archives"
+        element={<PartnerArchiveListPage />}
+      />
+      <Route
+        path="/m/workspace/user-center/partner-archives/:id"
+        element={<PartnerArchiveDetailPage />}
+      />
+      <Route path="/m/partner-archives/form" element={<PartnerArchiveFormPage />} />
 
       <Route path="/m/module/:moduleId" element={<GenericModulePage />} />
 

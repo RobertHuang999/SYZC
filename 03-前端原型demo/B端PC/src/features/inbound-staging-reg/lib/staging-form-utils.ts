@@ -112,6 +112,7 @@ export function formFromStagingReg(reg: InboundStagingReg): InboundFormState {
     remark: reg.remark ?? "",
     goodsLines: goodsLines.length ? goodsLines : [createEmptyGoodsLine()],
     isNewOwner: reg.ownerTag !== "档案货主",
+    partnerId: archive?.partnerId ?? "",
   }
 }
 

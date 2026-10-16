@@ -98,12 +98,13 @@ export function InboundRecordDetailPage() {
           </div>
 
           <div className="pt-2 border-t border-[#232D39]/5 space-y-1.5 text-xs">
-            <div className="flex justify-between items-baseline">
-              <span className="text-[#232D39]/60 shrink-0">货主</span>
-              <span className="font-medium text-[#232D39] text-right">
-                {detail.ownerName}{" "}
-                <span className="ml-1">{detail.ownerIdentifierMasked}</span>
-              </span>
+            <div className="flex justify-between items-baseline gap-3">
+              <span className="text-[#232D39]/60 shrink-0">货主名称</span>
+              <span className="font-medium text-[#232D39] text-right">{detail.ownerName}</span>
+            </div>
+            <div className="flex justify-between items-baseline gap-3">
+              <span className="text-[#232D39]/60 shrink-0">货主标识</span>
+              <span className="text-[#232D39] text-right">{detail.ownerIdentifierMasked}</span>
             </div>
             <div className="flex justify-between items-baseline">
               <span className="text-[#232D39]/60 shrink-0">入库日期</span>

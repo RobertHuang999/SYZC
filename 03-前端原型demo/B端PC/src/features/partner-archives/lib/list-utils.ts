@@ -1,11 +1,26 @@
 import { SUBJECT_STATUS_LABELS } from "../domain/actions"
 import type { PartnerArchiveFilters, PartnerSubject } from "../domain/types"
 import {
+  CONTACT_PHONE_VERIFY_LABELS,
+  resolveContactPhoneVerified,
+} from "./contact-phone-verify"
+import {
   ROLE_STATUS_LABELS,
   ROLE_TYPE_LABELS,
   SOURCE_TYPE_LABELS,
   SUBJECT_TYPE_LABELS,
 } from "../domain/types"
+
+function toRangeBound(value: string, bound: "start" | "end") {
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return ""
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return bound === "end" ? `${trimmed} 23:59:59` : `${trimmed} 00:00:00`
+  }
+  return toComparableDateTime(trimmed)
+}
 
 function toComparableDateTime(value: string) {
   const trimmed = value.trim()
@@ -33,8 +48,8 @@ function matchesCreateTimeRange(
     return true
   }
   const current = toComparableDateTime(createTime)
-  const start = toComparableDateTime(createTimeStart)
-  const end = toComparableDateTime(createTimeEnd)
+  const start = toRangeBound(createTimeStart, "start")
+  const end = toRangeBound(createTimeEnd, "end")
   if (start && current < start) {
     return false
   }
@@ -66,6 +81,14 @@ export function filterPartnerArchives(
   if (filters.contactPhone.trim()) {
     const phone = filters.contactPhone.trim()
     result = result.filter((item) => item.contactPhone.trim() === phone)
+  }
+
+  if (!isAll(filters.contactPhoneVerified)) {
+    result = result.filter(
+      (item) =>
+        CONTACT_PHONE_VERIFY_LABELS[resolveContactPhoneVerified(item)] ===
+        filters.contactPhoneVerified
+    )
   }
 
   if (!isAll(filters.subjectType)) {

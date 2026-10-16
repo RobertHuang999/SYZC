@@ -30,7 +30,15 @@ interface WorkstationGroup {
   items: WorkstationItem[]
 }
 
-const WORKSPACE_GROUP_ORDER = ["仓储", "融资/监管", "交易", "风控", "结算", "配置管理"]
+const WORKSPACE_GROUP_ORDER = [
+  "仓储",
+  "融资/监管",
+  "交易",
+  "风控",
+  "结算",
+  "用户中心",
+  "配置管理",
+]
 
 // 设备管理是工作台的聚合 hub，其他 4 个设备 Tab 从 hub 内进入。
 const DEVICE_HUB_TAB_IDS = new Set([
@@ -46,6 +54,7 @@ const GROUP_ACCENT_COLORS: Record<string, readonly string[]> = {
   交易: ["bg-[#e53935]", "bg-[#1e88e5]", "bg-[#43a047]"],
   风控: ["bg-[#f57c00]", "bg-[#e53935]", "bg-[#43a047]", "bg-[#1e88e5]"],
   结算: ["bg-[#1875f0]", "bg-[#43a047]", "bg-[#e53935]"],
+  用户中心: ["bg-[#1875f0]", "bg-[#0288d1]", "bg-[#43a047]"],
   配置管理: ["bg-[#1875f0]", "bg-[#43a047]", "bg-[#0288d1]", "bg-[#1976d2]"],
 }
 

@@ -2,11 +2,13 @@ import type { NavigateFunction } from "react-router-dom"
 import { resolveFormalInboundByOrderNo } from "@prototype/shared/inbound/formal-inbound-link"
 import { inboundDetailRoute } from "@/features/inbound-records/domain/constants"
 import { mobileInboundRecordsMock } from "@/features/inbound-records/mock/inbound-records.mock"
+import type { StackBackLocationState } from "@/shared/navigation/stack-back"
 
 export function navigateToFormalInbound(
   orderNo: string | null | undefined,
   navigate: NavigateFunction,
   showToast: (message: string) => void,
+  returnTo?: string,
 ): void {
   const trimmed = orderNo?.trim()
   if (!trimmed) {
@@ -14,15 +16,19 @@ export function navigateToFormalInbound(
     return
   }
 
+  const detailState: StackBackLocationState | undefined = returnTo
+    ? { returnTo }
+    : undefined
+
   const catalog = resolveFormalInboundByOrderNo(trimmed)
   if (catalog?.kind === "approved-record") {
-    navigate(inboundDetailRoute(catalog.mobileId))
+    navigate(inboundDetailRoute(catalog.mobileId), { state: detailState })
     return
   }
 
   const dynamic = mobileInboundRecordsMock.find((row) => row.orderNo === trimmed)
   if (dynamic) {
-    navigate(inboundDetailRoute(dynamic.id))
+    navigate(inboundDetailRoute(dynamic.id), { state: detailState })
     return
   }
 

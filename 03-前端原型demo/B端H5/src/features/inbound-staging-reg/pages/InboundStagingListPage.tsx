@@ -26,13 +26,15 @@ import { StagingVoidSheet } from "../components/StagingVoidSheet"
 import {
   H5_INBOUND_INITIATE_ROUTE,
   INBOUND_STAGING_FORM_ROUTE,
+  INBOUND_STAGING_LIST_ROUTE,
   inboundStagingEditQuery,
 } from "../domain/constants"
+import { WORKSPACE_ROUTE } from "@/features/inbound-records/domain/constants"
 import {
   InboundDateFilterModal,
   type DateRangeDraft,
 } from "@/features/inbound-records/components/InboundDateFilterModal"
-import { H5_FILTER_BAR, H5_LIST_SCROLL } from "@/shared/h5-ui-theme"
+import { H5_FILTER_BAR, H5_LIST_SCROLL, H5_PAGE_BODY } from "@/shared/h5-ui-theme"
 import { navigateToFormalInbound } from "../lib/formal-inbound-nav"
 
 const EMPTY_DATE_RANGE: DateRangeDraft = {
@@ -193,14 +195,19 @@ export function InboundStagingListPage() {
   }
 
   const handleViewFormal = (row: InboundStagingReg) => {
-    navigateToFormalInbound(row.relatedFormalNo, navigate, showToast)
+    navigateToFormalInbound(
+      row.relatedFormalNo,
+      navigate,
+      showToast,
+      INBOUND_STAGING_LIST_ROUTE,
+    )
   }
 
   return (
     <MobileShell>
-      <div className="relative flex min-h-0 flex-1 flex-col bg-[#edf2f8]">
+      <div className={`relative ${H5_PAGE_BODY} bg-[#edf2f8]`}>
         <PrototypeAnnotationTarget annotationIds={["inbound-staging-h5-list"]}>
-          <NavBar title="入库暂存登记" />
+          <NavBar title="入库暂存登记" backTo={WORKSPACE_ROUTE} />
         </PrototypeAnnotationTarget>
 
         <div className={H5_FILTER_BAR}>
@@ -266,7 +273,7 @@ export function InboundStagingListPage() {
           </div>
         </div>
 
-        <PrototypeAnnotationTarget annotationIds={["inbound-staging-h5-list-actions"]}>
+        <PrototypeAnnotationTarget flexGrow annotationIds={["inbound-staging-h5-list-actions"]}>
         <div className={`${H5_LIST_SCROLL} pb-24`}>
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">

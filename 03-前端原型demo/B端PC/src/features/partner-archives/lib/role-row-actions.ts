@@ -36,6 +36,9 @@ export function getPartnerRoleRowActions(
 
   if (roleStatus === "FROZEN") {
     actions.push("unfreeze")
+    if (roleType !== "OWNER") {
+      actions.push("remove")
+    }
   }
 
   if (roleStatus === "PENDING_EFFECTIVE" && roleType !== "OWNER") {

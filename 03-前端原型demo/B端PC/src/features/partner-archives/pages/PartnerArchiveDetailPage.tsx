@@ -21,6 +21,8 @@ import { partnerArchiveDocuments } from "../documents/partner-archive-documents"
 import { partnerArchiveDetailAnnotations } from "../annotations/partner-archive-detail.annotations"
 import { PartnerAppendRoleDialog } from "../components/PartnerAppendRoleDialog"
 import { PartnerConfirmDialog } from "../components/PartnerConfirmDialog"
+import { PartnerVerifyDialog } from "../components/PartnerVerifyDialog"
+import { partnerArchivesMock } from "../mock/partner-archives.mock"
 import { PARTNER_ARCHIVE_LIST_PATH } from "../domain/constants"
 import {
   ROLE_STATUS_BADGE_CLASS,
@@ -38,27 +40,37 @@ import {
   type RoleType,
 } from "../domain/types"
 import {
+  commitPartnerArchive,
   getPartnerArchiveById,
   getPartnerDetailHeaderActions,
   maskLoginPhone,
 } from "../lib/detail-utils"
-import { hasActiveBusinessForRole } from "../lib/partner-archive-rules"
+import {
+  CONTACT_PHONE_VERIFY_BADGE_CLASS,
+  CONTACT_PHONE_VERIFY_LABELS,
+  markContactPhoneVerified,
+  resolveContactPhoneVerified,
+  resolveContactPhoneVerifiedAt,
+} from "../lib/contact-phone-verify"
+import { buildAppendedRole, hasActiveBusinessForRole } from "../lib/partner-archive-rules"
 import {
   getPartnerRoleRowActions,
   PARTNER_ROLE_ROW_ACTION_LABELS,
   type PartnerRoleRowAction,
 } from "../lib/role-row-actions"
 import { cn } from "@/lib/utils"
+import {
+  PARTNER_DETAIL_TAB_ITEMS,
+  PARTNER_SUBJECT_FREEZE_DIALOG,
+  PARTNER_SUBJECT_UNFREEZE_DIALOG,
+  PARTNER_SUBJECT_UNFREEZE_SUCCESS_TOAST,
+  getPartnerRoleRowDialogCopy,
+  type PartnerDetailTabKey,
+} from "../lib/partner-archive-ui-labels"
 
-type DetailTab = "basic" | "roles" | "account" | "documents" | "logs"
+type DetailTab = PartnerDetailTabKey
 
-const TAB_ITEMS: { key: DetailTab; label: string }[] = [
-  { key: "basic", label: "基础档案" },
-  { key: "roles", label: "业务角色" },
-  { key: "account", label: "关联客户账号" },
-  { key: "documents", label: "关联业务单据" },
-  { key: "logs", label: "操作审批日志" },
-]
+const TAB_ITEMS = PARTNER_DETAIL_TAB_ITEMS
 
 export function PartnerArchiveDetailPage() {
   const { id } = useParams()
@@ -74,6 +86,7 @@ export function PartnerArchiveDetailPage() {
   } | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [removeBlockedMessage, setRemoveBlockedMessage] = useState<string | null>(null)
+  const [verifyContactOpen, setVerifyContactOpen] = useState(false)
 
   useEffect(() => {
     setPartner(getPartnerArchiveById(id))
@@ -92,6 +105,49 @@ export function PartnerArchiveDetailPage() {
     )
   }, [partner])
 
+  const canVerifyContactPhone = useMemo(() => {
+    if (!partner) return false
+    if (resolveContactPhoneVerified(partner) === "VERIFIED") {
+      return false
+    }
+    if (partner.status === "FROZEN" && !needsCompletion) {
+      return false
+    }
+    return true
+  }, [partner, needsCompletion])
+
+  const applyContactPhoneVerified = () => {
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19)
+    setPartner((prev) => {
+      if (!prev) {
+        return prev
+      }
+      const next: PartnerSubject = {
+        ...prev,
+        updateTime: now,
+        auditLogs: [
+          {
+            id: `log-${Date.now()}`,
+            opTime: now,
+            operator: "当前用户",
+            actionType: "AUDIT_SNAPSHOT",
+            actionName: "联系手机核验",
+            detail: "详情主动补验：短信二元身份确认通过，联系手机已验证（PA-R04c 已生效）",
+          },
+          ...prev.auditLogs,
+        ],
+      }
+      markContactPhoneVerified(next, now)
+      const mockIndex = partnerArchivesMock.findIndex((item) => item.id === prev.id)
+      if (mockIndex >= 0) {
+        partnerArchivesMock[mockIndex] = next
+      }
+      return next
+    })
+    setVerifyContactOpen(false)
+    showToast("联系手机验证成功")
+  }
+
   if (!partner) {
     return (
       <div className="space-y-4 p-6">
@@ -108,46 +164,48 @@ export function PartnerArchiveDetailPage() {
     )
   }
 
-  const handleAppendRole = (roleType: RoleType) => {
+  const handleAppendRole = (roleTypes: RoleType[]) => {
+    if (roleTypes.length === 0) {
+      return
+    }
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19)
     setPartner((prev) => {
       if (!prev) return prev
-      return {
+      const appended = roleTypes.map((roleType) => buildAppendedRole(prev, roleType, now))
+      return commitPartnerArchive({
         ...prev,
-        roles: [
-          ...prev.roles,
-          {
-            roleType,
-            roleStatus: "NORMAL",
-            sourceDocType: "人工建档",
-            sourceDocNo: "——",
-            roleEffectiveTime: new Date().toISOString().replace("T", " ").substring(0, 19),
-          },
-        ],
+        roles: [...prev.roles, ...appended],
         auditLogs: [
           {
             id: `log-${Date.now()}`,
-            opTime: new Date().toISOString().replace("T", " ").substring(0, 19),
+            opTime: now,
             operator: "当前用户",
             actionType: "APPEND_ROLE",
             actionName: "追加业务角色",
-            detail: `追加【${ROLE_TYPE_LABELS[roleType]}】角色，状态为正常`,
+            detail: appended
+              .map(
+                (role) =>
+                  `追加【${ROLE_TYPE_LABELS[role.roleType]}】，状态为${role.roleStatus === "PENDING_COMPLETION" ? "待补全" : "正常"}`
+              )
+              .join("；"),
           },
           ...prev.auditLogs,
         ],
-      }
+      })
     })
   }
 
   const handleFreeze = (reason: string) => {
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19)
     setPartner((prev) => {
       if (!prev) return prev
-      return {
+      return commitPartnerArchive({
         ...prev,
         status: "FROZEN",
         auditLogs: [
           {
             id: `log-${Date.now()}`,
-            opTime: new Date().toISOString().replace("T", " ").substring(0, 19),
+            opTime: now,
             operator: "当前用户",
             actionType: "FREEZE",
             actionName: "冻结主体",
@@ -155,20 +213,21 @@ export function PartnerArchiveDetailPage() {
           },
           ...prev.auditLogs,
         ],
-      }
+      })
     })
   }
 
   const handleUnfreeze = (note: string) => {
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19)
     setPartner((prev) => {
       if (!prev) return prev
-      return {
+      return commitPartnerArchive({
         ...prev,
         status: "NORMAL",
         auditLogs: [
           {
             id: `log-${Date.now()}`,
-            opTime: new Date().toISOString().replace("T", " ").substring(0, 19),
+            opTime: now,
             operator: "当前用户",
             actionType: "UNFREEZE",
             actionName: "解冻主体",
@@ -176,7 +235,7 @@ export function PartnerArchiveDetailPage() {
           },
           ...prev.auditLogs,
         ],
-      }
+      })
     })
   }
 
@@ -257,7 +316,7 @@ export function PartnerArchiveDetailPage() {
             ? "解冻角色"
             : "移除角色"
 
-      return {
+      return commitPartnerArchive({
         ...prev,
         roles,
         auditLogs: [
@@ -271,13 +330,14 @@ export function PartnerArchiveDetailPage() {
           },
           ...prev.auditLogs,
         ],
-      }
+      })
     })
     setRoleRowPending(null)
   }
 
-  const roleRowDialogCopy = !roleRowPending
-    ? {
+  const roleRowDialogCopy = roleRowPending
+    ? getPartnerRoleRowDialogCopy(roleRowPending.action)
+    : {
         title: "确认操作",
         description: "",
         confirmLabel: "确认",
@@ -285,32 +345,6 @@ export function PartnerArchiveDetailPage() {
         reasonLabel: "原因",
         reasonPlaceholder: "请输入原因（1～200 字）",
       }
-    : roleRowPending.action === "freeze"
-      ? {
-          title: "确认冻结角色",
-          description: "冻结后该角色将限制发起对应业务，同主体其他角色不受影响。",
-          confirmLabel: "确认冻结",
-          destructive: true,
-          reasonLabel: "冻结原因",
-          reasonPlaceholder: "请输入冻结原因（1～200 字）",
-        }
-      : roleRowPending.action === "unfreeze"
-        ? {
-            title: "确认解冻角色",
-            description: "解冻后该角色恢复为正常状态，可继续参与业务单据。",
-            confirmLabel: "确认解冻",
-            destructive: false,
-            reasonLabel: "解冻原因",
-            reasonPlaceholder: "请输入解冻复核依据（1～200 字）",
-          }
-        : {
-            title: "确认移除非货主角色",
-            description: "移除后角色关系流转为失效；货主角色不可移除。",
-            confirmLabel: "确认移除",
-            destructive: true,
-            reasonLabel: "移除角色原因",
-            reasonPlaceholder: "请输入移除原因（1～200 字）",
-          }
 
   return (
     <PrototypeAnnotationProvider
@@ -341,11 +375,11 @@ export function PartnerArchiveDetailPage() {
               </div>
               <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                 <span>
-                  身份标识：<span className="font-mono">{partner.idNumberMasked}</span>
+                  身份标识：<span>{partner.idNumberMasked}</span>
                 </span>
                 <span>·</span>
                 <span className="inline-flex items-center gap-1">
-                  合作方编号：<span className="font-mono">{partner.partnerNo}</span>
+                  合作方主体标识：<span>{partner.partnerNo}</span>
                   <Button
                     type="button"
                     size="icon-sm"
@@ -370,6 +404,15 @@ export function PartnerArchiveDetailPage() {
                     返回
                   </Button>
                 </Link>
+              )}
+              {canVerifyContactPhone && (
+                <Button
+                  variant="outline"
+                  className="whitespace-nowrap"
+                  onClick={() => setVerifyContactOpen(true)}
+                >
+                  验证联系手机
+                </Button>
               )}
               {headerActions.includes("edit") && (
                 <Link to={`${PARTNER_ARCHIVE_LIST_PATH}/编辑/${partner.id}`}>
@@ -452,14 +495,51 @@ export function PartnerArchiveDetailPage() {
               {/* 第一行：主体关联信息（联系电话、证件地址） */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="md:col-span-1">
+                  <DetailField label="联系手机核验">
+                    <Badge
+                      variant="outline"
+                      className={
+                        CONTACT_PHONE_VERIFY_BADGE_CLASS[
+                          resolveContactPhoneVerified(partner)
+                        ]
+                      }
+                    >
+                      {
+                        CONTACT_PHONE_VERIFY_LABELS[
+                          resolveContactPhoneVerified(partner)
+                        ]
+                      }
+                    </Badge>
+                  </DetailField>
+                </div>
+                <div className="md:col-span-1">
+                  <DetailField label="核验时间">
+                    {(() => {
+                      const verifiedAt = resolveContactPhoneVerifiedAt(partner)
+                      return verifiedAt ? (
+                        <DateTimeText value={verifiedAt} plain />
+                      ) : (
+                        <span className="text-muted-foreground">——</span>
+                      )
+                    })()}
+                  </DetailField>
+                </div>
+                {partner.subjectType === "ENTERPRISE" && (
+                  <div className="md:col-span-1">
+                    <DetailField label="经办人姓名">
+                      {partner.agentName || "——"}
+                    </DetailField>
+                  </div>
+                )}
+                <div className="md:col-span-1">
                   <DetailField
                     label={
                       partner.subjectType === "INDIVIDUAL"
-                        ? "联系电话"
-                        : "联系电话（经办人）"
+                        ? "手机号"
+                        : "联系电话（经办人手机）"
                     }
                   >
-                    <span className="font-mono">
+                    <span>
                       {partner.contactPhone.length >= 11
                         ? maskLoginPhone(partner.contactPhone)
                         : partner.contactPhone || "——"}
@@ -528,10 +608,10 @@ export function PartnerArchiveDetailPage() {
 
         {activeTab === "roles" && (
           <PrototypeAnnotationTarget annotationIds={["partner-archive-detail-roles"]}>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span className="font-medium text-foreground">业务角色列表</span>
-                <span className="font-mono">共 {partner.roles.length} 个角色记录</span>
+                <span>共 {partner.roles.length} 个角色记录</span>
               </div>
               <div className="overflow-hidden rounded-md border">
                 <Table>
@@ -553,7 +633,7 @@ export function PartnerArchiveDetailPage() {
                       const rowActions = getPartnerRoleRowActions(role.roleType, role.roleStatus)
                       return (
                       <TableRow key={`${role.roleType}-${index}`}>
-                        <TableCell className="text-center font-mono text-xs text-muted-foreground">
+                        <TableCell className="text-center text-xs text-muted-foreground">
                           {index + 1}
                         </TableCell>
                         <TableCell className="font-medium">{ROLE_TYPE_LABELS[role.roleType]}</TableCell>
@@ -566,7 +646,7 @@ export function PartnerArchiveDetailPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>{role.sourceDocType ?? "——"}</TableCell>
-                        <TableCell className="font-mono text-xs">
+                        <TableCell className="text-xs">
                           {role.sourceDocNo && role.sourceDocNo !== "——" ? (
                             <button
                               type="button"
@@ -582,7 +662,11 @@ export function PartnerArchiveDetailPage() {
                           )}
                         </TableCell>
                         <TableCell>
-                          <DateTimeText value={role.roleEffectiveTime} />
+                          {role.roleEffectiveTime && role.roleEffectiveTime !== "——" ? (
+                            <DateTimeText value={role.roleEffectiveTime} />
+                          ) : (
+                            "——"
+                          )}
                         </TableCell>
                         <TableCell>
                           {role.roleInvalidTime ? (
@@ -651,9 +735,7 @@ export function PartnerArchiveDetailPage() {
             {partner.boundAccount ? (
               <>
                 <DetailField label="登录手机号">
-                  <span className="font-mono">
-                    {maskLoginPhone(partner.boundAccount.loginPhone)}
-                  </span>
+                  <span>{maskLoginPhone(partner.boundAccount.loginPhone)}</span>
                 </DetailField>
                 <DetailField label="实名认证状态">
                   {AUTH_STATUS_LABELS[partner.boundAccount.authStatus]}
@@ -671,10 +753,10 @@ export function PartnerArchiveDetailPage() {
 
         {activeTab === "documents" && (
           <PrototypeAnnotationTarget annotationIds={["partner-archive-detail-documents"]}>
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>关联业务单据（穿透只读）：反映该主体在仓储、数字仓单、融资质押等环节的真实履约单据</span>
-              <span className="font-mono">共 {partner.associatedDocs.length} 笔业务单据</span>
+              <span>共 {partner.associatedDocs.length} 笔业务单据</span>
             </div>
             <div className="overflow-hidden rounded-md border">
               <Table>
@@ -710,10 +792,10 @@ export function PartnerArchiveDetailPage() {
 
                     return (
                       <TableRow key={doc.id}>
-                        <TableCell className="text-center font-mono text-xs text-muted-foreground">
+                        <TableCell className="text-center text-xs text-muted-foreground">
                           {index + 1}
                         </TableCell>
-                        <TableCell className="font-mono text-xs font-medium">
+                        <TableCell className="text-xs font-medium">
                           <button
                             type="button"
                             className="text-primary hover:underline"
@@ -770,7 +852,7 @@ export function PartnerArchiveDetailPage() {
 
         {activeTab === "logs" && (
           <PrototypeAnnotationTarget annotationIds={["partner-archive-detail-logs"]}>
-          <DetailSection title="操作审批日志">
+          <DetailSection title="操作审计日志">
             <div className="space-y-0 rounded-md border px-5 py-4">
               {partner.auditLogs.map((log) => {
                 let dotColorClass = "bg-primary"
@@ -798,9 +880,10 @@ export function PartnerArchiveDetailPage() {
                       )}
                     />
                     <div className="flex flex-wrap items-center gap-2 text-sm">
-                      <DateTimeText value={log.opTime} className="font-mono text-xs text-muted-foreground" />
+                      <DateTimeText value={log.opTime} className="text-xs text-muted-foreground" />
                       <span className="text-muted-foreground">·</span>
                       <span className="font-medium text-foreground">{log.operator}</span>
+                      <span className="text-xs text-muted-foreground">IP {log.ip || "——"}</span>
                       <Badge variant="outline" className="text-xs">
                         {log.actionName}
                       </Badge>
@@ -816,13 +899,13 @@ export function PartnerArchiveDetailPage() {
 
         <PartnerConfirmDialog
           open={pendingAction === "freeze"}
-          title="确认冻结主体"
-          description="冻结后该主体名下业务角色将暂停发起新业务单据，历史在库库存进入只读风控锁定。请录入冻结原因。"
-          confirmLabel="确认冻结"
+          title={PARTNER_SUBJECT_FREEZE_DIALOG.title}
+          description={PARTNER_SUBJECT_FREEZE_DIALOG.description}
+          confirmLabel={PARTNER_SUBJECT_FREEZE_DIALOG.confirmLabel}
           destructive
           reasonRequired
-          reasonLabel="冻结原因"
-          reasonPlaceholder="请输入冻结理由（1～200 字）"
+          reasonLabel={PARTNER_SUBJECT_FREEZE_DIALOG.reasonLabel}
+          reasonPlaceholder={PARTNER_SUBJECT_FREEZE_DIALOG.reasonPlaceholder}
           onOpenChange={(open) => {
             if (!open) setPendingAction(null)
           }}
@@ -831,18 +914,18 @@ export function PartnerArchiveDetailPage() {
 
         <PartnerConfirmDialog
           open={pendingAction === "unfreeze"}
-          title="提交解冻主体申请"
-          description="解冻须风控审批终审通过后生效。请录入解冻复核依据；原型演示在确认后模拟审批通过。"
-          confirmLabel="提交解冻申请"
+          title={PARTNER_SUBJECT_UNFREEZE_DIALOG.title}
+          description={PARTNER_SUBJECT_UNFREEZE_DIALOG.description}
+          confirmLabel={PARTNER_SUBJECT_UNFREEZE_DIALOG.confirmLabel}
           reasonRequired
-          reasonLabel="解冻原因"
-          reasonPlaceholder="请输入解冻复核依据（1～200 字）"
+          reasonLabel={PARTNER_SUBJECT_UNFREEZE_DIALOG.reasonLabel}
+          reasonPlaceholder={PARTNER_SUBJECT_UNFREEZE_DIALOG.reasonPlaceholder}
           onOpenChange={(open) => {
             if (!open) setPendingAction(null)
           }}
           onConfirm={(reason) => {
             confirmPendingAction(reason)
-            showToast("解冻审批已通过，主体已恢复正常")
+            showToast(PARTNER_SUBJECT_UNFREEZE_SUCCESS_TOAST)
           }}
         />
 
@@ -868,6 +951,21 @@ export function PartnerArchiveDetailPage() {
           open={appendRoleOpen}
           onOpenChange={setAppendRoleOpen}
           onConfirm={handleAppendRole}
+        />
+
+        <PartnerVerifyDialog
+          open={verifyContactOpen}
+          mode="VERIFY_CONTACT"
+          verifyContext="DETAIL_VERIFY"
+          subjectType={partner.subjectType}
+          name={partner.name}
+          idNumber={partner.idNumber}
+          contactPhone={partner.contactPhone}
+          agentName={partner.agentName}
+          fullAddress={partner.certAddress.fullAddress}
+          roles={partner.roles.map((role) => role.roleType)}
+          onOpenChange={setVerifyContactOpen}
+          onConfirm={applyContactPhoneVerified}
         />
 
         {toastMessage && (
