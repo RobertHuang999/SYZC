@@ -1,5 +1,7 @@
 .env
+.venv
 .venv/
+venv/
 .DS_Store
 Thumbs.db
 

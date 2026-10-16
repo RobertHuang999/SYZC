@@ -1,0 +1,9 @@
+# Cursor & AI IDE ignore list
+.venv/
+venv/
+.obsidian/
+node_modules/
+dist/
+dist-ssr/
+.vite/
+21-Yuan Code/
