@@ -9,7 +9,10 @@ import {
 } from "../data/menu-iteration-records"
 import { SystemReferenceSubNav } from "../components/SystemReferenceSubNav"
 import { IterationPathChangeCell } from "../components/IterationPathChangeCell"
-import { IterationPriorityBadge } from "../components/IterationPriorityBadge"
+import {
+  IterationDeliveryTagBadge,
+  IterationPriorityBadge,
+} from "../components/IterationPriorityBadge"
 import {
   iterationDefaultTypeStyle,
   iterationPlatformStyles,
@@ -48,6 +51,9 @@ function IterationTableRow({ entry }: { entry: IterationRecordEntry }) {
       </td>
       <td className="p-2.5 text-xs">
         <IterationPriorityBadge priority={entry.priority} />
+      </td>
+      <td className="p-2.5 text-xs">
+        <IterationDeliveryTagBadge tag={entry.deliveryTag} />
       </td>
       <td className="min-w-[140px] p-2.5 text-xs font-medium leading-snug text-foreground">{entry.title}</td>
       <td className="p-2.5 text-xs">
@@ -220,11 +226,29 @@ export function IterationRecordPage() {
         </div>
 
         {activeVersionMeta && activeVersion !== "全部" && (
-          <div className="mt-2 rounded-md border border-border/50 bg-muted/10 px-3 py-2">
-            <p className="text-xs font-medium text-foreground">{activeVersionMeta.name}</p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">{activeVersionMeta.summary}</p>
-            {activeVersionMeta.docPath && (
-              <p className="mt-1 text-[10px] text-muted-foreground/80">版本 README：{activeVersionMeta.docPath}</p>
+          <div className="mt-2 space-y-2">
+            <div className="rounded-md border border-border/50 bg-muted/10 px-3 py-2">
+              <p className="text-xs font-medium text-foreground">{activeVersionMeta.name}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{activeVersionMeta.summary}</p>
+              {activeVersionMeta.docPath && (
+                <p className="mt-1 text-[10px] text-muted-foreground/80">版本 README：{activeVersionMeta.docPath}</p>
+              )}
+            </div>
+            {activeVersionMeta.scopeAnnotations && activeVersionMeta.scopeAnnotations.length > 0 && (
+              <div className="rounded-md border border-orange-200/80 bg-orange-50/30 px-3 py-2">
+                <p className="text-[11px] font-semibold text-foreground">交付范围标注</p>
+                <ul className="mt-1.5 space-y-1.5">
+                  {activeVersionMeta.scopeAnnotations.map((item) => (
+                    <li key={item.tag} className="text-[10px] leading-relaxed text-muted-foreground">
+                      <IterationDeliveryTagBadge tag={item.tag} />
+                      <span className="ml-1.5 text-foreground/90">{item.meaning}</span>
+                      {item.menus ? (
+                        <span className="mt-0.5 block pl-0.5 text-muted-foreground/90">{item.menus}</span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         )}
@@ -239,6 +263,7 @@ export function IterationRecordPage() {
                 <th className="p-2.5">端</th>
                 <th className="p-2.5">变更类型</th>
                 <th className="p-2.5">优先级</th>
+                <th className="p-2.5">交付标注</th>
                 <th className="p-2.5">变更项</th>
                 <th className="p-2.5">路径 / 能力对比</th>
                 <th className="p-2.5">业务说明</th>
@@ -252,7 +277,7 @@ export function IterationRecordPage() {
                   <Fragment key={versionLabel || "single"}>
                     {activeVersion === "全部" && versionLabel && (
                       <tr className="sticky top-[41px] z-[1] border-b border-border/70 bg-slate-100/95 backdrop-blur-sm">
-                        <td colSpan={9} className="px-2.5 py-1.5">
+                        <td colSpan={10} className="px-2.5 py-1.5">
                           <span className="text-[11px] font-semibold text-foreground">{versionLabel} 版本</span>
                           <span className="ml-2 text-[10px] font-normal text-muted-foreground">{rows.length} 项</span>
                         </td>
@@ -265,7 +290,7 @@ export function IterationRecordPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={9} className="p-8 text-center text-xs text-muted-foreground">
+                  <td colSpan={10} className="p-8 text-center text-xs text-muted-foreground">
                     没有匹配的迭代记录，请调整版本、端、优先级或搜索关键词。
                   </td>
                 </tr>

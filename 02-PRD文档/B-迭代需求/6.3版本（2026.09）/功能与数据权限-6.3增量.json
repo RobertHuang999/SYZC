@@ -14,7 +14,7 @@
       "platform": "PC",
       "level2Menu": "入库记录",
       "recordStatus": "6.3-delivered",
-      "changeNote": "6.3 P0：合作方货主快捷建档（R03）；暂存登记整模块本期不放开",
+      "changeNote": "6.3 P0：合作方货主快捷建档（R03）；暂存登记暂定开发，R32 随迭代放开",
       "updatedAt": "2026-10-19",
       "actionPermissions": "查看页面、详情、新增入库、分配二维码、下载记录、单据下载、快速添加货主"
     },
@@ -22,7 +22,7 @@
       "platform": "PC",
       "level2Menu": "入库暂存登记",
       "recordStatus": "6.3-target",
-      "changeNote": "6.3 P0 三件套已定；本期菜单/路由/原型均不放开",
+      "changeNote": "6.3 暂定开发：三件套已定，菜单/路由随研发迭代放开",
       "updatedAt": "2026-10-19"
     },
     {
@@ -66,7 +66,7 @@
       "platform": "移动",
       "level2Menu": "入库管理",
       "recordStatus": "6.3-delivered",
-      "changeNote": "6.3：入库发起合作方货主；暂存磁贴本期隐藏",
+      "changeNote": "6.3：入库发起合作方货主；暂存磁贴随暂存登记暂定开发进度展示",
       "updatedAt": "2026-10-19"
     },
     {
@@ -101,7 +101,7 @@
       "platform": "移动",
       "level2Menu": "入库发起",
       "recordStatus": "6.3-delivered",
-      "changeNote": "6.3 P0：合作方货主快捷建档；暂存通道本期不展示",
+      "changeNote": "6.3 P0：合作方货主快捷建档；暂存通道随暂存登记暂定开发放开",
       "updatedAt": "2026-10-19"
     },
     {
@@ -110,20 +110,6 @@
       "recordStatus": "6.3-delivered",
       "changeNote": "6.3 P0：提货经办人快捷建档（O06a）",
       "updatedAt": "2026-10-19"
-    },
-    {
-      "platform": "PC",
-      "tab": "客户入库预约",
-      "recordStatus": "6.3-delivered",
-      "changeNote": "6.3 P0：货主引用合作方，准入校验前置",
-      "updatedAt": "2026-09-20"
-    },
-    {
-      "platform": "移动",
-      "tab": "客户入库预约",
-      "recordStatus": "6.3-delivered",
-      "changeNote": "6.3 P0：货主引用合作方，准入校验前置",
-      "updatedAt": "2026-09-20"
     }
   ],
   "append": [
@@ -168,9 +154,9 @@
       "legacyPath": "—",
       "actionPermissions": "查看页面、编辑字段池、保质期单位白名单",
       "dataPermission": "配置管理菜单权限",
-      "changeNote": "6.3 P1 字段池与 SKU 收集项联动",
+      "changeNote": "6.3 暂定：三件套保留，本期不交付菜单与研发",
       "createdAt": "2026-09-01",
-      "updatedAt": "2026-09-20"
+      "updatedAt": "2026-10-19"
     },
     {
       "platform": "移动",
@@ -183,7 +169,7 @@
       "legacyPath": "货物管理～入库暂存登记",
       "actionPermissions": "查看页面、新增登记、编辑、作废（转为正式入库本期关闭）",
       "dataPermission": "账号赋予的仓库权限",
-      "changeNote": "6.3 P0 规格已定；本期不放开",
+      "changeNote": "6.3 暂定开发：规格已定，随研发放开",
       "createdAt": "2026-10-14",
       "updatedAt": "2026-10-19"
     },
@@ -198,7 +184,7 @@
       "legacyPath": "货物管理-入库-入库暂存登记",
       "actionPermissions": "查看页面、新增登记、拍照上传、保存暂存",
       "dataPermission": "账号赋予的仓库权限",
-      "changeNote": "6.3 业务发起磁贴；本期隐藏",
+      "changeNote": "6.3 业务发起磁贴；暂定开发随迭代展示",
       "createdAt": "2026-10-14",
       "updatedAt": "2026-10-19"
     }

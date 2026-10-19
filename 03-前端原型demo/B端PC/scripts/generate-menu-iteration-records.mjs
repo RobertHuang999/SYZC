@@ -85,7 +85,10 @@ function parseMarkdownTable(text, sectionTitle = "菜单调整明细") {
       if (tableLines.length > 0) break
       continue
     }
-    if (!line.trim().startsWith("|")) break
+    if (!line.trim().startsWith("|")) {
+      if (tableLines.length > 0) break
+      continue
+    }
     tableLines.push(line)
   }
 
@@ -133,6 +136,7 @@ function discoverVersionRecords() {
     entries.push({
       dirName,
       filePath: path.relative(path.resolve(iterationRoot, ".."), filePath).replace(/\\/g, "/"),
+      sourceText: text,
       meta,
       headers,
       rows,
@@ -142,15 +146,28 @@ function discoverVersionRecords() {
   return entries
 }
 
+function parseScopeAnnotationSection(text) {
+  const { headers, rows } = parseMarkdownTable(text, "交付范围标注")
+  if (headers["交付标注"] === undefined) return []
+  return rows
+    .map((row) => ({
+      tag: cell(row, headers, "交付标注"),
+      meaning: cell(row, headers, "含义（说人话）") || cell(row, headers, "含义"),
+      menus: cell(row, headers, "涉及菜单 / 能力") || cell(row, headers, "涉及菜单"),
+    }))
+    .filter((item) => item.tag)
+}
+
 const discovered = discoverVersionRecords()
 
-const iterationVersions = discovered.map(({ meta, filePath }) => ({
+const iterationVersions = discovered.map(({ meta, filePath, sourceText }) => ({
   version: meta.version ?? "",
   name: meta.name ?? "",
   period: meta.period ?? "",
   summary: meta.summary ?? "",
   docPath: meta.docPath ?? filePath.replace("/00-菜单迭代记录.md", "/README.md"),
   recordPath: filePath,
+  scopeAnnotations: parseScopeAnnotationSection(sourceText),
 }))
 
 const iterationRecords = []
@@ -169,6 +186,7 @@ for (const item of discovered) {
       before: cell(row, item.headers, "调整前"),
       after: cell(row, item.headers, "调整后"),
       priority: normalizePriority(cell(row, item.headers, "优先级")),
+      deliveryTag: cell(row, item.headers, "交付标注"),
       note: cell(row, item.headers, "说明"),
       date: cell(row, item.headers, "日期"),
       sourceDoc: cell(row, item.headers, "来源文档"),
@@ -185,6 +203,12 @@ export type IterationPlatform = "PC" | "移动" | "双端"
 /** 含 6.3 菜单记录中的「修改 / 合并调整 / 模块重构 / 保留」等扩展类型 */
 export type IterationChangeType = string
 
+export type IterationScopeAnnotation = {
+  tag: string
+  meaning: string
+  menus: string
+}
+
 export type IterationVersionMeta = {
   version: string
   name: string
@@ -192,6 +216,8 @@ export type IterationVersionMeta = {
   summary: string
   docPath: string
   recordPath: string
+  /** 可选 · 版本级交付范围标注（来自 Markdown「交付范围标注」节） */
+  scopeAnnotations?: IterationScopeAnnotation[]
 }
 
 export type IterationRecordEntry = {
@@ -204,6 +230,8 @@ export type IterationRecordEntry = {
   after: string
   /** 版本里程碑优先级，如 P0 / P1；无列或为空则留空 */
   priority: string
+  /** 6.3 等版本的交付裁切标注：暂定 / 不涉及 / 暂定开发 / 必交付 */
+  deliveryTag: string
   note: string
   date: string
   sourceDoc: string
