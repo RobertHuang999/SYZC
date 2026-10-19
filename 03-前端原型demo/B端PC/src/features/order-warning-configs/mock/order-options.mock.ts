@@ -1,7 +1,7 @@
 import type { OrderGoodsBatch, OrderType } from "../domain/types"
 
 /**
- * 对齐抵质押业务管理 [DZY-R08a]：
+ * 对齐监管管理（原抵质押业务管理）[DZY-R08a]：
  * - 未录入贷款结果（贷款余额缺失）或货值评估未完成 → currentLtv 为 null，列表/配置页展示 `—`
  * - 监管服务订单同样支持监管业务率 (LTV) 计算；未录入放款或货值未完成时 currentLtv 为 null
  */

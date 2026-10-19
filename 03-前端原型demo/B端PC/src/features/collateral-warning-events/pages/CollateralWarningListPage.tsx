@@ -299,7 +299,7 @@ export function CollateralWarningListPage() {
             if (target) {
               const returnRoute = `/物联网IOT与预警/预警信息/押品预警信息/详情/${target.eventId}`
               navigate(
-                `/融资/监管/抵质押业务/抵质押业务办理?order_id=${encodeURIComponent(target.orderNo)}&warn_id=${encodeURIComponent(target.eventId)}&return_route=${encodeURIComponent(returnRoute)}`
+                `/融资/监管/监管业务/监管管理?order_id=${encodeURIComponent(target.orderNo)}&warn_id=${encodeURIComponent(target.eventId)}&return_route=${encodeURIComponent(returnRoute)}`
               )
             }
           }}

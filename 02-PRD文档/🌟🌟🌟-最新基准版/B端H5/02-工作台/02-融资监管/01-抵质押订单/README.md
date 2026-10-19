@@ -1,8 +1,8 @@
-# 抵质押订单
+# 监管管理（原「抵质押订单」目录占位）
 
 > **文档状态**：占位 — 待迭代回写 H5 端 PRD / Demo / ASCII
 > **moduleId**：`ws-pledge-order-mgr`
-> **菜单路径**：工作台 → 融资/监管 → 抵质押订单
+> **菜单路径（6.2）**：工作台 → 融资/监管 → **监管管理**（Tab：抵押 / 质押 / 监管服务）
 > **原型路由**：`/m/module/ws-pledge-order-mgr`
 > **PC 原路径**：项目监管～项目管理
 > **功能清单唯一定义来源**：`03-前端原型demo/B端H5/src/data/mobileMenuData.ts`

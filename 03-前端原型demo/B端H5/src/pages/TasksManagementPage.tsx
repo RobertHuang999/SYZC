@@ -234,7 +234,7 @@ export function TasksManagementPage() {
               <span className="mt-1.5 text-[10px] font-medium text-gray-700">仓单开立</span>
             </div>
 
-            {/* 抵质押业务办理 */}
+            {/* 监管办理 */}
             <div
               onClick={() => openFeature("biz-init-pledge-biz")}
               className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
@@ -243,7 +243,7 @@ export function TasksManagementPage() {
                 <Lock className="size-5 stroke-[2.2]" />
               </div>
               <span className="mt-1.5 text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight">
-                抵质押业务办理
+                监管办理
               </span>
             </div>
 

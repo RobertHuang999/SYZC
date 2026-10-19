@@ -1293,9 +1293,9 @@ export const permissionRecords: PermissionRecord[] = [
     "recordStatus": "active",
     "pagePathSegments": [
       "融资管理",
-      "融资结果/线上抵质押办理"
+      "线上监管业务办理"
     ],
-    "pagePath": "融资管理 / 融资结果/线上抵质押办理",
+    "pagePath": "融资管理 / 线上监管业务办理",
     "legacyPath": "需求管理～监管委托需求",
     "actionPermissions": "查看(页面)、详情、分配、状态管理、20250627修改发起抵/质押、抵/质押信息确认、20250702新增：导出为Excel",
     "dataPermission": "1、可见数据根据当前登录账号角色的数据权限决定； 2、分配时可选机构为登录账号归属机构上配置的合作机构 + 本机构所有启用的人员账号；",
@@ -1312,10 +1312,10 @@ export const permissionRecords: PermissionRecord[] = [
     "baselineModuleDir": "B端PC/03-融资监管",
     "recordStatus": "active",
     "pagePathSegments": [
-      "抵质押业务",
-      "抵质押业务办理"
+      "监管业务",
+      "监管办理"
     ],
-    "pagePath": "抵质押业务 / 抵质押业务办理",
+    "pagePath": "监管业务 / 监管办理",
     "legacyPath": "项目管理～抵质押监管订单-抵押信息确认/质押信息确认（（只有开立页面）",
     "actionPermissions": "",
     "dataPermission": "",
@@ -1332,12 +1332,12 @@ export const permissionRecords: PermissionRecord[] = [
     "baselineModuleDir": "active",
     "recordStatus": "active",
     "pagePathSegments": [
-      "抵质押业务",
-      "抵质押业务管理"
+      "监管业务",
+      "监管管理"
     ],
-    "pagePath": "抵质押业务 / 抵质押业务管理",
+    "pagePath": "监管业务 / 监管管理",
     "legacyPath": "项目管理～抵质押监管订单（无开立按钮）",
-    "actionPermissions": "抵质押订单：查看(页面)、导出为excel、结算管理、 更多操作-质物置换、加/补仓、提货、解抵/质押、货物估值、货物盘点、盘点报告、移库、查看监控、平仓、设备管理、查看详情（查看抵质押详情）、部分结清、监管报告、监管报告-查看详情、监管报告-查看报告、监管报告-下载报告、监管报告-生成盘点监管报告、 资料管理、资料上传、查看风险--公示风险/批量公示风险（已处理数据下才展示）、风险公示 (更多操作对应权限内的操作按钮还需根据订单关联的总流程内是否配置对应子流程决定最终是否展示，包含 质物置换、加/补仓、提货、解抵/质押、货物估值、移库、平仓）",
+    "actionPermissions": "抵押/质押/监管服务订单：查看(页面)、导出为excel、结算管理、 更多操作-质物置换、加/补仓、提货、解抵/质押、货物估值、货物盘点、盘点报告、移库、查看监控、平仓、设备管理、查看详情（查看抵质押详情）、部分结清、监管报告、监管报告-查看详情、监管报告-查看报告、监管报告-下载报告、监管报告-生成盘点监管报告、 资料管理、资料上传、查看风险--公示风险/批量公示风险（已处理数据下才展示）、风险公示 (更多操作对应权限内的操作按钮还需根据订单关联的总流程内是否配置对应子流程决定最终是否展示，包含 质物置换、加/补仓、提货、解抵/质押、货物估值、移库、平仓）",
     "dataPermission": "数据权限：根据当前登录账号的角色的数据权限决定【任务发起人及任务处理人可看到相关信息，其他无关人员需要有对应数据所属机构的数据权限才能看到】； 盘点 - 盘点人只能盘点自己有仓库权限的货物 当针对没有仓库权限的货物点击扫码盘点 操作记录 - 能看到这笔抵/质押单，就能看到这笔抵/质押单的全部操作记录",
     "changeNote": "2026年9月11日",
     "createdAt": "2026-09-11",
@@ -3191,20 +3191,19 @@ export const permissionRecords: PermissionRecord[] = [
     "module": "2.工作台",
     "topBarModuleLabel": "B端H5/02-工作台",
     "menuModuleCode": "工作台",
-    "baselineModuleDir": "cancelled",
+    "baselineModuleDir": "B端H5/02-工作台",
     "recordStatus": "active",
     "pagePathSegments": [
       "融资/监管",
-      "抵质押业务管理",
-      "抵质押订单"
+      "监管管理"
     ],
-    "pagePath": "融资/监管 / 抵质押业务管理 / 抵质押订单",
+    "pagePath": "融资/监管 / 监管管理",
     "legacyPath": "项目监管～项目管理",
     "actionPermissions": "查看页面、结算管理、货物置换、货物补仓、货物出库、解抵质押、货物估值、货物盘点、盘点报告、货物移库、查看监控、平仓、查看风险、平仓、查看风险、设备管理、操作记录、货物详情、贷款结果录入、查看详情、监管报告（生成盘点监管报告、撤销申请、下载报告、查看详情、重新申请、查看报告）、部分结清、部分解抵质押",
     "dataPermission": "数据权限：根据当前登录账号的角色的数据权限决定【任务发起人及任务处理人可看到相关信息，其他无关人员需要有对应数据所属机构的数据权限才能看到】； 盘点 - 盘点人只能盘点自己有仓库权限的货物 当针对没有仓库权限的货物点击扫码盘点 操作记录 - 能看到这笔抵/质押单，就能看到这笔抵/质押单的全部操作记录",
-    "changeNote": "2026年9月11日",
+    "changeNote": "6.3 单入口；页内 Tab 抵押/质押/监管服务",
     "createdAt": "2026-09-11",
-    "updatedAt": ""
+    "updatedAt": "2026-10-19"
   },
   {
     "id": "159",
@@ -3213,19 +3212,19 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "工作台",
     "menuModuleCode": "02-工作台",
     "baselineModuleDir": "B端H5/02-工作台",
-    "recordStatus": "active",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "融资/监管",
-      "抵质押业务管理",
-      "监管订单"
+      "监管管理",
+      "监管服务"
     ],
-    "pagePath": "融资/监管 / 抵质押业务管理 / 监管订单",
+    "pagePath": "融资/监管 / 监管管理 / 监管服务（原独立监管订单菜单）",
     "legacyPath": "项目监管～项目管理",
     "actionPermissions": "查看页面、查看监控、查看风险、设备管理、货物估值、平仓、货物详情、查看详情、监管报告（生成盘点监管报告、撤销申请、下载报告、查看详情、重新申请、查看报告）",
     "dataPermission": "数据权限：根据当前登录账号的角色的数据权限决定【任务发起人及任务处理人可看到相关信息，其他无关人员需要有对应数据所属机构的数据权限才能看到】； 盘点 - 盘点人只能盘点自己有仓库权限的货物 当针对没有仓库权限的货物点击扫码盘点 操作记录 - 能看到这笔抵/质押单，就能看到这笔抵/质押单的全部操作记录",
-    "changeNote": "",
+    "changeNote": "6.3 并入监管管理 Tab，本行 cancelled",
     "createdAt": "2026-03-10",
-    "updatedAt": ""
+    "updatedAt": "2026-10-19"
   },
   {
     "id": "160",
@@ -3277,9 +3276,9 @@ export const permissionRecords: PermissionRecord[] = [
     "recordStatus": "active",
     "pagePathSegments": [
       "融资/监管",
-      "线上抵质押办理"
+      "线上监管业务办理"
     ],
-    "pagePath": "融资/监管 / 线上抵质押办理",
+    "pagePath": "融资/监管 / 线上监管业务办理",
     "legacyPath": "",
     "actionPermissions": "发起抵质押",
     "dataPermission": "·有融资申请审核权限的账号可看到所有融资申请信息 ·根据登录账号针对具体任务的操作权限决定；",
@@ -3877,9 +3876,9 @@ export const permissionRecords: PermissionRecord[] = [
     "recordStatus": "active",
     "pagePathSegments": [
       "业务发起",
-      "抵质押业务办理"
+      "监管办理"
     ],
-    "pagePath": "业务发起 / 抵质押业务办理",
+    "pagePath": "业务发起 / 监管办理",
     "legacyPath": "项目监管-项目发起-抵押信息确认 及 质押信息确认",
     "actionPermissions": "查看（页面）",
     "dataPermission": "",

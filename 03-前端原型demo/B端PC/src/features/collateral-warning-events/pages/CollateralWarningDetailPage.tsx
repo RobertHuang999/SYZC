@@ -55,7 +55,7 @@ export function CollateralWarningDetailPage() {
   const deviceDetailRoute =
     `/物联网IOT与预警/预警信息/设备预警信息/详情/${deviceEventId}?device_event_id=${encodeURIComponent(deviceEventId)}&warn_id=${encodeURIComponent(event.eventId)}&return_route=${encodeURIComponent(returnRoute)}`
   const orderProcessRoute =
-    `/融资/监管/抵质押业务/抵质押业务办理?order_id=${encodeURIComponent(event.orderNo)}&warn_id=${encodeURIComponent(event.eventId)}&return_route=${encodeURIComponent(returnRoute)}`
+    `/融资/监管/监管业务/监管管理?order_id=${encodeURIComponent(event.orderNo)}&warn_id=${encodeURIComponent(event.eventId)}&return_route=${encodeURIComponent(returnRoute)}`
 
   return (
     <PrototypeAnnotationProvider

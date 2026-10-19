@@ -612,5 +612,47 @@ export const iterationRecords: IterationRecordEntry[] = [
     "note": "6.1 主数据规格体系",
     "date": "2026-07",
     "sourceDoc": "货品规格管理/01大类管理/大类管理主PRD.md"
+  },
+  {
+    "id": "63-1",
+    "version": "6.2",
+    "platform": "PC",
+    "type": "重命名",
+    "title": "线上监管业务办理",
+    "before": "融资管理 / 融资结果/线上抵质押办理",
+    "after": "融资管理 / 线上监管业务办理",
+    "priority": "P1",
+    "deliveryTag": "必交付",
+    "note": "去掉「融资结果/」前缀",
+    "date": "2026-10-19",
+    "sourceDoc": "B-迭代需求/6.2版本（2026.08）/04-融资监管-菜单更名与监管管理口径.md"
+  },
+  {
+    "id": "63-2",
+    "version": "6.2",
+    "platform": "双端",
+    "type": "重命名",
+    "title": "监管业务 / 监管办理 / 监管管理",
+    "before": "抵质押业务 → 抵质押业务办理 / 抵质押业务管理",
+    "after": "监管业务 → 监管办理 / 监管管理",
+    "priority": "P1",
+    "deliveryTag": "必交付",
+    "note": "侧栏一级与二级菜单名词统一",
+    "date": "2026-10-19",
+    "sourceDoc": "B-迭代需求/6.2版本（2026.08）/04-融资监管-菜单更名与监管管理口径.md"
+  },
+  {
+    "id": "63-3",
+    "version": "6.2",
+    "platform": "移动",
+    "type": "结构合并",
+    "title": "H5 监管管理",
+    "before": "抵质押订单 + 监管订单（独立菜单）",
+    "after": "监管管理（Tab：抵押/质押/监管服务）",
+    "priority": "P1",
+    "deliveryTag": "必交付",
+    "note": "与 PC 三 Tab 对齐",
+    "date": "2026-10-19",
+    "sourceDoc": "B-迭代需求/6.2版本（2026.08）/04-融资监管-菜单更名与监管管理口径.md"
   }
 ]
