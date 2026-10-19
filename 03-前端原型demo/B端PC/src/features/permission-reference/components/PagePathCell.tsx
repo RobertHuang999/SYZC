@@ -27,6 +27,16 @@ export function PagePathCell({ record }: { record: PermissionRecord }) {
             6.2目标
           </span>
         )}
+        {record.recordStatus === "6.3-delivered" && (
+          <span className="rounded border border-teal-200/80 bg-teal-50 px-1.5 py-0.5 text-[10px] font-medium text-teal-900">
+            6.3已交付
+          </span>
+        )}
+        {record.recordStatus === "6.3-target" && (
+          <span className="rounded border border-teal-200/60 bg-teal-50/60 px-1.5 py-0.5 text-[10px] font-medium text-teal-800">
+            6.3目标
+          </span>
+        )}
         {is62MigrationSource(record, permissionRecords) && (
           <span className="rounded border border-amber-200/80 bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-800">
             6.2迁移

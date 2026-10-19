@@ -52,6 +52,11 @@ import {
 } from "@/features/inbound-staging-reg/lib/staging-form-utils"
 import { InboundStagingSwitchSheet } from "@/features/inbound-staging-reg/components/InboundStagingSwitchSheet"
 import {
+  INBOUND_FORMAL_STAGING_CHANNEL_ENABLED,
+} from "@prototype/shared/inbound/inbound-633-delivery"
+import type { PartnerSubject } from "@prototype/B端PC/src/features/partner-archives/domain/types"
+import { PartnerQuickCreateSheetMobile } from "@/features/partner-archives/components/PartnerQuickCreateSheetMobile"
+import {
   INBOUND_STAGING_FORM_ROUTE,
   INBOUND_STAGING_FORM_RESUME,
 } from "@/features/inbound-staging-reg/domain/constants"
@@ -76,6 +81,7 @@ export function InboundInitiatePage() {
   const [ownerDropdown, setOwnerDropdown] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [stagingSwitchOpen, setStagingSwitchOpen] = useState(false)
+  const [ownerQuickCreateOpen, setOwnerQuickCreateOpen] = useState(false)
 
   useEffect(() => {
     const resume = (
@@ -98,6 +104,7 @@ export function InboundInitiatePage() {
   }
 
   useEffect(() => {
+    if (!INBOUND_FORMAL_STAGING_CHANNEL_ENABLED) return
     if (!sourceRegId) return
     const reg = getStagingRegByNo(sourceRegId)
     if (!reg) return
@@ -131,12 +138,27 @@ export function InboundInitiatePage() {
           .filter(Boolean)
           .join("、")
 
+  const applyPartnerOwner = (partner: PartnerSubject) => {
+    const isEnterprise = partner.subjectType === "ENTERPRISE"
+    patch({
+      ownerType: isEnterprise ? "企业货主" : "个人货主",
+      ownerName: partner.name,
+      ownerIdentifier: isEnterprise ? partner.idNumberMasked : partner.contactPhone.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2"),
+      contactPhone: partner.contactPhone,
+      idCardNo: isEnterprise ? "" : partner.idNumber,
+      partnerId: partner.id,
+      isNewOwner: false,
+    })
+    showToast(`已绑定货主 ${partner.name}`)
+  }
+
   const setOwnerType = (value: OwnerType) => {
     patch({
       ownerType: value,
       ownerName: "",
       ownerIdentifier: "",
       contactPhone: "",
+      partnerId: "",
       idCardNo: "",
     })
     setOwnerDropdown(false)
@@ -199,11 +221,11 @@ export function InboundInitiatePage() {
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-8">
           <NativeInboundStepBar current={0} />
 
-          {sourceRegId ? (
+          {INBOUND_FORMAL_STAGING_CHANNEL_ENABLED && sourceRegId ? (
             <div className="mb-3 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-900">
               暂存转正预填 · {sourceRegId}（P10：提交成功回写登记单【已转正式】）
             </div>
-          ) : (
+          ) : INBOUND_FORMAL_STAGING_CHANNEL_ENABLED ? (
             <button
               type="button"
               className="mb-3 w-full rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900"
@@ -211,7 +233,7 @@ export function InboundInitiatePage() {
             >
               切换为【入库暂存登记】通道（P09 现场极速备忘）
             </button>
-          )}
+          ) : null}
 
           <NativeInfoCard
             title="货主信息"
@@ -282,9 +304,11 @@ export function InboundInitiatePage() {
                       onClick={() => {
                         patch({
                           ownerName: o.name,
-                          ownerIdentifier: o.identifierMasked,
+                          ownerIdentifier: o.ownerIdentifier,
                           contactPhone: o.contactPhone ?? "",
                           idCardNo: o.idCardNo ?? "",
+                          partnerId: o.partnerId ?? "",
+                          isNewOwner: false,
                         })
                         setOwnerDropdown(false)
                       }}
@@ -295,7 +319,32 @@ export function InboundInitiatePage() {
                   ))}
                 </div>
               ) : null}
+              {ownerDropdown &&
+              ownerCandidates.length === 0 &&
+              form.ownerName.trim() ? (
+                <div className="mt-2 rounded-lg bg-white px-3 py-2 text-center text-xs text-[#232D39]/60 shadow-sm">
+                  未找到匹配货主
+                  <button
+                    type="button"
+                    className="ml-2 font-medium text-blue-600"
+                    onClick={() => {
+                      setOwnerDropdown(false)
+                      setOwnerQuickCreateOpen(true)
+                    }}
+                  >
+                    + 添加货主
+                  </button>
+                </div>
+              ) : null}
             </div>
+
+            <button
+              type="button"
+              className="mb-2 w-full rounded-lg border border-blue-200 bg-blue-50 py-2 text-xs font-medium text-blue-700"
+              onClick={() => setOwnerQuickCreateOpen(true)}
+            >
+              + 快速添加货主
+            </button>
 
             {form.ownerType === "个人货主" ? (
               <>
@@ -522,20 +571,30 @@ export function InboundInitiatePage() {
         }}
       />
 
-      <InboundStagingSwitchSheet
-        open={stagingSwitchOpen}
-        onClose={() => setStagingSwitchOpen(false)}
-        onNavigateBlank={() => {
-          setStagingSwitchOpen(false)
-          clearInboundStagingSession()
-          navigate(INBOUND_STAGING_FORM_ROUTE)
-        }}
-        onNavigateWithCopy={() => {
-          setStagingSwitchOpen(false)
-          saveStagingEditId(null)
-          saveInboundStagingForm(formFromFormalInbound(form))
-          navigate(INBOUND_STAGING_FORM_ROUTE, { state: INBOUND_STAGING_FORM_RESUME })
-        }}
+      {INBOUND_FORMAL_STAGING_CHANNEL_ENABLED ? (
+        <InboundStagingSwitchSheet
+          open={stagingSwitchOpen}
+          onClose={() => setStagingSwitchOpen(false)}
+          onNavigateBlank={() => {
+            setStagingSwitchOpen(false)
+            clearInboundStagingSession()
+            navigate(INBOUND_STAGING_FORM_ROUTE)
+          }}
+          onNavigateWithCopy={() => {
+            setStagingSwitchOpen(false)
+            saveStagingEditId(null)
+            saveInboundStagingForm(formFromFormalInbound(form))
+            navigate(INBOUND_STAGING_FORM_ROUTE, { state: INBOUND_STAGING_FORM_RESUME })
+          }}
+        />
+      ) : null}
+
+      <PartnerQuickCreateSheetMobile
+        open={ownerQuickCreateOpen}
+        scene="INBOUND_OWNER"
+        onOpenChange={setOwnerQuickCreateOpen}
+        onCreated={applyPartnerOwner}
+        onError={showToast}
       />
 
       {leaveOpen ? (

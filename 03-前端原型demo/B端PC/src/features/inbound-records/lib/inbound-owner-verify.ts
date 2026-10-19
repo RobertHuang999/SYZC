@@ -11,21 +11,21 @@ export function isFinancialInboundType(
   )
 }
 
-/** R03 + PA-R04b：提交审核前是否须弹出货主短信二元核验 */
+/** 【合作方货主引用与快捷建档规则】(R03) + PA-R04b：金融类且联系手机未验证时提交前补验 */
 export function needsOwnerSmsAtSubmit(
   form: Pick<
     InboundFormState,
-    "isNewOwner" | "inboundType" | "ownerType" | "ownerName" | "ownerIdentifier"
+    "partnerId" | "inboundType"
   >,
   archive?: OwnerSearchRecord
 ): boolean {
-  if (form.isNewOwner) {
-    return true
-  }
-  if (!archive) {
+  if (!form.partnerId && !archive?.partnerId) {
     return false
   }
   if (!isFinancialInboundType(form.inboundType)) {
+    return false
+  }
+  if (!archive) {
     return false
   }
   return archive.contactPhoneVerified === "UNVERIFIED"

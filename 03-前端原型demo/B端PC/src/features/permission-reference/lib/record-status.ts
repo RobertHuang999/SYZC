@@ -5,6 +5,15 @@ export function is62TargetFeature(record: PermissionRecord): boolean {
   return record.recordStatus === "6.2-target"
 }
 
+/** 6.3 迭代：已交付原型或目标态（未完全上线） */
+export function is63Feature(record: PermissionRecord): boolean {
+  return record.recordStatus === "6.3-target" || record.recordStatus === "6.3-delivered"
+}
+
+export function is63DeliveredFeature(record: PermissionRecord): boolean {
+  return record.recordStatus === "6.3-delivered"
+}
+
 function normalizeLegacyPath(path: string) {
   return path.replace(/[～~]/g, "/").replace(/\s+/g, "").trim()
 }
@@ -39,7 +48,12 @@ export function isCancelledFeature(record: PermissionRecord): boolean {
 
 /** 归档状态条目（待开发 + 已取消 + 6.2 目标态）；具体页面可按展示口径筛选 */
 export function isArchivedFeature(record: PermissionRecord): boolean {
-  return isPlannedFeature(record) || isCancelledFeature(record) || is62TargetFeature(record)
+  return (
+    isPlannedFeature(record) ||
+    isCancelledFeature(record) ||
+    is62TargetFeature(record) ||
+    record.recordStatus === "6.3-target"
+  )
 }
 
 export function countPlannedFeatures(records: PermissionRecord[]) {

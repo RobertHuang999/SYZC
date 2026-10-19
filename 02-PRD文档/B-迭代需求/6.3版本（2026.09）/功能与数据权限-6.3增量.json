@@ -1,0 +1,206 @@
+{
+  "version": "6.3",
+  "docPath": "B-迭代需求/6.3版本（2026.09）/00-菜单迭代记录.md",
+  "patches": [
+    {
+      "platform": "PC",
+      "level2Menu": "入库申请",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 原型已交付入库申请；0504 线上曾取消菜单，6.3 与入库记录双轨",
+      "updatedAt": "2026-10-19",
+      "actionPermissions": "查看页面、详情、新增入库、撤销入库、操作记录"
+    },
+    {
+      "platform": "PC",
+      "level2Menu": "入库记录",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 P0：合作方货主快捷建档（R03）；暂存登记整模块本期不放开",
+      "updatedAt": "2026-10-19",
+      "actionPermissions": "查看页面、详情、新增入库、分配二维码、下载记录、单据下载、快速添加货主"
+    },
+    {
+      "platform": "PC",
+      "level2Menu": "入库暂存登记",
+      "recordStatus": "6.3-target",
+      "changeNote": "6.3 P0 三件套已定；本期菜单/路由/原型均不放开",
+      "updatedAt": "2026-10-19"
+    },
+    {
+      "platform": "PC",
+      "level2Menu": "出库记录",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 P0：货主、提货主体、提货经办人引用合作方；提货经办人快捷建档（O06a）",
+      "updatedAt": "2026-10-19",
+      "actionPermissions": "查看页面、详情、新增出库、下载记录、单据下载、快速添加提货经办人"
+    },
+    {
+      "platform": "PC",
+      "level1Menu": "提货单",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 P0：提货人引用合作方，支持身份证/手机号检索",
+      "updatedAt": "2026-09-20"
+    },
+    {
+      "platform": "PC",
+      "level1Menu": "客户管理",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 P0：保留菜单，增加客户账号与合作方主体绑定",
+      "updatedAt": "2026-09-20"
+    },
+    {
+      "platform": "PC",
+      "level2Menu": "基础配置",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 P0：平台运行底座重构；合作方准入策略并入；仓储作业参数只读联动",
+      "updatedAt": "2026-10-17"
+    },
+    {
+      "platform": "PC",
+      "level2Menu": "仓库管理",
+      "level1Menu": "仓库管理",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 P0：空间主档层级；库房出入库审核状态读取基础配置只读展示",
+      "updatedAt": "2026-10-17"
+    },
+    {
+      "platform": "移动",
+      "level2Menu": "入库管理",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3：入库发起合作方货主；暂存磁贴本期隐藏",
+      "updatedAt": "2026-10-19"
+    },
+    {
+      "platform": "移动",
+      "level2Menu": "出库管理",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 P0：出库制单引用合作方货主与提货经办人",
+      "updatedAt": "2026-09-20"
+    },
+    {
+      "platform": "移动",
+      "level2Menu": "货物转让",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 P0：接收方引用合作方",
+      "updatedAt": "2026-09-20"
+    },
+    {
+      "platform": "PC",
+      "level2Menu": "转让记录",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 P0：接收方引用合作方；转让生效变货主执行地址规则",
+      "updatedAt": "2026-09-20"
+    },
+    {
+      "platform": "移动",
+      "level2Menu": "提货单",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 P0：提货人引用合作方",
+      "updatedAt": "2026-09-20"
+    },
+    {
+      "platform": "移动",
+      "level2Menu": "入库发起",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 P0：合作方货主快捷建档；暂存通道本期不展示",
+      "updatedAt": "2026-10-19"
+    },
+    {
+      "platform": "移动",
+      "level2Menu": "出库发起",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 P0：提货经办人快捷建档（O06a）",
+      "updatedAt": "2026-10-19"
+    },
+    {
+      "platform": "PC",
+      "tab": "客户入库预约",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 P0：货主引用合作方，准入校验前置",
+      "updatedAt": "2026-09-20"
+    },
+    {
+      "platform": "移动",
+      "tab": "客户入库预约",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3 P0：货主引用合作方，准入校验前置",
+      "updatedAt": "2026-09-20"
+    }
+  ],
+  "append": [
+    {
+      "platform": "PC",
+      "module": "10.用户中心",
+      "topBarModuleLabel": "用户中心",
+      "menuModuleCode": "10-用户中心",
+      "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/04-合作方档案",
+      "recordStatus": "6.3-delivered",
+      "pagePathSegments": ["合作方管理", "合作方档案"],
+      "legacyPath": "—",
+      "actionPermissions": "查看页面、详情、新增、编辑、保存并提交、冻结/解冻、追加角色、入库快捷建档",
+      "dataPermission": "租户级隔离；列表按数据权限与仓库无关",
+      "changeNote": "6.3 P0 业务主体主数据统一入口",
+      "createdAt": "2026-09-01",
+      "updatedAt": "2026-10-19"
+    },
+    {
+      "platform": "移动",
+      "module": "2.工作台",
+      "topBarModuleLabel": "工作台",
+      "menuModuleCode": "02-工作台",
+      "baselineModuleDir": "B端H5/02-工作台",
+      "recordStatus": "6.3-delivered",
+      "pagePathSegments": ["用户中心", "合作方档案"],
+      "legacyPath": "用户中心-合作方管理-合作方档案",
+      "actionPermissions": "查看页面、详情、新增合作方、编辑、冻结/解冻",
+      "dataPermission": "租户级；与 PC 共用主数据服务",
+      "changeNote": "6.3 P1 外勤列表/详情/悬浮新增",
+      "createdAt": "2026-10-16",
+      "updatedAt": "2026-10-19"
+    },
+    {
+      "platform": "PC",
+      "module": "8.配置管理",
+      "topBarModuleLabel": "配置管理",
+      "menuModuleCode": "08-配置管理",
+      "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/07-货品规格管理-入库收集项配置",
+      "recordStatus": "6.3-target",
+      "pagePathSegments": ["货品规格管理", "入库收集项配置"],
+      "legacyPath": "—",
+      "actionPermissions": "查看页面、编辑字段池、保质期单位白名单",
+      "dataPermission": "配置管理菜单权限",
+      "changeNote": "6.3 P1 字段池与 SKU 收集项联动",
+      "createdAt": "2026-09-01",
+      "updatedAt": "2026-09-20"
+    },
+    {
+      "platform": "移动",
+      "module": "2.工作台",
+      "topBarModuleLabel": "工作台",
+      "menuModuleCode": "02-工作台",
+      "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/09-仓储管理-入库暂存登记",
+      "recordStatus": "6.3-target",
+      "pagePathSegments": ["仓储", "入库暂存登记"],
+      "legacyPath": "货物管理～入库暂存登记",
+      "actionPermissions": "查看页面、新增登记、编辑、作废（转为正式入库本期关闭）",
+      "dataPermission": "账号赋予的仓库权限",
+      "changeNote": "6.3 P0 规格已定；本期不放开",
+      "createdAt": "2026-10-14",
+      "updatedAt": "2026-10-19"
+    },
+    {
+      "platform": "移动",
+      "module": "3.业务办理",
+      "topBarModuleLabel": "业务办理",
+      "menuModuleCode": "03-业务办理",
+      "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/09-仓储管理-入库暂存登记",
+      "recordStatus": "6.3-target",
+      "pagePathSegments": ["业务发起", "入库暂存登记"],
+      "legacyPath": "货物管理-入库-入库暂存登记",
+      "actionPermissions": "查看页面、新增登记、拍照上传、保存暂存",
+      "dataPermission": "账号赋予的仓库权限",
+      "changeNote": "6.3 业务发起磁贴；本期隐藏",
+      "createdAt": "2026-10-14",
+      "updatedAt": "2026-10-19"
+    }
+  ]
+}

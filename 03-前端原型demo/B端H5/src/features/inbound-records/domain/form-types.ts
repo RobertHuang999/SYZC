@@ -49,6 +49,7 @@ export type InboundFormState = {
   remark: string
   goodsLines: GoodsLineForm[]
   isNewOwner: boolean
+  partnerId: string
 }
 
 export type RelatedOrderOption = {

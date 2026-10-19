@@ -19,6 +19,7 @@ import {
 import { resolveFormalInboundDetailPath } from "../lib/formal-record-link"
 import { buildStagingDetailGoodsRows } from "../lib/staging-detail-display"
 import { STAGING_ACTION_LABELS } from "@prototype/shared/inbound/staging-ui-labels"
+import { INBOUND_STAGING_CONVERT_ENABLED } from "@prototype/shared/inbound/inbound-633-delivery"
 import { getStagingRegById, voidStagingReg } from "../mock/inbound-staging.mock"
 
 function statusStamp(status: string) {
@@ -70,9 +71,11 @@ function DetailActionBar({
           <Button variant="secondary" size="sm" onClick={onEdit}>
             {STAGING_ACTION_LABELS.edit}
           </Button>
-          <Button size="sm" onClick={onConvert}>
-            {STAGING_ACTION_LABELS.convert}
-          </Button>
+          {INBOUND_STAGING_CONVERT_ENABLED ? (
+            <Button size="sm" onClick={onConvert}>
+              {STAGING_ACTION_LABELS.convert}
+            </Button>
+          ) : null}
         </>
       ) : null}
       {reg.status === "已转正式" && formalPath ? (

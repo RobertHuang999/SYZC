@@ -6,6 +6,7 @@ const CHANGE_NOTE_STYLES: Array<{ pattern: RegExp; label: string; className: str
   { pattern: /取消|已取消/, label: "已取消", className: "border-red-200 bg-red-50 text-red-700" },
   { pattern: /联登|智风控/, label: "外链跳转", className: "border-cyan-200 bg-cyan-50 text-cyan-800" },
   { pattern: /优化|0504|版本|修改|入口/, label: "迭代调整", className: "border-slate-200 bg-slate-50 text-slate-700" },
+  { pattern: /6\.3/, label: "6.3迭代", className: "border-teal-200 bg-teal-50 text-teal-900" },
 ]
 
 function formatDisplayDate(value: string) {

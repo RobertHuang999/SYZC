@@ -42,12 +42,15 @@ import {
   outboundRecordsMock,
 } from "../mock/outbound-records.mock"
 import { addDeliveryOrderFromOutbound } from "@/features/delivery-orders/mock/delivery-orders.mock"
+import { PartnerQuickCreateSheet } from "@/features/partner-archives/components/PartnerQuickCreateSheet"
+import type { PartnerSubject } from "@/features/partner-archives/domain/types"
 
 export function OutboundRecordFormPage() {
   const navigate = useNavigate()
   const [form, setForm] = useState<OutboundFormState>(() => createInitialFormState())
 
   const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false)
+  const [pickupQuickCreateOpen, setPickupQuickCreateOpen] = useState(false)
   const [flowSelectOpen, setFlowSelectOpen] = useState(false)
 
   const [basicExpanded, setBasicExpanded] = useState(true)
@@ -75,6 +78,17 @@ export function OutboundRecordFormPage() {
 
   const patchForm = (p: Partial<OutboundFormState>) => {
     setForm((prev) => ({ ...prev, ...p }))
+  }
+
+  const applyPickupAgentPartner = (partner: PartnerSubject) => {
+    patchForm({
+      pickupPersonType: "个人",
+      pickupName: partner.name,
+      pickupIdCardNo: partner.idNumber,
+      pickupPhone: partner.contactPhone,
+      pickupAgentPartnerId: partner.id,
+    })
+    showToast(`已绑定提货经办人 ${partner.name}`)
   }
 
   const handleCancel = () => {
@@ -335,6 +349,7 @@ export function OutboundRecordFormPage() {
               expanded={pickupExpanded}
               onToggle={() => setPickupExpanded(!pickupExpanded)}
               onPreviewImage={setPreviewImageUrl}
+              onQuickAddPickupAgent={() => setPickupQuickCreateOpen(true)}
             />
           </PrototypeAnnotationTarget>
         </div>
@@ -394,6 +409,14 @@ export function OutboundRecordFormPage() {
           confirmLabel="确认提交审批并生成提货单"
           noticeTitle="💡 出库审批须知："
           noticeContent="提交后单据进入待审核状态；终审通过后系统锁定并扣减库存行，同步生成提货单供现场核销。超时请勿重复提交，可在出库申请列表查看进度。"
+        />
+
+        <PartnerQuickCreateSheet
+          open={pickupQuickCreateOpen}
+          scene="OUTBOUND_PICKUP_AGENT"
+          onOpenChange={setPickupQuickCreateOpen}
+          onCreated={applyPickupAgentPartner}
+          onError={showToast}
         />
 
         <Dialog open={leaveOpen} onOpenChange={setLeaveOpen}>

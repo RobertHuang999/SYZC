@@ -32,6 +32,7 @@ export function createInitialFormState(): OutboundFormState {
     pickupPhone: "",
     pickupIdentity: "",
     pickupOperator: "",
+    pickupAgentPartnerId: "",
     plateNo: "",
     sitePhotos: [],
   }

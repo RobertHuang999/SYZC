@@ -55,6 +55,10 @@ import {
   markStagingConverted,
 } from "@/features/inbound-staging-reg/mock/inbound-staging.mock"
 import { formFromStagingReg } from "@/features/inbound-staging-reg/lib/staging-form-utils"
+import { INBOUND_FORMAL_STAGING_CHANNEL_ENABLED } from "@prototype/shared/inbound/inbound-633-delivery"
+import { PartnerQuickCreateSheet } from "@/features/partner-archives/components/PartnerQuickCreateSheet"
+import type { PartnerSubject } from "@/features/partner-archives/domain/types"
+import { resolveContactPhoneVerified } from "@/features/partner-archives/lib/contact-phone-verify"
 
 export function InboundRecordFormPage() {
   const navigate = useNavigate()
@@ -77,6 +81,7 @@ export function InboundRecordFormPage() {
   // 图片全屏大图预览弹窗
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
   const [stagingSwitchOpen, setStagingSwitchOpen] = useState(false)
+  const [ownerQuickCreateOpen, setOwnerQuickCreateOpen] = useState(false)
 
   const totals = useMemo(() => calcFormTotals(form.goodsLines), [form.goodsLines])
 
@@ -89,7 +94,22 @@ export function InboundRecordFormPage() {
     window.setTimeout(() => setToast(null), 2800)
   }
 
+  const applyPartnerOwner = (partner: PartnerSubject) => {
+    const isEnterprise = partner.subjectType === "ENTERPRISE"
+    patchForm({
+      ownerType: isEnterprise ? "企业货主" : "个人货主",
+      ownerName: partner.name,
+      ownerIdentifier: isEnterprise ? partner.idNumber : partner.contactPhone,
+      contactPhone: partner.contactPhone,
+      idCardNo: isEnterprise ? "" : partner.idNumber,
+      partnerId: partner.id,
+      isNewOwner: false,
+    })
+    showToast(`已绑定货主 ${partner.name}（${resolveContactPhoneVerified(partner) === "VERIFIED" ? "已验证" : "未验证"}）`)
+  }
+
   useEffect(() => {
+    if (!INBOUND_FORMAL_STAGING_CHANNEL_ENABLED && sourceRegId) return
     if (!sourceRegId) return
     const reg = getStagingRegByNo(sourceRegId)
     if (!reg) return
@@ -140,6 +160,10 @@ export function InboundRecordFormPage() {
     }
     if (!form.ownerType) {
       showToast("请选择货主类型")
+      return
+    }
+    if (!form.partnerId) {
+      showToast("请先搜索选择货主，或通过【快速添加货主】完成建档")
       return
     }
     if (!form.ownerName.trim()) {
@@ -240,7 +264,7 @@ export function InboundRecordFormPage() {
     const needsSms = needsOwnerSmsAtSubmit(form, archive)
 
     if (needsSms) {
-      setOwnerVerifyRequireSms(!form.isNewOwner)
+      setOwnerVerifyRequireSms(true)
       setOwnerVerifyOpen(true)
       return
     }
@@ -369,14 +393,16 @@ export function InboundRecordFormPage() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setStagingSwitchOpen(true)}
-                >
-                  入库暂存登记
-                </Button>
+                {INBOUND_FORMAL_STAGING_CHANNEL_ENABLED ? (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setStagingSwitchOpen(true)}
+                  >
+                    入库暂存登记
+                  </Button>
+                ) : null}
                 <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
                   取 消
                 </Button>
@@ -387,7 +413,7 @@ export function InboundRecordFormPage() {
             </div>
           </PrototypeAnnotationTarget>
 
-          {sourceRegId ? (
+          {INBOUND_FORMAL_STAGING_CHANNEL_ENABLED && sourceRegId ? (
             <div className="rounded-md border border-sky-200 bg-sky-50 px-4 py-2 text-sm text-sky-900">
               暂存转正预填：{sourceRegId}（正式单不展示来源暂存单号；提交成功回写登记单【已转正式】）
             </div>
@@ -403,6 +429,7 @@ export function InboundRecordFormPage() {
               onPickRelatedOrder={() => setRelatedOpen(true)}
               onOcrHint={handleOcr}
               onFormHint={showToast}
+              onQuickAddOwner={() => setOwnerQuickCreateOpen(true)}
             />
           </PrototypeAnnotationTarget>
 
@@ -507,18 +534,28 @@ export function InboundRecordFormPage() {
           }}
         />
 
-        <InboundStagingSwitchDialog
-          open={stagingSwitchOpen}
-          onClose={() => setStagingSwitchOpen(false)}
-          onNavigateBlank={() => {
-            setStagingSwitchOpen(false)
-            navigate(INBOUND_STAGING_FORM_PATH)
-          }}
-          onNavigateWithCopy={() => {
-            setStagingSwitchOpen(false)
-            navigate(INBOUND_STAGING_FORM_PATH, { state: { copyFromFormal: form } })
-            showToast("已带入当前表单至暂存登记页（Mock）")
-          }}
+        {INBOUND_FORMAL_STAGING_CHANNEL_ENABLED ? (
+          <InboundStagingSwitchDialog
+            open={stagingSwitchOpen}
+            onClose={() => setStagingSwitchOpen(false)}
+            onNavigateBlank={() => {
+              setStagingSwitchOpen(false)
+              navigate(INBOUND_STAGING_FORM_PATH)
+            }}
+            onNavigateWithCopy={() => {
+              setStagingSwitchOpen(false)
+              navigate(INBOUND_STAGING_FORM_PATH, { state: { copyFromFormal: form } })
+              showToast("已带入当前表单至暂存登记页（Mock）")
+            }}
+          />
+        ) : null}
+
+        <PartnerQuickCreateSheet
+          open={ownerQuickCreateOpen}
+          scene="INBOUND_OWNER"
+          onOpenChange={setOwnerQuickCreateOpen}
+          onCreated={applyPartnerOwner}
+          onError={showToast}
         />
 
         {/* 离开确认对话框 */}

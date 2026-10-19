@@ -24,6 +24,7 @@ import type { InboundStagingReg } from "../domain/types"
 import { STAGING_ACTION_LABELS } from "@prototype/shared/inbound/staging-ui-labels"
 import { resolveFormalInboundDetailPath } from "../lib/formal-record-link"
 import { inboundStagingDetailPath, inboundStagingEditPath } from "../domain/constants"
+import { INBOUND_STAGING_CONVERT_ENABLED } from "@prototype/shared/inbound/inbound-633-delivery"
 
 const STICKY_ACTION_CLASS =
   "sticky right-0 z-20 border-l border-border/80 shadow-[-8px_0_16px_-4px_rgba(0,0,0,0.08)]"
@@ -192,16 +193,20 @@ function RowActions({
       </ActionRow>
       {pending ? (
         <ActionRow>
-          <Button
-            type="button"
-            variant="link"
-            size="sm"
-            className={actionBtnClass}
-            onClick={() => onConvert(row)}
-          >
-            {STAGING_ACTION_LABELS.convert}
-          </Button>
-          <ActionSep />
+          {INBOUND_STAGING_CONVERT_ENABLED ? (
+            <>
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                className={actionBtnClass}
+                onClick={() => onConvert(row)}
+              >
+                {STAGING_ACTION_LABELS.convert}
+              </Button>
+              <ActionSep />
+            </>
+          ) : null}
           <Button
             type="button"
             variant="link"

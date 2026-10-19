@@ -8,8 +8,21 @@ import { PagePathCell, PagePathLegend } from "../components/PagePathCell"
 import { PlannedFeaturesButton } from "../components/PlannedFeaturesPanel"
 import { CancelledFeaturesButton } from "../components/CancelledFeaturesButton"
 import { Target62FeaturesButton } from "../components/Target62FeaturesButton"
+import { Target63FeaturesButton } from "../components/Target63FeaturesButton"
+import { SystemReferenceSubNav } from "../components/SystemReferenceSubNav"
+import {
+  IterationMenuChangeCell,
+  IterationMenuChangeLegend,
+} from "../components/IterationMenuChangeCell"
+import { getIterationChangesForPermission } from "../lib/match-iteration-to-permission"
+import type { IterationRecordEntry } from "../data/menu-iteration-records"
 import { isRecentChange } from "../lib/is-recent-change"
-import { is62TargetFeature, isCancelledFeature, isPlannedFeature } from "../lib/record-status"
+import {
+  is62TargetFeature,
+  is63Feature,
+  isCancelledFeature,
+  isPlannedFeature,
+} from "../lib/record-status"
 import { cn } from "@/lib/utils"
 
 type PlatformFilter = "PC" | "移动" | "全部"
@@ -59,7 +72,13 @@ function getGroupKey(record: PermissionRecord, activeModule: string) {
   return record.module.replace(/^\d+\./, "")
 }
 
-function RecordRow({ record }: { record: PermissionRecord }) {
+function RecordRow({
+  record,
+  iterationEntries,
+}: {
+  record: PermissionRecord
+  iterationEntries: IterationRecordEntry[]
+}) {
   return (
     <tr className="border-b border-border/60 align-top hover:bg-muted/30">
       <td className="p-2.5 text-xs">
@@ -78,6 +97,9 @@ function RecordRow({ record }: { record: PermissionRecord }) {
           changeNote={record.changeNote}
         />
       </td>
+      <td className="p-2.5 text-xs">
+        <IterationMenuChangeCell entries={iterationEntries} />
+      </td>
     </tr>
   )
 }
@@ -88,6 +110,14 @@ export function PermissionReferencePage() {
   const [search, setSearch] = useState("")
   const [activeModule, setActiveModule] = useState<string>("全部")
   const [activeSubMenu, setActiveSubMenu] = useState<string>("全部")
+
+  const permissionIterationMap = useMemo(() => {
+    const map = new Map<string, IterationRecordEntry[]>()
+    for (const record of permissionRecords) {
+      map.set(record.id, getIterationChangesForPermission(record))
+    }
+    return map
+  }, [])
 
   const scopeRecords = useMemo(() => {
     return permissionRecords.filter(
@@ -108,6 +138,10 @@ export function PermissionReferencePage() {
 
   const target62Records = useMemo(() => {
     return permissionRecords.filter((record) => matchesPlatform(record, platform) && is62TargetFeature(record))
+  }, [platform])
+
+  const target63Records = useMemo(() => {
+    return permissionRecords.filter((record) => matchesPlatform(record, platform) && is63Feature(record))
   }, [platform])
 
   const recentChangeTotal = useMemo(() => {
@@ -139,6 +173,10 @@ export function PermissionReferencePage() {
       if (activeSubMenu !== "全部" && getSubMenuKey(record) !== activeSubMenu) return false
       if (!keyword) return true
 
+      const iterationHaystack = (permissionIterationMap.get(record.id) ?? [])
+        .map((entry) => `${entry.version} ${entry.type} ${entry.title} ${entry.note} ${entry.after}`)
+        .join(" ")
+
       const haystack = [
         record.module,
         record.pagePath,
@@ -149,13 +187,14 @@ export function PermissionReferencePage() {
         record.legacyPath,
         record.createdAt,
         record.updatedAt,
+        iterationHaystack,
       ]
         .join(" ")
         .toLowerCase()
 
       return haystack.includes(keyword)
     })
-  }, [activeModule, activeSubMenu, scopeRecords, search])
+  }, [activeModule, activeSubMenu, permissionIterationMap, scopeRecords, search])
 
   const groupedRecords = useMemo(() => {
     const groups = new Map<string, PermissionRecord[]>()
@@ -213,6 +252,8 @@ export function PermissionReferencePage() {
             功能与数据权限
           </h1>
 
+          <SystemReferenceSubNav active="permission" />
+
           <span className="hidden h-4 w-px bg-border sm:block" />
 
           <div className="relative min-w-[180px] flex-1 max-w-sm">
@@ -221,7 +262,7 @@ export function PermissionReferencePage() {
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="搜索页面路径、功能按钮、可见范围、变更..."
+              placeholder="搜索页面路径、功能按钮、可见范围、变更、菜单迭代..."
               className="h-7 w-full rounded-md border bg-background pl-7 pr-2 text-[11px] outline-none ring-primary/30 transition focus:ring-1"
             />
           </div>
@@ -264,6 +305,7 @@ export function PermissionReferencePage() {
           </div>
 
           <PlannedFeaturesButton records={plannedRecords} />
+          <Target63FeaturesButton records={target63Records} />
           <Target62FeaturesButton records={target62Records} />
           <CancelledFeaturesButton records={cancelledRecords} />
 
@@ -353,7 +395,7 @@ export function PermissionReferencePage() {
               : "max-h-[calc(100vh-168px)]",
           )}
         >
-          <table className="w-full min-w-[960px] border-collapse text-left">
+          <table className="w-full min-w-[1120px] border-collapse text-left">
             <thead className="sticky top-0 z-[2] bg-muted/90 backdrop-blur-sm">
               <tr className="border-b text-[11px] font-semibold text-muted-foreground">
                 <th className="p-2.5">
@@ -380,6 +422,12 @@ export function PermissionReferencePage() {
                     <ChangeLogLegend />
                   </div>
                 </th>
+                <th className="p-2.5">
+                  <div className="space-y-1">
+                    <span>菜单迭代</span>
+                    <IterationMenuChangeLegend />
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -388,20 +436,24 @@ export function PermissionReferencePage() {
                   <Fragment key={groupLabel}>
                     {showGroupHeaders && (
                       <tr className="sticky top-[52px] z-[1] border-b border-border/70 bg-slate-100/95 backdrop-blur-sm">
-                        <td colSpan={4} className="px-2.5 py-1.5">
+                        <td colSpan={5} className="px-2.5 py-1.5">
                           <span className="text-[11px] font-semibold text-foreground">{groupLabel}</span>
                           <span className="ml-2 text-[10px] font-normal text-muted-foreground">{records.length} 项</span>
                         </td>
                       </tr>
                     )}
                     {records.map((record) => (
-                      <RecordRow key={record.id} record={record} />
+                      <RecordRow
+                        key={record.id}
+                        record={record}
+                        iterationEntries={permissionIterationMap.get(record.id) ?? []}
+                      />
                     ))}
                   </Fragment>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4} className="p-8 text-center text-xs text-muted-foreground">
+                  <td colSpan={5} className="p-8 text-center text-xs text-muted-foreground">
                     {changeFilter === "最近变更"
                       ? "当前筛选下没有变更记录，可切换到「全部」查看完整清单。"
                       : "没有匹配的权限记录，请调整筛选条件或搜索关键词。"}

@@ -188,9 +188,8 @@ export function filterOwnerSearchRecords(
     return (
       record.name.toLowerCase().includes(kw) ||
       label.includes(kw) ||
-      record.identifierMasked.toLowerCase().includes(kw) ||
       record.ownerIdentifier.toLowerCase().includes(kw) ||
-      (record.idCardNo ? record.idCardNo.toLowerCase().includes(kw) : false)
+      (record.contactPhone ? record.contactPhone.toLowerCase().includes(kw) : false)
     )
   })
 }

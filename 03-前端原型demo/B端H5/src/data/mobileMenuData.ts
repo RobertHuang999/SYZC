@@ -1,3 +1,5 @@
+import { INBOUND_STAGING_PROTOTYPE_RELEASED } from "@prototype/shared/inbound/inbound-633-delivery"
+
 export interface MenuItemData {
   id: string
   primaryModule: "首页" | "工作台" | "业务办理"
@@ -142,6 +144,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "可见数据根据当前登录账号的角色的仓库权限决定",
     customRoute: "/m/workspace/inbound-staging",
     iconType: "ClipboardList",
+    enabled: INBOUND_STAGING_PROTOTYPE_RELEASED,
   },
   {
     id: "ws-outbound-mgr",
@@ -677,6 +680,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "账号赋予的仓库权限",
     customRoute: "/m/inbound/staging/reg",
     iconType: "ClipboardList",
+    enabled: INBOUND_STAGING_PROTOTYPE_RELEASED,
   },
   {
     id: "biz-init-inbound",

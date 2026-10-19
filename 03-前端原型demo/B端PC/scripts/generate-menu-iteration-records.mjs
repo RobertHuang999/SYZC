@@ -168,7 +168,8 @@ const output = `// 自动生成，请勿手工编辑。运行 npm run generate:i
 
 export type IterationPlatform = "PC" | "移动" | "双端"
 
-export type IterationChangeType = "新增" | "更名" | "迁移" | "取消" | "结构"
+/** 含 6.3 菜单记录中的「修改 / 合并调整 / 模块重构 / 保留」等扩展类型 */
+export type IterationChangeType = string
 
 export type IterationVersionMeta = {
   version: string

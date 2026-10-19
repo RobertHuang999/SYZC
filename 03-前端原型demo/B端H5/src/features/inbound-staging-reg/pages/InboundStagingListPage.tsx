@@ -30,6 +30,7 @@ import {
   inboundStagingEditQuery,
 } from "../domain/constants"
 import { WORKSPACE_ROUTE } from "@/features/inbound-records/domain/constants"
+import { INBOUND_STAGING_CONVERT_ENABLED } from "@prototype/shared/inbound/inbound-633-delivery"
 import {
   InboundDateFilterModal,
   type DateRangeDraft,
@@ -296,7 +297,9 @@ export function InboundStagingListPage() {
                 key={row.id}
                 row={row}
                 onEdit={handleEdit}
-                onConvert={handleConvert}
+                onConvert={
+                  INBOUND_STAGING_CONVERT_ENABLED ? handleConvert : undefined
+                }
                 onVoid={handleVoid}
                 onViewFormal={handleViewFormal}
               />

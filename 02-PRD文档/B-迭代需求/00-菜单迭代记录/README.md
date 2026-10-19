@@ -60,6 +60,8 @@ npm run generate:iterations
 
 生成目标：`src/features/permission-reference/data/menu-iteration-records.ts`
 
+6.3 功能与数据权限增量见 `6.3版本（2026.09）/功能与数据权限-6.3增量.json`，与基准 CSV 一并由 `npm run generate:permissions` 合并进 `permission-records.ts`。
+
 ---
 
 ## 四、与基准版的关系

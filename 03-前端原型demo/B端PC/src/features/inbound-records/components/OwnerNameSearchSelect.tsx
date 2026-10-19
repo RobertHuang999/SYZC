@@ -39,6 +39,7 @@ type OwnerNameSearchSelectProps = {
   ownerIdentifier: string
   disabled?: boolean
   onSelect: (value: OwnerNameSelection) => void
+  onQuickAdd?: () => void
 }
 
 export function OwnerNameSearchSelect({
@@ -46,6 +47,7 @@ export function OwnerNameSearchSelect({
   ownerName,
   disabled,
   onSelect,
+  onQuickAdd,
 }: OwnerNameSearchSelectProps) {
   const [open, setOpen] = useState(false)
   const [keyword, setKeyword] = useState(ownerName)
@@ -136,17 +138,20 @@ export function OwnerNameSearchSelect({
     onSelect({
       ownerName: val,
       ownerType: fallbackType,
-      isNewOwner: true,
+      isNewOwner: false,
       partnerId: "",
+      ownerIdentifier: "",
+      contactPhone: "",
+      idCardNo: "",
     })
   }
 
   const placeholder =
     ownerType === "企业货主"
-      ? "请输入或选择企业全称"
+      ? "请输入主体名称或联系手机搜索"
       : ownerType === "个人货主"
-      ? "请输入或选择个人货主姓名"
-      : "请输入或选择货主名称"
+      ? "请输入主体名称或联系手机搜索"
+      : "请输入主体名称或联系手机搜索"
 
   return (
     <div ref={containerRef} className="relative w-full">
@@ -198,8 +203,21 @@ export function OwnerNameSearchSelect({
 
           <ul className="max-h-52 overflow-y-auto py-1 text-xs">
             {options.length === 0 ? (
-              <li className="px-3 py-3 text-center text-muted-foreground">
-                未找到匹配货主（将作为新货主登记）
+              <li className="px-3 py-4 text-center text-muted-foreground space-y-2">
+                <p className="text-xs">未找到匹配货主</p>
+                {onQuickAdd && keyword.trim() ? (
+                  <button
+                    type="button"
+                    className="text-xs font-medium text-primary hover:underline"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      setOpen(false)
+                      onQuickAdd()
+                    }}
+                  >
+                    + 添加货主
+                  </button>
+                ) : null}
               </li>
             ) : (
               options.map((record) => {

@@ -23,6 +23,7 @@ export interface OutboundFormState {
   pickupPhone: string
   pickupIdentity?: string
   pickupOperator?: string
+  pickupAgentPartnerId: string
   plateNo: string
   sitePhotos: string[]
 }

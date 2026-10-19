@@ -25,6 +25,9 @@ function validateCreditCode(code: string): boolean {
 }
 
 export function validateInboundBasicStep(form: InboundFormState): string | null {
+  if (!form.partnerId) {
+    return "请先选择货主或通过【快速添加货主】建档"
+  }
   if (!form.ownerType) {
     return "请选择货主类型"
   }

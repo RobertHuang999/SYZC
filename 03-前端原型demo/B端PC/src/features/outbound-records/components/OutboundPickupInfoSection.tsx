@@ -26,6 +26,7 @@ interface OutboundPickupInfoSectionProps {
   expanded: boolean
   onToggle: () => void
   onPreviewImage: (url: string) => void
+  onQuickAddPickupAgent?: () => void
 }
 
 function FormItem({
@@ -56,6 +57,7 @@ export function OutboundPickupInfoSection({
   expanded,
   onToggle,
   onPreviewImage,
+  onQuickAddPickupAgent,
 }: OutboundPickupInfoSectionProps) {
   // 模拟上传照片
   const handleUploadPhoto = () => {
@@ -125,6 +127,22 @@ export function OutboundPickupInfoSection({
             {/* 个人提货人字段 */}
             {isPersonal ? (
               <>
+                {onQuickAddPickupAgent ? (
+                  <div className="sm:col-span-2 lg:col-span-4">
+                    <button
+                      type="button"
+                      className="text-xs font-medium text-primary hover:underline"
+                      onClick={onQuickAddPickupAgent}
+                    >
+                      + 快速添加提货经办人
+                    </button>
+                    {form.pickupAgentPartnerId ? (
+                      <span className="ml-2 text-[11px] text-muted-foreground">
+                        已关联合作方档案
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
                 <FormItem label="提货人姓名:" required>
                   <Input
                     value={form.pickupName}

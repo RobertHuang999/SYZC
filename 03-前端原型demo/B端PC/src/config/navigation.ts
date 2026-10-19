@@ -1,6 +1,12 @@
 import { generatedSidebarGroupsByModule } from "./menu-catalog.generated"
+import {
+  INBOUND_STAGING_PROTOTYPE_RELEASED,
+  INBOUND_STAGING_PC_MENU_PATH,
+} from "@prototype/shared/inbound/inbound-633-delivery"
 
 export const PERMISSION_REFERENCE_PATH = "/系统参考/功能与数据权限"
+export const ITERATION_RECORD_PATH = "/系统参考/菜单迭代记录"
+export const ITERATION_RECORD_LABEL = "迭代记录"
 
 export const IOT_WARNING_MODULE_PREFIX = "/物联网IOT与预警"
 
@@ -119,7 +125,29 @@ const decodePath = (pathname: string) => {
 
 export function isSystemReferencePath(pathname: string) {
   const currentPath = decodePath(pathname)
-  return currentPath === PERMISSION_REFERENCE_PATH || currentPath.startsWith(`${PERMISSION_REFERENCE_PATH}/`)
+  return (
+    currentPath === PERMISSION_REFERENCE_PATH ||
+    currentPath.startsWith(`${PERMISSION_REFERENCE_PATH}/`) ||
+    currentPath === ITERATION_RECORD_PATH ||
+    currentPath.startsWith(`${ITERATION_RECORD_PATH}/`)
+  )
+}
+
+export function getSystemReferenceTab(pathname: string): "permission" | "iteration" | null {
+  const currentPath = decodePath(pathname)
+  if (
+    currentPath === ITERATION_RECORD_PATH ||
+    currentPath.startsWith(`${ITERATION_RECORD_PATH}/`)
+  ) {
+    return "iteration"
+  }
+  if (
+    currentPath === PERMISSION_REFERENCE_PATH ||
+    currentPath.startsWith(`${PERMISSION_REFERENCE_PATH}/`)
+  ) {
+    return "permission"
+  }
+  return null
 }
 
 const modulePrefixes: Record<string, string> = {
@@ -200,8 +228,24 @@ export function getAllMenuPaths(): string[] {
   return [...new Set(paths)]
 }
 
+function filterInboundStagingSidebarGroups(groups: SidebarGroup[]): SidebarGroup[] {
+  if (INBOUND_STAGING_PROTOTYPE_RELEASED) {
+    return groups
+  }
+  return groups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) =>
+          item.path !== INBOUND_STAGING_PC_MENU_PATH &&
+          !item.path.startsWith(`${INBOUND_STAGING_PC_MENU_PATH}/`),
+      ),
+    }))
+    .filter((group) => group.items.length > 0)
+}
+
 export function getSidebarGroups(module: TopModule): SidebarGroup[] {
-  return sidebarGroupsByModule[module.id] ?? []
+  return filterInboundStagingSidebarGroups(sidebarGroupsByModule[module.id] ?? [])
 }
 
 export function getActiveSidebarGroup(pathname: string): SidebarGroup {
@@ -219,7 +263,10 @@ export function getActiveSidebarGroup(pathname: string): SidebarGroup {
 export function getPageTitle(pathname: string) {
   const currentPath = decodePath(pathname).replace(/\/$/, "")
 
-  if (isSystemReferencePath(pathname)) {
+  if (getSystemReferenceTab(pathname) === "iteration") {
+    return ITERATION_RECORD_LABEL
+  }
+  if (getSystemReferenceTab(pathname) === "permission") {
     return "功能与数据权限"
   }
 
@@ -238,7 +285,10 @@ export function getPageTitle(pathname: string) {
 export function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
   const currentPath = decodePath(pathname).replace(/\/$/, "") || "/"
 
-  if (isSystemReferencePath(pathname)) {
+  if (getSystemReferenceTab(pathname) === "iteration") {
+    return [{ label: "系统参考" }, { label: ITERATION_RECORD_LABEL }]
+  }
+  if (getSystemReferenceTab(pathname) === "permission") {
     return [{ label: "系统参考" }, { label: "功能与数据权限" }]
   }
 

@@ -2,12 +2,16 @@ import { ChevronDown, KeyRound, Package } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { TopModuleNav } from "@/components/layout/TopModuleNav"
 import { IterationRecordButton } from "@/features/permission-reference/components/IterationRecordButton"
-import { isSystemReferencePath, PERMISSION_REFERENCE_PATH, type TopModule } from "@/config/navigation"
+import {
+  PERMISSION_REFERENCE_PATH,
+  type TopModule,
+} from "@/config/navigation"
 import { cn } from "@/lib/utils"
 
 export function Header({ activeModule }: { activeModule: TopModule }) {
   const { pathname } = useLocation()
-  const onPermissionPage = isSystemReferencePath(pathname)
+  const onPermissionPage =
+    pathname === PERMISSION_REFERENCE_PATH || pathname.startsWith(`${PERMISSION_REFERENCE_PATH}/`)
 
   return (
     <header className="header-bar">

@@ -1,4 +1,5 @@
 import { STAGING_ACTION_LABELS } from "@prototype/shared/inbound/staging-ui-labels"
+import { INBOUND_STAGING_CONVERT_ENABLED } from "@prototype/shared/inbound/inbound-633-delivery"
 import { H5_DETAIL_BTN_PRIMARY } from "@/shared/h5-ui-theme"
 
 type PendingProps = {
@@ -51,14 +52,18 @@ export function StagingMobileDetailFooter(props: Props) {
         >
           {STAGING_ACTION_LABELS.edit}
         </button>
-        <ActionSep />
-        <button
-          type="button"
-          className="shrink-0 whitespace-nowrap px-1 py-1 text-sm font-semibold text-blue-600 active:opacity-75"
-          onClick={props.onConvert}
-        >
-          {STAGING_ACTION_LABELS.convert}
-        </button>
+        {INBOUND_STAGING_CONVERT_ENABLED ? (
+          <>
+            <ActionSep />
+            <button
+              type="button"
+              className="shrink-0 whitespace-nowrap px-1 py-1 text-sm font-semibold text-blue-600 active:opacity-75"
+              onClick={props.onConvert}
+            >
+              {STAGING_ACTION_LABELS.convert}
+            </button>
+          </>
+        ) : null}
       </div>
     </div>
   )

@@ -1,12 +1,43 @@
 import type { OwnerType, RelatedOrderOption } from "../domain/form-types"
+import { partnerArchivesMock } from "@prototype/B端PC/src/features/partner-archives/mock/partner-archives.mock"
 
 export type OwnerSearchRecord = {
   id: string
   ownerType: OwnerType
   name: string
   identifierMasked: string
+  ownerIdentifier: string
   contactPhone?: string
   idCardNo?: string
+  partnerId?: string
+}
+
+function buildPartnerOwnerRecords(): OwnerSearchRecord[] {
+  return partnerArchivesMock
+    .filter((partner) =>
+      partner.roles.some(
+        (role) => role.roleType === "OWNER" && role.roleStatus === "NORMAL"
+      )
+    )
+    .map((partner) => {
+      const isEnterprise = partner.subjectType === "ENTERPRISE"
+      return {
+        id: `partner-${partner.id}`,
+        partnerId: partner.id,
+        ownerType: isEnterprise ? "企业货主" : "个人货主",
+        name: partner.name,
+        ownerIdentifier: isEnterprise ? partner.idNumber : partner.contactPhone,
+        identifierMasked: partner.idNumberMasked,
+        contactPhone: partner.contactPhone,
+        idCardNo: isEnterprise ? undefined : partner.idNumber,
+      }
+    })
+}
+
+function getOwnerSearchCatalog(): OwnerSearchRecord[] {
+  const partnerNames = new Set(buildPartnerOwnerRecords().map((r) => r.name))
+  const legacy = OWNER_SEARCH_RECORDS.filter((r) => !partnerNames.has(r.name))
+  return [...buildPartnerOwnerRecords(), ...legacy]
 }
 
 export function formatOwnerSearchLabel(name: string, identifierMasked: string) {
@@ -20,7 +51,8 @@ export const OWNER_SEARCH_RECORDS: OwnerSearchRecord[] = [
     ownerType: "个人货主",
     name: "原原李",
     identifierMasked: "185****7112",
-    contactPhone: "185****7112",
+    ownerIdentifier: "18512347112",
+    contactPhone: "18512347112",
     idCardNo: "420101********3328",
   },
   {
@@ -28,7 +60,8 @@ export const OWNER_SEARCH_RECORDS: OwnerSearchRecord[] = [
     ownerType: "个人货主",
     name: "张一",
     identifierMasked: "133****0001",
-    contactPhone: "133****0001",
+    ownerIdentifier: "13308000001",
+    contactPhone: "13308000001",
     idCardNo: "420101****3328",
   },
   {
@@ -36,7 +69,8 @@ export const OWNER_SEARCH_RECORDS: OwnerSearchRecord[] = [
     ownerType: "个人货主",
     name: "李爱",
     identifierMasked: "133****0027",
-    contactPhone: "133****0027",
+    ownerIdentifier: "13308000027",
+    contactPhone: "13308000027",
     idCardNo: "510101********1234",
   },
   {
@@ -44,14 +78,16 @@ export const OWNER_SEARCH_RECORDS: OwnerSearchRecord[] = [
     ownerType: "企业货主",
     name: "四川享宇科技有限公司",
     identifierMasked: "915100**********1A",
-    contactPhone: "028****8888",
+    ownerIdentifier: "91510000000000001A",
+    contactPhone: "02888888888",
   },
   {
     id: "owner-li-supervise",
     ownerType: "企业货主",
     name: "李一监督",
     identifierMasked: "913100**********2B",
-    contactPhone: "021****6666",
+    ownerIdentifier: "91310000000000002B",
+    contactPhone: "02166666666",
   },
 ]
 
@@ -59,10 +95,9 @@ export function filterOwnerSearchRecords(
   ownerType: OwnerType | "",
   keyword: string
 ): OwnerSearchRecord[] {
-  if (!ownerType) return []
   const kw = keyword.trim().toLowerCase()
-  return OWNER_SEARCH_RECORDS.filter((record) => {
-    if (record.ownerType !== ownerType) return false
+  return getOwnerSearchCatalog().filter((record) => {
+    if (ownerType && record.ownerType !== ownerType) return false
     if (!kw) return true
     const label = formatOwnerSearchLabel(
       record.name,
@@ -71,7 +106,8 @@ export function filterOwnerSearchRecords(
     return (
       record.name.toLowerCase().includes(kw) ||
       label.includes(kw) ||
-      record.identifierMasked.toLowerCase().includes(kw)
+      record.ownerIdentifier.toLowerCase().includes(kw) ||
+      (record.contactPhone ? record.contactPhone.toLowerCase().includes(kw) : false)
     )
   })
 }

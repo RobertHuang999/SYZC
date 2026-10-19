@@ -1,5 +1,6 @@
 // 自动生成，请勿手工编辑。运行 npm run generate:permissions 更新。
 // 数据源：02-PRD文档/🌟🌟🌟-最新基准版/00-功能与数据权限/功能与数据权限清单.csv
+// + 02-PRD文档/B-迭代需求/6.3版本（2026.09）/功能与数据权限-6.3增量.json
 // CSV 列名与原型页四列对齐：页面路径 / 页面功能按钮 / 数据可见范围 / 变更记录
 
 export type PermissionRecord = {
@@ -9,7 +10,7 @@ export type PermissionRecord = {
   topBarModuleLabel: string
   menuModuleCode: string
   baselineModuleDir: string
-  recordStatus: "active" | "planned" | "cancelled" | "6.2-target"
+  recordStatus: "active" | "planned" | "cancelled" | "6.2-target" | "6.3-target" | "6.3-delivered"
   pagePathSegments: string[]
   pagePath: string
   legacyPath: string
@@ -133,7 +134,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "工作中心",
     "menuModuleCode": "01-工作中心",
     "baselineModuleDir": "B端PC/01-工作中心",
-    "recordStatus": "active",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "审批中心",
       "业务管理审批",
@@ -145,7 +146,7 @@ export const permissionRecords: PermissionRecord[] = [
     "dataPermission": "",
     "changeNote": "",
     "createdAt": "2026-03-10",
-    "updatedAt": ""
+    "updatedAt": "2026-09-11"
   },
   {
     "id": "7",
@@ -175,7 +176,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "工作中心",
     "menuModuleCode": "01-工作中心",
     "baselineModuleDir": "B端PC/01-工作中心",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "审批中心",
       "客户需求审批",
@@ -185,9 +186,9 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "",
     "actionPermissions": "查看页面、查看详情、去处理",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "",
+    "changeNote": "6.3 P0：货主引用合作方，准入校验前置",
     "createdAt": "2026-05-13",
-    "updatedAt": ""
+    "updatedAt": "2026-09-20"
   },
   {
     "id": "9",
@@ -791,18 +792,18 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
     "baselineModuleDir": "B端PC/02-仓储",
-    "recordStatus": "cancelled",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "入库管理",
       "入库申请"
     ],
     "pagePath": "入库管理 / 入库申请",
     "legacyPath": "货物管理～入库申请",
-    "actionPermissions": "查看页面、详情、新增入库、 撤销入库、操作记录",
+    "actionPermissions": "查看页面、详情、新增入库、撤销入库、操作记录",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "0504：取消入库申请菜单",
+    "changeNote": "6.3 原型已交付入库申请；0504 线上曾取消菜单，6.3 与入库记录双轨",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-04-14"
+    "updatedAt": "2026-10-19"
   },
   {
     "id": "39",
@@ -811,21 +812,41 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
     "baselineModuleDir": "B端PC/02-仓储",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "入库管理",
       "入库记录"
     ],
     "pagePath": "入库管理 / 入库记录",
     "legacyPath": "货物管理～入库记录",
-    "actionPermissions": "查看页面、详情、编辑、分配二维码、下载记录、单据下载、新增入库",
+    "actionPermissions": "查看页面、详情、新增入库、分配二维码、下载记录、单据下载、快速添加货主",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "0504：入库申请入口修改、详情页面优化",
+    "changeNote": "6.3 P0：合作方货主快捷建档（R03）；暂存登记整模块本期不放开",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-04-14"
+    "updatedAt": "2026-10-19"
   },
   {
     "id": "40",
+    "platform": "PC",
+    "module": "2.仓储",
+    "topBarModuleLabel": "仓储",
+    "menuModuleCode": "02-仓储",
+    "baselineModuleDir": "B端PC/02-仓储",
+    "recordStatus": "6.3-target",
+    "pagePathSegments": [
+      "入库管理",
+      "入库暂存登记"
+    ],
+    "pagePath": "入库管理 / 入库暂存登记",
+    "legacyPath": "货物管理～入库暂存登记",
+    "actionPermissions": "查看页面、新增登记、编辑、转为正式入库、作废",
+    "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
+    "changeNote": "6.3 P0 三件套已定；本期菜单/路由/原型均不放开",
+    "createdAt": "2026-10-14",
+    "updatedAt": "2026-10-19"
+  },
+  {
+    "id": "41",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -845,27 +866,27 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "41",
+    "id": "42",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
     "baselineModuleDir": "B端PC/02-仓储",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "出库管理",
       "出库记录"
     ],
     "pagePath": "出库管理 / 出库记录",
     "legacyPath": "货物管理～出库记录",
-    "actionPermissions": "查看页面、详情、下载记录、单据下载、新增出库、新增出库",
+    "actionPermissions": "查看页面、详情、新增出库、下载记录、单据下载、快速添加提货经办人",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "0504：出库申请入口修改、详情页面优化",
+    "changeNote": "6.3 P0：货主、提货主体、提货经办人引用合作方；提货经办人快捷建档（O06a）",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-04-14"
+    "updatedAt": "2026-10-19"
   },
   {
-    "id": "42",
+    "id": "43",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -885,7 +906,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "43",
+    "id": "44",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -905,7 +926,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "44",
+    "id": "45",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -925,13 +946,13 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "45",
+    "id": "46",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
     "baselineModuleDir": "B端PC/02-仓储",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "货物转让",
       "转让记录"
@@ -940,12 +961,12 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理～转让记录",
     "actionPermissions": "查看页面、详情、新增转让、撤销转让",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "0504：转让申请入口修改、详情页面优化",
+    "changeNote": "6.3 P0：接收方引用合作方；转让生效变货主执行地址规则",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-04-14"
+    "updatedAt": "2026-09-20"
   },
   {
-    "id": "46",
+    "id": "47",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -965,7 +986,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "47",
+    "id": "48",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -985,7 +1006,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "48",
+    "id": "49",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -1005,13 +1026,13 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "49",
+    "id": "50",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
     "baselineModuleDir": "B端PC/02-仓储",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "提货单"
     ],
@@ -1019,12 +1040,12 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理～提货单",
     "actionPermissions": "查看页面、详情、取消提货、重置提货码、提货码核销、操作记录、确认提货",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "",
+    "changeNote": "6.3 P0：提货人引用合作方，支持身份证/手机号检索",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-05-07"
+    "updatedAt": "2026-09-20"
   },
   {
-    "id": "50",
+    "id": "51",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -1043,7 +1064,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "51",
+    "id": "52",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -1063,7 +1084,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "52",
+    "id": "53",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -1083,7 +1104,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "53",
+    "id": "54",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -1103,7 +1124,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "54",
+    "id": "55",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -1123,7 +1144,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "55",
+    "id": "56",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -1143,7 +1164,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "56",
+    "id": "57",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -1163,7 +1184,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "57",
+    "id": "58",
     "platform": "PC",
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
@@ -1183,7 +1204,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "58",
+    "id": "59",
     "platform": "PC",
     "module": "3.融资/监管",
     "topBarModuleLabel": "融资/监管",
@@ -1203,7 +1224,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "59",
+    "id": "60",
     "platform": "PC",
     "module": "3.融资/监管",
     "topBarModuleLabel": "融资/监管",
@@ -1223,7 +1244,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "60",
+    "id": "61",
     "platform": "PC",
     "module": "3.融资/监管",
     "topBarModuleLabel": "融资/监管",
@@ -1243,7 +1264,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "61",
+    "id": "62",
     "platform": "PC",
     "module": "3.融资/监管",
     "topBarModuleLabel": "融资/监管",
@@ -1263,7 +1284,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-07-28"
   },
   {
-    "id": "62",
+    "id": "63",
     "platform": "PC",
     "module": "3.融资/监管",
     "topBarModuleLabel": "融资/监管",
@@ -1283,7 +1304,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "63",
+    "id": "64",
     "platform": "PC",
     "module": "3.融资/监管",
     "topBarModuleLabel": "融资/监管",
@@ -1303,12 +1324,12 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "64",
+    "id": "65",
     "platform": "PC",
     "module": "3.融资/监管",
-    "topBarModuleLabel": "融资/监管",
-    "menuModuleCode": "03-融资监管",
-    "baselineModuleDir": "B端PC/03-融资监管",
+    "topBarModuleLabel": "B端PC/03-融资监管",
+    "menuModuleCode": "融资/监管",
+    "baselineModuleDir": "active",
     "recordStatus": "active",
     "pagePathSegments": [
       "抵质押业务",
@@ -1316,19 +1337,19 @@ export const permissionRecords: PermissionRecord[] = [
     ],
     "pagePath": "抵质押业务 / 抵质押业务管理",
     "legacyPath": "项目管理～抵质押监管订单（无开立按钮）",
-    "actionPermissions": "抵质押订单：查看(页面)、导出为excel、结算管理、 更多操作-质物置换、加/补仓、提货、解抵/质押、货物估值、货物盘点、盘点报告、移库、查看监控、平仓、设备管理、查看详情（查看抵质押详情）、部分结清、监管报告、监管报告-查看详情、监管报告-查看报告、监管报告-下载报告、监管报告-生成盘点监管报告、 资料管理、资料上传、查看风险--公示风险/批量公示风险（已处理数据下才展示）、风险公示 (更多操作对应权限内的操作按钮还需根据订单关联的总流程内是否配置对应子流程决定最终是否展示，包含 质物置换、加/补仓、提货、解抵/质押、货物估值、移库、平仓） 监管订单： 查看（页面）、导出为excel、操作记录、查看资料（修改为资料管理）、资料上传、结算管理 更多操作-加/补仓、提货、解监管、平仓、货物盘点、盘点报告、查看监控、查看风险、设备管理（更多操作对应权限内的操作按钮还需根据订单关联的总流程内是否配置对应子流程决定最终是否展示，包含 加/补仓、提货、解监管、货物估值、平仓）、查看详情（查看抵质押详情）、监管报告、监管报告-查看详情、监管报告-查看报告、监管报告-下载报告、监管报告-生成盘点监管报告",
+    "actionPermissions": "抵质押订单：查看(页面)、导出为excel、结算管理、 更多操作-质物置换、加/补仓、提货、解抵/质押、货物估值、货物盘点、盘点报告、移库、查看监控、平仓、设备管理、查看详情（查看抵质押详情）、部分结清、监管报告、监管报告-查看详情、监管报告-查看报告、监管报告-下载报告、监管报告-生成盘点监管报告、 资料管理、资料上传、查看风险--公示风险/批量公示风险（已处理数据下才展示）、风险公示 (更多操作对应权限内的操作按钮还需根据订单关联的总流程内是否配置对应子流程决定最终是否展示，包含 质物置换、加/补仓、提货、解抵/质押、货物估值、移库、平仓）",
     "dataPermission": "数据权限：根据当前登录账号的角色的数据权限决定【任务发起人及任务处理人可看到相关信息，其他无关人员需要有对应数据所属机构的数据权限才能看到】； 盘点 - 盘点人只能盘点自己有仓库权限的货物 当针对没有仓库权限的货物点击扫码盘点 操作记录 - 能看到这笔抵/质押单，就能看到这笔抵/质押单的全部操作记录",
-    "changeNote": "",
-    "createdAt": "2026-03-10",
+    "changeNote": "2026年9月11日",
+    "createdAt": "2026-09-11",
     "updatedAt": ""
   },
   {
-    "id": "65",
+    "id": "66",
     "platform": "PC",
     "module": "3.融资/监管",
-    "topBarModuleLabel": "融资/监管",
-    "menuModuleCode": "03-融资监管",
-    "baselineModuleDir": "B端PC/03-融资监管",
+    "topBarModuleLabel": "B端PC/03-融资监管",
+    "menuModuleCode": "融资/监管",
+    "baselineModuleDir": "cancelled",
     "recordStatus": "active",
     "pagePathSegments": [
       "监管业务",
@@ -1338,12 +1359,12 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "项目管理～供应链监管订单",
     "actionPermissions": "监管订单： 查看（页面）、导出为excel、操作记录、查看资料、结算管理 更多操作-加/补仓、提货、解监管、平仓、货物盘点、盘点报告、查看监控、查看风险、设备管理（更多操作对应权限内的操作按钮还需根据订单关联的总流程内是否配置对应子流程决定最终是否展示，包含 加/补仓、提货、解监管、货物估值、平仓）、20280804新增 查看详情（查看抵质押详情）、20250801新增03-2版本内容：监管报告、监管报告-查看详情、监管报告-查看报告、监管报告-下载报告、监管报告-生成盘点监管报告",
     "dataPermission": "数据权限：根据当前登录账号的角色的数据权限决定【任务发起人及任务处理人可看到相关信息，其他无关人员需要有对应数据所属机构的数据权限才能看到】； 盘点 - 盘点人只能盘点自己有仓库权限的货物 当针对没有仓库权限的货物点击扫码盘点 操作记录 - 能看到这笔抵/质押单，就能看到这笔抵/质押单的全部操作记录",
-    "changeNote": "",
-    "createdAt": "2026-03-10",
+    "changeNote": "2026年9月11日",
+    "createdAt": "2026-09-11",
     "updatedAt": ""
   },
   {
-    "id": "66",
+    "id": "67",
     "platform": "PC",
     "module": "3.融资/监管",
     "topBarModuleLabel": "融资/监管",
@@ -1363,7 +1384,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "67",
+    "id": "68",
     "platform": "PC",
     "module": "3.融资/监管",
     "topBarModuleLabel": "融资/监管",
@@ -1383,7 +1404,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "68",
+    "id": "69",
     "platform": "PC",
     "module": "3.融资/监管",
     "topBarModuleLabel": "融资/监管",
@@ -1403,7 +1424,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "69",
+    "id": "70",
     "platform": "PC",
     "module": "3.融资/监管",
     "topBarModuleLabel": "融资/监管",
@@ -1423,7 +1444,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "70",
+    "id": "71",
     "platform": "PC",
     "module": "4.交易",
     "topBarModuleLabel": "交易",
@@ -1443,7 +1464,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "71",
+    "id": "72",
     "platform": "PC",
     "module": "4.交易",
     "topBarModuleLabel": "交易",
@@ -1463,7 +1484,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "72",
+    "id": "73",
     "platform": "PC",
     "module": "4.交易",
     "topBarModuleLabel": "交易",
@@ -1483,13 +1504,13 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "73",
+    "id": "74",
     "platform": "PC",
     "module": "4.交易",
     "topBarModuleLabel": "交易",
     "menuModuleCode": "04-交易",
     "baselineModuleDir": "B端PC/04-交易",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "客户管理"
     ],
@@ -1497,12 +1518,12 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "客户管理～客户列表 （负责交易数据的客户）",
     "actionPermissions": "查看页面、详情、导出为Excel",
     "dataPermission": "1、挂靠顶级机构； 2、有功能权限可看；",
-    "changeNote": "",
+    "changeNote": "6.3 P0：保留菜单，增加客户账号与合作方主体绑定",
     "createdAt": "2026-03-10",
-    "updatedAt": ""
+    "updatedAt": "2026-09-20"
   },
   {
-    "id": "74",
+    "id": "75",
     "platform": "PC",
     "module": "5.风控",
     "topBarModuleLabel": "风控",
@@ -1522,7 +1543,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "75",
+    "id": "76",
     "platform": "PC",
     "module": "5.风控",
     "topBarModuleLabel": "风控",
@@ -1542,7 +1563,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "76",
+    "id": "77",
     "platform": "PC",
     "module": "5.风控",
     "topBarModuleLabel": "风控",
@@ -1562,7 +1583,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "77",
+    "id": "78",
     "platform": "PC",
     "module": "5.风控",
     "topBarModuleLabel": "风控",
@@ -1582,7 +1603,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "78",
+    "id": "79",
     "platform": "PC",
     "module": "5.风控",
     "topBarModuleLabel": "风控",
@@ -1602,7 +1623,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "79",
+    "id": "80",
     "platform": "PC",
     "module": "5.风控",
     "topBarModuleLabel": "风控",
@@ -1622,7 +1643,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-05-28"
   },
   {
-    "id": "80",
+    "id": "81",
     "platform": "PC",
     "module": "5.风控",
     "topBarModuleLabel": "风控",
@@ -1642,7 +1663,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-05-28"
   },
   {
-    "id": "81",
+    "id": "82",
     "platform": "PC",
     "module": "5.风控",
     "topBarModuleLabel": "风控",
@@ -1662,7 +1683,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-05-28"
   },
   {
-    "id": "82",
+    "id": "83",
     "platform": "PC",
     "module": "5.风控",
     "topBarModuleLabel": "风控",
@@ -1682,7 +1703,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "83",
+    "id": "84",
     "platform": "PC",
     "module": "5.风控",
     "topBarModuleLabel": "风控",
@@ -1702,7 +1723,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "84",
+    "id": "85",
     "platform": "PC",
     "module": "5.风控",
     "topBarModuleLabel": "风控",
@@ -1722,7 +1743,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "85",
+    "id": "86",
     "platform": "PC",
     "module": "5.风控",
     "topBarModuleLabel": "风控",
@@ -1742,7 +1763,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "86",
+    "id": "87",
     "platform": "PC",
     "module": "5.风控",
     "topBarModuleLabel": "风控",
@@ -1762,7 +1783,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "87",
+    "id": "88",
     "platform": "PC",
     "module": "5.风控",
     "topBarModuleLabel": "风控",
@@ -1782,7 +1803,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "88",
+    "id": "89",
     "platform": "PC",
     "module": "6.统计/看板",
     "topBarModuleLabel": "统计/看板",
@@ -1802,7 +1823,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "89",
+    "id": "90",
     "platform": "PC",
     "module": "6.统计/看板",
     "topBarModuleLabel": "统计/看板",
@@ -1822,7 +1843,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "90",
+    "id": "91",
     "platform": "PC",
     "module": "6.统计/看板",
     "topBarModuleLabel": "统计/看板",
@@ -1842,7 +1863,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "91",
+    "id": "92",
     "platform": "PC",
     "module": "6.统计/看板",
     "topBarModuleLabel": "统计/看板",
@@ -1862,7 +1883,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "92",
+    "id": "93",
     "platform": "PC",
     "module": "6.统计/看板",
     "topBarModuleLabel": "统计/看板",
@@ -1882,7 +1903,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "93",
+    "id": "94",
     "platform": "PC",
     "module": "6.统计/看板",
     "topBarModuleLabel": "统计/看板",
@@ -1902,7 +1923,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "94",
+    "id": "95",
     "platform": "PC",
     "module": "7.结算",
     "topBarModuleLabel": "结算",
@@ -1922,7 +1943,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "95",
+    "id": "96",
     "platform": "PC",
     "module": "7.结算",
     "topBarModuleLabel": "结算",
@@ -1942,7 +1963,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "96",
+    "id": "97",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -1962,7 +1983,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "97",
+    "id": "98",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -1982,7 +2003,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "98",
+    "id": "99",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2002,13 +2023,13 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "99",
+    "id": "100",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
     "menuModuleCode": "08-配置管理",
     "baselineModuleDir": "B端PC/08-配置管理",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "平台管理",
       "基础配置"
@@ -2017,12 +2038,12 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "系统配置～管理端配置",
     "actionPermissions": "查看(页面)、编辑",
     "dataPermission": "1.数据源参数子页面 - 展示给机构可配的数据源为平台端赋予该机构权限内的数据源； 2.硬件参数子页面 - 展示给机构可配的数据源为平台端赋予该机构权限内的硬件设备配置；",
-    "changeNote": "",
+    "changeNote": "6.3 P0：平台运行底座重构；合作方准入策略并入；仓储作业参数只读联动",
     "createdAt": "2026-03-10",
-    "updatedAt": ""
+    "updatedAt": "2026-10-17"
   },
   {
-    "id": "100",
+    "id": "101",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2042,7 +2063,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "101",
+    "id": "102",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2062,7 +2083,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "102",
+    "id": "103",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2082,7 +2103,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "103",
+    "id": "104",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2102,7 +2123,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "104",
+    "id": "105",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2122,13 +2143,13 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "105",
+    "id": "106",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
     "menuModuleCode": "08-配置管理",
     "baselineModuleDir": "B端PC/08-配置管理",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "仓库管理",
       "仓库管理"
@@ -2137,12 +2158,12 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "仓库管理～仓库管理",
     "actionPermissions": "查看(页面)、新增仓库、编辑、停/启用、删除",
     "dataPermission": "1、仓库管理列表 - 展示内容为登录账号权限内的所有数据（删除状态数据不展示）； 2、可见数据根据登录账号角色的数据权限决定； 3、库房新增存放区选择和标识",
-    "changeNote": "",
+    "changeNote": "6.3 P0：空间主档层级；库房出入库审核状态读取基础配置只读展示",
     "createdAt": "2026-03-10",
-    "updatedAt": ""
+    "updatedAt": "2026-10-17"
   },
   {
-    "id": "106",
+    "id": "107",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2162,7 +2183,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "107",
+    "id": "108",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2182,7 +2203,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "108",
+    "id": "109",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2202,7 +2223,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "109",
+    "id": "110",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2222,7 +2243,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "110",
+    "id": "111",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2241,7 +2262,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "111",
+    "id": "112",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2261,7 +2282,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "112",
+    "id": "113",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2281,7 +2302,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "113",
+    "id": "114",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2301,7 +2322,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "114",
+    "id": "115",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2321,7 +2342,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-08-31"
   },
   {
-    "id": "115",
+    "id": "116",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2341,7 +2362,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "116",
+    "id": "117",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2361,7 +2382,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-08-31"
   },
   {
-    "id": "117",
+    "id": "118",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2381,7 +2402,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "118",
+    "id": "119",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2401,7 +2422,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "119",
+    "id": "120",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2421,7 +2442,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "120",
+    "id": "121",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2441,7 +2462,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "121",
+    "id": "122",
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
@@ -2461,7 +2482,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "122",
+    "id": "123",
     "platform": "PC",
     "module": "9.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
@@ -2481,7 +2502,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "123",
+    "id": "124",
     "platform": "PC",
     "module": "9.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
@@ -2501,7 +2522,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "124",
+    "id": "125",
     "platform": "PC",
     "module": "9.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
@@ -2521,7 +2542,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "125",
+    "id": "126",
     "platform": "PC",
     "module": "9.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
@@ -2541,7 +2562,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "126",
+    "id": "127",
     "platform": "PC",
     "module": "9.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
@@ -2561,7 +2582,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "127",
+    "id": "128",
     "platform": "PC",
     "module": "9.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
@@ -2581,7 +2602,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "128",
+    "id": "129",
     "platform": "PC",
     "module": "9.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
@@ -2601,7 +2622,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "129",
+    "id": "130",
     "platform": "PC",
     "module": "9.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
@@ -2621,7 +2642,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "130",
+    "id": "131",
     "platform": "PC",
     "module": "9.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
@@ -2641,7 +2662,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "131",
+    "id": "132",
     "platform": "PC",
     "module": "9.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
@@ -2661,7 +2682,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "132",
+    "id": "133",
     "platform": "PC",
     "module": "9.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
@@ -2681,7 +2702,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "133",
+    "id": "134",
     "platform": "PC",
     "module": "9.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
@@ -2701,7 +2722,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "134",
+    "id": "135",
     "platform": "移动",
     "module": "1.首页",
     "topBarModuleLabel": "首页",
@@ -2720,7 +2741,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "135",
+    "id": "136",
     "platform": "移动",
     "module": "1.首页",
     "topBarModuleLabel": "首页",
@@ -2740,7 +2761,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "136",
+    "id": "137",
     "platform": "移动",
     "module": "1.首页",
     "topBarModuleLabel": "首页",
@@ -2760,7 +2781,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "137",
+    "id": "138",
     "platform": "移动",
     "module": "1.首页",
     "topBarModuleLabel": "首页",
@@ -2780,7 +2801,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "138",
+    "id": "139",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -2800,7 +2821,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "139",
+    "id": "140",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -2820,7 +2841,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "140",
+    "id": "141",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -2840,7 +2861,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "141",
+    "id": "142",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -2860,13 +2881,13 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "142",
+    "id": "143",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
     "menuModuleCode": "02-工作台",
     "baselineModuleDir": "B端H5/02-工作台",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "仓储",
       "入库管理"
@@ -2875,18 +2896,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理～入库",
     "actionPermissions": "查看页面、入库、入库记录（入库订单：查看详情、编辑、分配二维码、单据下载、下载记录；入库申请：查看详情、操作记录、入库撤销）",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "",
+    "changeNote": "6.3：入库发起合作方货主；暂存磁贴本期隐藏",
     "createdAt": "2026-03-10",
-    "updatedAt": ""
+    "updatedAt": "2026-10-19"
   },
   {
-    "id": "143",
+    "id": "144",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
     "menuModuleCode": "02-工作台",
     "baselineModuleDir": "B端H5/02-工作台",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "仓储",
       "出库管理"
@@ -2895,12 +2916,12 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理～出库",
     "actionPermissions": "查看页面、出库、出库记录（出库订单：查看详情、单据下载、下载记录；出库申请：查看详情、操作记录、出库撤销）",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "",
+    "changeNote": "6.3 P0：出库制单引用合作方货主与提货经办人",
     "createdAt": "2026-03-10",
-    "updatedAt": ""
+    "updatedAt": "2026-09-20"
   },
   {
-    "id": "144",
+    "id": "145",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -2920,13 +2941,13 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "145",
+    "id": "146",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
     "menuModuleCode": "02-工作台",
     "baselineModuleDir": "B端H5/02-工作台",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "仓储",
       "货物转让"
@@ -2935,18 +2956,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理～转让",
     "actionPermissions": "查看页面、转让、转让记录（转让申请：查看详情、撤销；转让记录：查看详情）",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "",
+    "changeNote": "6.3 P0：接收方引用合作方",
     "createdAt": "2026-03-10",
-    "updatedAt": ""
+    "updatedAt": "2026-09-20"
   },
   {
-    "id": "146",
+    "id": "147",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
     "menuModuleCode": "02-工作台",
     "baselineModuleDir": "B端H5/02-工作台",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "仓储",
       "提货单"
@@ -2955,12 +2976,12 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理～提货单",
     "actionPermissions": "查看页面、详情、取消提货、重置提货码、提货码核销、操作记录、确认提货",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "",
+    "changeNote": "6.3 P0：提货人引用合作方",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-05-07"
+    "updatedAt": "2026-09-20"
   },
   {
-    "id": "147",
+    "id": "148",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -2980,7 +3001,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "148",
+    "id": "149",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3000,7 +3021,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "149",
+    "id": "150",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3021,7 +3042,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "150",
+    "id": "151",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3042,7 +3063,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "151",
+    "id": "152",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3063,7 +3084,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "152",
+    "id": "153",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3084,7 +3105,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "153",
+    "id": "154",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3105,7 +3126,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "154",
+    "id": "155",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3125,7 +3146,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "155",
+    "id": "156",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3145,7 +3166,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "156",
+    "id": "157",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3165,12 +3186,12 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "157",
+    "id": "158",
     "platform": "移动",
     "module": "2.工作台",
-    "topBarModuleLabel": "工作台",
-    "menuModuleCode": "02-工作台",
-    "baselineModuleDir": "B端H5/02-工作台",
+    "topBarModuleLabel": "B端H5/02-工作台",
+    "menuModuleCode": "工作台",
+    "baselineModuleDir": "cancelled",
     "recordStatus": "active",
     "pagePathSegments": [
       "融资/监管",
@@ -3181,12 +3202,12 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "项目监管～项目管理",
     "actionPermissions": "查看页面、结算管理、货物置换、货物补仓、货物出库、解抵质押、货物估值、货物盘点、盘点报告、货物移库、查看监控、平仓、查看风险、平仓、查看风险、设备管理、操作记录、货物详情、贷款结果录入、查看详情、监管报告（生成盘点监管报告、撤销申请、下载报告、查看详情、重新申请、查看报告）、部分结清、部分解抵质押",
     "dataPermission": "数据权限：根据当前登录账号的角色的数据权限决定【任务发起人及任务处理人可看到相关信息，其他无关人员需要有对应数据所属机构的数据权限才能看到】； 盘点 - 盘点人只能盘点自己有仓库权限的货物 当针对没有仓库权限的货物点击扫码盘点 操作记录 - 能看到这笔抵/质押单，就能看到这笔抵/质押单的全部操作记录",
-    "changeNote": "",
-    "createdAt": "2026-03-10",
+    "changeNote": "2026年9月11日",
+    "createdAt": "2026-09-11",
     "updatedAt": ""
   },
   {
-    "id": "158",
+    "id": "159",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3207,7 +3228,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "159",
+    "id": "160",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3227,7 +3248,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-08-31"
   },
   {
-    "id": "160",
+    "id": "161",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3247,7 +3268,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "161",
+    "id": "162",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3267,7 +3288,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "162",
+    "id": "163",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3287,7 +3308,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "163",
+    "id": "164",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3307,7 +3328,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "164",
+    "id": "165",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3327,7 +3348,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "165",
+    "id": "166",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3347,7 +3368,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "166",
+    "id": "167",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3367,7 +3388,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "167",
+    "id": "168",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3387,7 +3408,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "168",
+    "id": "169",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3407,7 +3428,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "169",
+    "id": "170",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3427,7 +3448,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "170",
+    "id": "171",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3447,7 +3468,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "171",
+    "id": "172",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3467,7 +3488,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "172",
+    "id": "173",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3487,7 +3508,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "173",
+    "id": "174",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3507,7 +3528,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "174",
+    "id": "175",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3527,7 +3548,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "175",
+    "id": "176",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3547,7 +3568,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "176",
+    "id": "177",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3567,7 +3588,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "177",
+    "id": "178",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3587,7 +3608,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "178",
+    "id": "179",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3607,7 +3628,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "179",
+    "id": "180",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3627,7 +3648,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "180",
+    "id": "181",
     "platform": "移动",
     "module": "2.工作台",
     "topBarModuleLabel": "工作台",
@@ -3647,7 +3668,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "181",
+    "id": "182",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -3667,7 +3688,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-08-31"
   },
   {
-    "id": "182",
+    "id": "183",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -3687,7 +3708,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "183",
+    "id": "184",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -3707,7 +3728,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "184",
+    "id": "185",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -3727,7 +3748,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "185",
+    "id": "186",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -3747,13 +3768,13 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "186",
+    "id": "187",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
     "menuModuleCode": "03-业务办理",
     "baselineModuleDir": "B端H5/03-业务办理",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "业务发起",
       "入库发起"
@@ -3762,18 +3783,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理-入库-入库",
     "actionPermissions": "查看（页面）",
     "dataPermission": "",
-    "changeNote": "优化页面",
+    "changeNote": "6.3 P0：合作方货主快捷建档；暂存通道本期不展示",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-04-14"
+    "updatedAt": "2026-10-19"
   },
   {
-    "id": "187",
+    "id": "188",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
     "menuModuleCode": "03-业务办理",
     "baselineModuleDir": "B端H5/03-业务办理",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "业务发起",
       "出库发起"
@@ -3782,12 +3803,12 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理-出库-出库",
     "actionPermissions": "查看（页面）",
     "dataPermission": "",
-    "changeNote": "优化页面",
+    "changeNote": "6.3 P0：提货经办人快捷建档（O06a）",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-04-14"
+    "updatedAt": "2026-10-19"
   },
   {
-    "id": "188",
+    "id": "189",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -3807,13 +3828,13 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "189",
+    "id": "190",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
     "menuModuleCode": "03-业务办理",
     "baselineModuleDir": "B端H5/03-业务办理",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "业务发起",
       "货物转让"
@@ -3822,12 +3843,12 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物转让-转让-转让",
     "actionPermissions": "查看（页面）",
     "dataPermission": "",
-    "changeNote": "优化页面",
+    "changeNote": "6.3 P0：接收方引用合作方",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-04-14"
+    "updatedAt": "2026-09-20"
   },
   {
-    "id": "190",
+    "id": "191",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -3847,7 +3868,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "191",
+    "id": "192",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -3867,7 +3888,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "192",
+    "id": "193",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -3887,7 +3908,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "193",
+    "id": "194",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -3907,7 +3928,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "194",
+    "id": "195",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -3927,7 +3948,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-04-14"
   },
   {
-    "id": "195",
+    "id": "196",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -3947,7 +3968,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "196",
+    "id": "197",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -3967,13 +3988,13 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "197",
+    "id": "198",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
     "menuModuleCode": "03-业务办理",
     "baselineModuleDir": "B端H5/03-业务办理",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "客户需求审批",
       "客户入库预约"
@@ -3982,12 +4003,12 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "客户入库需求优化升级",
     "actionPermissions": "查看页面、查看详情、去处理",
     "dataPermission": "可见数据根据当前登录账号的角色的仓库权限决定",
-    "changeNote": "替代原客户入库需求",
+    "changeNote": "6.3 P0：货主引用合作方，准入校验前置",
     "createdAt": "2026-05-13",
-    "updatedAt": "2026-08-31"
+    "updatedAt": "2026-09-20"
   },
   {
-    "id": "198",
+    "id": "199",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -4007,7 +4028,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-08-31"
   },
   {
-    "id": "199",
+    "id": "200",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -4027,7 +4048,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-07-28"
   },
   {
-    "id": "200",
+    "id": "201",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -4047,7 +4068,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "201",
+    "id": "202",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -4067,7 +4088,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "202",
+    "id": "203",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -4087,7 +4108,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "203",
+    "id": "204",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -4107,7 +4128,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": ""
   },
   {
-    "id": "204",
+    "id": "205",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -4127,7 +4148,7 @@ export const permissionRecords: PermissionRecord[] = [
     "updatedAt": "2026-08-31"
   },
   {
-    "id": "205",
+    "id": "206",
     "platform": "移动",
     "module": "3.业务办理",
     "topBarModuleLabel": "业务办理",
@@ -4145,6 +4166,106 @@ export const permissionRecords: PermissionRecord[] = [
     "changeNote": "仅作为联登智风控的入口，联登成功后跳转到智风控平台任务列表页面",
     "createdAt": "2026-05-12",
     "updatedAt": ""
+  },
+  {
+    "platform": "PC",
+    "module": "10.用户中心",
+    "topBarModuleLabel": "用户中心",
+    "menuModuleCode": "10-用户中心",
+    "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/04-合作方档案",
+    "recordStatus": "6.3-delivered",
+    "pagePathSegments": [
+      "合作方管理",
+      "合作方档案"
+    ],
+    "pagePath": "合作方管理 / 合作方档案",
+    "legacyPath": "—",
+    "actionPermissions": "查看页面、详情、新增、编辑、保存并提交、冻结/解冻、追加角色、入库快捷建档",
+    "dataPermission": "租户级隔离；列表按数据权限与仓库无关",
+    "changeNote": "6.3 P0 业务主体主数据统一入口",
+    "createdAt": "2026-09-01",
+    "updatedAt": "2026-10-19",
+    "id": "207"
+  },
+  {
+    "platform": "移动",
+    "module": "2.工作台",
+    "topBarModuleLabel": "工作台",
+    "menuModuleCode": "02-工作台",
+    "baselineModuleDir": "B端H5/02-工作台",
+    "recordStatus": "6.3-delivered",
+    "pagePathSegments": [
+      "用户中心",
+      "合作方档案"
+    ],
+    "pagePath": "用户中心 / 合作方档案",
+    "legacyPath": "用户中心-合作方管理-合作方档案",
+    "actionPermissions": "查看页面、详情、新增合作方、编辑、冻结/解冻",
+    "dataPermission": "租户级；与 PC 共用主数据服务",
+    "changeNote": "6.3 P1 外勤列表/详情/悬浮新增",
+    "createdAt": "2026-10-16",
+    "updatedAt": "2026-10-19",
+    "id": "208"
+  },
+  {
+    "platform": "PC",
+    "module": "8.配置管理",
+    "topBarModuleLabel": "配置管理",
+    "menuModuleCode": "08-配置管理",
+    "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/07-货品规格管理-入库收集项配置",
+    "recordStatus": "6.3-target",
+    "pagePathSegments": [
+      "货品规格管理",
+      "入库收集项配置"
+    ],
+    "pagePath": "货品规格管理 / 入库收集项配置",
+    "legacyPath": "—",
+    "actionPermissions": "查看页面、编辑字段池、保质期单位白名单",
+    "dataPermission": "配置管理菜单权限",
+    "changeNote": "6.3 P1 字段池与 SKU 收集项联动",
+    "createdAt": "2026-09-01",
+    "updatedAt": "2026-09-20",
+    "id": "209"
+  },
+  {
+    "platform": "移动",
+    "module": "2.工作台",
+    "topBarModuleLabel": "工作台",
+    "menuModuleCode": "02-工作台",
+    "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/09-仓储管理-入库暂存登记",
+    "recordStatus": "6.3-target",
+    "pagePathSegments": [
+      "仓储",
+      "入库暂存登记"
+    ],
+    "pagePath": "仓储 / 入库暂存登记",
+    "legacyPath": "货物管理～入库暂存登记",
+    "actionPermissions": "查看页面、新增登记、编辑、作废（转为正式入库本期关闭）",
+    "dataPermission": "账号赋予的仓库权限",
+    "changeNote": "6.3 P0 规格已定；本期不放开",
+    "createdAt": "2026-10-14",
+    "updatedAt": "2026-10-19",
+    "id": "210"
+  },
+  {
+    "platform": "移动",
+    "module": "3.业务办理",
+    "topBarModuleLabel": "业务办理",
+    "menuModuleCode": "03-业务办理",
+    "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/09-仓储管理-入库暂存登记",
+    "recordStatus": "6.3-target",
+    "pagePathSegments": [
+      "业务发起",
+      "入库暂存登记"
+    ],
+    "pagePath": "业务发起 / 入库暂存登记",
+    "legacyPath": "货物管理-入库-入库暂存登记",
+    "actionPermissions": "查看页面、新增登记、拍照上传、保存暂存",
+    "dataPermission": "账号赋予的仓库权限",
+    "changeNote": "6.3 业务发起磁贴；本期隐藏",
+    "createdAt": "2026-10-14",
+    "updatedAt": "2026-10-19",
+    "id": "211"
   }
 ]
 
@@ -4160,5 +4281,6 @@ export const permissionModuleTree = [
   "9.物联网IOT与预警",
   "1.首页",
   "2.工作台",
-  "3.业务办理"
+  "3.业务办理",
+  "10.用户中心"
 ]

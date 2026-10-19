@@ -31,6 +31,7 @@ import { UnlockApplyDetailPage } from "@/features/unlock-applies/pages/UnlockApp
 import { AccessControlDeviceListPage } from "@/features/access-control-devices/pages/AccessControlDeviceListPage"
 import { MigrationSchemePage } from "@/features/migration-schemes/pages/MigrationSchemePage"
 import { PermissionReferencePage } from "@/features/permission-reference/pages/PermissionReferencePage"
+import { IterationRecordPage } from "@/features/permission-reference/pages/IterationRecordPage"
 import { PartnerArchiveListPage } from "@/features/partner-archives/pages/PartnerArchiveListPage"
 import { PartnerArchiveDetailPage } from "@/features/partner-archives/pages/PartnerArchiveDetailPage"
 import { PartnerArchiveFormPage } from "@/features/partner-archives/pages/PartnerArchiveFormPage"
@@ -46,6 +47,7 @@ import { OutboundRecordListPage } from "@/features/outbound-records/pages/Outbou
 import { OutboundRecordFormPage } from "@/features/outbound-records/pages/OutboundRecordFormPage"
 import { OutboundRecordDetailPage } from "@/features/outbound-records/pages/OutboundRecordDetailPage"
 import { DeliveryOrderListPage } from "@/features/delivery-orders/pages/DeliveryOrderListPage"
+import { InboundStagingPrototypeGate } from "@/features/inbound-staging-reg/components/InboundStagingPrototypeGate"
 import { InboundStagingListPage } from "@/features/inbound-staging-reg/pages/InboundStagingListPage"
 import { InboundStagingFormPage } from "@/features/inbound-staging-reg/pages/InboundStagingFormPage"
 import { InboundStagingDetailPage } from "@/features/inbound-staging-reg/pages/InboundStagingDetailPage"
@@ -230,6 +232,7 @@ export function AppRoutes() {
         />
 
         <Route path="系统参考/功能与数据权限" element={<PermissionReferencePage />} />
+        <Route path="系统参考/菜单迭代记录" element={<IterationRecordPage />} />
 
         <Route
           path="物联网IOT与预警/物联网IOT管理/门禁设备"
@@ -301,19 +304,35 @@ export function AppRoutes() {
         />
         <Route
           path="仓储/入库管理/入库暂存登记"
-          element={<InboundStagingListPage />}
+          element={
+            <InboundStagingPrototypeGate>
+              <InboundStagingListPage />
+            </InboundStagingPrototypeGate>
+          }
         />
         <Route
           path="仓储/入库管理/入库暂存登记/新增"
-          element={<InboundStagingFormPage />}
+          element={
+            <InboundStagingPrototypeGate>
+              <InboundStagingFormPage />
+            </InboundStagingPrototypeGate>
+          }
         />
         <Route
           path="仓储/入库管理/入库暂存登记/编辑/:id"
-          element={<InboundStagingFormPage />}
+          element={
+            <InboundStagingPrototypeGate>
+              <InboundStagingFormPage />
+            </InboundStagingPrototypeGate>
+          }
         />
         <Route
           path="仓储/入库管理/入库暂存登记/详情/:id"
-          element={<InboundStagingDetailPage />}
+          element={
+            <InboundStagingPrototypeGate>
+              <InboundStagingDetailPage />
+            </InboundStagingPrototypeGate>
+          }
         />
 
         {/* 仓储 - 出库管理（出库记录） */}

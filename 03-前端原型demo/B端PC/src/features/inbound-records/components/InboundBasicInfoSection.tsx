@@ -68,6 +68,8 @@ type InboundBasicInfoSectionProps = {
   onPickRelatedOrder: () => void
   onOcrHint?: () => void
   onFormHint?: (message: string) => void
+  /** 6.3 R03：唤起 PartnerQuickCreateSheet */
+  onQuickAddOwner?: () => void
   /** 暂存登记：P03 货主一体化、弱校验、关联单号选填 */
   variant?: "formal" | "staging"
 }
@@ -80,6 +82,7 @@ export function InboundBasicInfoSection({
   onPickRelatedOrder,
   onOcrHint,
   onFormHint,
+  onQuickAddOwner,
   variant = "formal",
 }: InboundBasicInfoSectionProps) {
   const isStaging = variant === "staging"
@@ -100,9 +103,8 @@ export function InboundBasicInfoSection({
     ownerName: ownerNameTrimmed,
     ownerIdentifier: form.ownerIdentifier,
   })
-  const isArchivedOwner = Boolean(matchedArchive)
-  const ownerFieldsLocked =
-    isArchivedOwner || (!form.isNewOwner && Boolean(ownerNameTrimmed))
+  const isArchivedOwner = Boolean(form.partnerId && matchedArchive)
+  const ownerFieldsLocked = Boolean(form.partnerId && ownerNameTrimmed)
   const idCardMaskedDisplay =
     resolvePersonalOwnerIdCardMasked(form, matchedArchive) ||
     matchedArchive?.idCardMasked ||
@@ -333,14 +335,16 @@ export function InboundBasicInfoSection({
               </Select>
             </Field>
 
-            {/* 3. 货主名称 */}
-            <Field label="货主名称" required>
+            {/* 3. 货主（合作方引用） */}
+            <Field label="货主" required className="sm:col-span-2 lg:col-span-2">
+              <div className="flex flex-col gap-2">
               <div className="flex gap-1.5">
                 <div className="min-w-0 flex-1">
                   <OwnerNameSearchSelect
                     ownerType={form.ownerType}
                     ownerName={form.ownerName}
                     ownerIdentifier={form.ownerIdentifier}
+                    onQuickAdd={onQuickAddOwner}
                     onSelect={(selection) => {
                       const ownerName = selection.ownerName.trim()
                       const targetType =
@@ -406,6 +410,31 @@ export function InboundBasicInfoSection({
                     }}
                   />
                 </div>
+                {onQuickAddOwner ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 text-xs"
+                    onClick={onQuickAddOwner}
+                  >
+                    + 快速添加货主
+                  </Button>
+                ) : null}
+                {(!form.ownerType || isEnterprise) ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0 text-primary border-primary/30 hover:bg-primary/5"
+                    title="营业执照 OCR 拍照识别（自动回填）"
+                    aria-label="证照识别"
+                    onClick={onOcrHint}
+                  >
+                    <CameraIcon className="size-4" />
+                  </Button>
+                ) : null}
+              </div>
                 {isArchivedOwner && matchedArchive ? (
                   <div className="col-span-full flex flex-wrap items-center gap-2 text-[11px]">
                     <span className="text-muted-foreground">档案货主</span>
@@ -442,19 +471,6 @@ export function InboundBasicInfoSection({
                       </span>
                     ) : null}
                   </div>
-                ) : null}
-                {(!form.ownerType || isEnterprise) ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="shrink-0 text-primary border-primary/30 hover:bg-primary/5"
-                    title="营业执照 OCR 拍照识别（自动回填）"
-                    aria-label="证照识别"
-                    onClick={onOcrHint}
-                  >
-                    <CameraIcon className="size-4" />
-                  </Button>
                 ) : null}
               </div>
             </Field>

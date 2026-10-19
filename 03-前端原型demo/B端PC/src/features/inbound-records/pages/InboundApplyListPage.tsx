@@ -34,6 +34,7 @@ import {
 } from "../lib/list-utils"
 import { rollbackStagingReg } from "@/features/inbound-staging-reg/mock/inbound-staging.mock"
 import { inboundAppliesMock } from "../mock/inbound-records.mock"
+import { INBOUND_STAGING_PROTOTYPE_RELEASED } from "@prototype/shared/inbound/inbound-633-delivery"
 
 export function InboundApplyListPage() {
   const navigate = useNavigate()
@@ -175,14 +176,16 @@ export function InboundApplyListPage() {
           </PrototypeAnnotationTarget>
 
           <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="gap-1.5"
-              onClick={() => navigate("/仓储/入库管理/入库暂存登记")}
-            >
-              入库暂存登记
-            </Button>
+            {INBOUND_STAGING_PROTOTYPE_RELEASED ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-1.5"
+                onClick={() => navigate("/仓储/入库管理/入库暂存登记")}
+              >
+                入库暂存登记
+              </Button>
+            ) : null}
             <Button
               type="button"
               className="gap-1.5"

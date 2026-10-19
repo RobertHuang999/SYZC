@@ -7,6 +7,10 @@ const csvPath = path.resolve(
   __dirname,
   "../../../02-PRD文档/🌟🌟🌟-最新基准版/00-功能与数据权限/功能与数据权限清单.csv",
 )
+const overlay63Path = path.resolve(
+  __dirname,
+  "../../../02-PRD文档/B-迭代需求/6.3版本（2026.09）/功能与数据权限-6.3增量.json",
+)
 const outputPath = path.resolve(__dirname, "../src/features/permission-reference/data/permission-records.ts")
 
 function parseCSVRows(text) {
@@ -102,14 +106,19 @@ const headerIndex = buildHeaderIndex(rows[0])
 const dataRows = rows.slice(1)
 
 const expectedColumnCount = rows[0]?.length ?? 0
-const invalidRows = dataRows
-  .map((row, index) => ({ line: index + 2, width: row.length }))
-  .filter(({ width }) => width !== expectedColumnCount)
-
-if (invalidRows.length > 0) {
-  const details = invalidRows.map(({ line, width }) => `第 ${line} 行为 ${width} 列`).join("、")
-  throw new Error(`权限 CSV 列数不一致：表头 ${expectedColumnCount} 列，${details}`)
-}
+const normalizedDataRows = dataRows.map((row, index) => {
+  if (row.length === expectedColumnCount) return row
+  if (row.length < expectedColumnCount) {
+    console.warn(
+      `[permissions CSV] 第 ${index + 2} 行 ${row.length} 列，已补空至 ${expectedColumnCount} 列`,
+    )
+    return [...row, ...Array(expectedColumnCount - row.length).fill("")]
+  }
+  console.warn(
+    `[permissions CSV] 第 ${index + 2} 行 ${row.length} 列，已截断至 ${expectedColumnCount} 列`,
+  )
+  return row.slice(0, expectedColumnCount)
+})
 
 let currentPlatform = ""
 let currentModule = ""
@@ -118,7 +127,7 @@ let currentLevel2 = ""
 
 const records = []
 
-for (const row of dataRows) {
+for (const row of normalizedDataRows) {
   const platformRaw = pick(row, headerIndex, "端")
   if (platformRaw) currentPlatform = platformRaw
 
@@ -181,8 +190,89 @@ for (const row of dataRows) {
   })
 }
 
+function recordMatchesPatch(record, patch) {
+  if (patch.platform && record.platform !== patch.platform) return false
+  if (patch.pagePath && record.pagePath !== patch.pagePath) return false
+  if (patch.level1Menu && record.pagePathSegments[0] !== patch.level1Menu) return false
+  if (patch.level2Menu && record.pagePathSegments[1] !== patch.level2Menu) return false
+  if (patch.tab && !record.pagePathSegments.includes(patch.tab)) return false
+  if (patch.legacyPathIncludes && !record.legacyPath.includes(patch.legacyPathIncludes)) {
+    return false
+  }
+  return true
+}
+
+function applyPatch(record, patch) {
+  const next = { ...record }
+  for (const key of [
+    "recordStatus",
+    "changeNote",
+    "updatedAt",
+    "createdAt",
+    "actionPermissions",
+    "dataPermission",
+    "legacyPath",
+    "module",
+    "topBarModuleLabel",
+    "menuModuleCode",
+    "baselineModuleDir",
+  ]) {
+    if (patch[key] !== undefined && patch[key] !== "") {
+      next[key] = patch[key]
+    }
+  }
+  return next
+}
+
+function appendOverlayRecord(raw) {
+  const pagePathSegments = raw.pagePathSegments ?? []
+  return {
+    platform: raw.platform,
+    module: raw.module,
+    topBarModuleLabel: raw.topBarModuleLabel ?? "",
+    menuModuleCode: raw.menuModuleCode ?? "",
+    baselineModuleDir: raw.baselineModuleDir ?? "",
+    recordStatus: raw.recordStatus ?? "6.3-delivered",
+    pagePathSegments,
+    pagePath: pagePathSegments.join(" / "),
+    legacyPath: raw.legacyPath ?? "",
+    actionPermissions: raw.actionPermissions ?? "",
+    dataPermission: raw.dataPermission ?? "",
+    changeNote: raw.changeNote ?? "",
+    createdAt: raw.createdAt ?? "",
+    updatedAt: raw.updatedAt ?? "",
+  }
+}
+
+let overlayApplied = { patches: 0, append: 0 }
+if (fs.existsSync(overlay63Path)) {
+  const overlay = JSON.parse(fs.readFileSync(overlay63Path, "utf8"))
+  for (const patch of overlay.patches ?? []) {
+    let hit = false
+    for (let i = 0; i < records.length; i += 1) {
+      if (recordMatchesPatch(records[i], patch)) {
+        records[i] = applyPatch(records[i], patch)
+        hit = true
+        overlayApplied.patches += 1
+      }
+    }
+    if (!hit) {
+      console.warn(`[6.3 overlay] 未匹配 patch: ${JSON.stringify(patch)}`)
+    }
+  }
+  for (const raw of overlay.append ?? []) {
+    records.push(appendOverlayRecord(raw))
+    overlayApplied.append += 1
+  }
+}
+
+for (let i = 0; i < records.length; i += 1) {
+  records[i].id = String(i + 1)
+}
+
 const fileContent = `// 自动生成，请勿手工编辑。运行 npm run generate:permissions 更新。
 // 数据源：02-PRD文档/🌟🌟🌟-最新基准版/00-功能与数据权限/功能与数据权限清单.csv
+// + 02-PRD文档/B-迭代需求/6.3版本（2026.09）/功能与数据权限-6.3增量.json
 // CSV 列名与原型页四列对齐：页面路径 / 页面功能按钮 / 数据可见范围 / 变更记录
 
 export type PermissionRecord = {
@@ -192,7 +282,7 @@ export type PermissionRecord = {
   topBarModuleLabel: string
   menuModuleCode: string
   baselineModuleDir: string
-  recordStatus: "active" | "planned" | "cancelled" | "6.2-target"
+  recordStatus: "active" | "planned" | "cancelled" | "6.2-target" | "6.3-target" | "6.3-delivered"
   pagePathSegments: string[]
   pagePath: string
   legacyPath: string
@@ -214,4 +304,6 @@ export const permissionModuleTree = ${JSON.stringify(
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true })
 fs.writeFileSync(outputPath, fileContent, "utf8")
-console.log(`Generated ${records.length} permission records -> ${outputPath}`)
+console.log(
+  `Generated ${records.length} permission records (6.3 overlay: ${overlayApplied.patches} patches, ${overlayApplied.append} append) -> ${outputPath}`,
+)
