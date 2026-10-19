@@ -7,6 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { ProductFieldHint } from "@/components/form/ProductFieldHint"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
@@ -18,7 +20,14 @@ import {
 } from "../domain/types"
 import { partnerArchivesMock } from "../mock/partner-archives.mock"
 import {
-  findIndividualOwnerAddressConflict,
+  PARTNER_APPEND_OWNER_MISSING_ADDRESS_SPEC,
+  PARTNER_APPEND_OWNER_MISSING_ADDRESS_USER,
+  PARTNER_APPEND_OWNER_WITH_ADDRESS_SPEC,
+  PARTNER_APPEND_OWNER_WITH_ADDRESS_USER,
+} from "../lib/partner-archive-ui-labels"
+import {
+  findOwnerAddressConflict,
+  ownerAddressConflictMessage,
   rolesAllowedForSubjectType,
 } from "../lib/partner-archive-rules"
 
@@ -62,16 +71,17 @@ export function PartnerAppendRoleDialog({
   )
 
   const ownerAddressConflict = useMemo(() => {
-    if (!partner || !selectedRoles.includes("OWNER") || partner.subjectType !== "INDIVIDUAL") {
+    if (!partner || !selectedRoles.includes("OWNER")) {
       return false
     }
     if (!partner.certAddress.fullAddress.trim()) {
       return false
     }
     return Boolean(
-      findIndividualOwnerAddressConflict(
+      findOwnerAddressConflict(
         partnerArchivesMock,
         partner.certAddress.fullAddress,
+        partner.subjectType,
         partner.id
       )
     )
@@ -153,15 +163,22 @@ export function PartnerAppendRoleDialog({
                 })}
               </div>
               {selectedRoles.includes("OWNER") && !ownerAddressConflict && (
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  {ownerAddressMissing
-                    ? "当前证件地址未录入。确认后货主角色记为待补全，请再到编辑页补全地址。"
-                    : "追加货主角色将校验证件地址必填与租户内地址唯一性。"}
-                </p>
+                <div className="space-y-2">
+                  <ProductFieldHint>
+                    {ownerAddressMissing
+                      ? PARTNER_APPEND_OWNER_MISSING_ADDRESS_USER
+                      : PARTNER_APPEND_OWNER_WITH_ADDRESS_USER}
+                  </ProductFieldHint>
+                  <PrototypeSpecCallout>
+                    {ownerAddressMissing
+                      ? PARTNER_APPEND_OWNER_MISSING_ADDRESS_SPEC
+                      : PARTNER_APPEND_OWNER_WITH_ADDRESS_SPEC}
+                  </PrototypeSpecCallout>
+                </div>
               )}
               {ownerAddressConflict && (
                 <p className="text-xs leading-relaxed text-destructive">
-                  已有相同证件地址，不能绑定为该个人货主
+                  {ownerAddressConflictMessage(partner.subjectType)}
                 </p>
               )}
             </div>

@@ -33,7 +33,7 @@ export function Header({ activeModule }: { activeModule: TopModule }) {
         <NavLink
           to={PERMISSION_REFERENCE_PATH}
           className={cn("permission-reference-button", onPermissionPage && "is-active")}
-          title="查看全系统功能与数据权限说明"
+          title="查看全系统页面路径、操作按钮与数据可见范围对照表"
         >
           <KeyRound size={14} strokeWidth={1.8} />
           <span>功能与数据权限</span>

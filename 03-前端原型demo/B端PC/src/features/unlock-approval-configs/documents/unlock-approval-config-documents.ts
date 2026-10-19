@@ -1,11 +1,11 @@
 import type { PrototypeDocument } from "@/shared/annotations/PrototypeAnnotationLayer"
 import mockDataMarkdown from "@prototype/MOCK_DATA-开锁审批-V1.3.md?raw"
-import prdMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/06-门禁开锁审批/01-审批配置/门禁开锁审批配置主PRD.md?raw"
-import fieldsMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/06-门禁开锁审批/01-审批配置/门禁开锁审批配置字段清单.md?raw"
-import rulesMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/06-门禁开锁审批/01-审批配置/门禁开锁审批配置业务规则规格.md?raw"
-import demoListMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/06-门禁开锁审批/01-审批配置/门禁开锁审批配置_Demo_列表页.md?raw"
-import demoFormMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/06-门禁开锁审批/01-审批配置/门禁开锁审批配置_Demo_新增编辑页.md?raw"
-import demoDetailMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/06-门禁开锁审批/01-审批配置/门禁开锁审批配置_Demo_详情页.md?raw"
+import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/09-配置管理/07-业务流程管理-开锁审批/开锁审批配置主PRD.md?raw"
+import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/09-配置管理/07-业务流程管理-开锁审批/开锁审批配置字段清单.md?raw"
+import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/09-配置管理/07-业务流程管理-开锁审批/开锁审批配置业务规则规格.md?raw"
+import demoListMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/09-配置管理/07-业务流程管理-开锁审批/开锁审批配置_Demo_列表页.md?raw"
+import demoFormMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/09-配置管理/07-业务流程管理-开锁审批/开锁审批配置_Demo_新增编辑页.md?raw"
+import demoDetailMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/09-配置管理/07-业务流程管理-开锁审批/开锁审批配置_Demo_详情页.md?raw"
 
 export const unlockApprovalConfigDocuments: PrototypeDocument[] = [
   {

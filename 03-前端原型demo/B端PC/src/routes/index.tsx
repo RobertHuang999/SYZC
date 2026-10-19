@@ -24,8 +24,16 @@ import { UnlockApprovalConfigListPage } from "@/features/unlock-approval-configs
 import { UnlockApprovalConfigDetailPage } from "@/features/unlock-approval-configs/pages/UnlockApprovalConfigDetailPage"
 import { UnlockApprovalConfigFormPage } from "@/features/unlock-approval-configs/pages/UnlockApprovalConfigFormPage"
 import { ApprovalCenterPage } from "@/features/unlock-applies/pages/ApprovalCenterPage"
-import { MyApplicationsPage } from "@/features/unlock-applies/pages/MyApplicationsPage"
-import { MyUnlockApplyDetailPage } from "@/features/unlock-applies/pages/MyUnlockApplyDetailPage"
+const MyApplicationsPage = lazy(() =>
+  import("@/features/unlock-applies/pages/MyApplicationsPage").then((module) => ({
+    default: module.MyApplicationsPage,
+  })),
+)
+const MyUnlockApplyDetailPage = lazy(() =>
+  import("@/features/unlock-applies/pages/MyUnlockApplyDetailPage").then((module) => ({
+    default: module.MyUnlockApplyDetailPage,
+  })),
+)
 import { UnlockApplyListPage } from "@/features/unlock-applies/pages/UnlockApplyListPage"
 import { UnlockApplyDetailPage } from "@/features/unlock-applies/pages/UnlockApplyDetailPage"
 import { AccessControlDeviceListPage } from "@/features/access-control-devices/pages/AccessControlDeviceListPage"
@@ -53,6 +61,7 @@ import { InboundStagingFormPage } from "@/features/inbound-staging-reg/pages/Inb
 import { InboundStagingDetailPage } from "@/features/inbound-staging-reg/pages/InboundStagingDetailPage"
 import { getAllMenuPaths, topModules } from "@/config/navigation"
 import { isImplementedRoute } from "@/config/implemented-routes"
+import { lazy } from "react"
 import { Navigate, Route, Routes } from "react-router-dom"
 
 const monitorDeviceRoutes = [
@@ -232,7 +241,15 @@ export function AppRoutes() {
         />
 
         <Route path="系统参考/功能与数据权限" element={<PermissionReferencePage />} />
-        <Route path="系统参考/菜单迭代记录" element={<IterationRecordPage />} />
+        <Route
+          path="功能与数据权限"
+          element={<Navigate to="/系统参考/功能与数据权限" replace />}
+        />
+        <Route path="系统参考/迭代记录" element={<IterationRecordPage />} />
+        <Route
+          path="系统参考/菜单迭代记录"
+          element={<Navigate to="/系统参考/迭代记录" replace />}
+        />
 
         <Route
           path="物联网IOT与预警/物联网IOT管理/门禁设备"

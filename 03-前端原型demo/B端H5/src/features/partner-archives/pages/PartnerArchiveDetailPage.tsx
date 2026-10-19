@@ -34,6 +34,11 @@ import {
 } from "@prototype/B端PC/src/features/partner-archives/lib/contact-phone-verify"
 import { buildAppendedRole, hasActiveBusinessForRole } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-rules"
 import {
+  PARTNER_DETAIL_PENDING_DOCS_SPEC,
+  PARTNER_DETAIL_PENDING_DOCS_USER,
+} from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
+import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
+import {
   getPartnerRoleRowActions,
   PARTNER_ROLE_ROW_ACTION_LABELS,
   type PartnerRoleRowAction,
@@ -316,8 +321,11 @@ export function PartnerArchiveDetailPage() {
 
       <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto bg-[#edf2f8] p-3 pb-32 overscroll-contain">
         {needsCompletion ? (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
-            存在待补全信息（证件地址或角色待补全），请通过【去补全资料】完善后再发单。
+          <div className="space-y-2">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
+              {PARTNER_DETAIL_PENDING_DOCS_USER}
+            </div>
+            <PrototypeSpecCallout>{PARTNER_DETAIL_PENDING_DOCS_SPEC}</PrototypeSpecCallout>
           </div>
         ) : null}
 

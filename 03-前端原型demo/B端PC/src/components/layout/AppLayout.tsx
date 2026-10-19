@@ -3,6 +3,7 @@ import { PageTabs } from "@/components/layout/PageTabs"
 import { SidebarNav } from "@/components/layout/SidebarNav"
 import { getActiveTopModule, shouldShowSidebar } from "@/config/navigation"
 import { cn } from "@/lib/utils"
+import { Suspense } from "react"
 import { Outlet, useLocation } from "react-router-dom"
 
 export function AppLayout() {
@@ -19,7 +20,15 @@ export function AppLayout() {
           <div className="content-column">
             <PageTabs />
             <div className="page-surface">
-              <Outlet />
+              <Suspense
+                fallback={
+                  <div className="flex min-h-[240px] items-center justify-center text-sm text-muted-foreground">
+                    页面加载中…
+                  </div>
+                }
+              >
+                <Outlet />
+              </Suspense>
             </div>
           </div>
         </main>

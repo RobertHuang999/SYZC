@@ -27,7 +27,7 @@ export function DuplicateAddressDialog({
         </DialogHeader>
         <p className="text-sm text-amber-700 dark:text-amber-400">
           系统中已存在 {conflicts.length}{" "}
-          组个人货主的地址重复。若开启一人一址校验，以下主体后续开单将被拦截：
+          组个人货主的地址重复。若开启一人一址校验，以下主体在档案绑货主或快捷建档时将可能被拦截：
         </p>
         <div className="overflow-hidden rounded-lg border">
           <table className="w-full border-collapse text-left text-xs">

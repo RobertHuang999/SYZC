@@ -232,6 +232,48 @@ PRD、ASCII、Demo 与规范文档互相引用章节时**不使用章节符**，
   * **日期时间对齐预警标杆**：列表日期时间优先采用 `<TableDateTimeCell value={...} plain />` 单行规范呈现，完整继承 PingFang SC 正文字体。
   * **Sticky 操作列防穿透**：表格横向滚动操作列必须声明 100% 不透明实色背景与立体投影（表头 `bg-slate-100 dark:bg-slate-800`，数据行 `bg-white dark:bg-slate-900 group-hover:bg-slate-50`），严禁半透明底色导致滚动时其他列文字透出重叠。
 
+### 4.1.3 表单辅助文案分层（上线说明 vs 规格对照 · Agent 默认执行）
+
+> **速查**：[03-前端原型demo/原型页面布局速查.md](./03-前端原型demo/原型页面布局速查.md) 第 3、5 节。  
+> **标注 Skill（打点/改表单说明时必读）**：[07-常用skill/标注juan-prototype-annotation/SKILL.md](./07-常用skill/标注juan-prototype-annotation/SKILL.md) **3.3**；H5 见 [标注juan mobile-prototype-annotation/SKILL.md](./07-常用skill/标注juan%20mobile-prototype-annotation/SKILL.md) **3.3**。Cursor 同步副本：`.cursor/skills/标注juan-prototype-annotation/`。  
+> **目的**：页面上给用户看的说明与含规则编号（P/R/PA-R）的评审对照**必须分开**，避免研发把规格段落原样写进生产 UI。
+
+**何时必须用**
+
+- 表单 Card 下说明、配置项 `hint`、弹窗 `DialogDescription`、H5 横幅/Sheet 说明等，只要可能出现 **规则编号、三件套引用、审计字段说明**，一律走本分层。
+- **标注层（4.2）**仍写完整规则；本节只约束**页面 DOM 上**的文案。
+
+**组件（双端共用路径）**
+
+| 用途 | 组件 | 路径 |
+| :--- | :--- | :--- |
+| **上线用户文案** | `ProductFieldHint` | `03-前端原型demo/B端PC/src/components/form/ProductFieldHint.tsx` |
+| **规格对照（非上线）** | `PrototypeSpecCallout` | `03-前端原型demo/B端PC/src/components/form/PrototypeSpecCallout.tsx` |
+
+- **PC**：`import { ProductFieldHint } from "@/components/form/ProductFieldHint"`（及 `PrototypeSpecCallout`）。
+- **H5**：`import … from "@prototype/B端PC/src/components/form/…"`（与现有合作方/入库一致）。
+
+**文案真源（禁止在 TSX 里随手写 P01）**
+
+1. 每个 feature 或跨端模块维护 `*-ui-labels.ts`（或 `shared/{模块}/*-ui-labels.ts`）。
+2. 命名约定：
+   - `*_USER_*` / `*UserHint` → **仅**给 `ProductFieldHint` 或 `DialogDescription`、字段 `Label` 旁说明；**说人话、无规则编号**。
+   - `*_SPEC_*` / `*SpecNote` → **仅**给 `PrototypeSpecCallout`；可写 `【规则名称】(编号)`。
+3. 弹窗：`DialogDescription` 只放 USER 句；`specNote` 可选 prop 或紧跟的 `PrototypeSpecCallout`（见 `PartnerConfirmDialog` / `YesNoRadio` 的 `specHint`）。
+
+**禁止**
+
+- 同一段 `text-muted-foreground` 里混写「请填写地址（P01）」。
+- 把 `PrototypeSpecCallout` 文案当作生产环境默认展示（原型 demo 可始终展示对照框；若生产要隐藏对照层，由工程开关处理，不在 PRD 里取消 USER 句）。
+
+**标杆参照**
+
+- 合作方：`partner-archive-ui-labels.ts` + `PartnerArchiveFormPage` / `PartnerQuickCreateSheet` / `PartnerVerifyDialog`（`partnerVerifyDialogCopy`）。
+- 基础配置：`platform-basic-config-ui-labels.ts` + `PartnerSubjectPolicyCard` / `YesNoRadio`。
+- 入库：`shared/inbound/staging-ui-labels.ts`、`owner-ui-labels.ts` + `InboundBasicInfoSection`、暂存 H5 横幅。
+
+**Agent 硬性约定**：新建或改版原型表单/配置/弹窗说明时，**默认**按本节实现 USER + SPEC 分层并写入对应 `*-ui-labels.ts`；用户无需每次重复提醒。
+
 ### 4.2 原型标注标杆标准（四维一体）
 
 > 需求真源见 **4.0 节 三件套 + 衍生**；原型与标注不得脱离三件套单独演进。  
@@ -258,6 +300,7 @@ PRD、ASCII、Demo 与规范文档互相引用章节时**不使用章节符**，
 #### 4.2.1 双端原型标注对齐（PC 为正文真源 · H5 只绑端差异）
 
 > **操作说明（AI 必读）**：[03-前端原型demo/原型双端标注对齐说明.md](./03-前端原型demo/原型双端标注对齐说明.md)  
+> **标注 Skill（打点作业清单）**：[07-常用skill/标注juan-prototype-annotation/SKILL.md](./07-常用skill/标注juan-prototype-annotation/SKILL.md) **2.3**（PC+H5 一套小红点 + 三件套）；H5 见 [标注juan mobile-prototype-annotation/SKILL.md](./07-常用skill/标注juan%20mobile-prototype-annotation/SKILL.md) **3.3**。  
 > **标杆实现**：`03-前端原型demo/shared/partner-archives/annotations/` + H5 `partner-archive-h5.annotation-bindings.ts`
 
 同一菜单同时交付 PC 与 H5 原型时，**禁止**在 `B端H5/.../annotations/` 里另写一套业务正文。必须：

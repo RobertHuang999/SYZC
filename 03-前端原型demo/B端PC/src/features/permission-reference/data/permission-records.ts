@@ -831,7 +831,7 @@ export const permissionRecords: PermissionRecord[] = [
     "module": "2.仓储",
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
-    "baselineModuleDir": "B端PC/02-仓储",
+    "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/09-仓储管理-入库暂存登记",
     "recordStatus": "6.3-target",
     "pagePathSegments": [
       "入库管理",
@@ -1070,7 +1070,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
     "baselineModuleDir": "B端PC/02-仓储",
-    "recordStatus": "active",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "设备管理",
       "监控设备"
@@ -1079,7 +1079,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "设备管理～监控设备",
     "actionPermissions": "查看页面、重命名、仓库绑定、查看直播、查看回放、图像锚点、移除设备",
     "dataPermission": "根据仓库权限决定可看数据，未绑定具体位置的设备所有登录账号可见",
-    "changeNote": "【6.2目标态】迁至 物联网IOT与预警 / 物联网IOT管理 / 监控设备",
+    "changeNote": "【6.2目标态】迁至 物联网IOT与预警 / 物联网IOT管理 / 监控设备；【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警/01-物联网IOT管理/01监控设备",
     "createdAt": "2026-03-10",
     "updatedAt": ""
   },
@@ -1090,7 +1090,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
     "baselineModuleDir": "B端PC/02-仓储",
-    "recordStatus": "active",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "设备管理",
       "门禁设备"
@@ -1099,7 +1099,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "设备管理～门禁设备",
     "actionPermissions": "查看页面、重命名、仓库绑定、设备数据、获取密码、移除设备、人脸管理",
     "dataPermission": "根据仓库权限决定可看数据，未绑定具体位置的设备所有登录账号可见",
-    "changeNote": "",
+    "changeNote": "【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警/01-物联网IOT管理/02门禁设备",
     "createdAt": "2026-03-10",
     "updatedAt": ""
   },
@@ -1110,7 +1110,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
     "baselineModuleDir": "B端PC/02-仓储",
-    "recordStatus": "active",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "设备管理",
       "物联设备"
@@ -1119,7 +1119,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "设备管理～物联设备",
     "actionPermissions": "查看页面、重命名、仓库绑定、设备数据、移除设备",
     "dataPermission": "根据仓库权限决定可看数据，未绑定具体位置的设备所有登录账号可见",
-    "changeNote": "",
+    "changeNote": "【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警/01-物联网IOT管理/03物联设备",
     "createdAt": "2026-03-10",
     "updatedAt": ""
   },
@@ -1130,7 +1130,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
     "baselineModuleDir": "B端PC/02-仓储",
-    "recordStatus": "active",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "设备管理",
       "GPS设备"
@@ -1139,7 +1139,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "设备管理～GPS设备",
     "actionPermissions": "查看页面、重命名、仓库绑定、实时定位、运动轨迹、移除设备、GPS平台规则配置、GPS平台基础数据",
     "dataPermission": "根据仓库权限决定可看数据，未绑定具体位置的设备所有登录账号可见",
-    "changeNote": "",
+    "changeNote": "【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警/01-物联网IOT管理/04GPS设备",
     "createdAt": "2026-03-10",
     "updatedAt": ""
   },
@@ -1150,7 +1150,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
     "baselineModuleDir": "B端PC/02-仓储",
-    "recordStatus": "active",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "设备管理",
       "门禁事务记录"
@@ -1159,7 +1159,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "设备管理～门禁事务记录",
     "actionPermissions": "查看页面",
     "dataPermission": "根据仓库权限决定可看数据，未绑定具体位置的设备事务记录所有登录账号可见",
-    "changeNote": "",
+    "changeNote": "【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警",
     "createdAt": "2026-03-10",
     "updatedAt": ""
   },
@@ -1170,7 +1170,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
     "baselineModuleDir": "B端PC/02-仓储",
-    "recordStatus": "active",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "设备管理",
       "人脸配置"
@@ -1179,7 +1179,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "设备管理～人脸配置",
     "actionPermissions": "查看(页面)、上传人脸、分配门禁",
     "dataPermission": "1.分配门禁用：仓库权限可见 2.人员列表：机构数据权限",
-    "changeNote": "",
+    "changeNote": "【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警/01-物联网IOT管理/05人脸配置",
     "createdAt": "2026-03-10",
     "updatedAt": ""
   },
@@ -1629,7 +1629,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "风控",
     "menuModuleCode": "05-风控",
     "baselineModuleDir": "B端PC/05-风控",
-    "recordStatus": "active",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "风险信息",
       "设备预警信息"
@@ -1638,7 +1638,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "风险管理～设备预警管理",
     "actionPermissions": "查看页面、详情、去处理（操作权限+预警状态为未处理）",
     "dataPermission": "仓库权限 登录账号仓库权限（未绑定具体位置的设备所有账号可见） 数据权限内的数据；",
-    "changeNote": "【6.2目标态】迁至 物联网IOT与预警 / 预警信息 / 设备预警信息",
+    "changeNote": "【6.2目标态】迁至 物联网IOT与预警 / 预警信息 / 设备预警信息；【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警/02-预警信息/01设备预警信息",
     "createdAt": "2026-03-10",
     "updatedAt": "2026-05-28"
   },
@@ -1649,7 +1649,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "风控",
     "menuModuleCode": "05-风控",
     "baselineModuleDir": "B端PC/05-风控",
-    "recordStatus": "active",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "风险信息",
       "押品预警信息"
@@ -1658,7 +1658,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "风险管理～订单预警管理",
     "actionPermissions": "查看页面、详情、去查看、公示风险、批量公示风险（已处理数据下才展示）",
     "dataPermission": "订单数据权限 登录账号数据权限内的数据（可见订单则可见订单相关的预警消息）",
-    "changeNote": "",
+    "changeNote": "【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警/02-预警信息/02押品预警信息",
     "createdAt": "2026-03-10",
     "updatedAt": "2026-05-28"
   },
@@ -1669,7 +1669,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "风控",
     "menuModuleCode": "05-风控",
     "baselineModuleDir": "B端PC/05-风控",
-    "recordStatus": "active",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "风险信息",
       "设备事务通知信息"
@@ -1678,7 +1678,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "风险管理～设备事务通知管理",
     "actionPermissions": "查看(页面)、去处理",
     "dataPermission": "根据仓库权限决定可看数据，未绑定具体位置的设备事务记录所有登录账号可见",
-    "changeNote": "",
+    "changeNote": "【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警",
     "createdAt": "2026-03-10",
     "updatedAt": "2026-05-28"
   },
@@ -1689,7 +1689,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "风控",
     "menuModuleCode": "05-风控",
     "baselineModuleDir": "B端PC/05-风控",
-    "recordStatus": "active",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "风险信息",
       "贷中风控管理"
@@ -1698,7 +1698,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "风险管理~风险公示",
     "actionPermissions": "查看（页面）、查看详情、执行风控模型、批量执行",
     "dataPermission": "订单数据权限",
-    "changeNote": "",
+    "changeNote": "【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警/02-预警信息/03贷中风控管理",
     "createdAt": "2026-05-12",
     "updatedAt": ""
   },
@@ -1709,7 +1709,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "风控",
     "menuModuleCode": "05-风控",
     "baselineModuleDir": "B端PC/05-风控",
-    "recordStatus": "active",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "风险信息",
       "风险公示"
@@ -1718,7 +1718,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "",
     "actionPermissions": "",
     "dataPermission": "订单数据权限 登录账号数据权限内的数据（可见订单则可见订单相关的预警消息）",
-    "changeNote": "",
+    "changeNote": "【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警/02-预警信息/04风险公示",
     "createdAt": "",
     "updatedAt": ""
   },
@@ -1805,10 +1805,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "89",
     "platform": "PC",
-    "module": "6.统计/看板",
+    "module": "7.统计/看板",
     "topBarModuleLabel": "统计/看板",
-    "menuModuleCode": "06-统计",
-    "baselineModuleDir": "B端PC/06-统计",
+    "menuModuleCode": "07-统计",
+    "baselineModuleDir": "B端PC/07-统计",
     "recordStatus": "active",
     "pagePathSegments": [
       "总机构报表看板",
@@ -1825,10 +1825,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "90",
     "platform": "PC",
-    "module": "6.统计/看板",
+    "module": "7.统计/看板",
     "topBarModuleLabel": "统计/看板",
-    "menuModuleCode": "06-统计",
-    "baselineModuleDir": "B端PC/06-统计",
+    "menuModuleCode": "07-统计",
+    "baselineModuleDir": "B端PC/07-统计",
     "recordStatus": "active",
     "pagePathSegments": [
       "总机构报表看板",
@@ -1845,10 +1845,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "91",
     "platform": "PC",
-    "module": "6.统计/看板",
+    "module": "7.统计/看板",
     "topBarModuleLabel": "统计/看板",
-    "menuModuleCode": "06-统计",
-    "baselineModuleDir": "B端PC/06-统计",
+    "menuModuleCode": "07-统计",
+    "baselineModuleDir": "B端PC/07-统计",
     "recordStatus": "active",
     "pagePathSegments": [
       "总机构报表看板",
@@ -1865,10 +1865,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "92",
     "platform": "PC",
-    "module": "6.统计/看板",
+    "module": "7.统计/看板",
     "topBarModuleLabel": "统计/看板",
-    "menuModuleCode": "06-统计",
-    "baselineModuleDir": "B端PC/06-统计",
+    "menuModuleCode": "07-统计",
+    "baselineModuleDir": "B端PC/07-统计",
     "recordStatus": "active",
     "pagePathSegments": [
       "机构报表看板",
@@ -1885,10 +1885,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "93",
     "platform": "PC",
-    "module": "6.统计/看板",
+    "module": "7.统计/看板",
     "topBarModuleLabel": "统计/看板",
-    "menuModuleCode": "06-统计",
-    "baselineModuleDir": "B端PC/06-统计",
+    "menuModuleCode": "07-统计",
+    "baselineModuleDir": "B端PC/07-统计",
     "recordStatus": "active",
     "pagePathSegments": [
       "机构报表看板",
@@ -1905,10 +1905,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "94",
     "platform": "PC",
-    "module": "6.统计/看板",
+    "module": "7.统计/看板",
     "topBarModuleLabel": "统计/看板",
-    "menuModuleCode": "06-统计",
-    "baselineModuleDir": "B端PC/06-统计",
+    "menuModuleCode": "07-统计",
+    "baselineModuleDir": "B端PC/07-统计",
     "recordStatus": "active",
     "pagePathSegments": [
       "机构报表看板",
@@ -1925,10 +1925,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "95",
     "platform": "PC",
-    "module": "7.结算",
+    "module": "8.结算",
     "topBarModuleLabel": "结算",
-    "menuModuleCode": "07-结算",
-    "baselineModuleDir": "B端PC/07-结算",
+    "menuModuleCode": "08-结算",
+    "baselineModuleDir": "B端PC/08-结算",
     "recordStatus": "active",
     "pagePathSegments": [
       "监管结算",
@@ -1945,10 +1945,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "96",
     "platform": "PC",
-    "module": "7.结算",
+    "module": "8.结算",
     "topBarModuleLabel": "结算",
-    "menuModuleCode": "07-结算",
-    "baselineModuleDir": "B端PC/07-结算",
+    "menuModuleCode": "08-结算",
+    "baselineModuleDir": "B端PC/08-结算",
     "recordStatus": "active",
     "pagePathSegments": [
       "监管结算",
@@ -1965,10 +1965,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "97",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "门户管理",
@@ -1985,10 +1985,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "98",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "门户管理",
@@ -2005,10 +2005,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "99",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "门户管理",
@@ -2025,10 +2025,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "100",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "平台管理",
@@ -2045,10 +2045,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "101",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "平台管理",
@@ -2065,10 +2065,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "102",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "平台管理",
@@ -2085,10 +2085,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "103",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "平台管理",
@@ -2105,10 +2105,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "104",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "平台管理",
@@ -2125,10 +2125,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "105",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "平台管理",
@@ -2145,10 +2145,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "106",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "仓库管理",
@@ -2165,10 +2165,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "107",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "仓库管理",
@@ -2185,10 +2185,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "108",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "货品规格管理",
@@ -2205,10 +2205,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "109",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "货品规格管理",
@@ -2225,10 +2225,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "110",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "货品规格管理",
@@ -2245,10 +2245,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "111",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "合同模板管理"
@@ -2264,10 +2264,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "112",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "业务流程管理",
@@ -2284,10 +2284,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "113",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "业务流程管理",
@@ -2304,10 +2304,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "114",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "业务流程管理",
@@ -2324,10 +2324,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "115",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "active",
     "pagePathSegments": [
       "业务流程管理",
@@ -2344,10 +2344,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "116",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "cancelled",
     "pagePathSegments": [
       "业务流程管理",
@@ -2364,11 +2364,11 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "117",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
-    "recordStatus": "active",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "预警配置",
       "预警等级"
@@ -2377,18 +2377,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "风险管理～预警等级",
     "actionPermissions": "查看页面、新增、编辑、详情、删除、启停用、排序",
     "dataPermission": "有菜单权限人员可见当前租户等级字典",
-    "changeNote": "【6.2目标态】迁至 物联网IOT与预警 / 预警配置 / 预警等级；6.2 新增公共底座",
+    "changeNote": "【6.2目标态】迁至 物联网IOT与预警 / 预警配置 / 预警等级；6.2 新增公共底座；【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警/03-预警配置/01预警等级",
     "createdAt": "2026-08-25",
     "updatedAt": "2026-08-31"
   },
   {
     "id": "118",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
-    "recordStatus": "active",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "预警配置",
       "订单预警配置"
@@ -2397,18 +2397,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "风险管理～订单预警配置",
     "actionPermissions": "查看页面、详情、新增、编辑、删除",
     "dataPermission": "1、订单预警配置：可选和可看订单根据登录账号数据权限决定（可见订单则可见订单相关的预警配置和选项）； 2、设备预警配置：可选设备根据登录账号仓库权限决定，可看配置根据登录账号数据权限决定；",
-    "changeNote": "",
+    "changeNote": "【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警/03-预警配置/03订单预警配置",
     "createdAt": "2026-03-10",
     "updatedAt": ""
   },
   {
     "id": "119",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
-    "recordStatus": "active",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "预警配置",
       "设备预警配置"
@@ -2417,18 +2417,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "风险管理～设备预警配置",
     "actionPermissions": "查看页面、详情、新增、编辑、删除",
     "dataPermission": "1、订单预警配置：可选和可看订单根据登录账号数据权限决定（可见订单则可见订单相关的预警配置和选项）； 2、设备预警配置：可选设备根据登录账号仓库权限决定，可看配置根据登录账号数据权限决定；",
-    "changeNote": "",
+    "changeNote": "【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警/03-预警配置/02设备预警配置",
     "createdAt": "2026-03-10",
     "updatedAt": ""
   },
   {
     "id": "120",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
-    "recordStatus": "active",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
+    "recordStatus": "cancelled",
     "pagePathSegments": [
       "预警配置",
       "设备事务通知配置"
@@ -2437,17 +2437,17 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "风险管理～设备事务通知配置",
     "actionPermissions": "查看页面、详情、新增、编辑、删除、启停用",
     "dataPermission": "设备类型分页：如果账号仓库权限和单条规则绑定设备的任意一个设备相同，则展示该条规则；如果单条规则的设备没有绑定任何仓库，则该规则展示给所有人",
-    "changeNote": "",
+    "changeNote": "【6.2已上线】菜单迁至06-物联网IOT与预警，见基准 B端PC/06-物联网IOT与预警",
     "createdAt": "2026-03-10",
     "updatedAt": ""
   },
   {
     "id": "121",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "planned",
     "pagePathSegments": [
       "巡检配置（新)",
@@ -2464,10 +2464,10 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "122",
     "platform": "PC",
-    "module": "8.配置管理",
+    "module": "9.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
-    "baselineModuleDir": "B端PC/08-配置管理",
+    "menuModuleCode": "09-配置管理",
+    "baselineModuleDir": "B端PC/09-配置管理",
     "recordStatus": "planned",
     "pagePathSegments": [
       "巡检配置（新)",
@@ -2484,11 +2484,11 @@ export const permissionRecords: PermissionRecord[] = [
   {
     "id": "123",
     "platform": "PC",
-    "module": "9.物联网IOT与预警",
+    "module": "6.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
-    "menuModuleCode": "09-物联网IOT预警",
-    "baselineModuleDir": "B-迭代需求/6.2版本（2026.08）/01-物联网IOT管理",
-    "recordStatus": "6.2-target",
+    "menuModuleCode": "06-物联网IOT预警",
+    "baselineModuleDir": "B端PC/06-物联网IOT与预警/01-物联网IOT管理/01监控设备",
+    "recordStatus": "active",
     "pagePathSegments": [
       "物联网IOT管理",
       "监控设备"
@@ -2497,18 +2497,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "设备管理～监控设备",
     "actionPermissions": "查看页面、重命名、仓库绑定、查看直播、查看回放、图像锚点、移除设备",
     "dataPermission": "根据仓库权限决定可看数据，未绑定具体位置的设备所有登录账号可见",
-    "changeNote": "6.2目标态菜单；上线前见 2.仓储/设备管理",
+    "changeNote": "6.2已上线基准；6.2上线合流批次A",
     "createdAt": "2026-09-03",
     "updatedAt": ""
   },
   {
     "id": "124",
     "platform": "PC",
-    "module": "9.物联网IOT与预警",
+    "module": "6.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
-    "menuModuleCode": "09-物联网IOT预警",
-    "baselineModuleDir": "B-迭代需求/6.2版本（2026.08）/01-物联网IOT管理",
-    "recordStatus": "6.2-target",
+    "menuModuleCode": "06-物联网IOT预警",
+    "baselineModuleDir": "B端PC/06-物联网IOT与预警/01-物联网IOT管理/02门禁设备",
+    "recordStatus": "active",
     "pagePathSegments": [
       "物联网IOT管理",
       "门禁设备"
@@ -2517,18 +2517,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "设备管理～门禁设备",
     "actionPermissions": "查看页面、重命名、仓库绑定、设备数据、获取密码、移除设备、人脸管理",
     "dataPermission": "根据仓库权限决定可看数据，未绑定具体位置的设备所有登录账号可见",
-    "changeNote": "6.2目标态菜单",
+    "changeNote": "6.2目标态菜单；6.2上线合流批次A",
     "createdAt": "2026-09-03",
     "updatedAt": ""
   },
   {
     "id": "125",
     "platform": "PC",
-    "module": "9.物联网IOT与预警",
+    "module": "6.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
-    "menuModuleCode": "09-物联网IOT预警",
-    "baselineModuleDir": "B-迭代需求/6.2版本（2026.08）/01-物联网IOT管理",
-    "recordStatus": "6.2-target",
+    "menuModuleCode": "06-物联网IOT预警",
+    "baselineModuleDir": "B端PC/06-物联网IOT与预警/01-物联网IOT管理/03物联设备",
+    "recordStatus": "active",
     "pagePathSegments": [
       "物联网IOT管理",
       "物联设备"
@@ -2537,18 +2537,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "设备管理～物联设备",
     "actionPermissions": "查看页面、重命名、仓库绑定、设备数据、移除设备",
     "dataPermission": "根据仓库权限决定可看数据，未绑定具体位置的设备所有登录账号可见",
-    "changeNote": "6.2目标态菜单",
+    "changeNote": "6.2目标态菜单；6.2上线合流批次A",
     "createdAt": "2026-09-03",
     "updatedAt": ""
   },
   {
     "id": "126",
     "platform": "PC",
-    "module": "9.物联网IOT与预警",
+    "module": "6.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
-    "menuModuleCode": "09-物联网IOT预警",
-    "baselineModuleDir": "B-迭代需求/6.2版本（2026.08）/01-物联网IOT管理",
-    "recordStatus": "6.2-target",
+    "menuModuleCode": "06-物联网IOT预警",
+    "baselineModuleDir": "B端PC/06-物联网IOT与预警/01-物联网IOT管理/04GPS设备",
+    "recordStatus": "active",
     "pagePathSegments": [
       "物联网IOT管理",
       "GPS设备"
@@ -2557,18 +2557,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "设备管理～GPS设备",
     "actionPermissions": "查看页面、重命名、仓库绑定、实时定位、运动轨迹、移除设备、GPS平台规则配置、GPS平台基础数据",
     "dataPermission": "根据仓库权限决定可看数据，未绑定具体位置的设备所有登录账号可见",
-    "changeNote": "6.2目标态菜单",
+    "changeNote": "6.2目标态菜单；6.2上线合流批次A",
     "createdAt": "2026-09-03",
     "updatedAt": ""
   },
   {
     "id": "127",
     "platform": "PC",
-    "module": "9.物联网IOT与预警",
+    "module": "6.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
-    "menuModuleCode": "09-物联网IOT预警",
-    "baselineModuleDir": "B-迭代需求/6.2版本（2026.08）/01-物联网IOT管理",
-    "recordStatus": "6.2-target",
+    "menuModuleCode": "06-物联网IOT预警",
+    "baselineModuleDir": "B端PC/06-物联网IOT与预警/01-物联网IOT管理/05人脸配置",
+    "recordStatus": "active",
     "pagePathSegments": [
       "物联网IOT管理",
       "人脸配置"
@@ -2577,18 +2577,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "设备管理～人脸配置",
     "actionPermissions": "查看(页面)、上传人脸、分配门禁",
     "dataPermission": "1.分配门禁用：仓库权限可见 2.人员列表：机构数据权限",
-    "changeNote": "6.2目标态菜单",
+    "changeNote": "6.2目标态菜单；6.2上线合流批次A",
     "createdAt": "2026-09-03",
     "updatedAt": ""
   },
   {
     "id": "128",
     "platform": "PC",
-    "module": "9.物联网IOT与预警",
+    "module": "6.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
-    "menuModuleCode": "09-物联网IOT预警",
-    "baselineModuleDir": "B-迭代需求/6.2版本（2026.08）/02-预警信息",
-    "recordStatus": "6.2-target",
+    "menuModuleCode": "06-物联网IOT预警",
+    "baselineModuleDir": "B端PC/06-物联网IOT与预警/02-预警信息/01设备预警信息",
+    "recordStatus": "active",
     "pagePathSegments": [
       "预警信息",
       "设备预警信息"
@@ -2597,18 +2597,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "风险管理～设备预警管理",
     "actionPermissions": "查看页面、详情、去处理（操作权限+预警状态为未处理）",
     "dataPermission": "仓库权限 登录账号仓库权限（未绑定具体位置的设备所有账号可见） 数据权限内的数据；",
-    "changeNote": "6.2目标态；合流门禁事务/设备事务通知流水",
+    "changeNote": "6.2目标态；合流门禁事务/设备事务通知流水；6.2上线合流批次A",
     "createdAt": "2026-09-03",
     "updatedAt": ""
   },
   {
     "id": "129",
     "platform": "PC",
-    "module": "9.物联网IOT与预警",
+    "module": "6.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
-    "menuModuleCode": "09-物联网IOT预警",
-    "baselineModuleDir": "B-迭代需求/6.2版本（2026.08）/02-预警信息",
-    "recordStatus": "6.2-target",
+    "menuModuleCode": "06-物联网IOT预警",
+    "baselineModuleDir": "B端PC/06-物联网IOT与预警/02-预警信息/02押品预警信息",
+    "recordStatus": "active",
     "pagePathSegments": [
       "预警信息",
       "押品预警信息"
@@ -2617,18 +2617,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "风险管理～订单预警管理",
     "actionPermissions": "查看页面、详情、去查看、公示风险、批量公示风险（已处理数据下才展示）",
     "dataPermission": "订单数据权限 登录账号数据权限内的数据（可见订单则可见订单相关的预警消息）",
-    "changeNote": "6.2目标态菜单",
+    "changeNote": "6.2目标态菜单；6.2上线合流批次A",
     "createdAt": "2026-09-03",
     "updatedAt": ""
   },
   {
     "id": "130",
     "platform": "PC",
-    "module": "9.物联网IOT与预警",
+    "module": "6.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
-    "menuModuleCode": "09-物联网IOT预警",
-    "baselineModuleDir": "B-迭代需求/6.2版本（2026.08）/02-预警信息",
-    "recordStatus": "6.2-target",
+    "menuModuleCode": "06-物联网IOT预警",
+    "baselineModuleDir": "B端PC/06-物联网IOT与预警/02-预警信息/03贷中风控管理",
+    "recordStatus": "active",
     "pagePathSegments": [
       "预警信息",
       "贷中风控管理"
@@ -2637,18 +2637,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "风险管理~风险公示",
     "actionPermissions": "查看（页面）、查看详情、执行风控模型、批量执行",
     "dataPermission": "订单数据权限",
-    "changeNote": "6.2目标态菜单",
+    "changeNote": "6.2目标态菜单；6.2上线合流批次A",
     "createdAt": "2026-09-03",
     "updatedAt": ""
   },
   {
     "id": "131",
     "platform": "PC",
-    "module": "9.物联网IOT与预警",
+    "module": "6.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
-    "menuModuleCode": "09-物联网IOT预警",
-    "baselineModuleDir": "B-迭代需求/6.2版本（2026.08）/02-预警信息",
-    "recordStatus": "6.2-target",
+    "menuModuleCode": "06-物联网IOT预警",
+    "baselineModuleDir": "B端PC/06-物联网IOT与预警/02-预警信息/04风险公示",
+    "recordStatus": "active",
     "pagePathSegments": [
       "预警信息",
       "风险公示"
@@ -2657,18 +2657,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "",
     "actionPermissions": "",
     "dataPermission": "订单数据权限 登录账号数据权限内的数据（可见订单则可见订单相关的预警消息）",
-    "changeNote": "6.2目标态菜单",
+    "changeNote": "6.2目标态菜单；6.2上线合流批次A",
     "createdAt": "2026-09-03",
     "updatedAt": ""
   },
   {
     "id": "132",
     "platform": "PC",
-    "module": "9.物联网IOT与预警",
+    "module": "6.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
-    "menuModuleCode": "09-物联网IOT预警",
-    "baselineModuleDir": "B-迭代需求/6.2版本（2026.08）/03-预警配置",
-    "recordStatus": "6.2-target",
+    "menuModuleCode": "06-物联网IOT预警",
+    "baselineModuleDir": "B端PC/06-物联网IOT与预警/03-预警配置/01预警等级",
+    "recordStatus": "active",
     "pagePathSegments": [
       "预警配置",
       "预警等级"
@@ -2677,18 +2677,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "风险管理～预警等级",
     "actionPermissions": "查看页面、新增、编辑、详情、删除、启停用、排序",
     "dataPermission": "有菜单权限人员可见当前租户等级字典",
-    "changeNote": "6.2目标态；2~20档动态字典",
+    "changeNote": "6.2目标态；2~20档动态字典；6.2上线合流批次A",
     "createdAt": "2026-09-03",
     "updatedAt": ""
   },
   {
     "id": "133",
     "platform": "PC",
-    "module": "9.物联网IOT与预警",
+    "module": "6.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
-    "menuModuleCode": "09-物联网IOT预警",
-    "baselineModuleDir": "B-迭代需求/6.2版本（2026.08）/03-预警配置",
-    "recordStatus": "6.2-target",
+    "menuModuleCode": "06-物联网IOT预警",
+    "baselineModuleDir": "B端PC/06-物联网IOT与预警/03-预警配置/02设备预警配置",
+    "recordStatus": "active",
     "pagePathSegments": [
       "预警配置",
       "设备预警配置"
@@ -2697,18 +2697,18 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "风险管理～设备预警配置",
     "actionPermissions": "查看页面、详情、新增、编辑、删除",
     "dataPermission": "1、订单预警配置：可选和可看订单根据登录账号数据权限决定（可见订单则可见订单相关的预警配置和选项）； 2、设备预警配置：可选设备根据登录账号仓库权限决定，可看配置根据登录账号数据权限决定；",
-    "changeNote": "6.2目标态；合流设备事务通知配置",
+    "changeNote": "6.2目标态；合流设备事务通知配置；6.2上线合流批次A",
     "createdAt": "2026-09-03",
     "updatedAt": ""
   },
   {
     "id": "134",
     "platform": "PC",
-    "module": "9.物联网IOT与预警",
+    "module": "6.物联网IOT与预警",
     "topBarModuleLabel": "物联网IOT与预警",
-    "menuModuleCode": "09-物联网IOT预警",
-    "baselineModuleDir": "B-迭代需求/6.2版本（2026.08）/03-预警配置",
-    "recordStatus": "6.2-target",
+    "menuModuleCode": "06-物联网IOT预警",
+    "baselineModuleDir": "B端PC/06-物联网IOT与预警/03-预警配置/03订单预警配置",
+    "recordStatus": "active",
     "pagePathSegments": [
       "预警配置",
       "订单预警配置"
@@ -2717,7 +2717,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "风险管理～订单预警配置",
     "actionPermissions": "查看页面、详情、新增、编辑、删除",
     "dataPermission": "1、订单预警配置：可选和可看订单根据登录账号数据权限决定（可见订单则可见订单相关的预警配置和选项）； 2、设备预警配置：可选设备根据登录账号仓库权限决定，可看配置根据登录账号数据权限决定；",
-    "changeNote": "6.2目标态菜单",
+    "changeNote": "6.2目标态菜单；6.2上线合流批次A",
     "createdAt": "2026-09-03",
     "updatedAt": ""
   },
@@ -4211,7 +4211,7 @@ export const permissionRecords: PermissionRecord[] = [
     "platform": "PC",
     "module": "8.配置管理",
     "topBarModuleLabel": "配置管理",
-    "menuModuleCode": "08-配置管理",
+    "menuModuleCode": "09-配置管理",
     "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/07-货品规格管理-入库收集项配置",
     "recordStatus": "6.3-target",
     "pagePathSegments": [
@@ -4275,12 +4275,13 @@ export const permissionModuleTree = [
   "3.融资/监管",
   "4.交易",
   "5.风控",
-  "6.统计/看板",
-  "7.结算",
-  "8.配置管理",
-  "9.物联网IOT与预警",
+  "7.统计/看板",
+  "8.结算",
+  "9.配置管理",
+  "6.物联网IOT与预警",
   "1.首页",
   "2.工作台",
   "3.业务办理",
-  "10.用户中心"
+  "10.用户中心",
+  "8.配置管理"
 ]

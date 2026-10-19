@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { maskLoginPhone } from "@prototype/B端PC/src/features/partner-archives/lib/detail-utils"
+import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
 import {
   INBOUND_OWNER_VERIFY_DIALOG,
   inboundOwnerTypeDisplay,
@@ -71,9 +72,16 @@ export function OwnerVerifySheet({
         <h3 className="text-base font-semibold">{INBOUND_OWNER_VERIFY_DIALOG.title}</h3>
         <p className="mt-1 text-xs leading-relaxed text-gray-500">
           {needVerifyCode
-            ? INBOUND_OWNER_VERIFY_DIALOG.descriptionSmsRequired
+            ? INBOUND_OWNER_VERIFY_DIALOG.descriptionSmsRequiredUser
             : INBOUND_OWNER_VERIFY_DIALOG.description}
         </p>
+        {needVerifyCode && INBOUND_OWNER_VERIFY_DIALOG.descriptionSmsRequiredSpec ? (
+          <div className="mt-2">
+            <PrototypeSpecCallout>
+              {INBOUND_OWNER_VERIFY_DIALOG.descriptionSmsRequiredSpec}
+            </PrototypeSpecCallout>
+          </div>
+        ) : null}
         <dl className="mt-3 space-y-2 rounded-lg border border-gray-100 bg-gray-50/80 p-3 text-sm">
           <div className="flex justify-between gap-3">
             <dt className="text-gray-500">{INBOUND_OWNER_VERIFY_DIALOG.ownerType}</dt>

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { AlertTriangleIcon, ArrowLeftIcon } from "lucide-react"
+import { ProductFieldHint } from "@/components/form/ProductFieldHint"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -38,11 +40,19 @@ import {
 import { getPartnerArchiveById } from "../lib/detail-utils"
 import { partnerArchivesMock } from "../mock/partner-archives.mock"
 import {
-  findIndividualOwnerAddressConflict,
+  findOwnerAddressConflict,
+  ownerAddressConflictMessage,
   findPartnerByIdNumber,
   maskIdNumber,
   rolesAllowedForSubjectType,
 } from "../lib/partner-archive-rules"
+import {
+  PARTNER_FORM_ADDRESS_SPEC_NOTE,
+  PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE,
+  PARTNER_FORM_INITIAL_ROLES_USER_HINT,
+  partnerFormAddressUserHint,
+  PARTNER_CHANGE_ADDRESS_DIALOG,
+} from "../lib/partner-archive-ui-labels"
 import {
   ROLE_TYPE_LABELS,
   SUBJECT_TYPE_LABELS,
@@ -137,6 +147,37 @@ export function PartnerArchiveFormPage() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload)
   }, [dirty])
 
+  const hasAddressDiff = useMemo(() => {
+    if (!existing || !existing.certAddress.fullAddress) return false
+    return (
+      existing.certAddress.province !== province ||
+      existing.certAddress.city !== city ||
+      existing.certAddress.district !== district ||
+      existing.certAddress.detail.trim() !== detailAddress.trim()
+    )
+  }, [existing, province, city, district, detailAddress])
+
+  const hasPhoneDiff = useMemo(() => {
+    if (!existing || isPendingCompletion) return false
+    return existing.contactPhone.trim() !== contactPhone.trim()
+  }, [existing, isPendingCompletion, contactPhone])
+
+  const hasAgentDiff = useMemo(() => {
+    if (!existing || subjectType !== "ENTERPRISE") {
+      return false
+    }
+    return (existing.agentName ?? "").trim() !== agentName.trim()
+  }, [existing, subjectType, agentName])
+
+  const hasIndividualOwnerRole = useMemo(() => {
+    if (existing) {
+      return existing.roles.some(
+        (role) => role.roleType === "OWNER" && role.roleStatus !== "INVALID"
+      )
+    }
+    return selectedRoles.includes("OWNER")
+  }, [existing, selectedRoles])
+
   if (isEdit && !existing) {
     return (
       <div className="space-y-4 p-6">
@@ -176,45 +217,13 @@ export function PartnerArchiveFormPage() {
     navigate(PARTNER_ARCHIVE_LIST_PATH)
   }
 
-  const hasAddressDiff = useMemo(() => {
-    if (!existing || !existing.certAddress.fullAddress) return false
-    return (
-      existing.certAddress.province !== province ||
-      existing.certAddress.city !== city ||
-      existing.certAddress.district !== district ||
-      existing.certAddress.detail.trim() !== detailAddress.trim()
-    )
-  }, [existing, province, city, district, detailAddress])
-
-  const hasPhoneDiff = useMemo(() => {
-    if (!existing || isPendingCompletion) return false
-    return existing.contactPhone.trim() !== contactPhone.trim()
-  }, [existing, isPendingCompletion, contactPhone])
-
-  const hasAgentDiff = useMemo(() => {
-    if (!existing || subjectType !== "ENTERPRISE") {
-      return false
-    }
-    return (existing.agentName ?? "").trim() !== agentName.trim()
-  }, [existing, subjectType, agentName])
-
-  const hasIndividualOwnerRole = useMemo(() => {
-    if (existing) {
-      return existing.roles.some(
-        (role) => role.roleType === "OWNER" && role.roleStatus !== "INVALID"
-      )
-    }
-    return selectedRoles.includes("OWNER")
-  }, [existing, selectedRoles])
-
   const isIndividualOwner = Boolean(
     subjectType === "INDIVIDUAL" && isEdit && hasIndividualOwnerRole
   )
 
+  /** 对齐【合作方档案证件地址必填校验规则】(P01) 默认「是」：仅在档案页保存时强制，作业快捷建档不共用本页校验 */
   const addressRequired =
-    isPendingCompletion ||
-    subjectType === "ENTERPRISE" ||
-    (subjectType === "INDIVIDUAL" && hasIndividualOwnerRole)
+    isPendingCompletion || subjectType === "ENTERPRISE" || subjectType === "INDIVIDUAL"
 
   const buildCertAddress = () => {
     const detail = detailAddress.trim()
@@ -425,7 +434,7 @@ export function PartnerArchiveFormPage() {
         newErrors.district = "请选择完整的省/市/区"
       }
       if (!detailTrimmed) {
-        newErrors.detailAddress = "请输入证件详细地址"
+        newErrors.detailAddress = "请补全证件登记地址"
       } else if (`${province}${city}${district}${detailTrimmed}`.length > 200) {
         newErrors.detailAddress = "证件地址不超过 200 字"
       }
@@ -453,16 +462,16 @@ export function PartnerArchiveFormPage() {
     }
 
     if (
-      subjectType === "INDIVIDUAL" &&
       hasIndividualOwnerRole &&
       detailTrimmed &&
-      findIndividualOwnerAddressConflict(
+      findOwnerAddressConflict(
         partnerArchivesMock,
         `${province}${city}${district}${detailTrimmed}`,
+        subjectType,
         existing?.id
       )
     ) {
-      setAccessWarning("已有相同证件地址，不能绑定为该个人货主")
+      setAccessWarning(ownerAddressConflictMessage(subjectType))
       return false
     }
 
@@ -830,16 +839,8 @@ export function PartnerArchiveFormPage() {
                 <CardTitle>证件登记地址</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {subjectType === "INDIVIDUAL" && hasIndividualOwnerRole && (
-                  <p className="text-xs text-muted-foreground">
-                    个人货主证件地址将联动统一准入核验，租户内不能与其他个人货主相同。
-                  </p>
-                )}
-                {subjectType === "INDIVIDUAL" && !hasIndividualOwnerRole && !isPendingCompletion && (
-                  <p className="text-xs text-muted-foreground">
-                    未挂接货主时，证件地址可以不填。
-                  </p>
-                )}
+                <ProductFieldHint>{partnerFormAddressUserHint(subjectType)}</ProductFieldHint>
+                <PrototypeSpecCallout>{PARTNER_FORM_ADDRESS_SPEC_NOTE}</PrototypeSpecCallout>
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="space-y-2">
                     <Label className="sr-only">省</Label>
@@ -941,9 +942,8 @@ export function PartnerArchiveFormPage() {
                   <CardTitle>业务角色（首次挂接）</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="text-xs text-muted-foreground">
-                    保存时将挂接所选角色；未选则仅创建主体，稍后在详情【追加角色】维护。勾选「货主」时将调用统一准入核验（PA-R04）。
-                  </p>
+                  <ProductFieldHint>{PARTNER_FORM_INITIAL_ROLES_USER_HINT}</ProductFieldHint>
+                  <PrototypeSpecCallout>{PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE}</PrototypeSpecCallout>
                   <div className="flex flex-wrap gap-2 pt-1">
                     {selectableRoles.map((role) => {
                       const isSelected = selectedRoles.includes(role)
@@ -970,9 +970,10 @@ export function PartnerArchiveFormPage() {
 
         <PartnerConfirmDialog
           open={changeAddressDialogOpen}
-          title="确认变更证件地址"
-          description="检测到个人货主证件登记地址已发生变动。依据 PA-R06a 规则，改址须经统一准入校验，保存后原旧地址释放出池、新地址进入活跃池，并记录不可变审计日志。请录入改址原因。"
-          confirmLabel="确认改址并保存"
+          title={PARTNER_CHANGE_ADDRESS_DIALOG.title}
+          description={PARTNER_CHANGE_ADDRESS_DIALOG.descriptionUser}
+          specNote={PARTNER_CHANGE_ADDRESS_DIALOG.descriptionSpec}
+          confirmLabel={PARTNER_CHANGE_ADDRESS_DIALOG.confirmLabel}
           reasonRequired
           reasonLabel="改址原因"
           reasonPlaceholder="请输入改址原因（1～200 字，如搬迁、证件登记信息变更等）"

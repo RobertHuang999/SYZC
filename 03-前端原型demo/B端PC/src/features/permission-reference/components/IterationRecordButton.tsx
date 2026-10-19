@@ -12,7 +12,7 @@ export function IterationRecordButton() {
     <NavLink
       to={ITERATION_RECORD_PATH}
       className={cn("iteration-changelog-button", active && "is-active")}
-      title="查看各版本菜单与导航调整记录"
+      title="查看各版本菜单、能力与导航变更（含优先级与 PRD 来源）"
     >
       <HistoryIcon size={14} strokeWidth={1.8} />
       <span>{ITERATION_RECORD_LABEL}</span>

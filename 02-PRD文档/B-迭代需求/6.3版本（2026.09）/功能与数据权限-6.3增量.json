@@ -161,7 +161,7 @@
       "platform": "PC",
       "module": "8.配置管理",
       "topBarModuleLabel": "配置管理",
-      "menuModuleCode": "08-配置管理",
+      "menuModuleCode": "09-配置管理",
       "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/07-货品规格管理-入库收集项配置",
       "recordStatus": "6.3-target",
       "pagePathSegments": ["货品规格管理", "入库收集项配置"],

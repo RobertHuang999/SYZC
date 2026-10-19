@@ -58,7 +58,11 @@ export default defineConfig({
   },
   server: {
     fs: {
-      allow: ["..", "../../02-PRD文档"],
+      allow: [
+        path.resolve(import.meta.dirname, ".."),
+        path.resolve(import.meta.dirname, "../.."),
+        path.resolve(import.meta.dirname, "../../02-PRD文档"),
+      ],
     },
     proxy: {
       "/api": {

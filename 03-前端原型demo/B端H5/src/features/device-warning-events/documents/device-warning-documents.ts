@@ -1,7 +1,7 @@
 import type { PrototypeDocument } from "@/shared/annotations/annotation.types"
-import prdMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/02-预警信息/01设备预警信息/设备预警信息主PRD.md?raw"
-import fieldsMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/02-预警信息/01设备预警信息/设备预警信息字段清单.md?raw"
-import rulesMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/02-预警信息/01设备预警信息/设备预警信息业务规则规格.md?raw"
+import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/02-预警信息/01设备预警信息/设备预警信息主PRD.md?raw"
+import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/02-预警信息/01设备预警信息/设备预警信息字段清单.md?raw"
+import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/02-预警信息/01设备预警信息/设备预警信息业务规则规格.md?raw"
 
 export const deviceWarningDocuments: PrototypeDocument[] = [
   {

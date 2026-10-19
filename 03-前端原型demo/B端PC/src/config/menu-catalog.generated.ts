@@ -190,10 +190,6 @@ export const generatedSidebarGroupsByModule: Record<string, SidebarGroup[]> = {
         {
           "label": "入库记录",
           "path": "/仓储/入库管理/入库记录"
-        },
-        {
-          "label": "入库暂存登记",
-          "path": "/仓储/入库管理/入库暂存登记"
         }
       ]
     },
@@ -684,7 +680,6 @@ export const generatedMenuPaths: readonly string[] = [
   "/仓储/货权管理/货权公示",
   "/仓储/货权管理/证据管理",
   "/仓储/入库管理/入库记录",
-  "/仓储/入库管理/入库暂存登记",
   "/仓储/出库管理/出库记录",
   "/仓储/移库管理/移库记录",
   "/仓储/货物转让/转让记录",

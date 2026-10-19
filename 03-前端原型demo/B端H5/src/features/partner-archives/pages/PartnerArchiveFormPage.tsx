@@ -18,11 +18,14 @@ import {
   type RoleType,
   type SubjectType,
 } from "@prototype/B端PC/src/features/partner-archives/domain/types"
+import { ProductFieldHint } from "@prototype/B端PC/src/components/form/ProductFieldHint"
+import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
 import { getPartnerArchiveById } from "@prototype/B端PC/src/features/partner-archives/lib/detail-utils"
 import { partnerArchivesMock } from "@prototype/B端PC/src/features/partner-archives/mock/partner-archives.mock"
 import {
-  findIndividualOwnerAddressConflict,
+  findOwnerAddressConflict,
   findPartnerByIdNumber,
+  ownerAddressConflictMessage,
   maskIdNumber,
   rolesAllowedForSubjectType,
 } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-rules"
@@ -34,8 +37,13 @@ import {
   PARTNER_CHANGE_ADDRESS_DIALOG,
   PARTNER_FORM_ACTION_LABELS,
   PARTNER_FORM_BASE_SECTION_TITLE,
-  PARTNER_FORM_INITIAL_ROLES_HINT,
+  PARTNER_FORM_ADDRESS_SPEC_NOTE,
   PARTNER_FORM_INITIAL_ROLES_SECTION_TITLE,
+  PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE,
+  PARTNER_FORM_INITIAL_ROLES_USER_HINT,
+  PARTNER_PENDING_COMPLETION_SPEC_NOTE,
+  PARTNER_PENDING_COMPLETION_USER_BANNER,
+  partnerFormAddressUserHint,
   partnerContactPhoneFormLabel,
   partnerContactPhoneDetailLabel,
   partnerFormPageTitle,
@@ -196,16 +204,16 @@ export function PartnerArchiveFormPage() {
       }
     }
     if (
-      subjectType === "INDIVIDUAL" &&
       hasIndividualOwnerRole &&
       detailTrimmed &&
-      findIndividualOwnerAddressConflict(
+      findOwnerAddressConflict(
         partnerArchivesMock,
         `${province}${city}${district}${detailTrimmed}`,
+        subjectType,
         existing?.id,
       )
     ) {
-      return "已有相同证件地址，不能绑定为该个人货主"
+      return ownerAddressConflictMessage(subjectType)
     }
     return null
   }
@@ -441,8 +449,11 @@ export function PartnerArchiveFormPage() {
           ) : null}
 
           {isPendingCompletion ? (
-            <div className="mb-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900">
-              该合作方档案处于「待补全」状态：请完善证件登记地址；保存并通过准入校验后，角色将自动激活为正常。
+            <div className="mb-3 space-y-2">
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-950">
+                {PARTNER_PENDING_COMPLETION_USER_BANNER}
+              </div>
+              <PrototypeSpecCallout>{PARTNER_PENDING_COMPLETION_SPEC_NOTE}</PrototypeSpecCallout>
             </div>
           ) : null}
 
@@ -555,6 +566,12 @@ export function PartnerArchiveFormPage() {
             ]}
           >
           <NativeInfoCard title="证件登记地址" icon={<UserRound className="size-5" />}>
+            <div className="space-y-2 px-3 pb-2">
+              <ProductFieldHint className="text-[#232D39]/55">
+                {partnerFormAddressUserHint(subjectType)}
+              </ProductFieldHint>
+              <PrototypeSpecCallout>{PARTNER_FORM_ADDRESS_SPEC_NOTE}</PrototypeSpecCallout>
+            </div>
             <NativeFormRow label="省">
               <input
                 className="w-full bg-transparent text-right text-sm outline-none"
@@ -609,9 +626,12 @@ export function PartnerArchiveFormPage() {
               title={PARTNER_FORM_INITIAL_ROLES_SECTION_TITLE}
               icon={<UserRound className="size-5" />}
             >
-              <p className="px-3 pb-2 text-xs leading-relaxed text-[#232D39]/55">
-                {PARTNER_FORM_INITIAL_ROLES_HINT}
-              </p>
+              <div className="space-y-2 px-3 pb-2">
+                <ProductFieldHint className="text-[#232D39]/55">
+                  {PARTNER_FORM_INITIAL_ROLES_USER_HINT}
+                </ProductFieldHint>
+                <PrototypeSpecCallout>{PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE}</PrototypeSpecCallout>
+              </div>
               <div className="flex flex-wrap gap-2 px-3 pb-3">
                 {selectableRoles.map((role) => {
                   const active = selectedRoles.includes(role)
@@ -713,7 +733,8 @@ export function PartnerArchiveFormPage() {
         <PartnerConfirmSheet
           open={changeAddressOpen}
           title={PARTNER_CHANGE_ADDRESS_DIALOG.title}
-          description={PARTNER_CHANGE_ADDRESS_DIALOG.description}
+          description={PARTNER_CHANGE_ADDRESS_DIALOG.descriptionUser}
+          specNote={PARTNER_CHANGE_ADDRESS_DIALOG.descriptionSpec}
           confirmLabel={PARTNER_CHANGE_ADDRESS_DIALOG.confirmLabel}
           reasonRequired
           reasonLabel={PARTNER_CHANGE_ADDRESS_DIALOG.reasonLabel}

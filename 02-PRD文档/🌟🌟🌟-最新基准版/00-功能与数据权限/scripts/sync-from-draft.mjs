@@ -47,9 +47,15 @@ const PC_MODULE_MAP = {
   "3.融资/监管": { code: "03-融资监管", label: "融资/监管", docDir: "B端PC/03-融资监管" },
   "4.交易": { code: "04-交易", label: "交易", docDir: "B端PC/04-交易" },
   "5.风控": { code: "05-风控", label: "风控", docDir: "B端PC/05-风控" },
-  "6.统计/看板": { code: "06-统计", label: "统计/看板", docDir: "B端PC/06-统计" },
-  "7.结算": { code: "07-结算", label: "结算", docDir: "B端PC/07-结算" },
-  "8.配置管理": { code: "08-配置管理", label: "配置管理", docDir: "B端PC/08-配置管理" },
+  "6.物联网IOT与预警": { code: "06-物联网IOT预警", label: "物联网IOT与预警", docDir: "B端PC/06-物联网IOT与预警" },
+  "7.统计/看板": { code: "07-统计", label: "统计/看板", docDir: "B端PC/07-统计" },
+  "8.结算": { code: "08-结算", label: "结算", docDir: "B端PC/08-结算" },
+  "9.配置管理": { code: "09-配置管理", label: "配置管理", docDir: "B端PC/09-配置管理" },
+  // 历史草稿别名（合流前编号）
+  "6.统计/看板": { code: "07-统计", label: "统计/看板", docDir: "B端PC/07-统计" },
+  "7.结算": { code: "08-结算", label: "结算", docDir: "B端PC/08-结算" },
+  "8.配置管理": { code: "09-配置管理", label: "配置管理", docDir: "B端PC/09-配置管理" },
+  "9.物联网IOT与预警": { code: "06-物联网IOT预警", label: "物联网IOT与预警", docDir: "B端PC/06-物联网IOT与预警" },
 }
 
 const H5_MODULE_MAP = {

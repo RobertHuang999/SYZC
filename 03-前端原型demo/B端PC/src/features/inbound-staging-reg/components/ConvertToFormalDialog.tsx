@@ -6,13 +6,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { ProductFieldHint } from "@/components/form/ProductFieldHint"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { Button } from "@/components/ui/button"
 import { Copy } from "lucide-react"
 import type { InboundStagingReg } from "../domain/types"
 import { resolveConvertTarget } from "../lib/convert-routing"
 import {
-  STAGING_O03_PC_CD_HINT,
-  STAGING_O03_REMINDERS,
+  STAGING_O03_PC_CD_HINT_USER,
+  STAGING_O03_REMINDERS_SPEC,
+  STAGING_O03_REMINDERS_USER,
 } from "@prototype/shared/inbound/staging-ui-labels"
 
 type Props = {
@@ -65,14 +68,21 @@ export function ConvertToFormalDialog({
             登记单 {reg.regNo} · {reg.inboundType}
           </DialogDescription>
         </DialogHeader>
-        <ul className="list-disc space-y-1.5 pl-5 text-sm text-muted-foreground">
-          {STAGING_O03_REMINDERS.map((line) => (
-            <li key={line}>{line}</li>
+        <ul className="list-disc space-y-1.5 pl-5">
+          {STAGING_O03_REMINDERS_USER.map((line) => (
+            <li key={line}>
+              <ProductFieldHint className="text-sm text-foreground">{line}</ProductFieldHint>
+            </li>
           ))}
           {target.kind === "mobile_only" ? (
-            <li className="font-medium text-amber-700">{STAGING_O03_PC_CD_HINT}</li>
+            <li>
+              <ProductFieldHint className="text-sm font-medium text-amber-800">
+                {STAGING_O03_PC_CD_HINT_USER}
+              </ProductFieldHint>
+            </li>
           ) : null}
         </ul>
+        <PrototypeSpecCallout>{STAGING_O03_REMINDERS_SPEC}</PrototypeSpecCallout>
         {target.kind === "mobile_only" ? (
           <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
             <p className="min-w-0 flex-1 break-all">

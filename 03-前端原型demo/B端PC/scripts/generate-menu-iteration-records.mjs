@@ -52,10 +52,23 @@ function isSeparatorRow(line) {
   return /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line.trim())
 }
 
+function stripMarkdownInline(value) {
+  return value
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .trim()
+}
+
 function normalizeCell(value) {
-  const text = value.replace(/\\([\\|])/g, "$1").trim()
+  const text = stripMarkdownInline(value.replace(/\\([\\|])/g, "$1").trim())
   if (text === "—" || text === "-") return ""
   return text
+}
+
+function normalizePriority(value) {
+  const text = normalizeCell(value)
+  const match = text.match(/P[0-2]/i)
+  return match ? match[0].toUpperCase() : text
 }
 
 function parseMarkdownTable(text, sectionTitle = "菜单调整明细") {
@@ -155,6 +168,7 @@ for (const item of discovered) {
       title: cell(row, item.headers, "标题"),
       before: cell(row, item.headers, "调整前"),
       after: cell(row, item.headers, "调整后"),
+      priority: normalizePriority(cell(row, item.headers, "优先级")),
       note: cell(row, item.headers, "说明"),
       date: cell(row, item.headers, "日期"),
       sourceDoc: cell(row, item.headers, "来源文档"),
@@ -188,6 +202,8 @@ export type IterationRecordEntry = {
   title: string
   before: string
   after: string
+  /** 版本里程碑优先级，如 P0 / P1；无列或为空则留空 */
+  priority: string
   note: string
   date: string
   sourceDoc: string

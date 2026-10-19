@@ -36,9 +36,52 @@ export const PARTNER_FORM_BASE_SECTION_TITLE = "基础档案资料"
 /** 新增页业务角色区块标题（与 PC CardTitle 一致） */
 export const PARTNER_FORM_INITIAL_ROLES_SECTION_TITLE = "业务角色（首次挂接）"
 
-/** 新增页业务角色区块说明（与 PC 表单一致） */
-export const PARTNER_FORM_INITIAL_ROLES_HINT =
-  "保存时将挂接所选角色；未选则仅创建主体，稍后在详情【追加角色】维护。勾选「货主」时将调用统一准入核验（PA-R04）。"
+/** ── 上线界面文案（字段清单口径；页面只展示 USER_*，规则编号见 SPEC_* + 标注层）── */
+
+export function partnerFormAddressUserHint(subjectType: SubjectType): string {
+  if (subjectType === "ENTERPRISE") {
+    return "请填写营业执照上的登记地址，须与证照一致。勾选「货主」时，同一地址不可重复绑定多个企业货主。"
+  }
+  return "请填写身份证上的登记地址，须与证照一致。勾选「货主」时，同一地址不可重复绑定多个个人货主。"
+}
+
+export const PARTNER_FORM_ADDRESS_SPEC_NOTE =
+  "档案保存走【合作方档案证件地址必填校验规则】(P01)；勾选货主走【证件登记地址防重复唯一校验与同步阻断规则】(P02)，个人与企业分池比对。"
+
+export const PARTNER_FORM_INITIAL_ROLES_USER_HINT =
+  "保存时将挂接所选角色；未选则仅创建主体，可稍后在详情页【追加角色】。"
+
+export const PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE =
+  "勾选货主时调用统一准入服务，执行【货主准入与地址唯一联动规则】(PA-R04) 与 P01/P02。"
+
+/** @deprecated 请改用 USER_HINT + PrototypeSpecCallout */
+export const PARTNER_FORM_INITIAL_ROLES_HINT = PARTNER_FORM_INITIAL_ROLES_USER_HINT
+
+export const PARTNER_QUICK_CREATE_CERT_ADDRESS_LABEL = "证件登记地址"
+
+export const PARTNER_QUICK_CREATE_CERT_ADDRESS_USER_HINT =
+  "选填。填写后将校验是否与租户内其他货主重复；不填不影响保存。"
+
+export const PARTNER_QUICK_CREATE_CERT_ADDRESS_SPEC_NOTE =
+  "入库快捷建档不走 P01；有地址时走 P02（个人/企业分池）。"
+
+export const PARTNER_PENDING_COMPLETION_USER_BANNER =
+  "该合作方处于「待补全」状态，请完善证件登记地址；保存通过后货主角色将变为正常。"
+
+export const PARTNER_PENDING_COMPLETION_SPEC_NOTE =
+  "对应 P01 档案域必填；缺址不阻断仓储/仓单等作业引用。"
+
+export const PARTNER_APPEND_OWNER_MISSING_ADDRESS_USER =
+  "当前未录入证件地址。确认后货主角色为「待补全」，请稍后在档案编辑页补全登记地址。"
+
+export const PARTNER_APPEND_OWNER_MISSING_ADDRESS_SPEC =
+  "待补全不受 P01 阻断追加动作；档案保存时仍走 P01。"
+
+export const PARTNER_APPEND_OWNER_WITH_ADDRESS_USER =
+  "追加货主后，若证件地址与租户内其他货主重复，将无法通过校验。"
+
+export const PARTNER_APPEND_OWNER_WITH_ADDRESS_SPEC =
+  "执行 P02 分池唯一；档案保存时另走 P01 必填。"
 
 export function partnerFormPageTitle(
   isEdit: boolean,
@@ -64,12 +107,105 @@ export const PARTNER_FORM_ACTION_LABELS = {
 
 export const PARTNER_CHANGE_ADDRESS_DIALOG = {
   title: "确认变更证件地址",
-  description:
-    "检测到个人货主证件登记地址已发生变动。依据【个人货主证件地址改址准入规则】(PA-R06a)，改址须经统一准入校验，保存后原旧地址释放出池、新地址进入活跃池，并记录不可变审计日志。请录入改址原因。",
+  descriptionUser:
+    "检测到证件登记地址已变更。保存后将按准入规则校验新地址，并记录改址原因；历史业务单据中的地址快照不会变更。",
+  descriptionSpec:
+    "【个人货主证件地址变更规则】(PA-R06a)：统一准入校验、活跃池切换、审计留痕。",
   confirmLabel: "确认改址并保存",
   reasonLabel: "改址原因",
   reasonPlaceholder: "请输入改址原因（1～200 字，如搬迁、证件登记信息变更等）",
+  /** @deprecated 使用 descriptionUser */
+  description:
+    "检测到证件登记地址已变更。保存后将按准入规则校验新地址，并记录改址原因；历史业务单据中的地址快照不会变更。",
 } as const
+
+export type PartnerVerifyMode = "CREATE" | "CHANGE_PHONE" | "VERIFY_CONTACT"
+export type PartnerVerifyContext =
+  | "CREATE_ARCHIVE"
+  | "DETAIL_VERIFY"
+  | "INBOUND_CREATE"
+  | "INBOUND_SUBMIT"
+
+export function partnerVerifyDialogCopy(
+  mode: PartnerVerifyMode | undefined,
+  verifyContext: PartnerVerifyContext | undefined
+): { user: string; spec?: string } {
+  if (mode === "CHANGE_PHONE") {
+    return { user: PARTNER_VERIFY_COPY.changePhone }
+  }
+  if (mode === "CREATE" || verifyContext === "CREATE_ARCHIVE") {
+    return {
+      user: PARTNER_VERIFY_COPY.verifyCreateUser,
+      spec: PARTNER_VERIFY_COPY.verifyCreateSpec,
+    }
+  }
+  if (mode === "VERIFY_CONTACT") {
+    if (verifyContext === "INBOUND_SUBMIT") {
+      return {
+        user: PARTNER_VERIFY_COPY.inboundSubmitUser,
+        spec: PARTNER_VERIFY_COPY.inboundSubmitSpec,
+      }
+    }
+    if (verifyContext === "DETAIL_VERIFY") {
+      return {
+        user: PARTNER_VERIFY_COPY.verifyDetailUser,
+        spec: PARTNER_VERIFY_COPY.verifyDetailSpec,
+      }
+    }
+    return {
+      user: PARTNER_VERIFY_COPY.verifyCreateUser,
+      spec: PARTNER_VERIFY_COPY.verifyCreateSpec,
+    }
+  }
+  if (verifyContext === "INBOUND_CREATE") {
+    return {
+      user: PARTNER_VERIFY_COPY.inboundCreateUser,
+      spec: PARTNER_VERIFY_COPY.inboundCreateSpec,
+    }
+  }
+  return {
+    user: PARTNER_VERIFY_COPY.inboundCreateLegacyUser,
+    spec: PARTNER_VERIFY_COPY.inboundCreateLegacySpec,
+  }
+}
+
+export const PARTNER_VERIFY_COPY = {
+  changePhone:
+    "检测到合作方业务联系手机号发生变更。系统已向新手机号发送验证码，请完成确认后再保存。",
+  verifyDetailUser:
+    "请向当前预留的业务联系手机完成短信确认。通过后更新为「已验证」，姓名与身份标识将锁定不可随意修改。",
+  verifyDetailSpec: "【联系手机核验后核心身份锁定规则】(PA-R04c)。",
+  verifyCreateUser:
+    "请向当前预留的业务联系手机完成短信确认。通过后建档为「已验证」，姓名与身份标识将锁定。",
+  verifyCreateSpec: "【联系手机核验后核心身份锁定规则】(PA-R04c)。",
+  inboundSubmitUser:
+    "该货主联系手机尚未验证。完成短信确认后将更新为「已验证」，并继续提交本入库单审核。",
+  inboundSubmitSpec: "【联系手机核验状态与金融场景强制核验规则】(PA-R04b)。",
+  inboundCreateUser:
+    "请核对货主实名信息与联系方式，并向预留手机完成短信确认。",
+  inboundCreateSpec: "【新货主二元身份核验与建档沉淀规则】(R03)。",
+  inboundCreateLegacyUser:
+    "新货主须通过预留手机号短信确认，以确保主体信息真实有效。",
+  inboundCreateLegacySpec: "入库准入 R03。",
+} as const
+
+export const PARTNER_QUICK_CREATE_INBOUND_USER =
+  "证件地址选填；保存后联系手机为「未验证」。普通入库可直接引用该货主；质押/仓单等金融类入库提交前须先完成手机验证。"
+
+export const PARTNER_QUICK_CREATE_INBOUND_SPEC =
+  "不走档案 P01；有地址时 P02 分池；金融节点 PA-R04b。"
+
+export const PARTNER_QUICK_CREATE_OUTBOUND_USER =
+  "仅通过本入口建档；输入框失焦不会自动创建档案。角色为提货经办人，不参与货主地址唯一校验。"
+
+export const PARTNER_QUICK_CREATE_OUTBOUND_SPEC =
+  "出库快捷建档场景；不触发 P02。"
+
+export const PARTNER_DETAIL_PENDING_DOCS_USER =
+  "存在待补全角色或资料不完整，请通过【去补全资料】完善证件登记地址；完善前部分作业仍可引用该货主。"
+
+export const PARTNER_DETAIL_PENDING_DOCS_SPEC =
+  "P01 仅档案保存必填；仓储/仓单不因缺址阻断。"
 
 export type PartnerConfirmCopy = {
   title: string

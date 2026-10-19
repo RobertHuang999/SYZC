@@ -21,9 +21,11 @@ import {
   inboundStagingEditQuery,
 } from "../domain/constants"
 import { navigateToFormalInbound } from "../lib/formal-inbound-nav"
+import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
 import {
   STAGING_DETAIL_TABS,
-  STAGING_P01_BANNER,
+  STAGING_P01_BANNER_SPEC,
+  STAGING_P01_BANNER_USER,
 } from "@prototype/shared/inbound/staging-ui-labels"
 
 type StagingDetailTab = "goods" | "audit"
@@ -112,8 +114,9 @@ export function InboundStagingDetailPage() {
       </PrototypeAnnotationTarget>
 
       <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto bg-[#edf2f8] p-3 pb-32 overscroll-contain">
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
-          {STAGING_P01_BANNER}
+        <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
+          <p>{STAGING_P01_BANNER_USER}</p>
+          <PrototypeSpecCallout>{STAGING_P01_BANNER_SPEC}</PrototypeSpecCallout>
         </div>
 
         <section className="rounded-xl border border-[#232D39]/10 bg-white p-3.5 shadow-xs space-y-2.5">

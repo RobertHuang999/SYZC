@@ -1,9 +1,10 @@
 import type { PartnerSubject, RoleType, SubjectType } from "../domain/types"
 import { partnerArchivesMock } from "../mock/partner-archives.mock"
 import {
-  findIndividualOwnerAddressConflict,
+  findOwnerAddressConflict,
   findPartnerByIdNumber,
   maskIdNumber,
+  ownerAddressConflictMessage,
 } from "./partner-archive-rules"
 
 export type JobQuickCreateScene = "INBOUND_OWNER" | "OUTBOUND_PICKUP_AGENT"
@@ -59,14 +60,15 @@ export function quickCreatePartnerFromJob(
     fullAddress: `${input.province}${input.city}${input.district}${input.detailAddress}`.trim(),
   }
 
-  if (input.scene === "INBOUND_OWNER" && input.subjectType === "INDIVIDUAL") {
-    const conflict = findIndividualOwnerAddressConflict(
+  if (input.scene === "INBOUND_OWNER" && certAddress.fullAddress.trim()) {
+    const conflict = findOwnerAddressConflict(
       partnerArchivesMock,
       certAddress.fullAddress,
+      input.subjectType,
       undefined
     )
     if (conflict) {
-      return { ok: false, message: "已有相同证件地址，不能绑定为该个人货主" }
+      return { ok: false, message: ownerAddressConflictMessage(input.subjectType) }
     }
   }
 

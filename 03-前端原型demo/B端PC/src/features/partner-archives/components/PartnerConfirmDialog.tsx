@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -15,6 +16,7 @@ type PartnerConfirmDialogProps = {
   open: boolean
   title: string
   description: string
+  specNote?: string
   confirmLabel: string
   destructive?: boolean
   reasonRequired?: boolean
@@ -30,6 +32,7 @@ export function PartnerConfirmDialog({
   open,
   title,
   description,
+  specNote,
   confirmLabel,
   destructive = false,
   reasonRequired = false,
@@ -63,6 +66,7 @@ export function PartnerConfirmDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
+          {specNote ? <PrototypeSpecCallout>{specNote}</PrototypeSpecCallout> : null}
         </DialogHeader>
         {(reasonRequired || reasonLabel) && (
           <div className="space-y-2">

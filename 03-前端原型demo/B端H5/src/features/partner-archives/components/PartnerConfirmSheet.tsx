@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react"
+import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
 
 type PartnerConfirmSheetProps = {
   open: boolean
   title: string
   description: string
+  specNote?: string
   confirmLabel: string
   destructive?: boolean
   reasonRequired?: boolean
@@ -19,6 +21,7 @@ export function PartnerConfirmSheet({
   open,
   title,
   description,
+  specNote,
   confirmLabel,
   destructive = false,
   reasonRequired = false,
@@ -53,6 +56,11 @@ export function PartnerConfirmSheet({
         <div className="border-b border-gray-100 px-4 py-3">
           <p className="text-base font-semibold text-gray-900">{title}</p>
           <p className="mt-1 text-xs leading-relaxed text-gray-500">{description}</p>
+          {specNote ? (
+            <div className="mt-2">
+              <PrototypeSpecCallout>{specNote}</PrototypeSpecCallout>
+            </div>
+          ) : null}
         </div>
         <div className="max-h-[50vh] overflow-y-auto px-4 py-3">
           <label className="text-xs font-medium text-gray-700">

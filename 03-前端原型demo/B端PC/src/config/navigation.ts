@@ -5,8 +5,19 @@ import {
 } from "@prototype/shared/inbound/inbound-633-delivery"
 
 export const PERMISSION_REFERENCE_PATH = "/系统参考/功能与数据权限"
-export const ITERATION_RECORD_PATH = "/系统参考/菜单迭代记录"
+/** 旧路由保留重定向，避免书签失效 */
+export const ITERATION_RECORD_LEGACY_PATH = "/系统参考/菜单迭代记录"
+export const ITERATION_RECORD_PATH = "/系统参考/迭代记录"
 export const ITERATION_RECORD_LABEL = "迭代记录"
+
+function isIterationRecordPath(currentPath: string) {
+  return (
+    currentPath === ITERATION_RECORD_PATH ||
+    currentPath.startsWith(`${ITERATION_RECORD_PATH}/`) ||
+    currentPath === ITERATION_RECORD_LEGACY_PATH ||
+    currentPath.startsWith(`${ITERATION_RECORD_LEGACY_PATH}/`)
+  )
+}
 
 export const IOT_WARNING_MODULE_PREFIX = "/物联网IOT与预警"
 
@@ -128,17 +139,13 @@ export function isSystemReferencePath(pathname: string) {
   return (
     currentPath === PERMISSION_REFERENCE_PATH ||
     currentPath.startsWith(`${PERMISSION_REFERENCE_PATH}/`) ||
-    currentPath === ITERATION_RECORD_PATH ||
-    currentPath.startsWith(`${ITERATION_RECORD_PATH}/`)
+    isIterationRecordPath(currentPath)
   )
 }
 
 export function getSystemReferenceTab(pathname: string): "permission" | "iteration" | null {
   const currentPath = decodePath(pathname)
-  if (
-    currentPath === ITERATION_RECORD_PATH ||
-    currentPath.startsWith(`${ITERATION_RECORD_PATH}/`)
-  ) {
+  if (isIterationRecordPath(currentPath)) {
     return "iteration"
   }
   if (

@@ -31,8 +31,8 @@ SECONDARY_FOLDER = {
 
 # moduleId → B端PC relative path (business rule 唯一定义来源, cross-reference only)
 PC_RULE_SOURCE: dict[str, str | None] = {
-    "home-digital-warehouse-monitor": "B端PC/02-仓储/16-设备管理-监控设备",
-    "home-digital-warehouse-temp": "B端PC/02-仓储/18-设备管理-物联设备",
+    "home-digital-warehouse-monitor": "B端PC/06-物联网IOT与预警/01-物联网IOT管理/01监控设备",
+    "home-digital-warehouse-temp": "B端PC/06-物联网IOT与预警/01-物联网IOT管理/03物联设备",
     "ws-inventory-mgr": "B端PC/02-仓储/01-库存查询-存货管理",
     "ws-receipt-mgr": "B端PC/02-仓储/05-仓单管理",
     "ws-cargo-rights": "B端PC/02-仓储/06-货权管理-货权档案",
@@ -43,11 +43,11 @@ PC_RULE_SOURCE: dict[str, str | None] = {
     "ws-transfer-owner-mgr": "B端PC/02-仓储/12-货物转让-转让记录",
     "ws-delivery-order": "B端PC/02-仓储/14-提货单",
     "ws-stock-taking": "B端PC/02-仓储/15-货物盘点",
-    "ws-device-monitoring": "B端PC/02-仓储/16-设备管理-监控设备",
-    "ws-device-iot": "B端PC/02-仓储/18-设备管理-物联设备",
-    "ws-device-access": "B端PC/02-仓储/17-设备管理-门禁设备",
-    "ws-device-gps": "B端PC/02-仓储/19-设备管理-GPS设备",
-    "ws-device-access-logs": "B端PC/02-仓储/20-设备管理-门禁事务记录",
+    "ws-device-monitoring": "B端PC/06-物联网IOT与预警/01-物联网IOT管理/01监控设备",
+    "ws-device-iot": "B端PC/06-物联网IOT与预警/01-物联网IOT管理/03物联设备",
+    "ws-device-access": "B端PC/06-物联网IOT与预警/01-物联网IOT管理/02门禁设备",
+    "ws-device-gps": "B端PC/06-物联网IOT与预警/01-物联网IOT管理/04GPS设备",
+    "ws-device-access-logs": "B端PC/06-物联网IOT与预警/02-预警信息/01设备预警信息",
     "ws-cargo-movement": "B端PC/02-仓储/13-货物异动-异动记录",
     "ws-tally-stacking": "B端PC/02-仓储/02-库存查询-理货堆放",
     "ws-stock-detail": "B端PC/02-仓储/03-库存查询-库存明细",
@@ -60,16 +60,16 @@ PC_RULE_SOURCE: dict[str, str | None] = {
     "ws-supervision-archive": "B端PC/03-融资监管/11-监管业务-供应链监管业务",
     "ws-trade-procure": "B端PC/04-交易/01-采购需求管理",
     "ws-trade-sales": "B端PC/04-交易/02-销售需求管理",
-    "ws-policy-news": "B端PC/08-配置管理/02-门户管理-政策资讯",
-    "ws-risk-device-warning": "B端PC/05-风控/05-风险信息-设备预警信息",
-    "ws-risk-order-warning": "B端PC/05-风控/06-风险信息-押品预警信息",
-    "ws-risk-device-events": "B端PC/05-风控/07-风险信息-设备事务通知信息",
-    "ws-risk-in-loan": "B端PC/05-风控/08-风险信息-贷中风控管理",
+    "ws-policy-news": "B端PC/09-配置管理/02-门户管理-政策资讯",
+    "ws-risk-device-warning": "B端PC/06-物联网IOT与预警/02-预警信息/01设备预警信息",
+    "ws-risk-order-warning": "B端PC/06-物联网IOT与预警/02-预警信息/02押品预警信息",
+    "ws-risk-device-events": "B端PC/06-物联网IOT与预警/02-预警信息/01设备预警信息",
+    "ws-risk-in-loan": "B端PC/06-物联网IOT与预警/02-预警信息/03贷中风控管理",
     "ws-settle-mgr": "B端PC/07-结算/01-监管结算-项目结算管理",
-    "ws-conf-warehouse": "B端PC/08-配置管理/10-仓库管理-仓库管理",
-    "ws-conf-industrial-site-mgr": "B端PC/08-配置管理/11-仓库管理-产地区域管理",
+    "ws-conf-warehouse": "B端PC/09-配置管理/10-仓库管理-仓库管理",
+    "ws-conf-industrial-site-mgr": "B端PC/09-配置管理/11-仓库管理-产地区域管理",
     "biz-approve-customer-finance-leads": "B端PC/03-融资监管/01-融资管理-客户融资需求线索",
-    "biz-approve-policy-news": "B端PC/08-配置管理/02-门户管理-政策资讯",
+    "biz-approve-policy-news": "B端PC/09-配置管理/02-门户管理-政策资讯",
 }
 
 ITER_RULE_SOURCE: dict[str, str] = {
@@ -277,7 +277,7 @@ def main():
         "05-风控",
         "06-统计",
         "07-结算",
-        "08-配置管理",
+        "09-配置管理",
         "样式规范- PC端",
     ]:
         p = H5_BASE / name

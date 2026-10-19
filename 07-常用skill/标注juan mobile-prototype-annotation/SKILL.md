@@ -1,6 +1,6 @@
 ---
 name: mobile-prototype-annotation
-description: Build, refine, or validate an interactive mobile or H5 prototype annotation workspace from product requirements, page lists, business rules, API contracts, and reference screenshots. Features left page directory, center phone preview, outer canvas requirement inspector (zero screen obstruction), and right PRD/field/rule drawer with linked highlighting, mock data, responsive phone sizing, and local browser verification.
+description: Build, refine, or validate an interactive mobile or H5 prototype annotation workspace from product requirements, page lists, business rules, API contracts, and reference screenshots. Features left page directory, center phone preview, outer canvas requirement inspector (zero screen obstruction), and right PRD/field/rule drawer with linked highlighting, mock data, responsive phone sizing, and local browser verification. SYZC H5 must NOT fork annotations—use shared *.annotations.shared.ts + *-h5.annotation-bindings.ts (PC annotation Skill 2.3). Form hints: ProductFieldHint + PrototypeSpecCallout (Skill 3.3).
 ---
 
 # 📱 Mobile Prototype Annotation & Canvas Inspector (移动端原型打点与画布检查器规范)
@@ -102,6 +102,28 @@ export const deviceWarningDocuments: PrototypeDocument[] = [
 ]
 ```
 
+### 3.3 PC / H5 一套标注（H5 侧执行要点）
+
+> **完整规范**：[标注juan-prototype-annotation/SKILL.md](../标注juan-prototype-annotation/SKILL.md) **2.3** · [原型双端标注对齐说明.md](../../03-前端原型demo/原型双端标注对齐说明.md) · [AGENTS.md](../../AGENTS.md) **4.2.1**。
+
+| 做什么 | H5 怎么做 |
+| :--- | :--- |
+| 小红点 / #N / title / details / Mermaid | **只读** `shared/{模块}/annotations/*.annotations.shared.ts`，**禁止**在 H5 注解文件里改 |
+| 三件套 📋📄📐 | 与 PC **同** `documents/*-documents.ts` 路径（`?raw` 同三件套） |
+| 靶点位置 | `*-h5.annotation-bindings.ts` 里配 `targetId`，页面 `PrototypeAnnotationTarget` 的 `annotationIds` 与 PC **同 id** |
+| 端差异 | 仅 `contentSuffix`，且以 **`【H5 端差异】`** 开头；由 `applyH5PrototypeAnnotationBindings()` 拼到 `content` 末尾 |
+| 画布检查器 #N | 与 PC 侧边抽屉 **同 number 同 id**，便于双端评审对照 |
+
+**H5 禁止**：单独维护 `*-h5-only.annotations.ts` 业务正文；禁止 H5 抽屉挂另一套 rules/prd Markdown。
+
+### 3.4 页面内辅助文案分层（H5 · 与 PC 一致）
+
+> **条文真源**：[AGENTS.md](../../AGENTS.md) **4.1.3**；PC 细则见 [标注juan-prototype-annotation/SKILL.md](../标注juan-prototype-annotation/SKILL.md) **3.3**。
+
+- **组件 import**：`@prototype/B端PC/src/components/form/ProductFieldHint`、`PrototypeSpecCallout`（H5 与 PC 共用实现）。
+- **文案真源**：与 PC 共用 `*-ui-labels.ts`（`shared/` 或 `B端PC/.../lib/`），`*_USER_*` / `*_SPEC_*` 命名一致。
+- **与打点的边界**：页面灰字/琥珀框是**上线说明**；规则全文仍在 **shared 标注 + 三件套**，不在 H5 重复写第二套。
+
 ---
 
 ## 🚀 4. 组件接入使用规范
@@ -164,4 +186,6 @@ export function DeviceWarningListPage() {
    * 点击检查器底部的 `[手机聚焦]`：手机视口自动平滑滚动并将靶点居中；
 3. ✅ **上一条/下一条切换**：点击 `◀ 上一条` / `下一条 ▶` 可在画布上连续流转切换所有需求点；
 4. ✅ **机型尺寸自适应**：切换 375px、390px、414px 时，手机内容与外侧画布检查器保持协调无水平溢出；
-5. ✅ **编译与静态检查**：必须通过 `npm run lint` 和 `npm run build`，控制台 0 报错。
+5. ✅ **双端一套标注**：H5 标注数组来自 `applyH5PrototypeAnnotationBindings(shared, bindings)`；#N 与 PC 同 id；三件套与 PC 同路径（**2.3 / 3.3**）。
+6. ✅ **文案分层**：表单说明 USER + SPEC 分离（**3.4**）。
+7. ✅ **编译与静态检查**：必须通过 `npm run lint` 和 `npm run build`，控制台 0 报错。

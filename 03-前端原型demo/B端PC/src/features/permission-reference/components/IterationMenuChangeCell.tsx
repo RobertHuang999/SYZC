@@ -1,4 +1,8 @@
+import { Link } from "react-router-dom"
+import { ITERATION_RECORD_LABEL, ITERATION_RECORD_PATH } from "@/config/navigation"
 import type { IterationRecordEntry } from "../data/menu-iteration-records"
+import { IterationPathChangeCell } from "./IterationPathChangeCell"
+import { IterationPriorityBadge } from "./IterationPriorityBadge"
 import {
   iterationDefaultTypeStyle,
   iterationPlatformStyles,
@@ -12,8 +16,8 @@ export function IterationMenuChangeCell({ entries }: { entries: IterationRecordE
   }
 
   return (
-    <div className="min-w-[160px] max-w-[240px] space-y-2">
-      {entries.slice(0, 3).map((entry) => (
+    <div className="min-w-[200px] max-w-[320px] space-y-2">
+      {entries.slice(0, 2).map((entry) => (
         <div
           key={`${entry.version}-${entry.id}`}
           className="rounded-md border border-border/60 bg-muted/10 px-2 py-1.5"
@@ -36,17 +40,26 @@ export function IterationMenuChangeCell({ entries }: { entries: IterationRecordE
             >
               {entry.type}
             </span>
+            <IterationPriorityBadge priority={entry.priority} />
           </div>
           <p className="mt-1 text-[11px] font-medium leading-snug text-foreground">{entry.title}</p>
+          {(entry.before || entry.after) && (
+            <div className="mt-1">
+              <IterationPathChangeCell before={entry.before} after={entry.after} compact />
+            </div>
+          )}
           {entry.note && (
-            <p className="mt-0.5 text-[10px] leading-snug text-muted-foreground line-clamp-2">
-              {entry.note}
-            </p>
+            <p className="mt-1 text-[10px] leading-snug text-muted-foreground">{entry.note}</p>
           )}
         </div>
       ))}
-      {entries.length > 3 && (
-        <p className="text-[10px] text-muted-foreground">另有 {entries.length - 3} 条，见「菜单迭代记录」</p>
+      {entries.length > 2 && (
+        <p className="text-[10px] text-muted-foreground">
+          另有 {entries.length - 2} 条，见
+          <Link to={ITERATION_RECORD_PATH} className="ml-0.5 font-medium text-primary hover:underline">
+            {ITERATION_RECORD_LABEL}
+          </Link>
+        </p>
       )}
     </div>
   )
@@ -55,7 +68,7 @@ export function IterationMenuChangeCell({ entries }: { entries: IterationRecordE
 export function IterationMenuChangeLegend({ className }: { className?: string }) {
   return (
     <p className={cn("text-[10px] font-normal text-muted-foreground", className)}>
-      自动关联 B-迭代需求/各版本/00-菜单迭代记录.md
+      按页面路径自动关联各版本迭代记录（含路径对比与 P0/P1）
     </p>
   )
 }

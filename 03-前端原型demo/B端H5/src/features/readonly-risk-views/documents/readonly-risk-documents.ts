@@ -1,10 +1,10 @@
 import type { PrototypeDocument } from "@/shared/annotations/annotation.types"
-import midLoanPrd from "@docs/B-迭代需求/6.2版本（2026.08）/02-预警信息/03贷中风控管理/贷中风控管理主PRD.md?raw"
-import midLoanFields from "@docs/B-迭代需求/6.2版本（2026.08）/02-预警信息/03贷中风控管理/贷中风控管理字段清单.md?raw"
-import midLoanRules from "@docs/B-迭代需求/6.2版本（2026.08）/02-预警信息/03贷中风控管理/贷中风控管理业务规则规格.md?raw"
-import disclosurePrd from "@docs/B-迭代需求/6.2版本（2026.08）/02-预警信息/04风险公示/风险公示主PRD.md?raw"
-import disclosureFields from "@docs/B-迭代需求/6.2版本（2026.08）/02-预警信息/04风险公示/风险公示字段清单.md?raw"
-import disclosureRules from "@docs/B-迭代需求/6.2版本（2026.08）/02-预警信息/04风险公示/风险公示业务规则规格.md?raw"
+import midLoanPrd from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/02-预警信息/03贷中风控管理/贷中风控管理主PRD.md?raw"
+import midLoanFields from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/02-预警信息/03贷中风控管理/贷中风控管理字段清单.md?raw"
+import midLoanRules from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/02-预警信息/03贷中风控管理/贷中风控管理业务规则规格.md?raw"
+import disclosurePrd from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/02-预警信息/04风险公示/风险公示主PRD.md?raw"
+import disclosureFields from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/02-预警信息/04风险公示/风险公示字段清单.md?raw"
+import disclosureRules from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/02-预警信息/04风险公示/风险公示业务规则规格.md?raw"
 
 function createDocuments(
   prefix: string,

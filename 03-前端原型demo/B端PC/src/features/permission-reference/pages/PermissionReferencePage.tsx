@@ -34,10 +34,10 @@ const permissionModuleOrder = [
   "3.融资/监管",
   "4.交易",
   "5.风控",
-  "9.物联网IOT与预警",
-  "6.统计/看板",
-  "7.结算",
-  "8.配置管理",
+  "6.物联网IOT与预警",
+  "7.统计/看板",
+  "8.结算",
+  "9.配置管理",
 ]
 
 const permissionModuleOrderMap = new Map(permissionModuleOrder.map((moduleName, index) => [moduleName, index]))
@@ -262,7 +262,7 @@ export function PermissionReferencePage() {
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="搜索页面路径、功能按钮、可见范围、变更、菜单迭代..."
+              placeholder="搜索页面路径、功能按钮、可见范围、变更、迭代关联..."
               className="h-7 w-full rounded-md border bg-background pl-7 pr-2 text-[11px] outline-none ring-primary/30 transition focus:ring-1"
             />
           </div>
@@ -310,7 +310,7 @@ export function PermissionReferencePage() {
           <CancelledFeaturesButton records={cancelledRecords} />
 
           <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">
-            {filteredRecords.length} / {listTotal} 条
+            {filteredRecords.length} / {listTotal} 条 · 基准清单 CSV + 6.3 增量 JSON
           </span>
         </div>
 
@@ -424,7 +424,7 @@ export function PermissionReferencePage() {
                 </th>
                 <th className="p-2.5">
                   <div className="space-y-1">
-                    <span>菜单迭代</span>
+                    <span>迭代关联</span>
                     <IterationMenuChangeLegend />
                   </div>
                 </th>

@@ -6,7 +6,9 @@ import {
   type RoleType,
   type SubjectType,
 } from "@prototype/B端PC/src/features/partner-archives/domain/types"
+import { partnerVerifyDialogCopy } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
 import { maskLoginPhone } from "@prototype/B端PC/src/features/partner-archives/lib/detail-utils"
+import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
 
 const DEFAULT_MOCK_CODE = "888888"
 
@@ -77,14 +79,7 @@ export function PartnerVerifySheet({
           ? "验证联系手机"
           : "合作方身份信息确认"
 
-  const description =
-    mode === "CHANGE_PHONE"
-      ? "检测到合作方业务联系手机号发生变更。依风控与安全要求，系统已向新手机号发送验证码，请完成二元身份核验以确认变更。"
-      : mode === "VERIFY_CONTACT"
-        ? verifyContext === "DETAIL_VERIFY"
-          ? "请向当前预留的业务联系手机完成短信确认。通过后主档将更新为「已验证」，并按【联系手机核验后核心身份锁定规则】(PA-R04c) 锁定核心身份信息。"
-          : "请向当前预留的业务联系手机完成短信确认。通过后建档为「已验证」，姓名与身份标识将按规则锁定（PA-R04c）。"
-        : "请向当前预留的业务联系手机完成短信确认（场景 3），通过后完成建档或验证。"
+  const dialogCopy = partnerVerifyDialogCopy(mode, verifyContext)
 
   const confirmLabel =
     mode === "CHANGE_PHONE"
@@ -120,7 +115,12 @@ export function PartnerVerifySheet({
             <ShieldCheck className="size-5 text-blue-600" />
             <p className="text-base font-semibold text-gray-900">{title}</p>
           </div>
-          <p className="mt-1 text-xs leading-relaxed text-gray-500">{description}</p>
+          <p className="mt-1 text-xs leading-relaxed text-gray-500">{dialogCopy.user}</p>
+          {dialogCopy.spec ? (
+            <div className="mt-2">
+              <PrototypeSpecCallout>{dialogCopy.spec}</PrototypeSpecCallout>
+            </div>
+          ) : null}
         </div>
 
         <div className="space-y-3 px-4 py-3 text-xs">

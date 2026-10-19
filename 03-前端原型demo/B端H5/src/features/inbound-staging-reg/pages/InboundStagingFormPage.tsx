@@ -33,7 +33,13 @@ import {
   INBOUND_STAGING_LIST_ROUTE,
   inboundStagingDetailPath,
 } from "../domain/constants"
-import { STAGING_P01_BANNER } from "@prototype/shared/inbound/staging-ui-labels"
+import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
+import {
+  STAGING_H5_TEMP_OWNER_SPEC,
+  STAGING_H5_TEMP_OWNER_USER,
+  STAGING_P01_BANNER_SPEC,
+  STAGING_P01_BANNER_USER,
+} from "@prototype/shared/inbound/staging-ui-labels"
 
 export function InboundStagingFormPage() {
   const navigate = useNavigate()
@@ -131,8 +137,9 @@ export function InboundStagingFormPage() {
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-8">
           <NativeInboundStepBar current={0} />
 
-          <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-            {STAGING_P01_BANNER}
+          <div className="mb-3 space-y-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+            <p>{STAGING_P01_BANNER_USER}</p>
+            <PrototypeSpecCallout>{STAGING_P01_BANNER_SPEC}</PrototypeSpecCallout>
           </div>
 
           <NativeInfoCard title="现场说明" icon={<Building2 className="size-5" />}>
@@ -145,9 +152,12 @@ export function InboundStagingFormPage() {
                 onChange={(e) => patch({ ownerName: e.target.value })}
               />
             </NativeFormRow>
-            <p className="px-1 pb-2 text-[11px] leading-relaxed text-[#232D39]/50">
-              暂存可手填司机/车牌；转正须选档案货主（P03 · 临时待核）
+            <p className="px-1 pb-1 text-[11px] leading-relaxed text-[#232D39]/55">
+              {STAGING_H5_TEMP_OWNER_USER}
             </p>
+            <div className="px-1 pb-2">
+              <PrototypeSpecCallout>{STAGING_H5_TEMP_OWNER_SPEC}</PrototypeSpecCallout>
+            </div>
             <div className="relative mt-1 rounded-lg bg-[#232D39]/5 p-3">
               <textarea
                 className="min-h-[60px] w-full resize-none bg-transparent text-sm text-[#232D39] outline-none placeholder:text-[#232D39]/30"

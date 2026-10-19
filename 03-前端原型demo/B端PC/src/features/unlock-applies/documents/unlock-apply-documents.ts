@@ -1,14 +1,15 @@
 import type { PrototypeDocument } from "@/shared/annotations/PrototypeAnnotationLayer"
 import mockDataMarkdown from "@prototype/MOCK_DATA-开锁审批-V1.3.md?raw"
-import myApplyShellPrd from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/02-完整页/我的申请管理主PRD.md?raw"
-import myApplyShellDemo from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/02-完整页/我的申请管理_Demo_PC.md?raw"
-import prdMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请主PRD.md?raw"
-import fieldsMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请字段清单.md?raw"
-import rulesMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请业务规则规格.md?raw"
-import demoListMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请_Demo_列表页_PC.md?raw"
-import demoDetailMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请_Demo_详情页_PC.md?raw"
-import demoCredentialMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/02-操作字段清单/02查看与下发凭证字段清单.md?raw"
-import demoSubmitMarkdown from "@docs/B-迭代需求/6.2版本（2026.08）/07-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请_Demo_发起申请页.md?raw"
+import myApplyShellPrd from "@docs/🌟🌟🌟-最新基准版/B端PC/01-工作中心/01-审批中心/03-业务审批/04-我的申请管理/我的申请管理主PRD.md?raw"
+// 壳层 Demo：原型内副本（与基准 `…/04-我的申请管理/我的申请管理_Demo_PC.md` 同步；避免基准衍生未入库时 dev 无法启动）
+import myApplyShellDemo from "@prototype/shared/unlock-applies/我的申请管理_Demo_PC.md?raw"
+import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/01-工作中心/01-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请主PRD.md?raw"
+import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/01-工作中心/01-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请字段清单.md?raw"
+import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/01-工作中心/01-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请业务规则规格.md?raw"
+import demoListMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/01-工作中心/01-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请_Demo_列表页_PC.md?raw"
+import demoDetailMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/01-工作中心/01-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请_Demo_详情页_PC.md?raw"
+import demoCredentialMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/01-工作中心/01-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/02-操作字段清单/02查看与下发凭证字段清单.md?raw"
+import demoSubmitMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/01-工作中心/01-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请_Demo_发起申请页.md?raw"
 
 export const unlockApplyDocuments: PrototypeDocument[] = [
   {

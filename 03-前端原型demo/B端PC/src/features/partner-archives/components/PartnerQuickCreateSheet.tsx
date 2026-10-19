@@ -8,6 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { ProductFieldHint } from "@/components/form/ProductFieldHint"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -23,6 +25,15 @@ import {
   type JobQuickCreateScene,
   quickCreatePartnerFromJob,
 } from "../lib/quick-create-partner"
+import {
+  PARTNER_QUICK_CREATE_CERT_ADDRESS_LABEL,
+  PARTNER_QUICK_CREATE_CERT_ADDRESS_SPEC_NOTE,
+  PARTNER_QUICK_CREATE_CERT_ADDRESS_USER_HINT,
+  PARTNER_QUICK_CREATE_INBOUND_SPEC,
+  PARTNER_QUICK_CREATE_INBOUND_USER,
+  PARTNER_QUICK_CREATE_OUTBOUND_SPEC,
+  PARTNER_QUICK_CREATE_OUTBOUND_USER,
+} from "../lib/partner-archive-ui-labels"
 
 type PartnerQuickCreateSheetProps = {
   open: boolean
@@ -34,16 +45,18 @@ type PartnerQuickCreateSheetProps = {
 
 const SCENE_COPY: Record<
   JobQuickCreateScene,
-  { title: string; hint: string; roleReadonly: string }
+  { title: string; hintUser: string; hintSpec: string; roleReadonly: string }
 > = {
   INBOUND_OWNER: {
     title: "快速添加货主",
-    hint: "保存并提交后联系手机为「未验证」；普通入库可直接引用；金融类入库提交前须验证（PA-R04b）。",
+    hintUser: PARTNER_QUICK_CREATE_INBOUND_USER,
+    hintSpec: PARTNER_QUICK_CREATE_INBOUND_SPEC,
     roleReadonly: "货主",
   },
   OUTBOUND_PICKUP_AGENT: {
     title: "快速添加提货经办人",
-    hint: "仅通过本入口建档；失焦手输不会自动沉淀档案。角色为提货经办人，不触发个人货主地址唯一校验。",
+    hintUser: PARTNER_QUICK_CREATE_OUTBOUND_USER,
+    hintSpec: PARTNER_QUICK_CREATE_OUTBOUND_SPEC,
     roleReadonly: "提货经办人",
   },
 }
@@ -95,9 +108,6 @@ export function PartnerQuickCreateSheet({
     } else if (idNumber.trim().length < 18) {
       return "请填写 18 位统一社会信用代码"
     }
-    if (scene === "INBOUND_OWNER" && !detailAddress.trim()) {
-      return "个人货主须填写证件地址"
-    }
     return null
   }
 
@@ -143,7 +153,8 @@ export function PartnerQuickCreateSheet({
         <DialogContent className="max-h-[90vh] max-w-[640px] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{copy.title}</DialogTitle>
-            <DialogDescription className="text-xs leading-relaxed">{copy.hint}</DialogDescription>
+            <DialogDescription>{copy.hintUser}</DialogDescription>
+            <PrototypeSpecCallout>{copy.hintSpec}</PrototypeSpecCallout>
           </DialogHeader>
 
           <div className="grid gap-3 sm:grid-cols-2 text-xs">
@@ -238,23 +249,23 @@ export function PartnerQuickCreateSheet({
                   <Input value={district} onChange={(e) => { setDistrict(e.target.value); markDirty() }} />
                 </div>
                 <div className="space-y-1.5 sm:col-span-2">
-                  <Label>
-                    <span className="text-destructive">* </span>
-                    证件地址
-                  </Label>
+                  <Label>{PARTNER_QUICK_CREATE_CERT_ADDRESS_LABEL}</Label>
                   <Input
                     value={detailAddress}
                     onChange={(e) => {
                       setDetailAddress(e.target.value)
                       markDirty()
                     }}
+                    placeholder="街道、门牌号等（选填）"
                   />
+                  <ProductFieldHint>{PARTNER_QUICK_CREATE_CERT_ADDRESS_USER_HINT}</ProductFieldHint>
+                  <PrototypeSpecCallout>{PARTNER_QUICK_CREATE_CERT_ADDRESS_SPEC_NOTE}</PrototypeSpecCallout>
                 </div>
               </>
             ) : null}
-            <p className="sm:col-span-2 text-[11px] text-muted-foreground">
-              创建来源：{scene === "INBOUND_OWNER" ? "入库快捷建档" : "出库快捷建档"} · 创建人：当前用户
-            </p>
+            <PrototypeSpecCallout className="sm:col-span-2">
+              创建来源：{scene === "INBOUND_OWNER" ? "入库快捷建档" : "出库快捷建档"} · 创建人：当前用户（审计字段，非用户提示）
+            </PrototypeSpecCallout>
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0">

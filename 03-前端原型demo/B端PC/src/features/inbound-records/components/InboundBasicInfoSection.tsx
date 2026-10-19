@@ -36,7 +36,16 @@ import {
   FORM_WAREHOUSES,
   resolveOwnerSearchRecord,
 } from "../mock/inbound-form.mock"
-import { STAGING_P01_FORM_HINT } from "@prototype/shared/inbound/staging-ui-labels"
+import { ProductFieldHint } from "@/components/form/ProductFieldHint"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
+import {
+  INBOUND_FINANCIAL_OWNER_SMS_SPEC,
+  INBOUND_FINANCIAL_OWNER_SMS_USER,
+} from "@prototype/shared/inbound/owner-ui-labels"
+import {
+  STAGING_P01_FORM_HINT_SPEC,
+  STAGING_P01_FORM_HINT_USER,
+} from "@prototype/shared/inbound/staging-ui-labels"
 import {
   CONTACT_PHONE_VERIFY_BADGE_CLASS,
   CONTACT_PHONE_VERIFY_LABELS,
@@ -184,10 +193,12 @@ export function InboundBasicInfoSection({
       {expanded ? (
         <CardContent className="space-y-4 pt-5 pb-6">
           {isStaging ? (
-            <p className="rounded-md border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs text-amber-900">
-              {STAGING_P01_FORM_HINT}
-              主表入库库房选填，暂存阶段可混选需审核与免审库房；转正提交时再执行 R06。
-            </p>
+            <div className="space-y-2 rounded-md border border-amber-200/80 bg-amber-50/90 px-3 py-2">
+              <ProductFieldHint className="text-amber-950">
+                {STAGING_P01_FORM_HINT_USER}
+              </ProductFieldHint>
+              <PrototypeSpecCallout>{STAGING_P01_FORM_HINT_SPEC}</PrototypeSpecCallout>
+            </div>
           ) : null}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {isStaging ? (
@@ -466,8 +477,11 @@ export function InboundBasicInfoSection({
                     ) : null}
                     {matchedArchive.contactPhoneVerified === "UNVERIFIED" &&
                     isFinancialInboundType(form.inboundType) ? (
-                      <span className="text-amber-700">
-                        提交审核时将需完成手机短信确认（PA-R04b）
+                      <span className="block space-y-1 text-xs">
+                        <span className="text-amber-800">{INBOUND_FINANCIAL_OWNER_SMS_USER}</span>
+                        <PrototypeSpecCallout className="mt-1">
+                          {INBOUND_FINANCIAL_OWNER_SMS_SPEC}
+                        </PrototypeSpecCallout>
                       </span>
                     ) : null}
                   </div>

@@ -1,6 +1,6 @@
 ---
 name: prototype-annotation
-description: Add or improve reusable, interactive annotations and multi-dimensional requirement specification boards (Annotations, Fields, PRD, Business Rules) for desktop prototypes, especially React/TypeScript/Vite ERP and financial risk management systems. Use when annotating prototypes with numbered target badges, draggable in-place tooltip cards, an edge floating dock, or direct in-page PRD/field/rule document viewing.
+description: Add or improve reusable, interactive annotations and multi-dimensional requirement specification boards (Annotations, Fields, PRD, Business Rules) for desktop prototypes, especially React/TypeScript/Vite ERP and financial risk management systems. Use when annotating prototypes with numbered target badges, draggable in-place tooltip cards, an edge floating dock, or direct in-page PRD/field/rule document viewing. SYZC dual-end (PC+H5) must share one annotation set and one three-piece document mount (Skill 2.3). Form helper text uses ProductFieldHint + PrototypeSpecCallout (AGENTS 4.1.3 · Skill 3.3).
 ---
 
 # 🎯 Prototype Annotation & Specification Layer (原型打点与规格看板规范)
@@ -89,6 +89,74 @@ export const deviceWarningConfigDocuments: PrototypeDocument[] = [
 ]
 ```
 
+### 2.3 PC / H5 一套标注（共享小红点编号 + 三件套 · SYZC 强制）
+
+> **条文真源**：[AGENTS.md](../../AGENTS.md) **4.2.1**；操作细则 [03-前端原型demo/原型双端标注对齐说明.md](../../03-前端原型demo/原型双端标注对齐说明.md)。  
+> **原则**：同一菜单 **PC 与 H5 共用一套** `PrototypeAnnotation` 正文 + **同一份** 三件套 Markdown 挂载；评审时 **① 号点在双端指同一业务块**，右侧 📋📄📐 抽屉内容一致。
+
+**禁止**
+
+- 在 `B端H5/.../annotations/` 里**另写**与 PC 不同的 `title`、`details`、Mermaid、规则结论或重新编号。
+- H5 挂「精简版」PRD/规则；双端 `documents` 必须 `?raw` 导入**同路径**三件套。
+
+**目录约定（标杆：合作方档案）**
+
+```
+03-前端原型demo/
+├── shared/{模块}/annotations/
+│   └── *.annotations.shared.ts          ← 业务正文唯一真源（id / number / title / content / details）
+├── shared/annotations/
+│   └── prototype-annotation.shared-types.ts   ← applyH5PrototypeAnnotationBindings()
+├── B端PC/src/features/{模块}/annotations/
+│   └── *.annotations.ts                 ← 仅 re-export shared（可 as PrototypeAnnotation[]）
+├── B端PC/src/features/{模块}/documents/
+│   └── *-documents.ts                   ← prd / fields / rules 三件套 ?raw
+└── B端H5/src/features/{模块}/annotations/
+    ├── *-h5.annotation-bindings.ts      ← 仅 targetId + contentSuffix
+    └── *-h5.annotations.ts              ← applyBindings(shared) 后导出
+```
+
+**H5 仅允许的两类补丁**
+
+| 补丁 | 位置 | 格式 |
+| :--- | :--- | :--- |
+| **挂载点** | `*-h5.annotation-bindings.ts` 的 `targetId` | 与页面 `PrototypeAnnotationTarget` / `annotationIds` 一致 |
+| **端差异一句** | 同文件 `contentSuffix` | **必须**以 `【H5 端差异】` 开头，只写入口/控件/Sheet/底栏与 PC 不同之处 |
+
+**落地顺序（双端菜单）**
+
+1. 三件套定稿 → 2. 写 `shared/.../*.annotations.shared.ts` → 3. PC `*.annotations.ts` re-export + 页面 `PrototypeAnnotationTarget` + `documents` → 4. H5 bindings + 同 id 靶点（或等价区块）→ 5. 跑 **2.3 自检**。
+
+**2.3 自检（与对齐说明第 4 节一致）**
+
+- [ ] PC / H5 **id 集合一致**（shared 里定义的 id 双端都有；H5 未挂载的 id 须补 DOM 或合并靶点并注释）。
+- [ ] **number 连续且同 id 同序号**（侧边检查器 #N 双端对齐）。
+- [ ] H5 端差仅 `contentSuffix`，且每条以 `【H5 端差异】` 开头。
+- [ ] 双端 `PrototypeDocument` 三件套路径相同；`PrototypeAnnotationProvider` 的 `documents` 不分叉。
+
+**PC 侧 re-export 示例**
+
+```ts
+import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotationLayer"
+import { partnerArchiveFormAnnotationsShared } from "@prototype/shared/partner-archives/annotations/partner-archive-form.annotations.shared"
+
+export const partnerArchiveFormAnnotations =
+  partnerArchiveFormAnnotationsShared as PrototypeAnnotation[]
+```
+
+**H5 侧 bindings + 生成示例**
+
+```ts
+import { applyH5PrototypeAnnotationBindings } from "@prototype/shared/annotations/prototype-annotation.shared-types"
+import { partnerArchiveFormAnnotationsShared } from "@prototype/shared/partner-archives/annotations/partner-archive-form.annotations.shared"
+import { partnerArchiveH5FormAnnotationBindings } from "./partner-archive-h5.annotation-bindings"
+
+export const partnerArchiveFormAnnotations = applyH5PrototypeAnnotationBindings(
+  partnerArchiveFormAnnotationsShared,
+  partnerArchiveH5FormAnnotationBindings
+)
+```
+
 ---
 
 ## 🚀 3. 页面接入与使用规范
@@ -134,6 +202,31 @@ export function DeviceWarningConfigFormPage() {
 </PrototypeAnnotationTarget>
 ```
 
+### 3.3 页面内辅助文案分层（与打点并列 · SYZC 默认执行）
+
+> **条文真源**：仓库根目录 [AGENTS.md](../../AGENTS.md) **4.1.3**；布局速查 [03-前端原型demo/原型页面布局速查.md](../../03-前端原型demo/原型页面布局速查.md) 第 3、5 节。  
+> **与打点的关系**：**打点/抽屉**承载完整 PRD、字段表、规则规格；**页面 DOM** 只放用户能看懂的短说明 + 可选规格对照框，禁止把规则编号写进同一段灰字。
+
+**组件**
+
+| 层 | 组件 | 路径 |
+| :--- | :--- | :--- |
+| 上线用户文案 | `ProductFieldHint` | `03-前端原型demo/B端PC/src/components/form/ProductFieldHint.tsx` |
+| 规格对照（非上线） | `PrototypeSpecCallout` | `03-前端原型demo/B端PC/src/components/form/PrototypeSpecCallout.tsx` |
+
+**文案真源**：feature 内 `{模块}-ui-labels.ts` 或 `03-前端原型demo/shared/{模块}/*-ui-labels.ts`
+
+- `*_USER_*` → 仅 `ProductFieldHint` / `DialogDescription` / 字段 Label 旁说明（说人话、无 P/R 编号）
+- `*_SPEC_*` → 仅 `PrototypeSpecCallout`（可写【规则名称】(编号)）
+
+**接入打点（推荐）**
+
+在对应 `*.annotations.shared.ts` 的字段/表单类打点 `details` 中增加一项 **「页面文案分层（原型约定）」**，说明 USER/SPEC 与组件名，便于评审在打开 🎯 打点时看到约定（标杆：`shared/partner-archives/annotations/partner-archive-form.annotations.shared.ts`）。
+
+**Agent 执行顺序（表单/配置/弹窗有说明文案时）**
+
+1. 三件套定稿 → 2. 写 `*_USER_*` / `*_SPEC_*` → 3. 页面挂双组件 → 4. `PrototypeAnnotationTarget` 打点 → 5. 自检：页面灰字无孤立 `P01`/`R03`，规格只在琥珀虚线框或标注里。
+
 ---
 
 ## 🎨 4. 核心交互与视觉标准
@@ -175,3 +268,5 @@ npm run lint && npm run build
 4. **文档直读**：点击【字段清单】、【需求文档】、【业务规则规格】均能直接在抽屉内渲染 Markdown 表格与 Mermaid 图表；
 5. **一键复制**：文档右上角的 `[复制 Markdown]` 能正常写入系统剪贴板并提示成功；
 6. **无业务破坏**：原型本身的表单输入、下拉选择、按钮点击及模态弹窗完全正常可用。
+7. **文案分层**：表单/配置区若存在说明文字，须 USER（灰字）与 SPEC（`PrototypeSpecCallout`）分离，且与 3.3 节一致。
+8. **双端一套标注**：若该菜单同时有 PC 与 H5 原型，须满足 **2.3**（shared 正文 + H5 仅 bindings）；不得 H5 单独维护第二套小红点业务文案或第二套三件套。

@@ -1,3 +1,5 @@
+import { ProductFieldHint } from "@/components/form/ProductFieldHint"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { Label } from "@/components/ui/label"
 import type { YesNo } from "../domain/types"
 
@@ -8,6 +10,7 @@ type YesNoRadioProps = {
   value: YesNo
   onChange: (value: YesNo) => void
   hint?: string
+  specHint?: string
 }
 
 export function YesNoRadio({
@@ -17,6 +20,7 @@ export function YesNoRadio({
   value,
   onChange,
   hint,
+  specHint,
 }: YesNoRadioProps) {
   return (
     <div className="space-y-2">
@@ -37,7 +41,8 @@ export function YesNoRadio({
           </label>
         ))}
       </div>
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      {hint ? <ProductFieldHint>{hint}</ProductFieldHint> : null}
+      {specHint ? <PrototypeSpecCallout>{specHint}</PrototypeSpecCallout> : null}
     </div>
   )
 }

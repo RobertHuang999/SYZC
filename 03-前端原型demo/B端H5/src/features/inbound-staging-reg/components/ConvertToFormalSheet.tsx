@@ -1,8 +1,11 @@
 import type { InboundStagingReg } from "@prototype/shared/inbound/inbound-staging.mock"
+import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
 import {
   STAGING_ACTION_LABELS,
-  STAGING_O03_H5_ROUTE_HINT,
-  STAGING_O03_REMINDERS,
+  STAGING_O03_H5_ROUTE_HINT_USER,
+  STAGING_O03_H5_ROUTE_HINT_SPEC,
+  STAGING_O03_REMINDERS_SPEC,
+  STAGING_O03_REMINDERS_USER,
 } from "@prototype/shared/inbound/staging-ui-labels"
 
 type Props = {
@@ -23,11 +26,14 @@ export function ConvertToFormalSheet({ open, reg, onClose, onConfirm }: Props) {
           {reg.regNo} · {reg.inboundType}
         </p>
         <ul className="mt-3 list-disc space-y-1.5 pl-4 text-xs leading-relaxed text-[#232D39]/70">
-          {STAGING_O03_REMINDERS.map((line) => (
+          {STAGING_O03_REMINDERS_USER.map((line) => (
             <li key={line}>{line}</li>
           ))}
-          <li className="font-medium text-blue-800">{STAGING_O03_H5_ROUTE_HINT.replace("{REG}", reg.regNo)}</li>
+          <li className="font-medium text-blue-800">{STAGING_O03_H5_ROUTE_HINT_USER}</li>
         </ul>
+        <PrototypeSpecCallout className="mt-2">
+          {STAGING_O03_REMINDERS_SPEC} {STAGING_O03_H5_ROUTE_HINT_SPEC.replace("{REG}", reg.regNo)}
+        </PrototypeSpecCallout>
         <div className="mt-5 flex flex-col gap-2">
           <button
             type="button"

@@ -7,7 +7,8 @@ import {
 } from "@prototype/B端PC/src/features/partner-archives/domain/types"
 import { partnerArchivesMock } from "@prototype/B端PC/src/features/partner-archives/mock/partner-archives.mock"
 import {
-  findIndividualOwnerAddressConflict,
+  findOwnerAddressConflict,
+  ownerAddressConflictMessage,
   rolesAllowedForSubjectType,
 } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-rules"
 
@@ -48,16 +49,17 @@ export function PartnerAppendRoleSheet({
   )
 
   const ownerAddressConflict = useMemo(() => {
-    if (!partner || !selected.includes("OWNER") || partner.subjectType !== "INDIVIDUAL") {
+    if (!partner || !selected.includes("OWNER")) {
       return false
     }
     if (!partner.certAddress.fullAddress.trim()) {
       return false
     }
     return Boolean(
-      findIndividualOwnerAddressConflict(
+      findOwnerAddressConflict(
         partnerArchivesMock,
         partner.certAddress.fullAddress,
+        partner.subjectType,
         partner.id,
       ),
     )
@@ -82,7 +84,7 @@ export function PartnerAppendRoleSheet({
         <div className="border-b border-gray-100 px-4 py-3">
           <p className="text-base font-semibold text-gray-900">追加业务角色</p>
           <p className="mt-1 text-xs text-gray-500">
-            为主体「{partner.name}」追加合作角色；可多选。追加货主时将联动证件地址准入校验。
+            为主体「{partner.name}」追加合作角色；可多选。追加货主时个人与企业均校 P02 地址唯一；地址必填 P01 仅在档案保存时生效。
           </p>
         </div>
         <div className="space-y-2 px-4 py-3">
@@ -136,7 +138,9 @@ export function PartnerAppendRoleSheet({
             <p className="text-xs text-amber-700">追加货主前请先补全证件登记地址。</p>
           ) : null}
           {ownerAddressConflict ? (
-            <p className="text-xs text-red-600">该证件地址已被其他个人货主占用，无法追加货主角色。</p>
+            <p className="text-xs text-red-600">
+              {ownerAddressConflictMessage(partner.subjectType)}（无法追加货主角色）
+            </p>
           ) : null}
         </div>
         <div className="flex gap-3 border-t border-gray-100 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">

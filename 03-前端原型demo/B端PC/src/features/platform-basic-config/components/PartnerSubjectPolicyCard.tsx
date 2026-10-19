@@ -1,3 +1,5 @@
+import { ProductFieldHint } from "@/components/form/ProductFieldHint"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { SearchIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,6 +17,9 @@ type PartnerSubjectPolicyCardProps = {
   onChange: (patch: Partial<PartnerSubjectAccessPolicy>) => void
   onScanDuplicates?: () => void
   footnote?: string
+  certSpecNote?: string
+  duplicateSpecNote?: string
+  footnoteSpecNote?: string
 }
 
 export function PartnerSubjectPolicyCard({
@@ -26,6 +31,9 @@ export function PartnerSubjectPolicyCard({
   onChange,
   onScanDuplicates,
   footnote,
+  certSpecNote,
+  duplicateSpecNote,
+  footnoteSpecNote,
 }: PartnerSubjectPolicyCardProps) {
   const namePrefix = title.includes("个人") ? "personal" : "enterprise"
 
@@ -33,9 +41,8 @@ export function PartnerSubjectPolicyCard({
     <Card>
       <CardHeader>
         <CardTitle className="text-base">{title}</CardTitle>
-        {footnote && (
-          <p className="text-xs text-muted-foreground">{footnote}</p>
-        )}
+        {footnote ? <ProductFieldHint>{footnote}</ProductFieldHint> : null}
+        {footnoteSpecNote ? <PrototypeSpecCallout>{footnoteSpecNote}</PrototypeSpecCallout> : null}
       </CardHeader>
       <CardContent className="space-y-6">
         <YesNoRadio
@@ -45,6 +52,7 @@ export function PartnerSubjectPolicyCard({
           value={policy.certAddressRequired}
           onChange={(v: YesNo) => onChange({ certAddressRequired: v })}
           hint={certHint}
+          specHint={certSpecNote}
         />
         <div className="space-y-3">
           <Label>
@@ -73,8 +81,11 @@ export function PartnerSubjectPolicyCard({
               </Button>
             )}
           </div>
-          <p className="text-xs text-amber-700 dark:text-amber-400">{duplicateWarning}</p>
-          <p className="text-xs text-muted-foreground">{duplicateHint}</p>
+          <ProductFieldHint className="text-amber-800 dark:text-amber-300">
+            {duplicateWarning}
+          </ProductFieldHint>
+          <ProductFieldHint>{duplicateHint}</ProductFieldHint>
+          {duplicateSpecNote ? <PrototypeSpecCallout>{duplicateSpecNote}</PrototypeSpecCallout> : null}
         </div>
       </CardContent>
     </Card>

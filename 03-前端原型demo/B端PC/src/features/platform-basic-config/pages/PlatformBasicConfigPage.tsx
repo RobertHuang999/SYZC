@@ -43,6 +43,14 @@ import { SmtpTestMailDialog } from "../components/SmtpTestMailDialog"
 import { WarehouseAuditPickerDialog } from "../components/WarehouseAuditPickerDialog"
 import { YesNoRadio } from "../components/YesNoRadio"
 import {
+  PARTNER_POLICY_DUP_AUDIT_SPEC,
+  PARTNER_POLICY_ENTERPRISE_CERT_SPEC,
+  PARTNER_POLICY_ENTERPRISE_DUP_SPEC,
+  PARTNER_POLICY_ENTERPRISE_FOOTNOTE_USER,
+  PARTNER_POLICY_INDIVIDUAL_CERT_SPEC,
+  PARTNER_POLICY_INDIVIDUAL_DUP_SPEC,
+} from "../lib/platform-basic-config-ui-labels"
+import {
   AGREEMENT_PLACEMENT_OPTIONS,
   CONFIG_CATEGORIES,
   DATA_SOURCE_CARD_DEFS,
@@ -597,19 +605,24 @@ export function PlatformBasicConfigPage() {
           policy={state.partnerAccess.individual}
           onChange={(patch) => updatePartnerSubject("individual", patch)}
           onScanDuplicates={() => setDuplicateDialogOpen(true)}
-          certHint="开启后，个人货主建档、出入库制单时必须录入身份证证件地址。"
-          duplicateWarning="开启后，同一证件地址仅允许绑定一个个人货主。若地址已被他人使用，制单或建档时将直接拦截。"
+          certHint="开启后，在合作方档案新增/编辑/补全保存时须填写身份证登记地址；入库、出库、仓单等作业不受影响。"
+          certSpecNote={PARTNER_POLICY_INDIVIDUAL_CERT_SPEC}
+          duplicateWarning="开启后，同一证件地址在租户内仅允许绑定一个个人货主。冲突时在档案保存或作业快捷建档绑货主时直接拦截。"
           duplicateHint="降低风控要求（由必填改为选填、或关闭防重复）时，保存须填写变更原因。"
+          duplicateSpecNote={`${PARTNER_POLICY_INDIVIDUAL_DUP_SPEC} ${PARTNER_POLICY_DUP_AUDIT_SPEC}`}
         />
         <PartnerSubjectPolicyCard
           title="企业货主证件地址规则"
           policy={state.partnerAccess.enterprise}
           onChange={(patch) => updatePartnerSubject("enterprise", patch)}
           onScanDuplicates={() => setDuplicateDialogOpen(true)}
-          certHint="开启后，企业货主建档、业务引入时必须录入营业执照登记地址。"
-          duplicateWarning="开启后，同一登记地址仅允许绑定一个企业货主主体；冲突时在建档或制单入口直接拦截。"
-          duplicateHint="企业主体实名以统一社会信用代码为准；登记地址防重复与个人一人一址策略分别生效。"
-          footnote="企业货主通过营业执照统一信用代码进行实名认证，与个人货主策略分轨配置、分轨校验。"
+          certHint="开启后，在合作方档案新增/编辑/补全保存时须填写营业执照登记地址；仓储与仓单等作业引用货主不受影响。"
+          certSpecNote={PARTNER_POLICY_ENTERPRISE_CERT_SPEC}
+          duplicateWarning="开启后，企业货主登记地址在租户内须唯一（与个人货主分池比对，互不混比）。"
+          duplicateSpecNote={PARTNER_POLICY_ENTERPRISE_DUP_SPEC}
+          duplicateHint="企业主体实名以统一社会信用代码为准；地址防重复与个人货主分别生效。"
+          footnote={PARTNER_POLICY_ENTERPRISE_FOOTNOTE_USER}
+          footnoteSpecNote={PARTNER_POLICY_ENTERPRISE_DUP_SPEC}
         />
         <PartnerAccessAuditPanel records={partnerAccessAuditLog} />
       </div>

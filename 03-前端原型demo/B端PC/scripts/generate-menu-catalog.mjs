@@ -20,6 +20,11 @@ const moduleMap = {
   "3.融资/监管": "finance",
   "4.交易": "trade",
   "5.风控": "risk",
+  "6.物联网IOT与预警": "device-warning",
+  "7.统计/看板": "statistics",
+  "8.结算": "settlement",
+  "9.配置管理": "config",
+  // 合流前 CSV 别名
   "6.统计/看板": "statistics",
   "7.结算": "settlement",
   "8.配置管理": "config",

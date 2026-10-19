@@ -97,14 +97,20 @@ export function PartnerQuickCreateSheetMobile({
           />
         </label>
         {scene === "INBOUND_OWNER" ? (
-          <label className="mb-4 block text-sm">
-            <span className="text-[#EF3E3E]">*</span> 证件地址
-            <input
-              className="mt-1 w-full rounded-lg border border-[#232D39]/15 px-3 py-2 text-sm"
-              value={detailAddress}
-              onChange={(e) => setDetailAddress(e.target.value)}
-            />
-          </label>
+          <div className="mb-4 space-y-2">
+            <label className="block text-sm">
+              证件登记地址
+              <input
+                className="mt-1 w-full rounded-lg border border-[#232D39]/15 px-3 py-2 text-sm"
+                placeholder="街道、门牌号等（选填）"
+                value={detailAddress}
+                onChange={(e) => setDetailAddress(e.target.value)}
+              />
+            </label>
+            <p className="text-xs leading-relaxed text-[#232D39]/55">
+              选填。填写后将校验是否与租户内其他货主重复；不填不影响保存。
+            </p>
+          </div>
         ) : null}
         <button
           type="button"

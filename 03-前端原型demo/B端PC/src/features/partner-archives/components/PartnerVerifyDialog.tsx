@@ -18,6 +18,8 @@ import {
   type RoleType,
   type SubjectType,
 } from "../domain/types"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
+import { partnerVerifyDialogCopy } from "../lib/partner-archive-ui-labels"
 import { maskLoginPhone } from "../lib/detail-utils"
 
 export type PartnerVerifyDialogProps = {
@@ -130,19 +132,15 @@ export function PartnerVerifyDialog({
                     : "合作方身份信息确认"}
             </DialogTitle>
           </div>
-          <DialogDescription>
-            {mode === "CHANGE_PHONE"
-              ? "检测到合作方业务联系手机号发生变更。依风控与安全要求，系统已向新手机号发送验证码，请完成二元身份核验以确认变更。"
-              : mode === "VERIFY_CONTACT"
-                ? verifyContext === "INBOUND_SUBMIT"
-                  ? "该货主联系手机尚未验证。完成短信确认后将更新主档为「已验证」，并继续提交本入库单审核。"
-                  : verifyContext === "DETAIL_VERIFY"
-                    ? "请向当前预留的业务联系手机完成短信确认。通过后主档将更新为「已验证」，并按 PA-R04c 锁定核心身份信息。"
-                    : "请向当前预留的业务联系手机完成短信确认。通过后建档为「已验证」，姓名与身份标识将按规则锁定（PA-R04c）。"
-                : verifyContext === "INBOUND_CREATE"
-                  ? "请核对货主实名信息与联系方式，并向预留手机完成短信二元身份核验（R03）。"
-                  : "依入库准入及风控规则（R03），新合作方建档需通过预留手机号短信二元身份核验以确保主体真实有效。"}
-          </DialogDescription>
+          {(() => {
+            const copy = partnerVerifyDialogCopy(mode, verifyContext)
+            return (
+              <>
+                <DialogDescription>{copy.user}</DialogDescription>
+                {copy.spec ? <PrototypeSpecCallout>{copy.spec}</PrototypeSpecCallout> : null}
+              </>
+            )
+          })()}
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">

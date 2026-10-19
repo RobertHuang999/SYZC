@@ -54,11 +54,7 @@ export function normalizeCertAddress(value: string) {
   return value.replace(/[\s\u3000]/g, "")
 }
 
-/** 个人货主正常或冻结仍占活跃池（冻结不释放） */
-export function individualOwnerOccupiesAddressPool(partner: PartnerSubject) {
-  if (partner.subjectType !== "INDIVIDUAL") {
-    return false
-  }
+function ownerOccupiesAddressPool(partner: PartnerSubject) {
   if (!partner.certAddress.fullAddress.trim()) {
     return false
   }
@@ -69,9 +65,27 @@ export function individualOwnerOccupiesAddressPool(partner: PartnerSubject) {
   )
 }
 
-export function findIndividualOwnerAddressConflict(
+/** 个人货主正常或冻结仍占活跃池（冻结不释放） */
+export function individualOwnerOccupiesAddressPool(partner: PartnerSubject) {
+  return partner.subjectType === "INDIVIDUAL" && ownerOccupiesAddressPool(partner)
+}
+
+/** 企业货主正常或冻结仍占活跃池（与个人分池比对） */
+export function enterpriseOwnerOccupiesAddressPool(partner: PartnerSubject) {
+  return partner.subjectType === "ENTERPRISE" && ownerOccupiesAddressPool(partner)
+}
+
+/** 【证件登记地址防重复唯一校验与同步阻断规则】(P02) 冲突提示 */
+export function ownerAddressConflictMessage(subjectType: SubjectType) {
+  return subjectType === "ENTERPRISE"
+    ? "已有相同证件地址，不能绑定为该货主企业"
+    : "已有相同证件地址，不能绑定为该个人货主"
+}
+
+export function findOwnerAddressConflict(
   list: PartnerSubject[],
   fullAddress: string,
+  subjectType: SubjectType,
   excludeId?: string
 ) {
   const normalized = normalizeCertAddress(fullAddress)
@@ -81,9 +95,18 @@ export function findIndividualOwnerAddressConflict(
   return list.find(
     (item) =>
       item.id !== excludeId &&
-      individualOwnerOccupiesAddressPool(item) &&
+      item.subjectType === subjectType &&
+      ownerOccupiesAddressPool(item) &&
       normalizeCertAddress(item.certAddress.fullAddress) === normalized
   )
+}
+
+export function findIndividualOwnerAddressConflict(
+  list: PartnerSubject[],
+  fullAddress: string,
+  excludeId?: string
+) {
+  return findOwnerAddressConflict(list, fullAddress, "INDIVIDUAL", excludeId)
 }
 
 /** 追加货主且个人证件地址为空时记为待补全，其余追加为正常 */

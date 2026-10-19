@@ -21,7 +21,7 @@ const implementedRoutePrefixes = [
 const implementedExactRoutes = new Set<string>([
   "/物联网IOT与预警/物联网IOT管理/门禁设备",
   "/系统参考/功能与数据权限",
-  "/系统参考/菜单迭代记录",
+  "/系统参考/迭代记录",
   "/用户中心/合作方管理/合作方档案",
   "/仓储/入库管理/入库申请",
   "/仓储/入库管理/入库申请/新增",
