@@ -1,11 +1,12 @@
 import { Fragment, useMemo, useState } from "react"
-import { HistoryIcon, SearchIcon } from "lucide-react"
+import { ChevronDownIcon, ChevronUpIcon, HistoryIcon, SearchIcon } from "lucide-react"
 import {
   ITERATION_RECORD_LABEL,
   iterationRecords,
   iterationVersions,
   type IterationPlatform,
   type IterationRecordEntry,
+  type IterationScopeAnnotation,
 } from "../data/menu-iteration-records"
 import { SystemReferenceSubNav } from "../components/SystemReferenceSubNav"
 import { IterationPathChangeCell } from "../components/IterationPathChangeCell"
@@ -22,6 +23,50 @@ import { cn } from "@/lib/utils"
 
 type PlatformFilter = IterationPlatform | "全部"
 type PriorityFilter = "全部" | "P0" | "P1" | "P2"
+
+function IterationScopeAnnotationsPanel({
+  annotations,
+}: {
+  annotations: IterationScopeAnnotation[]
+}) {
+  const [expanded, setExpanded] = useState(false)
+
+  if (annotations.length === 0) return null
+
+  return (
+    <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-border/50 pt-1.5">
+      <span className="shrink-0 text-[10px] font-medium text-muted-foreground">交付范围标注</span>
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+        {annotations.map((item) => (
+          <IterationDeliveryTagBadge key={item.tag} tag={item.tag} />
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => setExpanded((value) => !value)}
+        className="inline-flex shrink-0 items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-medium text-primary hover:bg-primary/5 cursor-pointer"
+      >
+        {expanded ? "收起" : "展开说明"}
+        {expanded ? <ChevronUpIcon className="size-3" /> : <ChevronDownIcon className="size-3" />}
+      </button>
+      {expanded ? (
+        <div className="max-h-28 w-full overflow-y-auto rounded border border-orange-200/60 bg-orange-50/20 px-2 py-1.5">
+          <ul className="space-y-1">
+            {annotations.map((item) => (
+              <li key={item.tag} className="text-[10px] leading-snug text-muted-foreground">
+                <IterationDeliveryTagBadge tag={item.tag} />
+                <span className="ml-1 text-foreground/85">{item.meaning}</span>
+                {item.menus ? (
+                  <span className="text-muted-foreground/90"> · {item.menus}</span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  )
+}
 
 function IterationTableRow({ entry }: { entry: IterationRecordEntry }) {
   return (
@@ -226,36 +271,28 @@ export function IterationRecordPage() {
         </div>
 
         {activeVersionMeta && activeVersion !== "全部" && (
-          <div className="mt-2 space-y-2">
-            <div className="rounded-md border border-border/50 bg-muted/10 px-3 py-2">
-              <p className="text-xs font-medium text-foreground">{activeVersionMeta.name}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">{activeVersionMeta.summary}</p>
-              {activeVersionMeta.docPath && (
-                <p className="mt-1 text-[10px] text-muted-foreground/80">版本 README：{activeVersionMeta.docPath}</p>
-              )}
-            </div>
-            {activeVersionMeta.scopeAnnotations && activeVersionMeta.scopeAnnotations.length > 0 && (
-              <div className="rounded-md border border-orange-200/80 bg-orange-50/30 px-3 py-2">
-                <p className="text-[11px] font-semibold text-foreground">交付范围标注</p>
-                <ul className="mt-1.5 space-y-1.5">
-                  {activeVersionMeta.scopeAnnotations.map((item) => (
-                    <li key={item.tag} className="text-[10px] leading-relaxed text-muted-foreground">
-                      <IterationDeliveryTagBadge tag={item.tag} />
-                      <span className="ml-1.5 text-foreground/90">{item.meaning}</span>
-                      {item.menus ? (
-                        <span className="mt-0.5 block pl-0.5 text-muted-foreground/90">{item.menus}</span>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          <div className="mt-1.5 border-t border-border/60 pt-1.5">
+            <p className="truncate text-[11px] font-medium text-foreground" title={activeVersionMeta.name}>
+              {activeVersionMeta.name}
+            </p>
+            <p
+              className="mt-0.5 line-clamp-1 text-[10px] text-muted-foreground"
+              title={activeVersionMeta.summary}
+            >
+              {activeVersionMeta.summary}
+            </p>
+            {activeVersionMeta.scopeAnnotations && activeVersionMeta.scopeAnnotations.length > 0 ? (
+              <IterationScopeAnnotationsPanel
+                key={activeVersionMeta.version}
+                annotations={activeVersionMeta.scopeAnnotations}
+              />
+            ) : null}
           </div>
         )}
       </div>
 
       <div className="min-h-0 flex-1 overflow-hidden rounded-lg border bg-card shadow-sm">
-        <div className="h-full max-h-[calc(100vh-168px)] overflow-auto">
+        <div className="h-full min-h-0 overflow-auto">
           <table className="w-full min-w-[1180px] border-collapse text-left">
             <thead className="sticky top-0 z-[2] bg-muted/90 backdrop-blur-sm">
               <tr className="border-b text-[11px] font-semibold text-muted-foreground">
