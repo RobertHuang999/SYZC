@@ -27,6 +27,7 @@ import {
   sortOutboundRecords,
 } from "../lib/list-utils"
 import { outboundRecordsMock } from "../mock/outbound-records.mock"
+import { DocumentTimelineModal } from "@/shared/document-management"
 
 export function OutboundRecordListPage() {
   const navigate = useNavigate()
@@ -44,6 +45,7 @@ export function OutboundRecordListPage() {
   // 导出与单据预览弹窗状态
   const [exportTarget, setExportTarget] = useState<OutboundRecord | null>(null)
   const [pdfTarget, setPdfTarget] = useState<OutboundRecord | null>(null)
+  const [docsTarget, setDocsTarget] = useState<OutboundRecord | null>(null)
 
   const filtered = useMemo(() => {
     const matched = filterOutboundRecords(rows, appliedFilters)
@@ -80,6 +82,11 @@ export function OutboundRecordListPage() {
     }
     if (action === "downloadPdf") {
       setPdfTarget(item)
+      return
+    }
+    if (action === "manageDocs") {
+      setDocsTarget(item)
+      return
     }
   }
 
@@ -166,6 +173,17 @@ export function OutboundRecordListPage() {
           onClose={() => setPdfTarget(null)}
           onSuccess={showToast}
         />
+
+        {/* 资料管理全生命周期弹窗 */}
+        {docsTarget && (
+          <DocumentTimelineModal
+            open={!!docsTarget}
+            orderNo={docsTarget.orderNo}
+            approvalId="SP202605290001"
+            orderType="outbound"
+            onClose={() => setDocsTarget(null)}
+          />
+        )}
       </div>
     </PrototypeAnnotationProvider>
   )

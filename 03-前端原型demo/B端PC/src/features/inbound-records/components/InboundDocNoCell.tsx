@@ -9,7 +9,7 @@ type Props = {
   className?: string
 }
 
-/** 业务单号单元格：break-all 多行展示 + hover 复制（对齐入库记录列表） */
+/** 业务单号单元格：单行完整展示 + hover 轻量复制（对齐 AGENTS.md 规范与货主档案设计） */
 export function InboundDocNoCell({ docNo, linkTo, className }: Props) {
   const [copied, setCopied] = useState(false)
 
@@ -21,10 +21,13 @@ export function InboundDocNoCell({ docNo, linkTo, className }: Props) {
     window.setTimeout(() => setCopied(false), 1500)
   }
 
-  const textClass = cn("line-clamp-2 min-w-0 break-all text-sm leading-snug", className)
+  const textClass = cn(
+    "whitespace-nowrap font-medium text-sm leading-normal",
+    className
+  )
 
   return (
-    <div className="group/item flex items-start gap-1">
+    <div className="group/item inline-flex items-center gap-1.5 max-w-full">
       {linkTo ? (
         <Link to={linkTo} className={cn(textClass, "text-primary hover:underline")} title={docNo}>
           {docNo}
@@ -37,11 +40,11 @@ export function InboundDocNoCell({ docNo, linkTo, className }: Props) {
       <button
         type="button"
         onClick={handleCopy}
-        className="shrink-0 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 hover:text-foreground"
+        className="shrink-0 p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 hover:text-foreground cursor-pointer"
         title="复制单号"
       >
         {copied ? (
-          <span className="text-xs leading-none text-emerald-600">✓</span>
+          <span className="text-xs leading-none text-emerald-600 font-bold">✓</span>
         ) : (
           <Copy className="size-3.5" />
         )}

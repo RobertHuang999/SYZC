@@ -11,6 +11,7 @@ import {
   Clock,
   AlertCircle,
   RotateCcw,
+  Plus,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -42,8 +43,12 @@ import {
   type AttachmentDialogData,
 } from "../components/InboundAttachmentDialog"
 import { CURRENT_USER_NAME } from "../mock/inbound-records.mock"
+import {
+  DocumentManagementTabContent,
+  UploadSupplementaryModal,
+} from "@/shared/document-management"
 
-type DetailTab = "goods" | "audit" | "modify"
+type DetailTab = "goods" | "audit" | "modify" | "documents"
 
 export function InboundRecordDetailPage() {
   const { id } = useParams()
@@ -53,6 +58,7 @@ export function InboundRecordDetailPage() {
   const [tab, setTab] = useState<DetailTab>("goods")
   const [expandedGoods, setExpandedGoods] = useState<Record<string, boolean>>({})
   const [toast, setToast] = useState<string | null>(null)
+  const [uploadModalOpen, setUploadModalOpen] = useState(false)
 
   // 弹窗状态
   const [revokeOpen, setRevokeOpen] = useState(false)
@@ -214,6 +220,14 @@ export function InboundRecordDetailPage() {
                     撤 销
                   </Button>
                 )}
+                <Button
+                  size="sm"
+                  className="cursor-pointer"
+                  onClick={() => setUploadModalOpen(true)}
+                >
+                  <Plus className="size-3.5 mr-1" />
+                  补充资料
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
                   返 回
                 </Button>
@@ -316,6 +330,7 @@ export function InboundRecordDetailPage() {
                   ["goods", "入库明细"],
                   ["audit", "审核记录"],
                   ["modify", "入库信息修改记录"],
+                  ["documents", "资料管理"],
                 ] as const
               ).map(([key, label]) => (
                 <button
@@ -625,6 +640,16 @@ export function InboundRecordDetailPage() {
                 </div>
               </div>
             )}
+
+            {/* Tab 4: 资料管理 */}
+            {tab === "documents" && (
+              <DocumentManagementTabContent
+                orderNo={detail.orderNo}
+                approvalId="SP202605280001"
+                orderType="inbound"
+                onUploadClick={() => setUploadModalOpen(true)}
+              />
+            )}
           </div>
         </PrototypeAnnotationTarget>
 
@@ -716,6 +741,19 @@ export function InboundRecordDetailPage() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* 补充资料弹窗 */}
+        <UploadSupplementaryModal
+          open={uploadModalOpen}
+          orderNo={detail.orderNo}
+          approvalId="SP202605280001"
+          orderType="inbound"
+          onClose={() => setUploadModalOpen(false)}
+          onSuccess={() => {
+            showToast("资料上传成功并已关联入库单据")
+            setTab("documents")
+          }}
+        />
 
         {toast ? (
           <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-foreground px-4 py-3 text-xs text-background shadow-lg">

@@ -76,5 +76,5 @@ export type InboundRecordFilters = {
   createdAtEnd: string
 }
 
-export type InboundRecordRowAction = "detail" | "downloadExcel" | "downloadPdf"
+export type InboundRecordRowAction = "detail" | "downloadExcel" | "downloadPdf" | "manageDocs"
 export type InboundApplyRowAction = "detail" | "revoke"

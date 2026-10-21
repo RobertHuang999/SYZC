@@ -1,6 +1,5 @@
-import { Link } from "react-router-dom"
+import type { CSSProperties } from "react"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import {
   Tooltip,
   TooltipContent,
@@ -16,6 +15,11 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { TableDateTimeCell } from "@/shared/components/TableCells"
+import {
+  TableRowActionPanel,
+  TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX,
+  type TableRowActionItem,
+} from "@/shared/components/TableRowActionPanel"
 import { InboundDocNoCell } from "./InboundDocNoCell"
 import { inboundRecordDetailPath } from "../domain/constants"
 import type { InboundRecord, InboundRecordRowAction } from "../domain/types"
@@ -28,26 +32,29 @@ import {
 const STICKY_ACTION_CLASS =
   "sticky right-0 z-20 border-l border-border/80 shadow-[-8px_0_16px_-4px_rgba(0,0,0,0.08)]"
 
-/** 多列表格：列宽用 px 锁定 + min-w 防挤压畸变；视口不足时横向滚动（对齐 PC 表格规范），非百分比压缩 */
+const ACTION_COL_CLASS =
+  "w-[var(--inbound-action-col-w)] min-w-[var(--inbound-action-col-w)] max-w-[var(--inbound-action-col-w)]"
+
+/** 列宽锁定 + 充裕呼吸感（对齐合作方档案列表 2×2 紧凑操作列与 AGENTS.md 规范） */
 const COL = {
-  index: "w-12 min-w-12",
-  orderNo: "w-[148px] min-w-[148px]",
-  owner: "w-[136px] min-w-[136px]",
-  type: "w-[92px] min-w-[92px]",
-  inboundDate: "w-[104px] min-w-[104px]",
-  warehouse: "w-[100px] min-w-[100px]",
-  related: "hidden xl:table-cell w-[136px] min-w-[136px]",
-  goods: "w-[152px] min-w-[152px]",
-  quantity: "w-[88px] min-w-[88px]",
-  creator: "w-[128px] min-w-[128px]",
-  actions: "w-[228px] min-w-[228px]",
+  index: "w-16 min-w-16",
+  orderNo: "w-[200px] min-w-[200px]",
+  owner: "w-[210px] min-w-[210px]",
+  type: "w-[100px] min-w-[100px]",
+  inboundDate: "w-[110px] min-w-[110px]",
+  warehouse: "w-[150px] min-w-[150px]",
+  related: "hidden xl:table-cell w-[180px] min-w-[180px]",
+  goods: "w-[180px] min-w-[180px]",
+  quantity: "w-[100px] min-w-[100px]",
+  creator: "w-[140px] min-w-[140px]",
+  actions: ACTION_COL_CLASS,
 } as const
 
-const cellBase = "whitespace-normal align-middle px-2 py-2"
+const cellBase = "align-middle px-3.5 py-2.5 text-sm"
 const actionCell = cn(
   COL.actions,
   STICKY_ACTION_CLASS,
-  "whitespace-nowrap align-middle px-2 py-2 text-center",
+  "whitespace-normal align-middle px-2 py-2 text-center",
   "bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800 transition-colors"
 )
 
@@ -60,7 +67,7 @@ type InboundRecordTableProps = {
 
 function getInboundTypeBadge(type: string) {
   let badgeClass = "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-300"
-  
+
   if (type.includes("质押")) {
     badgeClass = "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/40 dark:bg-blue-950/40 dark:text-blue-300"
   } else if (type.includes("抵押")) {
@@ -76,7 +83,7 @@ function getInboundTypeBadge(type: string) {
   }
 
   return (
-    <Badge variant="outline" className={cn("text-[11px] px-1.5 py-0 font-normal shrink-0", badgeClass)}>
+    <Badge variant="outline" className={cn("text-[11px] px-2 py-0.5 font-normal shrink-0", badgeClass)}>
       {type}
     </Badge>
   )
@@ -105,7 +112,7 @@ function GoodsNamesCell({ goodsNames }: { goodsNames: string[] }) {
     <Tooltip>
       <TooltipTrigger
         render={<span />}
-        className="line-clamp-2 cursor-help text-left text-sm font-normal leading-snug break-words text-foreground"
+        className="line-clamp-1 cursor-help text-left text-sm font-normal leading-snug break-words text-foreground hover:text-primary transition-colors"
         aria-label={`货物名称：${joined}`}
       >
         {label}
@@ -115,43 +122,36 @@ function GoodsNamesCell({ goodsNames }: { goodsNames: string[] }) {
   )
 }
 
-function RowActions({
-  row,
-  onAction,
-}: {
-  row: InboundRecord
-  onAction: (action: InboundRecordRowAction, item: InboundRecord) => void
-}) {
-  return (
-    <div className="inline-flex max-w-none flex-nowrap items-center justify-center gap-1.5">
-      <Link
-        to={inboundRecordDetailPath(row.id)}
-        className="shrink-0 whitespace-nowrap text-sm text-primary hover:underline"
-      >
-        查看详情
-      </Link>
-      <span className="shrink-0 text-muted-foreground/30">|</span>
-      <Button
-        type="button"
-        variant="link"
-        size="sm"
-        className="h-auto shrink-0 whitespace-nowrap p-0 text-sm font-normal text-primary hover:underline cursor-pointer"
-        onClick={() => onAction("downloadPdf", row)}
-      >
-        单据下载
-      </Button>
-      <span className="shrink-0 text-muted-foreground/30">|</span>
-      <Button
-        type="button"
-        variant="link"
-        size="sm"
-        className="h-auto shrink-0 whitespace-nowrap p-0 text-sm font-normal text-primary hover:underline cursor-pointer"
-        onClick={() => onAction("downloadExcel", row)}
-      >
-        下载记录
-      </Button>
-    </div>
-  )
+function buildInboundRowActions(
+  row: InboundRecord,
+  onAction: (action: InboundRecordRowAction, item: InboundRecord) => void,
+): TableRowActionItem[] {
+  return [
+    {
+      key: "detail",
+      label: "详情",
+      title: "查看入库详情",
+      to: inboundRecordDetailPath(row.id),
+    },
+    {
+      key: "pdf",
+      label: "单据下载",
+      title: "下载标准入库凭证PDF",
+      onClick: () => onAction("downloadPdf", row),
+    },
+    {
+      key: "excel",
+      label: "下载记录",
+      title: "下载货品堆放记录清单Excel",
+      onClick: () => onAction("downloadExcel", row),
+    },
+    {
+      key: "docs",
+      label: "资料管理",
+      title: "查看与补充入库单据资料",
+      onClick: () => onAction("manageDocs", row),
+    },
+  ]
 }
 
 export function InboundRecordTable({
@@ -162,54 +162,64 @@ export function InboundRecordTable({
 }: InboundRecordTableProps) {
   return (
     <div className="overflow-x-auto rounded-md border bg-card">
-      <Table className="min-w-[1224px] w-full table-fixed text-sm xl:min-w-[1360px]">
+      <Table
+        className="w-full table-fixed text-sm min-w-[1380px] xl:min-w-[1560px]"
+        style={
+          {
+            "--inbound-action-col-w": `${TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX}px`,
+          } as CSSProperties
+        }
+      >
         <colgroup>
-          <col className="w-12" />
-          <col className="w-[148px]" />
-          <col className="w-[136px]" />
-          <col className="w-[92px]" />
-          <col className="w-[104px]" />
+          <col className="w-16" />
+          <col className="w-[200px]" />
+          <col className="w-[210px]" />
           <col className="w-[100px]" />
-          <col className="w-[136px]" />
-          <col className="w-[152px]" />
-          <col className="w-[88px]" />
-          <col className="w-[128px]" />
-          <col className="w-[228px]" />
+          <col className="w-[110px]" />
+          <col className="w-[150px]" />
+          <col className="w-[180px]" />
+          <col className="w-[180px]" />
+          <col className="w-[100px]" />
+          <col className="w-[140px]" />
+          <col style={{ width: TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX }} />
         </colgroup>
         <TableHeader>
-          <TableRow>
+          <TableRow className="bg-slate-50 dark:bg-slate-900/50">
             <TableHead
-              className={cn(COL.index, "text-center text-xs font-medium text-muted-foreground")}
+              className={cn(
+                COL.index,
+                "sticky left-0 z-10 text-center text-xs font-medium text-muted-foreground bg-slate-100 dark:bg-slate-800"
+              )}
             >
               序号
             </TableHead>
-            <TableHead className={cn(COL.orderNo, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.orderNo, "text-xs font-medium text-muted-foreground px-3.5")}>
               入库单号
             </TableHead>
-            <TableHead className={cn(COL.owner, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.owner, "text-xs font-medium text-muted-foreground px-3.5")}>
               货主名称/标识
             </TableHead>
-            <TableHead className={cn(COL.type, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.type, "text-xs font-medium text-muted-foreground px-3.5")}>
               入库类型
             </TableHead>
-            <TableHead className={cn(COL.inboundDate, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.inboundDate, "text-xs font-medium text-muted-foreground px-3.5")}>
               入库日期
             </TableHead>
-            <TableHead className={cn(COL.warehouse, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.warehouse, "text-xs font-medium text-muted-foreground px-3.5")}>
               仓库名称
             </TableHead>
-            <TableHead className={cn(COL.related, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.related, "text-xs font-medium text-muted-foreground px-3.5")}>
               关联单号
             </TableHead>
-            <TableHead className={cn(COL.goods, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.goods, "text-xs font-medium text-muted-foreground px-3.5")}>
               货物名称
             </TableHead>
             <TableHead
-              className={cn(COL.quantity, "text-right text-xs font-medium text-muted-foreground")}
+              className={cn(COL.quantity, "text-right text-xs font-medium text-muted-foreground px-3.5")}
             >
               入库数量
             </TableHead>
-            <TableHead className={cn(COL.creator, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.creator, "text-xs font-medium text-muted-foreground px-3.5")}>
               制单人
             </TableHead>
             <TableHead
@@ -238,8 +248,17 @@ export function InboundRecordTable({
               const createdParts = splitDateTime(row.createdAt)
 
               return (
-                <TableRow key={row.id} className="group align-middle hover:bg-muted/50 transition-colors">
-                  <TableCell className={cn(cellBase, "text-center text-xs text-muted-foreground")}>
+                <TableRow
+                  key={row.id}
+                  className="group align-middle hover:bg-muted/50 transition-colors"
+                >
+                  <TableCell
+                    className={cn(
+                      cellBase,
+                      "sticky left-0 z-10 text-center text-xs text-muted-foreground",
+                      "bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800 transition-colors"
+                    )}
+                  >
                     {(page - 1) * pageSize + index + 1}
                   </TableCell>
                   <TableCell className={cellBase}>
@@ -250,8 +269,10 @@ export function InboundRecordTable({
                   </TableCell>
                   <TableCell className={cellBase}>
                     <div className="flex flex-col gap-0.5 leading-snug">
-                      <span className="line-clamp-2 text-sm text-foreground">{row.ownerName}</span>
-                      <span className="line-clamp-1 text-xs text-muted-foreground">
+                      <span className="line-clamp-1 font-medium text-foreground" title={row.ownerName}>
+                        {row.ownerName}
+                      </span>
+                      <span className="line-clamp-1 text-xs text-muted-foreground tabular-nums">
                         {row.ownerIdentifierMasked}
                       </span>
                     </div>
@@ -261,7 +282,7 @@ export function InboundRecordTable({
                     <TableDateTimeCell value={row.inboundDate} stackedPlain />
                   </TableCell>
                   <TableCell className={cellBase}>
-                    <span className="line-clamp-2 text-sm leading-snug break-words text-foreground">
+                    <span className="line-clamp-1 text-sm text-foreground" title={row.warehouseName}>
                       {row.warehouseName}
                     </span>
                   </TableCell>
@@ -276,21 +297,24 @@ export function InboundRecordTable({
                     <GoodsNamesCell goodsNames={row.goodsNames} />
                   </TableCell>
                   <TableCell className={cn(cellBase, "text-right text-sm text-foreground")}>
-                    <span className="leading-snug">
+                    <span className="leading-snug tabular-nums font-medium">
                       {formatInboundQuantity(row.inboundQuantity)}
                       {row.goodsNames.length === 1 && row.unit ? (
-                        <span className="ml-0.5 text-xs text-muted-foreground">{row.unit}</span>
+                        <span className="ml-1 text-xs text-muted-foreground font-normal">{row.unit}</span>
                       ) : null}
                     </span>
                   </TableCell>
                   <TableCell className={cellBase}>
                     <div className="flex flex-col gap-0.5 leading-snug">
-                      <span className="line-clamp-2 text-sm text-foreground">{row.creatorDisplay}</span>
-                      <span className="text-xs text-muted-foreground">{createdParts.date}</span>
+                      <span className="line-clamp-1 text-sm text-foreground">{row.creatorDisplay}</span>
+                      <span className="text-xs text-muted-foreground tabular-nums">{createdParts.date}</span>
                     </div>
                   </TableCell>
                   <TableCell className={actionCell}>
-                    <RowActions row={row} onAction={onAction} />
+                    <TableRowActionPanel
+                      actions={buildInboundRowActions(row, onAction)}
+                      fixedCols={2}
+                    />
                   </TableCell>
                 </TableRow>
               )

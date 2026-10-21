@@ -1,7 +1,6 @@
-import { useState } from "react"
+import { useState, type CSSProperties } from "react"
 import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import {
   Tooltip,
   TooltipContent,
@@ -17,6 +16,11 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { TableDateTimeCell } from "@/shared/components/TableCells"
+import {
+  TableRowActionPanel,
+  TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX,
+  type TableRowActionItem,
+} from "@/shared/components/TableRowActionPanel"
 import { outboundRecordDetailPath } from "../domain/constants"
 import type { OutboundRecord, OutboundRecordRowAction } from "../domain/types"
 import {
@@ -28,31 +32,34 @@ import {
 const STICKY_ACTION_CLASS =
   "sticky right-0 z-20 border-l border-border/80 shadow-[-8px_0_16px_-4px_rgba(0,0,0,0.08)]"
 
-/** 与入库记录列表一致：px 列宽 + min-w + 窄屏横滑，避免百分比挤压畸变 */
+const ACTION_COL_CLASS =
+  "w-[var(--outbound-action-col-w)] min-w-[var(--outbound-action-col-w)] max-w-[var(--outbound-action-col-w)]"
+
+/** 与入库记录列表及货主档案对齐：px 列宽锁定 + 2×2 紧凑操作列 + 宽裕呼吸感 */
 const COL = {
-  index: "w-12 min-w-12",
-  orderNo: "w-[148px] min-w-[148px]",
-  owner: "w-[136px] min-w-[136px]",
-  type: "w-[92px] min-w-[92px]",
-  outboundDate: "w-[104px] min-w-[104px]",
-  warehouse: "w-[100px] min-w-[100px]",
-  related: "hidden xl:table-cell w-[136px] min-w-[136px]",
-  goods: "w-[152px] min-w-[152px]",
-  quantity: "w-[88px] min-w-[88px]",
-  creator: "w-[128px] min-w-[128px]",
-  actions: "w-[228px] min-w-[228px]",
+  index: "w-16 min-w-16",
+  orderNo: "w-[200px] min-w-[200px]",
+  owner: "w-[210px] min-w-[210px]",
+  type: "w-[100px] min-w-[100px]",
+  outboundDate: "w-[110px] min-w-[110px]",
+  warehouse: "w-[150px] min-w-[150px]",
+  related: "hidden xl:table-cell w-[180px] min-w-[180px]",
+  goods: "w-[180px] min-w-[180px]",
+  quantity: "w-[100px] min-w-[100px]",
+  creator: "w-[140px] min-w-[140px]",
+  actions: ACTION_COL_CLASS,
 } as const
 
-const cellBase = "whitespace-normal align-middle px-2 py-2"
+const cellBase = "align-middle px-3.5 py-2.5 text-sm"
 const actionCell = cn(
   COL.actions,
   STICKY_ACTION_CLASS,
-  "whitespace-nowrap align-middle px-2 py-2 text-center",
+  "whitespace-normal align-middle px-2 py-2 text-center",
   "bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800 transition-colors"
 )
 
 const badgeOutline =
-  "text-[11px] px-1.5 py-0 font-normal shrink-0 border outline-none"
+  "text-[11px] px-2 py-0.5 font-normal shrink-0 border outline-none"
 
 interface OutboundRecordTableProps {
   data: OutboundRecord[]
@@ -117,12 +124,27 @@ function getTypeBadge(type: OutboundRecord["type"]) {
           转让出库
         </Badge>
       )
-    default:
+    case "质押加工出库":
       return (
         <Badge
           variant="outline"
-          className={cn(badgeOutline, "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-300")}
+          className={cn(badgeOutline, "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-300")}
         >
+          质押加工出库
+        </Badge>
+      )
+    case "抵押加工出库":
+      return (
+        <Badge
+          variant="outline"
+          className={cn(badgeOutline, "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900/40 dark:bg-orange-950/40 dark:text-orange-300")}
+        >
+          抵押加工出库
+        </Badge>
+      )
+    default:
+      return (
+        <Badge variant="outline" className={cn(badgeOutline, "border-slate-200 bg-slate-50 text-slate-700")}>
           {type}
         </Badge>
       )
@@ -145,10 +167,10 @@ function OrderNoSingleRow({
     setTimeout(() => setCopied(false), 1500)
   }
 
-  const textClass = "line-clamp-2 min-w-0 break-all"
+  const textClass = "whitespace-nowrap font-medium text-sm leading-normal"
 
   return (
-    <div className="group/item flex items-start gap-1 text-sm leading-snug">
+    <div className="group/item inline-flex items-center gap-1.5 max-w-full">
       {linkTo ? (
         <Link
           to={linkTo}
@@ -168,7 +190,7 @@ function OrderNoSingleRow({
         className="opacity-0 group-hover/item:opacity-100 transition-opacity p-0.5 text-muted-foreground hover:text-foreground shrink-0 cursor-pointer"
         title="复制单号"
       >
-        <span className="text-xs leading-none">{copied ? "✓" : "📋"}</span>
+        <span className="text-xs leading-none text-emerald-600 font-bold">{copied ? "✓" : "📋"}</span>
       </button>
     </div>
   )
@@ -184,7 +206,7 @@ function OutboundGoodsCell({ row }: { row: OutboundRecord }) {
   }
 
   const triggerClass =
-    "line-clamp-2 cursor-help text-left text-sm font-normal leading-snug break-words text-foreground"
+    "line-clamp-1 cursor-help text-left text-sm font-normal leading-snug break-words text-foreground hover:text-primary transition-colors"
 
   if (row.goodsList.length === 1) {
     return (
@@ -221,43 +243,36 @@ function OutboundGoodsCell({ row }: { row: OutboundRecord }) {
   )
 }
 
-function RowActions({
-  row,
-  onAction,
-}: {
-  row: OutboundRecord
-  onAction: (action: OutboundRecordRowAction, item: OutboundRecord) => void
-}) {
-  return (
-    <div className="inline-flex max-w-none flex-nowrap items-center justify-center gap-1.5">
-      <Link
-        to={outboundRecordDetailPath(row.id)}
-        className="shrink-0 whitespace-nowrap text-sm text-primary hover:underline"
-      >
-        查看详情
-      </Link>
-      <span className="shrink-0 text-muted-foreground/30">|</span>
-      <Button
-        type="button"
-        variant="link"
-        size="sm"
-        className="h-auto shrink-0 whitespace-nowrap p-0 text-sm font-normal text-primary hover:underline cursor-pointer"
-        onClick={() => onAction("downloadPdf", row)}
-      >
-        单据下载
-      </Button>
-      <span className="shrink-0 text-muted-foreground/30">|</span>
-      <Button
-        type="button"
-        variant="link"
-        size="sm"
-        className="h-auto shrink-0 whitespace-nowrap p-0 text-sm font-normal text-primary hover:underline cursor-pointer"
-        onClick={() => onAction("downloadExcel", row)}
-      >
-        下载记录
-      </Button>
-    </div>
-  )
+function buildOutboundRowActions(
+  row: OutboundRecord,
+  onAction: (action: OutboundRecordRowAction, item: OutboundRecord) => void,
+): TableRowActionItem[] {
+  return [
+    {
+      key: "detail",
+      label: "详情",
+      title: "查看出库详情",
+      to: outboundRecordDetailPath(row.id),
+    },
+    {
+      key: "pdf",
+      label: "单据下载",
+      title: "下载标准出库凭证PDF",
+      onClick: () => onAction("downloadPdf", row),
+    },
+    {
+      key: "excel",
+      label: "下载记录",
+      title: "下载货品出库记录清单Excel",
+      onClick: () => onAction("downloadExcel", row),
+    },
+    {
+      key: "docs",
+      label: "资料管理",
+      title: "查看与补充出库单据资料",
+      onClick: () => onAction("manageDocs", row),
+    },
+  ]
 }
 
 export function OutboundRecordTable({
@@ -268,54 +283,64 @@ export function OutboundRecordTable({
 }: OutboundRecordTableProps) {
   return (
     <div className="overflow-x-auto rounded-md border bg-card">
-      <Table className="min-w-[1224px] w-full table-fixed text-sm xl:min-w-[1360px]">
+      <Table
+        className="w-full table-fixed text-sm min-w-[1380px] xl:min-w-[1560px]"
+        style={
+          {
+            "--outbound-action-col-w": `${TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX}px`,
+          } as CSSProperties
+        }
+      >
         <colgroup>
-          <col className="w-12" />
-          <col className="w-[148px]" />
-          <col className="w-[136px]" />
-          <col className="w-[92px]" />
-          <col className="w-[104px]" />
+          <col className="w-16" />
+          <col className="w-[200px]" />
+          <col className="w-[210px]" />
           <col className="w-[100px]" />
-          <col className="w-[136px]" />
-          <col className="w-[152px]" />
-          <col className="w-[88px]" />
-          <col className="w-[128px]" />
-          <col className="w-[228px]" />
+          <col className="w-[110px]" />
+          <col className="w-[150px]" />
+          <col className="w-[180px]" />
+          <col className="w-[180px]" />
+          <col className="w-[100px]" />
+          <col className="w-[140px]" />
+          <col style={{ width: TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX }} />
         </colgroup>
         <TableHeader>
-          <TableRow>
+          <TableRow className="bg-slate-50 dark:bg-slate-900/50">
             <TableHead
-              className={cn(COL.index, "text-center text-xs font-medium text-muted-foreground")}
+              className={cn(
+                COL.index,
+                "sticky left-0 z-10 text-center text-xs font-medium text-muted-foreground bg-slate-100 dark:bg-slate-800"
+              )}
             >
               序号
             </TableHead>
-            <TableHead className={cn(COL.orderNo, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.orderNo, "text-xs font-medium text-muted-foreground px-3.5")}>
               出库单号
             </TableHead>
-            <TableHead className={cn(COL.owner, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.owner, "text-xs font-medium text-muted-foreground px-3.5")}>
               货主名称/标识
             </TableHead>
-            <TableHead className={cn(COL.type, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.type, "text-xs font-medium text-muted-foreground px-3.5")}>
               出库类型
             </TableHead>
-            <TableHead className={cn(COL.outboundDate, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.outboundDate, "text-xs font-medium text-muted-foreground px-3.5")}>
               出库日期
             </TableHead>
-            <TableHead className={cn(COL.warehouse, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.warehouse, "text-xs font-medium text-muted-foreground px-3.5")}>
               仓库名称
             </TableHead>
-            <TableHead className={cn(COL.related, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.related, "text-xs font-medium text-muted-foreground px-3.5")}>
               关联单号
             </TableHead>
-            <TableHead className={cn(COL.goods, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.goods, "text-xs font-medium text-muted-foreground px-3.5")}>
               货物名称
             </TableHead>
             <TableHead
-              className={cn(COL.quantity, "text-right text-xs font-medium text-muted-foreground")}
+              className={cn(COL.quantity, "text-right text-xs font-medium text-muted-foreground px-3.5")}
             >
               出库数量
             </TableHead>
-            <TableHead className={cn(COL.creator, "text-xs font-medium text-muted-foreground")}>
+            <TableHead className={cn(COL.creator, "text-xs font-medium text-muted-foreground px-3.5")}>
               制单人
             </TableHead>
             <TableHead
@@ -344,8 +369,17 @@ export function OutboundRecordTable({
               const createdParts = splitDateTime(row.createTime)
 
               return (
-                <TableRow key={row.id} className="group align-middle hover:bg-muted/50 transition-colors">
-                  <TableCell className={cn(cellBase, "text-center text-xs text-muted-foreground")}>
+                <TableRow
+                  key={row.id}
+                  className="group align-middle hover:bg-muted/50 transition-colors"
+                >
+                  <TableCell
+                    className={cn(
+                      cellBase,
+                      "sticky left-0 z-10 text-center text-xs text-muted-foreground",
+                      "bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800 transition-colors"
+                    )}
+                  >
                     {(page - 1) * pageSize + index + 1}
                   </TableCell>
                   <TableCell className={cellBase}>
@@ -356,8 +390,10 @@ export function OutboundRecordTable({
                   </TableCell>
                   <TableCell className={cellBase}>
                     <div className="flex flex-col gap-0.5 leading-snug">
-                      <span className="line-clamp-2 text-sm text-foreground">{row.ownerName}</span>
-                      <span className="line-clamp-1 text-xs text-muted-foreground">
+                      <span className="line-clamp-1 font-medium text-foreground" title={row.ownerName}>
+                        {row.ownerName}
+                      </span>
+                      <span className="line-clamp-1 text-xs text-muted-foreground tabular-nums">
                         {row.ownerIdentifier}
                       </span>
                     </div>
@@ -367,7 +403,7 @@ export function OutboundRecordTable({
                     <TableDateTimeCell value={row.outboundTime} stackedPlain />
                   </TableCell>
                   <TableCell className={cellBase}>
-                    <span className="line-clamp-2 text-sm leading-snug break-words text-foreground">
+                    <span className="line-clamp-1 text-sm text-foreground" title={row.warehouseName}>
                       {row.warehouseName}
                     </span>
                   </TableCell>
@@ -382,10 +418,10 @@ export function OutboundRecordTable({
                     <OutboundGoodsCell row={row} />
                   </TableCell>
                   <TableCell className={cn(cellBase, "text-right text-sm text-foreground")}>
-                    <span className="leading-snug">
+                    <span className="leading-snug tabular-nums font-medium">
                       {formatOutboundQuantity(row.totalAmount, "")}
                       {row.goodsList.length === 1 && (row.amountUnit || row.goodsList[0]?.unit) ? (
-                        <span className="ml-0.5 text-xs text-muted-foreground">
+                        <span className="ml-1 text-xs text-muted-foreground font-normal">
                           {row.amountUnit || row.goodsList[0]?.unit}
                         </span>
                       ) : null}
@@ -393,12 +429,15 @@ export function OutboundRecordTable({
                   </TableCell>
                   <TableCell className={cellBase}>
                     <div className="flex flex-col gap-0.5 leading-snug">
-                      <span className="line-clamp-2 text-sm text-foreground">{row.createdByName}</span>
-                      <span className="text-xs text-muted-foreground">{createdParts.date}</span>
+                      <span className="line-clamp-1 text-sm text-foreground">{row.createdByName}</span>
+                      <span className="text-xs text-muted-foreground tabular-nums">{createdParts.date}</span>
                     </div>
                   </TableCell>
                   <TableCell className={actionCell}>
-                    <RowActions row={row} onAction={onAction} />
+                    <TableRowActionPanel
+                      actions={buildOutboundRowActions(row, onAction)}
+                      fixedCols={2}
+                    />
                   </TableCell>
                 </TableRow>
               )

@@ -167,4 +167,4 @@ export interface OutboundRecordFilters {
   createEndDate: string
 }
 
-export type OutboundRecordRowAction = "view" | "downloadExcel" | "downloadPdf"
+export type OutboundRecordRowAction = "view" | "downloadExcel" | "downloadPdf" | "manageDocs"

@@ -12,6 +12,7 @@ import {
   ChevronRight,
   QrCode,
   KeyRound,
+  Plus,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -39,8 +40,12 @@ import {
   completeDeliveryOrder,
 } from "@/features/delivery-orders/mock/delivery-orders.mock"
 import type { DeliveryOrderItem } from "@/features/delivery-orders/domain/types"
+import {
+  DocumentManagementTabContent,
+  UploadSupplementaryModal,
+} from "@/shared/document-management"
 
-type DetailTab = "goods" | "pickup" | "audit"
+type DetailTab = "goods" | "pickup" | "audit" | "documents"
 
 export function OutboundRecordDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -58,6 +63,7 @@ export function OutboundRecordDetailPage() {
   const [expandedGoods, setExpandedGoods] = useState<Record<string, boolean>>({})
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
+  const [uploadModalOpen, setUploadModalOpen] = useState(false)
 
   // 现场提货核销弹窗
   const [writeOffOpen, setWriteOffOpen] = useState(false)
@@ -209,6 +215,14 @@ export function OutboundRecordDetailPage() {
                     </Button>
                   </>
                 )}
+                <Button
+                  size="sm"
+                  className="cursor-pointer h-8 text-xs gap-1"
+                  onClick={() => setUploadModalOpen(true)}
+                >
+                  <Plus className="size-3.5" />
+                  补充资料
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -366,6 +380,18 @@ export function OutboundRecordDetailPage() {
               onClick={() => setTab("audit")}
             >
               全流程审核轨迹
+            </button>
+            <button
+              type="button"
+              className={cn(
+                "px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer",
+                tab === "documents"
+                  ? "border-primary text-primary font-semibold"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              )}
+              onClick={() => setTab("documents")}
+            >
+              资料管理
             </button>
           </div>
 
@@ -818,6 +844,16 @@ export function OutboundRecordDetailPage() {
               </div>
             </div>
           )}
+
+          {/* Tab 4: 资料管理 */}
+          {tab === "documents" && (
+            <DocumentManagementTabContent
+              orderNo={record.orderNo}
+              approvalId="SP202605290001"
+              orderType="outbound"
+              onUploadClick={() => setUploadModalOpen(true)}
+            />
+          )}
         </div>
 
         {/* 图片预览弹窗 */}
@@ -840,6 +876,19 @@ export function OutboundRecordDetailPage() {
           order={targetDeliveryOrder}
           onClose={() => setDirectConfirmOpen(false)}
           onSuccess={handleDirectConfirmSuccess}
+        />
+
+        {/* 补充资料弹窗 */}
+        <UploadSupplementaryModal
+          open={uploadModalOpen}
+          orderNo={record.orderNo}
+          approvalId="SP202605290001"
+          orderType="outbound"
+          onClose={() => setUploadModalOpen(false)}
+          onSuccess={() => {
+            showToast("资料上传成功并已关联出库单据")
+            setTab("documents")
+          }}
         />
 
         {/* 提示 Toast */}
