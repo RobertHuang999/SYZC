@@ -6,6 +6,12 @@ import { NavBar } from "@/components/layout/NavBar"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { H5_PAGE_BODY } from "@/shared/h5-ui-theme"
 import { NativeFormRow } from "@/features/inbound-records/components/NativeFormRow"
+import { PartnerEnterpriseLicenseOcrButton } from "../components/PartnerEnterpriseLicenseOcrButton"
+import {
+  demoPartnerEnterpriseLicenseOcr,
+  PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_RECOGNIZING,
+  PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_SUCCESS,
+} from "@prototype/shared/partner-archives/partner-enterprise-license-ocr.demo"
 import { NativeInfoCard } from "@/features/inbound-records/components/NativeInfoCard"
 import { MobileDownSelectSheet } from "@/features/inbound-records/components/MobileDownSelectSheet"
 import {
@@ -520,6 +526,21 @@ export function PartnerArchiveFormPage() {
 
   const identityReadOnly = isFrozenLimitedEdit || coreIdentityLocked
 
+  const enterpriseLicenseOcrDisabled =
+    subjectType !== "ENTERPRISE" || identityReadOnly
+
+  const runEnterpriseLicenseOcr = () => {
+    if (enterpriseLicenseOcrDisabled) return
+    showToast(PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_RECOGNIZING)
+    window.setTimeout(() => {
+      const demo = demoPartnerEnterpriseLicenseOcr(archiveMenuLabel)
+      markDirty()
+      setName(demo.enterpriseName)
+      setIdNumber(demo.unifiedSocialCreditCode)
+      showToast(PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_SUCCESS)
+    }, 500)
+  }
+
   return (
     <MobileShell>
       <div className={`${H5_PAGE_BODY} bg-gradient-to-b from-blue-50/80 to-[#F2F3F7]`}>
@@ -564,15 +585,24 @@ export function PartnerArchiveFormPage() {
                 </NativeFormRow>
                 <NativeFormRow label="主体名称">
                   <input
-                    className="w-full bg-transparent text-right text-sm outline-none disabled:opacity-50"
+                    className="min-w-0 flex-1 bg-transparent text-right text-sm outline-none disabled:opacity-50"
                     value={name}
                     maxLength={subjectType === "ENTERPRISE" ? 100 : 30}
                     readOnly={identityReadOnly}
+                    placeholder={
+                      subjectType === "ENTERPRISE" ? "营业执照标准全称" : undefined
+                    }
                     onChange={(e) => {
                       markDirty()
                       setName(e.target.value)
                     }}
                   />
+                  {subjectType === "ENTERPRISE" ? (
+                    <PartnerEnterpriseLicenseOcrButton
+                      disabled={enterpriseLicenseOcrDisabled}
+                      onClick={runEnterpriseLicenseOcr}
+                    />
+                  ) : null}
                 </NativeFormRow>
                 {subjectType === "ENTERPRISE" ? (
                   <NativeFormRow label="经办人姓名">

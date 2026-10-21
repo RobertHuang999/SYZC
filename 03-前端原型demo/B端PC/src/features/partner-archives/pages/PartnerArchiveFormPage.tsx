@@ -2,6 +2,11 @@ import { useEffect, useMemo, useState } from "react"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { partnerArchiveBaseFromPathname } from "@prototype/shared/partner-archives/partner-archive-routes"
 import { AlertTriangleIcon, ArrowLeftIcon } from "lucide-react"
+import {
+  demoPartnerEnterpriseLicenseOcr,
+  PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_RECOGNIZING,
+  PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_SUCCESS,
+} from "@prototype/shared/partner-archives/partner-enterprise-license-ocr.demo"
 import { ProductFieldHint } from "@/components/form/ProductFieldHint"
 import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { Badge } from "@/components/ui/badge"
@@ -31,6 +36,7 @@ import {
 } from "@prototype/shared/partner-archives/partner-archive-domain"
 import { partnerArchiveFormAnnotations } from "../annotations/partner-archive-form.annotations"
 import { PartnerConfirmDialog } from "../components/PartnerConfirmDialog"
+import { PartnerEnterpriseLicenseOcrButton } from "../components/PartnerEnterpriseLicenseOcrButton"
 import { PartnerVerifyDialog } from "../components/PartnerVerifyDialog"
 import { PARTNER_FORM_SUBJECT_TYPE_OPTIONS } from "../domain/constants"
 import {
@@ -157,6 +163,24 @@ export function PartnerArchiveFormPage() {
   )
 
   const coreIdentityLocked = Boolean(isEdit && isContactPhoneVerified && !isPendingCompletion)
+
+  const enterpriseNameReadOnly = isFrozenLimitedEdit || coreIdentityLocked
+  const enterpriseLicenseOcrDisabled =
+    subjectType !== "ENTERPRISE" || enterpriseNameReadOnly
+
+  const runEnterpriseLicenseOcr = () => {
+    if (enterpriseLicenseOcrDisabled) return
+    setToastMessage(PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_RECOGNIZING)
+    window.setTimeout(() => {
+      const demo = demoPartnerEnterpriseLicenseOcr(archiveMenuLabel)
+      markDirty()
+      setName(demo.enterpriseName)
+      setIdNumber(demo.unifiedSocialCreditCode)
+      setErrors((prev) => ({ ...prev, name: "", idNumber: "" }))
+      setToastMessage(PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_SUCCESS)
+      window.setTimeout(() => setToastMessage(null), 2800)
+    }, 500)
+  }
 
   useEffect(() => {
     if (!dirty) {
@@ -730,22 +754,31 @@ export function PartnerArchiveFormPage() {
                         <span className="mr-1 font-bold text-destructive">*</span>
                         主体名称
                       </Label>
-                      <Input
-                        id="partner-name"
-                        value={name}
-                        maxLength={subjectType === "ENTERPRISE" ? 100 : 30}
-                        readOnly={isFrozenLimitedEdit || coreIdentityLocked}
-                        placeholder={
-                          subjectType === "INDIVIDUAL"
-                            ? "请输入居民身份证姓名"
-                            : "请输入营业执照标准全称"
-                        }
-                        onChange={(event) => {
-                          markDirty()
-                          setName(event.target.value)
-                          setErrors((prev) => ({ ...prev, name: "" }))
-                        }}
-                      />
+                      <div className="flex gap-1.5">
+                        <Input
+                          id="partner-name"
+                          className="min-w-0 flex-1"
+                          value={name}
+                          maxLength={subjectType === "ENTERPRISE" ? 100 : 30}
+                          readOnly={enterpriseNameReadOnly}
+                          placeholder={
+                            subjectType === "INDIVIDUAL"
+                              ? "请输入居民身份证姓名"
+                              : "请输入营业执照标准全称"
+                          }
+                          onChange={(event) => {
+                            markDirty()
+                            setName(event.target.value)
+                            setErrors((prev) => ({ ...prev, name: "" }))
+                          }}
+                        />
+                        {subjectType === "ENTERPRISE" ? (
+                          <PartnerEnterpriseLicenseOcrButton
+                            disabled={enterpriseLicenseOcrDisabled}
+                            onClick={runEnterpriseLicenseOcr}
+                          />
+                        ) : null}
+                      </div>
                       {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                     </div>
 
