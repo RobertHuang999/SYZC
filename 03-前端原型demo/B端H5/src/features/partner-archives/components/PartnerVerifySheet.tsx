@@ -8,7 +8,7 @@ import {
 } from "@prototype/B端PC/src/features/partner-archives/domain/types"
 import { partnerVerifyDialogCopy } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
 import { maskLoginPhone } from "@prototype/B端PC/src/features/partner-archives/lib/detail-utils"
-import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 
 const DEFAULT_MOCK_CODE = "888888"
 

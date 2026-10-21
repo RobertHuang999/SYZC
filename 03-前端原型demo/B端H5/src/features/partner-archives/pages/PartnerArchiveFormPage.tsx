@@ -17,8 +17,8 @@ import {
   type RoleType,
   type SubjectType,
 } from "@prototype/B端PC/src/features/partner-archives/domain/types"
-import { ProductFieldHint } from "@prototype/B端PC/src/components/form/ProductFieldHint"
-import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
+import { ProductFieldHint } from "@/components/form/ProductFieldHint"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { getPartnerArchiveById } from "@prototype/B端PC/src/features/partner-archives/lib/detail-utils"
 import { partnerArchivesMock } from "@prototype/B端PC/src/features/partner-archives/mock/partner-archives.mock"
 import {

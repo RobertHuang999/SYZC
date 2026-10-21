@@ -1,5 +1,5 @@
 import { AlertCircle, Ban, FileText, Package } from "lucide-react"
-import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import type { PartnerSubject } from "@prototype/B端PC/src/features/partner-archives/domain/types"
 import type { FreezeBlockReason } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-rules"
 

@@ -33,7 +33,7 @@ import {
   INBOUND_STAGING_LIST_ROUTE,
   inboundStagingDetailPath,
 } from "../domain/constants"
-import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import {
   STAGING_H5_TEMP_OWNER_SPEC,
   STAGING_H5_TEMP_OWNER_USER,

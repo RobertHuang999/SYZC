@@ -21,7 +21,7 @@ import {
   inboundStagingEditQuery,
 } from "../domain/constants"
 import { navigateToFormalInbound } from "../lib/formal-inbound-nav"
-import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import {
   STAGING_DETAIL_TABS,
   STAGING_P01_BANNER_SPEC,

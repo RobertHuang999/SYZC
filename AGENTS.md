@@ -243,15 +243,15 @@ PRD、ASCII、Demo 与规范文档互相引用章节时**不使用章节符**，
 - 表单 Card 下说明、配置项 `hint`、弹窗 `DialogDescription`、H5 横幅/Sheet 说明等，只要可能出现 **规则编号、三件套引用、审计字段说明**，一律走本分层。
 - **标注层（4.2）**仍写完整规则；本节只约束**页面 DOM 上**的文案。
 
-**组件（双端共用路径）**
+**组件（双端同构路径）**
 
 | 用途 | 组件 | 路径 |
 | :--- | :--- | :--- |
-| **上线用户文案** | `ProductFieldHint` | `03-前端原型demo/B端PC/src/components/form/ProductFieldHint.tsx` |
-| **规格对照（非上线）** | `PrototypeSpecCallout` | `03-前端原型demo/B端PC/src/components/form/PrototypeSpecCallout.tsx` |
+| **上线用户文案** | `ProductFieldHint` | `03-前端原型demo/{端}/src/components/form/ProductFieldHint.tsx` |
+| **规格对照（非上线）** | `PrototypeSpecCallout` | `03-前端原型demo/{端}/src/components/form/PrototypeSpecCallout.tsx` |
 
 - **PC**：`import { ProductFieldHint } from "@/components/form/ProductFieldHint"`（及 `PrototypeSpecCallout`）。
-- **H5**：`import … from "@prototype/B端PC/src/components/form/…"`（与现有合作方/入库一致）。
+- **H5**：`import { ProductFieldHint } from "@/components/form/ProductFieldHint"`（及 `PrototypeSpecCallout`）。（独立部署防跨工程类型解析缺失）
 
 **文案真源（禁止在 TSX 里随手写 P01）**
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { maskLoginPhone } from "@prototype/B端PC/src/features/partner-archives/lib/detail-utils"
-import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import {
   INBOUND_OWNER_VERIFY_DIALOG,
   inboundOwnerTypeDisplay,

@@ -1,5 +1,5 @@
 import type { InboundStagingReg } from "@prototype/shared/inbound/inbound-staging.mock"
-import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import {
   STAGING_ACTION_LABELS,
   STAGING_O03_H5_ROUTE_HINT_USER,

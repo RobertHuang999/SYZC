@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 
 type PartnerConfirmSheetProps = {
   open: boolean

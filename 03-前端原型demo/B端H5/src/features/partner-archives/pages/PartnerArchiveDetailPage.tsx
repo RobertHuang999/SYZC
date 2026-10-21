@@ -43,7 +43,7 @@ import {
   PARTNER_DETAIL_PENDING_DOCS_SPEC,
   PARTNER_DETAIL_PENDING_DOCS_USER,
 } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
-import { PrototypeSpecCallout } from "@prototype/B端PC/src/components/form/PrototypeSpecCallout"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { partnerArchivesMock } from "@prototype/B端PC/src/features/partner-archives/mock/partner-archives.mock"
 import { PartnerAppendRoleSheet } from "../components/PartnerAppendRoleSheet"
 import { PartnerConfirmSheet } from "../components/PartnerConfirmSheet"
