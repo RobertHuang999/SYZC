@@ -92,8 +92,6 @@ export interface AuditLogItem {
     | "AUDIT_SNAPSHOT"
   actionName: string
   detail: string
-  /** 客户端 IP 地址留痕 */
-  ip?: string
 }
 
 export interface PartnerSubject {

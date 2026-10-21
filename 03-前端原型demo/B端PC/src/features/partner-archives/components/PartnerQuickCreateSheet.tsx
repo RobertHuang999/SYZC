@@ -37,6 +37,7 @@ import {
   PARTNER_QUICK_CREATE_SUPERVISION_FUNDER_USER,
   PARTNER_QUICK_CREATE_SUPERVISION_SERVICE_SPEC,
   PARTNER_QUICK_CREATE_SUPERVISION_SERVICE_USER,
+  PARTNER_OWNER_ENTERPRISE_AGENT_USER_HINT,
 } from "../lib/partner-archive-ui-labels"
 
 type PartnerQuickCreateSheetProps = {
@@ -254,6 +255,9 @@ export function PartnerQuickCreateSheet({
                     markDirty()
                   }}
                 />
+                {scene === "INBOUND_OWNER" ? (
+                  <ProductFieldHint>{PARTNER_OWNER_ENTERPRISE_AGENT_USER_HINT}</ProductFieldHint>
+                ) : null}
               </div>
             ) : null}
             {scene === "INBOUND_OWNER" ? (

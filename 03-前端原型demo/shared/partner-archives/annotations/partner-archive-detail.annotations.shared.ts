@@ -157,7 +157,7 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
 | **合作方主体标识** | 业务主键 | 文本展示 | 跳转详情路由须带对方 archiveMenu |
 | **主体名称** | 文本 | 不脱敏 | 对方主档名称 |
 | **主体状态** | 正常 / 冻结 | 徽章 | 对方 **本菜单域** 主体状态 |
-| **待补全派生** | 布尔派生 | 辅助徽章 | 对方菜单 04-x 必填未齐时展示 |
+| **待补全派生** | 布尔派生 | 辅助徽章 | **货主/提货人** 04-x 必填未齐时展示；详情横幅走 \`partnerPendingCompletionUserBanner\`；缺口字段行内 amber 提示（\`partnerFieldPendingInlineHint\`） |
 | **行操作** | 按钮 | 查看详情 / 解除关联 | 解除须录入原因（PA-R05）；**不提供** 冻结对方单条角色 |`,
           },
         ],
@@ -267,7 +267,7 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
           {
             label: "与时间轴 DOM 一致",
             content:
-              "第一行：时间·人·IP·【创建合作方档案】\n第二行：`由出库记录 CK-xxx 业务带出创建：联系手机已补齐`",
+              "第一行：时间·操作人·【创建合作方档案】（不展示操作人 IP）\n第二行：`由出库记录 CK-xxx 业务带出创建：联系手机已补齐`",
           },
           {
             label: "完整模板",

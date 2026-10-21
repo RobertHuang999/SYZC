@@ -47,6 +47,7 @@ import {
   CONTACT_PHONE_VERIFY_BADGE_CLASS,
   CONTACT_PHONE_VERIFY_LABELS,
   markContactPhoneVerified,
+  requiresPartnerEditPhoneSmsVerify,
   resolveContactPhoneVerified,
 } from "../lib/contact-phone-verify"
 import { getPartnerArchiveById } from "../lib/detail-utils"
@@ -80,11 +81,16 @@ import {
 import { buildPartnerAddressAuditClauses } from "@prototype/shared/partner-archives/partner-audit-log-detail"
 import { requiresPartnerChangeAddressReasonDialog } from "@prototype/shared/partner-archives/partner-change-address-pa-r06a"
 import {
+  canEditPartnerSubjectIdNumberOnForm,
+  canEditPartnerSubjectNameOnForm,
   isArchiveRequiredFieldsPending,
   isCertAddressSaveRequired,
   isEnterpriseOnlyArchiveMenu,
+  isPickupEnterpriseAgentNameRequired,
+  partnerArchiveMenuForFormValidation,
   validateArchiveMenuRequiredFields,
 } from "../lib/archive-required-fields-pending"
+import { PARTNER_FORM_LOCKED_FIELD_PC } from "@prototype/shared/partner-archives/partner-form-field-styles"
 import { cn } from "@/lib/utils"
 
 function subjectTypeFromLabel(label: string): SubjectType {
@@ -167,9 +173,36 @@ export function PartnerArchiveFormPage() {
 
   const coreIdentityLocked = Boolean(isEdit && isContactPhoneVerified && !isPendingCompletion)
 
-  const enterpriseNameReadOnly = isFrozenLimitedEdit || coreIdentityLocked
+  const menuForValidation = partnerArchiveMenuForFormValidation({
+    isEdit,
+    routeMenu: archiveMenuLabel,
+    existing,
+  })
+
+  const canEditSubjectName = canEditPartnerSubjectNameOnForm({
+    isEdit,
+    isFrozenLimitedEdit,
+    isContactPhoneVerified,
+  })
+  const canEditSubjectId = canEditPartnerSubjectIdNumberOnForm({
+    isEdit,
+    isFrozenLimitedEdit,
+    isContactPhoneVerified,
+  })
+
+  const subjectNameReadOnly = !canEditSubjectName
+  const subjectIdReadOnly = !canEditSubjectId
+  const subjectTypeLocked = Boolean(
+    isEdit || isEnterpriseOnlyArchiveMenu(archiveMenuLabel),
+  )
+  const agentNameLocked = Boolean(
+    isFrozenLimitedEdit || (coreIdentityLocked && !adjustAgentMode),
+  )
+  const enterprisePhoneLocked = Boolean(
+    subjectType === "ENTERPRISE" && coreIdentityLocked && !adjustAgentMode,
+  )
   const enterpriseLicenseOcrDisabled =
-    subjectType !== "ENTERPRISE" || enterpriseNameReadOnly
+    subjectType !== "ENTERPRISE" || subjectNameReadOnly
 
   const runEnterpriseLicenseOcr = () => {
     if (enterpriseLicenseOcrDisabled) return
@@ -261,11 +294,13 @@ export function PartnerArchiveFormPage() {
   /** 仅货主信息 + 基础配置 P01 开启时保存必录证件地址 */
   const addressRequired = isCertAddressSaveRequired(archiveMenuLabel, subjectType)
   const showPickupAgentIdField =
-    archiveMenuLabel === "提货人信息" && subjectType === "ENTERPRISE"
-  const enterpriseAgentRequired =
-    archiveMenuLabel === "提货人信息" && subjectType === "ENTERPRISE"
+    menuForValidation === "提货人信息" && subjectType === "ENTERPRISE"
+  const pickupEnterpriseAgentNameRequired = isPickupEnterpriseAgentNameRequired(
+    menuForValidation,
+    subjectType,
+  )
   const ownerEnterpriseAgentOptional =
-    archiveMenuLabel === "货主信息" && subjectType === "ENTERPRISE"
+    menuForValidation === "货主信息" && subjectType === "ENTERPRISE"
 
   const buildCertAddress = () => {
     const detail = detailAddress.trim()
@@ -298,6 +333,9 @@ export function PartnerArchiveFormPage() {
     options?: { verifiedOnCreate?: boolean }
   ) => {
     const phoneChanged = Boolean(isEdit && hasPhoneDiff)
+    const wasVerifiedBeforeEdit = Boolean(
+      existing && resolveContactPhoneVerified(existing) === "VERIFIED",
+    )
     const oldPhoneVal = existing?.contactPhone
     const now = new Date().toISOString().replace("T", " ").substring(0, 19)
     const today = now.substring(0, 10)
@@ -381,8 +419,13 @@ export function PartnerArchiveFormPage() {
       const certAddressBeforeSave = { ...existing.certAddress }
       const certAddressAfterSave = buildCertAddress()
 
-      if (!isFrozenLimitedEdit && !coreIdentityLocked) {
+      if (canEditSubjectName) {
         existing.name = name.trim()
+      }
+      if (canEditSubjectId) {
+        const trimmedId = idNumber.trim()
+        existing.idNumber = trimmedId
+        existing.idNumberMasked = maskIdNumber(trimmedId)
       }
       if (!isFrozenLimitedEdit) {
         existing.contactPhone = contactPhone.trim()
@@ -393,8 +436,14 @@ export function PartnerArchiveFormPage() {
           existing.agentIdNumber = agentIdNumber.trim()
         }
       }
-      if (phoneChanged || hasAgentDiff) {
+      if (
+        wasVerifiedBeforeEdit &&
+        (phoneChanged || (adjustAgentMode && hasAgentDiff))
+      ) {
         markContactPhoneVerified(existing)
+      } else if (phoneChanged && !wasVerifiedBeforeEdit) {
+        existing.contactPhoneVerified = "UNVERIFIED"
+        existing.contactPhoneVerifiedAt = undefined
       }
       existing.certAddress = certAddressAfterSave
 
@@ -414,7 +463,9 @@ export function PartnerArchiveFormPage() {
       const changeParts: string[] = []
       if (phoneChanged) {
         changeParts.push(
-          `变更业务联系电话为【${contactPhone.trim()}】（原：${oldPhoneVal}，短信二元核验通过）`
+          wasVerifiedBeforeEdit
+            ? `变更业务联系电话为【${contactPhone.trim()}】（原：${oldPhoneVal}，短信二元核验通过）`
+            : `变更业务联系电话为【${contactPhone.trim()}】（原：${oldPhoneVal}）`,
         )
       }
       changeParts.push(
@@ -448,9 +499,11 @@ export function PartnerArchiveFormPage() {
     setIsSubmitting(false)
     setToastMessage(
       isEdit
-        ? phoneChanged
+        ? phoneChanged && wasVerifiedBeforeEdit
           ? "短信身份核验通过，联系手机修改成功"
-          : changeReason
+          : phoneChanged
+            ? "联系手机修改成功"
+            : changeReason
             ? "改址成功并已生效"
             : isPendingCompletion
               ? "资料补全成功，主档已完备"
@@ -466,12 +519,12 @@ export function PartnerArchiveFormPage() {
     setAccessWarning(null)
     const certFull = `${province}${city}${district}${detailAddress.trim()}`
     const newErrors = validateArchiveMenuRequiredFields({
-      archiveMenu: archiveMenuLabel,
+      archiveMenu: menuForValidation,
       subjectType,
       name,
       idNumber,
       contactPhone,
-      agentName,
+      agentName: pickupEnterpriseAgentNameRequired ? agentName : undefined,
       agentIdNumber: showPickupAgentIdField ? agentIdNumber : undefined,
       certAddressFull: certFull,
     })
@@ -484,10 +537,7 @@ export function PartnerArchiveFormPage() {
     if (idNumber.trim() && idNumber.trim().length !== 18) {
       newErrors.idNumber = "证件号码长度必须为18位字符"
     }
-    if (
-      (enterpriseAgentRequired || showPickupAgentIdField) &&
-      agentName.trim().length > 30
-    ) {
+    if (pickupEnterpriseAgentNameRequired && agentName.trim().length > 30) {
       newErrors.agentName = "经办人姓名不超过 30 字"
     }
     if (
@@ -565,12 +615,14 @@ export function PartnerArchiveFormPage() {
       return
     }
 
-    const needsPhoneVerify =
-      isEdit &&
-      (hasPhoneDiff ||
-        (subjectType === "ENTERPRISE" &&
-          adjustAgentMode &&
-          (hasPhoneDiff || hasAgentDiff)))
+    const needsPhoneVerify = requiresPartnerEditPhoneSmsVerify({
+      isEdit,
+      existing,
+      hasPhoneDiff,
+      hasAgentDiff,
+      subjectType,
+      adjustAgentMode,
+    })
 
     if (needsPhoneVerify) {
       setVerifyDialogMode("CHANGE_PHONE")
@@ -734,7 +786,13 @@ export function PartnerArchiveFormPage() {
                           setSubjectTypeLabel(next)
                         }}
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger
+                          data-partner-form-locked={subjectTypeLocked ? "true" : undefined}
+                          className={cn(
+                            "w-full",
+                            subjectTypeLocked && PARTNER_FORM_LOCKED_FIELD_PC,
+                          )}
+                        >
                           <SelectValue placeholder="请选择主体类型" />
                         </SelectTrigger>
                         <SelectContent>
@@ -756,10 +814,17 @@ export function PartnerArchiveFormPage() {
                       <div className="flex gap-1.5">
                         <Input
                           id="partner-name"
-                          className="min-w-0 flex-1"
+                          data-partner-form-locked={
+                            subjectNameReadOnly ? "true" : undefined
+                          }
+                          className={cn(
+                            "min-w-0 flex-1",
+                            subjectNameReadOnly && PARTNER_FORM_LOCKED_FIELD_PC,
+                          )}
                           value={name}
                           maxLength={subjectType === "ENTERPRISE" ? 100 : 30}
-                          readOnly={enterpriseNameReadOnly}
+                          readOnly={subjectNameReadOnly}
+                          disabled={subjectNameReadOnly}
                           placeholder={
                             subjectType === "INDIVIDUAL"
                               ? "请输入居民身份证姓名"
@@ -785,7 +850,7 @@ export function PartnerArchiveFormPage() {
                       <div className="space-y-2">
                         <div className="flex items-center justify-between gap-2">
                           <Label htmlFor="partner-agent">
-                            {(enterpriseAgentRequired || showPickupAgentIdField) && (
+                            {pickupEnterpriseAgentNameRequired && (
                               <span className="mr-1 font-bold text-destructive">*</span>
                             )}
                             经办人姓名
@@ -806,12 +871,12 @@ export function PartnerArchiveFormPage() {
                         </div>
                         <Input
                           id="partner-agent"
+                          data-partner-form-locked={agentNameLocked ? "true" : undefined}
                           value={agentName}
                           maxLength={30}
-                          readOnly={
-                            isFrozenLimitedEdit ||
-                            (coreIdentityLocked && !adjustAgentMode)
-                          }
+                          readOnly={agentNameLocked}
+                          disabled={agentNameLocked}
+                          className={cn(agentNameLocked && PARTNER_FORM_LOCKED_FIELD_PC)}
                           placeholder="请输入企业业务对接人姓名"
                           onChange={(event) => {
                             markDirty()
@@ -838,9 +903,16 @@ export function PartnerArchiveFormPage() {
                         </Label>
                         <Input
                           id="partner-agent-id"
+                          data-partner-form-locked={
+                            isFrozenLimitedEdit ? "true" : undefined
+                          }
                           value={agentIdNumber}
                           maxLength={18}
                           readOnly={isFrozenLimitedEdit}
+                          disabled={isFrozenLimitedEdit}
+                          className={cn(
+                            isFrozenLimitedEdit && PARTNER_FORM_LOCKED_FIELD_PC,
+                          )}
                           placeholder="请输入18位经办人居民身份证号"
                           onChange={(event) => {
                             markDirty()
@@ -865,13 +937,16 @@ export function PartnerArchiveFormPage() {
                       </Label>
                       <Input
                         id="partner-phone"
+                        data-partner-form-locked={
+                          enterprisePhoneLocked ? "true" : undefined
+                        }
                         value={contactPhone}
                         maxLength={11}
-                        readOnly={
-                          subjectType === "ENTERPRISE" &&
-                          coreIdentityLocked &&
-                          !adjustAgentMode
-                        }
+                        readOnly={enterprisePhoneLocked}
+                        disabled={enterprisePhoneLocked}
+                        className={cn(
+                          enterprisePhoneLocked && PARTNER_FORM_LOCKED_FIELD_PC,
+                        )}
                         placeholder={
                           subjectType === "INDIVIDUAL"
                             ? "请输入11位手机号码"
@@ -895,8 +970,15 @@ export function PartnerArchiveFormPage() {
                       </Label>
                       <Input
                         id="partner-idNumber"
+                        data-partner-form-locked={
+                          subjectIdReadOnly ? "true" : undefined
+                        }
                         value={idNumber}
-                        readOnly={isEdit}
+                        readOnly={subjectIdReadOnly}
+                        disabled={subjectIdReadOnly}
+                        className={cn(
+                          subjectIdReadOnly && PARTNER_FORM_LOCKED_FIELD_PC,
+                        )}
                         placeholder={
                           subjectType === "INDIVIDUAL"
                             ? "请输入18位居民身份证号"
@@ -1078,7 +1160,16 @@ export function PartnerArchiveFormPage() {
           onOpenChange={(open) => setChangeAddressDialogOpen(open)}
           onConfirm={(reason) => {
             setChangeAddressDialogOpen(false)
-            if (hasPhoneDiff) {
+            if (
+              requiresPartnerEditPhoneSmsVerify({
+                isEdit,
+                existing,
+                hasPhoneDiff,
+                hasAgentDiff,
+                subjectType,
+                adjustAgentMode,
+              })
+            ) {
               setPendingChangeReason(reason)
               setVerifyDialogMode("CHANGE_PHONE")
               setVerifyDialogOpen(true)

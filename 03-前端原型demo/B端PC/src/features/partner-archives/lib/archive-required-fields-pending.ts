@@ -18,6 +18,53 @@ export function isEnterpriseOnlyArchiveMenu(menu: PartnerArchiveMenuLabel): bool
   return menu === "资金方信息" || menu === "服务方信息"
 }
 
+/** 提货人信息 · 企业：经办人姓名必填（货主信息企业经办人选填） */
+export function isPickupEnterpriseAgentNameRequired(
+  menu: PartnerArchiveMenuLabel,
+  subjectType: SubjectType,
+): boolean {
+  return menu === "提货人信息" && subjectType === "ENTERPRISE"
+}
+
+/**
+ * 编辑页：主体名称是否允许改。
+ * 【已验证主体核心字段锁定规则】(PA-R04c)：联系手机已验证时置灰只读；未验证可改（冻结态除外）。
+ */
+export function canEditPartnerSubjectNameOnForm(input: {
+  isEdit: boolean
+  isFrozenLimitedEdit: boolean
+  isContactPhoneVerified: boolean
+}): boolean {
+  if (!input.isEdit) return true
+  if (input.isFrozenLimitedEdit) return false
+  if (input.isContactPhoneVerified) return false
+  return true
+}
+
+/** 编辑页：身份标识 / 统一社会信用代码是否允许改（规则同主体名称） */
+export function canEditPartnerSubjectIdNumberOnForm(input: {
+  isEdit: boolean
+  isFrozenLimitedEdit: boolean
+  isContactPhoneVerified: boolean
+}): boolean {
+  if (!input.isEdit) return true
+  if (input.isFrozenLimitedEdit) return false
+  if (input.isContactPhoneVerified) return false
+  return true
+}
+
+/** 保存/校验时使用的档案归属菜单（编辑态以主档为准） */
+export function partnerArchiveMenuForFormValidation(input: {
+  isEdit: boolean
+  routeMenu: PartnerArchiveMenuLabel
+  existing?: PartnerSubject | null
+}): PartnerArchiveMenuLabel {
+  if (input.isEdit && input.existing?.archiveMenu) {
+    return input.existing.archiveMenu
+  }
+  return input.routeMenu
+}
+
 /** 仅货主信息走基础配置 P01 证件地址必填 */
 export function readOwnerCertAddressP01Enabled(subjectType: SubjectType): boolean {
   const policy = platformBasicConfigInitialState.partnerAccess

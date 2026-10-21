@@ -1,5 +1,6 @@
 import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
 import type { SubjectType } from "../domain/types"
+import type { ArchiveRequiredGap } from "./archive-required-fields-pending"
 
 /** 详情页 Tab 文案（PC / H5 共用） */
 export const PARTNER_DETAIL_TAB_ITEMS = [
@@ -284,7 +285,26 @@ export const PARTNER_DETAIL_PENDING_DOCS_USER =
   "本菜单必填项尚未齐备，请通过【补全资料】补录；完善前部分下游作业仍可按各业务规则引用。"
 
 export const PARTNER_DETAIL_PENDING_DOCS_SPEC =
-  "P01 仅档案保存必填；仓储/仓单不因缺址阻断。"
+  "待补全由 04-x 必填派生；货主/提货人按各菜单必填矩阵；仅货主信息因【货主证件地址必填校验规则】(P01) 纳入地址缺口。"
+
+/** 详情字段行：当前主档待补全缺口对应 inline 提示（无缺口返回 null） */
+export function partnerFieldPendingInlineHint(
+  gaps: ArchiveRequiredGap[],
+  field: ArchiveRequiredGap,
+): string | null {
+  if (!gaps.includes(field)) {
+    return null
+  }
+  const copy: Record<ArchiveRequiredGap, string> = {
+    name: "待补全（请补录主体名称）",
+    idNumber: "待补全（请补录身份标识）",
+    contactPhone: "待补全（请补录联系电话）",
+    agentName: "待补全（请补录经办人姓名）",
+    agentIdNumber: "待补全（请补录经办人身份证号）",
+    certAddress: "待补全（未录入证件登记地址）",
+  }
+  return copy[field]
+}
 
 export type PartnerConfirmCopy = {
   title: string

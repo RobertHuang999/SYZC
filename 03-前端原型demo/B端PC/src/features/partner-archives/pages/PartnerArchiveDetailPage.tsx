@@ -70,13 +70,16 @@ import {
 } from "../lib/archive-required-fields-pending"
 import { cn } from "@/lib/utils"
 import {
-  PARTNER_DETAIL_PENDING_DOCS_USER,
   PARTNER_DETAIL_TAB_ITEMS,
+  PARTNER_PENDING_COMPLETION_SPEC_NOTE,
   PARTNER_SUBJECT_FREEZE_DIALOG,
   PARTNER_SUBJECT_UNFREEZE_DIALOG,
   PARTNER_SUBJECT_UNFREEZE_SUCCESS_TOAST,
+  partnerFieldPendingInlineHint,
+  partnerPendingCompletionUserBanner,
   type PartnerDetailTabKey,
 } from "../lib/partner-archive-ui-labels"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 
 type DetailTab = PartnerDetailTabKey
 
@@ -123,6 +126,11 @@ export function PartnerArchiveDetailPage() {
   const needsCompletion = useMemo(() => {
     if (!partner) return false
     return isArchiveRequiredFieldsPending(partner)
+  }, [partner])
+
+  const requiredGaps = useMemo(() => {
+    if (!partner) return []
+    return collectArchiveRequiredGaps(partner)
   }, [partner])
 
   const canVerifyContactPhone = useMemo(() => {
@@ -354,10 +362,13 @@ export function PartnerArchiveDetailPage() {
           </div>
         </PrototypeAnnotationTarget>
 
-        {needsCompletion && (
-          <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            <AlertTriangleIcon className="mt-0.5 size-4 shrink-0 text-amber-600" />
-            <span>{PARTNER_DETAIL_PENDING_DOCS_USER}</span>
+        {needsCompletion && partner && (
+          <div className="space-y-2">
+            <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              <AlertTriangleIcon className="mt-0.5 size-4 shrink-0 text-amber-600" />
+              <span>{partnerPendingCompletionUserBanner(partner.archiveMenu)}</span>
+            </div>
+            <PrototypeSpecCallout>{PARTNER_PENDING_COMPLETION_SPEC_NOTE}</PrototypeSpecCallout>
           </div>
         )}
 
@@ -419,7 +430,13 @@ export function PartnerArchiveDetailPage() {
                 {partner.subjectType === "ENTERPRISE" && (
                   <div className="md:col-span-1">
                     <DetailField label="经办人姓名">
-                      {partner.agentName || "——"}
+                      {partnerFieldPendingInlineHint(requiredGaps, "agentName") ? (
+                        <span className="font-medium text-amber-600">
+                          {partnerFieldPendingInlineHint(requiredGaps, "agentName")}
+                        </span>
+                      ) : (
+                        partner.agentName || "——"
+                      )}
                     </DetailField>
                   </div>
                 )}
@@ -427,9 +444,15 @@ export function PartnerArchiveDetailPage() {
                   partner.subjectType === "ENTERPRISE" && (
                     <div className="md:col-span-1">
                       <DetailField label="经办人身份证号">
-                        {partner.agentIdNumber
-                          ? maskIdNumber(partner.agentIdNumber)
-                          : "——"}
+                        {partnerFieldPendingInlineHint(requiredGaps, "agentIdNumber") ? (
+                          <span className="font-medium text-amber-600">
+                            {partnerFieldPendingInlineHint(requiredGaps, "agentIdNumber")}
+                          </span>
+                        ) : partner.agentIdNumber ? (
+                          maskIdNumber(partner.agentIdNumber)
+                        ) : (
+                          "——"
+                        )}
                       </DetailField>
                     </div>
                   )}
@@ -441,20 +464,27 @@ export function PartnerArchiveDetailPage() {
                         : "联系电话（经办人手机）"
                     }
                   >
-                    <span>
-                      {partner.contactPhone.length >= 11
-                        ? maskLoginPhone(partner.contactPhone)
-                        : partner.contactPhone || "——"}
-                    </span>
+                    {partnerFieldPendingInlineHint(requiredGaps, "contactPhone") ? (
+                      <span className="font-medium text-amber-600">
+                        {partnerFieldPendingInlineHint(requiredGaps, "contactPhone")}
+                      </span>
+                    ) : (
+                      <span>
+                        {partner.contactPhone.length >= 11
+                          ? maskLoginPhone(partner.contactPhone)
+                          : partner.contactPhone || "——"}
+                      </span>
+                    )}
                   </DetailField>
                 </div>
                 <div className="md:col-span-3">
                   <DetailField label="证件地址">
                     {partner.certAddress.fullAddress ? (
                       <span>{partner.certAddress.fullAddress}</span>
-                    ) : collectArchiveRequiredGaps(partner).includes("certAddress") ? (
+                    ) : partnerFieldPendingInlineHint(requiredGaps, "certAddress") ? (
                       <span className="font-medium text-amber-600">
-                        待补全（未录入证件登记地址，请使用页头【补全资料】）
+                        {partnerFieldPendingInlineHint(requiredGaps, "certAddress")}
+                        （请使用页头【补全资料】）
                       </span>
                     ) : (
                       <span className="text-muted-foreground">——</span>
@@ -621,7 +651,6 @@ export function PartnerArchiveDetailPage() {
                       <DateTimeText value={log.opTime} className="text-xs text-muted-foreground" />
                       <span className="text-muted-foreground">·</span>
                       <span className="font-medium text-foreground">{log.operator}</span>
-                      <span className="text-xs text-muted-foreground">IP {log.ip || "——"}</span>
                       <Badge variant="outline" className="text-xs">
                         {log.actionName}
                       </Badge>

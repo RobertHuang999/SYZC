@@ -67,3 +67,21 @@
     background-color: rgb(191 219 254 / 90%);
   }
 }
+
+[data-partner-form-locked="true"] {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-height: 2.25rem;
+  background-color: #efefef !important;
+  border-color: #efefef !important;
+  color: #666666 !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #666666;
+}
+
+[data-partner-form-locked="true"]:disabled {
+  opacity: 1 !important;
+  -webkit-text-fill-color: #666666;
+}

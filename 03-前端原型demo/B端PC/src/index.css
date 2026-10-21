@@ -843,3 +843,13 @@ textarea {
     background-color: rgb(191 219 254 / 90%);
   }
 }
+
+/* 合作方档案表单 · 不可编辑字段（明显灰底） */
+[data-partner-form-locked="true"] {
+  background-color: #efefef !important;
+  border-color: #efefef !important;
+  color: #666666 !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #666666;
+}

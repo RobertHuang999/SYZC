@@ -40,8 +40,9 @@ import {
   collectArchiveRequiredGaps,
 } from "@prototype/B端PC/src/features/partner-archives/lib/archive-required-fields-pending"
 import {
-  PARTNER_DETAIL_PENDING_DOCS_SPEC,
-  PARTNER_DETAIL_PENDING_DOCS_USER,
+  PARTNER_PENDING_COMPLETION_SPEC_NOTE,
+  partnerFieldPendingInlineHint,
+  partnerPendingCompletionUserBanner,
 } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
 import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { partnerArchivesMock } from "@prototype/B端PC/src/features/partner-archives/mock/partner-archives.mock"
@@ -130,6 +131,11 @@ export function PartnerArchiveDetailPage() {
   const needsCompletion = useMemo(() => {
     if (!partner) return false
     return isArchiveRequiredFieldsPending(partner)
+  }, [partner])
+
+  const requiredGaps = useMemo(() => {
+    if (!partner) return []
+    return collectArchiveRequiredGaps(partner)
   }, [partner])
 
   const headerActions = useMemo(
@@ -262,12 +268,12 @@ export function PartnerArchiveDetailPage() {
         <NavBar title="合作方详情" backTo={partnerArchiveListRoute(menuFromPath)} />
 
       <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto bg-[#edf2f8] p-3 pb-32 overscroll-contain">
-        {needsCompletion ? (
+        {needsCompletion && partner ? (
           <div className="space-y-2">
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
-              {PARTNER_DETAIL_PENDING_DOCS_USER}
+              {partnerPendingCompletionUserBanner(partner.archiveMenu)}
             </div>
-            <PrototypeSpecCallout>{PARTNER_DETAIL_PENDING_DOCS_SPEC}</PrototypeSpecCallout>
+            <PrototypeSpecCallout>{PARTNER_PENDING_COMPLETION_SPEC_NOTE}</PrototypeSpecCallout>
           </div>
         ) : null}
 
@@ -331,22 +337,47 @@ export function PartnerArchiveDetailPage() {
                 value={resolveContactPhoneVerifiedAt(partner) || "——"}
               />
               {partner.subjectType === "ENTERPRISE" ? (
-                <DetailRow label="经办人姓名" value={partner.agentName || "——"} />
+                <DetailRow
+                  label="经办人姓名"
+                  value={
+                    partnerFieldPendingInlineHint(requiredGaps, "agentName") ? (
+                      <span className="font-medium text-amber-600">
+                        {partnerFieldPendingInlineHint(requiredGaps, "agentName")}
+                      </span>
+                    ) : (
+                      partner.agentName || "——"
+                    )
+                  }
+                />
               ) : null}
               {partner.archiveMenu === "提货人信息" && partner.subjectType === "ENTERPRISE" ? (
                 <DetailRow
                   label="经办人身份证号"
                   value={
-                    partner.agentIdNumber ? maskIdNumber(partner.agentIdNumber) : "——"
+                    partnerFieldPendingInlineHint(requiredGaps, "agentIdNumber") ? (
+                      <span className="font-medium text-amber-600">
+                        {partnerFieldPendingInlineHint(requiredGaps, "agentIdNumber")}
+                      </span>
+                    ) : partner.agentIdNumber ? (
+                      maskIdNumber(partner.agentIdNumber)
+                    ) : (
+                      "——"
+                    )
                   }
                 />
               ) : null}
               <DetailRow
                 label={partnerContactPhoneDetailLabel(partner.subjectType)}
                 value={
-                  partner.contactPhone.length >= 11
-                    ? maskLoginPhone(partner.contactPhone)
-                    : partner.contactPhone || "——"
+                  partnerFieldPendingInlineHint(requiredGaps, "contactPhone") ? (
+                    <span className="font-medium text-amber-600">
+                      {partnerFieldPendingInlineHint(requiredGaps, "contactPhone")}
+                    </span>
+                  ) : partner.contactPhone.length >= 11 ? (
+                    maskLoginPhone(partner.contactPhone)
+                  ) : (
+                    partner.contactPhone || "——"
+                  )
                 }
               />
               <DetailRow
@@ -354,9 +385,10 @@ export function PartnerArchiveDetailPage() {
                 value={
                   partner.certAddress.fullAddress ? (
                     partner.certAddress.fullAddress
-                  ) : collectArchiveRequiredGaps(partner).includes("certAddress") ? (
+                  ) : partnerFieldPendingInlineHint(requiredGaps, "certAddress") ? (
                     <span className="font-medium text-amber-600">
-                      待补全（未录入证件登记地址，请使用【补全资料】）
+                      {partnerFieldPendingInlineHint(requiredGaps, "certAddress")}
+                      （请使用【补全资料】）
                     </span>
                   ) : (
                     "——"
@@ -453,8 +485,6 @@ export function PartnerArchiveDetailPage() {
                     <p className="mt-1 text-xs text-[#232D39]/70 leading-relaxed">{log.detail}</p>
                     <p className="mt-1 text-[10px] text-[#232D39]/45">
                       操作人：{log.operator}
-                      <span className="mx-1">·</span>
-                      IP {log.ip || "——"}
                     </p>
                   </section>
                 ))}

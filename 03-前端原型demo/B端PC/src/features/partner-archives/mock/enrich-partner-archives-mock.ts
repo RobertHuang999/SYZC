@@ -12,10 +12,12 @@ const MENU_BY_ID: Record<string, PartnerArchiveMenuLabel> = {
   "p-07": "提货人信息",
   "p-08": "资金方信息",
   "p-09": "资金方信息",
-  "p-10": "资金方信息",
+  "p-10": "服务方信息",
   "p-11": "服务方信息",
-  "p-12": "服务方信息",
-  "p-13": "服务方信息",
+  "p-12": "货主信息",
+  "p-13": "提货人信息",
+  "p-14": "资金方信息",
+  "p-15": "服务方信息",
 }
 
 function activeRoleTypes(subject: PartnerSubjectMockInput): RoleType[] {

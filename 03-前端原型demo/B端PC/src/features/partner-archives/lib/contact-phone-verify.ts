@@ -1,4 +1,8 @@
-import type { ContactPhoneVerifyStatus, PartnerSubject } from "../domain/types"
+import type {
+  ContactPhoneVerifyStatus,
+  PartnerSubject,
+  SubjectType,
+} from "../domain/types"
 
 export function resolveContactPhoneVerified(
   partner: PartnerSubject
@@ -43,6 +47,38 @@ export function markContactPhoneVerified(
     at ?? new Date().toISOString().replace("T", " ").substring(0, 19)
   partner.contactPhoneVerified = "VERIFIED"
   partner.contactPhoneVerifiedAt = stamp
+}
+
+/**
+ * 编辑保存前是否须短信核验（【编辑修改联系手机二元核验规则】(PA-R04a)）。
+ * 联系手机仍为「未验证」时改号直接落库，不弹窗。
+ */
+export function requiresPartnerEditPhoneSmsVerify(input: {
+  isEdit: boolean
+  existing?: PartnerSubject | null
+  hasPhoneDiff: boolean
+  hasAgentDiff: boolean
+  subjectType: SubjectType
+  /** PC 已验证企业展开【调整经办人信息】后改经办人 */
+  adjustAgentMode?: boolean
+}): boolean {
+  if (!input.isEdit || !input.existing) {
+    return false
+  }
+  if (resolveContactPhoneVerified(input.existing) !== "VERIFIED") {
+    return false
+  }
+  if (input.hasPhoneDiff) {
+    return true
+  }
+  if (
+    input.subjectType === "ENTERPRISE" &&
+    input.adjustAgentMode &&
+    input.hasAgentDiff
+  ) {
+    return true
+  }
+  return false
 }
 
 export const CONTACT_PHONE_VERIFY_BADGE_CLASS: Record<ContactPhoneVerifyStatus, string> = {
