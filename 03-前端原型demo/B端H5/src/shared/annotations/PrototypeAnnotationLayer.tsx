@@ -690,17 +690,45 @@ export const PROTOTYPE_NAV_GROUPS: PrototypeNavGroup[] = [
     ],
   },
   {
-    label: "用户与配置",
+    label: "合作方档案",
     items: [
       {
-        title: "合作方档案",
-        path: "/m/workspace/user-center/partner-archives",
-        icon: "🤝",
+        title: "货主信息",
+        path: "/m/workspace/user-center/partner-archives/owner",
+        icon: "👥",
         matchPrefixes: [
-          "/m/workspace/user-center/partner-archives",
-          "/m/partner-archives/form",
+          "/m/workspace/user-center/partner-archives/owner",
         ],
       },
+      {
+        title: "提货人信息",
+        path: "/m/workspace/user-center/partner-archives/pickup-person",
+        icon: "🚚",
+        matchPrefixes: [
+          "/m/workspace/user-center/partner-archives/pickup-person",
+        ],
+      },
+      {
+        title: "资金方信息",
+        path: "/m/workspace/user-center/partner-archives/funder",
+        icon: "🏦",
+        matchPrefixes: [
+          "/m/workspace/user-center/partner-archives/funder",
+        ],
+      },
+      {
+        title: "服务方信息",
+        path: "/m/workspace/user-center/partner-archives/service-provider",
+        icon: "🏢",
+        matchPrefixes: [
+          "/m/workspace/user-center/partner-archives/service-provider",
+        ],
+      },
+    ],
+  },
+  {
+    label: "配置管理",
+    items: [
       {
         title: "仓库管理",
         path: "/m/workspace/config/warehouse-management",

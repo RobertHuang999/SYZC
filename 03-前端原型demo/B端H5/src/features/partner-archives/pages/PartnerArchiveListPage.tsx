@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react"
 import { Filter, Plus, RotateCcw, Search, X } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
-import { parsePartnerArchiveMenuFromH5ListPath } from "@prototype/shared/partner-archives/partner-archive-domain"
+import { parsePartnerArchiveMenuFromH5ListPath, h5PartnerArchiveListRoute } from "@prototype/shared/partner-archives/partner-archive-domain"
+import { PARTNER_ARCHIVE_MENU_LABELS } from "@prototype/shared/partner-archives/partner-archive-routes"
+import { cn } from "@/lib/utils"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import {
@@ -113,6 +115,35 @@ export function PartnerArchiveListPage() {
         <PrototypeAnnotationTarget annotationIds={["partner-archive-page"]}>
           <NavBar title={archiveMenuLabel} backTo={WORKSPACE_ROUTE} />
         </PrototypeAnnotationTarget>
+
+        {/* 四子菜单快速切换 Tabs */}
+        <div className="flex border-b border-gray-200/80 bg-white px-2 overflow-x-auto no-scrollbar shrink-0 select-none">
+          {PARTNER_ARCHIVE_MENU_LABELS.map((menu) => {
+            const active = menu === archiveMenuLabel
+            return (
+              <button
+                key={menu}
+                type="button"
+                onClick={() => {
+                  if (!active) {
+                    navigate(h5PartnerArchiveListRoute(menu))
+                  }
+                }}
+                className={cn(
+                  "relative shrink-0 px-3 py-2.5 text-xs font-medium transition-colors",
+                  active
+                    ? "text-blue-600 font-semibold"
+                    : "text-gray-500 hover:text-gray-900 active:text-blue-600",
+                )}
+              >
+                {menu}
+                {active && (
+                  <span className="absolute bottom-0 left-2.5 right-2.5 h-0.5 rounded-full bg-blue-600" />
+                )}
+              </button>
+            )
+          })}
+        </div>
 
         <PrototypeAnnotationTarget annotationIds={["partner-archive-filter"]}>
         <div className={H5_FILTER_BAR}>
