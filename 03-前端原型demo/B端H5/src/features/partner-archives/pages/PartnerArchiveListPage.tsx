@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Filter, Plus, RotateCcw, Search, X } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
-import { parsePartnerArchiveMenuFromH5ListPath, h5PartnerArchiveListRoute } from "@prototype/shared/partner-archives/partner-archive-domain"
-import { PARTNER_ARCHIVE_MENU_LABELS } from "@prototype/shared/partner-archives/partner-archive-routes"
-import { cn } from "@/lib/utils"
+import { parsePartnerArchiveMenuFromH5ListPath } from "@prototype/shared/partner-archives/partner-archive-domain"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import {
@@ -14,7 +12,6 @@ import { DrawerField, FilterDrawer } from "@/components/ui/FilterDrawer"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import {
   H5_FILTER_BAR,
-  H5_FILTER_PILL_ROW,
   H5_LIST_SCROLL,
   H5_PAGE_BODY,
 } from "@/shared/h5-ui-theme"
@@ -46,6 +43,11 @@ const PHONE_VERIFY_OPTIONS: DropdownOption[] = PARTNER_CONTACT_PHONE_VERIFY_FILT
 function drawerOptions(values: readonly string[], allLabel: string): DropdownOption[] {
   return values.map((v) => ({ label: v === "全部" ? allLabel : v, value: v }))
 }
+
+const SOURCE_OPTIONS: DropdownOption[] = drawerOptions(
+  PARTNER_SOURCE_FILTER_OPTIONS,
+  "全部来源",
+)
 
 export function PartnerArchiveListPage() {
   const navigate = useNavigate()
@@ -88,8 +90,6 @@ export function PartnerArchiveListPage() {
   }, [appliedFilters, mockTick, archiveMenuLabel])
 
   const drawerActive =
-    appliedFilters.source !== "全部" ||
-    appliedFilters.contactPhoneVerified !== "全部" ||
     Boolean(appliedFilters.contactPhone.trim()) ||
     Boolean(appliedFilters.createTimeStart) ||
     Boolean(appliedFilters.createTimeEnd)
@@ -115,35 +115,6 @@ export function PartnerArchiveListPage() {
         <PrototypeAnnotationTarget annotationIds={["partner-archive-page"]}>
           <NavBar title={archiveMenuLabel} backTo={WORKSPACE_ROUTE} />
         </PrototypeAnnotationTarget>
-
-        {/* 四子菜单快速切换 Tabs */}
-        <div className="flex border-b border-gray-200/80 bg-white px-2 overflow-x-auto no-scrollbar shrink-0 select-none">
-          {PARTNER_ARCHIVE_MENU_LABELS.map((menu) => {
-            const active = menu === archiveMenuLabel
-            return (
-              <button
-                key={menu}
-                type="button"
-                onClick={() => {
-                  if (!active) {
-                    navigate(h5PartnerArchiveListRoute(menu))
-                  }
-                }}
-                className={cn(
-                  "relative shrink-0 px-3 py-2.5 text-xs font-medium transition-colors",
-                  active
-                    ? "text-blue-600 font-semibold"
-                    : "text-gray-500 hover:text-gray-900 active:text-blue-600",
-                )}
-              >
-                {menu}
-                {active && (
-                  <span className="absolute bottom-0 left-2.5 right-2.5 h-0.5 rounded-full bg-blue-600" />
-                )}
-              </button>
-            )
-          })}
-        </div>
 
         <PrototypeAnnotationTarget annotationIds={["partner-archive-filter"]}>
         <div className={H5_FILTER_BAR}>
@@ -193,9 +164,8 @@ export function PartnerArchiveListPage() {
             </div>
           </div>
 
-          <div className={H5_FILTER_PILL_ROW}>
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
             <DropdownFilterPill
-              compactRow
               label="主体类型"
               value={appliedFilters.subjectType}
               options={SUBJECT_TYPE_OPTIONS}
@@ -206,7 +176,6 @@ export function PartnerArchiveListPage() {
               }}
             />
             <DropdownFilterPill
-              compactRow
               label="主体状态"
               value={appliedFilters.subjectStatus}
               options={subjectStatusOptions}
@@ -217,8 +186,17 @@ export function PartnerArchiveListPage() {
               }}
             />
             <DropdownFilterPill
-              compactRow
-              label="联系手机核验"
+              label="创建来源"
+              value={appliedFilters.source}
+              options={SOURCE_OPTIONS}
+              onChange={(source) => {
+                const next = { ...appliedFilters, source }
+                setDraftFilters(next)
+                setAppliedFilters(next)
+              }}
+            />
+            <DropdownFilterPill
+              label="手机核验"
               value={appliedFilters.contactPhoneVerified}
               options={PHONE_VERIFY_OPTIONS}
               onChange={(contactPhoneVerified) => {
@@ -281,8 +259,6 @@ export function PartnerArchiveListPage() {
           onReset={() => {
             setDraftFilters({
               ...appliedFilters,
-              source: "全部",
-              contactPhoneVerified: "全部",
               contactPhone: "",
               createTimeStart: "",
               createTimeEnd: "",
@@ -290,19 +266,6 @@ export function PartnerArchiveListPage() {
           }}
           onConfirm={applyDrawer}
         >
-          <DrawerField label="创建来源">
-            <select
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-              value={draftFilters.source}
-              onChange={(e) => patchDraft({ source: e.target.value })}
-            >
-              {drawerOptions(PARTNER_SOURCE_FILTER_OPTIONS, "全部来源").map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </DrawerField>
           <DrawerField label="联系手机">
             <input
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
