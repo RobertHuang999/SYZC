@@ -19,6 +19,8 @@ import {
 } from "../components/VersionChangeHighlight"
 import { useWarehouseOpsSnapshot } from "../hooks/use-warehouse-ops-snapshot"
 import { resolveStoreroomInboundAuditYesNo } from "../lib/storeroom-inbound-audit"
+import { applyStoreroomInboundAuditToggle } from "@prototype/shared/warehouse/inbound-audit-toggle"
+import { writeWarehouseOpsSnapshot } from "@/shared/config/warehouse-ops-snapshot"
 
 export function WarehouseDetailPage() {
   const { id } = useParams()
@@ -31,6 +33,7 @@ export function WarehouseDetailPage() {
   const [storeroomSheet, setStoreroomSheet] = useState<StoreroomNode | null>(
     null
   )
+  const [sheetInboundAudit, setSheetInboundAudit] = useState<"是" | "否">("是")
   const [partitionSheet, setPartitionSheet] = useState<
     ReturnType<typeof flattenPartitions>[number] | null
   >(null)
@@ -68,6 +71,30 @@ export function WarehouseDetailPage() {
 
   const auditYesNo = (roomId: string) =>
     resolveStoreroomInboundAuditYesNo(roomId, ops)
+
+  const auditEditable = ops.inOutRequiresAudit === "是"
+
+  const openStoreroomEdit = (room: StoreroomNode) => {
+    setStoreroomSheet(room)
+    setSheetInboundAudit(auditYesNo(room.id))
+  }
+
+  const saveStoreroomAudit = () => {
+    if (!storeroomSheet) return
+    const enable = sheetInboundAudit === "是"
+    const next = applyStoreroomInboundAuditToggle(
+      ops,
+      storeroomSheet.id,
+      enable
+    )
+    if (!next) {
+      window.alert("租户已关闭出入库审核，请先在 PC 基础配置开启")
+      return
+    }
+    writeWarehouseOpsSnapshot(next)
+    refresh()
+    setStoreroomSheet(null)
+  }
 
   return (
     <VersionChangeProvider>
@@ -171,18 +198,16 @@ export function WarehouseDetailPage() {
             <PrototypeAnnotationTarget annotationIds={["wh-h5-63-audit"]}>
               <div className="space-y-3">
                 {filteredStorerooms.map((room) => (
-                  <ChangeHighlight key={room.id} label="6.3 · 审核只读">
+                  <ChangeHighlight key={room.id} label="审核标记">
                     <div className="rounded-xl bg-white p-3 shadow-sm">
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="font-medium text-gray-900">
                             [库] {room.name}
                           </p>
-                          <p className="mt-1 text-xs text-gray-600">
-                            出入库审核：
-                            <span className="font-medium text-amber-800">
-                              {auditYesNo(room.id)}
-                            </span>
+                          <p className="mt-1 text-xs text-gray-500">
+                            出入库审核标记：
+                            {auditYesNo(room.id)}
                           </p>
                           <p className="mt-1 text-xs text-gray-500">
                             {room.remark || "暂无备注"}
@@ -196,9 +221,9 @@ export function WarehouseDetailPage() {
                         <button
                           type="button"
                           className="ml-auto text-blue-600"
-                          onClick={() => setStoreroomSheet(room)}
+                          onClick={() => openStoreroomEdit(room)}
                         >
-                          查看详情 ▶
+                          编辑 ▶
                         </button>
                       </div>
                     </div>
@@ -268,30 +293,54 @@ export function WarehouseDetailPage() {
 
         <BottomSheet
           open={Boolean(storeroomSheet)}
-          title="库房详情"
+          title="编辑库房"
           onClose={() => setStoreroomSheet(null)}
         >
           {storeroomSheet ? (
-            <ChangeHighlight label="6.3 · 只读">
-              <dl className="space-y-2 text-sm">
-                <div className="flex justify-between gap-4">
-                  <dt className="text-gray-500">出入库审核</dt>
-                  <dd className="font-medium text-amber-800">
-                    {auditYesNo(storeroomSheet.id)}
-                  </dd>
+            <ChangeHighlight label="R03 · 编辑表单">
+              <div className="space-y-4 text-sm">
+                <div>
+                  <p className="mb-1 text-gray-500">
+                    库房名称 <span className="text-red-500">*</span>
+                  </p>
+                  <p className="font-medium">{storeroomSheet.name}</p>
                 </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-gray-500">库房名称</dt>
-                  <dd>{storeroomSheet.name}</dd>
+                <div>
+                  <p className="mb-2 text-gray-500">
+                    出入库是否审核 <span className="text-red-500">*</span>
+                  </p>
+                  <div className="flex gap-6">
+                    {(["是", "否"] as const).map((option) => (
+                      <label
+                        key={option}
+                        className="flex items-center gap-2"
+                      >
+                        <input
+                          type="radio"
+                          name="h5-inbound-audit"
+                          checked={sheetInboundAudit === option}
+                          disabled={!auditEditable}
+                          onChange={() => setSheetInboundAudit(option)}
+                        />
+                        {option}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-gray-500">备注信息</dt>
-                  <dd>{storeroomSheet.remark || "暂无备注"}</dd>
+                <div>
+                  <p className="mb-1 text-gray-500">备注信息</p>
+                  <p className="text-gray-700">
+                    {storeroomSheet.remark || "暂无备注"}
+                  </p>
                 </div>
-              </dl>
-              <p className="mt-3 text-xs text-gray-500">
-                6.3 起不在移动端修改审核策略；请至 PC【基础配置 → 仓储作业参数】维护。
-              </p>
+                <button
+                  type="button"
+                  className="w-full rounded-lg bg-blue-600 py-2.5 font-medium text-white"
+                  onClick={saveStoreroomAudit}
+                >
+                  确认
+                </button>
+              </div>
             </ChangeHighlight>
           ) : null}
         </BottomSheet>

@@ -467,7 +467,7 @@ export function InboundBasicInfoSection({
                     ) : null}
                     {matchedArchive.partnerId ? (
                       <Link
-                        to={`/用户中心/合作方管理/合作方档案/详情/${matchedArchive.partnerId}`}
+                        to={`/用户中心/合作方档案/货主信息/详情/${matchedArchive.partnerId}`}
                         className="text-primary hover:underline"
                         target="_blank"
                         rel="noreferrer"

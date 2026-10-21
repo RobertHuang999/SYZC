@@ -1,17 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
+import {
+  parsePartnerArchiveMenuFromPathname,
+  partnerArchiveAddPath,
+} from "@prototype/shared/partner-archives/partner-archive-routes"
 import { WarningListPagination } from "@/components/business/WarningListPrimitives"
 import {
   PrototypeAnnotationProvider,
   PrototypeAnnotationTarget,
 } from "@/shared/annotations/PrototypeAnnotationLayer"
-import { partnerArchiveDocuments } from "../documents/partner-archive-documents"
+import { getPartnerArchiveDocuments } from "../documents/partner-archive-documents"
+import { ARCHIVE_MENU_SHORT_LABEL } from "@prototype/shared/partner-archives/partner-archive-domain"
 import { partnerArchiveListAnnotations } from "../annotations/partner-archive-list.annotations"
 import { partnerArchivesMock } from "../mock/partner-archives.mock"
 import { PartnerArchiveFiltersPanel } from "../components/PartnerArchiveFiltersPanel"
 import { PartnerArchiveTable } from "../components/PartnerArchiveTable"
 import { PartnerAppendRoleDialog } from "../components/PartnerAppendRoleDialog"
 import { PartnerConfirmDialog } from "../components/PartnerConfirmDialog"
+import { PartnerFreezeBlockedDialog } from "../components/PartnerFreezeBlockedDialog"
 import {
   DEFAULT_PARTNER_ARCHIVE_FILTERS,
   PAGE_SIZE,
@@ -20,15 +26,19 @@ import type {
   PartnerArchivePendingAction,
   PartnerArchiveRowAction,
 } from "../domain/actions"
+import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
 import {
-  ROLE_TYPE_LABELS,
   type PartnerArchiveFilters,
   type PartnerSubject,
-  type RoleType,
 } from "../domain/types"
 import { commitPartnerArchive } from "../lib/detail-utils"
 import { filterPartnerArchives, paginatePartnerArchives } from "../lib/list-utils"
-import { buildAppendedRole } from "../lib/partner-archive-rules"
+import { appendLinkedPartnerMenus } from "../lib/linked-partner-archives"
+import {
+  checkPartnerSubjectFreezeEligibility,
+  type FreezeBlockReason,
+} from "../lib/partner-archive-rules"
+import { PARTNER_SUBJECT_FREEZE_DIALOG } from "../lib/partner-archive-ui-labels"
 
 type PendingDialog = {
   action: PartnerArchivePendingAction
@@ -38,6 +48,11 @@ type PendingDialog = {
 export function PartnerArchiveListPage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const archiveMenuLabel = parsePartnerArchiveMenuFromPathname(location.pathname)
+  const archiveDocuments = useMemo(
+    () => getPartnerArchiveDocuments(archiveMenuLabel),
+    [archiveMenuLabel],
+  )
   const [dataList, setDataList] = useState<PartnerSubject[]>(() => [
     ...partnerArchivesMock,
   ])
@@ -50,6 +65,10 @@ export function PartnerArchiveListPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(PAGE_SIZE)
   const [pendingDialog, setPendingDialog] = useState<PendingDialog | null>(null)
+  const [blockedDialog, setBlockedDialog] = useState<{
+    partner: PartnerSubject
+    blockInfo: FreezeBlockReason
+  } | null>(null)
   const [appendRoleOpen, setAppendRoleOpen] = useState(false)
   const [activePartner, setActivePartner] = useState<PartnerSubject | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -60,8 +79,8 @@ export function PartnerArchiveListPage() {
   }, [location.pathname, location.key])
 
   const filteredData = useMemo(
-    () => filterPartnerArchives(dataList, appliedFilters),
-    [dataList, appliedFilters]
+    () => filterPartnerArchives(dataList, appliedFilters, archiveMenuLabel),
+    [dataList, appliedFilters, archiveMenuLabel]
   )
 
   const totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize))
@@ -96,9 +115,15 @@ export function PartnerArchiveListPage() {
         setActivePartner(item)
         setAppendRoleOpen(true)
         return
-      case "freeze":
+      case "freeze": {
+        const check = checkPartnerSubjectFreezeEligibility(item)
+        if (!check.canFreeze) {
+          setBlockedDialog({ partner: item, blockInfo: check })
+          return
+        }
         setPendingDialog({ action: "freeze", partner: item })
         return
+      }
       case "unfreeze":
         setPendingDialog({ action: "unfreeze", partner: item })
         return
@@ -164,51 +189,31 @@ export function PartnerArchiveListPage() {
     setPendingDialog(null)
   }
 
-  const handleAppendRoleConfirm = (roleTypes: RoleType[]) => {
-    if (!activePartner || roleTypes.length === 0) {
+  const handleAppendRoleConfirm = (targetMenus: PartnerArchiveMenuLabel[]) => {
+    if (!activePartner || targetMenus.length === 0) {
       return
     }
-    const now = new Date().toISOString().replace("T", " ").substring(0, 19)
-    const appended = roleTypes.map((roleType) =>
-      buildAppendedRole(activePartner, roleType, now)
-    )
-    const next: PartnerSubject = {
-      ...activePartner,
-      roles: [...activePartner.roles, ...appended],
-      auditLogs: [
-        {
-          id: `log-${Date.now()}`,
-          opTime: now,
-          operator: "当前用户",
-          actionType: "APPEND_ROLE",
-          actionName: "追加业务角色",
-          detail: appended
-            .map(
-              (role) =>
-                `追加【${ROLE_TYPE_LABELS[role.roleType]}】，状态为${role.roleStatus === "PENDING_COMPLETION" ? "待补全" : "正常"}`
-            )
-            .join("；"),
-        },
-        ...activePartner.auditLogs,
-      ],
-    }
+    const detail = targetMenus
+      .map((menu) => `在【${menu}】创建独立主档或关联已有主档`)
+      .join("；")
+    const next = appendLinkedPartnerMenus(activePartner, targetMenus, detail)
     commitPartnerArchive(next)
     setDataList((prev) => prev.map((item) => (item.id === activePartner.id ? next : item)))
-    showToast(`已成功为【${activePartner.name}】追加业务角色`)
+    showToast(`已为【${activePartner.name}】追加合作方档案角色`)
     setActivePartner(null)
   }
 
   return (
     <PrototypeAnnotationProvider
       annotations={partnerArchiveListAnnotations}
-      documents={partnerArchiveDocuments}
+      documents={archiveDocuments}
       title="合作方档案列表 · 原型批注"
     >
       <div className="space-y-4 p-6">
         <PrototypeAnnotationTarget annotationIds={["partner-archive-page"]}>
-          <h1 className="text-2xl font-semibold tracking-tight">合作方档案</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{archiveMenuLabel}</h1>
           <p className="text-sm text-muted-foreground">
-            维护个人与企业主体身份、证件地址、业务角色及全生命周期状态，作为全平台业务单据主数据
+            维护当前子菜单合作身份主档、证件地址与主体状态；跨菜单身份通过「其他合作档案」关联
           </p>
         </PrototypeAnnotationTarget>
 
@@ -224,7 +229,9 @@ export function PartnerArchiveListPage() {
               onChange={setDraftFilters}
               onSearch={handleSearch}
               onReset={handleReset}
-              onAdd={() => navigate("/用户中心/合作方管理/合作方档案/新增")}
+              onAdd={() => navigate(partnerArchiveAddPath(archiveMenuLabel))}
+              addLabel={`新增${ARCHIVE_MENU_SHORT_LABEL[archiveMenuLabel]}`}
+              archiveMenu={archiveMenuLabel}
             />
           </PrototypeAnnotationTarget>
         </form>
@@ -258,7 +265,7 @@ export function PartnerArchiveListPage() {
         <PartnerConfirmDialog
           open={pendingDialog?.action === "freeze"}
           title="确认冻结主体"
-          description="冻结后该主体名下业务角色将暂停发起新业务单据，历史在库库存进入只读风控锁定。请录入冻结原因。"
+          description={PARTNER_SUBJECT_FREEZE_DIALOG.description}
           confirmLabel="确认冻结"
           destructive
           reasonRequired
@@ -270,6 +277,17 @@ export function PartnerArchiveListPage() {
             }
           }}
           onConfirm={confirmPendingDialog}
+        />
+
+        <PartnerFreezeBlockedDialog
+          open={Boolean(blockedDialog)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setBlockedDialog(null)
+            }
+          }}
+          partner={blockedDialog?.partner ?? null}
+          blockInfo={blockedDialog?.blockInfo ?? null}
         />
 
         <PartnerConfirmDialog

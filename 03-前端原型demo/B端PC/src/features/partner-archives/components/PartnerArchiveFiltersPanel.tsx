@@ -13,12 +13,10 @@ import { cn } from "@/lib/utils"
 import { WarningFilterHeader } from "@/components/business/WarningListPrimitives"
 import {
   DEFAULT_PARTNER_ARCHIVE_FILTERS,
-  PARTNER_ROLE_STATUS_FILTER_OPTIONS,
-  PARTNER_ROLE_TYPE_FILTER_OPTIONS,
   PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS,
   PARTNER_SOURCE_FILTER_OPTIONS,
-  PARTNER_SUBJECT_STATUS_FILTER_OPTIONS,
   PARTNER_SUBJECT_TYPE_FILTER_OPTIONS,
+  partnerSubjectStatusFilterOptions,
 } from "../domain/constants"
 import type { PartnerArchiveFilters } from "../domain/types"
 
@@ -28,6 +26,8 @@ type PartnerArchiveFiltersPanelProps = {
   onSearch: () => void
   onReset: () => void
   onAdd: () => void
+  addLabel?: string
+  archiveMenu?: string
 }
 
 export function PartnerArchiveFiltersPanel({
@@ -36,8 +36,11 @@ export function PartnerArchiveFiltersPanel({
   onSearch,
   onReset,
   onAdd,
+  addLabel = "新增合作方",
+  archiveMenu,
 }: PartnerArchiveFiltersPanelProps) {
   const [expanded, setExpanded] = useState(false)
+  const subjectStatusOptions = partnerSubjectStatusFilterOptions(archiveMenu)
 
   return (
     <Card>
@@ -51,7 +54,7 @@ export function PartnerArchiveFiltersPanel({
             onReset()
           }}
           onAdd={onAdd}
-          addLabel="新增合作方"
+          addLabel={addLabel}
         />
 
         <div className="grid gap-4 lg:grid-cols-4">
@@ -85,21 +88,21 @@ export function PartnerArchiveFiltersPanel({
             </Select>
           </FilterField>
 
-          <FilterField label="业务角色">
+          <FilterField label="联系手机核验">
             <Select
-              value={value.roleType}
+              value={value.contactPhoneVerified}
               onValueChange={(next) => {
                 if (!next) return
-                onChange({ ...value, roleType: next })
+                onChange({ ...value, contactPhoneVerified: next })
               }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {PARTNER_ROLE_TYPE_FILTER_OPTIONS.map((option) => (
+                {PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS.map((option) => (
                   <SelectItem key={option} value={option}>
-                    {option === "全部" ? "全部业务角色" : option}
+                    {option === "全部" ? "全部核验状态" : option}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -118,7 +121,7 @@ export function PartnerArchiveFiltersPanel({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {PARTNER_SUBJECT_STATUS_FILTER_OPTIONS.map((option) => (
+                {subjectStatusOptions.map((option) => (
                   <SelectItem key={option} value={option}>
                     {option === "全部" ? "全部主体状态" : option}
                   </SelectItem>
@@ -130,27 +133,6 @@ export function PartnerArchiveFiltersPanel({
 
         {expanded && (
           <div className="grid gap-4 border-t pt-4 lg:grid-cols-4">
-            <FilterField label="角色状态">
-              <Select
-                value={value.roleStatus}
-                onValueChange={(next) => {
-                  if (!next) return
-                  onChange({ ...value, roleStatus: next })
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PARTNER_ROLE_STATUS_FILTER_OPTIONS.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option === "全部" ? "全部角色状态" : option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FilterField>
-
             <FilterField label="创建来源">
               <Select
                 value={value.source}
@@ -166,27 +148,6 @@ export function PartnerArchiveFiltersPanel({
                   {PARTNER_SOURCE_FILTER_OPTIONS.map((option) => (
                     <SelectItem key={option} value={option}>
                       {option === "全部" ? "全部创建来源" : option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FilterField>
-
-            <FilterField label="联系手机核验状态">
-              <Select
-                value={value.contactPhoneVerified}
-                onValueChange={(next) => {
-                  if (!next) return
-                  onChange({ ...value, contactPhoneVerified: next })
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option === "全部" ? "全部核验状态" : option}
                     </SelectItem>
                   ))}
                 </SelectContent>

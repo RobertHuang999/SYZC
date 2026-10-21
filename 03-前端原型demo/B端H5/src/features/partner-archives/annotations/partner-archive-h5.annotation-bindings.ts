@@ -57,14 +57,14 @@ export const partnerArchiveH5DetailAnnotationBindings: Record<
   },
   "partner-archive-detail-roles": {
     targetId: "partner-archive-detail-roles",
-    contentSuffix: "【H5 端差异】角色按卡片逐条展示行内文字链操作（非 PC 子表）。",
+    contentSuffix: "【H5 端差异】其他合作档案为纵向卡片 +「查看详情」链（非 PC 表格）。",
   },
   "partner-archive-detail-account": {
     targetId: "partner-archive-detail-account",
   },
   "partner-archive-detail-documents": {
     targetId: "partner-archive-detail-documents",
-    contentSuffix: "【H5 端差异】关联单据为卡片列表（非 PC 表格）。",
+    contentSuffix: "【H5 端差异】6.3 详情无此 Tab；标注仅占位。",
   },
   "partner-archive-detail-logs": {
     targetId: "partner-archive-detail-logs",

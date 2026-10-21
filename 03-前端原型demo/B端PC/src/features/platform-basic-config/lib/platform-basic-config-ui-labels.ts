@@ -1,13 +1,13 @@
 /** 平台管理 · 基础配置页 · 上线文案与规格对照 */
 
 export const PARTNER_POLICY_INDIVIDUAL_CERT_SPEC =
-  "【合作方档案证件地址必填校验规则】(P01) 仅档案保存；不影响入库/出库/仓单作业。"
+  "【货主证件地址必填校验规则】(P01) 仅货主信息子菜单保存；不影响入库/出库/仓单作业。"
 
 export const PARTNER_POLICY_INDIVIDUAL_DUP_SPEC =
   "【证件登记地址防重复唯一校验与同步阻断规则】(P02) 个人货主池。"
 
 export const PARTNER_POLICY_ENTERPRISE_CERT_SPEC =
-  "P01 档案域必填（企业营业执照登记地址）；作业引用不因缺址拦截。"
+  "【货主证件地址必填校验规则】(P01) 仅货主信息保存（企业营业执照登记地址）；作业引用不因缺址拦截。"
 
 export const PARTNER_POLICY_ENTERPRISE_DUP_SPEC =
   "P02 企业货主池，与个人分池互不混比。"

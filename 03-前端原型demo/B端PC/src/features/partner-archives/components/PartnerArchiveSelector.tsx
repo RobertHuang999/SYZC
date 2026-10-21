@@ -6,6 +6,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
+import { implicitRoleForArchiveMenu } from "@prototype/shared/partner-archives/partner-archive-domain"
 import { partnerArchivesMock } from "../mock/partner-archives.mock"
 import {
   ROLE_STATUS_LABELS,
@@ -15,6 +17,8 @@ import {
   type RoleType,
 } from "../domain/types"
 import { resolveContactPhoneVerified } from "../lib/contact-phone-verify"
+import { PARTNER_ARCHIVE_EMPTY_FILTERS } from "../lib/partner-archive-empty-filters"
+import { filterPartnerArchives } from "../lib/list-utils"
 import { cn } from "@/lib/utils"
 import { PARTNER_SELECTOR_DEFAULT_PLACEHOLDER } from "../lib/partner-archive-ui-labels"
 
@@ -31,6 +35,8 @@ export type PartnerSelectorValue = {
 }
 
 type PartnerArchiveSelectorProps = {
+  /** 6.3 档案域硬过滤（PA-R12）；与 roleType 二选一或组合，域优先推导隐式角色 */
+  archiveMenu?: PartnerArchiveMenuLabel
   roleType?: RoleType
   value?: string
   onChange: (payload: PartnerSelectorValue | null) => void
@@ -38,25 +44,42 @@ type PartnerArchiveSelectorProps = {
   className?: string
 }
 
-/** 字段清单 §5.2：默认过滤主体正常且引用角色正常 */
-function toSelectablePartners(roleType: RoleType): PartnerSubject[] {
-  return partnerArchivesMock.filter(
+/** 字段清单 §5.2：默认过滤主体正常且引用角色正常；6.3 叠加 archiveMenu 域隔离 */
+function toSelectablePartners(
+  roleType: RoleType,
+  archiveMenu?: PartnerArchiveMenuLabel,
+): PartnerSubject[] {
+  let list = partnerArchivesMock.filter(
     (item) =>
       item.status === "NORMAL" &&
       item.roles.some(
-        (role) => role.roleType === roleType && role.roleStatus === "NORMAL"
-      )
+        (role) => role.roleType === roleType && role.roleStatus === "NORMAL",
+      ),
   )
+  if (archiveMenu) {
+    list = filterPartnerArchives(list, PARTNER_ARCHIVE_EMPTY_FILTERS, archiveMenu)
+  }
+  return list
 }
 
 export function PartnerArchiveSelector({
-  roleType = "OWNER",
+  archiveMenu,
+  roleType: roleTypeProp,
   value,
   onChange,
   placeholder = PARTNER_SELECTOR_DEFAULT_PLACEHOLDER,
   className,
 }: PartnerArchiveSelectorProps) {
-  const options = useMemo(() => toSelectablePartners(roleType), [roleType])
+  const roleType: RoleType =
+    roleTypeProp ??
+    (archiveMenu
+      ? (implicitRoleForArchiveMenu(archiveMenu) as RoleType)
+      : "OWNER")
+
+  const options = useMemo(
+    () => toSelectablePartners(roleType, archiveMenu),
+    [roleType, archiveMenu],
+  )
 
   return (
     <Select

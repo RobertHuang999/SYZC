@@ -8,7 +8,7 @@ export const CONFIG_CATEGORIES: {
   bulkSave: boolean
 }[] = [
   { id: "warehouse-ops", label: "仓储作业参数", bulkSave: true },
-  { id: "partner-access", label: "合作方准入策略", bulkSave: true },
+  { id: "partner-access", label: "货主准入策略", bulkSave: true },
   { id: "agreements", label: "协议配置", bulkSave: true },
   { id: "data-sources", label: "数据源参数", bulkSave: false },
   { id: "iot-hardware", label: "物联网硬件参数", bulkSave: false },

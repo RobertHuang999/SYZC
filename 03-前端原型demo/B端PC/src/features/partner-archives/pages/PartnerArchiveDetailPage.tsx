@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react"
-import { Link, useParams } from "react-router-dom"
-import { AlertTriangleIcon, ArrowLeftIcon, CopyIcon } from "lucide-react"
+import { Link, useLocation, useParams } from "react-router-dom"
+import {
+  partnerArchiveBaseFromPathname,
+  partnerArchiveDetailPath,
+  type PartnerArchiveMenuLabel,
+} from "@prototype/shared/partner-archives/partner-archive-routes"
+import { AlertTriangleIcon, ArrowLeftIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,27 +22,24 @@ import {
   PrototypeAnnotationProvider,
   PrototypeAnnotationTarget,
 } from "@/shared/annotations/PrototypeAnnotationLayer"
-import { partnerArchiveDocuments } from "../documents/partner-archive-documents"
+import { getPartnerArchiveDocuments } from "../documents/partner-archive-documents"
+import { parsePartnerArchiveMenuFromPathname } from "@prototype/shared/partner-archives/partner-archive-routes"
 import { partnerArchiveDetailAnnotations } from "../annotations/partner-archive-detail.annotations"
 import { PartnerAppendRoleDialog } from "../components/PartnerAppendRoleDialog"
 import { PartnerConfirmDialog } from "../components/PartnerConfirmDialog"
+import { PartnerFreezeBlockedDialog } from "../components/PartnerFreezeBlockedDialog"
 import { PartnerVerifyDialog } from "../components/PartnerVerifyDialog"
 import { partnerArchivesMock } from "../mock/partner-archives.mock"
-import { PARTNER_ARCHIVE_LIST_PATH } from "../domain/constants"
 import {
-  ROLE_STATUS_BADGE_CLASS,
   SUBJECT_STATUS_BADGE_CLASS,
   SUBJECT_STATUS_LABELS,
   type PartnerArchivePendingAction,
 } from "../domain/actions"
 import {
   AUTH_STATUS_LABELS,
-  ROLE_TYPE_LABELS,
-  ROLE_STATUS_LABELS,
   SOURCE_TYPE_LABELS,
   SUBJECT_TYPE_LABELS,
   type PartnerSubject,
-  type RoleType,
 } from "../domain/types"
 import {
   commitPartnerArchive,
@@ -52,19 +54,27 @@ import {
   resolveContactPhoneVerified,
   resolveContactPhoneVerifiedAt,
 } from "../lib/contact-phone-verify"
-import { buildAppendedRole, hasActiveBusinessForRole } from "../lib/partner-archive-rules"
 import {
-  getPartnerRoleRowActions,
-  PARTNER_ROLE_ROW_ACTION_LABELS,
-  type PartnerRoleRowAction,
-} from "../lib/role-row-actions"
+  appendLinkedPartnerMenus,
+  formatLinkedArchiveStatus,
+} from "../lib/linked-partner-archives"
+import {
+  checkPartnerSubjectFreezeEligibility,
+  maskIdNumber,
+  type FreezeBlockReason,
+} from "../lib/partner-archive-rules"
+import {
+  collectArchiveRequiredGaps,
+  isArchiveRequiredFieldsPending,
+  partnerArchiveEditActionLabel,
+} from "../lib/archive-required-fields-pending"
 import { cn } from "@/lib/utils"
 import {
+  PARTNER_DETAIL_PENDING_DOCS_USER,
   PARTNER_DETAIL_TAB_ITEMS,
   PARTNER_SUBJECT_FREEZE_DIALOG,
   PARTNER_SUBJECT_UNFREEZE_DIALOG,
   PARTNER_SUBJECT_UNFREEZE_SUCCESS_TOAST,
-  getPartnerRoleRowDialogCopy,
   type PartnerDetailTabKey,
 } from "../lib/partner-archive-ui-labels"
 
@@ -74,19 +84,32 @@ const TAB_ITEMS = PARTNER_DETAIL_TAB_ITEMS
 
 export function PartnerArchiveDetailPage() {
   const { id } = useParams()
+  const location = useLocation()
+  const listPath = partnerArchiveBaseFromPathname(location.pathname)
+  const archiveMenuLabel = parsePartnerArchiveMenuFromPathname(location.pathname)
+  const archiveDocuments = useMemo(
+    () => getPartnerArchiveDocuments(archiveMenuLabel),
+    [archiveMenuLabel],
+  )
   const initialPartner = useMemo(() => getPartnerArchiveById(id), [id])
 
   const [partner, setPartner] = useState<PartnerSubject | undefined>(initialPartner)
   const [activeTab, setActiveTab] = useState<DetailTab>("basic")
   const [pendingAction, setPendingAction] = useState<PartnerArchivePendingAction | null>(null)
   const [appendRoleOpen, setAppendRoleOpen] = useState(false)
-  const [roleRowPending, setRoleRowPending] = useState<{
-    roleIndex: number
-    action: Extract<PartnerRoleRowAction, "freeze" | "unfreeze" | "remove">
-  } | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
-  const [removeBlockedMessage, setRemoveBlockedMessage] = useState<string | null>(null)
   const [verifyContactOpen, setVerifyContactOpen] = useState(false)
+  const [blockedBlockInfo, setBlockedBlockInfo] = useState<FreezeBlockReason | null>(null)
+
+  const handleFreezeClick = () => {
+    if (!partner) return
+    const check = checkPartnerSubjectFreezeEligibility(partner)
+    if (!check.canFreeze) {
+      setBlockedBlockInfo(check)
+      return
+    }
+    setPendingAction("freeze")
+  }
 
   useEffect(() => {
     setPartner(getPartnerArchiveById(id))
@@ -99,10 +122,7 @@ export function PartnerArchiveDetailPage() {
 
   const needsCompletion = useMemo(() => {
     if (!partner) return false
-    return (
-      partner.roles.some((r) => r.roleStatus === "PENDING_COMPLETION") ||
-      !partner.certAddress.fullAddress
-    )
+    return isArchiveRequiredFieldsPending(partner)
   }, [partner])
 
   const canVerifyContactPhone = useMemo(() => {
@@ -151,7 +171,7 @@ export function PartnerArchiveDetailPage() {
   if (!partner) {
     return (
       <div className="space-y-4 p-6">
-        <Link to={PARTNER_ARCHIVE_LIST_PATH}>
+        <Link to={listPath}>
           <Button variant="outline">
             <ArrowLeftIcon />
             返回
@@ -164,35 +184,23 @@ export function PartnerArchiveDetailPage() {
     )
   }
 
-  const handleAppendRole = (roleTypes: RoleType[]) => {
-    if (roleTypes.length === 0) {
+  const showToast = (message: string) => {
+    setToastMessage(message)
+    window.setTimeout(() => setToastMessage(null), 2500)
+  }
+
+  const handleAppendRole = (targetMenus: PartnerArchiveMenuLabel[]) => {
+    if (targetMenus.length === 0) {
       return
     }
-    const now = new Date().toISOString().replace("T", " ").substring(0, 19)
+    const detail = targetMenus
+      .map((menu) => `在【${menu}】创建独立主档或关联已有主档`)
+      .join("；")
     setPartner((prev) => {
       if (!prev) return prev
-      const appended = roleTypes.map((roleType) => buildAppendedRole(prev, roleType, now))
-      return commitPartnerArchive({
-        ...prev,
-        roles: [...prev.roles, ...appended],
-        auditLogs: [
-          {
-            id: `log-${Date.now()}`,
-            opTime: now,
-            operator: "当前用户",
-            actionType: "APPEND_ROLE",
-            actionName: "追加业务角色",
-            detail: appended
-              .map(
-                (role) =>
-                  `追加【${ROLE_TYPE_LABELS[role.roleType]}】，状态为${role.roleStatus === "PENDING_COMPLETION" ? "待补全" : "正常"}`
-              )
-              .join("；"),
-          },
-          ...prev.auditLogs,
-        ],
-      })
+      return commitPartnerArchive(appendLinkedPartnerMenus(prev, targetMenus, detail))
     })
+    showToast("已追加合作方档案角色")
   }
 
   const handleFreeze = (reason: string) => {
@@ -249,108 +257,11 @@ export function PartnerArchiveDetailPage() {
     setPendingAction(null)
   }
 
-  const showToast = (message: string) => {
-    setToastMessage(message)
-    window.setTimeout(() => setToastMessage(null), 2500)
-  }
-
-  const confirmRoleRowAction = (reason: string) => {
-    if (!roleRowPending || !partner) {
-      return
-    }
-    const { roleIndex, action } = roleRowPending
-    const targetRole = partner.roles[roleIndex]
-    if (!targetRole) {
-      return
-    }
-
-    if (
-      action === "remove" &&
-      hasActiveBusinessForRole(partner, targetRole.roleType)
-    ) {
-      setRemoveBlockedMessage("存在进行中的关联业务，无法移除该角色")
-      setRoleRowPending(null)
-      return
-    }
-
-    const now = new Date().toISOString().replace("T", " ").substring(0, 19)
-
-    setPartner((prev) => {
-      if (!prev) {
-        return prev
-      }
-      const target = prev.roles[roleIndex]
-      if (!target) {
-        return prev
-      }
-
-      const roles = prev.roles.map((role, index) => {
-        if (index !== roleIndex) {
-          return role
-        }
-        if (action === "freeze") {
-          return {
-            ...role,
-            roleStatus: "FROZEN" as const,
-            freezeReason: reason,
-          }
-        }
-        if (action === "unfreeze") {
-          return {
-            ...role,
-            roleStatus: "NORMAL" as const,
-            freezeReason: undefined,
-          }
-        }
-        return {
-          ...role,
-          roleStatus: "INVALID" as const,
-          roleInvalidTime: now,
-        }
-      })
-
-      const actionName =
-        action === "freeze"
-          ? "冻结角色"
-          : action === "unfreeze"
-            ? "解冻角色"
-            : "移除角色"
-
-      return commitPartnerArchive({
-        ...prev,
-        roles,
-        auditLogs: [
-          {
-            id: `log-${Date.now()}`,
-            opTime: now,
-            operator: "当前用户",
-            actionType: "CHANGE_ROLE_STATUS",
-            actionName,
-            detail: `${actionName}【${ROLE_TYPE_LABELS[target.roleType]}】：${reason}`,
-          },
-          ...prev.auditLogs,
-        ],
-      })
-    })
-    setRoleRowPending(null)
-  }
-
-  const roleRowDialogCopy = roleRowPending
-    ? getPartnerRoleRowDialogCopy(roleRowPending.action)
-    : {
-        title: "确认操作",
-        description: "",
-        confirmLabel: "确认",
-        destructive: false,
-        reasonLabel: "原因",
-        reasonPlaceholder: "请输入原因（1～200 字）",
-      }
-
   return (
     <PrototypeAnnotationProvider
       title="合作方档案详情 · 原型批注"
       annotations={partnerArchiveDetailAnnotations}
-      documents={partnerArchiveDocuments}
+      documents={archiveDocuments}
     >
       <div className="space-y-4 p-6">
         <PrototypeAnnotationTarget
@@ -372,33 +283,22 @@ export function PartnerArchiveDetailPage() {
                     待补全
                   </Badge>
                 )}
+                <Badge variant="secondary">档案归属：{partner.archiveMenu}</Badge>
               </div>
               <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                 <span>
                   身份标识：<span>{partner.idNumberMasked}</span>
                 </span>
                 <span>·</span>
-                <span className="inline-flex items-center gap-1">
+                <span>
                   合作方主体标识：<span>{partner.partnerNo}</span>
-                  <Button
-                    type="button"
-                    size="icon-sm"
-                    variant="ghost"
-                    className="size-7"
-                    onClick={() => {
-                      void navigator.clipboard.writeText(partner.partnerNo)
-                      showToast("合作方主体标识已复制")
-                    }}
-                  >
-                    <CopyIcon className="size-3.5" />
-                  </Button>
                 </span>
               </p>
             </div>
 
             <div className="flex shrink-0 flex-wrap gap-2 lg:justify-end">
               {headerActions.includes("back") && (
-                <Link to={PARTNER_ARCHIVE_LIST_PATH}>
+                <Link to={listPath}>
                   <Button variant="outline">
                     <ArrowLeftIcon />
                     返回
@@ -415,7 +315,7 @@ export function PartnerArchiveDetailPage() {
                 </Button>
               )}
               {headerActions.includes("edit") && (
-                <Link to={`${PARTNER_ARCHIVE_LIST_PATH}/编辑/${partner.id}`}>
+                <Link to={`${listPath}/编辑/${partner.id}`}>
                   <Button
                     variant={needsCompletion ? "default" : "secondary"}
                     className={cn(
@@ -423,20 +323,20 @@ export function PartnerArchiveDetailPage() {
                       needsCompletion && "bg-amber-600 text-white hover:bg-amber-700"
                     )}
                   >
-                    {needsCompletion ? "去补全资料" : "编辑"}
+                    {partnerArchiveEditActionLabel(partner)}
                   </Button>
                 </Link>
               )}
               {headerActions.includes("appendRole") && (
                 <Button className="whitespace-nowrap" onClick={() => setAppendRoleOpen(true)}>
-                  追加角色
+                  追加合作方档案
                 </Button>
               )}
               {headerActions.includes("freeze") && (
                 <Button
                   variant="destructive"
                   className="whitespace-nowrap"
-                  onClick={() => setPendingAction("freeze")}
+                  onClick={handleFreezeClick}
                 >
                   冻结主体
                 </Button>
@@ -454,18 +354,10 @@ export function PartnerArchiveDetailPage() {
           </div>
         </PrototypeAnnotationTarget>
 
-        {removeBlockedMessage && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            {removeBlockedMessage}
-          </div>
-        )}
-
         {needsCompletion && (
           <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
             <AlertTriangleIcon className="mt-0.5 size-4 shrink-0 text-amber-600" />
-            <span>
-              当前主体存在待补全信息（证件登记地址未录入，关联角色限制发单）。请通过页头【去补全资料】完善档案以解除业务限制。
-            </span>
+            <span>{PARTNER_DETAIL_PENDING_DOCS_USER}</span>
           </div>
         )}
 
@@ -480,9 +372,9 @@ export function PartnerArchiveDetailPage() {
                 onClick={() => setActiveTab(tab.key)}
               >
                 {tab.label}
-                {tab.key === "roles" && ` (${partner.roles.length})`}
+                {tab.key === "linked" &&
+                  ` (${partner.linkedPartnerArchives?.length ?? 0})`}
                 {tab.key === "account" && ` (${partner.boundAccount ? "1" : "0"})`}
-                {tab.key === "documents" && ` (${partner.associatedDocs.length})`}
                 {tab.key === "logs" && ` (${partner.auditLogs.length})`}
               </Button>
             ))}
@@ -531,6 +423,16 @@ export function PartnerArchiveDetailPage() {
                     </DetailField>
                   </div>
                 )}
+                {partner.archiveMenu === "提货人信息" &&
+                  partner.subjectType === "ENTERPRISE" && (
+                    <div className="md:col-span-1">
+                      <DetailField label="经办人身份证号">
+                        {partner.agentIdNumber
+                          ? maskIdNumber(partner.agentIdNumber)
+                          : "——"}
+                      </DetailField>
+                    </div>
+                  )}
                 <div className="md:col-span-1">
                   <DetailField
                     label={
@@ -550,10 +452,12 @@ export function PartnerArchiveDetailPage() {
                   <DetailField label="证件地址">
                     {partner.certAddress.fullAddress ? (
                       <span>{partner.certAddress.fullAddress}</span>
-                    ) : (
+                    ) : collectArchiveRequiredGaps(partner).includes("certAddress") ? (
                       <span className="font-medium text-amber-600">
-                        待补全（未录入证件登记地址，请使用页头【去补全资料】）
+                        待补全（未录入证件登记地址，请使用页头【补全资料】）
                       </span>
+                    ) : (
+                      <span className="text-muted-foreground">——</span>
                     )}
                   </DetailField>
                 </div>
@@ -606,125 +510,58 @@ export function PartnerArchiveDetailPage() {
           </PrototypeAnnotationTarget>
         )}
 
-        {activeTab === "roles" && (
+        {activeTab === "linked" && (
           <PrototypeAnnotationTarget annotationIds={["partner-archive-detail-roles"]}>
             <div className="space-y-4">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span className="font-medium text-foreground">业务角色列表</span>
-                <span>共 {partner.roles.length} 个角色记录</span>
+                <span className="font-medium text-foreground">其他合作档案</span>
+                <span>共 {partner.linkedPartnerArchives?.length ?? 0} 条关联</span>
               </div>
-              <div className="overflow-hidden rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12 text-center">序号</TableHead>
-                      <TableHead>业务角色类型</TableHead>
-                      <TableHead>角色状态</TableHead>
-                      <TableHead>来源单据类型</TableHead>
-                      <TableHead>来源单据号</TableHead>
-                      <TableHead>角色生效时间</TableHead>
-                      <TableHead>角色失效时间</TableHead>
-                      <TableHead>冻结原因</TableHead>
-                      <TableHead className="min-w-[10.5rem] whitespace-nowrap">行操作</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {partner.roles.map((role, index) => {
-                      const rowActions = getPartnerRoleRowActions(role.roleType, role.roleStatus)
-                      return (
-                      <TableRow key={`${role.roleType}-${index}`}>
-                        <TableCell className="text-center text-xs text-muted-foreground">
-                          {index + 1}
-                        </TableCell>
-                        <TableCell className="font-medium">{ROLE_TYPE_LABELS[role.roleType]}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={ROLE_STATUS_BADGE_CLASS[role.roleStatus]}
-                          >
-                            {ROLE_STATUS_LABELS[role.roleStatus]}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{role.sourceDocType ?? "——"}</TableCell>
-                        <TableCell className="text-xs">
-                          {role.sourceDocNo && role.sourceDocNo !== "——" ? (
-                            <button
-                              type="button"
-                              className="text-primary hover:underline"
-                              onClick={() =>
-                                showToast(`原型占位：跳转至来源单据 ${role.sourceDocNo}`)
-                              }
-                            >
-                              {role.sourceDocNo}
-                            </button>
-                          ) : (
-                            "——"
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {role.roleEffectiveTime && role.roleEffectiveTime !== "——" ? (
-                            <DateTimeText value={role.roleEffectiveTime} />
-                          ) : (
-                            "——"
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {role.roleInvalidTime ? (
-                            <DateTimeText value={role.roleInvalidTime} />
-                          ) : (
-                            "——"
-                          )}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {role.roleStatus === "FROZEN" ? role.freezeReason ?? "——" : "——"}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 py-0.5">
-                            {rowActions.map((action) => {
-                              if (action === "complete") {
-                                return (
-                                  <Link
-                                    key={action}
-                                    to={`${PARTNER_ARCHIVE_LIST_PATH}/编辑/${partner.id}`}
-                                    className="shrink-0 text-sm font-medium text-amber-600 hover:underline whitespace-nowrap"
-                                  >
-                                    {PARTNER_ROLE_ROW_ACTION_LABELS[action]}
-                                  </Link>
-                                )
-                              }
-                              return (
-                                <Button
-                                  key={action}
-                                  type="button"
-                                  variant="link"
-                                  size="sm"
-                                  className={cn(
-                                    "h-auto shrink-0 p-0 text-sm whitespace-nowrap",
-                                    action === "freeze" || action === "remove"
-                                      ? "text-destructive hover:text-destructive"
-                                      : "text-primary"
-                                  )}
-                                  onClick={() =>
-                                    setRoleRowPending({
-                                      roleIndex: index,
-                                      action,
-                                    })
-                                  }
-                                >
-                                  {PARTNER_ROLE_ROW_ACTION_LABELS[action]}
-                                </Button>
-                              )
-                            })}
-                            {rowActions.length === 0 && (
-                              <span className="text-xs text-muted-foreground">——</span>
-                            )}
-                          </div>
-                        </TableCell>
+              {(partner.linkedPartnerArchives?.length ?? 0) === 0 ? (
+                <p className="rounded-md border bg-muted/30 px-4 py-6 text-sm text-muted-foreground">
+                  暂无其他子菜单主档关联。可通过页头【追加合作方档案】跨菜单创建或关联。
+                </p>
+              ) : (
+                <div className="overflow-hidden rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12 text-center">序号</TableHead>
+                        <TableHead>目标菜单</TableHead>
+                        <TableHead>主体名称</TableHead>
+                        <TableHead>合作方主体标识</TableHead>
+                        <TableHead>主体状态</TableHead>
+                        <TableHead className="min-w-[8rem]">操作</TableHead>
                       </TableRow>
-                    )})}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {partner.linkedPartnerArchives!.map((link, index) => (
+                        <TableRow key={`${link.targetMenu}-${link.partnerId}`}>
+                          <TableCell className="text-center text-xs text-muted-foreground">
+                            {index + 1}
+                          </TableCell>
+                          <TableCell className="font-medium">{link.targetMenu}</TableCell>
+                          <TableCell>{link.name}</TableCell>
+                          <TableCell className="text-xs tabular-nums">{link.partnerNo}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {formatLinkedArchiveStatus(link)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Link
+                              to={partnerArchiveDetailPath(link.targetMenu, link.partnerId)}
+                              className="text-sm font-medium text-primary hover:underline"
+                            >
+                              查看详情
+                            </Link>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </div>
           </PrototypeAnnotationTarget>
         )}
@@ -748,105 +585,6 @@ export function PartnerArchiveDetailPage() {
               <p className="text-sm text-muted-foreground">暂未绑定 C 端客户账号</p>
             )}
           </DetailSection>
-          </PrototypeAnnotationTarget>
-        )}
-
-        {activeTab === "documents" && (
-          <PrototypeAnnotationTarget annotationIds={["partner-archive-detail-documents"]}>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>关联业务单据（穿透只读）：反映该主体在仓储、数字仓单、融资质押等环节的真实履约单据</span>
-              <span>共 {partner.associatedDocs.length} 笔业务单据</span>
-            </div>
-            <div className="overflow-hidden rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12 text-center">序号</TableHead>
-                    <TableHead>业务单据号</TableHead>
-                    <TableHead>单据类型</TableHead>
-                    <TableHead>承担业务角色</TableHead>
-                    <TableHead>业务品类/规格说明</TableHead>
-                    <TableHead>单据业务日期</TableHead>
-                    <TableHead>当前状态</TableHead>
-                    <TableHead>经办人员</TableHead>
-                    <TableHead className="text-right">行操作</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {partner.associatedDocs.map((doc, index) => {
-                    const isFrozenOrReject =
-                      doc.statusName.includes("冻结") ||
-                      doc.statusName.includes("驳回") ||
-                      doc.statusName.includes("查封")
-                    const isPending =
-                      doc.statusName.includes("待") ||
-                      doc.statusName.includes("审核") ||
-                      doc.statusName.includes("进行中") ||
-                      doc.statusName.includes("审批")
-                    const statusBadgeClass = isFrozenOrReject
-                      ? "border-destructive/20 bg-destructive/10 text-destructive"
-                      : isPending
-                      ? "border-blue-200 bg-blue-50 text-blue-700"
-                      : "border-emerald-200 bg-emerald-50 text-emerald-700"
-
-                    return (
-                      <TableRow key={doc.id}>
-                        <TableCell className="text-center text-xs text-muted-foreground">
-                          {index + 1}
-                        </TableCell>
-                        <TableCell className="text-xs font-medium">
-                          <button
-                            type="button"
-                            className="text-primary hover:underline"
-                            onClick={() =>
-                              showToast(`原型占位：跳转至${doc.docTypeName} ${doc.docNo}`)
-                            }
-                          >
-                            {doc.docNo}
-                          </button>
-                        </TableCell>
-                        <TableCell>{doc.docTypeName}</TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className="font-normal">
-                            {doc.roleName ?? "货主"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {doc.remark ?? "——"}
-                        </TableCell>
-                        <TableCell className="text-xs">
-                          {doc.bizDate}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={statusBadgeClass}>
-                            {doc.statusName}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-xs">{doc.handlerName}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="link"
-                            size="sm"
-                            className="h-auto p-0 text-xs text-primary"
-                            onClick={() =>
-                              showToast(`原型占位：查看${doc.docTypeName} ${doc.docNo} 详情`)
-                            }
-                          >
-                            查看单据
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-              <span>注：关联单据来源于仓储、仓单与转让业务流转记录</span>
-              <span>显示第 1 至 {partner.associatedDocs.length} 笔（共 {partner.associatedDocs.length} 笔）</span>
-            </div>
-          </div>
           </PrototypeAnnotationTarget>
         )}
 
@@ -912,6 +650,17 @@ export function PartnerArchiveDetailPage() {
           onConfirm={confirmPendingAction}
         />
 
+        <PartnerFreezeBlockedDialog
+          open={Boolean(blockedBlockInfo)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setBlockedBlockInfo(null)
+            }
+          }}
+          partner={partner ?? null}
+          blockInfo={blockedBlockInfo}
+        />
+
         <PartnerConfirmDialog
           open={pendingAction === "unfreeze"}
           title={PARTNER_SUBJECT_UNFREEZE_DIALOG.title}
@@ -927,23 +676,6 @@ export function PartnerArchiveDetailPage() {
             confirmPendingAction(reason)
             showToast(PARTNER_SUBJECT_UNFREEZE_SUCCESS_TOAST)
           }}
-        />
-
-        <PartnerConfirmDialog
-          open={roleRowPending !== null}
-          title={roleRowDialogCopy.title}
-          description={roleRowDialogCopy.description}
-          confirmLabel={roleRowDialogCopy.confirmLabel}
-          destructive={roleRowDialogCopy.destructive}
-          reasonRequired
-          reasonLabel={roleRowDialogCopy.reasonLabel}
-          reasonPlaceholder={roleRowDialogCopy.reasonPlaceholder}
-          onOpenChange={(open) => {
-            if (!open) {
-              setRoleRowPending(null)
-            }
-          }}
-          onConfirm={confirmRoleRowAction}
         />
 
         <PartnerAppendRoleDialog

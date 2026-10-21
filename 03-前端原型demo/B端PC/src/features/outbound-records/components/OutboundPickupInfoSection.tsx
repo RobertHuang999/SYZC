@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import { useMemo, type ReactNode } from "react"
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -19,6 +19,10 @@ import {
 import { cn } from "@/lib/utils"
 import type { OutboundFormState } from "../domain/form-types"
 import type { PickupPersonType } from "../domain/types"
+import { PartnerArchiveEmbeddedPicker } from "@/features/partner-archives/components/PartnerArchiveEmbeddedPicker"
+import type { PartnerSelectorValue } from "@/features/partner-archives/components/PartnerArchiveSelector"
+import { partnerArchivesMock } from "@/features/partner-archives/mock/partner-archives.mock"
+import { resolveContactPhoneVerified } from "@/features/partner-archives/lib/contact-phone-verify"
 
 interface OutboundPickupInfoSectionProps {
   form: OutboundFormState
@@ -26,7 +30,6 @@ interface OutboundPickupInfoSectionProps {
   expanded: boolean
   onToggle: () => void
   onPreviewImage: (url: string) => void
-  onQuickAddPickupAgent?: () => void
 }
 
 function FormItem({
@@ -57,8 +60,48 @@ export function OutboundPickupInfoSection({
   expanded,
   onToggle,
   onPreviewImage,
-  onQuickAddPickupAgent,
 }: OutboundPickupInfoSectionProps) {
+  const pickupSelection = useMemo((): PartnerSelectorValue | null => {
+    if (!form.pickupAgentPartnerId) return null
+    const partner = partnerArchivesMock.find((p) => p.id === form.pickupAgentPartnerId)
+    if (!partner) return null
+    const role = partner.roles.find((r) => r.roleType === "PICKUP_AGENT")
+    if (!role) return null
+    return {
+      partnerId: partner.id,
+      partnerNo: partner.partnerNo,
+      name: partner.name,
+      idNumberMasked: partner.idNumberMasked,
+      subjectType: partner.subjectType,
+      roleType: "PICKUP_AGENT",
+      roleStatus: role.roleStatus,
+      subjectStatus: partner.status,
+      contactPhoneVerified: resolveContactPhoneVerified(partner),
+    }
+  }, [form.pickupAgentPartnerId])
+
+  const applyPickupPartner = (payload: PartnerSelectorValue | null) => {
+    if (!payload) {
+      onPatch({
+        pickupAgentPartnerId: "",
+        pickupName: "",
+        pickupIdCardNo: "",
+        pickupPhone: "",
+      })
+      return
+    }
+    const partner = partnerArchivesMock.find((p) => p.id === payload.partnerId)
+    if (!partner) return
+    onPatch({
+      pickupPersonType: "个人",
+      pickupAgentPartnerId: partner.id,
+      pickupName: partner.name,
+      pickupIdCardNo: partner.idNumberMasked,
+      pickupPhone: partner.contactPhone,
+    })
+  }
+
+  const pickupFieldsLocked = Boolean(form.pickupAgentPartnerId)
   // 模拟上传照片
   const handleUploadPhoto = () => {
     if (form.sitePhotos.length >= 10) return
@@ -127,36 +170,32 @@ export function OutboundPickupInfoSection({
             {/* 个人提货人字段 */}
             {isPersonal ? (
               <>
-                {onQuickAddPickupAgent ? (
-                  <div className="sm:col-span-2 lg:col-span-4">
-                    <button
-                      type="button"
-                      className="text-xs font-medium text-primary hover:underline"
-                      onClick={onQuickAddPickupAgent}
-                    >
-                      + 快速添加提货经办人
-                    </button>
-                    {form.pickupAgentPartnerId ? (
-                      <span className="ml-2 text-[11px] text-muted-foreground">
-                        已关联合作方档案
-                      </span>
-                    ) : null}
-                  </div>
-                ) : null}
+                <div className="sm:col-span-2 lg:col-span-4">
+                  <PartnerArchiveEmbeddedPicker
+                    archiveMenu="提货人信息"
+                    fieldLabel="提货经办人"
+                    required
+                    value={form.pickupAgentPartnerId || undefined}
+                    selection={pickupSelection}
+                    onChange={applyPickupPartner}
+                  />
+                </div>
                 <FormItem label="提货人姓名:" required>
                   <Input
                     value={form.pickupName}
                     onChange={(e) => onPatch({ pickupName: e.target.value })}
-                    placeholder="请输入提货人名称"
-                    className="h-9 text-xs"
+                    placeholder="请选择提货经办人或快捷建档"
+                    disabled={pickupFieldsLocked}
+                    className="h-9 text-xs disabled:bg-muted/60"
                   />
                 </FormItem>
                 <FormItem label="提货人身份证号:" required>
                   <Input
                     value={form.pickupIdCardNo}
                     onChange={(e) => onPatch({ pickupIdCardNo: e.target.value })}
-                    placeholder="请输入提货人身份证号"
-                    className="h-9 text-xs"
+                    placeholder="选中后只读反显"
+                    disabled={pickupFieldsLocked}
+                    className="h-9 text-xs disabled:bg-muted/60"
                   />
                 </FormItem>
                 <FormItem label="提货人电话:" required>
@@ -164,8 +203,9 @@ export function OutboundPickupInfoSection({
                     maxLength={11}
                     value={form.pickupPhone}
                     onChange={(e) => onPatch({ pickupPhone: e.target.value })}
-                    placeholder="请输入提货人电话"
-                    className="h-9 text-xs"
+                    placeholder="选中后只读反显"
+                    disabled={pickupFieldsLocked}
+                    className="h-9 text-xs disabled:bg-muted/60"
                   />
                 </FormItem>
                 <FormItem label="车牌号:">

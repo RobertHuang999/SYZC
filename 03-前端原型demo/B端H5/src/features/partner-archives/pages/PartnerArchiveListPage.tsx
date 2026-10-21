@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Filter, Plus, RotateCcw, Search, X } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
+import { parsePartnerArchiveMenuFromH5ListPath } from "@prototype/shared/partner-archives/partner-archive-domain"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import {
@@ -19,11 +20,9 @@ import { partnerArchivesMock } from "@prototype/B端PC/src/features/partner-arch
 import {
   DEFAULT_PARTNER_ARCHIVE_FILTERS,
   PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS,
-  PARTNER_ROLE_STATUS_FILTER_OPTIONS,
-  PARTNER_ROLE_TYPE_FILTER_OPTIONS,
   PARTNER_SOURCE_FILTER_OPTIONS,
-  PARTNER_SUBJECT_STATUS_FILTER_OPTIONS,
   PARTNER_SUBJECT_TYPE_FILTER_OPTIONS,
+  partnerSubjectStatusFilterOptions,
 } from "@prototype/B端PC/src/features/partner-archives/domain/constants"
 import type { PartnerArchiveFilters } from "@prototype/B端PC/src/features/partner-archives/domain/types"
 import { filterPartnerArchives } from "@prototype/B端PC/src/features/partner-archives/lib/list-utils"
@@ -32,18 +31,12 @@ import {
   PARTNER_LIST_KEYWORD_PLACEHOLDER,
 } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
 import { PartnerArchiveCard } from "../components/PartnerArchiveCard"
-import { PARTNER_ARCHIVE_FORM_ROUTE, WORKSPACE_ROUTE } from "../domain/constants"
+import { partnerArchiveFormRoute } from "../domain/constants"
+import { WORKSPACE_ROUTE } from "@/features/inbound-records/domain/constants"
 
 const SUBJECT_TYPE_OPTIONS: DropdownOption[] = PARTNER_SUBJECT_TYPE_FILTER_OPTIONS.map(
   (v) => ({ label: v === "全部" ? "全部类型" : v, value: v }),
 )
-const SUBJECT_STATUS_OPTIONS: DropdownOption[] = PARTNER_SUBJECT_STATUS_FILTER_OPTIONS.map(
-  (v) => ({ label: v === "全部" ? "全部状态" : v, value: v }),
-)
-const ROLE_TYPE_OPTIONS: DropdownOption[] = PARTNER_ROLE_TYPE_FILTER_OPTIONS.map((v) => ({
-  label: v === "全部" ? "全部角色" : v,
-  value: v,
-}))
 const PHONE_VERIFY_OPTIONS: DropdownOption[] = PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS.map(
   (v) => ({ label: v === "全部" ? "全部核验" : v, value: v }),
 )
@@ -54,6 +47,9 @@ function drawerOptions(values: readonly string[], allLabel: string): DropdownOpt
 
 export function PartnerArchiveListPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const archiveMenuLabel =
+    parsePartnerArchiveMenuFromH5ListPath(location.pathname) ?? "货主信息"
   const [mockTick, setMockTick] = useState(0)
   const [draftFilters, setDraftFilters] = useState<PartnerArchiveFilters>({
     ...DEFAULT_PARTNER_ARCHIVE_FILTERS,
@@ -73,13 +69,23 @@ export function PartnerArchiveListPage() {
     }
   }, [])
 
+  const subjectStatusOptions: DropdownOption[] = useMemo(() => {
+    return partnerSubjectStatusFilterOptions(archiveMenuLabel).map((v) => ({
+      label: v === "全部" ? "全部状态" : v,
+      value: v,
+    }))
+  }, [archiveMenuLabel])
+
   const filtered = useMemo(() => {
     void mockTick
-    return filterPartnerArchives([...partnerArchivesMock], appliedFilters)
-  }, [appliedFilters, mockTick])
+    return filterPartnerArchives(
+      [...partnerArchivesMock],
+      appliedFilters,
+      archiveMenuLabel,
+    )
+  }, [appliedFilters, mockTick, archiveMenuLabel])
 
   const drawerActive =
-    appliedFilters.roleStatus !== "全部" ||
     appliedFilters.source !== "全部" ||
     appliedFilters.contactPhoneVerified !== "全部" ||
     Boolean(appliedFilters.contactPhone.trim()) ||
@@ -105,7 +111,7 @@ export function PartnerArchiveListPage() {
     <MobileShell>
       <div className={`relative ${H5_PAGE_BODY} bg-[#edf2f8]`}>
         <PrototypeAnnotationTarget annotationIds={["partner-archive-page"]}>
-          <NavBar title="合作方档案" backTo={WORKSPACE_ROUTE} />
+          <NavBar title={archiveMenuLabel} backTo={WORKSPACE_ROUTE} />
         </PrototypeAnnotationTarget>
 
         <PrototypeAnnotationTarget annotationIds={["partner-archive-filter"]}>
@@ -172,20 +178,9 @@ export function PartnerArchiveListPage() {
               compactRow
               label="主体状态"
               value={appliedFilters.subjectStatus}
-              options={SUBJECT_STATUS_OPTIONS}
+              options={subjectStatusOptions}
               onChange={(subjectStatus) => {
                 const next = { ...appliedFilters, subjectStatus }
-                setDraftFilters(next)
-                setAppliedFilters(next)
-              }}
-            />
-            <DropdownFilterPill
-              compactRow
-              label="业务角色"
-              value={appliedFilters.roleType}
-              options={ROLE_TYPE_OPTIONS}
-              onChange={(roleType) => {
-                const next = { ...appliedFilters, roleType }
                 setDraftFilters(next)
                 setAppliedFilters(next)
               }}
@@ -244,7 +239,7 @@ export function PartnerArchiveListPage() {
           type="button"
           className="fixed bottom-20 right-4 flex size-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg active:bg-blue-700"
           aria-label="新增合作方"
-          onClick={() => navigate(PARTNER_ARCHIVE_FORM_ROUTE)}
+          onClick={() => navigate(partnerArchiveFormRoute(archiveMenuLabel))}
         >
           <Plus className="size-7" />
         </button>
@@ -255,7 +250,6 @@ export function PartnerArchiveListPage() {
           onReset={() => {
             setDraftFilters({
               ...appliedFilters,
-              roleStatus: "全部",
               source: "全部",
               contactPhoneVerified: "全部",
               contactPhone: "",
@@ -265,19 +259,6 @@ export function PartnerArchiveListPage() {
           }}
           onConfirm={applyDrawer}
         >
-          <DrawerField label="角色状态">
-            <select
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-              value={draftFilters.roleStatus}
-              onChange={(e) => patchDraft({ roleStatus: e.target.value })}
-            >
-              {drawerOptions(PARTNER_ROLE_STATUS_FILTER_OPTIONS, "全部角色状态").map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </DrawerField>
           <DrawerField label="创建来源">
             <select
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"

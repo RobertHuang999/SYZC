@@ -43,6 +43,10 @@ import { IterationRecordPage } from "@/features/permission-reference/pages/Itera
 import { PartnerArchiveListPage } from "@/features/partner-archives/pages/PartnerArchiveListPage"
 import { PartnerArchiveDetailPage } from "@/features/partner-archives/pages/PartnerArchiveDetailPage"
 import { PartnerArchiveFormPage } from "@/features/partner-archives/pages/PartnerArchiveFormPage"
+import { PartnerArchiveLegacyRedirect } from "@/features/partner-archives/components/PartnerArchiveLegacyRedirect"
+import { PartnerStockChangeMapPage } from "@/features/partner-synergy/pages/PartnerStockChangeMapPage"
+import { PartnerStockSynergySpecPage } from "@/features/partner-synergy/pages/PartnerStockSynergySpecPage"
+import { PARTNER_ARCHIVE_MENU_LABELS } from "@prototype/shared/partner-archives/partner-archive-routes"
 import { PlatformBasicConfigPage } from "@/features/platform-basic-config/pages/PlatformBasicConfigPage"
 import { WarehouseListPage } from "@/features/warehouse-management/pages/WarehouseListPage"
 import { WarehouseDetailPage } from "@/features/warehouse-management/pages/WarehouseDetailPage"
@@ -55,6 +59,7 @@ import { OutboundRecordListPage } from "@/features/outbound-records/pages/Outbou
 import { OutboundRecordFormPage } from "@/features/outbound-records/pages/OutboundRecordFormPage"
 import { OutboundRecordDetailPage } from "@/features/outbound-records/pages/OutboundRecordDetailPage"
 import { DeliveryOrderListPage } from "@/features/delivery-orders/pages/DeliveryOrderListPage"
+import { SupervisionHandlingPartnerRefPage } from "@/features/supervision-handling/pages/SupervisionHandlingPartnerRefPage"
 import { InboundStagingPrototypeGate } from "@/features/inbound-staging-reg/components/InboundStagingPrototypeGate"
 import { InboundStagingListPage } from "@/features/inbound-staging-reg/pages/InboundStagingListPage"
 import { InboundStagingFormPage } from "@/features/inbound-staging-reg/pages/InboundStagingFormPage"
@@ -236,6 +241,10 @@ export function AppRoutes() {
           element={<MigrationSchemePage />}
         />
         <Route
+          path="历史迁移与割接/合作方主数据迁移"
+          element={<MigrationSchemePage />}
+        />
+        <Route
           path="历史迁移与割接/:id"
           element={<MigrationSchemePage />}
         />
@@ -256,19 +265,40 @@ export function AppRoutes() {
           element={<AccessControlDeviceListPage />}
         />
 
-        {/* 6.3 版本 · 用户中心板块 (01 合作方档案 & 03 存量业务协同) */}
-        <Route path="用户中心/合作方管理/合作方档案" element={<PartnerArchiveListPage />} />
+        {/* 6.3 方案 B · 用户中心 → 合作方档案 四子菜单（04-1~04-4 共用页面壳） */}
+        {PARTNER_ARCHIVE_MENU_LABELS.flatMap((menu) => [
+          <Route
+            key={`${menu}-list`}
+            path={`用户中心/合作方档案/${menu}`}
+            element={<PartnerArchiveListPage />}
+          />,
+          <Route
+            key={`${menu}-detail`}
+            path={`用户中心/合作方档案/${menu}/详情/:id`}
+            element={<PartnerArchiveDetailPage />}
+          />,
+          <Route
+            key={`${menu}-add`}
+            path={`用户中心/合作方档案/${menu}/新增`}
+            element={<PartnerArchiveFormPage />}
+          />,
+          <Route
+            key={`${menu}-edit`}
+            path={`用户中心/合作方档案/${menu}/编辑/:id`}
+            element={<PartnerArchiveFormPage />}
+          />,
+        ])}
         <Route
-          path="用户中心/合作方管理/合作方档案/详情/:id"
-          element={<PartnerArchiveDetailPage />}
+          path="用户中心/合作方管理/合作方档案/*"
+          element={<PartnerArchiveLegacyRedirect />}
         />
         <Route
-          path="用户中心/合作方管理/合作方档案/新增"
-          element={<PartnerArchiveFormPage />}
+          path="用户中心/业务协同/合作方档案存量改造地图"
+          element={<PartnerStockChangeMapPage />}
         />
         <Route
-          path="用户中心/合作方管理/合作方档案/编辑/:id"
-          element={<PartnerArchiveFormPage />}
+          path="用户中心/业务协同/存量业务单据协同"
+          element={<PartnerStockSynergySpecPage />}
         />
 
         <Route
@@ -370,6 +400,12 @@ export function AppRoutes() {
         <Route
           path="仓储/提货单"
           element={<DeliveryOrderListPage />}
+        />
+
+        {/* 融资监管 · 监管办理（6.3 合作方权人/质权人引用切片） */}
+        <Route
+          path="融资/监管/监管业务/监管办理"
+          element={<SupervisionHandlingPartnerRefPage />}
         />
 
         {placeholderPaths.map((menuPath) => (

@@ -54,9 +54,11 @@ import type {
 import { getWarehouseById, warehousesMock } from "../mock/warehouses.mock"
 import {
   resolveStoreroomInboundAuditYesNo,
-  storeroomInboundAuditRequiresApproval,
+  type StoreroomInboundAuditYesNo,
 } from "../lib/storeroom-inbound-audit"
+import { applyStoreroomInboundAuditToggle } from "../lib/apply-storeroom-audit-toggle"
 import { useWarehouseOpsSnapshot } from "../hooks/use-warehouse-ops-snapshot"
+import { writeWarehouseOpsSnapshot } from "@/shared/config/warehouse-ops-snapshot"
 import { StoreroomFormDialog } from "../components/StoreroomFormDialog"
 import { PartitionFormDialog } from "../components/PartitionFormDialog"
 import { FacilityFormDialog } from "../components/FacilityFormDialog"
@@ -93,6 +95,10 @@ export function WarehouseDetailPage() {
   } | null>(null)
   const [confirmDeleteFacilityId, setConfirmDeleteFacilityId] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+
+  /** 原型：切换为 false 可演示仓库监管员视角（隐藏「前往配置」） */
+  /** false = 仓库监管员（无【前往配置】，WH-V15）；true = 管理员演示批量入口 */
+  const prototypeActAsPlatformAdmin = false
 
   useEffect(() => {
     setWarehouse(getWarehouseById(id))
@@ -139,6 +145,23 @@ export function WarehouseDetailPage() {
   }
 
   const statusBadge = warehouse.status === "ENABLED" ? "启用中" : "已停用"
+
+  const defaultInboundAuditForCreate = (): StoreroomInboundAuditYesNo => {
+    if (ops.inOutRequiresAudit === "否") return "否"
+    if (ops.auditScopeMode === "全部库房") return "是"
+    return "否"
+  }
+
+  const persistStoreroomInboundAudit = (
+    storeroomId: string,
+    inboundAudit: StoreroomInboundAuditYesNo
+  ) => {
+    const enable = inboundAudit === "是"
+    const next = applyStoreroomInboundAuditToggle(ops, storeroomId, enable)
+    if (!next) return
+    writeWarehouseOpsSnapshot(next)
+    refresh()
+  }
 
   // 停用 / 启用库房
   const handleToggleStoreroomStatus = (room: StoreroomNode) => {
@@ -532,40 +555,44 @@ export function WarehouseDetailPage() {
                     </CardTitle>
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1">
-                        <PrototypeAnnotationTarget annotationIds={["wh-63-goto-config"]}>
-                          <Link
-                            to={BASIC_CONFIG_PATH}
-                            className={cn(
-                              buttonVariants({ variant: "outline", size: "sm" }),
-                              "h-8 gap-1 text-xs font-normal"
-                            )}
+                        {prototypeActAsPlatformAdmin ? (
+                          <PrototypeAnnotationTarget
+                            annotationIds={["wh-63-goto-config"]}
                           >
-                            前往配置
-                            <ExternalLinkIcon className="size-3" />
-                          </Link>
-                        </PrototypeAnnotationTarget>
+                            <Link
+                              id="wh-goto-basic-config"
+                              to={BASIC_CONFIG_PATH}
+                              className={cn(
+                                buttonVariants({ variant: "outline", size: "sm" }),
+                                "h-8 gap-1 text-xs font-normal"
+                              )}
+                            >
+                              前往配置
+                              <ExternalLinkIcon className="size-3" />
+                            </Link>
+                          </PrototypeAnnotationTarget>
+                        ) : null}
                         <Tooltip>
                           <TooltipTrigger
                             type="button"
                             className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-help"
-                            aria-label="出入库审核统管说明"
+                            aria-label="出入库审核说明"
                           >
                             <CircleHelpIcon className="size-3.5" />
                           </TooltipTrigger>
                           <TooltipContent
                             side="top"
-                            className="max-w-[17rem] space-y-2 text-xs leading-relaxed"
+                            className="max-w-[18rem] space-y-2 text-xs leading-relaxed"
                           >
-                            <p className="font-medium">出入库审核在哪里配？</p>
+                            <p className="font-medium">出入库审核（R03 · F13）</p>
                             <p className="text-muted-foreground">
-                              本页只读，不能改审核范围。
+                              列表展示「出入库审核标记：是/否」；在【编辑库房】中修改，与基础配置自动同步（R03）。
                             </p>
-                            <ol className="list-decimal space-y-1 pl-4 text-muted-foreground">
-                              <li>点「前往配置」或进入【配置管理 → 平台管理 → 基础配置】</li>
-                              <li>打开「仓储作业参数」</li>
-                              <li>设置「出入库是否需要审核」；选「是」时可指定全部或部分库房</li>
-                              <li>点「保存全部」后刷新本页</li>
-                            </ol>
+                            {ops.inOutRequiresAudit === "否" ? (
+                              <p className="text-amber-700 dark:text-amber-400">
+                                当前租户总开关为「否」，编辑库房时审核单选置灰为「否」。
+                              </p>
+                            ) : null}
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -593,8 +620,6 @@ export function WarehouseDetailPage() {
                             room.id,
                             ops
                           )
-                          const auditRequired =
-                            storeroomInboundAuditRequiresApproval(room.id, ops)
 
                           return (
                             <div
@@ -635,37 +660,22 @@ export function WarehouseDetailPage() {
                                       {room.name}
                                     </span>
 
-                                    <div className="space-y-2 text-xs">
+                                    <div
+                                      id="wh-storeroom-audit-column"
+                                      className="space-y-2 text-xs"
+                                    >
                                       <PrototypeAnnotationTarget
                                         annotationIds={["wh-63-audit-badge"]}
                                       >
-                                        <Tooltip>
-                                          <TooltipTrigger
-                                            type="button"
-                                            className="flex flex-wrap items-center gap-x-2 gap-y-1 text-left cursor-help"
-                                          >
-                                            <span className="shrink-0 text-muted-foreground">
-                                              出入库审核
-                                            </span>
-                                            <Badge
-                                              variant="outline"
-                                              className={cn(
-                                                "shrink-0 font-normal min-w-[1.75rem] justify-center",
-                                                auditRequired
-                                                  ? "border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
-                                                  : "border-slate-200 bg-slate-50 text-slate-600 dark:bg-slate-900/40 dark:text-slate-400"
-                                              )}
-                                            >
-                                              {auditYesNo}
-                                            </Badge>
-                                          </TooltipTrigger>
-                                          <TooltipContent
-                                            side="top"
-                                            className="max-w-[14rem] text-xs leading-relaxed"
-                                          >
-                                            该库房是否需要出入库审核：{auditYesNo}。修改请点右上角「?」或「前往配置」。
-                                          </TooltipContent>
-                                        </Tooltip>
+                                        <p className="text-muted-foreground leading-snug">
+                                          出入库审核标记：
+                                          <span className="text-foreground/90">
+                                            {auditYesNo}
+                                          </span>
+                                          <span className="sr-only">
+                                            （编辑库房可修改，与基础配置 R03 同步）
+                                          </span>
+                                        </p>
                                       </PrototypeAnnotationTarget>
 
                                       {room.remark ? (
@@ -965,24 +975,32 @@ export function WarehouseDetailPage() {
           open={Boolean(storeroomDialog)}
           mode={storeroomDialog?.mode ?? "create"}
           initial={storeroomDialog?.room}
+          inOutRequiresAudit={ops.inOutRequiresAudit}
+          initialInboundAudit={
+            storeroomDialog?.room
+              ? resolveStoreroomInboundAuditYesNo(storeroomDialog.room.id, ops)
+              : defaultInboundAuditForCreate()
+          }
+          defaultInboundAuditForCreate={defaultInboundAuditForCreate()}
           onOpenChange={(open) => !open && setStoreroomDialog(null)}
-          onSubmit={({ name, remark }) => {
+          onSubmit={({ name, remark, inboundAudit }) => {
             if (storeroomDialog?.mode === "edit" && storeroomDialog.room) {
+              const roomId = storeroomDialog.room.id
               updateWarehouse((prev) => ({
                 ...prev,
                 storerooms: prev.storerooms.map((r) =>
-                  r.id === storeroomDialog.room!.id
-                    ? { ...r, name, remark }
-                    : r
+                  r.id === roomId ? { ...r, name, remark } : r
                 ),
               }))
+              persistStoreroomInboundAudit(roomId, inboundAudit)
             } else {
+              const newId = `room-${Date.now()}`
               updateWarehouse((prev) => ({
                 ...prev,
                 storerooms: [
                   ...prev.storerooms,
                   {
-                    id: `room-${Date.now()}`,
+                    id: newId,
                     name,
                     remark,
                     status: "ENABLED",
@@ -992,9 +1010,9 @@ export function WarehouseDetailPage() {
                   },
                 ],
               }))
+              persistStoreroomInboundAudit(newId, inboundAudit)
             }
-            refresh()
-            showToast("库房已保存")
+            showToast("库房已保存，出入库审核已与基础配置同步")
           }}
         />
 

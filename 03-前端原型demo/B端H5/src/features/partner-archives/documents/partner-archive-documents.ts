@@ -1,25 +1,11 @@
-import type { PrototypeDocument } from "@/shared/annotations/PrototypeAnnotationLayer"
-import prdMarkdown from "@docs/B-迭代需求/6.3版本（2026.09）/04-合作方档案/合作方档案主PRD.md?raw"
-import fieldsMarkdown from "@docs/B-迭代需求/6.3版本（2026.09）/04-合作方档案/合作方档案字段清单.md?raw"
-import rulesMarkdown from "@docs/B-迭代需求/6.3版本（2026.09）/04-合作方档案/合作方档案业务规则规格.md?raw"
+import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
+import { buildPartnerArchiveDocuments } from "@prototype/shared/partner-archives/partner-archive-documents.shared"
+import { PARTNER_ARCHIVE_DEFAULT_MENU } from "@prototype/shared/partner-archives/partner-archive-routes"
 
-export const partnerArchiveH5Documents: PrototypeDocument[] = [
-  {
-    id: "prd",
-    title: "合作方档案主PRD",
-    content: prdMarkdown,
-    category: "PRD需求规格",
-  },
-  {
-    id: "fields",
-    title: "合作方档案字段清单",
-    content: fieldsMarkdown,
-    category: "字段字典清单",
-  },
-  {
-    id: "rules",
-    title: "合作方档案业务规则规格",
-    content: rulesMarkdown,
-    category: "业务规则规格",
-  },
-]
+export function getPartnerArchiveDocuments(
+  archiveMenu: PartnerArchiveMenuLabel = PARTNER_ARCHIVE_DEFAULT_MENU,
+) {
+  return buildPartnerArchiveDocuments(archiveMenu)
+}
+
+export const partnerArchiveH5Documents = getPartnerArchiveDocuments()

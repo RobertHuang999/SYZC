@@ -84,7 +84,18 @@ import {
   summarizePartnerAccessRelax,
 } from "../lib/partner-access-audit"
 import { resolveWarehouseRooms } from "../mock/warehouse-tree.mock"
-import { writeWarehouseOpsSnapshot } from "@/shared/config/warehouse-ops-snapshot"
+import {
+  readWarehouseOpsSnapshot,
+  WAREHOUSE_OPS_SNAPSHOT_EVENT,
+  writeWarehouseOpsSnapshot,
+} from "@/shared/config/warehouse-ops-snapshot"
+
+function buildInitialPlatformState(): PlatformBasicConfigState {
+  const state = structuredClone(platformBasicConfigInitialState)
+  const snap = readWarehouseOpsSnapshot()
+  state.warehouseOps = cloneWarehouseOps(snap)
+  return state
+}
 
 const MOCK_OPERATOR = "李敏（系统管理员）"
 const PARTNER_AUDIT_MAX = 5
@@ -114,10 +125,10 @@ function newSmtpRow(): SmtpMailboxRow {
 
 export function PlatformBasicConfigPage() {
   const [state, setState] = useState<PlatformBasicConfigState>(() =>
-    structuredClone(platformBasicConfigInitialState)
+    buildInitialPlatformState()
   )
-  const [savedByCategory, setSavedByCategory] = useState<CategorySavedSnapshots>(() =>
-    buildCategorySavedSnapshots(platformBasicConfigInitialState)
+  const [savedByCategory, setSavedByCategory] = useState<CategorySavedSnapshots>(
+    () => buildCategorySavedSnapshots(buildInitialPlatformState())
   )
   const [category, setCategory] = useState<ConfigCategoryId>("warehouse-ops")
   const [pendingCategory, setPendingCategory] = useState<ConfigCategoryId | null>(null)
@@ -130,12 +141,34 @@ export function PlatformBasicConfigPage() {
   const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false)
   const [riskRelaxOpen, setRiskRelaxOpen] = useState(false)
   const [unsavedDialogOpen, setUnsavedDialogOpen] = useState(false)
-  const [unsavedAction, setUnsavedAction] = useState<"exit" | "switch" | null>(null)
+  const [unsavedAction, setUnsavedAction] = useState<"exit" | "switch" | "refresh" | null>(
+    null
+  )
 
   const [smtpTestTarget, setSmtpTestTarget] = useState<SmtpMailboxRow | null>(null)
   const [partnerAccessAuditLog, setPartnerAccessAuditLog] = useState<
     PartnerAccessAuditRecord[]
   >(() => [...partnerAccessAuditLogMock])
+
+  useEffect(() => {
+    const syncFromWarehouseMgmt = () => {
+      const snap = readWarehouseOpsSnapshot()
+      setState((current) => ({
+        ...current,
+        warehouseOps: cloneWarehouseOps(snap),
+      }))
+      setSavedByCategory((saved) => ({
+        ...saved,
+        "warehouse-ops": cloneWarehouseOps(snap),
+      }))
+    }
+    window.addEventListener(WAREHOUSE_OPS_SNAPSHOT_EVENT, syncFromWarehouseMgmt)
+    return () =>
+      window.removeEventListener(
+        WAREHOUSE_OPS_SNAPSHOT_EVENT,
+        syncFromWarehouseMgmt
+      )
+  }, [])
 
   const currentCategoryMeta = CONFIG_CATEGORIES.find((c) => c.id === category)!
   const showBulkSave = currentCategoryMeta.bulkSave
@@ -273,9 +306,21 @@ export function PlatformBasicConfigPage() {
     } else if (unsavedAction === "exit") {
       discardCategoryChanges(category)
       showToast("已退出当前分类编辑，未保存修改已丢弃")
+    } else if (unsavedAction === "refresh") {
+      discardCategoryChanges(category)
+      showToast("已从服务端刷新最新参数（Mock）")
     }
     setUnsavedDialogOpen(false)
     setUnsavedAction(null)
+  }
+
+  const handleRefreshCurrentCategory = () => {
+    if (isCategoryBlocked(category)) {
+      setUnsavedAction("refresh")
+      setUnsavedDialogOpen(true)
+      return
+    }
+    showToast("已从服务端刷新最新参数（Mock）")
   }
 
   const validateCategorySave = (target: ConfigCategoryId): string | null => {
@@ -605,7 +650,7 @@ export function PlatformBasicConfigPage() {
           policy={state.partnerAccess.individual}
           onChange={(patch) => updatePartnerSubject("individual", patch)}
           onScanDuplicates={() => setDuplicateDialogOpen(true)}
-          certHint="开启后，在合作方档案新增/编辑/补全保存时须填写身份证登记地址；入库、出库、仓单等作业不受影响。"
+          certHint="开启后，在货主信息新增/编辑/补全/改址保存时须填写身份证登记地址；入库、出库、仓单等作业不受影响。"
           certSpecNote={PARTNER_POLICY_INDIVIDUAL_CERT_SPEC}
           duplicateWarning="开启后，同一证件地址在租户内仅允许绑定一个个人货主。冲突时在档案保存或作业快捷建档绑货主时直接拦截。"
           duplicateHint="降低风控要求（由必填改为选填、或关闭防重复）时，保存须填写变更原因。"
@@ -616,7 +661,7 @@ export function PlatformBasicConfigPage() {
           policy={state.partnerAccess.enterprise}
           onChange={(patch) => updatePartnerSubject("enterprise", patch)}
           onScanDuplicates={() => setDuplicateDialogOpen(true)}
-          certHint="开启后，在合作方档案新增/编辑/补全保存时须填写营业执照登记地址；仓储与仓单等作业引用货主不受影响。"
+          certHint="开启后，在货主信息新增/编辑/补全/改址保存时须填写营业执照登记地址；仓储与仓单等作业引用货主不受影响。"
           certSpecNote={PARTNER_POLICY_ENTERPRISE_CERT_SPEC}
           duplicateWarning="开启后，企业货主登记地址在租户内须唯一（与个人货主分池比对，互不混比）。"
           duplicateSpecNote={PARTNER_POLICY_ENTERPRISE_DUP_SPEC}
@@ -1045,7 +1090,7 @@ export function PlatformBasicConfigPage() {
         <PrototypeAnnotationTarget annotationIds={["basic-config-page"]}>
           <h1 className="text-2xl font-semibold tracking-tight">基础配置</h1>
           <p className="text-sm text-muted-foreground">
-            集中维护仓储作业审批、合作方准入、协议文件、数据源与物联网网关、邮件通知等平台运行参数
+            集中维护仓储作业审批、货主准入、协议文件、数据源与物联网网关、邮件通知等平台运行参数
           </p>
         </PrototypeAnnotationTarget>
 
@@ -1081,22 +1126,20 @@ export function PlatformBasicConfigPage() {
             <PrototypeAnnotationTarget annotationIds={["basic-config-actions"]}>
               <div className="flex flex-wrap items-center justify-end gap-2 rounded-xl border bg-card px-4 py-3">
                 {showBulkSave ? (
-                  <Button type="button" onClick={handleSaveCurrentCategory}>
-                    保存
-                  </Button>
+                  <>
+                    <Button type="button" onClick={handleSaveCurrentCategory}>
+                      保存
+                    </Button>
+                    <Button type="button" variant="secondary" onClick={handleExitCurrentCategory}>
+                      退出
+                    </Button>
+                  </>
                 ) : (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => showToast("已从服务端刷新最新参数（Mock）")}
-                  >
+                  <Button type="button" variant="outline" onClick={handleRefreshCurrentCategory}>
                     <RefreshCwIcon className="size-4" />
                     刷新
                   </Button>
                 )}
-                <Button type="button" variant="secondary" onClick={handleExitCurrentCategory}>
-                  退出
-                </Button>
               </div>
             </PrototypeAnnotationTarget>
             {renderSection()}

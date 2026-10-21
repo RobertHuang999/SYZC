@@ -1,11 +1,11 @@
+import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
 import type { SubjectType } from "../domain/types"
 
 /** 详情页 Tab 文案（PC / H5 共用） */
 export const PARTNER_DETAIL_TAB_ITEMS = [
   { key: "basic", label: "基础档案" },
-  { key: "roles", label: "业务角色" },
+  { key: "linked", label: "其他合作档案" },
   { key: "account", label: "关联客户账号" },
-  { key: "documents", label: "关联业务单据" },
   { key: "logs", label: "操作审计日志" },
 ] as const
 
@@ -33,23 +33,29 @@ export const PARTNER_LIST_CONTACT_PHONE_PLACEHOLDER = "11 位手机号精确匹�
 /** 表单首卡标题（与 PC CardTitle 一致） */
 export const PARTNER_FORM_BASE_SECTION_TITLE = "基础档案资料"
 
-/** 新增页业务角色区块标题（与 PC CardTitle 一致） */
-export const PARTNER_FORM_INITIAL_ROLES_SECTION_TITLE = "业务角色（首次挂接）"
+/** 新增页可选跨菜单建档区块标题（与 PC CardTitle 一致） */
+export const PARTNER_FORM_INITIAL_ROLES_SECTION_TITLE = "追加合作方档案角色"
 
 /** ── 上线界面文案（字段清单口径；页面只展示 USER_*，规则编号见 SPEC_* + 标注层）── */
 
 export function partnerFormAddressUserHint(subjectType: SubjectType): string {
   if (subjectType === "ENTERPRISE") {
-    return "请填写营业执照上的登记地址，须与证照一致。勾选「货主」时，同一地址不可重复绑定多个企业货主。"
+    return "请填写营业执照上的登记地址，须与证照一致。作为企业货主，同一证件地址在租户内不可重复绑定多个企业货主。"
   }
-  return "请填写身份证上的登记地址，须与证照一致。勾选「货主」时，同一地址不可重复绑定多个个人货主。"
+  return "请填写身份证上的登记地址，须与证照一致。作为个人货主，同一证件地址在租户内不可重复绑定多个个人货主。"
 }
 
-export const PARTNER_FORM_ADDRESS_SPEC_NOTE =
-  "档案保存走【合作方档案证件地址必填校验规则】(P01)；勾选货主走【证件登记地址防重复唯一校验与同步阻断规则】(P02)，个人与企业分池比对。"
+export const PARTNER_FORM_ADDRESS_SPEC_NOTE_OWNER =
+  "货主域档案保存走【合作方档案证件地址必填校验规则】(P01)；追加货主走【证件登记地址防重复唯一校验与同步阻断规则】(P02)，个人与企业分池比对。"
+
+export const PARTNER_FORM_ADDRESS_USER_HINT_OTHER =
+  "请填写证照登记地址；非货主域不走 P01/P02 货主准入策略。"
+
+export const PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER =
+  "【货主准入与地址唯一联动规则】(PA-R04) 的 P01/P02 **仅货主信息域**；提货人/资金方/服务方保存不强制 P01。"
 
 export const PARTNER_FORM_INITIAL_ROLES_USER_HINT =
-  "保存时将挂接所选角色；未选则仅创建主体，可稍后在详情页【追加角色】。"
+  "可选在其他子菜单同步创建独立主档或建立关联；未选则仅在本菜单建档，可稍后在详情页追加。"
 
 export const PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE =
   "勾选货主时调用统一准入服务，执行【货主准入与地址唯一联动规则】(PA-R04) 与 P01/P02。"
@@ -65,11 +71,35 @@ export const PARTNER_QUICK_CREATE_CERT_ADDRESS_USER_HINT =
 export const PARTNER_QUICK_CREATE_CERT_ADDRESS_SPEC_NOTE =
   "入库快捷建档不走 P01；有地址时走 P02（个人/企业分池）。"
 
-export const PARTNER_PENDING_COMPLETION_USER_BANNER =
-  "该合作方处于「待补全」状态，请完善证件登记地址；保存通过后货主角色将变为正常。"
+export const PARTNER_PENDING_COMPLETION_OWNER_USER_BANNER =
+  "本菜单必填未齐（含基础配置已开启的证件登记地址）。请补录后保存；仅货主信息走【货主证件地址必填校验规则】(P01)。"
+
+export const PARTNER_PENDING_COMPLETION_PICKUP_USER_BANNER =
+  "本菜单必填未齐。个人须补齐姓名、身份证、手机号；企业须补齐企业名称、信用代码、经办人姓名、经办人身份证与联系电话。"
+
+export const PARTNER_PENDING_COMPLETION_FUNDER_USER_BANNER =
+  "本菜单必填未齐。请补全企业全称与统一社会信用代码。"
 
 export const PARTNER_PENDING_COMPLETION_SPEC_NOTE =
-  "对应 P01 档案域必填；缺址不阻断仓储/仓单等作业引用。"
+  "待补全由 04-x 必填派生；仅货主信息因 P01 校验证件地址，提货人/资金方/服务方不因地址进入待补全。"
+
+/** @deprecated 使用 partnerPendingCompletionUserBanner(archiveMenu) */
+export const PARTNER_PENDING_COMPLETION_USER_BANNER =
+  PARTNER_PENDING_COMPLETION_OWNER_USER_BANNER
+
+export function partnerPendingCompletionUserBanner(menu: PartnerArchiveMenuLabel): string {
+  switch (menu) {
+    case "货主信息":
+      return PARTNER_PENDING_COMPLETION_OWNER_USER_BANNER
+    case "提货人信息":
+      return PARTNER_PENDING_COMPLETION_PICKUP_USER_BANNER
+    case "资金方信息":
+    case "服务方信息":
+      return PARTNER_PENDING_COMPLETION_FUNDER_USER_BANNER
+    default:
+      return PARTNER_PENDING_COMPLETION_PICKUP_USER_BANNER
+  }
+}
 
 export const PARTNER_APPEND_OWNER_MISSING_ADDRESS_USER =
   "当前未录入证件地址。确认后货主角色为「待补全」，请稍后在档案编辑页补全登记地址。"
@@ -85,16 +115,19 @@ export const PARTNER_APPEND_OWNER_WITH_ADDRESS_SPEC =
 
 export function partnerFormPageTitle(
   isEdit: boolean,
+  menuShortLabel: string,
   subjectName?: string,
   isPendingCompletion?: boolean,
 ): string {
   if (isEdit) {
     if (isPendingCompletion) {
-      return subjectName ? `补全合作方档案 — ${subjectName}` : "补全合作方档案"
+      return subjectName
+        ? `补全${menuShortLabel}档案 — ${subjectName}`
+        : `补全${menuShortLabel}档案`
     }
-    return subjectName ? `编辑合作方档案 — ${subjectName}` : "编辑合作方档案"
+    return subjectName ? `编辑${menuShortLabel} — ${subjectName}` : `编辑${menuShortLabel}`
   }
-  return "新增合作方档案"
+  return `新增${menuShortLabel}`
 }
 
 /** 表单底栏按钮（PC / H5 新增编辑页一致） */
@@ -201,8 +234,50 @@ export const PARTNER_QUICK_CREATE_OUTBOUND_USER =
 export const PARTNER_QUICK_CREATE_OUTBOUND_SPEC =
   "出库快捷建档场景；不触发 P02。"
 
+export const PARTNER_QUICK_CREATE_SUPERVISION_FUNDER_USER =
+  "仅创建企业资金方档案，挂接至「资金方信息」菜单；用于抵押/质押单抵押权人、质押权人选择。"
+
+export const PARTNER_QUICK_CREATE_SUPERVISION_FUNDER_SPEC =
+  "【抵质押权人合作方引用规则】(R-PLG-14) · 【资金方信息库内匹配规则】(FN-R01)；不走货主 P01/P02。"
+
+export const PARTNER_QUICK_CREATE_SUPERVISION_SERVICE_USER =
+  "仅创建企业服务方档案，挂接至「服务方信息」菜单；用于监管服务单质权人，界面不写「资金方」。"
+
+export const PARTNER_QUICK_CREATE_SUPERVISION_SERVICE_SPEC =
+  "【监管服务质权人合作方引用规则】(R-PLG-15) · 【服务方信息库内匹配规则】(SP-R01)。"
+
+/** 出库制单：货主须在库有货，不提供作业页快捷新增 */
+export const OUTBOUND_OWNER_PICKER_USER_HINT =
+  "请从已有货主档案中选择；出库须扣减在库库存，新建货主尚无货物，本页不提供快捷建档。需新货主请先在入库等入口建档并完成入库。"
+
+export function partnerEmbeddedPickerUserHint(menu: PartnerArchiveMenuLabel): string {
+  switch (menu) {
+    case "货主信息":
+      return "仅列出本租户「货主信息」域、主体与货主角色均为正常的档案。"
+    case "资金方信息":
+      return "仅列出「资金方信息」域档案，供抵押单/质押单选择抵押权人、质押权人。"
+    case "服务方信息":
+      return "仅列出「服务方信息」域档案，供监管服务单选择质权人（服务方）。"
+    default:
+      return "仅列出当前合作方子菜单域内、主体与对应角色均为正常的档案。"
+  }
+}
+
+export function partnerEmbeddedPickerSpecNote(menu: PartnerArchiveMenuLabel): string {
+  switch (menu) {
+    case "货主信息":
+      return "【货主合作方引用规则】(R-PLG-16) · 【货主信息库内匹配与准入规则】(WH-R01) · 【合作方子菜单分视图与隐式角色规则】(PA-R12)。"
+    case "资金方信息":
+      return "【抵质押权人合作方引用规则】(R-PLG-14) · FN-R01 · PA-R12 域间硬隔离。"
+    case "服务方信息":
+      return "【监管服务质权人合作方引用规则】(R-PLG-15) · SP-R01 · 禁止与资金方域混选。"
+    default:
+      return "PA-R12 按 archiveMenu 过滤可选主档。"
+  }
+}
+
 export const PARTNER_DETAIL_PENDING_DOCS_USER =
-  "存在待补全角色或资料不完整，请通过【去补全资料】完善证件登记地址；完善前部分作业仍可引用该货主。"
+  "本菜单必填项尚未齐备，请通过【补全资料】补录；完善前部分下游作业仍可按各业务规则引用。"
 
 export const PARTNER_DETAIL_PENDING_DOCS_SPEC =
   "P01 仅档案保存必填；仓储/仓单不因缺址阻断。"
@@ -219,7 +294,7 @@ export type PartnerConfirmCopy = {
 export const PARTNER_SUBJECT_FREEZE_DIALOG: PartnerConfirmCopy = {
   title: "确认冻结主体",
   description:
-    "冻结后该主体名下业务角色将暂停发起新业务单据，历史在库库存进入只读风控锁定。请录入冻结原因。",
+    "冻结仅作用于当前子菜单主档，不影响同证号在其他子菜单的主档。冻结后本菜单下暂停发起新业务。请录入冻结原因。",
   confirmLabel: "确认冻结",
   destructive: true,
   reasonLabel: "冻结原因",

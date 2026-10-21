@@ -1,7 +1,23 @@
+import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
+
 export type SubjectType = "INDIVIDUAL" | "ENTERPRISE" // 个人 | 企业
 export type SubjectStatus = "NORMAL" | "FROZEN" // 正常 | 冻结
 
-export type RoleType = "OWNER" | "PICKUP_AGENT" | "RECEIVER" | "FUNDER" // 货主 | 提货经办人 | 接收方 | 资金方
+export interface LinkedPartnerArchive {
+  targetMenu: PartnerArchiveMenuLabel
+  partnerId: string
+  partnerNo: string
+  name: string
+  subjectStatus: SubjectStatus
+}
+
+export type RoleType =
+  | "OWNER"
+  | "PICKUP_AGENT"
+  | "FUNDER"
+  | "SERVICE_PROVIDER"
+  /** @deprecated 6.3 废止接收方主档域；存量 Mock 仅演示 */
+  | "RECEIVER"
 
 export type RoleStatus =
   | "NORMAL" // 正常
@@ -82,6 +98,8 @@ export interface AuditLogItem {
 
 export interface PartnerSubject {
   id: string
+  /** 档案归属菜单（PA-R12）；Mock 可由 enrich 推断 */
+  archiveMenu: PartnerArchiveMenuLabel
   partnerNo: string
   name: string
   subjectType: SubjectType
@@ -95,7 +113,11 @@ export interface PartnerSubject {
   contactPhoneVerifiedAt?: string
   /** 企业经办人姓名（仅企业主体） */
   agentName?: string
+  /** 企业经办人身份证号（提货人信息 · 企业必填） */
+  agentIdNumber?: string
   status: SubjectStatus
+  /** 其他子菜单主档关联（方案 B） */
+  linkedPartnerArchives?: LinkedPartnerArchive[]
   roles: PartnerRoleItem[]
   source: SourceType
   sourceDocNo?: string
@@ -137,8 +159,9 @@ export const AUTH_STATUS_LABELS: Record<
 export const ROLE_TYPE_LABELS: Record<RoleType, string> = {
   OWNER: "货主",
   PICKUP_AGENT: "提货经办人",
-  RECEIVER: "接收方",
   FUNDER: "资金方",
+  SERVICE_PROVIDER: "服务方",
+  RECEIVER: "接收方",
 }
 
 export const ROLE_STATUS_LABELS: Record<RoleStatus, string> = {
@@ -156,6 +179,6 @@ export const SUBJECT_TYPE_LABELS: Record<SubjectType, string> = {
 
 export const SOURCE_TYPE_LABELS: Record<SourceType, string> = {
   MANUAL: "人工建档",
-  CLIENT_AUTH: "C端认证",
-  DOC_SETTLEMENT: "单据沉淀",
+  CLIENT_AUTH: "C端注册",
+  DOC_SETTLEMENT: "人工建档",
 }

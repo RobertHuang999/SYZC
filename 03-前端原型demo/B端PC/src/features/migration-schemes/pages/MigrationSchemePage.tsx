@@ -24,7 +24,23 @@ import {
   migrationDocumentByPathMap,
   migrationDocumentMap,
 } from "../data/migration-documents"
+import { migrationDocuments63Partner } from "../data/migration-documents-63-partner"
 import { MermaidDiagram } from "@/shared/components/MermaidDiagram"
+
+const allMigrationDocuments: MigrationDocumentItem[] = [
+  ...migrationDocuments,
+  ...migrationDocuments63Partner,
+]
+
+const allMigrationDocumentMap = new Map<string, MigrationDocumentItem>([
+  ...migrationDocumentMap,
+  ...migrationDocuments63Partner.map((doc) => [doc.id, doc] as const),
+])
+
+const allMigrationDocumentByPathMap = new Map<string, MigrationDocumentItem>([
+  ...migrationDocumentByPathMap,
+  ...migrationDocuments63Partner.map((doc) => [doc.routePath, doc] as const),
+])
 
 interface TocItem {
   id: string
@@ -43,31 +59,32 @@ export function MigrationSchemePage() {
   const currentDoc: MigrationDocumentItem = useMemo(() => {
     // 1. 先通过 URL 完整路径匹配
     const decodedPath = decodeURIComponent(location.pathname).replace(/\/$/, "")
-    const matchedByPath = migrationDocumentByPathMap.get(decodedPath)
+    const matchedByPath = allMigrationDocumentByPathMap.get(decodedPath)
     if (matchedByPath) return matchedByPath
 
     // 2. 如果存在路由参数 id
-    if (params.id && migrationDocumentMap.has(params.id)) {
-      return migrationDocumentMap.get(params.id)!
+    if (params.id && allMigrationDocumentMap.has(params.id)) {
+      return allMigrationDocumentMap.get(params.id)!
     }
 
     // 3. 模糊匹配子路径
-    const found = migrationDocuments.find(
+    const found = allMigrationDocuments.find(
       (doc) => decodedPath.includes(doc.id) || decodedPath.includes(encodeURIComponent(doc.shortTitle))
     )
     if (found) return found
 
     // 默认展示第一篇（或三旧模块说明）
-    return migrationDocuments[0]
+    return allMigrationDocuments[0]
   }, [location.pathname, params.id])
 
   // 当前文档在列表中的索引与上下篇
   const currentIndex = useMemo(() => {
-    return migrationDocuments.findIndex((d) => d.id === currentDoc.id)
+    return allMigrationDocuments.findIndex((d) => d.id === currentDoc.id)
   }, [currentDoc])
 
-  const prevDoc = currentIndex > 0 ? migrationDocuments[currentIndex - 1] : null
-  const nextDoc = currentIndex < migrationDocuments.length - 1 ? migrationDocuments[currentIndex + 1] : null
+  const prevDoc = currentIndex > 0 ? allMigrationDocuments[currentIndex - 1] : null
+  const nextDoc =
+    currentIndex < allMigrationDocuments.length - 1 ? allMigrationDocuments[currentIndex + 1] : null
 
   // 提取 Markdown 中的目录大纲（TOC）
   const tocList: TocItem[] = useMemo(() => {
@@ -186,7 +203,7 @@ export function MigrationSchemePage() {
             <span className="text-xs font-medium text-muted-foreground shrink-0 mr-1 flex items-center gap-1">
               <FileCodeIcon className="size-3.5" /> 方案导航:
             </span>
-            {migrationDocuments.map((doc, idx) => {
+            {allMigrationDocuments.map((doc, idx) => {
               const isActive = doc.id === currentDoc.id
               return (
                 <button

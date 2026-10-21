@@ -57,10 +57,12 @@ export type TableRowActionTone = "primary" | "amber" | "danger"
 export type TableRowActionItem = {
   key: string
   label: string
+  title?: string
   tone?: TableRowActionTone
   onClick?: () => void
   to?: string
   icon?: ComponentType<{ className?: string }>
+  isPlaceholder?: boolean
 }
 
 const toneClass: Record<TableRowActionTone, string> = {
@@ -76,10 +78,18 @@ const actionControlClass = (tone: TableRowActionTone = "primary") =>
   )
 
 function ActionControl({ item }: { item: TableRowActionItem }) {
+  if (item.isPlaceholder) {
+    return (
+      <span className="text-sm font-normal text-muted-foreground/35 select-none" aria-hidden="true">
+        {item.label || "——"}
+      </span>
+    )
+  }
   const className = actionControlClass(item.tone)
+  const displayTitle = item.title ?? item.label
   if (item.to) {
     return (
-      <Link to={item.to} className={className} title={item.label}>
+      <Link to={item.to} className={className} title={displayTitle}>
         <span className="block max-w-full truncate text-center">{item.label}</span>
       </Link>
     )
@@ -89,7 +99,7 @@ function ActionControl({ item }: { item: TableRowActionItem }) {
       type="button"
       variant="link"
       className={className}
-      title={item.label}
+      title={displayTitle}
       onClick={item.onClick}
     >
       <span className="block max-w-full truncate text-center">{item.label}</span>
@@ -140,9 +150,10 @@ function MoreActionsTrigger() {
 
 type TableRowActionPanelProps = {
   actions: TableRowActionItem[]
+  fixedCols?: number
 }
 
-export function TableRowActionPanel({ actions }: TableRowActionPanelProps) {
+export function TableRowActionPanel({ actions, fixedCols }: TableRowActionPanelProps) {
   if (actions.length === 0) {
     return <span className="text-sm text-muted-foreground">——</span>
   }
@@ -180,7 +191,7 @@ export function TableRowActionPanel({ actions }: TableRowActionPanelProps) {
     )
   }
 
-  const gridCols = resolveActionGridCols(cells.length)
+  const gridCols = fixedCols ?? resolveActionGridCols(cells.length)
   const panelWidthPx = panelWidthForActionCols(gridCols)
 
   const rootStyle = {

@@ -70,7 +70,7 @@ export const iterationVersions: IterationVersionMeta[] = [
       {
         "tag": "必交付",
         "meaning": "6.3 合作方主线 P0/P1 必须上线",
-        "menus": "合作方档案、基础配置准入、仓库管理、入库记录货主 R03、出库/提货/转让/客户管理等（见下表明细）"
+        "menus": "合作方档案、基础配置准入、仓库管理、入库 QCP、出库/提货/转让/客户管理等（见下表明细）"
       }
     ]
   },
@@ -99,32 +99,88 @@ export const iterationRecords: IterationRecordEntry[] = [
     "id": "1",
     "version": "6.3",
     "platform": "PC",
-    "type": "新增",
-    "title": "合作方管理一级板块",
-    "before": "",
-    "after": "合作方管理 / 合作方档案",
+    "type": "重构",
+    "title": "合作方档案（侧栏分组 + 四菜单项）",
+    "before": "合作方管理 / 合作方档案（单页）",
+    "after": "用户中心 / 合作方档案（分组）/ 四子菜单",
     "priority": "P0",
     "deliveryTag": "必交付",
-    "note": "业务主体主档入口",
-    "date": "2026-09",
-    "sourceDoc": "04-合作方档案/合作方档案主PRD.md"
+    "note": "公共 [04-合作方档案](./04-合作方档案/README.md) + 子菜单 04-1~04-4 三件套",
+    "date": "2026-10-20",
+    "sourceDoc": "合作方主数据-公共主PRD 6.0 节"
   },
   {
     "id": "2",
     "version": "6.3",
     "platform": "PC",
+    "type": "新增",
+    "title": "货主信息",
+    "before": "",
+    "after": "用户中心 / 合作方档案 / 货主信息",
+    "priority": "P0",
+    "deliveryTag": "必交付",
+    "note": "独立 RBAC；三件套 [04-1 货主信息](./04-合作方档案/04-1-货主信息/)",
+    "date": "2026-10-20",
+    "sourceDoc": "货主信息主PRD.md"
+  },
+  {
+    "id": "3",
+    "version": "6.3",
+    "platform": "PC",
+    "type": "新增",
+    "title": "提货人信息",
+    "before": "",
+    "after": "用户中心 / 合作方档案 / 提货人信息",
+    "priority": "P0",
+    "deliveryTag": "必交付",
+    "note": "独立 RBAC；三件套 [04-2 提货人信息](./04-合作方档案/04-2-提货人信息/)",
+    "date": "2026-10-20",
+    "sourceDoc": "提货人信息主PRD.md"
+  },
+  {
+    "id": "4",
+    "version": "6.3",
+    "platform": "PC",
+    "type": "新增",
+    "title": "资金方信息",
+    "before": "",
+    "after": "用户中心 / 合作方档案 / 资金方信息",
+    "priority": "P0",
+    "deliveryTag": "必交付",
+    "note": "独立 RBAC；抵质押单抵质押权人；[04-3 资金方信息](./04-合作方档案/04-3-资金方信息/)",
+    "date": "2026-10-20",
+    "sourceDoc": "资金方信息主PRD.md"
+  },
+  {
+    "id": "5",
+    "version": "6.3",
+    "platform": "PC",
+    "type": "新增",
+    "title": "服务方信息",
+    "before": "",
+    "after": "用户中心 / 合作方档案 / 服务方信息",
+    "priority": "P0",
+    "deliveryTag": "必交付",
+    "note": "与资金方同构、分域；监管服务单质权人；[04-4 服务方信息](./04-合作方档案/04-4-服务方信息/)",
+    "date": "2026-10-20",
+    "sourceDoc": "服务方信息主PRD.md"
+  },
+  {
+    "id": "6",
+    "version": "6.3",
+    "platform": "PC",
     "type": "合并调整",
     "title": "合作方准入规则",
     "before": "配置管理 / 平台管理 / 合作方准入规则",
-    "after": "并入基础配置（配置管理 / 平台管理 / 基础配置 / 合作方准入策略）",
+    "after": "并入基础配置（配置管理 / 平台管理 / 基础配置 / 货主准入策略）",
     "priority": "P0",
     "deliveryTag": "必交付",
-    "note": "原独立单页设置整合进基础配置，消灭独立冗余菜单；提供个人一人一址双开关、存量检测与放宽审计",
+    "note": "原独立单页整合进基础配置；货主域 P01/P02 双开关、存量检测与放宽审计",
     "date": "2026-10",
     "sourceDoc": "02-平台管理-基础配置/基础配置主PRD.md"
   },
   {
-    "id": "3",
+    "id": "7",
     "version": "6.3",
     "platform": "PC",
     "type": "新增",
@@ -138,7 +194,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "08-版本范围与里程碑.md"
   },
   {
-    "id": "4",
+    "id": "8",
     "version": "6.3",
     "platform": "PC",
     "type": "修改",
@@ -152,7 +208,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "05-存量改造与关联业务协同/合作方改造-存量业务单据协同规格.md"
   },
   {
-    "id": "5",
+    "id": "9",
     "version": "6.3",
     "platform": "PC",
     "type": "保留",
@@ -166,7 +222,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "08-版本范围与里程碑.md"
   },
   {
-    "id": "6",
+    "id": "10",
     "version": "6.3",
     "platform": "PC",
     "type": "修改",
@@ -180,21 +236,21 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "10-仓储管理-入库记录/入库记录主PRD.md"
   },
   {
-    "id": "7",
+    "id": "11",
     "version": "6.3",
     "platform": "PC",
     "type": "修改",
     "title": "出库记录",
     "before": "仓储 / 出库管理 / 出库记录",
-    "after": "货主、提货主体、提货经办人引用合作方",
+    "after": "货主信息域仅选已有档案；提货人 O06a",
     "priority": "P0",
     "deliveryTag": "必交付",
-    "note": "提货人不触发货主地址规则",
-    "date": "2026-09",
-    "sourceDoc": "05-存量改造与关联业务协同/合作方改造-存量业务单据协同规格.md"
+    "note": "制单页不提供货主快捷建档（O05）；提货人不触发货主 P02",
+    "date": "2026-10-20",
+    "sourceDoc": "11-仓储管理-出库记录/出库记录主PRD.md"
   },
   {
-    "id": "8",
+    "id": "12",
     "version": "6.3",
     "platform": "PC",
     "type": "修改",
@@ -208,21 +264,21 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "05-存量改造与关联业务协同/合作方改造-存量业务单据协同规格.md"
   },
   {
-    "id": "9",
+    "id": "13",
     "version": "6.3",
     "platform": "PC",
     "type": "修改",
     "title": "转让记录",
     "before": "仓储 / 货物管理 / 转让记录",
-    "after": "接收方引用合作方",
+    "after": "货主信息域挂接/引用受让方",
     "priority": "P0",
     "deliveryTag": "必交付",
-    "note": "转让生效变货主时执行地址规则",
-    "date": "2026-09",
+    "note": "废止接收方/待生效；生效 P02（PA-V07）",
+    "date": "2026-10-20",
     "sourceDoc": "05-存量改造与关联业务协同/合作方改造-存量业务单据协同规格.md"
   },
   {
-    "id": "10",
+    "id": "14",
     "version": "6.3",
     "platform": "PC",
     "type": "修改",
@@ -236,7 +292,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "05-存量改造与关联业务协同/合作方改造-存量业务单据协同规格.md"
   },
   {
-    "id": "11",
+    "id": "15",
     "version": "6.3",
     "platform": "PC",
     "type": "保留",
@@ -250,7 +306,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "08-版本范围与里程碑.md"
   },
   {
-    "id": "12",
+    "id": "16",
     "version": "6.3",
     "platform": "PC",
     "type": "模块重构",
@@ -259,12 +315,12 @@ export const iterationRecords: IterationRecordEntry[] = [
     "after": "基础配置（平台运行底座、垂直6大分类导航中心）",
     "priority": "P0",
     "deliveryTag": "必交付",
-    "note": "纳管仓储作业参数（出入库受控库房联动、移库审核）、合作方准入策略、法律协议、9大数据源参数、9大硬件参数、邮件通道",
+    "note": "纳管仓储作业参数、货主准入策略、法律协议、9大数据源、9大硬件、邮件通道",
     "date": "2026-10",
     "sourceDoc": "02-平台管理-基础配置/基础配置主PRD.md"
   },
   {
-    "id": "13",
+    "id": "17",
     "version": "6.3",
     "platform": "PC",
     "type": "模块重构",
@@ -273,12 +329,12 @@ export const iterationRecords: IterationRecordEntry[] = [
     "after": "仓库管理（仓库主档、库房、分区空间监管）",
     "priority": "P0",
     "deliveryTag": "必交付",
-    "note": "空间主档层级维护；库房出入库审核状态改为读取基础配置只读展示",
+    "note": "空间主档层级维护；库房列表审核标记+编辑弹窗，与基础配置 R03 双端同步",
     "date": "2026-10",
     "sourceDoc": "03-仓库管理-仓库管理/仓库管理主PRD.md"
   },
   {
-    "id": "14",
+    "id": "18",
     "version": "6.3",
     "platform": "PC",
     "type": "新增",
@@ -292,7 +348,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "09-仓储管理-入库暂存登记/入库暂存登记主PRD.md"
   },
   {
-    "id": "15",
+    "id": "19",
     "version": "6.3",
     "platform": "PC",
     "type": "修改",
@@ -306,7 +362,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "10-仓储管理-入库记录/入库记录业务规则规格.md"
   },
   {
-    "id": "16",
+    "id": "20",
     "version": "6.3",
     "platform": "移动",
     "type": "新增",
@@ -320,7 +376,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "09-仓储管理-入库暂存登记/入库暂存登记主PRD.md"
   },
   {
-    "id": "17",
+    "id": "21",
     "version": "6.3",
     "platform": "移动",
     "type": "修改",
@@ -334,7 +390,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "10-仓储管理-入库记录/入库记录业务规则规格.md"
   },
   {
-    "id": "18",
+    "id": "22",
     "version": "6.3",
     "platform": "PC",
     "type": "保留/澄清",
@@ -348,35 +404,49 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "2026.09.14合作方需求设计方案.md"
   },
   {
-    "id": "19",
+    "id": "23",
     "version": "6.3",
     "platform": "移动",
     "type": "新增",
-    "title": "H5 合作方档案",
+    "title": "H5 用户中心四入口",
     "before": "",
-    "after": "工作台 / 用户中心 / 合作方档案",
+    "after": "工作台 / 用户中心 四按钮 → 货主 / 提货人 / 资金方 / 服务方 列表",
     "priority": "P1",
     "deliveryTag": "必交付",
-    "note": "外勤列表/详情/悬浮新增；规则与 PC 共用；不含 PC 全量改址与「保存并验证」",
-    "date": "2026-10",
-    "sourceDoc": "04-合作方档案/合作方档案主PRD.md 6.6 节"
+    "note": "与 PC 同 `archiveMenu`；RBAC 四路径分别授权",
+    "date": "2026-10-20",
+    "sourceDoc": "合作方主数据-公共主PRD 6.0 节"
   },
   {
-    "id": "20",
+    "id": "24",
     "version": "6.3",
     "platform": "移动",
     "type": "保留",
-    "title": "作业页内嵌合作方选择/创建",
+    "title": "作业页内嵌合作方快捷建档 (QCP)",
     "before": "",
     "after": "不单独增菜单",
-    "priority": "P2",
-    "deliveryTag": "",
-    "note": "入库等页面复用选择器与跳转详情",
-    "date": "2026-09",
-    "sourceDoc": "05-存量改造与关联业务协同/合作方改造-存量业务单据协同规格.md"
+    "priority": "P0",
+    "deliveryTag": "必交付",
+    "note": "入库货主 R03；出库提货 O06a；出库货主无快捷建档",
+    "date": "2026-10-20",
+    "sourceDoc": "08-版本范围与里程碑.md 序号 16b"
   },
   {
-    "id": "21",
+    "id": "25",
+    "version": "6.3",
+    "platform": "PC",
+    "type": "修改",
+    "title": "监管办理",
+    "before": "融资/监管 / 监管业务 / 监管办理",
+    "after": "权人/质权人分域选择器（04-3/04-4）",
+    "priority": "P0",
+    "deliveryTag": "必交付",
+    "note": "原型页已交付；权限与 12 口径对齐",
+    "date": "2026-10-20",
+    "sourceDoc": "12-融资监管-菜单更名与监管管理口径.md"
+  },
+  {
+    "id": "26",
     "version": "6.2",
     "platform": "PC",
     "type": "更名",
@@ -390,7 +460,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "B端PC/00-菜单地图.md"
   },
   {
-    "id": "22",
+    "id": "27",
     "version": "6.2",
     "platform": "双端",
     "type": "新增",
@@ -404,7 +474,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "06-门禁开锁审批/门禁开锁审批总索引.md"
   },
   {
-    "id": "23",
+    "id": "28",
     "version": "6.2",
     "platform": "PC",
     "type": "新增",
@@ -418,7 +488,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "03-预警配置/01预警等级/预警等级主PRD.md"
   },
   {
-    "id": "24",
+    "id": "29",
     "version": "6.2",
     "platform": "PC",
     "type": "结构",
@@ -432,7 +502,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "00-PC菜单地图（目标态）.md"
   },
   {
-    "id": "25",
+    "id": "30",
     "version": "6.2",
     "platform": "PC",
     "type": "迁移",
@@ -446,7 +516,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "01-物联网IOT管理/物联网IOT管理总索引.md"
   },
   {
-    "id": "26",
+    "id": "31",
     "version": "6.2",
     "platform": "PC",
     "type": "迁移",
@@ -460,7 +530,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "02-预警信息/预警信息总索引.md"
   },
   {
-    "id": "27",
+    "id": "32",
     "version": "6.2",
     "platform": "PC",
     "type": "迁移",
@@ -474,7 +544,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "03-预警配置/预警配置总索引.md"
   },
   {
-    "id": "28",
+    "id": "33",
     "version": "6.2",
     "platform": "PC",
     "type": "取消",
@@ -488,7 +558,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "04-历史迁移与割接方案/6.1→6.2 三旧模块兼容总说明.md"
   },
   {
-    "id": "29",
+    "id": "34",
     "version": "6.2",
     "platform": "PC",
     "type": "取消",
@@ -502,7 +572,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "同上"
   },
   {
-    "id": "30",
+    "id": "35",
     "version": "6.2",
     "platform": "PC",
     "type": "下线",
@@ -516,7 +586,63 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "功能与数据权限清单.csv"
   },
   {
-    "id": "31",
+    "id": "36",
+    "version": "6.2",
+    "platform": "PC",
+    "type": "重命名",
+    "title": "线上监管业务办理",
+    "before": "融资管理 / 融资结果/线上抵质押办理",
+    "after": "融资管理 / 线上监管业务办理",
+    "priority": "",
+    "deliveryTag": "",
+    "note": "去掉「融资结果/」前缀",
+    "date": "2026-08",
+    "sourceDoc": "[04-融资监管-菜单更名与监管管理口径.md](./04-融资监管-菜单更名与监管管理口径.md)"
+  },
+  {
+    "id": "37",
+    "version": "6.2",
+    "platform": "PC",
+    "type": "重命名",
+    "title": "监管业务 / 监管办理 / 监管管理",
+    "before": "抵质押业务 → 抵质押业务办理 / 抵质押业务管理",
+    "after": "监管业务 → 监管办理 / 监管管理",
+    "priority": "",
+    "deliveryTag": "",
+    "note": "侧栏与二级菜单统一更名",
+    "date": "2026-08",
+    "sourceDoc": "同上"
+  },
+  {
+    "id": "38",
+    "version": "6.2",
+    "platform": "移动",
+    "type": "结构合并",
+    "title": "H5 监管管理",
+    "before": "抵质押订单 + 监管订单（独立菜单）",
+    "after": "监管管理（Tab：抵押/质押/监管服务）",
+    "priority": "",
+    "deliveryTag": "",
+    "note": "与 PC 三 Tab 对齐",
+    "date": "2026-08",
+    "sourceDoc": "同上"
+  },
+  {
+    "id": "39",
+    "version": "6.2",
+    "platform": "移动",
+    "type": "重命名",
+    "title": "H5 线上监管业务办理 / 监管办理",
+    "before": "线上抵质押办理；业务发起·抵质押业务办理",
+    "after": "线上监管业务办理；监管办理",
+    "priority": "",
+    "deliveryTag": "",
+    "note": "moduleId 可不变",
+    "date": "2026-08",
+    "sourceDoc": "同上"
+  },
+  {
+    "id": "40",
     "version": "6.2",
     "platform": "移动",
     "type": "更名",
@@ -530,7 +656,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "B端H5/00-菜单地图.md"
   },
   {
-    "id": "32",
+    "id": "41",
     "version": "6.2",
     "platform": "双端",
     "type": "更名",
@@ -544,7 +670,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "功能与数据权限清单.csv"
   },
   {
-    "id": "33",
+    "id": "42",
     "version": "6.2",
     "platform": "双端",
     "type": "更名",
@@ -558,7 +684,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "功能与数据权限清单.csv"
   },
   {
-    "id": "34",
+    "id": "43",
     "version": "6.2",
     "platform": "PC",
     "type": "新增",
@@ -572,7 +698,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "02-预警信息/04风险公示/风险公示主PRD.md"
   },
   {
-    "id": "35",
+    "id": "44",
     "version": "6.1",
     "platform": "双端",
     "type": "新增",
@@ -586,7 +712,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "加工管理/加工管理主PRD.md"
   },
   {
-    "id": "36",
+    "id": "45",
     "version": "6.1",
     "platform": "双端",
     "type": "新增",
@@ -600,7 +726,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "融资管理/04线上抵质押办理/线上抵质押办理主PRD.md"
   },
   {
-    "id": "37",
+    "id": "46",
     "version": "6.1",
     "platform": "PC",
     "type": "新增",
@@ -612,47 +738,5 @@ export const iterationRecords: IterationRecordEntry[] = [
     "note": "6.1 主数据规格体系",
     "date": "2026-07",
     "sourceDoc": "货品规格管理/01大类管理/大类管理主PRD.md"
-  },
-  {
-    "id": "63-1",
-    "version": "6.2",
-    "platform": "PC",
-    "type": "重命名",
-    "title": "线上监管业务办理",
-    "before": "融资管理 / 融资结果/线上抵质押办理",
-    "after": "融资管理 / 线上监管业务办理",
-    "priority": "P1",
-    "deliveryTag": "必交付",
-    "note": "去掉「融资结果/」前缀",
-    "date": "2026-10-19",
-    "sourceDoc": "B-迭代需求/6.2版本（2026.08）/04-融资监管-菜单更名与监管管理口径.md"
-  },
-  {
-    "id": "63-2",
-    "version": "6.2",
-    "platform": "双端",
-    "type": "重命名",
-    "title": "监管业务 / 监管办理 / 监管管理",
-    "before": "抵质押业务 → 抵质押业务办理 / 抵质押业务管理",
-    "after": "监管业务 → 监管办理 / 监管管理",
-    "priority": "P1",
-    "deliveryTag": "必交付",
-    "note": "侧栏一级与二级菜单名词统一",
-    "date": "2026-10-19",
-    "sourceDoc": "B-迭代需求/6.2版本（2026.08）/04-融资监管-菜单更名与监管管理口径.md"
-  },
-  {
-    "id": "63-3",
-    "version": "6.2",
-    "platform": "移动",
-    "type": "结构合并",
-    "title": "H5 监管管理",
-    "before": "抵质押订单 + 监管订单（独立菜单）",
-    "after": "监管管理（Tab：抵押/质押/监管服务）",
-    "priority": "P1",
-    "deliveryTag": "必交付",
-    "note": "与 PC 三 Tab 对齐",
-    "date": "2026-10-19",
-    "sourceDoc": "B-迭代需求/6.2版本（2026.08）/04-融资监管-菜单更名与监管管理口径.md"
   }
 ]

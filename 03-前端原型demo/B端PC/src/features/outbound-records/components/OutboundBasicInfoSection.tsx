@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 import { Calendar, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -24,11 +24,12 @@ import { cn } from "@/lib/utils"
 import { MANUAL_OUTBOUND_TYPE_OPTIONS } from "../domain/constants"
 import type { OutboundFormState } from "../domain/form-types"
 import type { OwnerType, OutboundTypeName } from "../domain/types"
-import {
-  OWNER_CANDIDATES,
-  RELATED_ORDER_CANDIDATES,
-  type RelatedOrderItem,
-} from "../mock/outbound-form.mock"
+import { RELATED_ORDER_CANDIDATES, type RelatedOrderItem } from "../mock/outbound-form.mock"
+import { PartnerArchiveEmbeddedPicker } from "@/features/partner-archives/components/PartnerArchiveEmbeddedPicker"
+import { OUTBOUND_OWNER_PICKER_USER_HINT } from "@/features/partner-archives/lib/partner-archive-ui-labels"
+import type { PartnerSelectorValue } from "@/features/partner-archives/components/PartnerArchiveSelector"
+import { partnerArchivesMock } from "@/features/partner-archives/mock/partner-archives.mock"
+import { resolveContactPhoneVerified } from "@/features/partner-archives/lib/contact-phone-verify"
 
 interface OutboundBasicInfoSectionProps {
   form: OutboundFormState
@@ -36,6 +37,7 @@ interface OutboundBasicInfoSectionProps {
   onSelectRelatedOrder: (order: RelatedOrderItem) => void
   expanded: boolean
   onToggle: () => void
+  onHint?: (message: string) => void
 }
 
 function FormItem({
@@ -66,11 +68,30 @@ export function OutboundBasicInfoSection({
   onSelectRelatedOrder,
   expanded,
   onToggle,
+  onHint,
 }: OutboundBasicInfoSectionProps) {
   const [confirmRelatedOrder, setConfirmRelatedOrder] =
     useState<RelatedOrderItem | null>(null)
   const [showRelatedDialog, setShowRelatedDialog] = useState(false)
-  const [ownerDropdownOpen, setOwnerDropdownOpen] = useState(false)
+
+  const ownerSelection = useMemo((): PartnerSelectorValue | null => {
+    if (!form.ownerPartnerId) return null
+    const partner = partnerArchivesMock.find((p) => p.id === form.ownerPartnerId)
+    if (!partner) return null
+    const role = partner.roles.find((r) => r.roleType === "OWNER")
+    if (!role) return null
+    return {
+      partnerId: partner.id,
+      partnerNo: partner.partnerNo,
+      name: partner.name,
+      idNumberMasked: partner.idNumberMasked,
+      subjectType: partner.subjectType,
+      roleType: "OWNER",
+      roleStatus: role.roleStatus,
+      subjectStatus: partner.status,
+      contactPhoneVerified: resolveContactPhoneVerified(partner),
+    }
+  }, [form.ownerPartnerId])
 
   const isRelatedType =
     form.type === "仓单出库" || form.type === "质押出库" || form.type === "抵押出库"
@@ -83,46 +104,51 @@ export function OutboundBasicInfoSection({
       ownerIdentifier: "",
       contactPhone: "",
       ownerIdCard: "",
+      ownerPartnerId: "",
       relatedNo: "",
       goodsList: [],
     })
   }
 
-  // 匹配货主输入
-  const handleOwnerNameInput = (nameVal: string) => {
-    const match = OWNER_CANDIDATES.find(
-      (c) => c.name === nameVal && c.type === form.ownerType
-    )
-    if (match) {
+  const applyOwnerPartner = (payload: PartnerSelectorValue | null) => {
+    if (!payload) {
       onPatch({
-        ownerName: match.name,
-        ownerIdentifier: match.identifier,
-        contactPhone: match.phone,
-        ownerIdCard: match.idCard || "",
-      })
-    } else {
-      onPatch({
-        ownerName: nameVal,
+        ownerPartnerId: "",
+        ownerName: "",
         ownerIdentifier: "",
         contactPhone: "",
         ownerIdCard: "",
+        relatedNo: "",
+        goodsList: [],
       })
+      return
     }
-  }
-
-  // 选择货主候选
-  const handleOwnerSelect = (candidateId: string) => {
-    const candidate = OWNER_CANDIDATES.find((c) => c.id === candidateId)
-    if (!candidate) return
+    const partner = partnerArchivesMock.find((p) => p.id === payload.partnerId)
+    if (!partner) return
+    const expected =
+      form.ownerType === "企业" ? ("ENTERPRISE" as const) : ("INDIVIDUAL" as const)
+    if (partner.subjectType !== expected) {
+      onHint?.(
+        form.ownerType === "企业"
+          ? "所选档案为企业货主，请先将货主类型切换为企业"
+          : "所选档案为个人货主，请先将货主类型切换为个人",
+      )
+      return
+    }
+    const phoneMasked =
+      partner.contactPhone.length >= 11
+        ? `${partner.contactPhone.slice(0, 3)}****${partner.contactPhone.slice(-4)}`
+        : partner.contactPhone
     onPatch({
-      ownerName: candidate.name,
-      ownerIdentifier: candidate.identifier,
-      contactPhone: candidate.phone,
-      ownerIdCard: candidate.idCard || "",
+      ownerPartnerId: partner.id,
+      ownerName: partner.name,
+      ownerIdentifier:
+        partner.subjectType === "INDIVIDUAL" ? phoneMasked : partner.idNumberMasked,
+      ownerIdCard: partner.idNumberMasked,
+      contactPhone: partner.contactPhone,
       relatedNo: "",
       goodsList: [],
     })
-    setOwnerDropdownOpen(false)
   }
 
   // 出库类型变更
@@ -202,46 +228,18 @@ export function OutboundBasicInfoSection({
               </Select>
             </FormItem>
 
-            {/* 3. 货主名称 */}
-            <FormItem label="货主名称:" required>
-              <div className="relative">
-                <Input
-                  type="text"
-                  value={form.ownerName}
-                  placeholder={form.ownerType === "个人" ? "请输入货主名称" : "请输入公司全称"}
-                  onFocus={() => setOwnerDropdownOpen(true)}
-                  onChange={(e) => {
-                    handleOwnerNameInput(e.target.value)
-                    setOwnerDropdownOpen(true)
-                  }}
-                  className="h-9 text-xs"
-                />
-
-                {/* 联想候选浮层 */}
-                {ownerDropdownOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setOwnerDropdownOpen(false)}
-                    />
-                    <div className="absolute left-0 top-10 z-50 w-full rounded-md border bg-popover shadow-md max-h-52 overflow-y-auto py-1">
-                      {OWNER_CANDIDATES.filter((c) => c.type === form.ownerType).map(
-                        (c) => (
-                          <div
-                            key={c.id}
-                            className="px-3 py-1.5 hover:bg-accent cursor-pointer text-xs flex justify-between items-center"
-                            onClick={() => handleOwnerSelect(c.id)}
-                          >
-                            <span className="font-medium text-foreground">{c.name}</span>
-                            <span className="text-[11px] text-muted-foreground">{c.identifier}</span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-            </FormItem>
+            <div className="sm:col-span-2 lg:col-span-4">
+              <PartnerArchiveEmbeddedPicker
+                archiveMenu="货主信息"
+                fieldLabel="货主"
+                required
+                enableQuickCreate={false}
+                userHint={OUTBOUND_OWNER_PICKER_USER_HINT}
+                value={form.ownerPartnerId || undefined}
+                selection={ownerSelection}
+                onChange={applyOwnerPartner}
+              />
+            </div>
 
             {/* 4 & 5. 个人 vs 企业动态列 */}
             {form.ownerType === "个人" ? (
@@ -249,7 +247,7 @@ export function OutboundBasicInfoSection({
                 <FormItem label="货主标识:" required>
                   <Input
                     disabled
-                    value={form.ownerIdentifier || (form.ownerName === "原原李" ? "185****7112" : "")}
+                    value={form.ownerIdentifier}
                     placeholder="请输入手机号码"
                     className="h-9 text-xs border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
                   />
@@ -257,7 +255,7 @@ export function OutboundBasicInfoSection({
                 <FormItem label="身份证号:" required>
                   <Input
                     disabled
-                    value={form.ownerIdCard || (form.ownerName === "原原李" ? "420101****8682" : "")}
+                    value={form.ownerIdCard}
                     placeholder="请输入货主身份证号"
                     className="h-9 text-xs border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
                   />
@@ -268,7 +266,7 @@ export function OutboundBasicInfoSection({
                 <FormItem label="货主标识:" required>
                   <Input
                     disabled
-                    value={form.ownerIdentifier || "91510100MA6XXXXXXX"}
+                    value={form.ownerIdentifier}
                     placeholder="请输入公司统一社会信用编码"
                     className="h-9 text-xs border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
                   />
@@ -276,7 +274,7 @@ export function OutboundBasicInfoSection({
                 <FormItem label="联系电话:" required>
                   <Input
                     disabled
-                    value={form.contactPhone || "028-87654321"}
+                    value={form.contactPhone}
                     placeholder="请输入联系电话"
                     className="h-9 text-xs border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
                   />

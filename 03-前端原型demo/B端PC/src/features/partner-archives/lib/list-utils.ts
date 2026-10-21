@@ -1,11 +1,12 @@
+import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
 import { SUBJECT_STATUS_LABELS } from "../domain/actions"
 import type { PartnerArchiveFilters, PartnerSubject } from "../domain/types"
 import {
   CONTACT_PHONE_VERIFY_LABELS,
   resolveContactPhoneVerified,
 } from "./contact-phone-verify"
+import { isArchiveRequiredFieldsPending } from "./archive-required-fields-pending"
 import {
-  ROLE_STATUS_LABELS,
   ROLE_TYPE_LABELS,
   SOURCE_TYPE_LABELS,
   SUBJECT_TYPE_LABELS,
@@ -65,9 +66,14 @@ function isAll(value: string) {
 
 export function filterPartnerArchives(
   list: PartnerSubject[],
-  filters: PartnerArchiveFilters
+  filters: PartnerArchiveFilters,
+  archiveMenu?: PartnerArchiveMenuLabel,
 ) {
   let result = [...list]
+
+  if (archiveMenu) {
+    result = result.filter((item) => item.archiveMenu === archiveMenu)
+  }
 
   if (filters.keyword.trim()) {
     const keyword = filters.keyword.trim().toLowerCase()
@@ -104,17 +110,13 @@ export function filterPartnerArchives(
   }
 
   if (!isAll(filters.subjectStatus)) {
-    result = result.filter(
-      (item) => SUBJECT_STATUS_LABELS[item.status] === filters.subjectStatus
-    )
-  }
-
-  if (!isAll(filters.roleStatus)) {
-    result = result.filter((item) =>
-      item.roles.some(
-        (role) => ROLE_STATUS_LABELS[role.roleStatus] === filters.roleStatus
+    if (filters.subjectStatus === "待补全") {
+      result = result.filter((item) => isArchiveRequiredFieldsPending(item))
+    } else {
+      result = result.filter(
+        (item) => SUBJECT_STATUS_LABELS[item.status] === filters.subjectStatus
       )
-    )
+    }
   }
 
   if (!isAll(filters.source)) {

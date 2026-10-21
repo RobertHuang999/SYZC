@@ -52,15 +52,42 @@ import {
   partnerArchiveH5FormAnnotations,
   partnerArchiveH5ListAnnotations,
 } from "@/features/partner-archives/annotations/partner-archive-h5.annotations"
-import { partnerArchiveH5Documents } from "@/features/partner-archives/documents/partner-archive-documents"
+import { getPartnerArchiveDocuments } from "@/features/partner-archives/documents/partner-archive-documents"
+import { parsePartnerArchiveMenuFromH5ListPath } from "@prototype/shared/partner-archives/partner-archive-domain"
+import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
 import {
   PrototypeAnnotationProvider,
   type PrototypeAnnotation,
   type PrototypeDocument,
 } from "./PrototypeAnnotationLayer"
 
+function resolvePartnerArchiveMenuForH5(
+  pathname: string,
+  search: string,
+): PartnerArchiveMenuLabel {
+  const fromPath = parsePartnerArchiveMenuFromH5ListPath(pathname)
+  if (fromPath) return fromPath
+  const raw = new URLSearchParams(search).get("archiveMenu")
+  const map: Record<string, PartnerArchiveMenuLabel> = {
+    OWNER: "货主信息",
+    PICKUP_PERSON: "提货人信息",
+    FUNDER: "资金方信息",
+    SERVICE_PROVIDER: "服务方信息",
+    货主信息: "货主信息",
+    提货人信息: "提货人信息",
+    资金方信息: "资金方信息",
+    服务方信息: "服务方信息",
+  }
+  if (raw && map[raw]) return map[raw]
+  return "货主信息"
+}
+
 export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
   const location = useLocation()
+  const partnerArchiveMenu = resolvePartnerArchiveMenuForH5(
+    location.pathname,
+    location.search,
+  )
 
   let pageTitle = "森云科技 · SYZC 移动端原型"
   let currentAnnotations: PrototypeAnnotation[] = []
@@ -178,15 +205,15 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
   } else if (location.pathname.startsWith("/m/partner-archives/form")) {
     pageTitle = "合作方档案 · H5 新增/编辑 · PRD 标注"
     currentAnnotations = partnerArchiveH5FormAnnotations
-    currentDocuments = partnerArchiveH5Documents
+    currentDocuments = getPartnerArchiveDocuments(partnerArchiveMenu)
   } else if (location.pathname.startsWith("/m/workspace/user-center/partner-archives/")) {
     pageTitle = "合作方档案 · H5 详情 · PRD 标注"
     currentAnnotations = partnerArchiveH5DetailAnnotations
-    currentDocuments = partnerArchiveH5Documents
+    currentDocuments = getPartnerArchiveDocuments(partnerArchiveMenu)
   } else if (location.pathname.startsWith("/m/workspace/user-center/partner-archives")) {
     pageTitle = "合作方档案 · H5 列表 · PRD 标注"
     currentAnnotations = partnerArchiveH5ListAnnotations
-    currentDocuments = partnerArchiveH5Documents
+    currentDocuments = getPartnerArchiveDocuments(partnerArchiveMenu)
   } else if (
     location.pathname.startsWith("/m/workspace/config/warehouse-management") ||
     location.pathname.startsWith("/m/workspace/config/new-warehouse") ||

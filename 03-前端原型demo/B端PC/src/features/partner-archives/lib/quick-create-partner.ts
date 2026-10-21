@@ -1,3 +1,4 @@
+import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
 import type { PartnerSubject, RoleType, SubjectType } from "../domain/types"
 import { partnerArchivesMock } from "../mock/partner-archives.mock"
 import {
@@ -6,8 +7,13 @@ import {
   maskIdNumber,
   ownerAddressConflictMessage,
 } from "./partner-archive-rules"
+import { collectArchiveRequiredGaps } from "./archive-required-fields-pending"
 
-export type JobQuickCreateScene = "INBOUND_OWNER" | "OUTBOUND_PICKUP_AGENT"
+export type JobQuickCreateScene =
+  | "INBOUND_OWNER"
+  | "OUTBOUND_PICKUP_AGENT"
+  | "SUPERVISION_FUNDER"
+  | "SUPERVISION_SERVICE_PROVIDER"
 
 export type QuickCreatePartnerInput = {
   scene: JobQuickCreateScene
@@ -28,18 +34,41 @@ export type QuickCreatePartnerResult =
   | { ok: true; partner: PartnerSubject }
   | { ok: false; message: string }
 
-function sceneMeta(scene: JobQuickCreateScene) {
+function sceneMeta(scene: JobQuickCreateScene): {
+  roles: RoleType[]
+  archiveMenu: PartnerArchiveMenuLabel
+  sourceLabel: string
+  auditDetail: string
+} {
   if (scene === "INBOUND_OWNER") {
     return {
-      roles: ["OWNER"] as RoleType[],
+      roles: ["OWNER"],
+      archiveMenu: "货主信息",
       sourceLabel: "入库快捷建档",
       auditDetail: "入库制单页快捷建档（默认联系手机未验证）",
     }
   }
+  if (scene === "OUTBOUND_PICKUP_AGENT") {
+    return {
+      roles: ["PICKUP_AGENT"],
+      archiveMenu: "提货人信息",
+      sourceLabel: "出库快捷建档",
+      auditDetail: "出库制单页【快速添加经办人】建档",
+    }
+  }
+  if (scene === "SUPERVISION_FUNDER") {
+    return {
+      roles: ["FUNDER"],
+      archiveMenu: "资金方信息",
+      sourceLabel: "监管办理快捷建档",
+      auditDetail: "监管办理页快捷建档（资金方信息域 · 企业主体）",
+    }
+  }
   return {
-    roles: ["PICKUP_AGENT"] as RoleType[],
-    sourceLabel: "出库快捷建档",
-    auditDetail: "出库制单页【快速添加经办人】建档",
+    roles: ["SERVICE_PROVIDER"],
+    archiveMenu: "服务方信息",
+    sourceLabel: "监管办理快捷建档",
+    auditDetail: "监管办理页快捷建档（服务方信息域 · 企业主体）",
   }
 }
 
@@ -76,12 +105,44 @@ export function quickCreatePartnerFromJob(
   const today = now.substring(0, 10)
   const meta = sceneMeta(input.scene)
   const newId = `p-${Date.now()}`
+  const pendingDraft: PartnerSubject = {
+    id: "draft",
+    archiveMenu: meta.archiveMenu,
+    partnerNo: "",
+    name: input.name.trim(),
+    subjectType: input.subjectType,
+    idNumber: trimmedId,
+    idNumberMasked: maskIdNumber(trimmedId),
+    certAddress,
+    contactPhone: input.contactPhone.trim(),
+    agentName: input.subjectType === "ENTERPRISE" ? input.agentName?.trim() : undefined,
+    status: "NORMAL",
+    roles: [],
+    source: "MANUAL",
+    createDate: "",
+    createTime: "",
+    createdBy: "",
+    updateTime: "",
+    associatedDocs: [],
+    auditLogs: [],
+  }
   const roleStatus =
-    input.scene === "OUTBOUND_PICKUP_AGENT" ? ("PENDING_COMPLETION" as const) : ("NORMAL" as const)
+    collectArchiveRequiredGaps(pendingDraft).length > 0
+      ? ("PENDING_COMPLETION" as const)
+      : ("NORMAL" as const)
+
+  if (
+    (input.scene === "SUPERVISION_FUNDER" ||
+      input.scene === "SUPERVISION_SERVICE_PROVIDER") &&
+    input.subjectType !== "ENTERPRISE"
+  ) {
+    return { ok: false, message: "权人主体须为企业，请填写企业资料" }
+  }
 
   const newPartner: PartnerSubject = {
     id: newId,
     partnerNo: `PA-${Date.now()}`,
+    archiveMenu: meta.archiveMenu,
     name: input.name.trim(),
     subjectType: input.subjectType,
     idNumber: trimmedId,

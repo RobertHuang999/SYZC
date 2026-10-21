@@ -1,3 +1,4 @@
+import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
 import type {
   AssociatedDocItem,
   PartnerRoleItem,
@@ -14,26 +15,29 @@ const ROLE_RELATED_DOC_TYPES: Record<RoleType, AssociatedDocItem["docType"][]> =
   PICKUP_AGENT: ["OUTBOUND"],
   RECEIVER: ["TRANSFER"],
   FUNDER: ["WARRANT"],
+  SERVICE_PROVIDER: ["WARRANT"],
 }
 
 export function rolesAllowedForSubjectType(subjectType: SubjectType): RoleType[] {
-  const common: RoleType[] = ["OWNER", "RECEIVER"]
+  const common: RoleType[] = ["OWNER", "PICKUP_AGENT", "FUNDER", "SERVICE_PROVIDER"]
   if (subjectType === "INDIVIDUAL") {
-    return [...common, "PICKUP_AGENT"]
+    return common.filter((role) => role !== "FUNDER" && role !== "SERVICE_PROVIDER")
   }
-  return [...common, "FUNDER"]
+  return common.filter((role) => role !== "PICKUP_AGENT")
 }
 
 export function findPartnerByIdNumber(
   list: PartnerSubject[],
   idNumber: string,
-  excludeId?: string
+  excludeId?: string,
+  archiveMenu?: PartnerArchiveMenuLabel,
 ) {
   const normalized = idNumber.trim().toUpperCase()
   return list.find(
     (item) =>
       item.idNumber.trim().toUpperCase() === normalized &&
-      (!excludeId || item.id !== excludeId)
+      (!excludeId || item.id !== excludeId) &&
+      (!archiveMenu || item.archiveMenu === archiveMenu),
   )
 }
 
@@ -145,3 +149,123 @@ export function maskIdNumber(idNumber: string): string {
   }
   return `${idNumber.slice(0, 6)}********${idNumber.slice(-4)}`
 }
+
+export type FreezeBlockReason = {
+  canFreeze: boolean
+  title?: string
+  reason?: string
+  detail?: string
+  guide?: string
+  blockingDocs: AssociatedDocItem[]
+}
+
+/**
+ * 【分菜单主体冻结与在途在库前置校验规则】(PA-R02)
+ * 1. 货主信息：如果在系统中有货（在库库存或在押仓单），不能冻结
+ * 2. 提货人信息：名下有待提货的单据，也不能动（禁止冻结）
+ * 3. 资金方/服务方信息：名下有进行中的单据时，有进行中的单据也不能冻结
+ */
+export function checkPartnerSubjectFreezeEligibility(
+  partner: PartnerSubject
+): FreezeBlockReason {
+  if (partner.status === "FROZEN") {
+    return {
+      canFreeze: false,
+      title: "主体已处于冻结状态",
+      reason: "该主体当前已经是冻结状态，无需重复操作",
+      detail: "如需恢复业务资格，请点击操作列的「解冻」或详情页的「解冻主体」。",
+      guide: "如需调整资料，可直接点击「编辑」进行非关键字段维护。",
+      blockingDocs: [],
+    }
+  }
+
+  // 1. 货主信息：有货不能冻结
+  if (partner.archiveMenu === "货主信息") {
+    const stockDocs = (partner.associatedDocs ?? []).filter((doc) => {
+      // 仓单有效在押/开立
+      if (doc.docType === "WARRANT" && !/已解押|已注销|已作废/.test(doc.statusName)) {
+        return true
+      }
+      // 入库已完成且有在库货物吨位
+      if (doc.docType === "INBOUND" && doc.statusName === "已完成") {
+        return true
+      }
+      return false
+    })
+
+    if (stockDocs.length > 0) {
+      return {
+        canFreeze: false,
+        title: "无法冻结该货主主体",
+        reason: "该货主在系统中仍有在库库存或有效在押货物，暂不支持冻结",
+        detail:
+          "遵循【分菜单主体冻结与在途在库前置校验规则】(PA-R02)，为防范货权纠纷与物权悬空，名下存在在库货物或在押仓单的主体禁止冻结。",
+        guide: "请先办理存货出库转让或解除仓单质押，确保名下在库在押库存清零后再执行冻结操作。",
+        blockingDocs: stockDocs,
+      }
+    }
+  }
+
+  // 2. 提货人信息：名下有待提货的单据，也不能动
+  if (partner.archiveMenu === "提货人信息") {
+    const pendingPickupDocs = (partner.associatedDocs ?? []).filter(
+      (doc) => doc.statusName === "待提货" || doc.statusName.includes("待提货")
+    )
+
+    if (pendingPickupDocs.length > 0) {
+      return {
+        canFreeze: false,
+        title: "无法冻结该提货人主体",
+        reason: "该提货人名下存在处于「待提货」状态的出库单据，暂不支持冻结",
+        detail:
+          "遵循【分菜单主体冻结与在途在库前置校验规则】(PA-R02)，为防范现场提货履约中断或身份鉴权异常，名下存在待提货单据的提货人禁止冻结。",
+        guide: "请等待现场出库提货作业全部完成，或作废未执行的出库单据后再执行冻结操作。",
+        blockingDocs: pendingPickupDocs,
+      }
+    }
+  }
+
+  // 3. 资金方信息：名下有进行中的单据时不能冻结
+  if (partner.archiveMenu === "资金方信息") {
+    const activeDocs = (partner.associatedDocs ?? []).filter((doc) =>
+      /进行中|生效中|有效在押|审批中|待审批|待处理|处理中/.test(doc.statusName)
+    )
+
+    if (activeDocs.length > 0) {
+      return {
+        canFreeze: false,
+        title: "无法冻结该资金方主体",
+        reason: "该资金方名下存在进行中或在押中的融资业务单据，暂不支持冻结",
+        detail:
+          "遵循【分菜单主体冻结与在途在库前置校验规则】(PA-R02)，为保障存续抵质押担保与资方权益合规完整，进行中融资单据未结清前禁止冻结资金方。",
+        guide: "请先完成抵质押单据业务结清、解押注销或等待终审结案后再执行冻结操作。",
+        blockingDocs: activeDocs,
+      }
+    }
+  }
+
+  // 4. 服务方信息：名下有进行中的单据时不能冻结
+  if (partner.archiveMenu === "服务方信息") {
+    const activeDocs = (partner.associatedDocs ?? []).filter((doc) =>
+      /进行中|生效中|有效在押|审批中|待审批|待处理|处理中/.test(doc.statusName)
+    )
+
+    if (activeDocs.length > 0) {
+      return {
+        canFreeze: false,
+        title: "无法冻结该服务方主体",
+        reason: "该服务方名下存在进行中或生效中的监管服务单据，暂不支持冻结",
+        detail:
+          "遵循【分菜单主体冻结与在途在库前置校验规则】(PA-R02)，为保障监管服务协议履约与质权人监管责任闭环，存续监管单据未结清前禁止冻结服务方。",
+        guide: "请先完成监管服务单结案或协议到期终止后再执行冻结操作。",
+        blockingDocs: activeDocs,
+      }
+    }
+  }
+
+  return {
+    canFreeze: true,
+    blockingDocs: [],
+  }
+}
+

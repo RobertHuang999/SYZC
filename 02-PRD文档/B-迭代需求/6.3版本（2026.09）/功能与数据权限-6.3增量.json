@@ -29,8 +29,8 @@
       "platform": "PC",
       "level2Menu": "出库记录",
       "recordStatus": "6.3-delivered",
-      "changeNote": "6.3 P0：货主、提货主体、提货经办人引用合作方；提货经办人快捷建档（O06a）",
-      "updatedAt": "2026-10-19",
+      "changeNote": "6.3 P0：货主信息域仅选已有档案（无货主快捷建档·O05）；提货人信息域+O06a",
+      "updatedAt": "2026-10-20",
       "actionPermissions": "查看页面、详情、新增出库、下载记录、单据下载、快速添加提货经办人"
     },
     {
@@ -51,7 +51,7 @@
       "platform": "PC",
       "level2Menu": "基础配置",
       "recordStatus": "6.3-delivered",
-      "changeNote": "6.3 P0：平台运行底座重构；合作方准入策略并入；仓储作业参数只读联动",
+      "changeNote": "6.3 P0：平台运行底座重构；货主准入策略并入；仓储作业参数只读联动",
       "updatedAt": "2026-10-17"
     },
     {
@@ -59,7 +59,7 @@
       "level2Menu": "仓库管理",
       "level1Menu": "仓库管理",
       "recordStatus": "6.3-delivered",
-      "changeNote": "6.3 P0：空间主档层级；库房出入库审核状态读取基础配置只读展示",
+      "changeNote": "6.3 P0：空间主档层级；库房出入库审核标记+编辑弹窗，与基础配置 R03 同步",
       "updatedAt": "2026-10-17"
     },
     {
@@ -73,22 +73,22 @@
       "platform": "移动",
       "level2Menu": "出库管理",
       "recordStatus": "6.3-delivered",
-      "changeNote": "6.3 P0：出库制单引用合作方货主与提货经办人",
-      "updatedAt": "2026-09-20"
+      "changeNote": "6.3 P0：货主引用已有档案；提货经办人 O06a",
+      "updatedAt": "2026-10-20"
     },
     {
       "platform": "移动",
       "level2Menu": "货物转让",
       "recordStatus": "6.3-delivered",
-      "changeNote": "6.3 P0：接收方引用合作方",
-      "updatedAt": "2026-09-20"
+      "changeNote": "6.3 P0：货主信息域挂接受让方货主（PA-V07；无接收方角色态）",
+      "updatedAt": "2026-10-20"
     },
     {
       "platform": "PC",
       "level2Menu": "转让记录",
       "recordStatus": "6.3-delivered",
-      "changeNote": "6.3 P0：接收方引用合作方；转让生效变货主执行地址规则",
-      "updatedAt": "2026-09-20"
+      "changeNote": "6.3 P0：货主信息域引用/挂接；转让生效执行 P02（无接收方/待生效）",
+      "updatedAt": "2026-10-20"
     },
     {
       "platform": "移动",
@@ -110,6 +110,14 @@
       "recordStatus": "6.3-delivered",
       "changeNote": "6.3 P0：提货经办人快捷建档（O06a）",
       "updatedAt": "2026-10-19"
+    },
+    {
+      "platform": "PC",
+      "level1Menu": "监管业务",
+      "level2Menu": "监管办理",
+      "recordStatus": "6.3-delivered",
+      "changeNote": "6.3：权人/质权人嵌入式选择器（资金方信息·服务方信息域；archiveMenu 隔离）",
+      "updatedAt": "2026-10-20"
     }
   ],
   "append": [
@@ -118,15 +126,60 @@
       "module": "10.用户中心",
       "topBarModuleLabel": "用户中心",
       "menuModuleCode": "10-用户中心",
-      "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/04-合作方档案",
+      "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/04-合作方档案/04-1-货主信息",
       "recordStatus": "6.3-delivered",
-      "pagePathSegments": ["合作方管理", "合作方档案"],
-      "legacyPath": "—",
+      "pagePathSegments": ["用户中心", "合作方档案", "货主信息"],
+      "legacyPath": "用户中心-合作方管理-合作方档案",
       "actionPermissions": "查看页面、详情、新增、编辑、保存并提交、冻结/解冻、追加角色、入库快捷建档",
-      "dataPermission": "租户级隔离；列表按数据权限与仓库无关",
-      "changeNote": "6.3 P0 业务主体主数据统一入口",
+      "dataPermission": "租户级隔离；archiveMenu=货主信息",
+      "changeNote": "6.3 P0 合作方四子菜单-货主信息；独立 RBAC",
       "createdAt": "2026-09-01",
-      "updatedAt": "2026-10-19"
+      "updatedAt": "2026-10-20"
+    },
+    {
+      "platform": "PC",
+      "module": "10.用户中心",
+      "topBarModuleLabel": "用户中心",
+      "menuModuleCode": "10-用户中心",
+      "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/04-合作方档案/04-2-提货人信息",
+      "recordStatus": "6.3-delivered",
+      "pagePathSegments": ["用户中心", "合作方档案", "提货人信息"],
+      "legacyPath": "—",
+      "actionPermissions": "查看页面、详情、新增、编辑、保存并提交、冻结/解冻、追加角色、出库快捷建档",
+      "dataPermission": "租户级隔离；archiveMenu=提货人信息",
+      "changeNote": "6.3 P0 合作方四子菜单-提货人信息；独立 RBAC",
+      "createdAt": "2026-10-20",
+      "updatedAt": "2026-10-20"
+    },
+    {
+      "platform": "PC",
+      "module": "10.用户中心",
+      "topBarModuleLabel": "用户中心",
+      "menuModuleCode": "10-用户中心",
+      "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/04-合作方档案/04-3-资金方信息",
+      "recordStatus": "6.3-delivered",
+      "pagePathSegments": ["用户中心", "合作方档案", "资金方信息"],
+      "legacyPath": "—",
+      "actionPermissions": "查看页面、详情、新增、编辑、保存并提交、冻结/解冻、追加角色",
+      "dataPermission": "租户级隔离；archiveMenu=资金方信息；抵质押单抵质押权人引用",
+      "changeNote": "6.3 P0 合作方四子菜单-资金方信息；独立 RBAC",
+      "createdAt": "2026-10-20",
+      "updatedAt": "2026-10-20"
+    },
+    {
+      "platform": "PC",
+      "module": "10.用户中心",
+      "topBarModuleLabel": "用户中心",
+      "menuModuleCode": "10-用户中心",
+      "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/04-合作方档案/04-4-服务方信息",
+      "recordStatus": "6.3-delivered",
+      "pagePathSegments": ["用户中心", "合作方档案", "服务方信息"],
+      "legacyPath": "—",
+      "actionPermissions": "查看页面、详情、新增、编辑、保存并提交、冻结/解冻、追加角色",
+      "dataPermission": "租户级隔离；archiveMenu=服务方信息；监管服务单质权人引用",
+      "changeNote": "6.3 P0 合作方四子菜单-服务方信息（与资金方同构、合规分域）；独立 RBAC",
+      "createdAt": "2026-10-20",
+      "updatedAt": "2026-10-20"
     },
     {
       "platform": "移动",
@@ -135,13 +188,13 @@
       "menuModuleCode": "02-工作台",
       "baselineModuleDir": "B端H5/02-工作台",
       "recordStatus": "6.3-delivered",
-      "pagePathSegments": ["用户中心", "合作方档案"],
+      "pagePathSegments": ["用户中心", "合作方档案", "货主信息"],
       "legacyPath": "用户中心-合作方管理-合作方档案",
       "actionPermissions": "查看页面、详情、新增合作方、编辑、冻结/解冻",
-      "dataPermission": "租户级；与 PC 共用主数据服务",
-      "changeNote": "6.3 P1 外勤列表/详情/悬浮新增",
+      "dataPermission": "租户级；与 PC 共用主数据服务；H5 四入口分别授权",
+      "changeNote": "6.3 P1 H5 用户中心四按钮进四列表（示例路径为货主信息）",
       "createdAt": "2026-10-16",
-      "updatedAt": "2026-10-19"
+      "updatedAt": "2026-10-20"
     },
     {
       "platform": "PC",

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 import {
   readWarehouseOpsSnapshot,
+  WAREHOUSE_OPS_SNAPSHOT_EVENT,
   type WarehouseOpsConfig,
 } from "@/shared/config/warehouse-ops-snapshot"
 
@@ -15,7 +16,11 @@ export function useWarehouseOpsSnapshot() {
 
   useEffect(() => {
     window.addEventListener("focus", refresh)
-    return () => window.removeEventListener("focus", refresh)
+    window.addEventListener(WAREHOUSE_OPS_SNAPSHOT_EVENT, refresh)
+    return () => {
+      window.removeEventListener("focus", refresh)
+      window.removeEventListener(WAREHOUSE_OPS_SNAPSHOT_EVENT, refresh)
+    }
   }, [refresh])
 
   return { ops, refresh }

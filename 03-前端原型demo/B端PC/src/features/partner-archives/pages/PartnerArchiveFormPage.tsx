@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
+import { partnerArchiveBaseFromPathname } from "@prototype/shared/partner-archives/partner-archive-routes"
 import { AlertTriangleIcon, ArrowLeftIcon } from "lucide-react"
 import { ProductFieldHint } from "@/components/form/ProductFieldHint"
 import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
@@ -19,14 +20,19 @@ import {
   PrototypeAnnotationProvider,
   PrototypeAnnotationTarget,
 } from "@/shared/annotations/PrototypeAnnotationLayer"
-import { partnerArchiveDocuments } from "../documents/partner-archive-documents"
+import { getPartnerArchiveDocuments } from "../documents/partner-archive-documents"
+import {
+  parsePartnerArchiveMenuFromPathname,
+  type PartnerArchiveMenuLabel,
+} from "@prototype/shared/partner-archives/partner-archive-routes"
+import {
+  ARCHIVE_MENU_SHORT_LABEL,
+  implicitRoleForArchiveMenu,
+} from "@prototype/shared/partner-archives/partner-archive-domain"
 import { partnerArchiveFormAnnotations } from "../annotations/partner-archive-form.annotations"
 import { PartnerConfirmDialog } from "../components/PartnerConfirmDialog"
 import { PartnerVerifyDialog } from "../components/PartnerVerifyDialog"
-import {
-  PARTNER_ARCHIVE_LIST_PATH,
-  PARTNER_FORM_SUBJECT_TYPE_OPTIONS,
-} from "../domain/constants"
+import { PARTNER_FORM_SUBJECT_TYPE_OPTIONS } from "../domain/constants"
 import {
   SUBJECT_STATUS_BADGE_CLASS,
   SUBJECT_STATUS_LABELS,
@@ -44,22 +50,32 @@ import {
   ownerAddressConflictMessage,
   findPartnerByIdNumber,
   maskIdNumber,
-  rolesAllowedForSubjectType,
 } from "../lib/partner-archive-rules"
 import {
-  PARTNER_FORM_ADDRESS_SPEC_NOTE,
+  PARTNER_FORM_ADDRESS_SPEC_NOTE_OWNER,
+  PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER,
+  PARTNER_FORM_ADDRESS_USER_HINT_OTHER,
+  PARTNER_FORM_INITIAL_ROLES_SECTION_TITLE,
   PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE,
   PARTNER_FORM_INITIAL_ROLES_USER_HINT,
   partnerFormAddressUserHint,
+  partnerPendingCompletionUserBanner,
+  PARTNER_PENDING_COMPLETION_SPEC_NOTE,
+  partnerFormPageTitle,
   PARTNER_CHANGE_ADDRESS_DIALOG,
 } from "../lib/partner-archive-ui-labels"
+import type { PartnerSubject, SubjectType } from "../domain/types"
 import {
-  ROLE_TYPE_LABELS,
-  SUBJECT_TYPE_LABELS,
-  type PartnerSubject,
-  type RoleType,
-  type SubjectType,
-} from "../domain/types"
+  appendLinkedPartnerMenus,
+  normalizePartnerPlanB,
+  otherArchiveMenus,
+} from "../lib/linked-partner-archives"
+import {
+  isArchiveRequiredFieldsPending,
+  isCertAddressSaveRequired,
+  isEnterpriseOnlyArchiveMenu,
+  validateArchiveMenuRequiredFields,
+} from "../lib/archive-required-fields-pending"
 import { cn } from "@/lib/utils"
 
 function subjectTypeFromLabel(label: string): SubjectType {
@@ -73,25 +89,42 @@ function subjectTypeToLabel(type: SubjectType) {
 export function PartnerArchiveFormPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
+  const listPath = partnerArchiveBaseFromPathname(location.pathname)
+  const archiveMenuLabel = parsePartnerArchiveMenuFromPathname(location.pathname)
+  const menuShortLabel = ARCHIVE_MENU_SHORT_LABEL[archiveMenuLabel]
+  const archiveDocuments = useMemo(
+    () => getPartnerArchiveDocuments(archiveMenuLabel),
+    [archiveMenuLabel],
+  )
   const isEdit = Boolean(id)
   const existing = useMemo(() => (isEdit ? getPartnerArchiveById(id) : undefined), [id, isEdit])
 
-  const [subjectTypeLabel, setSubjectTypeLabel] = useState(
-    subjectTypeToLabel(existing?.subjectType ?? "INDIVIDUAL")
-  )
+  const defaultSubjectTypeLabel = useMemo(() => {
+    if (existing) {
+      return subjectTypeToLabel(existing.subjectType)
+    }
+    if (isEnterpriseOnlyArchiveMenu(archiveMenuLabel)) {
+      return "企业"
+    }
+    return "个人"
+  }, [existing, archiveMenuLabel])
+
+  const [subjectTypeLabel, setSubjectTypeLabel] = useState(defaultSubjectTypeLabel)
   const subjectType = subjectTypeFromLabel(subjectTypeLabel)
 
   const [name, setName] = useState(existing?.name ?? "")
   const [idNumber, setIdNumber] = useState(existing?.idNumber ?? "")
   const [contactPhone, setContactPhone] = useState(existing?.contactPhone ?? "")
   const [agentName, setAgentName] = useState(existing?.agentName ?? "")
+  const [agentIdNumber, setAgentIdNumber] = useState(existing?.agentIdNumber ?? "")
   const [adjustAgentMode, setAdjustAgentMode] = useState(false)
   const [province, setProvince] = useState(existing?.certAddress.province || (isEdit ? "" : "江苏省"))
   const [city, setCity] = useState(existing?.certAddress.city || (isEdit ? "" : "南京市"))
   const [district, setDistrict] = useState(existing?.certAddress.district || (isEdit ? "" : "鼓楼区"))
   const [detailAddress, setDetailAddress] = useState(existing?.certAddress.detail ?? "")
-  const [selectedRoles, setSelectedRoles] = useState<RoleType[]>(
-    existing ? existing.roles.map((role) => role.roleType) : ["OWNER"]
+  const [selectedAppendMenus, setSelectedAppendMenus] = useState<PartnerArchiveMenuLabel[]>(
+    [],
   )
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [accessWarning, setAccessWarning] = useState<string | null>(null)
@@ -105,17 +138,14 @@ export function PartnerArchiveFormPage() {
   const [pendingChangeReason, setPendingChangeReason] = useState<string | undefined>(undefined)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const selectableRoles = useMemo(
-    () => rolesAllowedForSubjectType(subjectType),
-    [subjectType]
+  const appendMenuOptions = useMemo(
+    () => otherArchiveMenus(archiveMenuLabel),
+    [archiveMenuLabel],
   )
 
   const isPendingCompletion = useMemo(() => {
     if (!existing) return false
-    return (
-      existing.roles.some((r) => r.roleStatus === "PENDING_COMPLETION") ||
-      !existing.certAddress.fullAddress
-    )
+    return isArchiveRequiredFieldsPending(existing)
   }, [existing])
 
   const isFrozenLimitedEdit = Boolean(
@@ -127,13 +157,6 @@ export function PartnerArchiveFormPage() {
   )
 
   const coreIdentityLocked = Boolean(isEdit && isContactPhoneVerified && !isPendingCompletion)
-
-  useEffect(() => {
-    if (isEdit) {
-      return
-    }
-    setSelectedRoles((prev) => prev.filter((role) => selectableRoles.includes(role)))
-  }, [isEdit, selectableRoles])
 
   useEffect(() => {
     if (!dirty) {
@@ -170,18 +193,21 @@ export function PartnerArchiveFormPage() {
   }, [existing, subjectType, agentName])
 
   const hasIndividualOwnerRole = useMemo(() => {
+    if (archiveMenuLabel !== "货主信息") {
+      return false
+    }
     if (existing) {
       return existing.roles.some(
         (role) => role.roleType === "OWNER" && role.roleStatus !== "INVALID"
       )
     }
-    return selectedRoles.includes("OWNER")
-  }, [existing, selectedRoles])
+    return true
+  }, [existing, archiveMenuLabel])
 
   if (isEdit && !existing) {
     return (
       <div className="space-y-4 p-6">
-        <Button variant="outline" onClick={() => navigate(PARTNER_ARCHIVE_LIST_PATH)}>
+        <Button variant="outline" onClick={() => navigate(listPath)}>
           <ArrowLeftIcon />
           返回
         </Button>
@@ -192,38 +218,39 @@ export function PartnerArchiveFormPage() {
     )
   }
 
-  const pageTitle = isEdit
-    ? isPendingCompletion
-      ? `补全合作方档案 — ${existing?.name ?? ""}`
-      : `编辑合作方档案 — ${existing?.name ?? ""}`
-    : "新增合作方档案"
+  const pageTitle = partnerFormPageTitle(
+    isEdit,
+    menuShortLabel,
+    existing?.name,
+    isPendingCompletion,
+  )
 
   const markDirty = () => setDirty(true)
 
-  const toggleRole = (role: RoleType) => {
+  const toggleAppendMenu = (menu: PartnerArchiveMenuLabel) => {
     markDirty()
-    if (selectedRoles.includes(role)) {
-      setSelectedRoles(selectedRoles.filter((item) => item !== role))
-    } else {
-      setSelectedRoles([...selectedRoles, role])
-    }
-    setErrors((prev) => ({ ...prev, roles: "" }))
+    setSelectedAppendMenus((current) =>
+      current.includes(menu) ? current.filter((item) => item !== menu) : [...current, menu],
+    )
   }
 
   const handleNavigateAway = () => {
     if (dirty && !window.confirm("当前有未保存的修改，确认离开吗？")) {
       return
     }
-    navigate(PARTNER_ARCHIVE_LIST_PATH)
+    navigate(listPath)
   }
 
   const isIndividualOwner = Boolean(
     subjectType === "INDIVIDUAL" && isEdit && hasIndividualOwnerRole
   )
 
-  /** 对齐【合作方档案证件地址必填校验规则】(P01) 默认「是」：仅在档案页保存时强制，作业快捷建档不共用本页校验 */
-  const addressRequired =
-    isPendingCompletion || subjectType === "ENTERPRISE" || subjectType === "INDIVIDUAL"
+  /** 仅货主信息 + 基础配置 P01 开启时保存必录证件地址 */
+  const addressRequired = isCertAddressSaveRequired(archiveMenuLabel, subjectType)
+  const showPickupAgentIdField =
+    archiveMenuLabel === "提货人信息" && subjectType === "ENTERPRISE"
+  const enterpriseAgentRequired =
+    archiveMenuLabel === "货主信息" && subjectType === "ENTERPRISE"
 
   const buildCertAddress = () => {
     const detail = detailAddress.trim()
@@ -261,18 +288,27 @@ export function PartnerArchiveFormPage() {
     const today = now.substring(0, 10)
 
     if (!existing) {
-      const duplicate = findPartnerByIdNumber(partnerArchivesMock, idNumber)
+      const duplicate = findPartnerByIdNumber(
+        partnerArchivesMock,
+        idNumber,
+        undefined,
+        archiveMenuLabel,
+      )
       if (duplicate) {
-        setAccessWarning("该主体已存在，请前往详情追加角色配置")
+        setAccessWarning("该主体在本菜单已存在，请前往详情追加合作方档案角色")
         setIsSubmitting(false)
         return
       }
 
       const newId = `p-${Date.now()}`
       const trimmedId = idNumber.trim()
-      const newPartner: PartnerSubject = {
+      const implicitRole = implicitRoleForArchiveMenu(archiveMenuLabel)
+      const partnerNo = `PA-${Date.now()}`
+
+      const draft: PartnerSubject = {
         id: newId,
-        partnerNo: `PA-${Date.now()}`,
+        archiveMenu: archiveMenuLabel,
+        partnerNo,
         name: name.trim(),
         subjectType,
         idNumber: trimmedId,
@@ -282,14 +318,21 @@ export function PartnerArchiveFormPage() {
         contactPhoneVerified: options?.verifiedOnCreate ? "VERIFIED" : "UNVERIFIED",
         contactPhoneVerifiedAt: options?.verifiedOnCreate ? now : undefined,
         agentName: subjectType === "ENTERPRISE" ? agentName.trim() : undefined,
+        agentIdNumber:
+          showPickupAgentIdField && subjectType === "ENTERPRISE"
+            ? agentIdNumber.trim()
+            : undefined,
         status: "NORMAL",
-        roles: selectedRoles.map((roleType) => ({
-          roleType,
-          roleStatus: "NORMAL" as const,
-          sourceDocType: "人工建档",
-          sourceDocNo: "——",
-          roleEffectiveTime: now,
-        })),
+        roles: [
+          {
+            roleType: implicitRole,
+            roleStatus: "NORMAL" as const,
+            sourceDocType: "人工建档",
+            sourceDocNo: "——",
+            roleEffectiveTime: now,
+          },
+        ],
+        linkedPartnerArchives: [],
         source: "MANUAL",
         createDate: today,
         createTime: now,
@@ -309,33 +352,47 @@ export function PartnerArchiveFormPage() {
           },
         ],
       }
-      partnerArchivesMock.unshift(newPartner)
+      let created = normalizePartnerPlanB(draft)
+      for (const menu of selectedAppendMenus) {
+        created = appendLinkedPartnerMenus(
+          created,
+          [menu],
+          `新建时在【${menu}】创建独立主档或关联`,
+        )
+      }
+      partnerArchivesMock.unshift(created)
     } else if (existing) {
-      const wasPending =
-        existing.roles.some((r) => r.roleStatus === "PENDING_COMPLETION") ||
-        !existing.certAddress.fullAddress
+      const wasPending = isArchiveRequiredFieldsPending(existing)
 
       if (!isFrozenLimitedEdit && !coreIdentityLocked) {
         existing.name = name.trim()
       }
-      if (!isPendingCompletion) {
+      if (!isFrozenLimitedEdit) {
         existing.contactPhone = contactPhone.trim()
       }
       if (!isFrozenLimitedEdit && subjectType === "ENTERPRISE") {
         existing.agentName = agentName.trim()
+        if (showPickupAgentIdField) {
+          existing.agentIdNumber = agentIdNumber.trim()
+        }
       }
       if (phoneChanged || hasAgentDiff) {
         markContactPhoneVerified(existing)
       }
       existing.certAddress = buildCertAddress()
 
-      if (wasPending) {
+      const afterSave: PartnerSubject = {
+        ...existing,
+        certAddress: buildCertAddress(),
+      }
+      if (wasPending && !isArchiveRequiredFieldsPending(afterSave)) {
         existing.roles = existing.roles.map((r) =>
           r.roleStatus === "PENDING_COMPLETION"
-            ? { ...r, roleStatus: "NORMAL" }
-            : r
+            ? { ...r, roleStatus: "NORMAL" as const }
+            : r,
         )
       }
+      Object.assign(existing, normalizePartnerPlanB(existing))
 
       const changeParts: string[] = []
       if (phoneChanged) {
@@ -357,7 +414,7 @@ export function PartnerArchiveFormPage() {
         changeParts.length > 0
           ? changeParts.join("；")
           : wasPending
-            ? `补全证件登记地址【${province}${city}${district}${detailAddress.trim()}】，关联角色自动生效激活为正常`
+            ? `补全证件登记地址【${province}${city}${district}${detailAddress.trim()}】，主档必填项已齐备`
             : `更新合作方档案基础资料`
 
       existing.auditLogs = [
@@ -382,60 +439,61 @@ export function PartnerArchiveFormPage() {
           : changeReason
             ? "改址成功并已生效"
             : isPendingCompletion
-              ? "资料补全成功，角色已激活为正常"
+              ? "资料补全成功，主档已完备"
               : "保存成功"
         : options?.verifiedOnCreate
           ? "合作方建档成功（联系手机已验证）"
           : "合作方建档成功（联系手机未验证）"
     )
-    window.setTimeout(() => navigate(PARTNER_ARCHIVE_LIST_PATH), 800)
+    window.setTimeout(() => navigate(listPath), 800)
   }
 
   const validateForm = (): boolean => {
     setAccessWarning(null)
-    const newErrors: Record<string, string> = {}
+    const certFull = `${province}${city}${district}${detailAddress.trim()}`
+    const newErrors = validateArchiveMenuRequiredFields({
+      archiveMenu: archiveMenuLabel,
+      subjectType,
+      name,
+      idNumber,
+      contactPhone,
+      agentName,
+      agentIdNumber: showPickupAgentIdField ? agentIdNumber : undefined,
+      certAddressFull: certFull,
+    })
 
-    if (!isPendingCompletion) {
-      const nameMax = subjectType === "ENTERPRISE" ? 100 : 30
-      if (!name.trim()) {
-        newErrors.name = "请输入主体名称"
-      } else if (name.trim().length > nameMax) {
-        newErrors.name =
-          subjectType === "ENTERPRISE"
-            ? "企业全称不超过 100 字"
-            : "姓名不超过 30 字"
-      }
-      if (!idNumber.trim()) {
-        newErrors.idNumber =
-          subjectType === "INDIVIDUAL"
-            ? "请输入18位居民身份证号"
-            : "请输入18位统一社会信用代码"
-      } else if (idNumber.trim().length !== 18) {
-        newErrors.idNumber = "证件号码长度必须为18位字符"
-      }
-      if (subjectType === "ENTERPRISE" && !agentName.trim()) {
-        newErrors.agentName = "请输入经办人姓名"
-      } else if (subjectType === "ENTERPRISE" && agentName.trim().length > 30) {
-        newErrors.agentName = "经办人姓名不超过 30 字"
-      }
-      if (!contactPhone.trim()) {
-        newErrors.contactPhone =
-          subjectType === "INDIVIDUAL"
-            ? "请输入11位手机号码"
-            : "请输入11位联系电话（经办人手机）"
-      } else if (!/^1[3-9]\d{9}$/.test(contactPhone.trim())) {
-        newErrors.contactPhone = "请输入11位大陆标准有效手机号码（用于接收短信验证码）"
-      }
+    const nameMax = subjectType === "ENTERPRISE" ? 100 : 30
+    if (name.trim() && name.trim().length > nameMax) {
+      newErrors.name =
+        subjectType === "ENTERPRISE" ? "企业全称不超过 100 字" : "姓名不超过 30 字"
     }
+    if (idNumber.trim() && idNumber.trim().length !== 18) {
+      newErrors.idNumber = "证件号码长度必须为18位字符"
+    }
+    if (
+      (enterpriseAgentRequired || showPickupAgentIdField) &&
+      agentName.trim().length > 30
+    ) {
+      newErrors.agentName = "经办人姓名不超过 30 字"
+    }
+    if (
+      contactPhone.trim() &&
+      !newErrors.contactPhone &&
+      !/^1[3-9]\d{9}$/.test(contactPhone.trim()) &&
+      (archiveMenuLabel === "货主信息" || archiveMenuLabel === "提货人信息")
+    ) {
+      newErrors.contactPhone = "请输入11位大陆标准有效手机号码（用于接收短信验证码）"
+    }
+
     const detailTrimmed = detailAddress.trim()
     const addressTouched = Boolean(detailTrimmed)
     if (addressRequired || addressTouched) {
       if (!province.trim() || !city.trim() || !district.trim()) {
         newErrors.district = "请选择完整的省/市/区"
       }
-      if (!detailTrimmed) {
+      if (addressRequired && !detailTrimmed) {
         newErrors.detailAddress = "请补全证件登记地址"
-      } else if (`${province}${city}${district}${detailTrimmed}`.length > 200) {
+      } else if (detailTrimmed && `${province}${city}${district}${detailTrimmed}`.length > 200) {
         newErrors.detailAddress = "证件地址不超过 200 字"
       }
     }
@@ -446,19 +504,16 @@ export function PartnerArchiveFormPage() {
     }
 
     if (!isEdit) {
-      const duplicate = findPartnerByIdNumber(partnerArchivesMock, idNumber)
+      const duplicate = findPartnerByIdNumber(
+        partnerArchivesMock,
+        idNumber,
+        undefined,
+        archiveMenuLabel,
+      )
       if (duplicate) {
-        setAccessWarning("该主体已存在，请前往详情追加角色配置")
+        setAccessWarning("该主体在本菜单已存在，请前往详情追加合作方档案角色")
         return false
       }
-    }
-
-    const illegalRole = selectedRoles.find((role) => !selectableRoles.includes(role))
-    if (!isEdit && illegalRole) {
-      setErrors({
-        roles: `${ROLE_TYPE_LABELS[illegalRole]}不适用于当前主体类型`,
-      })
-      return false
     }
 
     if (
@@ -538,7 +593,7 @@ export function PartnerArchiveFormPage() {
     <PrototypeAnnotationProvider
       title={`${pageTitle} · 原型批注`}
       annotations={partnerArchiveFormAnnotations}
-      documents={partnerArchiveDocuments}
+      documents={archiveDocuments}
     >
       <div className="space-y-4 p-6">
         <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 lg:flex-row lg:items-center lg:justify-between">
@@ -611,8 +666,11 @@ export function PartnerArchiveFormPage() {
             <div className="space-y-1">
               <p className="font-semibold text-amber-950">该合作方档案处于「待补全」状态</p>
               <p className="text-xs leading-relaxed text-amber-800">
-                当前主体由单据静默沉淀生成，证件登记地址为空，关联角色限制发起业务。请在此完善省市区及详细门牌地址；保存并通过统一准入校验后，角色将自动激活转为【正常】。
+                {partnerPendingCompletionUserBanner(archiveMenuLabel)}
               </p>
+              <PrototypeSpecCallout className="mt-2">
+                {PARTNER_PENDING_COMPLETION_SPEC_NOTE}
+              </PrototypeSpecCallout>
             </div>
           </div>
         )}
@@ -637,40 +695,6 @@ export function PartnerArchiveFormPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                {isPendingCompletion && existing ? (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-1 rounded-lg border bg-muted/30 p-3">
-                      <span className="text-xs text-muted-foreground">主体类型</span>
-                      <p className="text-sm font-medium">{SUBJECT_TYPE_LABELS[existing.subjectType]}</p>
-                    </div>
-                    <div className="space-y-1 rounded-lg border bg-muted/30 p-3">
-                      <span className="text-xs text-muted-foreground">主体名称</span>
-                      <p className="text-sm font-medium">{existing.name}</p>
-                    </div>
-                    {existing.subjectType === "ENTERPRISE" && (
-                      <div className="space-y-1 rounded-lg border bg-muted/30 p-3">
-                        <span className="text-xs text-muted-foreground">经办人姓名</span>
-                        <p className="text-sm font-medium">{existing.agentName || "——"}</p>
-                      </div>
-                    )}
-                    <div className="space-y-1 rounded-lg border bg-muted/30 p-3">
-                      <span className="text-xs text-muted-foreground">
-                        {existing.subjectType === "INDIVIDUAL"
-                          ? "手机号"
-                          : "联系电话（经办人手机）"}
-                      </span>
-                      <p className="text-sm font-medium">{existing.contactPhone || "——"}</p>
-                    </div>
-                    <div className="space-y-1 rounded-lg border bg-muted/30 p-3">
-                      <span className="text-xs text-muted-foreground">
-                        {existing.subjectType === "INDIVIDUAL"
-                          ? "身份标识（公民身份证号）"
-                          : "统一社会信用代码"}
-                      </span>
-                      <p className="text-sm font-medium">{existing.idNumber}</p>
-                    </div>
-                  </div>
-                ) : (
                   <div className="grid gap-4 md:grid-cols-2">
                     {/* 字段 1：主体类型 */}
                     <div className="space-y-2">
@@ -680,7 +704,7 @@ export function PartnerArchiveFormPage() {
                       </Label>
                       <Select
                         value={subjectTypeLabel}
-                        disabled={isEdit}
+                        disabled={isEdit || isEnterpriseOnlyArchiveMenu(archiveMenuLabel)}
                         onValueChange={(next) => {
                           if (!next) return
                           markDirty()
@@ -729,7 +753,9 @@ export function PartnerArchiveFormPage() {
                       <div className="space-y-2">
                         <div className="flex items-center justify-between gap-2">
                           <Label htmlFor="partner-agent">
-                            <span className="mr-1 font-bold text-destructive">*</span>
+                            {(enterpriseAgentRequired || showPickupAgentIdField) && (
+                              <span className="mr-1 font-bold text-destructive">*</span>
+                            )}
                             经办人姓名
                           </Label>
                           {coreIdentityLocked && !adjustAgentMode && (
@@ -767,10 +793,37 @@ export function PartnerArchiveFormPage() {
                       </div>
                     )}
 
+                    {showPickupAgentIdField && (
+                      <div className="space-y-2">
+                        <Label htmlFor="partner-agent-id">
+                          <span className="mr-1 font-bold text-destructive">*</span>
+                          经办人身份证号
+                        </Label>
+                        <Input
+                          id="partner-agent-id"
+                          value={agentIdNumber}
+                          maxLength={18}
+                          readOnly={isFrozenLimitedEdit}
+                          placeholder="请输入18位经办人居民身份证号"
+                          onChange={(event) => {
+                            markDirty()
+                            setAgentIdNumber(event.target.value)
+                            setErrors((prev) => ({ ...prev, agentIdNumber: "" }))
+                          }}
+                        />
+                        {errors.agentIdNumber && (
+                          <p className="text-xs text-destructive">{errors.agentIdNumber}</p>
+                        )}
+                      </div>
+                    )}
+
                     {/* 手机号（个人） / 联系电话（企业经办人手机） */}
                     <div className="space-y-2">
                       <Label htmlFor="partner-phone">
-                        <span className="mr-1 font-bold text-destructive">*</span>
+                        {(archiveMenuLabel === "货主信息" ||
+                          archiveMenuLabel === "提货人信息") && (
+                          <span className="mr-1 font-bold text-destructive">*</span>
+                        )}
                         {subjectType === "INDIVIDUAL" ? "手机号" : "联系电话（经办人手机）"}
                       </Label>
                       <Input
@@ -823,7 +876,6 @@ export function PartnerArchiveFormPage() {
                       )}
                     </div>
                   </div>
-                )}
               </CardContent>
             </Card>
           </PrototypeAnnotationTarget>
@@ -839,8 +891,18 @@ export function PartnerArchiveFormPage() {
                 <CardTitle>证件登记地址</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <ProductFieldHint>{partnerFormAddressUserHint(subjectType)}</ProductFieldHint>
-                <PrototypeSpecCallout>{PARTNER_FORM_ADDRESS_SPEC_NOTE}</PrototypeSpecCallout>
+                <ProductFieldHint>
+                  {archiveMenuLabel === "货主信息"
+                    ? partnerFormAddressUserHint(subjectType)
+                    : archiveMenuLabel === "提货人信息"
+                      ? "选填；提货人菜单不因证件地址进入待补全。"
+                      : PARTNER_FORM_ADDRESS_USER_HINT_OTHER}
+                </ProductFieldHint>
+                <PrototypeSpecCallout>
+                  {archiveMenuLabel === "货主信息"
+                    ? PARTNER_FORM_ADDRESS_SPEC_NOTE_OWNER
+                    : PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER}
+                </PrototypeSpecCallout>
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="space-y-2">
                     <Label className="sr-only">省</Label>
@@ -939,29 +1001,28 @@ export function PartnerArchiveFormPage() {
             <PrototypeAnnotationTarget annotationIds={["partner-archive-form-roles"]}>
               <Card>
                 <CardHeader>
-                  <CardTitle>业务角色（首次挂接）</CardTitle>
+                  <CardTitle>{PARTNER_FORM_INITIAL_ROLES_SECTION_TITLE}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <ProductFieldHint>{PARTNER_FORM_INITIAL_ROLES_USER_HINT}</ProductFieldHint>
                   <PrototypeSpecCallout>{PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE}</PrototypeSpecCallout>
                   <div className="flex flex-wrap gap-2 pt-1">
-                    {selectableRoles.map((role) => {
-                      const isSelected = selectedRoles.includes(role)
+                    {appendMenuOptions.map((menu) => {
+                      const isSelected = selectedAppendMenus.includes(menu)
                       return (
                         <Button
-                          key={role}
+                          key={menu}
                           type="button"
                           variant={isSelected ? "default" : "outline"}
                           size="sm"
                           className={cn(!isSelected && "bg-background")}
-                          onClick={() => toggleRole(role)}
+                          onClick={() => toggleAppendMenu(menu)}
                         >
-                          {ROLE_TYPE_LABELS[role]}
+                          {menu}
                         </Button>
                       )
                     })}
                   </div>
-                  {errors.roles && <p className="text-xs text-destructive">{errors.roles}</p>}
                 </CardContent>
               </Card>
             </PrototypeAnnotationTarget>
@@ -1007,7 +1068,7 @@ export function PartnerArchiveFormPage() {
           idNumber={idNumber.trim()}
           contactPhone={contactPhone.trim()}
           fullAddress={`${province}${city}${district}${detailAddress.trim()}`}
-          roles={selectedRoles}
+          roles={[implicitRoleForArchiveMenu(archiveMenuLabel)]}
           onOpenChange={handleVerifyOpenChange}
           onConfirm={() => {
             setVerifyDialogOpen(false)

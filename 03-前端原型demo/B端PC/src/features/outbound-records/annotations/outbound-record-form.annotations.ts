@@ -35,7 +35,7 @@ export const outboundRecordFormAnnotations: PrototypeAnnotation[] = [
     kind: "字段",
     title: "基础信息 · 时间合规与货主隔离",
     content:
-      "出库日期默认系统当前时间，严禁选择未来时间（O04）。货主类型支持企业/个人，切换时清空货主主体与已选货品防止数据串用（O05）。出库类型在新增制单页仅开放普通出库、仓单出库、质押出库、抵押出库 4 类手工/关联发起；移库/转让出库由上游终审自动联动写入本台账，不可手工制单（O03）。选择关联单号提示填充货物（O08）。",
+      "出库日期默认系统当前时间，严禁选择未来时间（O04）。货主须 **货主信息** 域嵌入式选择器（PA-R12），**仅选已有档案、无快捷建档**（新建货主无在库货）；【查看档案】深链带菜单路径。货主类型切换清空已选货主与货品（O05）。协同见 05 **3.3** 与出库 **O05**。",
     documentRefs: {
       rules: {
         section: "【业务时间合规性】(O04)",
@@ -102,7 +102,7 @@ export const outboundRecordFormAnnotations: PrototypeAnnotation[] = [
     kind: "字段",
     title: "提货信息 · 提货主体与现场照片必传",
     content:
-      "采集提货主体类型、姓名、身份证号（个人必填，脱敏展示）、联系电话、车牌号；出库现场照片为必填项（1~10张，支持jpg/png/jpeg，单张<=5MB），无照片阻断提交（C06）。提货信息在审批通过后同一事务内作为生成提货单的基础（O11）。",
+      "个人提货：**提货经办人** 须 **提货人信息** 域 `PartnerArchiveEmbeddedPicker` + 快捷建档（O06a · PP-R01），不触发货主 P02；选中后姓名/证号/电话只读反显。企业提货主体字段仍手输（P2 双层结构见 08 序号 14）。现场照片 1~10 张必传（C06）；审批通过后生成提货单（O11）。",
     documentRefs: {
       rules: {
         section: "【提货单自动生成与现场影像存证】(O11)",
@@ -114,6 +114,11 @@ export const outboundRecordFormAnnotations: PrototypeAnnotation[] = [
       {
         title: "影像要求",
         items: [
+          {
+            label: "提货人域隔离",
+            content:
+              "【合作方改造-存量业务单据协同规格】3.3：经办人 archiveMenu=提货人信息；与货主信息域分字段。",
+          },
           {
             label: "必传约束",
             content: "至少上传 1 张出库现场实物照片，支持缩略图与大图预览。",

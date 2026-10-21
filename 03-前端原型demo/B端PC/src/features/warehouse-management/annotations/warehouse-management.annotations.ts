@@ -52,9 +52,9 @@ export const warehouseDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "wh-storeroom-audit-column",
     number: 2,
     kind: "规则",
-    title: "6.3 变更 · 出入库审核只读 Badge（F13）",
+    title: "出入库审核展示与编辑（F13 × R03）",
     content:
-      "以前：库房编辑里可勾选「要不要审核」。现在：只在树表看「受控 / 免审」，由基础配置 R02 统一计算，本页不可改。",
+      "树表只读展示「出入库审核标记：是/否」（与线上一致）；在【编辑库房】弹窗维护「出入库是否审核」单选，保存后同步基础配置受控清单。",
     documentRefs: {
       fields: { section: "4. 库房字段", match: "出入库审核" },
       rules: { section: "5.4", match: "F13" },
@@ -66,12 +66,13 @@ export const warehouseDetailAnnotations: PrototypeAnnotation[] = [
         items: [
           {
             label: "库房表单",
-            content: "移除「出入库是否审核」单选，仅保留库房名称与备注（WH-V11）。",
+            content:
+              "保留线上一致三字段：库房名称、出入库是否审核（必填单选）、备注；保存触发 R03 同步（WH-V11 调整为表单维护）。",
           },
           {
             label: "树表展示",
             content:
-              "只读展示出入库审核「是 / 否」（由 R02 计算，对应入库侧需要审核 / 不需要审核）；改名单请去【基础配置 → 仓储作业参数】保存（WH-V12）。",
+              "第二行灰字「出入库审核标记：是/否」，由 R02+R03 计算；入库侧「需要审核」对应「是」（WH-V12）。",
           },
         ],
       },
@@ -83,7 +84,8 @@ export const warehouseDetailAnnotations: PrototypeAnnotation[] = [
     number: 3,
     kind: "交互",
     title: "6.3 变更 · 前往基础配置",
-    content: "受控库房范围不在仓库管理维护，说明区提供跳转入口，与入库 R06 同源。",
+    content:
+      "管理员批量入口：跳转基础配置（C02）。监管员主用【编辑库房】弹窗单选；与入库 R06 同源。",
     documentRefs: {
       prd: { section: "3.2", match: "基础配置" },
     },
@@ -95,7 +97,8 @@ export const warehouseDetailAnnotations: PrototypeAnnotation[] = [
     number: 4,
     kind: "规则",
     title: "6.3 变更 · 库房表单字段收敛",
-    content: "添加/编辑库房弹窗不再出现审核开关，避免与 R02 双轨配置。",
+    content:
+      "编辑库房弹窗含「出入库是否审核」必填单选；与基础配置双端同步（R03），非独立第二套配置。",
     documentRefs: {
       fields: { section: "4. 库房字段", match: "新增页" },
     },

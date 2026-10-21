@@ -21,6 +21,7 @@ export function createInitialFormState(): OutboundFormState {
     ownerIdentifier: "",
     contactPhone: "",
     ownerIdCard: "",
+    ownerPartnerId: "",
     type: "普通出库",
     relatedNo: "",
     warehouseName: "",

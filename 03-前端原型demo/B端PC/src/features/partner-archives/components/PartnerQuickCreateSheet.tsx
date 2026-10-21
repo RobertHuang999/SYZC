@@ -33,6 +33,10 @@ import {
   PARTNER_QUICK_CREATE_INBOUND_USER,
   PARTNER_QUICK_CREATE_OUTBOUND_SPEC,
   PARTNER_QUICK_CREATE_OUTBOUND_USER,
+  PARTNER_QUICK_CREATE_SUPERVISION_FUNDER_SPEC,
+  PARTNER_QUICK_CREATE_SUPERVISION_FUNDER_USER,
+  PARTNER_QUICK_CREATE_SUPERVISION_SERVICE_SPEC,
+  PARTNER_QUICK_CREATE_SUPERVISION_SERVICE_USER,
 } from "../lib/partner-archive-ui-labels"
 
 type PartnerQuickCreateSheetProps = {
@@ -59,6 +63,18 @@ const SCENE_COPY: Record<
     hintSpec: PARTNER_QUICK_CREATE_OUTBOUND_SPEC,
     roleReadonly: "提货经办人",
   },
+  SUPERVISION_FUNDER: {
+    title: "快捷添加资金方",
+    hintUser: PARTNER_QUICK_CREATE_SUPERVISION_FUNDER_USER,
+    hintSpec: PARTNER_QUICK_CREATE_SUPERVISION_FUNDER_SPEC,
+    roleReadonly: "资金方",
+  },
+  SUPERVISION_SERVICE_PROVIDER: {
+    title: "快捷添加服务方",
+    hintUser: PARTNER_QUICK_CREATE_SUPERVISION_SERVICE_USER,
+    hintSpec: PARTNER_QUICK_CREATE_SUPERVISION_SERVICE_SPEC,
+    roleReadonly: "服务方",
+  },
 }
 
 export function PartnerQuickCreateSheet({
@@ -84,7 +100,9 @@ export function PartnerQuickCreateSheet({
 
   useEffect(() => {
     if (!open) return
-    setSubjectTypeLabel(scene === "OUTBOUND_PICKUP_AGENT" ? "个人" : "个人")
+    const enterpriseOnly =
+      scene === "SUPERVISION_FUNDER" || scene === "SUPERVISION_SERVICE_PROVIDER"
+    setSubjectTypeLabel(enterpriseOnly ? "企业" : scene === "OUTBOUND_PICKUP_AGENT" ? "个人" : "个人")
     setName("")
     setIdNumber("")
     setContactPhone("")
@@ -166,7 +184,11 @@ export function PartnerQuickCreateSheet({
                   setSubjectTypeLabel(v as "个人" | "企业")
                   markDirty()
                 }}
-                disabled={scene === "OUTBOUND_PICKUP_AGENT"}
+                disabled={
+                  scene === "OUTBOUND_PICKUP_AGENT" ||
+                  scene === "SUPERVISION_FUNDER" ||
+                  scene === "SUPERVISION_SERVICE_PROVIDER"
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -264,7 +286,13 @@ export function PartnerQuickCreateSheet({
               </>
             ) : null}
             <PrototypeSpecCallout className="sm:col-span-2">
-              创建来源：{scene === "INBOUND_OWNER" ? "入库快捷建档" : "出库快捷建档"} · 创建人：当前用户（审计字段，非用户提示）
+              创建来源：
+              {scene === "INBOUND_OWNER"
+                ? "入库快捷建档"
+                : scene === "OUTBOUND_PICKUP_AGENT"
+                  ? "出库快捷建档"
+                  : "监管办理快捷建档"}{" "}
+              · 创建人：当前用户（审计字段，非用户提示）
             </PrototypeSpecCallout>
           </div>
 

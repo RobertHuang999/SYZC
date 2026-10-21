@@ -1,6 +1,8 @@
 /** 与 PC 原型共用 sessionStorage 键，便于同域演示 WH-V12 */
 const STORAGE_KEY = "SYZC_WAREHOUSE_OPS_SNAPSHOT"
 
+export const WAREHOUSE_OPS_SNAPSHOT_EVENT = "syzc:warehouse-ops-snapshot"
+
 export type YesNo = "是" | "否"
 export type WarehouseScopeMode = "全部库房" | "指定库房"
 
@@ -30,5 +32,20 @@ export function readWarehouseOpsSnapshot(): WarehouseOpsConfig {
   return {
     ...DEFAULT_WAREHOUSE_OPS,
     auditedRoomIds: [...DEFAULT_WAREHOUSE_OPS.auditedRoomIds],
+  }
+}
+
+export function writeWarehouseOpsSnapshot(config: WarehouseOpsConfig) {
+  try {
+    sessionStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        ...config,
+        auditedRoomIds: [...config.auditedRoomIds],
+      })
+    )
+    window.dispatchEvent(new CustomEvent(WAREHOUSE_OPS_SNAPSHOT_EVENT))
+  } catch {
+    /* ignore */
   }
 }

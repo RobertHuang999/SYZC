@@ -3,6 +3,11 @@ import {
   INBOUND_STAGING_PROTOTYPE_RELEASED,
   INBOUND_STAGING_PC_MENU_PATH,
 } from "@prototype/shared/inbound/inbound-633-delivery"
+import {
+  partnerArchiveListPath,
+  partnerArchiveSidebarItems,
+  PARTNER_ARCHIVE_DEFAULT_MENU,
+} from "@prototype/shared/partner-archives/partner-archive-routes"
 
 export const PERMISSION_REFERENCE_PATH = "/系统参考/功能与数据权限"
 /** 旧路由保留重定向，避免书签失效 */
@@ -44,7 +49,11 @@ export type BreadcrumbItem = {
 
 export const topModules: TopModule[] = [
   { id: "home", label: "工作中心", path: "/工作中心/审批中心" },
-  { id: "user-center", label: "用户中心", path: "/用户中心/合作方管理/合作方档案" },
+  {
+    id: "user-center",
+    label: "用户中心",
+    path: partnerArchiveListPath(PARTNER_ARCHIVE_DEFAULT_MENU),
+  },
   { id: "storage", label: "仓储", path: "/仓储/库存查询/存货管理" },
   { id: "finance", label: "融资/监管", path: "/融资/监管/融资管理/客户融资需求线索" },
   { id: "trade", label: "交易", path: "/交易/采购管理/采购需求管理" },
@@ -69,6 +78,7 @@ const migrationSidebarGroup: SidebarGroup = {
     { label: "订单规则与押品流水迁移", path: "/历史迁移与割接/订单规则与押品流水迁移" },
     { label: "门禁与设备事务通知兼容映射", path: "/历史迁移与割接/门禁与设备事务通知兼容映射" },
     { label: "跨域用例数据推演", path: "/历史迁移与割接/跨域用例数据推演" },
+    { label: "合作方主数据迁移（6.3）", path: "/历史迁移与割接/合作方主数据迁移" },
   ],
 }
 
@@ -99,21 +109,20 @@ const sidebarGroupsByModule: Record<string, SidebarGroup[]> = {
   ...generatedSidebarGroupsByModule,
   "user-center": [
     {
-      id: "partner-management",
-      label: "合作方管理",
-      items: [
-        {
-          label: "合作方档案",
-          path: "/用户中心/合作方管理/合作方档案",
-        },
-      ],
+      id: "partner-archive",
+      label: "合作方档案",
+      items: partnerArchiveSidebarItems,
     },
     {
       id: "synergy-spec",
       label: "业务协同与说明",
       items: [
         {
-          label: "存量业务单据协同",
+          label: "合作方档案存量改造地图",
+          path: "/用户中心/业务协同/合作方档案存量改造地图",
+        },
+        {
+          label: "存量协同规格全文",
           path: "/用户中心/业务协同/存量业务单据协同",
         },
       ],

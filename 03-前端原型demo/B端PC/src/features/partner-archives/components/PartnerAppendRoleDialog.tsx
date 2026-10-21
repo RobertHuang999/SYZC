@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type MouseEvent } from "react"
+import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
 import {
   Dialog,
   DialogContent,
@@ -12,31 +13,17 @@ import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+import type { PartnerSubject } from "../domain/types"
 import {
-  ROLE_STATUS_LABELS,
-  ROLE_TYPE_LABELS,
-  type PartnerSubject,
-  type RoleType,
-} from "../domain/types"
-import { partnerArchivesMock } from "../mock/partner-archives.mock"
-import {
-  PARTNER_APPEND_OWNER_MISSING_ADDRESS_SPEC,
-  PARTNER_APPEND_OWNER_MISSING_ADDRESS_USER,
-  PARTNER_APPEND_OWNER_WITH_ADDRESS_SPEC,
-  PARTNER_APPEND_OWNER_WITH_ADDRESS_USER,
-} from "../lib/partner-archive-ui-labels"
-import {
-  findOwnerAddressConflict,
-  ownerAddressConflictMessage,
-  rolesAllowedForSubjectType,
-} from "../lib/partner-archive-rules"
+  otherArchiveMenus,
+  linkedArchiveMenuLabel,
+} from "../lib/linked-partner-archives"
 
 type PartnerAppendRoleDialogProps = {
   partner: PartnerSubject | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** 字段清单：追加业务角色，可多选 */
-  onConfirm: (roleTypes: RoleType[]) => void
+  onConfirm: (targetMenus: PartnerArchiveMenuLabel[]) => void
 }
 
 export function PartnerAppendRoleDialog({
@@ -45,155 +32,144 @@ export function PartnerAppendRoleDialog({
   onOpenChange,
   onConfirm,
 }: PartnerAppendRoleDialogProps) {
-  const availableRoles = useMemo(() => {
+  const availableMenus = useMemo(() => {
     if (!partner) {
       return []
     }
-    const existingRoles = new Set(partner.roles.map((role) => role.roleType))
-    return rolesAllowedForSubjectType(partner.subjectType).filter(
-      (role) => !existingRoles.has(role)
+    const linked = new Set(
+      (partner.linkedPartnerArchives ?? []).map((item) => item.targetMenu),
     )
+    return otherArchiveMenus(partner.archiveMenu).filter((menu) => !linked.has(menu))
   }, [partner])
 
-  const [selectedRoles, setSelectedRoles] = useState<RoleType[]>([])
+  const [selectedMenus, setSelectedMenus] = useState<PartnerArchiveMenuLabel[]>([])
+  const [confirmCreateOpen, setConfirmCreateOpen] = useState(false)
 
   useEffect(() => {
     if (open) {
-      setSelectedRoles([])
+      setSelectedMenus([])
+      setConfirmCreateOpen(false)
     }
   }, [open, partner?.id])
-
-  const ownerAddressMissing = Boolean(
-    partner &&
-      selectedRoles.includes("OWNER") &&
-      partner.subjectType === "INDIVIDUAL" &&
-      !partner.certAddress.fullAddress.trim()
-  )
-
-  const ownerAddressConflict = useMemo(() => {
-    if (!partner || !selectedRoles.includes("OWNER")) {
-      return false
-    }
-    if (!partner.certAddress.fullAddress.trim()) {
-      return false
-    }
-    return Boolean(
-      findOwnerAddressConflict(
-        partnerArchivesMock,
-        partner.certAddress.fullAddress,
-        partner.subjectType,
-        partner.id
-      )
-    )
-  }, [partner, selectedRoles])
 
   if (!partner) {
     return null
   }
 
-  const confirmDisabled =
-    availableRoles.length === 0 || selectedRoles.length === 0 || ownerAddressConflict
-
-  const toggleRole = (role: RoleType) => {
-    setSelectedRoles((current) =>
-      current.includes(role) ? current.filter((item) => item !== role) : [...current, role]
+  const toggleMenu = (menu: PartnerArchiveMenuLabel) => {
+    setSelectedMenus((current) =>
+      current.includes(menu) ? current.filter((item) => item !== menu) : [...current, menu],
     )
   }
 
-  const handleConfirm = (event: MouseEvent<HTMLButtonElement>) => {
+  const handlePrimaryConfirm = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
     event.stopPropagation()
-    if (confirmDisabled) {
+    if (selectedMenus.length === 0) {
       return
     }
-    onConfirm(selectedRoles)
+    setConfirmCreateOpen(true)
+  }
+
+  const handleCreateConfirm = () => {
+    onConfirm(selectedMenus)
+    setConfirmCreateOpen(false)
     onOpenChange(false)
   }
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>追加业务角色</DialogTitle>
-          <DialogDescription>
-            为主体「{partner.name}」追加合作角色；可多选。追加货主时将联动证件地址准入校验。
-          </DialogDescription>
-        </DialogHeader>
+  const linkedSummary =
+    partner.linkedPartnerArchives && partner.linkedPartnerArchives.length > 0
+      ? partner.linkedPartnerArchives.map((item) => linkedArchiveMenuLabel(item)).join("、")
+      : "——"
 
-        <div className="space-y-4 text-sm">
-          <div className="rounded-md border bg-muted/40 px-3 py-2.5">
-            <div className="text-xs text-muted-foreground">已有业务角色</div>
-            <div className="mt-1 font-medium leading-relaxed">
-              {partner.roles.length > 0
-                ? partner.roles
-                    .map(
-                      (role) =>
-                        `${ROLE_TYPE_LABELS[role.roleType]}·${ROLE_STATUS_LABELS[role.roleStatus]}`
-                    )
-                    .join("、")
-                : "——"}
+  return (
+    <>
+      <Dialog open={open && !confirmCreateOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>追加合作方档案角色</DialogTitle>
+            <DialogDescription>
+              为「{partner.name}」在其它子菜单创建独立主档或建立关联（当前菜单：{partner.archiveMenu}）。
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 text-sm">
+            <div className="rounded-md border bg-muted/40 px-3 py-2.5">
+              <div className="text-xs text-muted-foreground">已关联其他合作档案</div>
+              <div className="mt-1 font-medium leading-relaxed">{linkedSummary}</div>
             </div>
+
+            {availableMenus.length === 0 ? (
+              <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
+                已关联全部可选子菜单，无需再次追加。
+              </p>
+            ) : (
+              <div className="space-y-2">
+                <Label>
+                  目标菜单
+                  <span className="ml-0.5 font-bold text-destructive">*</span>
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {availableMenus.map((menu) => {
+                    const isSelected = selectedMenus.includes(menu)
+                    return (
+                      <Button
+                        key={menu}
+                        type="button"
+                        variant={isSelected ? "default" : "outline"}
+                        size="sm"
+                        className={cn(!isSelected && "bg-background")}
+                        onClick={() => toggleMenu(menu)}
+                      >
+                        {menu}
+                      </Button>
+                    )
+                  })}
+                </div>
+                <ProductFieldHint>
+                  确认后将在所选菜单为该身份创建独立主档（若该菜单已有同证号主档，则仅建立关联）。
+                </ProductFieldHint>
+                <PrototypeSpecCallout>
+                  【主体识别与库内匹配总则】(PA-R03) · 【合作方子菜单分视图与隐式角色规则】(PA-R12)
+                </PrototypeSpecCallout>
+              </div>
+            )}
           </div>
 
-          {availableRoles.length === 0 ? (
-            <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
-              该主体在当前类型下已挂接全部可用业务角色，无需再次追加。
-            </p>
-          ) : (
-            <div className="space-y-2">
-              <Label>
-                追加业务角色
-                <span className="ml-0.5 font-bold text-destructive">*</span>
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {availableRoles.map((role) => {
-                  const isSelected = selectedRoles.includes(role)
-                  return (
-                    <Button
-                      key={role}
-                      type="button"
-                      variant={isSelected ? "default" : "outline"}
-                      size="sm"
-                      className={cn(!isSelected && "bg-background")}
-                      onClick={() => toggleRole(role)}
-                    >
-                      {ROLE_TYPE_LABELS[role]}
-                    </Button>
-                  )
-                })}
-              </div>
-              {selectedRoles.includes("OWNER") && !ownerAddressConflict && (
-                <div className="space-y-2">
-                  <ProductFieldHint>
-                    {ownerAddressMissing
-                      ? PARTNER_APPEND_OWNER_MISSING_ADDRESS_USER
-                      : PARTNER_APPEND_OWNER_WITH_ADDRESS_USER}
-                  </ProductFieldHint>
-                  <PrototypeSpecCallout>
-                    {ownerAddressMissing
-                      ? PARTNER_APPEND_OWNER_MISSING_ADDRESS_SPEC
-                      : PARTNER_APPEND_OWNER_WITH_ADDRESS_SPEC}
-                  </PrototypeSpecCallout>
-                </div>
-              )}
-              {ownerAddressConflict && (
-                <p className="text-xs leading-relaxed text-destructive">
-                  {ownerAddressConflictMessage(partner.subjectType)}
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              取消
+            </Button>
+            <Button
+              type="button"
+              disabled={availableMenus.length === 0 || selectedMenus.length === 0}
+              onClick={handlePrimaryConfirm}
+            >
+              下一步
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            取消
-          </Button>
-          <Button type="button" disabled={confirmDisabled} onClick={handleConfirm}>
-            确认追加
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <Dialog open={confirmCreateOpen} onOpenChange={setConfirmCreateOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>确认创建独立主档</DialogTitle>
+            <DialogDescription>
+              {selectedMenus.map((m) => `将在【${m}】为该身份创建独立主档（或关联已有主档）`).join("；")}
+              。是否继续？
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setConfirmCreateOpen(false)}>
+              取消
+            </Button>
+            <Button type="button" onClick={handleCreateConfirm}>
+              确认创建
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

@@ -12,6 +12,8 @@ export interface OutboundFormState {
   ownerIdentifier: string
   contactPhone: string
   ownerIdCard: string
+  /** 6.3 合作方引用 · 货主信息域 */
+  ownerPartnerId: string
   type: OutboundTypeName
   relatedNo: string
   warehouseName: string

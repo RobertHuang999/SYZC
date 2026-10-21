@@ -50,7 +50,7 @@ export function DuplicateAddressDialog({
           </table>
         </div>
         <p className="text-xs text-muted-foreground">
-          建议：请先前往「合作方管理 / 合作方档案」核实修正重复地址后再开启一人一址校验。
+          建议：请先前往「用户中心 → 合作方档案 → 货主信息」核实修正重复地址后再开启一人一址校验。
         </p>
         <DialogFooter>
           <Button type="button" onClick={() => onOpenChange(false)}>

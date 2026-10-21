@@ -41,9 +41,9 @@ export const warehouseH5DetailAnnotations: PrototypeAnnotation[] = [
     targetId: "wh-h5-63-audit",
     number: 2,
     kind: "规则",
-    title: "6.3 变更 · 库房出入库审核只读",
+    title: "库房出入库审核（F13 × R03）",
     content:
-      "旧版卡片/详情弹窗展示「审核: 是/否」且编辑抽屉可改。6.3 改为只读「受控/免审」，由基础配置 R02 计算（F13）。",
+      "卡片展示「出入库审核标记：是/否」；编辑 Sheet 含「出入库是否审核」单选，与 PC 编辑库房弹窗、基础配置同步。",
     details: [
       {
         title: "移动端差异点",
@@ -53,8 +53,8 @@ export const warehouseH5DetailAnnotations: PrototypeAnnotation[] = [
             content: "列表行展示 6.3 文案；编辑抽屉仅名称+备注，不含审核单选。",
           },
           {
-            label: "详情只读弹窗",
-            content: "「出入库审核」字段只展示 Badge，不可修改。",
+            label: "编辑 Sheet",
+            content: "与 PC「编辑库房」一致：出入库是否审核单选，确认后写 R03 快照。",
           },
         ],
       },

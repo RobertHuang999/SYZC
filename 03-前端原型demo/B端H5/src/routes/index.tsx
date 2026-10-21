@@ -45,6 +45,12 @@ import {
 import { PartnerArchiveListPage } from "@/features/partner-archives/pages/PartnerArchiveListPage"
 import { PartnerArchiveDetailPage } from "@/features/partner-archives/pages/PartnerArchiveDetailPage"
 import { PartnerArchiveFormPage } from "@/features/partner-archives/pages/PartnerArchiveFormPage"
+import { PartnerArchiveH5LegacyRedirect } from "@/features/partner-archives/components/PartnerArchiveH5LegacyRedirect"
+import { H5_PARTNER_ARCHIVE_LIST_SLUG } from "@prototype/shared/partner-archives/partner-archive-domain"
+import {
+  PARTNER_ARCHIVE_MENU_LABELS,
+  type PartnerArchiveMenuLabel,
+} from "@prototype/shared/partner-archives/partner-archive-routes"
 
 const midLoanMenuItem = MOBILE_MENU_ITEMS.find((item) => item.id === "ws-risk-in-loan")
 
@@ -149,13 +155,24 @@ export function AppRoutes() {
       <Route path="/m/outbound/initiate" element={<OutboundInitiatePage />} />
       <Route path="/m/outbound/initiate/goods" element={<OutboundInitiateGoodsPage />} />
 
+      {PARTNER_ARCHIVE_MENU_LABELS.flatMap((menu) => {
+        const slug = H5_PARTNER_ARCHIVE_LIST_SLUG[menu as PartnerArchiveMenuLabel]
+        return [
+          <Route
+            key={`${slug}-list`}
+            path={`/m/workspace/user-center/partner-archives/${slug}`}
+            element={<PartnerArchiveListPage />}
+          />,
+          <Route
+            key={`${slug}-detail`}
+            path={`/m/workspace/user-center/partner-archives/${slug}/:id`}
+            element={<PartnerArchiveDetailPage />}
+          />,
+        ]
+      })}
       <Route
-        path="/m/workspace/user-center/partner-archives"
-        element={<PartnerArchiveListPage />}
-      />
-      <Route
-        path="/m/workspace/user-center/partner-archives/:id"
-        element={<PartnerArchiveDetailPage />}
+        path="/m/workspace/user-center/partner-archives/*"
+        element={<PartnerArchiveH5LegacyRedirect />}
       />
       <Route path="/m/partner-archives/form" element={<PartnerArchiveFormPage />} />
 

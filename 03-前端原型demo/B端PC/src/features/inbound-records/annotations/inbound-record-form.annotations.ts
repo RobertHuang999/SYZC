@@ -21,7 +21,7 @@ export const inboundRecordFormAnnotations: PrototypeAnnotation[] = [
     kind: "字段",
     title: "基础信息联动",
     content:
-      "企业：货主标识为统一社会信用代码、联系电话；个人：货主标识+身份证号。质押/抵押/仓单唤起关联单选择弹窗。入库库房多选且同审核属性（R06）。",
+      "企业：货主标识为统一社会信用代码、联系电话；个人：货主标识+身份证号。质押/抵押/仓单唤起关联单选择弹窗。入库库房多选分组「需要审核/不需要审核」，与仓库 R02+R03+F13 同源；同单不可混选（【库房同审核属性强校验】(R06)）。",
     documentRefs: {
       rules: { section: "五、", match: "R02", element: "text" },
     },

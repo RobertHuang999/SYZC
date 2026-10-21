@@ -13,7 +13,6 @@ import {
 } from "@prototype/B端PC/src/features/partner-archives/domain/constants"
 import {
   ROLE_TYPE_LABELS,
-  SUBJECT_TYPE_LABELS,
   type PartnerSubject,
   type RoleType,
   type SubjectType,
@@ -37,24 +36,52 @@ import {
   PARTNER_CHANGE_ADDRESS_DIALOG,
   PARTNER_FORM_ACTION_LABELS,
   PARTNER_FORM_BASE_SECTION_TITLE,
-  PARTNER_FORM_ADDRESS_SPEC_NOTE,
+  PARTNER_FORM_ADDRESS_SPEC_NOTE_OWNER,
+  PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER,
+  PARTNER_FORM_ADDRESS_USER_HINT_OTHER,
   PARTNER_FORM_INITIAL_ROLES_SECTION_TITLE,
   PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE,
   PARTNER_FORM_INITIAL_ROLES_USER_HINT,
   PARTNER_PENDING_COMPLETION_SPEC_NOTE,
-  PARTNER_PENDING_COMPLETION_USER_BANNER,
+  partnerPendingCompletionUserBanner,
   partnerFormAddressUserHint,
   partnerContactPhoneFormLabel,
-  partnerContactPhoneDetailLabel,
   partnerFormPageTitle,
 } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
 import { PartnerConfirmSheet } from "../components/PartnerConfirmSheet"
 import { PartnerVerifySheet } from "../components/PartnerVerifySheet"
 import { handleStackBack } from "@/shared/navigation/stack-back"
+import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
 import {
-  PARTNER_ARCHIVE_LIST_ROUTE,
-  partnerArchiveDetailPath,
+  ARCHIVE_MENU_SHORT_LABEL,
+  implicitRoleForArchiveMenu,
+} from "@prototype/shared/partner-archives/partner-archive-domain"
+import {
+  partnerArchiveDetailRoute,
+  partnerArchiveListRoute,
 } from "../domain/constants"
+import {
+  collectArchiveRequiredGaps,
+  isArchiveRequiredFieldsPending,
+  isCertAddressSaveRequired,
+  isEnterpriseOnlyArchiveMenu,
+  validateArchiveMenuRequiredFields,
+} from "@prototype/B端PC/src/features/partner-archives/lib/archive-required-fields-pending"
+
+function parseArchiveMenuFromSearch(raw: string | null): PartnerArchiveMenuLabel {
+  const map: Record<string, PartnerArchiveMenuLabel> = {
+    OWNER: "货主信息",
+    PICKUP_PERSON: "提货人信息",
+    FUNDER: "资金方信息",
+    SERVICE_PROVIDER: "服务方信息",
+    货主信息: "货主信息",
+    提货人信息: "提货人信息",
+    资金方信息: "资金方信息",
+    服务方信息: "服务方信息",
+  }
+  if (raw && map[raw]) return map[raw]
+  return "货主信息"
+}
 
 function subjectTypeFromLabel(label: string): SubjectType {
   return label === "企业" ? "ENTERPRISE" : "INDIVIDUAL"
@@ -65,15 +92,24 @@ export function PartnerArchiveFormPage() {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const editId = searchParams.get("edit")
+  const archiveMenuLabel = parseArchiveMenuFromSearch(searchParams.get("archiveMenu"))
+  const menuShortLabel = ARCHIVE_MENU_SHORT_LABEL[archiveMenuLabel]
+  const isOwnerArchiveMenu = archiveMenuLabel === "货主信息"
   const existing = useMemo(
     () => (editId ? getPartnerArchiveById(editId) : undefined),
     [editId],
   )
   const isEdit = Boolean(existing)
 
-  const [subjectTypeLabel, setSubjectTypeLabel] = useState(
-    existing?.subjectType === "ENTERPRISE" ? "企业" : "个人",
-  )
+  const [subjectTypeLabel, setSubjectTypeLabel] = useState(() => {
+    if (existing) {
+      return existing.subjectType === "ENTERPRISE" ? "企业" : "个人"
+    }
+    if (isEnterpriseOnlyArchiveMenu(archiveMenuLabel)) {
+      return "企业"
+    }
+    return "个人"
+  })
   const subjectType = subjectTypeFromLabel(subjectTypeLabel)
   const [typeOpen, setTypeOpen] = useState(false)
 
@@ -81,6 +117,7 @@ export function PartnerArchiveFormPage() {
   const [idNumber, setIdNumber] = useState(existing?.idNumber ?? "")
   const [contactPhone, setContactPhone] = useState(existing?.contactPhone ?? "")
   const [agentName, setAgentName] = useState(existing?.agentName ?? "")
+  const [agentIdNumber, setAgentIdNumber] = useState(existing?.agentIdNumber ?? "")
   const [province, setProvince] = useState(existing?.certAddress.province || (isEdit ? "" : "江苏省"))
   const [city, setCity] = useState(existing?.certAddress.city || (isEdit ? "" : "南京市"))
   const [district, setDistrict] = useState(existing?.certAddress.district || (isEdit ? "" : "鼓楼区"))
@@ -102,12 +139,12 @@ export function PartnerArchiveFormPage() {
 
   const isPendingCompletion = useMemo(() => {
     if (!existing) return false
-    return (
-      existing.roles.some((r) => r.roleStatus === "PENDING_COMPLETION") ||
-      !existing.certAddress.fullAddress
-    )
+    return isArchiveRequiredFieldsPending(existing)
   }, [existing])
 
+  const addressRequired = isCertAddressSaveRequired(archiveMenuLabel, subjectType)
+  const showPickupAgentIdField =
+    archiveMenuLabel === "提货人信息" && subjectType === "ENTERPRISE"
   const isFrozenLimitedEdit = Boolean(
     isEdit && existing?.status === "FROZEN" && !isPendingCompletion,
   )
@@ -138,8 +175,9 @@ export function PartnerArchiveFormPage() {
   )
 
   const hasIndividualOwnerRole = Boolean(
-    existing?.roles.some((r) => r.roleType === "OWNER") ||
-      (!isEdit && selectedRoles.includes("OWNER")),
+    isOwnerArchiveMenu &&
+      (existing?.roles.some((r) => r.roleType === "OWNER") ||
+        (!isEdit && selectedRoles.includes("OWNER"))),
   )
 
   const selectableRoles = useMemo(
@@ -167,6 +205,15 @@ export function PartnerArchiveFormPage() {
 
   const buildCertAddress = () => {
     const detail = detailAddress.trim()
+    if (!addressRequired && !detail) {
+      return {
+        province: "",
+        city: "",
+        district: "",
+        detail: "",
+        fullAddress: "",
+      }
+    }
     return {
       province,
       city,
@@ -177,28 +224,26 @@ export function PartnerArchiveFormPage() {
   }
 
   const validate = (): string | null => {
-    if (!isPendingCompletion) {
-      if (!name.trim()) return "请填写主体名称"
-      if (!idNumber.trim() || idNumber.trim().length !== 18) {
-        return "证件号码长度必须为18位字符"
-      }
-      if (subjectType === "ENTERPRISE" && !agentName.trim()) {
-        return "企业主体请填写经办人姓名"
-      }
-      if (!contactPhone.trim() || !/^1[3-9]\d{9}$/.test(contactPhone.trim())) {
-        return subjectType === "INDIVIDUAL"
-          ? "请输入11位手机号码"
-          : "请输入11位联系电话（经办人手机）"
-      }
-    }
-    if (!isEdit && selectedRoles.length === 0) return "请至少选择一个业务角色"
-    const needAddress =
-      subjectType === "ENTERPRISE" || hasIndividualOwnerRole || isPendingCompletion
-    if (needAddress && !detailTrimmed) {
-      return "货主或企业主体须填写证件登记地址"
-    }
+    const certFull = `${province}${city}${district}${detailTrimmed}`
+    const fieldErrors = validateArchiveMenuRequiredFields({
+      archiveMenu: archiveMenuLabel,
+      subjectType,
+      name,
+      idNumber,
+      contactPhone,
+      agentName,
+      agentIdNumber: showPickupAgentIdField ? agentIdNumber : undefined,
+      certAddressFull: certFull,
+    })
+    const firstMsg = Object.values(fieldErrors)[0]
+    if (firstMsg) return firstMsg
     if (!isEdit) {
-      const duplicate = findPartnerByIdNumber(partnerArchivesMock, idNumber)
+      const duplicate = findPartnerByIdNumber(
+        partnerArchivesMock,
+        idNumber,
+        undefined,
+        archiveMenuLabel,
+      )
       if (duplicate) {
         return "该主体已存在，请前往详情追加角色配置"
       }
@@ -226,22 +271,57 @@ export function PartnerArchiveFormPage() {
 
     if (!existing) {
       const trimmedId = idNumber.trim()
+      const implicitRole = implicitRoleForArchiveMenu(archiveMenuLabel)
+      const roleTypes = Array.from(new Set([implicitRole, ...selectedRoles]))
+      const certAddress = buildCertAddress()
+      const draftForGaps: PartnerSubject = {
+        id: "draft",
+        archiveMenu: archiveMenuLabel,
+        partnerNo: "",
+        name: name.trim(),
+        subjectType,
+        idNumber: trimmedId,
+        idNumberMasked: maskIdNumber(trimmedId),
+        certAddress,
+        contactPhone: contactPhone.trim(),
+        agentName: subjectType === "ENTERPRISE" ? agentName.trim() : undefined,
+        agentIdNumber:
+          showPickupAgentIdField && subjectType === "ENTERPRISE"
+            ? agentIdNumber.trim()
+            : undefined,
+        status: "NORMAL",
+        roles: [],
+        source: "MANUAL",
+        createDate: today,
+        createTime: now,
+        createdBy: "当前用户",
+        updateTime: now,
+        associatedDocs: [],
+        auditLogs: [],
+      }
+      const gapPending = collectArchiveRequiredGaps(draftForGaps).length > 0
+
       const newPartner: PartnerSubject = {
         id: `p-${Date.now()}`,
+        archiveMenu: archiveMenuLabel,
         partnerNo: `PA-${Date.now()}`,
         name: name.trim(),
         subjectType,
         idNumber: trimmedId,
         idNumberMasked: maskIdNumber(trimmedId),
-        certAddress: buildCertAddress(),
+        certAddress,
         contactPhone: contactPhone.trim(),
         contactPhoneVerified: options?.verifiedOnCreate ? "VERIFIED" : "UNVERIFIED",
         contactPhoneVerifiedAt: options?.verifiedOnCreate ? now : undefined,
         agentName: subjectType === "ENTERPRISE" ? agentName.trim() : undefined,
+        agentIdNumber:
+          showPickupAgentIdField && subjectType === "ENTERPRISE"
+            ? agentIdNumber.trim()
+            : undefined,
         status: "NORMAL",
-        roles: selectedRoles.map((roleType) => ({
+        roles: roleTypes.map((roleType) => ({
           roleType,
-          roleStatus: "NORMAL" as const,
+          roleStatus: gapPending ? ("PENDING_COMPLETION" as const) : ("NORMAL" as const),
           sourceDocType: "人工建档",
           sourceDocNo: "——",
           roleEffectiveTime: now,
@@ -274,19 +354,22 @@ export function PartnerArchiveFormPage() {
           ? "合作方建档成功（联系手机已验证）"
           : "合作方建档成功（联系手机未验证）",
       )
-      navigate(partnerArchiveDetailPath(newPartner.id))
+      navigate(partnerArchiveDetailRoute(archiveMenuLabel, newPartner.id))
       return
     }
 
-    const wasPending = isPendingCompletion
+    const wasPending = isArchiveRequiredFieldsPending(existing)
     if (!isFrozenLimitedEdit && !coreIdentityLocked) {
       existing.name = name.trim()
     }
-    if (!isPendingCompletion) {
+    if (!isFrozenLimitedEdit) {
       existing.contactPhone = contactPhone.trim()
     }
     if (!isFrozenLimitedEdit && subjectType === "ENTERPRISE") {
       existing.agentName = agentName.trim()
+      if (showPickupAgentIdField) {
+        existing.agentIdNumber = agentIdNumber.trim()
+      }
     }
     if (phoneChanged || hasAgentDiff) {
       markContactPhoneVerified(existing, now)
@@ -294,7 +377,11 @@ export function PartnerArchiveFormPage() {
     existing.certAddress = buildCertAddress()
     existing.updateTime = now
 
-    if (wasPending) {
+    const afterSave: PartnerSubject = {
+      ...existing,
+      certAddress: buildCertAddress(),
+    }
+    if (wasPending && !isArchiveRequiredFieldsPending(afterSave)) {
       existing.roles = existing.roles.map((r) =>
         r.roleStatus === "PENDING_COMPLETION" ? { ...r, roleStatus: "NORMAL" } : r,
       )
@@ -343,7 +430,7 @@ export function PartnerArchiveFormPage() {
             ? "资料补全成功，角色已激活为正常"
             : "保存成功",
     )
-    navigate(partnerArchiveDetailPath(existing.id))
+    navigate(partnerArchiveDetailRoute(existing.archiveMenu, existing.id))
   }
 
   const proceedAfterValidation = (intent: "SAVE" | "SAVE_AND_VERIFY") => {
@@ -408,8 +495,8 @@ export function PartnerArchiveFormPage() {
       : PARTNER_FORM_ACTION_LABELS.saveSubmit
 
   const formBackFallback = editId
-    ? partnerArchiveDetailPath(editId)
-    : PARTNER_ARCHIVE_LIST_ROUTE
+    ? partnerArchiveDetailRoute(existing?.archiveMenu ?? archiveMenuLabel, editId)
+    : partnerArchiveListRoute(archiveMenuLabel)
 
   const leaveToPrevious = () => {
     handleStackBack(navigate, location, formBackFallback)
@@ -423,10 +510,14 @@ export function PartnerArchiveFormPage() {
     leaveToPrevious()
   }
 
-  const title = partnerFormPageTitle(isEdit, existing?.name, isPendingCompletion)
+  const title = partnerFormPageTitle(
+    isEdit,
+    menuShortLabel,
+    existing?.name,
+    isPendingCompletion,
+  )
 
-  const identityReadOnly =
-    isPendingCompletion || isFrozenLimitedEdit || coreIdentityLocked
+  const identityReadOnly = isFrozenLimitedEdit || coreIdentityLocked
 
   return (
     <MobileShell>
@@ -451,7 +542,7 @@ export function PartnerArchiveFormPage() {
           {isPendingCompletion ? (
             <div className="mb-3 space-y-2">
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-950">
-                {PARTNER_PENDING_COMPLETION_USER_BANNER}
+                {partnerPendingCompletionUserBanner(archiveMenuLabel)}
               </div>
               <PrototypeSpecCallout>{PARTNER_PENDING_COMPLETION_SPEC_NOTE}</PrototypeSpecCallout>
             </div>
@@ -459,43 +550,13 @@ export function PartnerArchiveFormPage() {
 
           <PrototypeAnnotationTarget annotationIds={["partner-archive-form-base"]}>
           <NativeInfoCard title={PARTNER_FORM_BASE_SECTION_TITLE} icon={<UserRound className="size-5" />}>
-            {isPendingCompletion && existing ? (
-              <div className="space-y-2 px-3 pb-3 text-xs">
-                <div className="flex justify-between gap-2">
-                  <span className="text-[#232D39]/55">主体类型</span>
-                  <span>{SUBJECT_TYPE_LABELS[existing.subjectType]}</span>
-                </div>
-                <div className="flex justify-between gap-2">
-                  <span className="text-[#232D39]/55">主体名称</span>
-                  <span className="font-medium">{existing.name}</span>
-                </div>
-                {existing.subjectType === "ENTERPRISE" ? (
-                  <div className="flex justify-between gap-2">
-                    <span className="text-[#232D39]/55">经办人姓名</span>
-                    <span>{existing.agentName || "——"}</span>
-                  </div>
-                ) : null}
-                <div className="flex justify-between gap-2">
-                  <span className="text-[#232D39]/55">
-                    {partnerContactPhoneDetailLabel(existing.subjectType)}
-                  </span>
-                  <span>{existing.contactPhone || "——"}</span>
-                </div>
-                <div className="flex justify-between gap-2">
-                  <span className="text-[#232D39]/55">
-                    {existing.subjectType === "ENTERPRISE" ? "统一社会信用代码" : "身份标识"}
-                  </span>
-                  <span>{existing.idNumberMasked}</span>
-                </div>
-              </div>
-            ) : (
-              <>
+            <>
                 <NativeFormRow label="主体类型">
                   <button
                     type="button"
                     className="w-full text-right text-sm text-[#232D39] disabled:opacity-50"
                     onClick={() => setTypeOpen(true)}
-                    disabled={isEdit}
+                    disabled={isEdit || isEnterpriseOnlyArchiveMenu(archiveMenuLabel)}
                   >
                     {subjectTypeLabel}
                   </button>
@@ -526,13 +587,27 @@ export function PartnerArchiveFormPage() {
                     />
                   </NativeFormRow>
                 ) : null}
+                {showPickupAgentIdField ? (
+                  <NativeFormRow label="经办人身份证号">
+                    <input
+                      className="w-full bg-transparent text-right text-sm outline-none disabled:opacity-50"
+                      value={agentIdNumber}
+                      maxLength={18}
+                      readOnly={isFrozenLimitedEdit}
+                      onChange={(e) => {
+                        markDirty()
+                        setAgentIdNumber(e.target.value)
+                      }}
+                    />
+                  </NativeFormRow>
+                ) : null}
                 <NativeFormRow label={partnerContactPhoneFormLabel(subjectType)}>
                   <input
                     className="w-full bg-transparent text-right text-sm outline-none disabled:opacity-50"
                     inputMode="numeric"
                     value={contactPhone}
                     maxLength={11}
-                    readOnly={isPendingCompletion}
+                    readOnly={isFrozenLimitedEdit}
                     onChange={(e) => {
                       markDirty()
                       setContactPhone(e.target.value.replace(/\D/g, ""))
@@ -554,8 +629,7 @@ export function PartnerArchiveFormPage() {
                     }}
                   />
                 </NativeFormRow>
-              </>
-            )}
+            </>
           </NativeInfoCard>
           </PrototypeAnnotationTarget>
 
@@ -568,9 +642,15 @@ export function PartnerArchiveFormPage() {
           <NativeInfoCard title="证件登记地址" icon={<UserRound className="size-5" />}>
             <div className="space-y-2 px-3 pb-2">
               <ProductFieldHint className="text-[#232D39]/55">
-                {partnerFormAddressUserHint(subjectType)}
+                {isOwnerArchiveMenu
+                  ? partnerFormAddressUserHint(subjectType)
+                  : PARTNER_FORM_ADDRESS_USER_HINT_OTHER}
               </ProductFieldHint>
-              <PrototypeSpecCallout>{PARTNER_FORM_ADDRESS_SPEC_NOTE}</PrototypeSpecCallout>
+              <PrototypeSpecCallout>
+                {isOwnerArchiveMenu
+                  ? PARTNER_FORM_ADDRESS_SPEC_NOTE_OWNER
+                  : PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER}
+              </PrototypeSpecCallout>
             </div>
             <NativeFormRow label="省">
               <input

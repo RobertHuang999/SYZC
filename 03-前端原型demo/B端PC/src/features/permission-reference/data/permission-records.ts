@@ -176,7 +176,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "工作中心",
     "menuModuleCode": "01-工作中心",
     "baselineModuleDir": "B端PC/01-工作中心",
-    "recordStatus": "6.3-delivered",
+    "recordStatus": "active",
     "pagePathSegments": [
       "审批中心",
       "客户需求审批",
@@ -186,9 +186,9 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "",
     "actionPermissions": "查看页面、查看详情、去处理",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "6.3 P0：货主引用合作方，准入校验前置",
+    "changeNote": "",
     "createdAt": "2026-05-13",
-    "updatedAt": "2026-09-20"
+    "updatedAt": ""
   },
   {
     "id": "9",
@@ -821,7 +821,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理～入库记录",
     "actionPermissions": "查看页面、详情、新增入库、分配二维码、下载记录、单据下载、快速添加货主",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "6.3 P0：合作方货主快捷建档（R03）；暂存登记整模块本期不放开",
+    "changeNote": "6.3 P0：合作方货主快捷建档（R03）；暂存登记暂定开发，R32 随迭代放开",
     "createdAt": "2026-03-10",
     "updatedAt": "2026-10-19"
   },
@@ -841,7 +841,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理～入库暂存登记",
     "actionPermissions": "查看页面、新增登记、编辑、转为正式入库、作废",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "6.3 P0 三件套已定；本期菜单/路由/原型均不放开",
+    "changeNote": "6.3 暂定开发：三件套已定，菜单/路由随研发迭代放开",
     "createdAt": "2026-10-14",
     "updatedAt": "2026-10-19"
   },
@@ -881,9 +881,9 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理～出库记录",
     "actionPermissions": "查看页面、详情、新增出库、下载记录、单据下载、快速添加提货经办人",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "6.3 P0：货主、提货主体、提货经办人引用合作方；提货经办人快捷建档（O06a）",
+    "changeNote": "6.3 P0：货主信息域仅选已有档案（无货主快捷建档·O05）；提货人信息域+O06a",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-10-19"
+    "updatedAt": "2026-10-20"
   },
   {
     "id": "43",
@@ -961,9 +961,9 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理～转让记录",
     "actionPermissions": "查看页面、详情、新增转让、撤销转让",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "6.3 P0：接收方引用合作方；转让生效变货主执行地址规则",
+    "changeNote": "6.3 P0：货主信息域引用/挂接；转让生效执行 P02（无接收方/待生效）",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-09-20"
+    "updatedAt": "2026-10-20"
   },
   {
     "id": "47",
@@ -1310,7 +1310,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "融资/监管",
     "menuModuleCode": "03-融资监管",
     "baselineModuleDir": "B端PC/03-融资监管",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "监管业务",
       "监管办理"
@@ -1319,9 +1319,9 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "项目管理～抵质押监管订单-抵押信息确认/质押信息确认（（只有开立页面）",
     "actionPermissions": "",
     "dataPermission": "",
-    "changeNote": "页面优化 发起抵押或质押申请 原项目管理～抵质押监管订单 （原开立按钮，调整为页面填写）",
+    "changeNote": "6.3：权人/质权人嵌入式选择器（资金方信息·服务方信息域；archiveMenu 隔离）",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-04-14"
+    "updatedAt": "2026-10-20"
   },
   {
     "id": "65",
@@ -1337,7 +1337,7 @@ export const permissionRecords: PermissionRecord[] = [
     ],
     "pagePath": "监管业务 / 监管管理",
     "legacyPath": "项目管理～抵质押监管订单（无开立按钮）",
-    "actionPermissions": "抵押/质押/监管服务订单：查看(页面)、导出为excel、结算管理、 更多操作-质物置换、加/补仓、提货、解抵/质押、货物估值、货物盘点、盘点报告、移库、查看监控、平仓、设备管理、查看详情（查看抵质押详情）、部分结清、监管报告、监管报告-查看详情、监管报告-查看报告、监管报告-下载报告、监管报告-生成盘点监管报告、 资料管理、资料上传、查看风险--公示风险/批量公示风险（已处理数据下才展示）、风险公示 (更多操作对应权限内的操作按钮还需根据订单关联的总流程内是否配置对应子流程决定最终是否展示，包含 质物置换、加/补仓、提货、解抵/质押、货物估值、移库、平仓）",
+    "actionPermissions": "抵押/质押/监管服务（监管订单）订单：查看(页面)、导出为excel、结算管理、 更多操作-质物置换、加/补仓、提货、解抵/质押、货物估值、货物盘点、盘点报告、移库、查看监控、平仓、设备管理、查看详情（查看抵质押详情）、部分结清、监管报告、监管报告-查看详情、监管报告-查看报告、监管报告-下载报告、监管报告-生成盘点监管报告、 资料管理、资料上传、查看风险--公示风险/批量公示风险（已处理数据下才展示）、风险公示 (更多操作对应权限内的操作按钮还需根据订单关联的总流程内是否配置对应子流程决定最终是否展示，包含 质物置换、加/补仓、提货、解抵/质押、货物估值、移库、平仓）",
     "dataPermission": "数据权限：根据当前登录账号的角色的数据权限决定【任务发起人及任务处理人可看到相关信息，其他无关人员需要有对应数据所属机构的数据权限才能看到】； 盘点 - 盘点人只能盘点自己有仓库权限的货物 当针对没有仓库权限的货物点击扫码盘点 操作记录 - 能看到这笔抵/质押单，就能看到这笔抵/质押单的全部操作记录",
     "changeNote": "2026年9月11日",
     "createdAt": "2026-09-11",
@@ -2038,7 +2038,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "系统配置～管理端配置",
     "actionPermissions": "查看(页面)、编辑",
     "dataPermission": "1.数据源参数子页面 - 展示给机构可配的数据源为平台端赋予该机构权限内的数据源； 2.硬件参数子页面 - 展示给机构可配的数据源为平台端赋予该机构权限内的硬件设备配置；",
-    "changeNote": "6.3 P0：平台运行底座重构；合作方准入策略并入；仓储作业参数只读联动",
+    "changeNote": "6.3 P0：平台运行底座重构；货主准入策略并入；仓储作业参数只读联动",
     "createdAt": "2026-03-10",
     "updatedAt": "2026-10-17"
   },
@@ -2158,7 +2158,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "仓库管理～仓库管理",
     "actionPermissions": "查看(页面)、新增仓库、编辑、停/启用、删除",
     "dataPermission": "1、仓库管理列表 - 展示内容为登录账号权限内的所有数据（删除状态数据不展示）； 2、可见数据根据登录账号角色的数据权限决定； 3、库房新增存放区选择和标识",
-    "changeNote": "6.3 P0：空间主档层级；库房出入库审核状态读取基础配置只读展示",
+    "changeNote": "6.3 P0：空间主档层级；库房出入库审核标记+编辑弹窗，与基础配置 R03 同步",
     "createdAt": "2026-03-10",
     "updatedAt": "2026-10-17"
   },
@@ -2896,7 +2896,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理～入库",
     "actionPermissions": "查看页面、入库、入库记录（入库订单：查看详情、编辑、分配二维码、单据下载、下载记录；入库申请：查看详情、操作记录、入库撤销）",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "6.3：入库发起合作方货主；暂存磁贴本期隐藏",
+    "changeNote": "6.3：入库发起合作方货主；暂存磁贴随暂存登记暂定开发进度展示",
     "createdAt": "2026-03-10",
     "updatedAt": "2026-10-19"
   },
@@ -2916,9 +2916,9 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理～出库",
     "actionPermissions": "查看页面、出库、出库记录（出库订单：查看详情、单据下载、下载记录；出库申请：查看详情、操作记录、出库撤销）",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "6.3 P0：出库制单引用合作方货主与提货经办人",
+    "changeNote": "6.3 P0：货主引用已有档案；提货经办人 O06a",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-09-20"
+    "updatedAt": "2026-10-20"
   },
   {
     "id": "145",
@@ -2956,9 +2956,9 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理～转让",
     "actionPermissions": "查看页面、转让、转让记录（转让申请：查看详情、撤销；转让记录：查看详情）",
     "dataPermission": "可见数据根据当前登录账号的角色的 仓库 权限决定；",
-    "changeNote": "6.3 P0：接收方引用合作方",
+    "changeNote": "6.3 P0：货主信息域挂接受让方货主（PA-V07；无接收方角色态）",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-09-20"
+    "updatedAt": "2026-10-20"
   },
   {
     "id": "147",
@@ -3191,7 +3191,7 @@ export const permissionRecords: PermissionRecord[] = [
     "module": "2.工作台",
     "topBarModuleLabel": "B端H5/02-工作台",
     "menuModuleCode": "工作台",
-    "baselineModuleDir": "B端H5/02-工作台",
+    "baselineModuleDir": "active",
     "recordStatus": "active",
     "pagePathSegments": [
       "融资/监管",
@@ -3199,11 +3199,11 @@ export const permissionRecords: PermissionRecord[] = [
     ],
     "pagePath": "融资/监管 / 监管管理",
     "legacyPath": "项目监管～项目管理",
-    "actionPermissions": "查看页面、结算管理、货物置换、货物补仓、货物出库、解抵质押、货物估值、货物盘点、盘点报告、货物移库、查看监控、平仓、查看风险、平仓、查看风险、设备管理、操作记录、货物详情、贷款结果录入、查看详情、监管报告（生成盘点监管报告、撤销申请、下载报告、查看详情、重新申请、查看报告）、部分结清、部分解抵质押",
-    "dataPermission": "数据权限：根据当前登录账号的角色的数据权限决定【任务发起人及任务处理人可看到相关信息，其他无关人员需要有对应数据所属机构的数据权限才能看到】； 盘点 - 盘点人只能盘点自己有仓库权限的货物 当针对没有仓库权限的货物点击扫码盘点 操作记录 - 能看到这笔抵/质押单，就能看到这笔抵/质押单的全部操作记录",
-    "changeNote": "6.3 单入口；页内 Tab 抵押/质押/监管服务",
-    "createdAt": "2026-09-11",
-    "updatedAt": "2026-10-19"
+    "actionPermissions": "查看页面、结算管理、货物置换、货物补仓、货物出库、解抵质押、货物估值、货物盘点、盘点报告、货物移库、查看监控、平仓、查看风险、设备管理、操作记录、货物详情、贷款结果录入、查看详情、监管报告（生成盘点监管报告、撤销申请、下载报告、查看详情、重新申请、查看报告）、部分结清、部分解抵质押",
+    "dataPermission": "页内 Tab：抵押 / 质押 / 监管服务（监管订单）。数据权限：根据当前登录账号的角色的数据权限决定【任务发起人及任务处理人可看到相关信息，其他无关人员需要有对应数据所属机构的数据权限才能看到】； 盘点 - 盘点人只能盘点自己有仓库权限的货物 当针对没有仓库权限的货物点击扫码盘点 操作记录 - 能看到这笔抵/质押单，就能看到这笔抵/质押单的全部操作记录",
+    "changeNote": "2026年10月19日",
+    "createdAt": "2026-10-19",
+    "updatedAt": ""
   },
   {
     "id": "159",
@@ -3216,15 +3216,15 @@ export const permissionRecords: PermissionRecord[] = [
     "pagePathSegments": [
       "融资/监管",
       "监管管理",
-      "监管服务"
+      "监管订单"
     ],
-    "pagePath": "融资/监管 / 监管管理 / 监管服务（原独立监管订单菜单）",
+    "pagePath": "融资/监管 / 监管管理 / 监管订单",
     "legacyPath": "项目监管～项目管理",
     "actionPermissions": "查看页面、查看监控、查看风险、设备管理、货物估值、平仓、货物详情、查看详情、监管报告（生成盘点监管报告、撤销申请、下载报告、查看详情、重新申请、查看报告）",
-    "dataPermission": "数据权限：根据当前登录账号的角色的数据权限决定【任务发起人及任务处理人可看到相关信息，其他无关人员需要有对应数据所属机构的数据权限才能看到】； 盘点 - 盘点人只能盘点自己有仓库权限的货物 当针对没有仓库权限的货物点击扫码盘点 操作记录 - 能看到这笔抵/质押单，就能看到这笔抵/质押单的全部操作记录",
-    "changeNote": "6.3 并入监管管理 Tab，本行 cancelled",
+    "dataPermission": "6.3 独立菜单下线，并入「监管管理 · 监管服务」Tab；本行保留历史权限对照",
+    "changeNote": "",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-10-19"
+    "updatedAt": ""
   },
   {
     "id": "160",
@@ -3782,7 +3782,7 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理-入库-入库",
     "actionPermissions": "查看（页面）",
     "dataPermission": "",
-    "changeNote": "6.3 P0：合作方货主快捷建档；暂存通道本期不展示",
+    "changeNote": "6.3 P0：合作方货主快捷建档；暂存通道随暂存登记暂定开发放开",
     "createdAt": "2026-03-10",
     "updatedAt": "2026-10-19"
   },
@@ -3842,9 +3842,9 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物转让-转让-转让",
     "actionPermissions": "查看（页面）",
     "dataPermission": "",
-    "changeNote": "6.3 P0：接收方引用合作方",
+    "changeNote": "6.3 P0：货主信息域挂接受让方货主（PA-V07；无接收方角色态）",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-09-20"
+    "updatedAt": "2026-10-20"
   },
   {
     "id": "191",
@@ -3993,7 +3993,7 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "业务办理",
     "menuModuleCode": "03-业务办理",
     "baselineModuleDir": "B端H5/03-业务办理",
-    "recordStatus": "6.3-delivered",
+    "recordStatus": "active",
     "pagePathSegments": [
       "客户需求审批",
       "客户入库预约"
@@ -4002,9 +4002,9 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "客户入库需求优化升级",
     "actionPermissions": "查看页面、查看详情、去处理",
     "dataPermission": "可见数据根据当前登录账号的角色的仓库权限决定",
-    "changeNote": "6.3 P0：货主引用合作方，准入校验前置",
+    "changeNote": "替代原客户入库需求",
     "createdAt": "2026-05-13",
-    "updatedAt": "2026-09-20"
+    "updatedAt": "2026-08-31"
   },
   {
     "id": "199",
@@ -4171,20 +4171,84 @@ export const permissionRecords: PermissionRecord[] = [
     "module": "10.用户中心",
     "topBarModuleLabel": "用户中心",
     "menuModuleCode": "10-用户中心",
-    "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/04-合作方档案",
+    "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/04-合作方档案/04-1-货主信息",
     "recordStatus": "6.3-delivered",
     "pagePathSegments": [
-      "合作方管理",
-      "合作方档案"
+      "用户中心",
+      "合作方档案",
+      "货主信息"
     ],
-    "pagePath": "合作方管理 / 合作方档案",
-    "legacyPath": "—",
+    "pagePath": "用户中心 / 合作方档案 / 货主信息",
+    "legacyPath": "用户中心-合作方管理-合作方档案",
     "actionPermissions": "查看页面、详情、新增、编辑、保存并提交、冻结/解冻、追加角色、入库快捷建档",
-    "dataPermission": "租户级隔离；列表按数据权限与仓库无关",
-    "changeNote": "6.3 P0 业务主体主数据统一入口",
+    "dataPermission": "租户级隔离；archiveMenu=货主信息",
+    "changeNote": "6.3 P0 合作方四子菜单-货主信息；独立 RBAC",
     "createdAt": "2026-09-01",
-    "updatedAt": "2026-10-19",
+    "updatedAt": "2026-10-20",
     "id": "207"
+  },
+  {
+    "platform": "PC",
+    "module": "10.用户中心",
+    "topBarModuleLabel": "用户中心",
+    "menuModuleCode": "10-用户中心",
+    "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/04-合作方档案/04-2-提货人信息",
+    "recordStatus": "6.3-delivered",
+    "pagePathSegments": [
+      "用户中心",
+      "合作方档案",
+      "提货人信息"
+    ],
+    "pagePath": "用户中心 / 合作方档案 / 提货人信息",
+    "legacyPath": "—",
+    "actionPermissions": "查看页面、详情、新增、编辑、保存并提交、冻结/解冻、追加角色、出库快捷建档",
+    "dataPermission": "租户级隔离；archiveMenu=提货人信息",
+    "changeNote": "6.3 P0 合作方四子菜单-提货人信息；独立 RBAC",
+    "createdAt": "2026-10-20",
+    "updatedAt": "2026-10-20",
+    "id": "208"
+  },
+  {
+    "platform": "PC",
+    "module": "10.用户中心",
+    "topBarModuleLabel": "用户中心",
+    "menuModuleCode": "10-用户中心",
+    "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/04-合作方档案/04-3-资金方信息",
+    "recordStatus": "6.3-delivered",
+    "pagePathSegments": [
+      "用户中心",
+      "合作方档案",
+      "资金方信息"
+    ],
+    "pagePath": "用户中心 / 合作方档案 / 资金方信息",
+    "legacyPath": "—",
+    "actionPermissions": "查看页面、详情、新增、编辑、保存并提交、冻结/解冻、追加角色",
+    "dataPermission": "租户级隔离；archiveMenu=资金方信息；抵质押单抵质押权人引用",
+    "changeNote": "6.3 P0 合作方四子菜单-资金方信息；独立 RBAC",
+    "createdAt": "2026-10-20",
+    "updatedAt": "2026-10-20",
+    "id": "209"
+  },
+  {
+    "platform": "PC",
+    "module": "10.用户中心",
+    "topBarModuleLabel": "用户中心",
+    "menuModuleCode": "10-用户中心",
+    "baselineModuleDir": "B-迭代需求/6.3版本（2026.09）/04-合作方档案/04-4-服务方信息",
+    "recordStatus": "6.3-delivered",
+    "pagePathSegments": [
+      "用户中心",
+      "合作方档案",
+      "服务方信息"
+    ],
+    "pagePath": "用户中心 / 合作方档案 / 服务方信息",
+    "legacyPath": "—",
+    "actionPermissions": "查看页面、详情、新增、编辑、保存并提交、冻结/解冻、追加角色",
+    "dataPermission": "租户级隔离；archiveMenu=服务方信息；监管服务单质权人引用",
+    "changeNote": "6.3 P0 合作方四子菜单-服务方信息（与资金方同构、合规分域）；独立 RBAC",
+    "createdAt": "2026-10-20",
+    "updatedAt": "2026-10-20",
+    "id": "210"
   },
   {
     "platform": "移动",
@@ -4195,16 +4259,17 @@ export const permissionRecords: PermissionRecord[] = [
     "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "用户中心",
-      "合作方档案"
+      "合作方档案",
+      "货主信息"
     ],
-    "pagePath": "用户中心 / 合作方档案",
+    "pagePath": "用户中心 / 合作方档案 / 货主信息",
     "legacyPath": "用户中心-合作方管理-合作方档案",
     "actionPermissions": "查看页面、详情、新增合作方、编辑、冻结/解冻",
-    "dataPermission": "租户级；与 PC 共用主数据服务",
-    "changeNote": "6.3 P1 外勤列表/详情/悬浮新增",
+    "dataPermission": "租户级；与 PC 共用主数据服务；H5 四入口分别授权",
+    "changeNote": "6.3 P1 H5 用户中心四按钮进四列表（示例路径为货主信息）",
     "createdAt": "2026-10-16",
-    "updatedAt": "2026-10-19",
-    "id": "208"
+    "updatedAt": "2026-10-20",
+    "id": "211"
   },
   {
     "platform": "PC",
@@ -4221,10 +4286,10 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "—",
     "actionPermissions": "查看页面、编辑字段池、保质期单位白名单",
     "dataPermission": "配置管理菜单权限",
-    "changeNote": "6.3 P1 字段池与 SKU 收集项联动",
+    "changeNote": "6.3 暂定：三件套保留，本期不交付菜单与研发",
     "createdAt": "2026-09-01",
-    "updatedAt": "2026-09-20",
-    "id": "209"
+    "updatedAt": "2026-10-19",
+    "id": "212"
   },
   {
     "platform": "移动",
@@ -4241,10 +4306,10 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理～入库暂存登记",
     "actionPermissions": "查看页面、新增登记、编辑、作废（转为正式入库本期关闭）",
     "dataPermission": "账号赋予的仓库权限",
-    "changeNote": "6.3 P0 规格已定；本期不放开",
+    "changeNote": "6.3 暂定开发：规格已定，随研发放开",
     "createdAt": "2026-10-14",
     "updatedAt": "2026-10-19",
-    "id": "210"
+    "id": "213"
   },
   {
     "platform": "移动",
@@ -4261,10 +4326,10 @@ export const permissionRecords: PermissionRecord[] = [
     "legacyPath": "货物管理-入库-入库暂存登记",
     "actionPermissions": "查看页面、新增登记、拍照上传、保存暂存",
     "dataPermission": "账号赋予的仓库权限",
-    "changeNote": "6.3 业务发起磁贴；本期隐藏",
+    "changeNote": "6.3 业务发起磁贴；暂定开发随迭代展示",
     "createdAt": "2026-10-14",
     "updatedAt": "2026-10-19",
-    "id": "211"
+    "id": "214"
   }
 ]
 

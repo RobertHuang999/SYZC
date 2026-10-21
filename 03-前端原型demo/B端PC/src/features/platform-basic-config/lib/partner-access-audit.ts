@@ -31,7 +31,7 @@ export function summarizePartnerAccessRelax(
     parts.push("企业：关闭证件地址防重复")
   }
 
-  return parts.length > 0 ? parts.join("；") : "合作方准入策略变更"
+  return parts.length > 0 ? parts.join("；") : "货主准入策略变更"
 }
 
 export function formatAuditTimestamp(date: Date) {

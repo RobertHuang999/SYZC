@@ -1,4 +1,8 @@
-import type { RoleStatus, SubjectStatus } from "./types"
+import type { PartnerSubject, RoleStatus, SubjectStatus } from "./types"
+import {
+  isArchiveRequiredFieldsPending,
+  partnerArchiveEditActionLabel,
+} from "../lib/archive-required-fields-pending"
 
 export const SUBJECT_STATUS_BADGE_CLASS: Record<SubjectStatus, string> = {
   NORMAL: "border-emerald-200 bg-emerald-50 text-emerald-700",
@@ -25,13 +29,16 @@ export type PartnerArchiveRowAction =
   | "freeze"
   | "unfreeze"
 
+/** 方案 A：操作位固定；待补全时由 UI 将「编辑」文案换为「补全资料」 */
 export function getPartnerArchiveRowActions(
-  status: SubjectStatus
+  item: PartnerSubject,
 ): PartnerArchiveRowAction[] {
-  if (status === "FROZEN") {
+  if (item.status === "FROZEN") {
     return ["detail", "edit", "unfreeze"]
   }
   return ["detail", "edit", "appendRole", "freeze"]
 }
+
+export { isArchiveRequiredFieldsPending, partnerArchiveEditActionLabel }
 
 export type PartnerArchivePendingAction = "freeze" | "unfreeze" | "appendRole"
