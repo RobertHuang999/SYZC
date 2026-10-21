@@ -153,6 +153,11 @@ export function PartnerArchiveFormPage() {
   const addressRequired = isCertAddressSaveRequired(archiveMenuLabel, subjectType)
   const showPickupAgentIdField =
     archiveMenuLabel === "提货人信息" && subjectType === "ENTERPRISE"
+  const enterpriseAgentRequired =
+    archiveMenuLabel === "提货人信息" && subjectType === "ENTERPRISE"
+  /** 货主/提货人菜单：联系电话必填；资金方/服务方仅名称+信用代码必填 */
+  const contactPhoneRequired =
+    archiveMenuLabel === "货主信息" || archiveMenuLabel === "提货人信息"
   const isFrozenLimitedEdit = Boolean(
     isEdit && existing?.status === "FROZEN" && !isPendingCompletion,
   )
@@ -581,7 +586,7 @@ export function PartnerArchiveFormPage() {
           <PrototypeAnnotationTarget annotationIds={["partner-archive-form-base"]}>
           <NativeInfoCard title={PARTNER_FORM_BASE_SECTION_TITLE} icon={<UserRound className="size-5" />}>
             <>
-                <NativeFormRow label="主体类型">
+                <NativeFormRow label="主体类型" required>
                   <button
                     type="button"
                     className="w-full text-right text-sm text-[#232D39] disabled:opacity-50"
@@ -591,7 +596,7 @@ export function PartnerArchiveFormPage() {
                     {subjectTypeLabel}
                   </button>
                 </NativeFormRow>
-                <NativeFormRow label="主体名称">
+                <NativeFormRow label="主体名称" required>
                   <input
                     className="min-w-0 flex-1 bg-transparent text-right text-sm outline-none disabled:opacity-50"
                     value={name}
@@ -613,7 +618,7 @@ export function PartnerArchiveFormPage() {
                   ) : null}
                 </NativeFormRow>
                 {subjectType === "ENTERPRISE" ? (
-                  <NativeFormRow label="经办人姓名">
+                  <NativeFormRow label="经办人姓名" required={enterpriseAgentRequired}>
                     <input
                       className="w-full bg-transparent text-right text-sm outline-none disabled:opacity-50"
                       value={agentName}
@@ -627,7 +632,7 @@ export function PartnerArchiveFormPage() {
                   </NativeFormRow>
                 ) : null}
                 {showPickupAgentIdField ? (
-                  <NativeFormRow label="经办人身份证号">
+                  <NativeFormRow label="经办人身份证号" required>
                     <input
                       className="w-full bg-transparent text-right text-sm outline-none disabled:opacity-50"
                       value={agentIdNumber}
@@ -640,7 +645,10 @@ export function PartnerArchiveFormPage() {
                     />
                   </NativeFormRow>
                 ) : null}
-                <NativeFormRow label={partnerContactPhoneFormLabel(subjectType)}>
+                <NativeFormRow
+                  label={partnerContactPhoneFormLabel(subjectType)}
+                  required={contactPhoneRequired}
+                >
                   <input
                     className="w-full bg-transparent text-right text-sm outline-none disabled:opacity-50"
                     inputMode="numeric"
@@ -655,6 +663,7 @@ export function PartnerArchiveFormPage() {
                 </NativeFormRow>
                 <NativeFormRow
                   label={subjectType === "ENTERPRISE" ? "统一社会信用代码" : "身份标识"}
+                  required
                 >
                   <input
                     className="w-full bg-transparent text-right text-sm outline-none disabled:opacity-50"
@@ -691,7 +700,7 @@ export function PartnerArchiveFormPage() {
                   : PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER}
               </PrototypeSpecCallout>
             </div>
-            <NativeFormRow label="省">
+            <NativeFormRow label="省" required={addressRequired}>
               <input
                 className="w-full bg-transparent text-right text-sm outline-none"
                 value={province}
@@ -701,7 +710,7 @@ export function PartnerArchiveFormPage() {
                 }}
               />
             </NativeFormRow>
-            <NativeFormRow label="市">
+            <NativeFormRow label="市" required={addressRequired}>
               <input
                 className="w-full bg-transparent text-right text-sm outline-none"
                 value={city}
@@ -711,7 +720,7 @@ export function PartnerArchiveFormPage() {
                 }}
               />
             </NativeFormRow>
-            <NativeFormRow label="区/县">
+            <NativeFormRow label="区/县" required={addressRequired}>
               <input
                 className="w-full bg-transparent text-right text-sm outline-none"
                 value={district}
@@ -722,7 +731,12 @@ export function PartnerArchiveFormPage() {
               />
             </NativeFormRow>
             <div className="px-3 pb-1 pt-1">
-              <p className="text-xs text-[#232D39]/55">证件地址详细</p>
+              <p className="text-xs text-[#232D39]/55">
+                {addressRequired ? (
+                  <span className="mr-0.5 text-[#EF3E3E]">*</span>
+                ) : null}
+                证件地址详细
+              </p>
             </div>
             <div className="px-3 pb-3">
               <textarea

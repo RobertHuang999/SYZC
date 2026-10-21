@@ -67,6 +67,7 @@ import {
   partnerFormAddressUserHint,
   partnerPendingCompletionUserBanner,
   PARTNER_PENDING_COMPLETION_SPEC_NOTE,
+  PARTNER_OWNER_ENTERPRISE_AGENT_USER_HINT,
   partnerFormPageTitle,
   PARTNER_CHANGE_ADDRESS_DIALOG,
 } from "../lib/partner-archive-ui-labels"
@@ -262,6 +263,8 @@ export function PartnerArchiveFormPage() {
   const showPickupAgentIdField =
     archiveMenuLabel === "提货人信息" && subjectType === "ENTERPRISE"
   const enterpriseAgentRequired =
+    archiveMenuLabel === "提货人信息" && subjectType === "ENTERPRISE"
+  const ownerEnterpriseAgentOptional =
     archiveMenuLabel === "货主信息" && subjectType === "ENTERPRISE"
 
   const buildCertAddress = () => {
@@ -819,6 +822,11 @@ export function PartnerArchiveFormPage() {
                         {errors.agentName && (
                           <p className="text-xs text-destructive">{errors.agentName}</p>
                         )}
+                        {ownerEnterpriseAgentOptional ? (
+                          <ProductFieldHint>
+                            {PARTNER_OWNER_ENTERPRISE_AGENT_USER_HINT}
+                          </ProductFieldHint>
+                        ) : null}
                       </div>
                     )}
 

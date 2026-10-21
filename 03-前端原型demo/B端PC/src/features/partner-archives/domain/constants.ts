@@ -20,9 +20,9 @@ export const PARTNER_ROLE_TYPE_FILTER_OPTIONS = ["全部", "货主", "提货经�
 export const PARTNER_SUBJECT_STATUS_FILTER_OPTIONS = ["全部", "正常", "冻结"] as const
 export const PARTNER_OWNER_SUBJECT_STATUS_FILTER_OPTIONS = ["全部", "正常", "待补全", "冻结"] as const
 
-/** 主体状态筛选项按子菜单动态自适应：仅货主信息含「待补全」，提货人/资金方/服务方仅「正常/冻结」 */
+/** 主体状态筛选项：货主信息、提货人信息含「待补全」；资金方/服务方仅「正常/冻结」 */
 export function partnerSubjectStatusFilterOptions(menu?: string): readonly string[] {
-  if (menu === "货主信息") {
+  if (menu === "货主信息" || menu === "提货人信息") {
     return PARTNER_OWNER_SUBJECT_STATUS_FILTER_OPTIONS
   }
   return PARTNER_SUBJECT_STATUS_FILTER_OPTIONS

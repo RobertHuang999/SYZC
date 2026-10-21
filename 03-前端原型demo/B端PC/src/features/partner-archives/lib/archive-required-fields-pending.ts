@@ -56,9 +56,6 @@ export function collectArchiveRequiredGaps(subject: PartnerSubject): ArchiveRequ
       if (!nameOk) gaps.push("name")
       if (!idOk) gaps.push("idNumber")
       if (!phoneOk) gaps.push("contactPhone")
-      if (subject.subjectType === "ENTERPRISE" && !subject.agentName?.trim()) {
-        gaps.push("agentName")
-      }
       if (
         readOwnerCertAddressP01Enabled(subject.subjectType) &&
         !subject.certAddress.fullAddress.trim()
@@ -90,17 +87,17 @@ export function collectArchiveRequiredGaps(subject: PartnerSubject): ArchiveRequ
   return gaps
 }
 
-/** 仅「货主信息」子菜单在 P01 缺地址等必填未齐时派生「待补全」；其他页面（提货人/资金方/服务方）一律不派生待补全 */
+/** 货主信息、提货人信息：04-x 必填未齐时派生「待补全」；资金方/服务方不派生 */
 export function isArchiveRequiredFieldsPending(subject: PartnerSubject): boolean {
-  if (subject.archiveMenu !== "货主信息") {
+  if (subject.archiveMenu !== "货主信息" && subject.archiveMenu !== "提货人信息") {
     return false
   }
   return collectArchiveRequiredGaps(subject).length > 0
 }
 
-/** 仅「货主信息」在待补全时行操作显示「补全资料」；其他页面一律显示「编辑」 */
+/** 货主/提货人在待补全时行操作显示「补全资料」，否则「编辑」 */
 export function partnerArchiveEditActionLabel(subject: PartnerSubject): "编辑" | "补全资料" {
-  if (subject.archiveMenu !== "货主信息") {
+  if (subject.archiveMenu !== "货主信息" && subject.archiveMenu !== "提货人信息") {
     return "编辑"
   }
   return isArchiveRequiredFieldsPending(subject) ? "补全资料" : "编辑"

@@ -81,7 +81,11 @@ export const PARTNER_PENDING_COMPLETION_FUNDER_USER_BANNER =
   "本菜单必填未齐。请补全企业全称与统一社会信用代码。"
 
 export const PARTNER_PENDING_COMPLETION_SPEC_NOTE =
-  "待补全由 04-x 必填派生；仅货主信息因 P01 校验证件地址，提货人/资金方/服务方不因地址进入待补全。"
+  "待补全由 04-x 必填派生；货主/提货人按各菜单 04-x 必填矩阵；仅货主信息因【货主证件地址必填校验规则】(P01) 纳入地址缺口；提货人/资金方/服务方不因缺址进入待补全。"
+
+/** 货主信息 · 企业主体 · 经办人姓名（选填） */
+export const PARTNER_OWNER_ENTERPRISE_AGENT_USER_HINT =
+  "选填。可不填经办人姓名；填写后用于详情展示，已验证企业改经办人须短信确认。"
 
 /** @deprecated 使用 partnerPendingCompletionUserBanner(archiveMenu) */
 export const PARTNER_PENDING_COMPLETION_USER_BANNER =
