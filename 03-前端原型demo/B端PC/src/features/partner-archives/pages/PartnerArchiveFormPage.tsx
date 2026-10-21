@@ -61,7 +61,6 @@ import {
 import {
   PARTNER_FORM_ADDRESS_SPEC_NOTE_OWNER,
   PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER,
-  PARTNER_FORM_ADDRESS_USER_HINT_OTHER,
   PARTNER_FORM_INITIAL_ROLES_SECTION_TITLE,
   PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE,
   PARTNER_FORM_INITIAL_ROLES_USER_HINT,
@@ -1010,13 +1009,11 @@ export function PartnerArchiveFormPage() {
                 <CardTitle>证件登记地址</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <ProductFieldHint>
-                  {archiveMenuLabel === "货主信息"
-                    ? partnerFormAddressUserHint(subjectType)
-                    : archiveMenuLabel === "提货人信息"
-                      ? "选填；提货人菜单不因证件地址进入待补全。"
-                      : PARTNER_FORM_ADDRESS_USER_HINT_OTHER}
-                </ProductFieldHint>
+                {archiveMenuLabel === "货主信息" ? (
+                  <ProductFieldHint>
+                    {partnerFormAddressUserHint(subjectType, addressRequired)}
+                  </ProductFieldHint>
+                ) : null}
                 <PrototypeSpecCallout>
                   {archiveMenuLabel === "货主信息"
                     ? PARTNER_FORM_ADDRESS_SPEC_NOTE_OWNER

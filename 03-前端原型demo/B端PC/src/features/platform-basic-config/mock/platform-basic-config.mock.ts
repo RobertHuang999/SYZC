@@ -124,15 +124,60 @@ export const partnerAccessAuditLogMock: PartnerAccessAuditRecord[] = [
   },
 ]
 
+/** 原型 Mock：首组冲突主体同时含个人与企业脱敏样例行，便于默认展开区对照展示。 */
 export const duplicateAddressConflictsMock = [
   {
+    ownerPool: "personal" as const,
     address: "浙江省杭州市西湖区文三路100号",
-    subject1: "张三 (330106****) · 138****0001",
-    subject2: "李四 (330106****) · 139****0002",
+    subjects: [
+      {
+        id: "sub-hz-p-1",
+        displayLine: "张三 (330106****) · 138****0001",
+      },
+      {
+        id: "sub-hz-p-2",
+        displayLine: "李四 (330106****) · 139****0002",
+      },
+      {
+        id: "sub-hz-p-3",
+        displayLine: "陈七 (330106****) · 135****3303",
+      },
+      {
+        id: "sub-hz-e-1",
+        displayLine: "杭州森云供应链有限公司 (91330100****) · 0571****6601",
+      },
+      {
+        id: "sub-hz-e-2",
+        displayLine: "杭州森云物流科技有限公司 (91330100****) · 0571****7702",
+      },
+    ],
   },
   {
+    ownerPool: "personal" as const,
     address: "江苏省南京市鼓楼区中山北路88号",
-    subject1: "王五 (320106****) · 137****1100",
-    subject2: "赵六 (320106****) · 136****2200",
+    subjects: [
+      {
+        id: "sub-nj-1",
+        displayLine: "王五 (320106****) · 137****1100",
+      },
+      {
+        id: "sub-nj-2",
+        displayLine: "赵六 (320106****) · 136****2200",
+      },
+    ],
+  },
+  {
+    ownerPool: "enterprise" as const,
+    address: "上海市浦东新区陆家嘴环路1000号",
+    subjects: [
+      {
+        id: "sub-sh-1",
+        displayLine: "上海森云供应链有限公司 (91310000****) · 021****6601",
+      },
+      {
+        id: "sub-sh-2",
+        displayLine: "上海森云物流科技有限公司 (91310000****) · 021****7702",
+      },
+    ],
   },
 ]

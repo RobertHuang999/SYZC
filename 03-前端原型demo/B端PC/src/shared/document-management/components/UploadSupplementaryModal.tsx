@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
   Dialog,
   DialogContent,
@@ -7,7 +7,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -15,7 +14,9 @@ import {
   FileText,
   Trash2,
   AlertCircle,
+  Check,
 } from "lucide-react"
+import { cn } from "@/lib/utils"
 import type { DocumentItem } from "../types"
 import { addDocumentItem } from "../mock"
 
@@ -24,19 +25,79 @@ interface UploadSupplementaryModalProps {
   orderNo: string
   approvalId?: string
   orderType: "inbound" | "outbound"
+  defaultFlowType?: string
   onClose: () => void
   onSuccess: (newDoc: DocumentItem) => void
 }
+
+/** 入库业务流程阶段选项 */
+export const INBOUND_STAGE_OPTIONS = [
+  {
+    value: "1",
+    label: "入库申请初审",
+    stageText: "【入库申请初审】阶段",
+    hint: "现场随车送货单、进场交接单、实物照片等",
+  },
+  {
+    value: "2",
+    label: "过磅核验",
+    stageText: "【过磅核验】阶段",
+    hint: "现场地磅过磅单、复磅更正函、称重凭据等",
+  },
+  {
+    value: "3",
+    label: "入库终审与质检",
+    stageText: "【入库终审与质检】阶段",
+    hint: "SGS第三方化验单、商检证书、品质报告等",
+  },
+  {
+    value: "9527",
+    label: "事后补充资料",
+    stageText: "【事后综合补充】节点",
+    hint: "仓储费结算发票、货转协议等通用补充",
+  },
+]
+
+/** 出库业务流程阶段选项 */
+export const OUTBOUND_STAGE_OPTIONS = [
+  {
+    value: "1",
+    label: "出库申请审核",
+    stageText: "【出库申请审核】阶段",
+    hint: "出库申请单、提货委托书、货权人证明等",
+  },
+  {
+    value: "2",
+    label: "出场过磅核验",
+    stageText: "【出场过磅核验】阶段",
+    hint: "出库地磅单、出场实车交接单据等",
+  },
+  {
+    value: "3",
+    label: "出库终审放行",
+    stageText: "【出库终审放行】阶段",
+    hint: "放行确认单、出库品质检验单据等",
+  },
+  {
+    value: "9527",
+    label: "事后补充资料",
+    stageText: "【事后综合补充】节点",
+    hint: "运费结算单、运单发票等通用补充",
+  },
+]
 
 export function UploadSupplementaryModal({
   open,
   orderNo,
   approvalId = "SP202605280001",
   orderType,
+  defaultFlowType = "2",
   onClose,
   onSuccess,
 }: UploadSupplementaryModalProps) {
-  const [name, setName] = useState("")
+  const stageOptions = orderType === "outbound" ? OUTBOUND_STAGE_OPTIONS : INBOUND_STAGE_OPTIONS
+
+  const [selectedFlowType, setSelectedFlowType] = useState<string>(defaultFlowType)
   const [description, setDescription] = useState("")
   const [selectedFile, setSelectedFile] = useState<{
     name: string
@@ -44,6 +105,15 @@ export function UploadSupplementaryModal({
     type: "pdf" | "jpg" | "png" | "zip" | "docx"
   } | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  // 当弹窗打开或传入阶段发生变化时同步默认阶段
+  useEffect(() => {
+    if (open) {
+      const initialFlow = defaultFlowType || "2"
+      setSelectedFlowType(initialFlow)
+      setErrorMessage(null)
+    }
+  }, [open, defaultFlowType])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -60,18 +130,31 @@ export function UploadSupplementaryModal({
       size: `${sizeMb} MB`,
       type: matchedType,
     })
-    if (!name) {
-      setName(file.name.replace(/\.[^/.]+$/, ""))
-    }
   }
 
   const handleSimulateSelectFile = () => {
-    setSelectedFile({
-      name: "SGS第三方铜锭化验分析单_盖章扫描件.pdf",
-      size: "3.40 MB",
-      type: "pdf",
-    })
-    if (!name) setName("SGS第三方铜锭化验分析单")
+    if (selectedFlowType === "2") {
+      setSelectedFile({
+        name: "20260601_海霸王地磅更正情况说明函_盖章件.pdf",
+        size: "2.15 MB",
+        type: "pdf",
+      })
+      if (!description) setDescription("现场随车地磅单车牌少录一位，补充地磅站重开并加盖公章说明。")
+    } else if (selectedFlowType === "3") {
+      setSelectedFile({
+        name: "SGS第三方铜锭化验分析单_盖章扫描件.pdf",
+        size: "3.40 MB",
+        type: "pdf",
+      })
+      if (!description) setDescription("供应商出具的权威第三方 SGS 质量检测分析报告后置归档。")
+    } else {
+      setSelectedFile({
+        name: "冷链仓储服务费结算单及专用发票.pdf",
+        size: "1.18 MB",
+        type: "pdf",
+      })
+      if (!description) setDescription("仓储履约后置结算发票凭证存档。")
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -82,19 +165,17 @@ export function UploadSupplementaryModal({
       setErrorMessage("请先上传附件文件")
       return
     }
-    if (!name.trim()) {
-      setErrorMessage("请输入资料名称")
-      return
-    }
+
+    const matchedStage = stageOptions.find((s) => s.value === selectedFlowType) || stageOptions[0]
 
     const newDoc = addDocumentItem({
       orderNo,
       approvalId,
       orderType,
-      flowType: "9527",
-      flowNodeTitle: "补充资料",
+      flowType: selectedFlowType,
+      flowNodeTitle: matchedStage.label,
       nature: "ADDITION",
-      category: "INSPECTION",
+      category: "OTHER",
       name: selectedFile.name,
       version: "V1.0",
       fileType: selectedFile.type,
@@ -111,18 +192,85 @@ export function UploadSupplementaryModal({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-md p-6">
+      <DialogContent className="sm:max-w-md p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="pb-1">
           <DialogTitle className="text-base font-semibold text-slate-800">
             上传补充资料
           </DialogTitle>
         </DialogHeader>
 
+        {/* 顶部单据上下文 */}
+        <div className="flex items-center justify-between text-xs px-3 py-2 rounded-md bg-slate-50 border border-slate-100 text-slate-600">
+          <div>
+            <span className="text-slate-400">单据编号：</span>
+            <span className="font-medium text-slate-800 tabular-nums">{orderNo}</span>
+          </div>
+          <div>
+            <span className="text-slate-400">关联审批单：</span>
+            <span className="font-medium text-blue-600 tabular-nums">{approvalId}</span>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4 pt-1">
+          {/* 关联流程节点 */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-slate-700 flex items-center justify-between">
+              <span className="flex items-center gap-1">
+                <span className="text-destructive">*</span>
+                <span>补充资料挂载至哪个流程节点：</span>
+              </span>
+              <span className="text-[11px] text-muted-foreground font-normal">
+                当前选中：<strong className="text-blue-600 font-semibold">{stageOptions.find((s) => s.value === selectedFlowType)?.label}</strong>
+              </span>
+            </Label>
+
+            {/* 4大业务流程节点可视化选择卡片 */}
+            <div className="grid grid-cols-2 gap-2">
+              {stageOptions.map((st) => {
+                const isSelected = selectedFlowType === st.value
+                return (
+                  <button
+                    key={st.value}
+                    type="button"
+                    onClick={() => {
+                      setSelectedFlowType(st.value)
+                      setErrorMessage(null)
+                    }}
+                    className={cn(
+                      "p-2.5 rounded-lg border text-left transition-all cursor-pointer relative flex flex-col justify-between",
+                      isSelected
+                        ? "border-blue-600 bg-blue-50/80 ring-1 ring-blue-600 shadow-2xs"
+                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70"
+                    )}
+                  >
+                    <div className="flex items-center justify-between w-full mb-1">
+                      <span
+                        className={cn(
+                          "text-xs font-semibold",
+                          isSelected ? "text-blue-700" : "text-slate-800"
+                        )}
+                      >
+                        {st.stageText}
+                      </span>
+                      {isSelected && (
+                        <span className="w-4 h-4 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                          <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10.5px] text-slate-500 leading-tight line-clamp-2">
+                      {st.hint}
+                    </p>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
           {/* 附件上传区域 */}
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-slate-700">
-              附件上传：
+              <span className="text-destructive mr-1">*</span>附件上传：
             </Label>
 
             {selectedFile ? (
@@ -152,15 +300,15 @@ export function UploadSupplementaryModal({
                 </Button>
               </div>
             ) : (
-              <div className="border border-dashed border-slate-200 rounded-lg p-5 text-center hover:border-blue-400 transition-colors bg-slate-50/50">
-                <UploadCloud className="w-7 h-7 text-slate-400 mx-auto mb-1.5" />
+              <div className="border border-dashed border-slate-200 rounded-lg p-4 text-center hover:border-blue-400 transition-colors bg-slate-50/50">
+                <UploadCloud className="w-6 h-6 text-slate-400 mx-auto mb-1" />
                 <p className="text-xs font-medium text-slate-700">
                   点击上传或直接将文件拖拽至此处
                 </p>
                 <p className="text-[11px] text-slate-400 mt-0.5">
                   支持 PDF、JPG、PNG、ZIP、DOCX，单个文件不超过 50MB
                 </p>
-                <div className="mt-3 flex items-center justify-center gap-2">
+                <div className="mt-2.5 flex items-center justify-center gap-2">
                   <label className="cursor-pointer">
                     <span className="inline-flex items-center justify-center rounded-md text-xs font-medium border border-slate-200 bg-white hover:bg-slate-50 h-7 px-3 text-slate-700 shadow-2xs">
                       浏览本地文件
@@ -186,20 +334,6 @@ export function UploadSupplementaryModal({
             )}
           </div>
 
-          {/* 资料名称 */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-slate-700">
-              资料名称：
-            </Label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="请输入资料名称"
-              className="h-8 text-xs rounded-md"
-              maxLength={60}
-            />
-          </div>
-
           {/* 补充说明 */}
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-slate-700">
@@ -208,7 +342,7 @@ export function UploadSupplementaryModal({
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="可输入补充说明备注"
+              placeholder="可输入补充说明备注、出具单位或后置补录原因"
               rows={2}
               className="text-xs resize-none"
               maxLength={150}

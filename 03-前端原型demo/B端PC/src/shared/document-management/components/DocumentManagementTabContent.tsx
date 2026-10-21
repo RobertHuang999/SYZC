@@ -4,7 +4,6 @@ interface DocumentManagementTabContentProps {
   orderNo: string
   approvalId?: string
   orderType?: "inbound" | "outbound"
-  onUploadClick?: () => void
 }
 
 export function DocumentManagementTabContent({

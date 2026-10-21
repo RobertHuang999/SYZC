@@ -34,6 +34,7 @@ export function DocumentTimelineView({
   const [searchKeyword, setSearchKeyword] = useState("")
   const [refreshKey, setRefreshKey] = useState(0)
   const [uploadOpen, setUploadOpen] = useState(false)
+  const [uploadTargetFlowType, setUploadTargetFlowType] = useState<string>("2")
   const [previewPdfOpen, setPreviewPdfOpen] = useState(false)
   const [previewPdfName, setPreviewPdfName] = useState("")
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -131,7 +132,10 @@ export function DocumentTimelineView({
           <Button
             size="sm"
             className="h-8 px-4 text-xs font-medium text-white bg-amber-600 hover:bg-amber-700 transition-colors shadow-2xs cursor-pointer"
-            onClick={() => setUploadOpen(true)}
+            onClick={() => {
+              setUploadTargetFlowType("2")
+              setUploadOpen(true)
+            }}
           >
             上传补充资料
           </Button>
@@ -194,8 +198,23 @@ export function DocumentTimelineView({
                     )}
                   </div>
 
-                  {/* 右侧资料份数与折叠指示 */}
+                  {/* 右侧资料份数、补充本阶段资料按钮与折叠指示 */}
                   <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 px-2 text-[11px] font-normal text-blue-600 hover:text-blue-700 hover:bg-blue-50/80 cursor-pointer rounded"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setUploadTargetFlowType(step.flowType)
+                        setUploadOpen(true)
+                      }}
+                    >
+                      <Plus className="w-3 h-3 mr-0.5" />
+                      补充本阶段资料
+                    </Button>
+
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs bg-blue-50 text-blue-600 border border-blue-100">
                       <FileText className="w-3 h-3 text-blue-500" />
                       {step.documents.length}份资料
@@ -235,12 +254,19 @@ export function DocumentTimelineView({
                               </div>
 
                               <div className="min-w-0">
-                                <h4
-                                  className="text-sm font-medium text-slate-800 truncate"
-                                  title={doc.name}
-                                >
-                                  {doc.name}
-                                </h4>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <h4
+                                    className="text-sm font-medium text-slate-800 truncate"
+                                    title={doc.name}
+                                  >
+                                    {doc.name}
+                                  </h4>
+                                  {doc.nature === "ADDITION" && (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-normal bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                                      事后补录
+                                    </span>
+                                  )}
+                                </div>
 
                                 <div className="text-xs text-slate-400 flex flex-wrap items-center gap-x-4 gap-y-1 mt-0.5">
                                   <span>{doc.fileType}</span>
@@ -251,6 +277,11 @@ export function DocumentTimelineView({
                                     {doc.uploaderOrg && ` (${doc.uploaderOrg})`}
                                   </span>
                                 </div>
+                                {doc.description && (
+                                  <p className="text-xs text-slate-500 mt-1 line-clamp-1 bg-slate-50/80 px-2 py-0.5 rounded border border-slate-100/80">
+                                    说明：{doc.description}
+                                  </p>
+                                )}
                               </div>
                             </div>
 
@@ -327,6 +358,7 @@ export function DocumentTimelineView({
         orderNo={orderNo}
         approvalId={approvalId}
         orderType={orderType}
+        defaultFlowType={uploadTargetFlowType}
         onClose={() => setUploadOpen(false)}
         onSuccess={handleUploadSuccess}
       />

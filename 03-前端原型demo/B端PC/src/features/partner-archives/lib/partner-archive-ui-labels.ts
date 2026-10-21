@@ -39,18 +39,26 @@ export const PARTNER_FORM_INITIAL_ROLES_SECTION_TITLE = "追加合作方档案�
 
 /** ── 上线界面文案（字段清单口径；页面只展示 USER_*，规则编号见 SPEC_* + 标注层）── */
 
-export function partnerFormAddressUserHint(subjectType: SubjectType): string {
-  if (subjectType === "ENTERPRISE") {
-    return "请填写营业执照上的登记地址，须与证照一致。作为企业货主，同一证件地址在租户内不可重复绑定多个企业货主。"
+/** 货主信息 · 证件登记地址（是否必填由基础配置决定，由表单传入 addressRequired） */
+export function partnerFormAddressUserHint(
+  subjectType: SubjectType,
+  addressRequired: boolean,
+): string {
+  const certName = subjectType === "ENTERPRISE" ? "营业执照" : "身份证"
+  const align = `请填写${certName}上的登记地址，与证照保持一致。`
+  const dup = "同一登记地址不能重复绑定为多个货主。"
+  if (addressRequired) {
+    return `${align}${dup}`
   }
-  return "请填写身份证上的登记地址，须与证照一致。作为个人货主，同一证件地址在租户内不可重复绑定多个个人货主。"
+  return `选填。${align}若填写，系统将校验是否与其他货主重复。`
 }
 
 export const PARTNER_FORM_ADDRESS_SPEC_NOTE_OWNER =
   "货主域档案保存走【合作方档案证件地址必填校验规则】(P01)；追加货主走【证件登记地址防重复唯一校验与同步阻断规则】(P02)，个人与企业分池比对。"
 
+/** @deprecated 非货主菜单表单不再展示地址区 ProductFieldHint（选填项，标题已足够） */
 export const PARTNER_FORM_ADDRESS_USER_HINT_OTHER =
-  "请填写证照登记地址；非货主域不走 P01/P02 货主准入策略。"
+  "选填。可按证照填写登记地址。"
 
 export const PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER =
   "【货主准入与地址唯一联动规则】(PA-R04) 的 P01/P02 **仅货主信息域**；提货人/资金方/服务方保存不强制 P01。"
@@ -73,7 +81,7 @@ export const PARTNER_QUICK_CREATE_CERT_ADDRESS_SPEC_NOTE =
   "入库快捷建档不走 P01；有地址时走 P02（个人/企业分池）。"
 
 export const PARTNER_PENDING_COMPLETION_OWNER_USER_BANNER =
-  "本菜单必填未齐（含基础配置已开启的证件登记地址）。请补录后保存；仅货主信息走【货主证件地址必填校验规则】(P01)。"
+  "还有必填项未填齐（若已开启登记地址必填，也须补全地址）。请补全后保存。"
 
 export const PARTNER_PENDING_COMPLETION_PICKUP_USER_BANNER =
   "本菜单必填未齐。个人须补齐姓名、身份证、手机号；企业须补齐企业名称、信用代码、经办人姓名、经办人身份证与联系电话。"

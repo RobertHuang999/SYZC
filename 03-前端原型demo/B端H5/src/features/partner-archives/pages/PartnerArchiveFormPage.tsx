@@ -47,7 +47,6 @@ import {
   PARTNER_FORM_BASE_SECTION_TITLE,
   PARTNER_FORM_ADDRESS_SPEC_NOTE_OWNER,
   PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER,
-  PARTNER_FORM_ADDRESS_USER_HINT_OTHER,
   PARTNER_FORM_INITIAL_ROLES_SECTION_TITLE,
   PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE,
   PARTNER_FORM_INITIAL_ROLES_USER_HINT,
@@ -790,11 +789,11 @@ export function PartnerArchiveFormPage() {
           >
           <NativeInfoCard title="证件登记地址" icon={<UserRound className="size-5" />}>
             <div className="space-y-2 px-3 pb-2">
-              <ProductFieldHint className="text-[#232D39]/55">
-                {isOwnerArchiveMenu
-                  ? partnerFormAddressUserHint(subjectType)
-                  : PARTNER_FORM_ADDRESS_USER_HINT_OTHER}
-              </ProductFieldHint>
+              {isOwnerArchiveMenu ? (
+                <ProductFieldHint className="text-[#232D39]/55">
+                  {partnerFormAddressUserHint(subjectType, addressRequired)}
+                </ProductFieldHint>
+              ) : null}
               <PrototypeSpecCallout>
                 {isOwnerArchiveMenu
                   ? PARTNER_FORM_ADDRESS_SPEC_NOTE_OWNER

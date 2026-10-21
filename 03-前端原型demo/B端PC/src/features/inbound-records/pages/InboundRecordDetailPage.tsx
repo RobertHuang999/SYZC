@@ -12,6 +12,7 @@ import {
   AlertCircle,
   RotateCcw,
   Plus,
+  FileText,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -46,6 +47,7 @@ import { CURRENT_USER_NAME } from "../mock/inbound-records.mock"
 import {
   DocumentManagementTabContent,
   UploadSupplementaryModal,
+  getDocumentsByOrderNo,
 } from "@/shared/document-management"
 
 type DetailTab = "goods" | "audit" | "modify" | "documents"
@@ -58,7 +60,6 @@ export function InboundRecordDetailPage() {
   const [tab, setTab] = useState<DetailTab>("goods")
   const [expandedGoods, setExpandedGoods] = useState<Record<string, boolean>>({})
   const [toast, setToast] = useState<string | null>(null)
-  const [uploadModalOpen, setUploadModalOpen] = useState(false)
 
   // 弹窗状态
   const [revokeOpen, setRevokeOpen] = useState(false)
@@ -76,6 +77,13 @@ export function InboundRecordDetailPage() {
   // 选项 A：统一查看附件弹窗
   const [attachmentData, setAttachmentData] = useState<AttachmentDialogData | null>(null)
   const [relatedOrderModalOpen, setRelatedOrderModalOpen] = useState(false)
+  const [auditUploadFlowType, setAuditUploadFlowType] = useState<string | null>(null)
+  const [docsRefreshKey, setDocsRefreshKey] = useState(0)
+
+  const allOrderDocs = useMemo(() => {
+    if (!detail) return []
+    return getDocumentsByOrderNo(detail.orderNo)
+  }, [detail, docsRefreshKey])
 
   const showToast = (message: string) => {
     setToast(message)
@@ -220,14 +228,6 @@ export function InboundRecordDetailPage() {
                     撤 销
                   </Button>
                 )}
-                <Button
-                  size="sm"
-                  className="cursor-pointer"
-                  onClick={() => setUploadModalOpen(true)}
-                >
-                  <Plus className="size-3.5 mr-1" />
-                  补充资料
-                </Button>
                 <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
                   返 回
                 </Button>
@@ -565,30 +565,84 @@ export function InboundRecordDetailPage() {
             {tab === "audit" && (
               <div className="space-y-4 py-2">
                 <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
-                  {detail.auditTrail.map((step, idx) => (
-                    <div key={idx} className="relative flex items-start gap-3 text-xs">
-                      <div className="absolute -left-6 mt-1 flex size-5 items-center justify-center rounded-full bg-primary text-white">
-                        <CheckCircle2 className="size-3.5" />
-                      </div>
-                      <div className="flex-1 rounded-md border bg-muted/20 p-3 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-foreground text-sm">
-                            {step.node}
-                          </span>
-                          <span className="text-muted-foreground">{step.time}</span>
+                  {detail.auditTrail.map((step, idx) => {
+                    const stepFlowType = idx === 0 ? "1" : idx === 1 ? "2" : "3"
+                    const stepDocs = allOrderDocs.filter((d) => d.flowType === stepFlowType)
+
+                    return (
+                      <div key={idx} className="relative flex items-start gap-3 text-xs">
+                        <div className="absolute -left-6 mt-1 flex size-5 items-center justify-center rounded-full bg-primary text-white">
+                          <CheckCircle2 className="size-3.5" />
                         </div>
-                        <div className="flex items-center gap-3 text-muted-foreground">
-                          <span>处理人：{step.actor}</span>
-                          <span>操作动作：<strong className="text-foreground">{step.action}</strong></span>
+                        <div className="flex-1 rounded-md border bg-muted/20 p-3 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-foreground text-sm">
+                              {step.node}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground">{step.time}</span>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-6 px-2 text-[11px] text-blue-600 border-blue-200 hover:bg-blue-50 cursor-pointer"
+                                onClick={() => setAuditUploadFlowType(stepFlowType)}
+                              >
+                                <Plus className="size-3 mr-0.5" />
+                                补充本阶段资料
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 text-muted-foreground">
+                            <span>处理人：{step.actor}</span>
+                            <span>操作动作：<strong className="text-foreground">{step.action}</strong></span>
+                          </div>
+                          {step.opinion && (
+                            <p className="rounded bg-card p-2 text-foreground/90 border border-border/50">
+                              审核意见：{step.opinion}
+                            </p>
+                          )}
+
+                          {/* 节点挂载资料穿透展示 */}
+                          <div className="pt-2 border-t border-border/60">
+                            <div className="text-[11px] font-medium text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                              <Paperclip className="size-3 text-muted-foreground" />
+                              <span>本节点关联资料 ({stepDocs.length})：</span>
+                            </div>
+                            {stepDocs.length > 0 ? (
+                              <div className="space-y-1.5">
+                                {stepDocs.map((doc) => (
+                                  <div
+                                    key={doc.id}
+                                    className="flex items-center justify-between p-2 rounded bg-card border border-border/40 text-xs hover:border-blue-200 transition-colors"
+                                  >
+                                    <div className="flex items-center gap-2 truncate">
+                                      <FileText className="size-3.5 text-blue-500 shrink-0" />
+                                      <span className="font-medium text-foreground truncate">{doc.name}</span>
+                                      <span className="text-[10.5px] text-muted-foreground shrink-0">({doc.fileSize})</span>
+                                      {doc.nature === "ADDITION" && (
+                                        <span className="px-1.5 py-0.5 rounded text-[10px] bg-amber-50 text-amber-700 border border-amber-200/60 font-medium shrink-0">
+                                          事后补录
+                                        </span>
+                                      )}
+                                      {doc.description && (
+                                        <span className="text-[11px] text-muted-foreground truncate hidden md:inline">
+                                          - {doc.description}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[11px] text-muted-foreground shrink-0 ml-2">{doc.createTime}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-[11px] text-muted-foreground">暂无资料附件</span>
+                            )}
+                          </div>
                         </div>
-                        {step.opinion && (
-                          <p className="mt-1.5 rounded bg-card p-2 text-foreground/90 border border-border/50">
-                            审核意见：{step.opinion}
-                          </p>
-                        )}
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -647,7 +701,6 @@ export function InboundRecordDetailPage() {
                 orderNo={detail.orderNo}
                 approvalId="SP202605280001"
                 orderType="inbound"
-                onUploadClick={() => setUploadModalOpen(true)}
               />
             )}
           </div>
@@ -742,18 +795,21 @@ export function InboundRecordDetailPage() {
           </DialogContent>
         </Dialog>
 
-        {/* 补充资料弹窗 */}
-        <UploadSupplementaryModal
-          open={uploadModalOpen}
-          orderNo={detail.orderNo}
-          approvalId="SP202605280001"
-          orderType="inbound"
-          onClose={() => setUploadModalOpen(false)}
-          onSuccess={() => {
-            showToast("资料上传成功并已关联入库单据")
-            setTab("documents")
-          }}
-        />
+        {/* 审核记录中的补充资料弹窗 */}
+        {auditUploadFlowType && (
+          <UploadSupplementaryModal
+            open={auditUploadFlowType !== null}
+            orderNo={detail.orderNo}
+            approvalId="SP202605280001"
+            orderType="inbound"
+            defaultFlowType={auditUploadFlowType}
+            onClose={() => setAuditUploadFlowType(null)}
+            onSuccess={(newDoc) => {
+              setDocsRefreshKey((k) => k + 1)
+              showToast(`资料已成功补充挂载至本流程节点：${newDoc.name}`)
+            }}
+          />
+        )}
 
         {toast ? (
           <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-foreground px-4 py-3 text-xs text-background shadow-lg">

@@ -77,10 +77,17 @@ export interface SmtpMailboxRow {
   editing: boolean
 }
 
+export type DuplicateAddressOwnerPool = "personal" | "enterprise"
+
+export interface DuplicateAddressConflictSubject {
+  id: string
+  displayLine: string
+}
+
 export interface DuplicateAddressConflict {
+  ownerPool: DuplicateAddressOwnerPool
   address: string
-  subject1: string
-  subject2: string
+  subjects: DuplicateAddressConflictSubject[]
 }
 
 export interface PartnerAccessAuditRecord {
