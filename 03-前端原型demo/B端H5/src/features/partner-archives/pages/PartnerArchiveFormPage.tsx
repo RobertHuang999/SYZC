@@ -38,6 +38,8 @@ import {
   markContactPhoneVerified,
   resolveContactPhoneVerified,
 } from "@prototype/B端PC/src/features/partner-archives/lib/contact-phone-verify"
+import { buildPartnerAddressAuditClauses } from "@prototype/shared/partner-archives/partner-audit-log-detail"
+import { requiresPartnerChangeAddressReasonDialog } from "@prototype/shared/partner-archives/partner-change-address-pa-r06a"
 import {
   PARTNER_CHANGE_ADDRESS_DIALOG,
   PARTNER_FORM_ACTION_LABELS,
@@ -174,12 +176,6 @@ export function PartnerArchiveFormPage() {
   )
 
   const detailTrimmed = detailAddress.trim()
-  const hasAddressDiff = Boolean(
-    isEdit &&
-      existing &&
-      `${province}${city}${district}${detailTrimmed}` !== existing.certAddress.fullAddress,
-  )
-
   const hasIndividualOwnerRole = Boolean(
     isOwnerArchiveMenu &&
       (existing?.roles.some((r) => r.roleType === "OWNER") ||
@@ -365,6 +361,9 @@ export function PartnerArchiveFormPage() {
     }
 
     const wasPending = isArchiveRequiredFieldsPending(existing)
+    const certAddressBeforeSave = { ...existing.certAddress }
+    const certAddressAfterSave = buildCertAddress()
+
     if (!isFrozenLimitedEdit && !coreIdentityLocked) {
       existing.name = name.trim()
     }
@@ -380,12 +379,12 @@ export function PartnerArchiveFormPage() {
     if (phoneChanged || hasAgentDiff) {
       markContactPhoneVerified(existing, now)
     }
-    existing.certAddress = buildCertAddress()
+    existing.certAddress = certAddressAfterSave
     existing.updateTime = now
 
     const afterSave: PartnerSubject = {
       ...existing,
-      certAddress: buildCertAddress(),
+      certAddress: certAddressAfterSave,
     }
     if (wasPending && !isArchiveRequiredFieldsPending(afterSave)) {
       existing.roles = existing.roles.map((r) =>
@@ -399,13 +398,16 @@ export function PartnerArchiveFormPage() {
         `变更业务联系电话为【${contactPhone.trim()}】（原：${oldPhoneVal}，短信二元核验通过）`,
       )
     }
-    if (changeReason) {
-      changeParts.push(
-        `变更证件地址为【${province}${city}${district}${detailTrimmed}】，改址原因：${changeReason}`,
-      )
-    } else if (hasAddressDiff) {
-      changeParts.push(`变更证件地址为【${province}${city}${district}${detailTrimmed}】`)
-    }
+    changeParts.push(
+      ...buildPartnerAddressAuditClauses({
+        archiveMenu: archiveMenuLabel,
+        subjectType,
+        certBefore: certAddressBeforeSave,
+        certAfter: certAddressAfterSave,
+        wasPendingCompletion: wasPending,
+        changeReason,
+      }),
+    )
 
     existing.auditLogs = [
       {
@@ -415,11 +417,7 @@ export function PartnerArchiveFormPage() {
         actionType: "EDIT",
         actionName: "修改合作方档案",
         detail: `修改合作方档案：${
-          changeParts.length > 0
-            ? changeParts.join("；")
-            : wasPending
-              ? `补全证件登记地址【${province}${city}${district}${detailTrimmed}】，必填项已齐备`
-              : "更新基础资料"
+          changeParts.length > 0 ? changeParts.join("；") : "更新基础资料"
         }`,
       },
       ...existing.auditLogs,
@@ -444,11 +442,21 @@ export function PartnerArchiveFormPage() {
     setSubmitting(true)
     setWarning(null)
 
+    const nextCert = {
+      province,
+      city,
+      district,
+      detail: detailTrimmed,
+      fullAddress: `${province}${city}${district}${detailTrimmed}`,
+    }
     if (
-      isEdit &&
-      subjectType === "INDIVIDUAL" &&
-      hasIndividualOwnerRole &&
-      hasAddressDiff
+      requiresPartnerChangeAddressReasonDialog({
+        isEdit,
+        archiveMenu: archiveMenuLabel,
+        subjectType,
+        existingCertAddress: existing?.certAddress,
+        nextCertAddress: nextCert,
+      })
     ) {
       setChangeAddressOpen(true)
       setSubmitting(false)

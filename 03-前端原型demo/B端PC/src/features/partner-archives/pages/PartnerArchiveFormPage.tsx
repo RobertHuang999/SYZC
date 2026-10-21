@@ -76,6 +76,8 @@ import {
   normalizePartnerPlanB,
   otherArchiveMenus,
 } from "../lib/linked-partner-archives"
+import { buildPartnerAddressAuditClauses } from "@prototype/shared/partner-archives/partner-audit-log-detail"
+import { requiresPartnerChangeAddressReasonDialog } from "@prototype/shared/partner-archives/partner-change-address-pa-r06a"
 import {
   isArchiveRequiredFieldsPending,
   isCertAddressSaveRequired,
@@ -194,16 +196,6 @@ export function PartnerArchiveFormPage() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload)
   }, [dirty])
 
-  const hasAddressDiff = useMemo(() => {
-    if (!existing || !existing.certAddress.fullAddress) return false
-    return (
-      existing.certAddress.province !== province ||
-      existing.certAddress.city !== city ||
-      existing.certAddress.district !== district ||
-      existing.certAddress.detail.trim() !== detailAddress.trim()
-    )
-  }, [existing, province, city, district, detailAddress])
-
   const hasPhoneDiff = useMemo(() => {
     if (!existing || isPendingCompletion) return false
     return existing.contactPhone.trim() !== contactPhone.trim()
@@ -264,10 +256,6 @@ export function PartnerArchiveFormPage() {
     }
     navigate(listPath)
   }
-
-  const isIndividualOwner = Boolean(
-    subjectType === "INDIVIDUAL" && isEdit && hasIndividualOwnerRole
-  )
 
   /** 仅货主信息 + 基础配置 P01 开启时保存必录证件地址 */
   const addressRequired = isCertAddressSaveRequired(archiveMenuLabel, subjectType)
@@ -387,6 +375,8 @@ export function PartnerArchiveFormPage() {
       partnerArchivesMock.unshift(created)
     } else if (existing) {
       const wasPending = isArchiveRequiredFieldsPending(existing)
+      const certAddressBeforeSave = { ...existing.certAddress }
+      const certAddressAfterSave = buildCertAddress()
 
       if (!isFrozenLimitedEdit && !coreIdentityLocked) {
         existing.name = name.trim()
@@ -403,11 +393,11 @@ export function PartnerArchiveFormPage() {
       if (phoneChanged || hasAgentDiff) {
         markContactPhoneVerified(existing)
       }
-      existing.certAddress = buildCertAddress()
+      existing.certAddress = certAddressAfterSave
 
       const afterSave: PartnerSubject = {
         ...existing,
-        certAddress: buildCertAddress(),
+        certAddress: certAddressAfterSave,
       }
       if (wasPending && !isArchiveRequiredFieldsPending(afterSave)) {
         existing.roles = existing.roles.map((r) =>
@@ -424,22 +414,19 @@ export function PartnerArchiveFormPage() {
           `变更业务联系电话为【${contactPhone.trim()}】（原：${oldPhoneVal}，短信二元核验通过）`
         )
       }
-      if (changeReason) {
-        changeParts.push(
-          `变更证件地址为【${province}${city}${district}${detailAddress.trim()}】，改址原因：${changeReason}`
-        )
-      } else if (hasAddressDiff) {
-        changeParts.push(
-          `变更证件地址为【${province}${city}${district}${detailAddress.trim()}】`
-        )
-      }
+      changeParts.push(
+        ...buildPartnerAddressAuditClauses({
+          archiveMenu: archiveMenuLabel,
+          subjectType,
+          certBefore: certAddressBeforeSave,
+          certAfter: certAddressAfterSave,
+          wasPendingCompletion: wasPending,
+          changeReason,
+        }),
+      )
 
       const changeBody =
-        changeParts.length > 0
-          ? changeParts.join("；")
-          : wasPending
-            ? `补全证件登记地址【${province}${city}${district}${detailAddress.trim()}】，必填项已齐备`
-            : "更新基础资料"
+        changeParts.length > 0 ? changeParts.join("；") : "更新基础资料"
 
       existing.auditLogs = [
         {
@@ -560,7 +547,16 @@ export function PartnerArchiveFormPage() {
   const proceedAfterValidation = (intent: "SAVE" | "SAVE_AND_VERIFY") => {
     setIsSubmitting(true)
 
-    if (isEdit && isIndividualOwner && hasAddressDiff) {
+    const nextCert = buildCertAddress()
+    if (
+      requiresPartnerChangeAddressReasonDialog({
+        isEdit,
+        archiveMenu: archiveMenuLabel,
+        subjectType,
+        existingCertAddress: existing?.certAddress,
+        nextCertAddress: nextCert,
+      })
+    ) {
       setChangeAddressDialogOpen(true)
       setIsSubmitting(false)
       return

@@ -248,8 +248,9 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
 | C04 | 由{单据类型}{单号}业务带出创建：{说明} |
 | M01 | 变更字段为【新】（原：旧） |
 | M02 | 联系手机短信核验通过 |
-| M03 | 补全地址，必填项已齐备 |
-| M04 | 改址 + 改址原因 |`,
+| M03 | 待补全首次补地址，**无**改址原因 |
+| M04 | 一般改地址（新/旧），**无**改址原因 |
+| M05 | 货主·个人改址弹窗**已提交原因**时才用；否则 M04 |`,
           },
           {
             label: "冻解 S",
