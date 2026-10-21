@@ -133,7 +133,7 @@ export const partnerArchiveListAnnotationsShared: SharedPrototypeAnnotation[] = 
           {
             label: "冻结/解冻成功后审计文案",
             content:
-              "见详情 **8 号点 §2 状态表**：冻结→徽章「冻结主体」+ **R01**；解冻→「解冻主体」+ **R02**（弹窗录入全文写入 {原因}/{说明}）。",
+              "见详情 **8 号点**：**冻**→「冻结主体」+ **S01**；**解**→「解冻主体」+ **S02**（弹窗原文写入 {原因}/{说明}）。",
           },
         ],
       },

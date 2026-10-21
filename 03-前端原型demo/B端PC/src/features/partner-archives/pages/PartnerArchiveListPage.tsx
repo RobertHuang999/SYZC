@@ -151,7 +151,7 @@ export function PartnerArchiveListPage() {
             operator: "当前用户",
             actionType: "FREEZE",
             actionName: "冻结主体",
-            detail: `执行主体冻结管控，原因：${reason}`,
+            detail: `冻结主体：${reason}`,
           },
           ...partner.auditLogs,
         ],
@@ -173,9 +173,7 @@ export function PartnerArchiveListPage() {
             operator: "当前用户",
             actionType: "UNFREEZE",
             actionName: "解冻主体",
-            detail: reason
-              ? `解冻恢复主体正常状态，说明：${reason}`
-              : "解冻恢复主体正常状态",
+            detail: reason ? `解冻主体：${reason}` : "解冻主体：审批通过",
           },
           ...partner.auditLogs,
         ],

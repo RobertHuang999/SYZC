@@ -345,10 +345,10 @@ export function PartnerArchiveFormPage() {
             opTime: now,
             operator: "当前用户",
             actionType: "CREATE",
-            actionName: options?.verifiedOnCreate ? "联系手机核验" : "人工建档",
+            actionName: "创建合作方档案",
             detail: options?.verifiedOnCreate
-              ? "人工建档并短信验证成功（联系手机已验证，PA-R04c 已生效）"
-              : "人工建档保存成功（联系手机未验证，金融场景提交前须补验）",
+              ? "管理端人工创建：联系手机已验证并完成短信核验"
+              : "管理端人工创建：联系手机未验证",
           },
         ],
       }
@@ -410,12 +410,12 @@ export function PartnerArchiveFormPage() {
         )
       }
 
-      const logDetail =
+      const changeBody =
         changeParts.length > 0
           ? changeParts.join("；")
           : wasPending
-            ? `补全证件登记地址【${province}${city}${district}${detailAddress.trim()}】，主档必填项已齐备`
-            : `更新合作方档案基础资料`
+            ? `补全证件登记地址【${province}${city}${district}${detailAddress.trim()}】，必填项已齐备`
+            : "更新基础资料"
 
       existing.auditLogs = [
         {
@@ -423,8 +423,8 @@ export function PartnerArchiveFormPage() {
           opTime: new Date().toISOString().replace("T", " ").substring(0, 19),
           operator: "当前用户",
           actionType: "EDIT",
-          actionName: wasPending ? "完善档案资料" : "编辑合作方档案",
-          detail: logDetail,
+          actionName: "修改合作方档案",
+          detail: `修改合作方档案：${changeBody}`,
         },
         ...existing.auditLogs,
       ]

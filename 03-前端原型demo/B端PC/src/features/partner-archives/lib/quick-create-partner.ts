@@ -172,10 +172,10 @@ export function quickCreatePartnerFromJob(
         opTime: now,
         operator: input.createdBy ?? "当前用户",
         actionType: "CREATE",
-        actionName: meta.sourceLabel,
+        actionName: "创建合作方档案",
         detail: input.verifiedOnCreate
-          ? `${meta.auditDetail}；保存并验证通过`
-          : meta.auditDetail,
+          ? `由${meta.sourceLabel}快捷创建：联系手机已验证`
+          : `由${meta.sourceLabel}快捷创建：${meta.auditDetail}`,
       },
     ],
   }
