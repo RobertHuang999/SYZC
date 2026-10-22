@@ -43,3 +43,18 @@ export function getPartnerArchiveRowActions(
 export { isArchiveRequiredFieldsPending, partnerArchiveEditActionLabel }
 
 export type PartnerArchivePendingAction = "freeze" | "unfreeze" | "appendRole"
+
+/** PC 详情页头 = 列表行操作去掉【详情】，并加【返回】；与方案 A 矩阵一致 */
+export type PartnerDetailHeaderAction = "back" | Exclude<PartnerArchiveRowAction, "detail">
+
+export function getPartnerDetailHeaderActions(
+  partner: PartnerSubject,
+): PartnerDetailHeaderAction[] {
+  const actions: PartnerDetailHeaderAction[] = ["back"]
+  for (const action of getPartnerArchiveRowActions(partner)) {
+    if (action !== "detail") {
+      actions.push(action)
+    }
+  }
+  return actions
+}

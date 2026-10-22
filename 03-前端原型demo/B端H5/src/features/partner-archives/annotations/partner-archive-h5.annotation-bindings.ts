@@ -45,7 +45,7 @@ export const partnerArchiveH5DetailAnnotationBindings: Record<
   "partner-archive-detail-actions": {
     targetId: "partner-archive-detail-actions",
     contentSuffix:
-      "【H5 端差异】详情只读查阅；列表卡片与 PC 行操作 + PC 详情页头均含【验证联系手机】（显隐同 PA-P02）。",
+      "【H5 端差异】详情只读查阅，不提供冻结/解冻/追加；上述操作仅在列表卡片 Footer（与 PC 列表行操作矩阵一致）。详情 Tab 内可【验证联系手机】的显隐仍同 PA-P02（若页头未做验证入口则走列表卡片【验证】）。",
   },
   "partner-archive-detail-tabs": {
     targetId: "partner-archive-detail-tabs",

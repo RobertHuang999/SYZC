@@ -72,6 +72,11 @@ export const PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE =
 /** @deprecated 请改用 USER_HINT + PrototypeSpecCallout */
 export const PARTNER_FORM_INITIAL_ROLES_HINT = PARTNER_FORM_INITIAL_ROLES_USER_HINT
 
+/** 快捷建档弹窗：档案最终沉淀到哪个子菜单（双端共用） */
+export function partnerQuickCreateArchiveUserHint(menuLabel: string) {
+  return `建档后自动沉淀至「用户中心 / 合作方档案 / ${menuLabel}」，可在档案列表与详情继续完善。`
+}
+
 export const PARTNER_QUICK_CREATE_CERT_ADDRESS_LABEL = "证件登记地址"
 
 export const PARTNER_QUICK_CREATE_CERT_ADDRESS_USER_HINT =

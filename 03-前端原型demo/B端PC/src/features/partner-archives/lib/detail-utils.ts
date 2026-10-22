@@ -1,4 +1,4 @@
-import type { PartnerSubject, SubjectStatus } from "../domain/types"
+import type { PartnerSubject } from "../domain/types"
 
 /** 列表/详情展示：138****5678 */
 export function maskLoginPhone(phone: string) {
@@ -31,21 +31,3 @@ export function commitPartnerArchive(next: PartnerSubject) {
   return next
 }
 
-export type PartnerDetailHeaderAction =
-  | "back"
-  | "edit"
-  | "appendRole"
-  | "freeze"
-  | "unfreeze"
-
-export function getPartnerDetailHeaderActions(
-  status: SubjectStatus
-): PartnerDetailHeaderAction[] {
-  const actions: PartnerDetailHeaderAction[] = ["back", "edit"]
-  if (status === "FROZEN") {
-    actions.push("unfreeze")
-    return actions
-  }
-  actions.push("appendRole", "freeze")
-  return actions
-}

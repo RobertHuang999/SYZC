@@ -33,6 +33,7 @@ import { partnerArchivesMock } from "../mock/partner-archives.mock"
 import {
   SUBJECT_STATUS_BADGE_CLASS,
   SUBJECT_STATUS_LABELS,
+  getPartnerDetailHeaderActions,
   type PartnerArchivePendingAction,
 } from "../domain/actions"
 import {
@@ -44,7 +45,6 @@ import { resolveCreateSourceDisplayLabel } from "../lib/create-source-display"
 import {
   commitPartnerArchive,
   getPartnerArchiveById,
-  getPartnerDetailHeaderActions,
   maskLoginPhone,
 } from "../lib/detail-utils"
 import {
@@ -111,23 +111,13 @@ export function PartnerArchiveDetailPage() {
   const [verifyContactOpen, setVerifyContactOpen] = useState(false)
   const [blockedBlockInfo, setBlockedBlockInfo] = useState<FreezeBlockReason | null>(null)
 
-  const handleFreezeClick = () => {
-    if (!partner) return
-    const check = checkPartnerSubjectFreezeEligibility(withPartnerFreezeDemoData(partner))
-    if (!check.canFreeze) {
-      setBlockedBlockInfo(check)
-      return
-    }
-    setPendingAction("freeze")
-  }
-
   useEffect(() => {
     setPartner(getPartnerArchiveById(id))
   }, [id])
 
   const headerActions = useMemo(
-    () => (partner ? getPartnerDetailHeaderActions(partner.status) : ["back"]),
-    [partner]
+    () => (partner ? getPartnerDetailHeaderActions(partner) : ["back"]),
+    [partner],
   )
 
   const needsCompletion = useMemo(() => {
@@ -212,33 +202,30 @@ export function PartnerArchiveDetailPage() {
     showToast("已追加合作方档案角色")
   }
 
-  const handleFreeze = (reason: string) => {
-    setPartner((prev) => {
-      if (!prev) return prev
-      return commitPartnerArchive(applyPartnerSubjectFreeze(prev, reason))
-    })
-  }
-
-  const handleUnfreeze = (note: string) => {
-    setPartner((prev) => {
-      if (!prev) return prev
-      return commitPartnerArchive(applyPartnerSubjectUnfreeze(prev, note))
-    })
+  const handleFreezeClick = () => {
+    const check = checkPartnerSubjectFreezeEligibility(withPartnerFreezeDemoData(partner))
+    if (!check.canFreeze) {
+      setBlockedBlockInfo(check)
+      return
+    }
+    setPendingAction("freeze")
   }
 
   const confirmPendingAction = (reason: string) => {
-    const name = partner?.name
+    const name = partner.name
     if (pendingAction === "freeze") {
-      handleFreeze(reason)
-      if (name) {
-        showToast(formatPartnerSubjectStatusToast(name, "freeze"))
-      }
+      setPartner((prev) => {
+        if (!prev) return prev
+        return commitPartnerArchive(applyPartnerSubjectFreeze(prev, reason))
+      })
+      showToast(formatPartnerSubjectStatusToast(name, "freeze"))
     }
     if (pendingAction === "unfreeze") {
-      handleUnfreeze(reason)
-      if (name) {
-        showToast(formatPartnerSubjectStatusToast(name, "unfreeze"))
-      }
+      setPartner((prev) => {
+        if (!prev) return prev
+        return commitPartnerArchive(applyPartnerSubjectUnfreeze(prev, reason))
+      })
+      showToast(formatPartnerSubjectStatusToast(name, "unfreeze"))
     }
     setPendingAction(null)
   }
@@ -324,7 +311,7 @@ export function PartnerArchiveDetailPage() {
                   className="whitespace-nowrap"
                   onClick={handleFreezeClick}
                 >
-                  冻结主体
+                  冻结
                 </Button>
               )}
               {headerActions.includes("unfreeze") && (
@@ -333,7 +320,7 @@ export function PartnerArchiveDetailPage() {
                   className="whitespace-nowrap"
                   onClick={() => setPendingAction("unfreeze")}
                 >
-                  解冻主体
+                  解冻
                 </Button>
               )}
             </div>
@@ -662,7 +649,7 @@ export function PartnerArchiveDetailPage() {
           title={PARTNER_SUBJECT_FREEZE_DIALOG.title}
           description={PARTNER_SUBJECT_FREEZE_DIALOG.description}
           confirmLabel={PARTNER_SUBJECT_FREEZE_DIALOG.confirmLabel}
-          destructive
+          destructive={PARTNER_SUBJECT_FREEZE_DIALOG.destructive}
           reasonRequired
           reasonLabel={PARTNER_SUBJECT_FREEZE_DIALOG.reasonLabel}
           reasonPlaceholder={PARTNER_SUBJECT_FREEZE_DIALOG.reasonPlaceholder}
@@ -679,7 +666,7 @@ export function PartnerArchiveDetailPage() {
               setBlockedBlockInfo(null)
             }
           }}
-          partner={partner ?? null}
+          partner={partner}
           blockInfo={blockedBlockInfo}
         />
 
