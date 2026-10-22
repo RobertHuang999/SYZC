@@ -81,7 +81,7 @@ import {
   PARTNER_PENDING_COMPLETION_SPEC_NOTE,
   PARTNER_SUBJECT_FREEZE_DIALOG,
   PARTNER_SUBJECT_UNFREEZE_DIALOG,
-  PARTNER_SUBJECT_UNFREEZE_SUCCESS_TOAST,
+  formatPartnerSubjectStatusToast,
   partnerFieldPendingInlineHint,
   partnerPendingCompletionUserBanner,
   type PartnerDetailTabKey,
@@ -227,11 +227,18 @@ export function PartnerArchiveDetailPage() {
   }
 
   const confirmPendingAction = (reason: string) => {
+    const name = partner?.name
     if (pendingAction === "freeze") {
       handleFreeze(reason)
+      if (name) {
+        showToast(formatPartnerSubjectStatusToast(name, "freeze"))
+      }
     }
     if (pendingAction === "unfreeze") {
       handleUnfreeze(reason)
+      if (name) {
+        showToast(formatPartnerSubjectStatusToast(name, "unfreeze"))
+      }
     }
     setPendingAction(null)
   }
@@ -687,10 +694,7 @@ export function PartnerArchiveDetailPage() {
           onOpenChange={(open) => {
             if (!open) setPendingAction(null)
           }}
-          onConfirm={(reason) => {
-            confirmPendingAction(reason)
-            showToast(PARTNER_SUBJECT_UNFREEZE_SUCCESS_TOAST)
-          }}
+          onConfirm={confirmPendingAction}
         />
 
         <PartnerAppendRoleDialog

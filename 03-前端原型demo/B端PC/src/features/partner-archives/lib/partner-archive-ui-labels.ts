@@ -311,24 +311,35 @@ export type PartnerConfirmCopy = {
 
 export const PARTNER_SUBJECT_FREEZE_DIALOG: PartnerConfirmCopy = {
   title: "确认冻结主体",
-  description:
-    "冻结仅作用于当前子菜单主档，不影响同证号在其他子菜单的主档。冻结后本菜单下暂停发起新业务。请录入冻结原因。",
+  description: "冻结后本菜单暂停发起新业务，请填写冻结原因。",
   confirmLabel: "确认冻结",
   destructive: true,
   reasonLabel: "冻结原因",
-  reasonPlaceholder: "请输入冻结理由（1～200 字）",
+  reasonPlaceholder: "请输入冻结原因（1～200 字）",
 }
 
 export const PARTNER_SUBJECT_UNFREEZE_DIALOG: PartnerConfirmCopy = {
-  title: "提交解冻主体申请",
-  description:
-    "解冻须风控审批终审通过后生效。请录入解冻复核依据；原型演示在确认后模拟审批通过。",
-  confirmLabel: "提交解冻申请",
+  title: "确认解冻主体",
+  description: "解冻后恢复本菜单业务发起，请填写解冻原因。",
+  confirmLabel: "确认解冻",
   reasonLabel: "解冻原因",
-  reasonPlaceholder: "请输入解冻复核依据（1～200 字）",
+  reasonPlaceholder: "请输入解冻原因（1～200 字）",
 }
 
-export const PARTNER_SUBJECT_UNFREEZE_SUCCESS_TOAST = "解冻审批已通过，主体已恢复正常"
+export const PARTNER_SUBJECT_FREEZE_SUCCESS_TOAST = "已冻结，本菜单暂停发起新业务"
+export const PARTNER_SUBJECT_UNFREEZE_SUCCESS_TOAST = "已解冻，可正常发起业务"
+
+/** PC/H5 列表、详情冻结/解冻成功提示（双端一致） */
+export function formatPartnerSubjectStatusToast(
+  partnerName: string,
+  action: "freeze" | "unfreeze",
+): string {
+  const suffix =
+    action === "freeze"
+      ? PARTNER_SUBJECT_FREEZE_SUCCESS_TOAST
+      : PARTNER_SUBJECT_UNFREEZE_SUCCESS_TOAST
+  return `【${partnerName}】${suffix}`
+}
 
 export function getPartnerRoleRowDialogCopy(
   action: "freeze" | "unfreeze" | "remove",
@@ -349,7 +360,7 @@ export function getPartnerRoleRowDialogCopy(
       description: "解冻后该角色恢复为正常状态，可继续参与业务单据。",
       confirmLabel: "确认解冻",
       reasonLabel: "解冻原因",
-      reasonPlaceholder: "请输入解冻复核依据（1～200 字）",
+      reasonPlaceholder: "请输入解冻原因（1～200 字）",
     }
   }
   return {

@@ -48,7 +48,11 @@ import {
   type FreezeBlockReason,
 } from "../lib/partner-archive-rules"
 import { markContactPhoneVerified } from "../lib/contact-phone-verify"
-import { PARTNER_SUBJECT_FREEZE_DIALOG } from "../lib/partner-archive-ui-labels"
+import {
+  PARTNER_SUBJECT_FREEZE_DIALOG,
+  PARTNER_SUBJECT_UNFREEZE_DIALOG,
+  formatPartnerSubjectStatusToast,
+} from "../lib/partner-archive-ui-labels"
 
 type PendingDialog = {
   action: PartnerArchivePendingAction
@@ -185,14 +189,14 @@ export function PartnerArchiveListPage() {
       const next = applyPartnerSubjectFreeze(partner, reason)
       commitPartnerArchive(next)
       setDataList((prev) => prev.map((item) => (item.id === partner.id ? next : item)))
-      showToast(`主体【${partner.name}】已成功冻结`)
+      showToast(formatPartnerSubjectStatusToast(partner.name, "freeze"))
     }
 
     if (action === "unfreeze") {
       const next = applyPartnerSubjectUnfreeze(partner, reason)
       commitPartnerArchive(next)
       setDataList((prev) => prev.map((item) => (item.id === partner.id ? next : item)))
-      showToast(`主体【${partner.name}】解冻审批已通过，已恢复正常`)
+      showToast(formatPartnerSubjectStatusToast(partner.name, "unfreeze"))
     }
 
     ignoreRowActionsUntilRef.current = Date.now() + 300
@@ -274,13 +278,13 @@ export function PartnerArchiveListPage() {
 
         <PartnerConfirmDialog
           open={pendingDialog?.action === "freeze"}
-          title="确认冻结主体"
+          title={PARTNER_SUBJECT_FREEZE_DIALOG.title}
           description={PARTNER_SUBJECT_FREEZE_DIALOG.description}
-          confirmLabel="确认冻结"
-          destructive
+          confirmLabel={PARTNER_SUBJECT_FREEZE_DIALOG.confirmLabel}
+          destructive={PARTNER_SUBJECT_FREEZE_DIALOG.destructive}
           reasonRequired
-          reasonLabel="冻结原因"
-          reasonPlaceholder="请输入冻结理由（1～200 字）"
+          reasonLabel={PARTNER_SUBJECT_FREEZE_DIALOG.reasonLabel}
+          reasonPlaceholder={PARTNER_SUBJECT_FREEZE_DIALOG.reasonPlaceholder}
           onOpenChange={(open) => {
             if (!open) {
               setPendingDialog(null)
@@ -302,12 +306,12 @@ export function PartnerArchiveListPage() {
 
         <PartnerConfirmDialog
           open={pendingDialog?.action === "unfreeze"}
-          title="提交解冻主体申请"
-          description="解冻须风控审批终审通过后生效。请录入解冻复核依据；原型演示在确认后模拟审批通过并恢复业务发起能力。"
-          confirmLabel="提交解冻申请"
+          title={PARTNER_SUBJECT_UNFREEZE_DIALOG.title}
+          description={PARTNER_SUBJECT_UNFREEZE_DIALOG.description}
+          confirmLabel={PARTNER_SUBJECT_UNFREEZE_DIALOG.confirmLabel}
           reasonRequired
-          reasonLabel="解冻原因"
-          reasonPlaceholder="请输入解冻复核依据（1～200 字）"
+          reasonLabel={PARTNER_SUBJECT_UNFREEZE_DIALOG.reasonLabel}
+          reasonPlaceholder={PARTNER_SUBJECT_UNFREEZE_DIALOG.reasonPlaceholder}
           onOpenChange={(open) => {
             if (!open) {
               setPendingDialog(null)

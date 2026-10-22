@@ -89,7 +89,7 @@ export function applyPartnerSubjectUnfreeze(
         operator,
         actionType: "UNFREEZE",
         actionName: "解冻主体",
-        detail: trimmed ? `解冻主体：${trimmed}` : "解冻主体：审批通过",
+        detail: trimmed ? `解冻主体：${trimmed}` : "解冻主体",
       },
       ...partner.auditLogs,
     ],
