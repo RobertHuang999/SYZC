@@ -41,7 +41,7 @@ export function findPartnerByIdNumber(
   )
 }
 
-/** PA-R05：移除非货主角色前扫描在途关联业务（原型按单据状态近似） */
+/** 预留：移除非货主角色前扫描在途（6.3 不提供角色移除/解除关联 UI） */
 export function hasActiveBusinessForRole(
   partner: PartnerSubject,
   roleType: RoleType
