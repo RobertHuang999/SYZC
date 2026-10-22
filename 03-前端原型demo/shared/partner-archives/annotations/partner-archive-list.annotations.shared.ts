@@ -17,7 +17,7 @@ export const partnerArchiveListAnnotationsShared: SharedPrototypeAnnotation[] = 
             label: "生命周期流转图",
             content: `flowchart TD
     subgraph S1["主体状态流转 (分菜单独立)"]
-        A["主体建档 (人工/C端认证/单据沉淀)"] -->|"初始主体正常"| B["🟢 主体正常"]
+        A["主体建档 (C端注册/人工建档)"] -->|"初始主体正常"| B["🟢 主体正常"]
         B -->|"风控冻结 (PA-R02)"| C["🟠 主体冻结"]
         C -->|"解冻审批通过 (PA-R08)"| B
     end
@@ -45,7 +45,7 @@ export const partnerArchiveListAnnotationsShared: SharedPrototypeAnnotation[] = 
     number: 2,
     kind: "交互",
     title: "多维组合检索与建档入口",
-    content: "默认 4 项筛选 + 展开（无业务角色筛，列表域由 archiveMenu 隐式决定）；含角色状态、来源、联系手机核验与建档时间；右上【+ 新增{子菜单}】。",
+    content: "默认 4 项筛选 + 展开（无业务角色筛、无创建来源筛，列表域由 archiveMenu 隐式决定）；含联系手机核验与建档时间；右上【+ 新增{子菜单}】。",
     details: [
       {
         title: "检索维度说明",
@@ -63,8 +63,8 @@ export const partnerArchiveListAnnotationsShared: SharedPrototypeAnnotation[] = 
             content: "主体状态（全部 / 正常 / 冻结）；精确匹配当前档案归属菜单的主体生命周期状态。",
           },
           {
-            label: "创建来源",
-            content: "下拉精确匹配：全部创建来源 / C端注册 / 人工建档。业务单据流转中由操作人员录入的合作方信息统一归并为人工建档。",
+            label: "创建来源（仅详情）",
+            content: "列表与筛选不提供创建来源。详情【基础档案】第 2 行只读展示：货主信息为 C端注册 / 人工建档；提货人、资金方、服务方仅人工建档。",
           },
           {
             label: "创建时间范围",
@@ -128,12 +128,31 @@ export const partnerArchiveListAnnotationsShared: SharedPrototypeAnnotation[] = 
           },
           {
             label: "冻结前置资产与单据强校验 (PA-R02)",
-            content: "【分菜单主体冻结与在途在库前置校验规则】(PA-R02)：四大菜单域执行主体冻结前必须查询在库货物与在途单据。若存在未结清业务，界面直接弹出强阻断弹窗，列出具体单据号、单据类型、业务状态与处置建议，阻断提交，确保业务资产闭环。",
+            content: "【分菜单主体冻结与在途在库前置校验规则】(PA-R02)：行操作【冻结】前先查在库/在途。命中则弹出阻断弹窗（非冻结原因弹窗），列出单据号与状态。**原型 Mock**：货主「赵磊」、提货人「李华」、资金方「建行无锡分行」可复现阻断。",
           },
           {
             label: "冻结/解冻成功后审计文案",
             content:
               "见详情 **8 号点**：**冻**→「冻结主体」+ **S01**；**解**→「解冻主体」+ **S02**（弹窗原文写入 {原因}/{说明}）。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "partner-archive-freeze-blocked",
+    targetId: "partner-archive-freeze-blocked",
+    number: 6,
+    kind: "交互",
+    title: "冻结前置校验阻断弹窗 (PA-R02)",
+    content: "行操作【冻结】命中在库/待提货/进行中单据时强阻断，禁止进入冻结原因录入；展示关联单据清单与处置建议。",
+    details: [
+      {
+        title: "阻断规格",
+        items: [
+          {
+            label: "货主有货",
+            content: "在库库存、未出清入库、有效在押仓单 → 弹出本弹窗；对齐 ASCII 列表页 1.0 节。原型可测：货主「赵磊」、提货人「李华」、资金方「建行无锡分行」。",
           },
         ],
       },

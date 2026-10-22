@@ -6,10 +6,10 @@ import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotat
 import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
 import {
   AUTH_STATUS_LABELS,
-  SOURCE_TYPE_LABELS,
   SUBJECT_TYPE_LABELS,
   type PartnerSubject,
 } from "@prototype/B端PC/src/features/partner-archives/domain/types"
+import { resolveCreateSourceDisplayLabel } from "@prototype/B端PC/src/features/partner-archives/lib/create-source-display"
 import {
   SUBJECT_STATUS_BADGE_CLASS,
   SUBJECT_STATUS_LABELS,
@@ -395,7 +395,10 @@ export function PartnerArchiveDetailPage() {
                   )
                 }
               />
-              <DetailRow label="创建来源" value={SOURCE_TYPE_LABELS[partner.source]} />
+              <DetailRow
+                label="创建来源"
+                value={resolveCreateSourceDisplayLabel(partner)}
+              />
               <DetailRow label="创建人" value={partner.createdBy} />
               <DetailRow label="创建时间" value={partner.createTime} />
               <DetailRow

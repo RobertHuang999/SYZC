@@ -8,7 +8,6 @@ export const PARTNER_ARCHIVE_EMPTY_FILTERS: PartnerArchiveFilters = {
   roleType: "全部",
   subjectStatus: "全部",
   roleStatus: "全部",
-  source: "全部",
   createTimeStart: "",
   createTimeEnd: "",
 }

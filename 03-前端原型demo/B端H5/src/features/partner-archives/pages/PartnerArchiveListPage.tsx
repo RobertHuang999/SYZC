@@ -19,7 +19,6 @@ import { partnerArchivesMock } from "@prototype/B端PC/src/features/partner-arch
 import {
   DEFAULT_PARTNER_ARCHIVE_FILTERS,
   PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS,
-  PARTNER_SOURCE_FILTER_OPTIONS,
   PARTNER_SUBJECT_TYPE_FILTER_OPTIONS,
   partnerSubjectStatusFilterOptions,
 } from "@prototype/B端PC/src/features/partner-archives/domain/constants"
@@ -38,15 +37,6 @@ const SUBJECT_TYPE_OPTIONS: DropdownOption[] = PARTNER_SUBJECT_TYPE_FILTER_OPTIO
 )
 const PHONE_VERIFY_OPTIONS: DropdownOption[] = PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS.map(
   (v) => ({ label: v === "全部" ? "全部核验" : v, value: v }),
-)
-
-function drawerOptions(values: readonly string[], allLabel: string): DropdownOption[] {
-  return values.map((v) => ({ label: v === "全部" ? allLabel : v, value: v }))
-}
-
-const SOURCE_OPTIONS: DropdownOption[] = drawerOptions(
-  PARTNER_SOURCE_FILTER_OPTIONS,
-  "全部来源",
 )
 
 export function PartnerArchiveListPage() {
@@ -181,16 +171,6 @@ export function PartnerArchiveListPage() {
               options={subjectStatusOptions}
               onChange={(subjectStatus) => {
                 const next = { ...appliedFilters, subjectStatus }
-                setDraftFilters(next)
-                setAppliedFilters(next)
-              }}
-            />
-            <DropdownFilterPill
-              label="创建来源"
-              value={appliedFilters.source}
-              options={SOURCE_OPTIONS}
-              onChange={(source) => {
-                const next = { ...appliedFilters, source }
                 setDraftFilters(next)
                 setAppliedFilters(next)
               }}

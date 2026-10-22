@@ -8,7 +8,6 @@ import {
 import { isArchiveRequiredFieldsPending } from "./archive-required-fields-pending"
 import {
   ROLE_TYPE_LABELS,
-  SOURCE_TYPE_LABELS,
   SUBJECT_TYPE_LABELS,
 } from "../domain/types"
 
@@ -117,12 +116,6 @@ export function filterPartnerArchives(
         (item) => SUBJECT_STATUS_LABELS[item.status] === filters.subjectStatus
       )
     }
-  }
-
-  if (!isAll(filters.source)) {
-    result = result.filter(
-      (item) => SOURCE_TYPE_LABELS[item.source] === filters.source
-    )
   }
 
   result = result.filter((item) =>

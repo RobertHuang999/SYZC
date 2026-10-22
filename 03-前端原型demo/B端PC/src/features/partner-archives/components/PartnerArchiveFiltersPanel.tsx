@@ -14,7 +14,6 @@ import { WarningFilterHeader } from "@/components/business/WarningListPrimitives
 import {
   DEFAULT_PARTNER_ARCHIVE_FILTERS,
   PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS,
-  PARTNER_SOURCE_FILTER_OPTIONS,
   PARTNER_SUBJECT_TYPE_FILTER_OPTIONS,
   partnerSubjectStatusFilterOptions,
 } from "../domain/constants"
@@ -133,27 +132,6 @@ export function PartnerArchiveFiltersPanel({
 
         {expanded && (
           <div className="grid gap-4 border-t pt-4 lg:grid-cols-4">
-            <FilterField label="创建来源">
-              <Select
-                value={value.source}
-                onValueChange={(next) => {
-                  if (next == null || next === "") return
-                  onChange({ ...value, source: next })
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PARTNER_SOURCE_FILTER_OPTIONS.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option === "全部" ? "全部创建来源" : option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FilterField>
-
             <FilterField label="联系手机">
               <Input
                 placeholder="11 位手机号精确匹配"

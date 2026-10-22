@@ -290,13 +290,13 @@ export function PartnerQuickCreateSheet({
               </>
             ) : null}
             <PrototypeSpecCallout className="sm:col-span-2">
-              创建来源：
+              落库创建来源固定为「人工建档」；本弹窗为
               {scene === "INBOUND_OWNER"
                 ? "入库快捷建档"
                 : scene === "OUTBOUND_PICKUP_AGENT"
                   ? "出库快捷建档"
-                  : "监管办理快捷建档"}{" "}
-              · 创建人：当前用户（审计字段，非用户提示）
+                  : "监管办理快捷建档"}
+              入口（入口差异见 PA-R07 操作审计，非上线用户文案）
             </PrototypeSpecCallout>
           </div>
 

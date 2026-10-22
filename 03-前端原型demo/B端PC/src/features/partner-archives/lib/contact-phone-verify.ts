@@ -28,7 +28,7 @@ export function formatContactPhoneVerifiedAt(value?: string) {
   return value.trim()
 }
 
-/** 详情展示：显式核验时间；C 端认证默认可用建档时间 */
+/** 详情展示：显式核验时间；C端注册默认可用建档时间 */
 export function resolveContactPhoneVerifiedAt(partner: PartnerSubject): string | undefined {
   if (partner.contactPhoneVerifiedAt?.trim()) {
     return partner.contactPhoneVerifiedAt.trim()

@@ -1,8 +1,13 @@
 import { enrichPartnerArchivesMock, type PartnerSubjectMockInput } from "./enrich-partner-archives-mock"
+import {
+  MOCK_FUNDER_FREEZE_BLOCKING_DOCS,
+  MOCK_OWNER_FREEZE_BLOCKING_DOCS,
+  MOCK_PICKUP_FREEZE_BLOCKING_DOCS,
+} from "./partner-freeze-blocking-mock-docs"
 
 /**
  * 合作方档案 Mock · 各业务场景各 1 条（精简）
- * 货主：个人已验证 / 个人未验证待补地址 / 企业已验证 / 企业未验证无经办人 / 企业冻结
+ * 货主：个人已验证（p-01 · PA-R02 有在库在押，冻结阻断）/ 个人未验证待补地址 / …
  * 提货：个人已验证 / 个人未验证 / 企业五要素 / 个人冻结
  * 资金方·服务方：完整 / 极简 / 各 1 条冻结
  */
@@ -31,7 +36,7 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
       {
         roleType: "OWNER",
         roleStatus: "NORMAL",
-        sourceDocType: "C端认证",
+        sourceDocType: "C端注册",
         sourceDocNo: "——",
         roleEffectiveTime: "2026-09-20 11:05:44",
       },
@@ -50,7 +55,7 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
     createTime: "2026-09-20 11:05:44",
     createdBy: "系统",
     updateTime: "2026-09-20 11:05:44",
-    associatedDocs: [],
+    associatedDocs: MOCK_OWNER_FREEZE_BLOCKING_DOCS,
     auditLogs: [
       {
         id: "log-101",
@@ -251,7 +256,7 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
     createTime: "2026-09-18 10:00:00",
     createdBy: "王调度",
     updateTime: "2026-09-18 10:00:00",
-    associatedDocs: [],
+    associatedDocs: MOCK_PICKUP_FREEZE_BLOCKING_DOCS,
     auditLogs: [
       {
         id: "log-501",
@@ -285,7 +290,7 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
       {
         roleType: "PICKUP_AGENT",
         roleStatus: "NORMAL",
-        sourceDocType: "出库快捷建档",
+        sourceDocType: "人工建档",
         sourceDocNo: "CK-20260928-011",
         roleEffectiveTime: "2026-09-28 07:45:00",
       },
@@ -402,7 +407,7 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
     createTime: "2026-08-01 09:00:00",
     createdBy: "金融业务部",
     updateTime: "2026-08-01 09:00:00",
-    associatedDocs: [],
+    associatedDocs: MOCK_FUNDER_FREEZE_BLOCKING_DOCS,
     auditLogs: [
       {
         id: "log-801",

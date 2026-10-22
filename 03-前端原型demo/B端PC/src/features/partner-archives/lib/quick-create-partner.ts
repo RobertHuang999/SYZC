@@ -156,7 +156,7 @@ export function quickCreatePartnerFromJob(
     roles: meta.roles.map((roleType) => ({
       roleType,
       roleStatus,
-      sourceDocType: meta.sourceLabel,
+      sourceDocType: "人工建档",
       sourceDocNo: "——",
       roleEffectiveTime: now,
     })),

@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
+import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { AlertCircle, Ban, FileText, Package } from "lucide-react"
 import type { PartnerSubject } from "../domain/types"
 import type { FreezeBlockReason } from "../lib/partner-archive-rules"
@@ -34,6 +35,9 @@ export function PartnerFreezeBlockedDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
+        <PrototypeAnnotationTarget annotationIds={["partner-archive-freeze-blocked"]}>
+          <span className="sr-only">冻结前置校验阻断</span>
+        </PrototypeAnnotationTarget>
         <DialogHeader>
           <div className="flex items-center gap-2.5 text-amber-600 dark:text-amber-500">
             <div className="flex size-9 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/50">

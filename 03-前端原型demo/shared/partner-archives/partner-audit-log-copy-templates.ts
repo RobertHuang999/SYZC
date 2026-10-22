@@ -21,7 +21,7 @@ export const PARTNER_AUDIT_ACTION_NAME = {
 export const PARTNER_AUDIT_CREATE_LINE = {
   C01: "管理端人工创建：{verifyHint}",
   C02: "由{bizEntry}快捷创建：{note}",
-  C03: "C 端实名认证通过，系统自动创建：{note}",
+  C03: "C端注册（实名认证通过），系统自动创建：{note}",
   C04: "由{docType} {docNo} 业务带出创建：{note}",
 } as const
 

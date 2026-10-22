@@ -182,13 +182,16 @@ export function checkPartnerSubjectFreezeEligibility(
   // 1. 货主信息：有货不能冻结
   if (partner.archiveMenu === "货主信息") {
     const stockDocs = (partner.associatedDocs ?? []).filter((doc) => {
-      // 仓单有效在押/开立
-      if (doc.docType === "WARRANT" && !/已解押|已注销|已作废/.test(doc.statusName)) {
+      if (doc.docType === "WARRANT" && !/已解押|已注销|已作废|已关闭/.test(doc.statusName)) {
         return true
       }
-      // 入库已完成且有在库货物吨位
-      if (doc.docType === "INBOUND" && doc.statusName === "已完成") {
-        return true
+      if (doc.docType === "INBOUND") {
+        if (/已作废|已取消|已关闭|已出清/.test(doc.statusName)) {
+          return false
+        }
+        if (/已完成|审批中|待审批|处理中|未出清/.test(doc.statusName)) {
+          return true
+        }
       }
       return false
     })
@@ -197,10 +200,11 @@ export function checkPartnerSubjectFreezeEligibility(
       return {
         canFreeze: false,
         title: "无法冻结该货主主体",
-        reason: "该货主在系统中仍有在库库存或有效在押货物，暂不支持冻结",
+        reason:
+          "该货主名下仍有在库或在押货物，无法执行冻结。请先办理货物出库转让或解除质押，确保名下库存清零后再行冻结。",
         detail:
-          "遵循【分菜单主体冻结与在途在库前置校验规则】(PA-R02)，为防范货权纠纷与物权悬空，名下存在在库货物或在押仓单的主体禁止冻结。",
-        guide: "请先办理存货出库转让或解除仓单质押，确保名下在库在押库存清零后再执行冻结操作。",
+          "遵循【分菜单主体冻结与在途在库前置校验规则】(PA-R02)：命中在库库存、未出清入库单或有效在押仓单时强阻断，禁止进入冻结原因录入步骤。",
+        guide: "请先办理存货出库、货物转让或仓单解押/注销，待名下在库与在押清零后再点击【冻结】。",
         blockingDocs: stockDocs,
       }
     }

@@ -37,10 +37,10 @@ import {
 } from "../domain/actions"
 import {
   AUTH_STATUS_LABELS,
-  SOURCE_TYPE_LABELS,
   SUBJECT_TYPE_LABELS,
   type PartnerSubject,
 } from "../domain/types"
+import { resolveCreateSourceDisplayLabel } from "../lib/create-source-display"
 import {
   commitPartnerArchive,
   getPartnerArchiveById,
@@ -498,7 +498,9 @@ export function PartnerArchiveDetailPage() {
               {/* 第二行：创建信息（创建来源、创建人、创建时间） */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="md:col-span-1">
-                  <DetailField label="创建来源">{SOURCE_TYPE_LABELS[partner.source]}</DetailField>
+                  <DetailField label="创建来源">
+                    {resolveCreateSourceDisplayLabel(partner)}
+                  </DetailField>
                 </div>
                 <div className="md:col-span-1">
                   <DetailField label="创建人">{partner.createdBy}</DetailField>

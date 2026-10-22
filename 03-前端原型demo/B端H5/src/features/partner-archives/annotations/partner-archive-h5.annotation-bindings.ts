@@ -14,7 +14,7 @@ export const partnerArchiveH5ListAnnotationBindings: Record<
   "partner-archive-filter": {
     targetId: "partner-archive-filter",
     contentSuffix:
-      "【H5 端差异】筛选项以顶栏关键词 + 四枚横滑筛选胶囊（主体类型、主体状态、创建来源、手机核验）+ 筛选抽屉（联系手机、创建时间）；新增走右下角悬浮【+】（无 PC 筛选区右上按钮）。",
+      "【H5 端差异】筛选项以顶栏关键词 + 三枚横滑筛选胶囊（主体类型、主体状态、手机核验）+ 筛选抽屉（联系手机、创建时间；无创建来源筛）；新增走右下角悬浮【+】（无 PC 筛选区右上按钮）。",
   },
   "partner-archive-table": {
     targetId: "partner-archive-table",

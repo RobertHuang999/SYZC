@@ -35,12 +35,6 @@ export const PARTNER_ROLE_STATUS_FILTER_OPTIONS = [
   "冻结",
 ] as const
 
-export const PARTNER_SOURCE_FILTER_OPTIONS = [
-  "全部",
-  "C端注册",
-  "人工建档",
-] as const
-
 export const PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS = [
   "全部",
   "已验证",
@@ -55,7 +49,6 @@ export const DEFAULT_PARTNER_ARCHIVE_FILTERS: PartnerArchiveFilters = {
   roleType: "全部",
   subjectStatus: "全部",
   roleStatus: "全部",
-  source: "全部",
   createTimeStart: "",
   createTimeEnd: "",
 }

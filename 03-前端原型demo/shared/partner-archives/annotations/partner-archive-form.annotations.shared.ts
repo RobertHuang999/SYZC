@@ -16,10 +16,9 @@ export const partnerArchiveFormAnnotationsShared: SharedPrototypeAnnotation[] = 
           {
             label: "业务流转时序图",
             content: `flowchart TD
-    subgraph S1[上游建档入口渠道]
-        A1["管理端人工建档<br/>(本页面入口)"]
-        A2["C端实名认证回调沉淀<br/>(默认挂接正常货主)"]
-        A3["单据静默沉淀经办人<br/>(出库单录入新司机)"]
+    subgraph S1[上游建档入口 · 创建来源仅两类]
+        A1["人工建档<br/>(管理端新增与作业快捷录入)"]
+        A2["C端注册<br/>(实名认证回调，仅货主信息域)"]
     end
 
     subgraph S2[合作方主数据与准入引擎]
@@ -38,7 +37,6 @@ export const partnerArchiveFormAnnotationsShared: SharedPrototypeAnnotation[] = 
 
     A1 --> B1
     A2 --> B1
-    A3 --> B1
     B1 -->|唯一校验通过| B2
     B2 -->|准入通过| B3
     B3 -->|合作方主体引用| C1

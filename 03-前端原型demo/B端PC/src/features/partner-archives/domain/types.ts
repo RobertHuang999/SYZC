@@ -26,7 +26,7 @@ export type RoleStatus =
   | "FROZEN" // 冻结
   | "INVALID" // 失效
 
-export type SourceType = "MANUAL" | "CLIENT_AUTH" | "DOC_SETTLEMENT" // 人工建档 | C端认证 | 单据沉淀
+export type SourceType = "MANUAL" | "CLIENT_AUTH" // 人工建档 | C端注册
 
 /** 业务联系手机短信二元核验状态（与 C 端实名认证独立） */
 export type ContactPhoneVerifyStatus = "VERIFIED" | "UNVERIFIED"
@@ -140,7 +140,6 @@ export interface PartnerArchiveFilters {
   roleType: string
   subjectStatus: string
   roleStatus: string
-  source: string
   createTimeStart: string
   createTimeEnd: string
 }
@@ -178,5 +177,4 @@ export const SUBJECT_TYPE_LABELS: Record<SubjectType, string> = {
 export const SOURCE_TYPE_LABELS: Record<SourceType, string> = {
   MANUAL: "人工建档",
   CLIENT_AUTH: "C端注册",
-  DOC_SETTLEMENT: "人工建档",
 }
