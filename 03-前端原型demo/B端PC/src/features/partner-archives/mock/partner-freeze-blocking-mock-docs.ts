@@ -41,6 +41,21 @@ export const MOCK_PICKUP_FREEZE_BLOCKING_DOCS: AssociatedDocItem[] = [
   },
 ]
 
+/** PA-R02 演示：服务方进行中监管单（中储发展 PA-202609010 · p-10） */
+export const MOCK_SERVICE_FREEZE_BLOCKING_DOCS: AssociatedDocItem[] = [
+  {
+    id: "doc-jg-p10-1",
+    docType: "WARRANT",
+    docTypeName: "监管服务单",
+    docNo: "JG-20260918-007",
+    roleName: "监管方",
+    bizDate: "2026-09-18",
+    statusName: "生效中",
+    handlerName: "郑主管",
+    remark: "无锡阳山电解铜监管服务 · 协议存续",
+  },
+]
+
 /** PA-R02 演示：资金方进行中抵质押（建行无锡分行 PA-202609008） */
 export const MOCK_FUNDER_FREEZE_BLOCKING_DOCS: AssociatedDocItem[] = [
   {

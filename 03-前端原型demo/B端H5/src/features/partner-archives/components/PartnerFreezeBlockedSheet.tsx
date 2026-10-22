@@ -1,4 +1,5 @@
 import { AlertCircle, Ban, X } from "lucide-react"
+import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import type { PartnerSubject } from "@prototype/B端PC/src/features/partner-archives/domain/types"
 import type { FreezeBlockReason } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-rules"
 
@@ -30,7 +31,13 @@ export function PartnerFreezeBlockedSheet({
         aria-label="关闭"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-sm rounded-xl bg-white p-4 shadow-xl">
+      <div
+        id="partner-archive-freeze-blocked"
+        className="relative w-full max-w-sm rounded-xl bg-white p-4 shadow-xl"
+      >
+        <PrototypeAnnotationTarget annotationIds={["partner-archive-freeze-blocked"]}>
+          <span className="sr-only">冻结前置校验阻断</span>
+        </PrototypeAnnotationTarget>
         <button
           type="button"
           className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-md text-gray-400 active:bg-gray-100"

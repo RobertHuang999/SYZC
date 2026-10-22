@@ -32,11 +32,8 @@ export function partnerCertAddressFieldsDiff(
   )
 }
 
-/**
- * 【个人货主证件地址变更规则】(PA-R06a)：须先弹改址确认并必填改址原因。
- * 待补全首次补地址（原无保存地址）不触发，走 M03 补全文案。
- */
-export function requiresPartnerChangeAddressReasonDialog(input: {
+/** 个人货主编辑改址（非待补全首次补地址）时，保存后走 PA-R06a 活跃池切换。 */
+export function isPartnerIndividualOwnerCertAddressChange(input: {
   isEdit: boolean
   archiveMenu: PartnerArchiveMenuLabel
   subjectType: SubjectType

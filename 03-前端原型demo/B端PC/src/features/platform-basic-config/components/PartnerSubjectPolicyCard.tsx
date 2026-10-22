@@ -16,6 +16,9 @@ type PartnerSubjectPolicyCardProps = {
   policy: PartnerSubjectAccessPolicy
   onChange: (patch: Partial<PartnerSubjectAccessPolicy>) => void
   onScanDuplicates?: () => void
+  /** 开启/关闭防重复前校验（P03）；未传则直接写 policy */
+  onDuplicatePreventChange?: (checked: boolean) => void
+  duplicateOrderHint?: string
   footnote?: string
   certSpecNote?: string
   duplicateSpecNote?: string
@@ -30,6 +33,8 @@ export function PartnerSubjectPolicyCard({
   policy,
   onChange,
   onScanDuplicates,
+  onDuplicatePreventChange,
+  duplicateOrderHint,
   footnote,
   certSpecNote,
   duplicateSpecNote,
@@ -62,14 +67,18 @@ export function PartnerSubjectPolicyCard({
           <div className="flex flex-wrap items-center gap-3">
             <ToggleSwitch
               checked={policy.addressDuplicatePrevent}
-              onCheckedChange={(checked) =>
+              onCheckedChange={(checked) => {
+                if (onDuplicatePreventChange) {
+                  onDuplicatePreventChange(checked)
+                  return
+                }
                 onChange({ addressDuplicatePrevent: checked })
-              }
+              }}
             />
             <span className="text-sm">
               {policy.addressDuplicatePrevent ? "开启" : "关闭"}
             </span>
-            {policy.addressDuplicatePrevent && onScanDuplicates && (
+            {!policy.addressDuplicatePrevent && onScanDuplicates && (
               <Button
                 type="button"
                 variant="outline"
@@ -84,7 +93,7 @@ export function PartnerSubjectPolicyCard({
           <ProductFieldHint className="text-amber-800 dark:text-amber-300">
             {duplicateWarning}
           </ProductFieldHint>
-          <ProductFieldHint>{duplicateHint}</ProductFieldHint>
+          <ProductFieldHint>{duplicateOrderHint ?? duplicateHint}</ProductFieldHint>
           {duplicateSpecNote ? <PrototypeSpecCallout>{duplicateSpecNote}</PrototypeSpecCallout> : null}
         </div>
       </CardContent>

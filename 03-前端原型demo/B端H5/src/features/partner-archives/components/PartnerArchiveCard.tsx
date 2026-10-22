@@ -4,14 +4,17 @@ import {
   type PartnerSubject,
 } from "@prototype/B端PC/src/features/partner-archives/domain/types"
 import {
-  isArchiveRequiredFieldsPending,
+  getPartnerArchiveRowActions,
   partnerArchiveEditActionLabel,
-} from "@prototype/B端PC/src/features/partner-archives/lib/archive-required-fields-pending"
-import {
   SUBJECT_STATUS_LABELS,
+  type PartnerArchiveRowAction,
 } from "@prototype/B端PC/src/features/partner-archives/domain/actions"
+import { isArchiveRequiredFieldsPending } from "@prototype/B端PC/src/features/partner-archives/lib/archive-required-fields-pending"
 import { maskLoginPhone } from "@prototype/B端PC/src/features/partner-archives/lib/detail-utils"
+import { resolvePartnerSubjectFreezeReason } from "@prototype/B端PC/src/features/partner-archives/lib/partner-subject-freeze-state"
 import {
+  canShowVerifyContactPhoneAction,
+  CONTACT_PHONE_VERIFY_BADGE_CLASS,
   CONTACT_PHONE_VERIFY_LABELS,
   resolveContactPhoneVerified,
 } from "@prototype/B端PC/src/features/partner-archives/lib/contact-phone-verify"
@@ -19,6 +22,7 @@ import { partnerArchiveDetailRoute, partnerArchiveFormRoute } from "../domain/co
 
 type PartnerArchiveCardProps = {
   item: PartnerSubject
+  onRowAction: (action: PartnerArchiveRowAction, item: PartnerSubject) => void
 }
 
 function subjectStatusClass(status: PartnerSubject["status"]) {
@@ -27,19 +31,20 @@ function subjectStatusClass(status: PartnerSubject["status"]) {
     : "bg-amber-50 text-amber-700 border-amber-200"
 }
 
-function verifyBadgeClass(status: ReturnType<typeof resolveContactPhoneVerified>) {
-  return status === "VERIFIED"
-    ? "bg-sky-50 text-sky-700 border-sky-200"
-    : "bg-gray-100 text-gray-600 border-gray-200"
-}
+const actionTextClass = "shrink-0 text-blue-600 active:opacity-75"
+const actionDangerTextClass = "shrink-0 text-red-600 active:opacity-75"
 
-export function PartnerArchiveCard({ item }: PartnerArchiveCardProps) {
+export function PartnerArchiveCard({ item, onRowAction }: PartnerArchiveCardProps) {
   const verifyStatus = resolveContactPhoneVerified(item)
+  const showVerifyContact = canShowVerifyContactPhoneAction(item)
   const linkedSummary = (item.linkedPartnerArchives ?? [])
     .map((link) => link.targetMenu)
     .slice(0, 3)
     .join("、")
   const profilePending = isArchiveRequiredFieldsPending(item)
+  const freezeReason =
+    item.status === "FROZEN" ? resolvePartnerSubjectFreezeReason(item) : undefined
+  const rowActions = getPartnerArchiveRowActions(item)
 
   return (
     <div className="rounded-xl border border-[#232D39]/10 bg-white p-3.5 shadow-xs">
@@ -68,6 +73,12 @@ export function PartnerArchiveCard({ item }: PartnerArchiveCardProps) {
       </div>
 
       <dl className="mt-2.5 space-y-1.5 text-xs">
+        {freezeReason ? (
+          <div className="rounded-md border border-amber-100 bg-amber-50/90 px-2 py-1.5 text-[11px] leading-snug text-amber-900">
+            <span className="text-[#232D39]/55">冻结原因 · </span>
+            {freezeReason}
+          </div>
+        ) : null}
         <div className="flex justify-between gap-2">
           <dt className="text-[#232D39]/55 shrink-0">主体类型</dt>
           <dd className="text-[#232D39] text-right">{SUBJECT_TYPE_LABELS[item.subjectType]}</dd>
@@ -96,7 +107,7 @@ export function PartnerArchiveCard({ item }: PartnerArchiveCardProps) {
                 : item.contactPhone || "——"}
             </span>
             <span
-              className={`inline-flex shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-medium ${verifyBadgeClass(verifyStatus)}`}
+              className={`inline-flex shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-medium ${CONTACT_PHONE_VERIFY_BADGE_CLASS[verifyStatus]}`}
             >
               {CONTACT_PHONE_VERIFY_LABELS[verifyStatus]}
             </span>
@@ -108,19 +119,59 @@ export function PartnerArchiveCard({ item }: PartnerArchiveCardProps) {
         </div>
       </dl>
 
-      <div className="mt-3 flex gap-2 border-t border-[#232D39]/5 pt-3">
-        <Link
-          to={partnerArchiveDetailRoute(item.archiveMenu, item.id)}
-          className="rounded-md bg-[#232D39]/5 px-3 py-1.5 text-xs font-medium text-[#232D39]"
-        >
-          查看详情
-        </Link>
-        <Link
-          to={partnerArchiveFormRoute(item.archiveMenu, item.id)}
-          className="ml-auto rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white"
-        >
-          {partnerArchiveEditActionLabel(item)}
-        </Link>
+      <div className="mt-2 flex flex-nowrap items-center justify-end gap-4 overflow-x-auto border-t border-[#232D39]/5 pt-2 text-xs font-medium [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {rowActions.includes("detail") ? (
+          <Link
+            to={partnerArchiveDetailRoute(item.archiveMenu, item.id)}
+            className={actionTextClass}
+          >
+            详情
+          </Link>
+        ) : null}
+        {showVerifyContact ? (
+          <button
+            type="button"
+            className={`cursor-pointer ${actionTextClass}`}
+            onClick={() => onRowAction("verifyContact", item)}
+          >
+            验证
+          </button>
+        ) : null}
+        {rowActions.includes("edit") ? (
+          <Link
+            to={partnerArchiveFormRoute(item.archiveMenu, item.id)}
+            className={actionTextClass}
+          >
+            {partnerArchiveEditActionLabel(item)}
+          </Link>
+        ) : null}
+        {rowActions.includes("appendRole") ? (
+          <button
+            type="button"
+            className={`cursor-pointer ${actionTextClass}`}
+            onClick={() => onRowAction("appendRole", item)}
+          >
+            追加
+          </button>
+        ) : null}
+        {rowActions.includes("freeze") ? (
+          <button
+            type="button"
+            className={`cursor-pointer ${actionDangerTextClass}`}
+            onClick={() => onRowAction("freeze", item)}
+          >
+            冻结
+          </button>
+        ) : null}
+        {rowActions.includes("unfreeze") ? (
+          <button
+            type="button"
+            className={`cursor-pointer ${actionTextClass}`}
+            onClick={() => onRowAction("unfreeze", item)}
+          >
+            解冻
+          </button>
+        ) : null}
       </div>
     </div>
   )

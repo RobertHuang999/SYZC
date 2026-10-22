@@ -5,6 +5,7 @@ import { inboundDetailRoute } from "../domain/constants"
 import type { MobileInboundRecord } from "../domain/types"
 import { MobileGoodsNamesSheet } from "./MobileGoodsNamesSheet"
 import { H5_CARD } from "@/shared/h5-ui-theme"
+import { DocumentManagementSheet } from "@/shared/document-management"
 
 type Props = {
   item: MobileInboundRecord
@@ -14,6 +15,7 @@ type Props = {
 export function InboundRecordCard({ item, onDownload }: Props) {
   const [downloadToast, setDownloadToast] = useState<string | null>(null)
   const [goodsSheetOpen, setGoodsSheetOpen] = useState(false)
+  const [docsOpen, setDocsOpen] = useState(false)
   const multiGoods = item.goodsNames.length > 1
 
   const handleDownloadDoc = (e: React.MouseEvent) => {
@@ -74,9 +76,9 @@ export function InboundRecordCard({ item, onDownload }: Props) {
           </button>
         </div>
 
-        <div className="space-y-1.5 text-xs">
+        <div className="rounded-lg bg-[#232D39]/5 p-3 space-y-2 text-xs">
           <div className="flex items-baseline justify-between">
-            <span className="shrink-0 text-gray-500">入库单号</span>
+            <span className="shrink-0 text-[#232D39]/60">入库单号</span>
             <Link
               to={inboundDetailRoute(item.id)}
               className="max-w-[65%] truncate pl-2 text-right font-medium text-blue-600"
@@ -85,15 +87,15 @@ export function InboundRecordCard({ item, onDownload }: Props) {
             </Link>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="shrink-0 text-gray-500">仓库名称</span>
-            <span className="truncate pl-2 text-right text-gray-900">{item.warehouseName}</span>
+            <span className="shrink-0 text-[#232D39]/60">仓库名称</span>
+            <span className="truncate pl-2 text-right text-[#232D39]">{item.warehouseName}</span>
           </div>
           <div className="flex items-baseline justify-between gap-2">
-            <span className="shrink-0 text-gray-500">入库货品</span>
+            <span className="shrink-0 text-[#232D39]/60">入库货品</span>
             {multiGoods ? (
               <button
                 type="button"
-                className="flex min-w-0 items-center gap-0.5 text-right text-gray-900"
+                className="flex min-w-0 items-center gap-0.5 text-right text-[#232D39]"
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
@@ -101,32 +103,32 @@ export function InboundRecordCard({ item, onDownload }: Props) {
                 }}
               >
                 <span className="truncate">{item.goodsSummary}</span>
-                <ChevronRight className="size-3.5 shrink-0 text-gray-400" />
+                <ChevronRight className="size-3.5 shrink-0 text-[#232D39]/40" />
               </button>
             ) : (
-              <span className="truncate pl-2 text-right text-gray-900">{item.goodsSummary}</span>
+              <span className="truncate pl-2 text-right text-[#232D39]">{item.goodsSummary}</span>
             )}
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="shrink-0 text-gray-500">入库日期</span>
-            <span className="pl-2 text-right text-gray-900">{item.inboundDate}</span>
+            <span className="shrink-0 text-[#232D39]/60">入库日期</span>
+            <span className="pl-2 text-right text-[#232D39]">{item.inboundDate}</span>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="shrink-0 text-gray-500">入库数量</span>
-            <span className="pl-2 text-right font-medium text-gray-900">
+            <span className="shrink-0 text-[#232D39]/60">入库数量</span>
+            <span className="pl-2 text-right font-medium text-[#232D39]">
               {item.quantityLabel}
               {item.unit ? ` ${item.unit}` : ""}
             </span>
           </div>
         </div>
 
-        <div className="space-y-1 border-t border-gray-100 pt-2 text-xs text-gray-500">
+        <div className="space-y-1 pt-0.5 text-xs text-[#232D39]/50">
           <div className="flex items-center gap-1.5">
-            <User className="size-3 shrink-0 text-gray-400" />
+            <User className="size-3 shrink-0 text-[#232D39]/35" />
             <span className="truncate">制单人: {item.creatorDisplay}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <Clock className="size-3 shrink-0 text-gray-400" />
+            <Clock className="size-3 shrink-0 text-[#232D39]/35" />
             <span>制单时间: {item.createdAt}</span>
           </div>
         </div>
@@ -138,6 +140,17 @@ export function InboundRecordCard({ item, onDownload }: Props) {
             className="cursor-pointer text-blue-600 active:opacity-75"
           >
             下载记录
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setDocsOpen(true)
+            }}
+            className="cursor-pointer text-blue-600 active:opacity-75"
+          >
+            资料管理
           </button>
           <Link
             to={inboundDetailRoute(item.id)}
@@ -159,6 +172,15 @@ export function InboundRecordCard({ item, onDownload }: Props) {
         orderNo={item.orderNo}
         goodsNames={item.goodsNames}
         onClose={() => setGoodsSheetOpen(false)}
+      />
+
+      <DocumentManagementSheet
+        open={docsOpen}
+        orderNo={item.orderNo}
+        orderType="inbound"
+        ownerName={item.ownerName}
+        warehouseName={item.warehouseName}
+        onClose={() => setDocsOpen(false)}
       />
     </div>
   )

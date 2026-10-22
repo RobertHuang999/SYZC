@@ -1,7 +1,8 @@
 import { useState } from "react"
-import { ChevronRight, FileCheck, FileText, User, Clock, Package } from "lucide-react"
+import { User, Clock, Package } from "lucide-react"
 import { Link } from "react-router-dom"
 import type { MobileOutboundRecord } from "../domain/types"
+import { DocumentManagementSheet } from "@/shared/document-management"
 
 interface OutboundRecordCardProps {
   item: MobileOutboundRecord
@@ -19,6 +20,7 @@ const TYPE_BADGE_CLASS: Record<string, string> = {
 
 export function OutboundRecordCard({ item, onDownload }: OutboundRecordCardProps) {
   const [goodsDetailOpen, setGoodsDetailOpen] = useState(false)
+  const [docsOpen, setDocsOpen] = useState(false)
   const typeBadgeClass =
     TYPE_BADGE_CLASS[item.type] || "bg-gray-50 text-gray-700 border-gray-200"
 
@@ -121,30 +123,34 @@ export function OutboundRecordCard({ item, onDownload }: OutboundRecordCardProps
         </div>
       </div>
 
-      {/* 快捷操作区 (对齐源码 buttons-view) */}
-      <div className="mt-2 border-t border-[#232D39]/5 px-3.5 py-2.5 flex items-center justify-end gap-2">
+      {/* 快捷操作区：与入库记录卡片一致，纯文字操作不打边框 */}
+      <div className="mx-3.5 mt-2 pb-3.5 flex items-center justify-end gap-4 text-xs font-medium">
         <button
           type="button"
-          className="flex items-center gap-1 rounded-full border border-[#232D39]/20 px-3 py-1 text-xs font-medium text-[#232D39]/80 active:bg-gray-50 cursor-pointer"
+          className="cursor-pointer text-blue-600 active:opacity-75"
           onClick={() => onDownload("excel", item)}
         >
-          <FileCheck className="size-3 text-[#232D39]/50" />
           下载记录
         </button>
         <button
           type="button"
-          className="flex items-center gap-1 rounded-full border border-[#232D39]/20 px-3 py-1 text-xs font-medium text-[#232D39]/80 active:bg-gray-50 cursor-pointer"
+          className="cursor-pointer text-blue-600 active:opacity-75"
           onClick={() => onDownload("pdf", item)}
         >
-          <FileText className="size-3 text-[#232D39]/50" />
           单据下载
+        </button>
+        <button
+          type="button"
+          className="cursor-pointer text-blue-600 active:opacity-75"
+          onClick={() => setDocsOpen(true)}
+        >
+          资料管理
         </button>
         <Link
           to={`/m/workspace/outbound-records/${item.id}`}
-          className="flex items-center gap-0.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600 active:bg-blue-100 cursor-pointer"
+          className="text-blue-600 active:opacity-75"
         >
-          <span>查看详情</span>
-          <ChevronRight className="size-3" />
+          查看详情
         </Link>
       </div>
 
@@ -203,6 +209,15 @@ export function OutboundRecordCard({ item, onDownload }: OutboundRecordCardProps
           </div>
         </div>
       )}
+
+      <DocumentManagementSheet
+        open={docsOpen}
+        orderNo={item.orderNo}
+        orderType="outbound"
+        ownerName={item.ownerName}
+        warehouseName={item.warehouseName}
+        onClose={() => setDocsOpen(false)}
+      />
     </div>
   )
 }

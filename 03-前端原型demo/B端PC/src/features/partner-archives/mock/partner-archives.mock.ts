@@ -3,13 +3,15 @@ import {
   MOCK_FUNDER_FREEZE_BLOCKING_DOCS,
   MOCK_OWNER_FREEZE_BLOCKING_DOCS,
   MOCK_PICKUP_FREEZE_BLOCKING_DOCS,
+  MOCK_SERVICE_FREEZE_BLOCKING_DOCS,
 } from "./partner-freeze-blocking-mock-docs"
 
 /**
  * 合作方档案 Mock · 各业务场景各 1 条（精简）
- * 货主：个人已验证（p-01 · PA-R02 有在库在押，冻结阻断）/ 个人未验证待补地址 / …
- * 提货：个人已验证 / 个人未验证 / 企业五要素 / 个人冻结
- * 资金方·服务方：完整 / 极简 / 各 1 条冻结
+ *
+ * **H5/PC 冻结演示**
+ * - 已冻结样例（筛「冻结」或列表沉底）：货主 p-12 · 提货 p-13 · 资金 p-14 · 服务 p-15
+ * - PA-R02 阻断（详情/列表点【冻结主体】）：货主 p-01 赵磊 · 提货 p-05 李华 · 资金 p-08 建行 · 服务 p-10 中储
  */
 const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
   // ── 货主信息 ──
@@ -51,6 +53,12 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
       },
     ],
     source: "CLIENT_AUTH",
+    boundAccount: {
+      accountId: "CU-20260920001",
+      loginPhone: "13801234567",
+      authStatus: "AUTHENTICATED",
+      bindTime: "2026-09-20 11:05:44",
+    },
     createDate: "2026-09-20",
     createTime: "2026-09-20 11:05:44",
     createdBy: "系统",
@@ -63,7 +71,15 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
         operator: "系统",
         actionType: "CREATE",
         actionName: "创建合作方档案",
-        detail: "C 端实名认证：联系手机已验证（编辑页姓名/证号锁定）",
+        detail: "C端注册（实名认证通过），系统自动创建：联系手机已验证并完成短信核验",
+      },
+      {
+        id: "log-102",
+        opTime: "2026-09-20 11:05:44",
+        operator: "系统",
+        actionType: "BIND_ACCOUNT",
+        actionName: "绑定客户账号",
+        detail: "C 端账号 CU-20260920001 与主体 1:1 绑定生效",
       },
     ],
   },
@@ -501,7 +517,7 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
     createTime: "2026-08-15 10:30:00",
     createdBy: "运营主管",
     updateTime: "2026-08-15 10:30:00",
-    associatedDocs: [],
+    associatedDocs: MOCK_SERVICE_FREEZE_BLOCKING_DOCS,
     auditLogs: [
       {
         id: "log-1001",

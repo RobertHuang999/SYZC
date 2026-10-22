@@ -19,12 +19,12 @@ export const partnerArchiveH5ListAnnotationBindings: Record<
   "partner-archive-table": {
     targetId: "partner-archive-table",
     contentSuffix:
-      "【H5 端差异】列表为卡片流（非表格）；点击整卡进详情。",
+      "【H5 端差异】列表为卡片流（非表格）；点名称/【详情】进详情页。",
   },
   "partner-archive-row-actions": {
     targetId: "partner-archive-table",
     contentSuffix:
-      "【H5 端差异】无表格操作列；冻结/追加/解冻等收口在详情底栏（规则矩阵同 PC）。",
+      "【H5 端差异】方案 A 行操作在卡片 Footer 单行右对齐文字链（对齐入库/出库 H5 卡片，无胶囊栅格）；含未验证时的【验证】；与 PC 操作列位次一致；详情页只读无重复底栏。",
   },
   "partner-archive-pagination": {
     targetId: "partner-archive-pagination",
@@ -45,7 +45,7 @@ export const partnerArchiveH5DetailAnnotationBindings: Record<
   "partner-archive-detail-actions": {
     targetId: "partner-archive-detail-actions",
     contentSuffix:
-      "【H5 端差异】操作按钮在底部固定条（非 PC 页头横栏）；按钮集合与显隐矩阵同 PC。",
+      "【H5 端差异】详情只读查阅；列表卡片与 PC 行操作 + PC 详情页头均含【验证联系手机】（显隐同 PA-P02）。",
   },
   "partner-archive-detail-tabs": {
     targetId: "partner-archive-detail-tabs",
@@ -85,12 +85,7 @@ export const partnerArchiveH5FormAnnotationBindings: Record<
   "partner-archive-form-address": {
     targetId: "partner-archive-form-address",
     contentSuffix:
-      "【H5 端差异】省/市/区/详细地址为四行控件 + 多行详细地址（字段清单 8.8.3）。",
-  },
-  "partner-archive-form-change-address": {
-    targetId: "partner-archive-form-change-address",
-    contentSuffix:
-      "【H5 端差异】改址确认用底部 Sheet（非 PC Dialog）；规则仍【个人货主证件地址变更规则】(PA-R06a)。",
+      "【H5 端差异】省/市/区/详细地址为四行控件 + 多行详细地址（字段清单 8.8.3）；个人货主改址与 PC 一致，保存前准入、无单独改址 Sheet（PA-R06a）。",
   },
   "partner-archive-form-roles": {
     targetId: "partner-archive-form-roles",

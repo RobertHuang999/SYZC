@@ -40,9 +40,7 @@ import {
   resolveContactPhoneVerified,
 } from "@prototype/B端PC/src/features/partner-archives/lib/contact-phone-verify"
 import { buildPartnerAddressAuditClauses } from "@prototype/shared/partner-archives/partner-audit-log-detail"
-import { requiresPartnerChangeAddressReasonDialog } from "@prototype/shared/partner-archives/partner-change-address-pa-r06a"
 import {
-  PARTNER_CHANGE_ADDRESS_DIALOG,
   PARTNER_FORM_ACTION_LABELS,
   PARTNER_FORM_BASE_SECTION_TITLE,
   PARTNER_FORM_ADDRESS_SPEC_NOTE_OWNER,
@@ -57,7 +55,6 @@ import {
   partnerFormPageTitle,
   PARTNER_OWNER_ENTERPRISE_AGENT_USER_HINT,
 } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
-import { PartnerConfirmSheet } from "../components/PartnerConfirmSheet"
 import { PartnerVerifySheet } from "../components/PartnerVerifySheet"
 import { handleStackBack } from "@/shared/navigation/stack-back"
 import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
@@ -150,8 +147,6 @@ export function PartnerArchiveFormPage() {
   const [verifyMode, setVerifyMode] = useState<"CHANGE_PHONE" | "VERIFY_CONTACT">(
     "VERIFY_CONTACT",
   )
-  const [changeAddressOpen, setChangeAddressOpen] = useState(false)
-  const [pendingChangeReason, setPendingChangeReason] = useState<string | undefined>()
   const [submitting, setSubmitting] = useState(false)
 
   const isPendingCompletion = useMemo(() => {
@@ -300,7 +295,7 @@ export function PartnerArchiveFormPage() {
     return null
   }
 
-  const doSave = (changeReason?: string, options?: { verifiedOnCreate?: boolean }) => {
+  const doSave = (options?: { verifiedOnCreate?: boolean }) => {
     const phoneChanged = Boolean(isEdit && hasPhoneDiff)
     const oldPhoneVal = existing?.contactPhone
     const now = new Date().toISOString().replace("T", " ").substring(0, 19)
@@ -452,7 +447,6 @@ export function PartnerArchiveFormPage() {
         certBefore: certAddressBeforeSave,
         certAfter: certAddressAfterSave,
         wasPendingCompletion: wasPending,
-        changeReason,
       }),
     )
 
@@ -478,8 +472,6 @@ export function PartnerArchiveFormPage() {
         ? "短信身份核验通过，联系手机修改成功"
         : phoneChanged
           ? "联系手机修改成功"
-          : changeReason
-          ? "改址成功并已生效"
           : wasPending
             ? "资料补全成功，角色已激活为正常"
             : "保存成功",
@@ -490,27 +482,6 @@ export function PartnerArchiveFormPage() {
   const proceedAfterValidation = (intent: "SAVE" | "SAVE_AND_VERIFY") => {
     setSubmitting(true)
     setWarning(null)
-
-    const nextCert = {
-      province,
-      city,
-      district,
-      detail: detailTrimmed,
-      fullAddress: `${province}${city}${district}${detailTrimmed}`,
-    }
-    if (
-      requiresPartnerChangeAddressReasonDialog({
-        isEdit,
-        archiveMenu: archiveMenuLabel,
-        subjectType,
-        existingCertAddress: existing?.certAddress,
-        nextCertAddress: nextCert,
-      })
-    ) {
-      setChangeAddressOpen(true)
-      setSubmitting(false)
-      return
-    }
 
     const needsPhoneVerify = requiresPartnerEditPhoneSmsVerify({
       isEdit,
@@ -637,7 +608,7 @@ export function PartnerArchiveFormPage() {
 
           {isFrozenLimitedEdit ? (
             <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900">
-              主体处于冻结状态：名称与身份标识不可修改；可以维护联系电话。证件地址仅限纠偏，须通过准入并填写改址原因。
+              主体处于冻结状态：名称与身份标识不可修改；可以维护联系电话。证件地址仅限纠偏，须通过准入校验。
             </div>
           ) : null}
 
@@ -782,10 +753,7 @@ export function PartnerArchiveFormPage() {
           </PrototypeAnnotationTarget>
 
           <PrototypeAnnotationTarget
-            annotationIds={[
-              "partner-archive-form-address",
-              "partner-archive-form-change-address",
-            ]}
+            annotationIds={["partner-archive-form-address"]}
           >
           <NativeInfoCard title="证件登记地址" icon={<UserRound className="size-5" />}>
             <div className="space-y-2 px-3 pb-2">
@@ -963,36 +931,6 @@ export function PartnerArchiveFormPage() {
           </div>
         ) : null}
 
-        <PartnerConfirmSheet
-          open={changeAddressOpen}
-          title={PARTNER_CHANGE_ADDRESS_DIALOG.title}
-          description={PARTNER_CHANGE_ADDRESS_DIALOG.descriptionUser}
-          specNote={PARTNER_CHANGE_ADDRESS_DIALOG.descriptionSpec}
-          confirmLabel={PARTNER_CHANGE_ADDRESS_DIALOG.confirmLabel}
-          reasonRequired
-          reasonLabel={PARTNER_CHANGE_ADDRESS_DIALOG.reasonLabel}
-          reasonPlaceholder={PARTNER_CHANGE_ADDRESS_DIALOG.reasonPlaceholder}
-          onClose={() => setChangeAddressOpen(false)}
-          onConfirm={(reason) => {
-            setChangeAddressOpen(false)
-            if (
-              requiresPartnerEditPhoneSmsVerify({
-                isEdit,
-                existing,
-                hasPhoneDiff,
-                hasAgentDiff,
-                subjectType,
-              })
-            ) {
-              setPendingChangeReason(reason)
-              setVerifyMode("CHANGE_PHONE")
-              setVerifyOpen(true)
-            } else {
-              doSave(reason)
-            }
-          }}
-        />
-
         <PartnerVerifySheet
           open={verifyOpen}
           mode={verifyMode}
@@ -1010,15 +948,12 @@ export function PartnerArchiveFormPage() {
           onClose={() => {
             setVerifyOpen(false)
             setSubmitting(false)
-            setPendingChangeReason(undefined)
           }}
           onConfirm={() => {
             setVerifyOpen(false)
             doSave(
-              pendingChangeReason,
               verifyMode === "VERIFY_CONTACT" ? { verifiedOnCreate: true } : undefined,
             )
-            setPendingChangeReason(undefined)
           }}
         />
 

@@ -9,8 +9,9 @@ import { InboundGoodsDetailCardMobile } from "../components/InboundGoodsDetailCa
 import { MobileQrModal } from "../components/MobileQrModal"
 import { MobileImageModal } from "../components/MobileImageModal"
 import { MobilePdfModal } from "../components/MobilePdfModal"
+import { DocumentManagementTab } from "@/shared/document-management"
 
-type TabKey = "goods" | "audit" | "modify"
+type TabKey = "goods" | "audit" | "modify" | "documents"
 
 export function InboundRecordDetailPage() {
   const { id } = useParams()
@@ -149,13 +150,14 @@ export function InboundRecordDetailPage() {
               ["goods", "入库明细"],
               ["audit", "审核记录"],
               ["modify", "修改记录"],
+              ["documents", "资料管理"],
             ] as const
           ).map(([key, label]) => (
             <button
               key={key}
               type="button"
               onClick={() => setTab(key)}
-              className={`flex-1 py-2 text-center text-xs font-medium cursor-pointer transition-colors ${
+              className={`flex-1 min-w-0 whitespace-nowrap py-2 text-center text-xs font-medium cursor-pointer transition-colors ${
                 tab === key
                   ? "border-b-2 border-blue-600 font-semibold text-blue-600"
                   : "text-[#232D39]/60"
@@ -229,6 +231,18 @@ export function InboundRecordDetailPage() {
             ) : (
               <p className="text-center text-[#232D39]/40 py-6">暂无修改记录</p>
             )}
+          </section>
+        )}
+
+        {tab === "documents" && (
+          <section className="rounded-xl border border-[#232D39]/10 bg-white p-3.5 shadow-xs">
+            <DocumentManagementTab
+              orderNo={detail.orderNo}
+              orderType="inbound"
+              ownerName={detail.ownerName}
+              warehouseName={detail.warehouseName}
+              onToast={showToast}
+            />
           </section>
         )}
       </div>

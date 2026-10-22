@@ -24,6 +24,7 @@ export const ROLE_STATUS_BADGE_CLASS: Record<RoleStatus, string> = {
 
 export type PartnerArchiveRowAction =
   | "detail"
+  | "verifyContact"
   | "edit"
   | "appendRole"
   | "freeze"

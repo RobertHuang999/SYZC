@@ -3,22 +3,28 @@ import { X, FileText, Download, CheckCircle2 } from "lucide-react"
 type MobilePdfModalProps = {
   open: boolean
   title?: string
+  /** 副标题，默认按入库验收凭证展示；出库/资料管理可覆盖 */
+  subtitle?: string
   fileName: string
   fileSize?: string
   orderNo?: string
   ownerName?: string
   warehouseName?: string
+  /** 下载回调，不传则沿用浏览器 alert 提示 */
+  onDownload?: (fileName: string) => void
   onClose: () => void
 }
 
 export function MobilePdfModal({
   open,
   title = "单据与凭证预览",
+  subtitle = "入库验收确认凭证（存管备查联）",
   fileName,
   fileSize = "1.2 MB",
   orderNo = "2108438504322834433",
   ownerName = "成都锦城冷链物流有限公司",
   warehouseName = "海霸王仓库",
+  onDownload,
   onClose,
 }: MobilePdfModalProps) {
   if (!open) return null
@@ -56,7 +62,7 @@ export function MobilePdfModal({
               <h2 className="text-sm font-bold tracking-wide text-gray-900">
                 供应链金融存货监管系统
               </h2>
-              <p className="mt-0.5 text-[11px] text-gray-500">入库验收确认凭证（存管备查联）</p>
+              <p className="mt-0.5 text-[11px] text-gray-500">{subtitle}</p>
             </div>
 
             <div className="mt-3 space-y-1.5 text-[11px] text-gray-700">
@@ -107,7 +113,11 @@ export function MobilePdfModal({
               type="button"
               className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white active:bg-blue-700"
               onClick={() => {
-                alert(`已启动下载：${fileName}`)
+                if (onDownload) {
+                  onDownload(fileName)
+                } else {
+                  alert(`已启动下载：${fileName}`)
+                }
                 onClose()
               }}
             >

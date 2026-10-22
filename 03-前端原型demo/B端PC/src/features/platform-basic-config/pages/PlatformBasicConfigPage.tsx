@@ -43,13 +43,25 @@ import { SmtpTestMailDialog } from "../components/SmtpTestMailDialog"
 import { WarehouseAuditPickerDialog } from "../components/WarehouseAuditPickerDialog"
 import { YesNoRadio } from "../components/YesNoRadio"
 import {
+  BULK_EDIT_DISCARDED_TOAST_USER,
+  BULK_SAVE_TOPBAR_CANCEL_USER,
   PARTNER_POLICY_DUP_AUDIT_SPEC,
   PARTNER_POLICY_ENTERPRISE_CERT_SPEC,
   PARTNER_POLICY_ENTERPRISE_DUP_SPEC,
   PARTNER_POLICY_ENTERPRISE_FOOTNOTE_USER,
   PARTNER_POLICY_INDIVIDUAL_CERT_SPEC,
   PARTNER_POLICY_INDIVIDUAL_DUP_SPEC,
+  PARTNER_POLICY_DUP_SCAN_ORDER_SPEC,
+  PARTNER_POLICY_DUP_SCAN_ORDER_USER,
+  UNSAVED_LEAVE_DIALOG_CONFIRM_USER,
+  UNSAVED_LEAVE_DIALOG_DESCRIPTION_USER,
 } from "../lib/platform-basic-config-ui-labels"
+import {
+  hasDuplicateAddressConflictsInPool,
+  partnerSubjectToOwnerPool,
+  validatePartnerDuplicateEnableOnSave,
+  type PartnerSubjectKey,
+} from "../lib/duplicate-address-stock"
 import {
   AGREEMENT_PLACEMENT_OPTIONS,
   CONFIG_CATEGORIES,
@@ -139,6 +151,9 @@ export function PlatformBasicConfigPage() {
 
   const [warehousePickerOpen, setWarehousePickerOpen] = useState(false)
   const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false)
+  const [duplicateScanAcknowledged, setDuplicateScanAcknowledged] = useState<
+    Record<PartnerSubjectKey, boolean>
+  >({ individual: false, enterprise: false })
   const [riskRelaxOpen, setRiskRelaxOpen] = useState(false)
   const [unsavedDialogOpen, setUnsavedDialogOpen] = useState(false)
   const [unsavedAction, setUnsavedAction] = useState<"exit" | "switch" | "refresh" | null>(
@@ -272,6 +287,7 @@ export function PlatformBasicConfigPage() {
         warehouseOps: cloneWarehouseOps(savedByCategory["warehouse-ops"]),
       }))
     } else if (target === "partner-access") {
+      setDuplicateScanAcknowledged({ individual: false, enterprise: false })
       setState((current) => ({
         ...current,
         partnerAccess: clonePartnerAccess(savedByCategory["partner-access"]),
@@ -305,7 +321,7 @@ export function PlatformBasicConfigPage() {
       setPendingCategory(null)
     } else if (unsavedAction === "exit") {
       discardCategoryChanges(category)
-      showToast("已退出当前分类编辑，未保存修改已丢弃")
+      showToast(BULK_EDIT_DISCARDED_TOAST_USER)
     } else if (unsavedAction === "refresh") {
       discardCategoryChanges(category)
       showToast("已从服务端刷新最新参数（Mock）")
@@ -342,6 +358,12 @@ export function PlatformBasicConfigPage() {
         if (agr.name.length > 50) return "协议名称不能超过 50 字"
         if (!agr.fileName) return "请上传协议文件"
       }
+    }
+    if (target === "partner-access") {
+      return validatePartnerDuplicateEnableOnSave(
+        savedByCategory["partner-access"],
+        state.partnerAccess
+      )
     }
     return null
   }
@@ -431,7 +453,7 @@ export function PlatformBasicConfigPage() {
   }
 
   const updatePartnerSubject = (
-    subject: "individual" | "enterprise",
+    subject: PartnerSubjectKey,
     patch: Partial<typeof state.partnerAccess.individual>
   ) => {
     setState((c) => ({
@@ -442,6 +464,41 @@ export function PlatformBasicConfigPage() {
       },
     }))
     markCategoryDirty("partner-access")
+  }
+
+  const runPartnerDuplicateScan = (subject: PartnerSubjectKey) => {
+    const pool = partnerSubjectToOwnerPool(subject)
+    setDuplicateScanAcknowledged((current) => ({ ...current, [subject]: true }))
+    setDuplicateDialogOpen(true)
+    if (hasDuplicateAddressConflictsInPool(pool)) {
+      showToast(
+        "排查完成：当前类型仍有关联重复地址，治理完成前无法开启防重复。"
+      )
+      return
+    }
+    showToast("排查完成：当前类型未发现重复地址，可以开启防重复。")
+  }
+
+  const handlePartnerDuplicatePreventChange = (
+    subject: PartnerSubjectKey,
+    checked: boolean
+  ) => {
+    if (!checked) {
+      setDuplicateScanAcknowledged((current) => ({ ...current, [subject]: false }))
+      updatePartnerSubject(subject, { addressDuplicatePrevent: false })
+      return
+    }
+    if (!duplicateScanAcknowledged[subject]) {
+      showToast("请先点击「排查历史重复地址」，确认无冲突后再开启防重复。")
+      return
+    }
+    const pool = partnerSubjectToOwnerPool(subject)
+    if (hasDuplicateAddressConflictsInPool(pool)) {
+      showToast("仍存在历史重复地址，无法在货主信息治理前开启防重复。")
+      setDuplicateDialogOpen(true)
+      return
+    }
+    updatePartnerSubject(subject, { addressDuplicatePrevent: true })
   }
 
   const handleCredentialEdit = (kind: "data" | "iot", cardId: string) => {
@@ -649,22 +706,30 @@ export function PlatformBasicConfigPage() {
           title="个人货主证件地址规则"
           policy={state.partnerAccess.individual}
           onChange={(patch) => updatePartnerSubject("individual", patch)}
-          onScanDuplicates={() => setDuplicateDialogOpen(true)}
+          onScanDuplicates={() => runPartnerDuplicateScan("individual")}
+          onDuplicatePreventChange={(checked) =>
+            handlePartnerDuplicatePreventChange("individual", checked)
+          }
+          duplicateOrderHint={PARTNER_POLICY_DUP_SCAN_ORDER_USER}
           certHint="开启后，在货主信息新增/编辑/补全/改址保存时须填写身份证登记地址；入库、出库、仓单等作业不受影响。"
           certSpecNote={PARTNER_POLICY_INDIVIDUAL_CERT_SPEC}
           duplicateWarning="开启后，同一证件地址在租户内仅允许绑定一个个人货主。冲突时在档案保存或作业快捷建档绑货主时直接拦截。"
           duplicateHint="降低风控要求（由必填改为选填、或关闭防重复）时，保存须填写变更原因。"
-          duplicateSpecNote={`${PARTNER_POLICY_INDIVIDUAL_DUP_SPEC} ${PARTNER_POLICY_DUP_AUDIT_SPEC}`}
+          duplicateSpecNote={`${PARTNER_POLICY_INDIVIDUAL_DUP_SPEC} ${PARTNER_POLICY_DUP_AUDIT_SPEC} ${PARTNER_POLICY_DUP_SCAN_ORDER_SPEC}`}
         />
         <PartnerSubjectPolicyCard
           title="企业货主证件地址规则"
           policy={state.partnerAccess.enterprise}
           onChange={(patch) => updatePartnerSubject("enterprise", patch)}
-          onScanDuplicates={() => setDuplicateDialogOpen(true)}
+          onScanDuplicates={() => runPartnerDuplicateScan("enterprise")}
+          onDuplicatePreventChange={(checked) =>
+            handlePartnerDuplicatePreventChange("enterprise", checked)
+          }
+          duplicateOrderHint={PARTNER_POLICY_DUP_SCAN_ORDER_USER}
           certHint="开启后，在货主信息新增/编辑/补全/改址保存时须填写营业执照登记地址；仓储与仓单等作业引用货主不受影响。"
           certSpecNote={PARTNER_POLICY_ENTERPRISE_CERT_SPEC}
           duplicateWarning="开启后，企业货主登记地址在租户内须唯一（与个人货主分池比对，互不混比）。"
-          duplicateSpecNote={PARTNER_POLICY_ENTERPRISE_DUP_SPEC}
+          duplicateSpecNote={`${PARTNER_POLICY_ENTERPRISE_DUP_SPEC} ${PARTNER_POLICY_DUP_SCAN_ORDER_SPEC}`}
           duplicateHint="企业主体实名以统一社会信用代码为准；地址防重复与个人货主分别生效。"
           footnote={PARTNER_POLICY_ENTERPRISE_FOOTNOTE_USER}
           footnoteSpecNote={PARTNER_POLICY_ENTERPRISE_DUP_SPEC}
@@ -1131,7 +1196,7 @@ export function PlatformBasicConfigPage() {
                       保存
                     </Button>
                     <Button type="button" variant="secondary" onClick={handleExitCurrentCategory}>
-                      退出
+                      {BULK_SAVE_TOPBAR_CANCEL_USER}
                     </Button>
                   </>
                 ) : (
@@ -1186,9 +1251,7 @@ export function PlatformBasicConfigPage() {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>提示</DialogTitle>
-              <DialogDescription>
-                您有配置内容尚未保存，若直接退出编辑内容将会丢失，请确认是否退出？
-              </DialogDescription>
+              <DialogDescription>{UNSAVED_LEAVE_DIALOG_DESCRIPTION_USER}</DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <Button
@@ -1203,7 +1266,7 @@ export function PlatformBasicConfigPage() {
                 取消
               </Button>
               <Button type="button" variant="destructive" onClick={confirmUnsavedLeave}>
-                确认退出
+                {UNSAVED_LEAVE_DIALOG_CONFIRM_USER}
               </Button>
             </DialogFooter>
           </DialogContent>

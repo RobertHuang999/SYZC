@@ -1,5 +1,5 @@
 import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
-import type { PartnerSubject, RoleType } from "../domain/types"
+import type { BoundAccountInfo, PartnerSubject, RoleType } from "../domain/types"
 import { normalizePartnerPlanB } from "../lib/linked-partner-archives"
 
 export type PartnerSubjectMockInput = Omit<PartnerSubject, "archiveMenu"> & {
@@ -51,11 +51,29 @@ function inferArchiveMenu(subject: PartnerSubjectMockInput): PartnerArchiveMenuL
   return "货主信息"
 }
 
+/** C 端注册建档默认 1:1 绑定客户账号（字段清单 Tab 3）；显式 mock 优先 */
+function resolveBoundAccount(item: PartnerSubjectMockInput): BoundAccountInfo | undefined {
+  if (item.boundAccount) {
+    return item.boundAccount
+  }
+  if (item.source !== "CLIENT_AUTH") {
+    return undefined
+  }
+  const suffix = item.partnerNo.replace(/^PA-/, "") || item.id.replace(/\D/g, "") || "000"
+  return {
+    accountId: `CU-${suffix}`,
+    loginPhone: item.contactPhone,
+    authStatus: "AUTHENTICATED",
+    bindTime: item.createTime,
+  }
+}
+
 export function enrichPartnerArchivesMock(raw: PartnerSubjectMockInput[]): PartnerSubject[] {
   return raw.map((item) =>
     normalizePartnerPlanB({
       ...item,
       archiveMenu: inferArchiveMenu(item),
+      boundAccount: resolveBoundAccount(item),
     }),
   )
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Filter, Plus, RotateCcw, Search, X } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { parsePartnerArchiveMenuFromH5ListPath } from "@prototype/shared/partner-archives/partner-archive-domain"
@@ -22,13 +22,44 @@ import {
   PARTNER_SUBJECT_TYPE_FILTER_OPTIONS,
   partnerSubjectStatusFilterOptions,
 } from "@prototype/B端PC/src/features/partner-archives/domain/constants"
-import type { PartnerArchiveFilters } from "@prototype/B端PC/src/features/partner-archives/domain/types"
+import type {
+  PartnerArchiveFilters,
+  PartnerSubject,
+} from "@prototype/B端PC/src/features/partner-archives/domain/types"
+import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
+import {
+  type PartnerArchivePendingAction,
+  type PartnerArchiveRowAction,
+} from "@prototype/B端PC/src/features/partner-archives/domain/actions"
+import { commitPartnerArchive } from "@prototype/B端PC/src/features/partner-archives/lib/detail-utils"
+import {
+  markContactPhoneVerified,
+} from "@prototype/B端PC/src/features/partner-archives/lib/contact-phone-verify"
 import { filterPartnerArchives } from "@prototype/B端PC/src/features/partner-archives/lib/list-utils"
+import { appendLinkedPartnerMenus } from "@prototype/B端PC/src/features/partner-archives/lib/linked-partner-archives"
+import {
+  checkPartnerSubjectFreezeEligibility,
+  type FreezeBlockReason,
+} from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-rules"
+import {
+  applyPartnerSubjectFreeze,
+  applyPartnerSubjectUnfreeze,
+} from "@prototype/B端PC/src/features/partner-archives/lib/partner-subject-freeze-state"
+import {
+  enrichPartnerListForFreezeDemo,
+  withPartnerFreezeDemoData,
+} from "@prototype/B端PC/src/features/partner-archives/mock/partner-freeze-demo-rehydrate"
 import {
   PARTNER_LIST_CONTACT_PHONE_PLACEHOLDER,
   PARTNER_LIST_KEYWORD_PLACEHOLDER,
+  PARTNER_SUBJECT_FREEZE_DIALOG,
+  PARTNER_SUBJECT_UNFREEZE_SUCCESS_TOAST,
 } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
+import { PartnerAppendRoleSheet } from "../components/PartnerAppendRoleSheet"
 import { PartnerArchiveCard } from "../components/PartnerArchiveCard"
+import { PartnerConfirmSheet } from "../components/PartnerConfirmSheet"
+import { PartnerFreezeBlockedSheet } from "../components/PartnerFreezeBlockedSheet"
+import { PartnerVerifySheet } from "../components/PartnerVerifySheet"
 import { partnerArchiveFormRoute } from "../domain/constants"
 import { WORKSPACE_ROUTE } from "@/features/inbound-records/domain/constants"
 
@@ -38,6 +69,11 @@ const SUBJECT_TYPE_OPTIONS: DropdownOption[] = PARTNER_SUBJECT_TYPE_FILTER_OPTIO
 const PHONE_VERIFY_OPTIONS: DropdownOption[] = PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS.map(
   (v) => ({ label: v === "全部" ? "全部核验" : v, value: v }),
 )
+
+type PendingDialog = {
+  action: PartnerArchivePendingAction
+  partner: PartnerSubject
+}
 
 export function PartnerArchiveListPage() {
   const navigate = useNavigate()
@@ -52,6 +88,16 @@ export function PartnerArchiveListPage() {
     ...DEFAULT_PARTNER_ARCHIVE_FILTERS,
   })
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [pendingDialog, setPendingDialog] = useState<PendingDialog | null>(null)
+  const [blockedDialog, setBlockedDialog] = useState<{
+    partner: PartnerSubject
+    blockInfo: FreezeBlockReason
+  } | null>(null)
+  const [appendRoleOpen, setAppendRoleOpen] = useState(false)
+  const [activePartner, setActivePartner] = useState<PartnerSubject | null>(null)
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [verifyPartner, setVerifyPartner] = useState<PartnerSubject | null>(null)
+  const ignoreRowActionsUntilRef = useRef(0)
 
   useEffect(() => {
     const bump = () => setMockTick((t) => t + 1)
@@ -73,7 +119,7 @@ export function PartnerArchiveListPage() {
   const filtered = useMemo(() => {
     void mockTick
     return filterPartnerArchives(
-      [...partnerArchivesMock],
+      enrichPartnerListForFreezeDemo([...partnerArchivesMock]),
       appliedFilters,
       archiveMenuLabel,
     )
@@ -97,6 +143,97 @@ export function PartnerArchiveListPage() {
     const next = { ...DEFAULT_PARTNER_ARCHIVE_FILTERS }
     setDraftFilters(next)
     setAppliedFilters(next)
+  }
+
+  const showToast = (message: string) => {
+    setToastMessage(message)
+    window.setTimeout(() => setToastMessage(null), 2600)
+    window.dispatchEvent(new Event("partner-archive-updated"))
+  }
+
+  const handleRowAction = (action: PartnerArchiveRowAction, item: PartnerSubject) => {
+    if (Date.now() < ignoreRowActionsUntilRef.current) {
+      return
+    }
+    switch (action) {
+      case "appendRole":
+        setActivePartner(item)
+        setAppendRoleOpen(true)
+        return
+      case "freeze": {
+        const check = checkPartnerSubjectFreezeEligibility(withPartnerFreezeDemoData(item))
+        if (!check.canFreeze) {
+          setBlockedDialog({ partner: item, blockInfo: check })
+          return
+        }
+        setPendingDialog({ action: "freeze", partner: item })
+        return
+      }
+      case "unfreeze":
+        setPendingDialog({ action: "unfreeze", partner: item })
+        return
+      case "verifyContact":
+        setVerifyPartner(item)
+        return
+      default:
+        return
+    }
+  }
+
+  const confirmPendingDialog = (reason: string) => {
+    if (!pendingDialog) {
+      return
+    }
+    const { action, partner } = pendingDialog
+    if (action === "freeze") {
+      commitPartnerArchive(applyPartnerSubjectFreeze(partner, reason))
+      showToast(`主体【${partner.name}】已冻结`)
+    }
+    if (action === "unfreeze") {
+      commitPartnerArchive(applyPartnerSubjectUnfreeze(partner, reason))
+      showToast(PARTNER_SUBJECT_UNFREEZE_SUCCESS_TOAST)
+    }
+    ignoreRowActionsUntilRef.current = Date.now() + 300
+    setPendingDialog(null)
+  }
+
+  const completeVerifyContact = () => {
+    if (!verifyPartner) {
+      return
+    }
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19)
+    const next: PartnerSubject = {
+      ...verifyPartner,
+      updateTime: now,
+      auditLogs: [
+        {
+          id: `log-${Date.now()}`,
+          opTime: now,
+          operator: "当前用户",
+          actionType: "EDIT",
+          actionName: "修改合作方档案",
+          detail: "修改合作方档案：联系手机完成短信核验，状态变为已验证",
+        },
+        ...verifyPartner.auditLogs,
+      ],
+    }
+    markContactPhoneVerified(next, now)
+    commitPartnerArchive(next)
+    setVerifyPartner(null)
+    showToast("联系手机验证成功")
+  }
+
+  const handleAppendRoleConfirm = (targetMenus: PartnerArchiveMenuLabel[]) => {
+    if (!activePartner || targetMenus.length === 0) {
+      return
+    }
+    const detail = targetMenus
+      .map((menu) => `在【${menu}】创建独立主档或关联已有主档`)
+      .join("；")
+    commitPartnerArchive(appendLinkedPartnerMenus(activePartner, targetMenus, detail))
+    setAppendRoleOpen(false)
+    setActivePartner(null)
+    showToast("已追加合作方档案角色")
   }
 
   return (
@@ -210,7 +347,13 @@ export function PartnerArchiveListPage() {
               </button>
             </div>
           ) : (
-            filtered.map((row) => <PartnerArchiveCard key={row.id} item={row} />)
+            filtered.map((row) => (
+              <PartnerArchiveCard
+                key={row.id}
+                item={row}
+                onRowAction={handleRowAction}
+              />
+            ))
           )}
           <PrototypeAnnotationTarget annotationIds={["partner-archive-pagination"]}>
             {filtered.length > 0 ? (
@@ -271,6 +414,75 @@ export function PartnerArchiveListPage() {
             />
           </DrawerField>
         </FilterDrawer>
+
+        <PartnerFreezeBlockedSheet
+          open={Boolean(blockedDialog)}
+          onClose={() => setBlockedDialog(null)}
+          partner={blockedDialog?.partner ?? null}
+          blockInfo={blockedDialog?.blockInfo ?? null}
+        />
+
+        <PartnerAppendRoleSheet
+          partner={activePartner}
+          open={appendRoleOpen}
+          onClose={() => {
+            setAppendRoleOpen(false)
+            setActivePartner(null)
+          }}
+          onConfirm={handleAppendRoleConfirm}
+        />
+
+        {pendingDialog?.action === "freeze" ? (
+          <PartnerConfirmSheet
+            open
+            title="确认冻结主体"
+            description={PARTNER_SUBJECT_FREEZE_DIALOG.description}
+            confirmLabel="确认冻结"
+            destructive
+            reasonRequired
+            reasonLabel="冻结原因"
+            reasonPlaceholder="请输入冻结理由（1～200 字）"
+            onClose={() => setPendingDialog(null)}
+            onConfirm={confirmPendingDialog}
+          />
+        ) : null}
+
+        {pendingDialog?.action === "unfreeze" ? (
+          <PartnerConfirmSheet
+            open
+            title="提交解冻主体申请"
+            description="解冻须风控审批终审通过后生效。请录入解冻复核依据；原型演示在确认后模拟审批通过并恢复业务发起能力。"
+            confirmLabel="提交解冻申请"
+            reasonRequired
+            reasonLabel="解冻原因"
+            reasonPlaceholder="请输入解冻复核依据（1～200 字）"
+            onClose={() => setPendingDialog(null)}
+            onConfirm={confirmPendingDialog}
+          />
+        ) : null}
+
+        {verifyPartner ? (
+          <PartnerVerifySheet
+            open
+            mode="VERIFY_CONTACT"
+            verifyContext="DETAIL_VERIFY"
+            subjectType={verifyPartner.subjectType}
+            name={verifyPartner.name}
+            idNumber={verifyPartner.idNumber}
+            contactPhone={verifyPartner.contactPhone}
+            fullAddress={verifyPartner.certAddress.fullAddress}
+            roles={verifyPartner.roles.map((r) => r.roleType)}
+            agentName={verifyPartner.agentName}
+            onClose={() => setVerifyPartner(null)}
+            onConfirm={completeVerifyContact}
+          />
+        ) : null}
+
+        {toastMessage ? (
+          <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-black/80 px-4 py-1.5 text-xs text-white shadow-lg">
+            {toastMessage}
+          </div>
+        ) : null}
       </div>
     </MobileShell>
   )

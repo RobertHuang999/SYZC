@@ -17,7 +17,7 @@ import {
 import { splitDateTime } from "@/features/inbound-records/lib/list-utils"
 import {
   TableRowActionPanel,
-  TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX,
+  TABLE_ROW_ACTION_COL_TOTAL_PX,
   type TableRowActionItem,
 } from "@/shared/components/TableRowActionPanel"
 import { ContactPhoneVerifyBadge } from "./ContactPhoneVerifyBadge"
@@ -31,7 +31,10 @@ import {
 } from "../domain/actions"
 import { SUBJECT_TYPE_LABELS, type PartnerSubject } from "../domain/types"
 import { maskLoginPhone } from "../lib/detail-utils"
-import { resolveContactPhoneVerified } from "../lib/contact-phone-verify"
+import {
+  canShowVerifyContactPhoneAction,
+  resolveContactPhoneVerified,
+} from "../lib/contact-phone-verify"
 import { cn } from "@/lib/utils"
 
 const STICKY_ACTION_CLASS =
@@ -71,13 +74,20 @@ function buildPartnerRowActions(
   listBasePath: string,
 ): TableRowActionItem[] {
   const list: TableRowActionItem[] = []
-  const isFrozen = item.status === "FROZEN"
 
   if (actions.includes("detail")) {
     list.push({
       key: "detail",
       label: "详情",
       to: `${listBasePath}/详情/${item.id}`,
+    })
+  }
+  if (canShowVerifyContactPhoneAction(item)) {
+    list.push({
+      key: "verifyContact",
+      label: "验证",
+      title: "验证联系手机",
+      onClick: () => onAction("verifyContact", item),
     })
   }
   if (actions.includes("edit")) {
@@ -93,12 +103,6 @@ function buildPartnerRowActions(
       label: "追加",
       title: "追加合作方档案",
       onClick: () => onAction("appendRole", item),
-    })
-  } else if (isFrozen) {
-    list.push({
-      key: "placeholder-append",
-      label: "——",
-      isPlaceholder: true,
     })
   }
   if (actions.includes("freeze")) {
@@ -150,7 +154,7 @@ export function PartnerArchiveTable({
         )}
         style={
           {
-            "--partner-action-col-w": `${TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX}px`,
+            "--partner-action-col-w": `${TABLE_ROW_ACTION_COL_TOTAL_PX}px`,
           } as CSSProperties
         }
       >
@@ -162,7 +166,7 @@ export function PartnerArchiveTable({
           <col className="w-[140px]" />
           {showLinkedColumn && <col className="w-[160px]" />}
           <col className="w-[160px]" />
-          <col style={{ width: TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX }} />
+          <col style={{ width: TABLE_ROW_ACTION_COL_TOTAL_PX }} />
         </colgroup>
         <TableHeader>
           <TableRow>
@@ -305,7 +309,7 @@ export function PartnerArchiveTable({
                     </div>
                   </TableCell>
                   <TableCell className={actionCell(isFrozen)}>
-                    <TableRowActionPanel actions={rowActions} fixedCols={2} />
+                    <TableRowActionPanel actions={rowActions} fixedCols={3} />
                   </TableCell>
                 </TableRow>
               )

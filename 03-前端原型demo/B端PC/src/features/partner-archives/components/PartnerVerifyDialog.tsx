@@ -31,7 +31,7 @@ export type PartnerVerifyDialogProps = {
   fullAddress: string
   roles?: RoleType[]
   mode?: "CREATE" | "CHANGE_PHONE" | "VERIFY_CONTACT"
-  /** 场景 3 子场景：新增建档 / 详情补验 / 入库 R03·PA-R04b */
+  /** 场景 3 子场景：新增建档 / 列表或详情补验 / 入库 R03·PA-R04b */
   verifyContext?: "CREATE_ARCHIVE" | "DETAIL_VERIFY" | "INBOUND_CREATE" | "INBOUND_SUBMIT"
   agentName?: string
   oldPhone?: string

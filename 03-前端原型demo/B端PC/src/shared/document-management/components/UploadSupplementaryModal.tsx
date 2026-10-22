@@ -8,15 +8,20 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import {
   UploadCloud,
   FileText,
   Trash2,
   AlertCircle,
-  Check,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
 import type { DocumentItem } from "../types"
 import { addDocumentItem } from "../mock"
 
@@ -212,59 +217,42 @@ export function UploadSupplementaryModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-1">
-          {/* 关联流程节点 */}
-          <div className="space-y-2">
-            <Label className="text-xs font-medium text-slate-700 flex items-center justify-between">
-              <span className="flex items-center gap-1">
-                <span className="text-destructive">*</span>
-                <span>补充资料挂载至哪个流程节点：</span>
-              </span>
-              <span className="text-[11px] text-muted-foreground font-normal">
-                当前选中：<strong className="text-blue-600 font-semibold">{stageOptions.find((s) => s.value === selectedFlowType)?.label}</strong>
-              </span>
+          {/* 关联流程阶段 */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-slate-700">
+              <span className="text-destructive mr-1">*</span>关联流程阶段：
             </Label>
 
-            {/* 4大业务流程节点可视化选择卡片 */}
-            <div className="grid grid-cols-2 gap-2">
-              {stageOptions.map((st) => {
-                const isSelected = selectedFlowType === st.value
-                return (
-                  <button
-                    key={st.value}
-                    type="button"
-                    onClick={() => {
-                      setSelectedFlowType(st.value)
-                      setErrorMessage(null)
-                    }}
-                    className={cn(
-                      "p-2.5 rounded-lg border text-left transition-all cursor-pointer relative flex flex-col justify-between",
-                      isSelected
-                        ? "border-blue-600 bg-blue-50/80 ring-1 ring-blue-600 shadow-2xs"
-                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70"
-                    )}
-                  >
-                    <div className="flex items-center justify-between w-full mb-1">
-                      <span
-                        className={cn(
-                          "text-xs font-semibold",
-                          isSelected ? "text-blue-700" : "text-slate-800"
-                        )}
-                      >
+            <Select
+              value={selectedFlowType}
+              onValueChange={(value) => {
+                setSelectedFlowType(String(value))
+                setErrorMessage(null)
+              }}
+            >
+              <SelectTrigger className="w-full text-xs">
+                <SelectValue>
+                  {(value) => {
+                    const matched = stageOptions.find((s) => s.value === value)
+                    return matched ? matched.stageText : "请选择关联流程阶段"
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {stageOptions.map((st) => (
+                  <SelectItem key={st.value} value={st.value} className="py-2">
+                    <span className="flex flex-col gap-0.5 whitespace-normal">
+                      <span className="text-xs font-medium text-slate-800">
                         {st.stageText}
                       </span>
-                      {isSelected && (
-                        <span className="w-4 h-4 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
-                          <Check className="w-2.5 h-2.5 stroke-[3]" />
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[10.5px] text-slate-500 leading-tight line-clamp-2">
-                      {st.hint}
-                    </p>
-                  </button>
-                )
-              })}
-            </div>
+                      <span className="text-[10.5px] leading-tight text-slate-500">
+                        {st.hint}
+                      </span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* 附件上传区域 */}

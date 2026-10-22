@@ -3,6 +3,7 @@ import type {
   PartnerSubject,
   SubjectType,
 } from "../domain/types"
+import { isArchiveRequiredFieldsPending } from "./archive-required-fields-pending"
 
 export function resolveContactPhoneVerified(
   partner: PartnerSubject
@@ -29,6 +30,17 @@ export function formatContactPhoneVerifiedAt(value?: string) {
 }
 
 /** 详情展示：显式核验时间；C端注册默认可用建档时间 */
+/** 【合作方档案操作权限矩阵】(PA-P02)：详情/列表「验证联系手机」显隐（冻结且非待补全时隐藏） */
+export function canShowVerifyContactPhoneAction(partner: PartnerSubject): boolean {
+  if (resolveContactPhoneVerified(partner) === "VERIFIED") {
+    return false
+  }
+  if (partner.status === "FROZEN" && !isArchiveRequiredFieldsPending(partner)) {
+    return false
+  }
+  return true
+}
+
 export function resolveContactPhoneVerifiedAt(partner: PartnerSubject): string | undefined {
   if (partner.contactPhoneVerifiedAt?.trim()) {
     return partner.contactPhoneVerifiedAt.trim()

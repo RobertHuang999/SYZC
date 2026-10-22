@@ -151,20 +151,6 @@ export const PARTNER_FORM_ACTION_LABELS = {
   saveComplete: "补全并生效",
 } as const
 
-export const PARTNER_CHANGE_ADDRESS_DIALOG = {
-  title: "确认变更证件地址",
-  descriptionUser:
-    "检测到证件登记地址已变更。保存后将按准入规则校验新地址，并记录改址原因；历史业务单据中的地址快照不会变更。",
-  descriptionSpec:
-    "【个人货主证件地址变更规则】(PA-R06a)：统一准入校验、活跃池切换、审计留痕。",
-  confirmLabel: "确认改址并保存",
-  reasonLabel: "改址原因",
-  reasonPlaceholder: "请输入改址原因（1～200 字，如搬迁、证件登记信息变更等）",
-  /** @deprecated 使用 descriptionUser */
-  description:
-    "检测到证件登记地址已变更。保存后将按准入规则校验新地址，并记录改址原因；历史业务单据中的地址快照不会变更。",
-} as const
-
 export type PartnerVerifyMode = "CREATE" | "CHANGE_PHONE" | "VERIFY_CONTACT"
 export type PartnerVerifyContext =
   | "CREATE_ARCHIVE"

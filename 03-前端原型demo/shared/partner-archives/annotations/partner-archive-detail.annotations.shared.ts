@@ -50,7 +50,7 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
     number: 2,
     kind: "交互",
     title: "页头操作栏 · 状态化控制与权限隔离矩阵 (PA-P02)",
-    content: "【合作方档案操作权限矩阵】(PA-P02)：未验证可【验证联系手机】；冻结仅编辑/解冻；正常可追加/冻结；禁止删档。",
+    content: "【合作方档案操作权限矩阵】(PA-P02)：PC 详情页头与列表【验证】/ H5 卡片【验证】共用场景 3；冻结仅编辑/解冻；正常可追加/冻结；禁止删档。",
     details: [
       {
         title: "1. 主体操作控制矩阵",
@@ -71,7 +71,7 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
         items: [
           {
             label: "分菜单主体冻结与在库在途前置校验 (PA-R01 / PA-R02)",
-            content: "【分菜单主体冻结与在途在库前置校验规则】(PA-R02)：冻结前查在库/在途；命中则精简阻断弹窗。【冻结主体】仅冻结当前菜单主档；6.3 **不提供** 列表/子表 **删除、解除关联、按角色移除**；主列表行操作为方案 A 四钮。",
+            content: "【分菜单主体冻结与在途在库前置校验规则】(PA-R02)：冻结前查在库/在途；命中则精简阻断弹窗。【冻结主体】仅冻结当前菜单主档；6.3 **不提供** 列表/子表 **删除、解除关联、按角色移除**；主列表行操作为方案 A（含条件【验证】，每行最多 3 钮）。",
           },
           {
             label: "自审禁止规则与不可变证据链",
@@ -252,9 +252,8 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
 | C04 | 由{单据类型}{单号}业务带出创建：{说明} |
 | M01 | 变更字段为【新】（原：旧） |
 | M02 | 联系手机短信核验通过 |
-| M03 | 待补全首次补地址，**无**改址原因 |
-| M04 | 一般改地址（新/旧），**无**改址原因 |
-| M05 | 货主·个人改址弹窗**已提交原因**时才用；否则 M04 |`,
+| M03 | 待补全首次补地址 |
+| M04 | 变更证件登记地址（新/旧），含个人货主 PA-R06a 改址 |`,
           },
           {
             label: "冻解 S",

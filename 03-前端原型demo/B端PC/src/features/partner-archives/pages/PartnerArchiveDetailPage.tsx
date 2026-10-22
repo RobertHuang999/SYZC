@@ -51,6 +51,7 @@ import {
   CONTACT_PHONE_VERIFY_BADGE_CLASS,
   CONTACT_PHONE_VERIFY_LABELS,
   markContactPhoneVerified,
+  canShowVerifyContactPhoneAction,
   resolveContactPhoneVerified,
   resolveContactPhoneVerifiedAt,
 } from "../lib/contact-phone-verify"
@@ -63,6 +64,12 @@ import {
   maskIdNumber,
   type FreezeBlockReason,
 } from "../lib/partner-archive-rules"
+import {
+  applyPartnerSubjectFreeze,
+  applyPartnerSubjectUnfreeze,
+  resolvePartnerSubjectFreezeReason,
+} from "../lib/partner-subject-freeze-state"
+import { withPartnerFreezeDemoData } from "../mock/partner-freeze-demo-rehydrate"
 import {
   collectArchiveRequiredGaps,
   isArchiveRequiredFieldsPending,
@@ -106,7 +113,7 @@ export function PartnerArchiveDetailPage() {
 
   const handleFreezeClick = () => {
     if (!partner) return
-    const check = checkPartnerSubjectFreezeEligibility(partner)
+    const check = checkPartnerSubjectFreezeEligibility(withPartnerFreezeDemoData(partner))
     if (!check.canFreeze) {
       setBlockedBlockInfo(check)
       return
@@ -135,14 +142,8 @@ export function PartnerArchiveDetailPage() {
 
   const canVerifyContactPhone = useMemo(() => {
     if (!partner) return false
-    if (resolveContactPhoneVerified(partner) === "VERIFIED") {
-      return false
-    }
-    if (partner.status === "FROZEN" && !needsCompletion) {
-      return false
-    }
-    return true
-  }, [partner, needsCompletion])
+    return canShowVerifyContactPhoneAction(partner)
+  }, [partner])
 
   const applyContactPhoneVerified = () => {
     const now = new Date().toISOString().replace("T", " ").substring(0, 19)
@@ -212,46 +213,16 @@ export function PartnerArchiveDetailPage() {
   }
 
   const handleFreeze = (reason: string) => {
-    const now = new Date().toISOString().replace("T", " ").substring(0, 19)
     setPartner((prev) => {
       if (!prev) return prev
-      return commitPartnerArchive({
-        ...prev,
-        status: "FROZEN",
-        auditLogs: [
-          {
-            id: `log-${Date.now()}`,
-            opTime: now,
-            operator: "当前用户",
-            actionType: "FREEZE",
-            actionName: "冻结主体",
-            detail: `冻结主体：${reason}`,
-          },
-          ...prev.auditLogs,
-        ],
-      })
+      return commitPartnerArchive(applyPartnerSubjectFreeze(prev, reason))
     })
   }
 
   const handleUnfreeze = (note: string) => {
-    const now = new Date().toISOString().replace("T", " ").substring(0, 19)
     setPartner((prev) => {
       if (!prev) return prev
-      return commitPartnerArchive({
-        ...prev,
-        status: "NORMAL",
-        auditLogs: [
-          {
-            id: `log-${Date.now()}`,
-            opTime: now,
-            operator: "当前用户",
-            actionType: "UNFREEZE",
-            actionName: "解冻主体",
-            detail: `解冻主体：${note}`,
-          },
-          ...prev.auditLogs,
-        ],
-      })
+      return commitPartnerArchive(applyPartnerSubjectUnfreeze(prev, note))
     })
   }
 
@@ -492,6 +463,19 @@ export function PartnerArchiveDetailPage() {
                   </DetailField>
                 </div>
               </div>
+
+              {partner.status === "FROZEN" ? (
+                <>
+                  <div className="h-px bg-border/40" />
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="md:col-span-4">
+                      <DetailField label="冻结原因">
+                        {resolvePartnerSubjectFreezeReason(partner) || "——"}
+                      </DetailField>
+                    </div>
+                  </div>
+                </>
+              ) : null}
 
               <div className="h-px bg-border/40" />
 

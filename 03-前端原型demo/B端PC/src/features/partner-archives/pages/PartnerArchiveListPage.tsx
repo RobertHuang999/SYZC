@@ -18,6 +18,7 @@ import { PartnerArchiveTable } from "../components/PartnerArchiveTable"
 import { PartnerAppendRoleDialog } from "../components/PartnerAppendRoleDialog"
 import { PartnerConfirmDialog } from "../components/PartnerConfirmDialog"
 import { PartnerFreezeBlockedDialog } from "../components/PartnerFreezeBlockedDialog"
+import { PartnerVerifyDialog } from "../components/PartnerVerifyDialog"
 import {
   DEFAULT_PARTNER_ARCHIVE_FILTERS,
   PAGE_SIZE,
@@ -33,11 +34,20 @@ import {
 } from "../domain/types"
 import { commitPartnerArchive } from "../lib/detail-utils"
 import { filterPartnerArchives, paginatePartnerArchives } from "../lib/list-utils"
+import {
+  applyPartnerSubjectFreeze,
+  applyPartnerSubjectUnfreeze,
+} from "../lib/partner-subject-freeze-state"
+import {
+  enrichPartnerListForFreezeDemo,
+  withPartnerFreezeDemoData,
+} from "../mock/partner-freeze-demo-rehydrate"
 import { appendLinkedPartnerMenus } from "../lib/linked-partner-archives"
 import {
   checkPartnerSubjectFreezeEligibility,
   type FreezeBlockReason,
 } from "../lib/partner-archive-rules"
+import { markContactPhoneVerified } from "../lib/contact-phone-verify"
 import { PARTNER_SUBJECT_FREEZE_DIALOG } from "../lib/partner-archive-ui-labels"
 
 type PendingDialog = {
@@ -53,9 +63,9 @@ export function PartnerArchiveListPage() {
     () => getPartnerArchiveDocuments(archiveMenuLabel),
     [archiveMenuLabel],
   )
-  const [dataList, setDataList] = useState<PartnerSubject[]>(() => [
-    ...partnerArchivesMock,
-  ])
+  const [dataList, setDataList] = useState<PartnerSubject[]>(() =>
+    enrichPartnerListForFreezeDemo([...partnerArchivesMock]),
+  )
   const [draftFilters, setDraftFilters] = useState<PartnerArchiveFilters>(
     DEFAULT_PARTNER_ARCHIVE_FILTERS
   )
@@ -72,10 +82,11 @@ export function PartnerArchiveListPage() {
   const [appendRoleOpen, setAppendRoleOpen] = useState(false)
   const [activePartner, setActivePartner] = useState<PartnerSubject | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [verifyPartner, setVerifyPartner] = useState<PartnerSubject | null>(null)
   const ignoreRowActionsUntilRef = useRef(0)
 
   useEffect(() => {
-    setDataList([...partnerArchivesMock])
+    setDataList(enrichPartnerListForFreezeDemo([...partnerArchivesMock]))
   }, [location.pathname, location.key])
 
   const filteredData = useMemo(
@@ -93,6 +104,7 @@ export function PartnerArchiveListPage() {
   const showToast = (message: string) => {
     setToastMessage(message)
     window.setTimeout(() => setToastMessage(null), 2500)
+    window.dispatchEvent(new Event("partner-archive-updated"))
   }
 
   const handleSearch = () => {
@@ -116,7 +128,7 @@ export function PartnerArchiveListPage() {
         setAppendRoleOpen(true)
         return
       case "freeze": {
-        const check = checkPartnerSubjectFreezeEligibility(item)
+        const check = checkPartnerSubjectFreezeEligibility(withPartnerFreezeDemoData(item))
         if (!check.canFreeze) {
           setBlockedDialog({ partner: item, blockInfo: check })
           return
@@ -127,9 +139,39 @@ export function PartnerArchiveListPage() {
       case "unfreeze":
         setPendingDialog({ action: "unfreeze", partner: item })
         return
+      case "verifyContact":
+        setVerifyPartner(item)
+        return
       default:
         return
     }
+  }
+
+  const completeVerifyContact = () => {
+    if (!verifyPartner) {
+      return
+    }
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19)
+    const next: PartnerSubject = {
+      ...verifyPartner,
+      updateTime: now,
+      auditLogs: [
+        {
+          id: `log-${Date.now()}`,
+          opTime: now,
+          operator: "当前用户",
+          actionType: "EDIT",
+          actionName: "修改合作方档案",
+          detail: "修改合作方档案：联系手机完成短信核验，状态变为已验证",
+        },
+        ...verifyPartner.auditLogs,
+      ],
+    }
+    markContactPhoneVerified(next, now)
+    commitPartnerArchive(next)
+    setDataList((prev) => prev.map((item) => (item.id === verifyPartner.id ? next : item)))
+    setVerifyPartner(null)
+    showToast("联系手机验证成功")
   }
 
   const confirmPendingDialog = (reason: string) => {
@@ -140,44 +182,14 @@ export function PartnerArchiveListPage() {
     const { action, partner } = pendingDialog
 
     if (action === "freeze") {
-      const now = new Date().toISOString().replace("T", " ").substring(0, 19)
-      const next: PartnerSubject = {
-        ...partner,
-        status: "FROZEN",
-        auditLogs: [
-          {
-            id: `log-${Date.now()}`,
-            opTime: now,
-            operator: "当前用户",
-            actionType: "FREEZE",
-            actionName: "冻结主体",
-            detail: `冻结主体：${reason}`,
-          },
-          ...partner.auditLogs,
-        ],
-      }
+      const next = applyPartnerSubjectFreeze(partner, reason)
       commitPartnerArchive(next)
       setDataList((prev) => prev.map((item) => (item.id === partner.id ? next : item)))
       showToast(`主体【${partner.name}】已成功冻结`)
     }
 
     if (action === "unfreeze") {
-      const now = new Date().toISOString().replace("T", " ").substring(0, 19)
-      const next: PartnerSubject = {
-        ...partner,
-        status: "NORMAL",
-        auditLogs: [
-          {
-            id: `log-${Date.now()}`,
-            opTime: now,
-            operator: "当前用户",
-            actionType: "UNFREEZE",
-            actionName: "解冻主体",
-            detail: reason ? `解冻主体：${reason}` : "解冻主体：审批通过",
-          },
-          ...partner.auditLogs,
-        ],
-      }
+      const next = applyPartnerSubjectUnfreeze(partner, reason)
       commitPartnerArchive(next)
       setDataList((prev) => prev.map((item) => (item.id === partner.id ? next : item)))
       showToast(`主体【${partner.name}】解冻审批已通过，已恢复正常`)
@@ -315,6 +327,27 @@ export function PartnerArchiveListPage() {
           }}
           onConfirm={handleAppendRoleConfirm}
         />
+
+        {verifyPartner ? (
+          <PartnerVerifyDialog
+            open
+            mode="VERIFY_CONTACT"
+            verifyContext="DETAIL_VERIFY"
+            subjectType={verifyPartner.subjectType}
+            name={verifyPartner.name}
+            idNumber={verifyPartner.idNumber}
+            contactPhone={verifyPartner.contactPhone}
+            fullAddress={verifyPartner.certAddress.fullAddress}
+            roles={verifyPartner.roles.map((role) => role.roleType)}
+            agentName={verifyPartner.agentName}
+            onOpenChange={(open) => {
+              if (!open) {
+                setVerifyPartner(null)
+              }
+            }}
+            onConfirm={completeVerifyContact}
+          />
+        ) : null}
 
         {toastMessage && (
           <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
