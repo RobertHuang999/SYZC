@@ -54,7 +54,7 @@ export function PartnerFreezeBlockedSheet({
           <div className="min-w-0">
             <p className="text-base font-semibold text-gray-900">{title}</p>
             <p className="mt-0.5 text-xs text-gray-500">
-              主体名称：{partner.name}（{partner.archiveMenu} · {partner.partnerNo}）
+              主体名称：{partner.name}（{partner.archiveMenu}）
             </p>
           </div>
         </div>

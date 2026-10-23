@@ -475,7 +475,7 @@ export function PartnerArchiveFormPage() {
       {
         scopeLabel: `【${archiveMenuLabel}（本页）】`,
         outcome: "CREATED",
-        detail: `主体标识：${created.partnerNo} · ${verifyLabel}`,
+        detail: `${created.name} · ${verifyLabel}`,
       },
       ...compositePlan.map((item) => ({
         scopeLabel: `【${item.targetMenu}（追加）】`,

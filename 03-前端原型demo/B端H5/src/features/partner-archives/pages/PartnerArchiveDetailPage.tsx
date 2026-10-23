@@ -147,9 +147,7 @@ export function PartnerArchiveDetailPage() {
               ) : null}
             </div>
             <p className="text-[11px] leading-relaxed text-[#232D39]/55">
-              <span>身份标识：{partner.idNumberMasked}</span>
-              <span className="mx-1">·</span>
-              <span>合作方主体标识：{partner.partnerNo}</span>
+              身份标识：{partner.idNumberMasked}
             </p>
           </div>
         </section>
@@ -306,7 +304,6 @@ export function PartnerArchiveDetailPage() {
                     >
                       <DetailRow label="目标菜单" value={link.targetMenu} />
                       <DetailRow label="主体名称" value={link.name} />
-                      <DetailRow label="合作方主体标识" value={link.partnerNo} />
                       <DetailRow label="状态" value={formatLinkedArchiveStatus(link)} />
                       <Link
                         to={partnerArchiveDetailRoute(link.targetMenu, link.partnerId)}

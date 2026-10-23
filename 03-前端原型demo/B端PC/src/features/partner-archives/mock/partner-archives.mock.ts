@@ -71,7 +71,9 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
     createDate: "2026-09-20",
     createTime: "2026-09-20 11:05:44",
     createdBy: "系统",
-    updateTime: "2026-09-20 11:05:44",
+    updatedBy: "张工",
+    updatedByOrg: "江苏森云仓储监管有限公司",
+    updateTime: "2026-09-25 14:20:10",
     associatedDocs: MOCK_OWNER_FREEZE_BLOCKING_DOCS,
     auditLogs: [
       {
@@ -84,11 +86,12 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
       },
       {
         id: "log-102",
-        opTime: "2026-09-20 11:05:44",
-        operator: "系统",
-        actionType: "BIND_ACCOUNT",
-        actionName: "绑定客户账号",
-        detail: "C 端账号 CU-20260920001 与主体 1:1 绑定生效",
+        opTime: "2026-09-25 14:20:10",
+        operator: "张工",
+        actionType: "EDIT",
+        actionName: "修改合作方档案",
+        detail:
+          "修改合作方档案：变更证件登记地址为【江苏省南京市鼓楼区中山北路 200 号金峰国际 901 室】（原：江苏省南京市玄武区北京东路 1 号）",
       },
     ],
   },

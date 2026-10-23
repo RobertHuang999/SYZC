@@ -373,6 +373,10 @@ export function formatPartnerSubjectStatusToast(
   return `【${partnerName}】${suffix}`
 }
 
+/**
+ * @deprecated 6.3 方案 B 已废止单主档挂接多业务角色子表及按角色冻结/移除；
+ * 主档冻结/解冻请统一使用 PARTNER_SUBJECT_FREEZE_DIALOG / PARTNER_SUBJECT_UNFREEZE_DIALOG。
+ */
 export function getPartnerRoleRowDialogCopy(
   action: "freeze" | "unfreeze" | "remove",
 ): PartnerConfirmCopy {

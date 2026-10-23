@@ -45,7 +45,7 @@ export function PartnerFreezeBlockedDialog({
                 {title}
               </DialogTitle>
               <p className="text-xs text-muted-foreground">
-                主体名称：{partner.name}（{partner.archiveMenu} · {partner.partnerNo}）
+                主体名称：{partner.name}（{partner.archiveMenu}）
               </p>
             </div>
           </div>

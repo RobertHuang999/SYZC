@@ -56,7 +56,6 @@ export function PartnerArchiveCard({ item, onRowAction }: PartnerArchiveCardProp
           >
             {item.name}
           </Link>
-          <p className="mt-0.5 text-[11px] text-[#232D39]/50">{item.partnerNo}</p>
         </div>
         <div className="flex shrink-0 flex-wrap justify-end gap-1">
           <span

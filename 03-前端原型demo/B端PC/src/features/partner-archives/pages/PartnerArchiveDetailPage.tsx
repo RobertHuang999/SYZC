@@ -257,14 +257,8 @@ export function PartnerArchiveDetailPage() {
                 )}
                 <Badge variant="secondary">档案归属：{partner.archiveMenu}</Badge>
               </div>
-              <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                <span>
-                  身份标识：<span>{partner.idNumberMasked}</span>
-                </span>
-                <span>·</span>
-                <span>
-                  合作方主体标识：<span>{partner.partnerNo}</span>
-                </span>
+              <p className="text-sm text-muted-foreground">
+                身份标识：<span>{partner.idNumberMasked}</span>
               </p>
             </div>
 
@@ -540,7 +534,6 @@ export function PartnerArchiveDetailPage() {
                         <TableHead className="w-12 text-center">序号</TableHead>
                         <TableHead>目标菜单</TableHead>
                         <TableHead>主体名称</TableHead>
-                        <TableHead>合作方主体标识</TableHead>
                         <TableHead>主体状态</TableHead>
                         <TableHead className="min-w-[8rem]">操作</TableHead>
                       </TableRow>
@@ -553,7 +546,6 @@ export function PartnerArchiveDetailPage() {
                           </TableCell>
                           <TableCell className="font-medium">{link.targetMenu}</TableCell>
                           <TableCell>{link.name}</TableCell>
-                          <TableCell className="text-xs tabular-nums">{link.partnerNo}</TableCell>
                           <TableCell>
                             <Badge variant="outline">
                               {formatLinkedArchiveStatus(link)}

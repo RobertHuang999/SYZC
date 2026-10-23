@@ -26,6 +26,11 @@ export const partnerArchiveH5ListAnnotationBindings: Record<
     contentSuffix:
       "【H5 端差异】方案 A 行操作在卡片 Footer 单行右对齐文字链（对齐入库/出库 H5 卡片，无胶囊栅格）；含未验证时的【验证】；与 PC 操作列位次一致；详情页只读无重复底栏。",
   },
+  "partner-archive-freeze-blocked": {
+    targetId: "partner-archive-freeze-blocked",
+    contentSuffix:
+      "【H5 端差异】以底部抽屉（Sheet）形式弹出阻断提示（非 PC 居中对话框）。",
+  },
   "partner-archive-row-append-pa-r03a": {
     targetId: "partner-archive-row-append-pa-r03a",
     contentSuffix:

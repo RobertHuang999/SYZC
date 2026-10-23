@@ -15,6 +15,11 @@ import pickupPrd from "@docs/B-迭代需求/6.3版本（2026.09）/04-合作方�
 import funderPrd from "@docs/B-迭代需求/6.3版本（2026.09）/04-合作方档案/04-3-资金方信息/资金方信息主PRD.md?raw"
 import servicePrd from "@docs/B-迭代需求/6.3版本（2026.09）/04-合作方档案/04-4-服务方信息/服务方信息主PRD.md?raw"
 
+import ownerFields from "@docs/B-迭代需求/6.3版本（2026.09）/04-合作方档案/04-1-货主信息/货主信息字段清单.md?raw"
+import pickupFields from "@docs/B-迭代需求/6.3版本（2026.09）/04-合作方档案/04-2-提货人信息/提货人信息字段清单.md?raw"
+import funderFields from "@docs/B-迭代需求/6.3版本（2026.09）/04-合作方档案/04-3-资金方信息/资金方信息字段清单.md?raw"
+import serviceFields from "@docs/B-迭代需求/6.3版本（2026.09）/04-合作方档案/04-4-服务方信息/服务方信息字段清单.md?raw"
+
 const SUBMENU_RULES: Record<PartnerArchiveMenuLabel, string> = {
   货主信息: ownerRules,
   提货人信息: pickupRules,
@@ -29,7 +34,14 @@ const SUBMENU_PRD: Record<PartnerArchiveMenuLabel, string> = {
   服务方信息: servicePrd,
 }
 
-/** 公共三件套 + 当前 archiveMenu 子菜单规则/主 PRD 补充（原型标注挂载真源） */
+const SUBMENU_FIELDS: Record<PartnerArchiveMenuLabel, string> = {
+  货主信息: ownerFields,
+  提货人信息: pickupFields,
+  资金方信息: funderFields,
+  服务方信息: serviceFields,
+}
+
+/** 公共三件套 + 当前 archiveMenu 子菜单规则/主 PRD/字段清单补充（原型标注挂载真源） */
 export function buildPartnerArchiveDocuments(
   archiveMenu: PartnerArchiveMenuLabel,
 ): PrototypeDocument[] {
@@ -44,7 +56,7 @@ export function buildPartnerArchiveDocuments(
       id: "fields",
       title: "字段清单字典",
       category: "字段字典清单",
-      content: publicFields,
+      content: `${publicFields}\n\n---\n\n## 当前子菜单字段清单（${archiveMenu}）\n\n${SUBMENU_FIELDS[archiveMenu]}`,
     },
     {
       id: "rules",
