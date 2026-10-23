@@ -29,6 +29,8 @@ type PartnerArchiveEmbeddedPickerProps = {
   enableQuickCreate?: boolean
   /** 覆盖默认 archiveMenu 说明（如出库货主仅选已有档案） */
   userHint?: string
+  /** 外层已用 PartnerChangeFieldMark 时设为 true，避免重复琥珀说明 */
+  hideEmbeddedHints?: boolean
   className?: string
 }
 
@@ -41,6 +43,7 @@ export function PartnerArchiveEmbeddedPicker({
   onChange,
   enableQuickCreate = true,
   userHint,
+  hideEmbeddedHints = false,
   className,
 }: PartnerArchiveEmbeddedPickerProps) {
   const [quickOpen, setQuickOpen] = useState(false)
@@ -91,8 +94,12 @@ export function PartnerArchiveEmbeddedPicker({
             </Link>
           </div>
         ) : null}
-        <ProductFieldHint>{userHint ?? partnerEmbeddedPickerUserHint(archiveMenu)}</ProductFieldHint>
-        <PrototypeSpecCallout>{partnerEmbeddedPickerSpecNote(archiveMenu)}</PrototypeSpecCallout>
+        {hideEmbeddedHints ? null : (
+          <>
+            <ProductFieldHint>{userHint ?? partnerEmbeddedPickerUserHint(archiveMenu)}</ProductFieldHint>
+            <PrototypeSpecCallout>{partnerEmbeddedPickerSpecNote(archiveMenu)}</PrototypeSpecCallout>
+          </>
+        )}
       </div>
 
       {quickScene ? (

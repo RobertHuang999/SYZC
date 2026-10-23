@@ -29,9 +29,21 @@ export const outboundRecordFormAnnotations: PrototypeAnnotation[] = [
     ],
   },
   {
+    id: "outbound-form-partner-owner",
+    targetId: "outbound-form-partner-owner",
+    number: 2,
+    kind: "交互",
+    title: "6.3 货主引用改造点",
+    content: "货主信息域嵌入式选择器，仅选已有档案，无快捷建档。",
+    documentRefs: {
+      rules: { section: "3.3", match: "出库记录", element: "text" },
+    },
+    details: [],
+  },
+  {
     id: "outbound-form-basic",
     targetId: "outbound-form-basic",
-    number: 2,
+    number: 3,
     kind: "字段",
     title: "基础信息 · 时间合规与货主隔离",
     content:
@@ -67,7 +79,7 @@ export const outboundRecordFormAnnotations: PrototypeAnnotation[] = [
   {
     id: "outbound-form-goods",
     targetId: "outbound-form-goods",
-    number: 3,
+    number: 4,
     kind: "交互",
     title: "货品明细 · 选货弹窗与关联行独立勾选",
     content:
@@ -96,9 +108,21 @@ export const outboundRecordFormAnnotations: PrototypeAnnotation[] = [
     ],
   },
   {
+    id: "outbound-form-partner-pickup",
+    targetId: "outbound-form-partner-pickup",
+    number: 5,
+    kind: "交互",
+    title: "6.3 提货经办人改造点",
+    content: "提货人信息域 + 快捷建档（O06a）；选中后只读反显。",
+    documentRefs: {
+      rules: { section: "O06a", match: "快捷建档", element: "text" },
+    },
+    details: [],
+  },
+  {
     id: "outbound-form-pickup",
     targetId: "outbound-form-pickup",
-    number: 4,
+    number: 6,
     kind: "字段",
     title: "提货信息 · 提货主体与现场照片必传",
     content:
@@ -130,7 +154,7 @@ export const outboundRecordFormAnnotations: PrototypeAnnotation[] = [
   {
     id: "outbound-form-summary",
     targetId: "outbound-form-summary",
-    number: 5,
+    number: 7,
     kind: "规则",
     title: "固定底栏 · 统计汇总与原子提交前置校验",
     content:

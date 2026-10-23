@@ -50,7 +50,7 @@ export const partnerArchiveH5DetailAnnotationBindings: Record<
   "partner-archive-detail-header": {
     targetId: "partner-archive-detail-header",
     contentSuffix:
-      "【H5 端差异】页头白卡仅名称/状态/身份标识/合作方主体标识；联系手机核验在 Tab「基础档案」。",
+      "【H5 端差异】页头白卡仅名称/状态/身份标识（不展示合作方主体标识）；联系手机核验在 Tab「基础档案」。",
   },
   "partner-archive-detail-actions": {
     targetId: "partner-archive-detail-actions",

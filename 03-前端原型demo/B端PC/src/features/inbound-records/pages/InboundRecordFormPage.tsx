@@ -59,14 +59,22 @@ import { INBOUND_FORMAL_STAGING_CHANNEL_ENABLED } from "@prototype/shared/inboun
 import { PartnerQuickCreateSheet } from "@/features/partner-archives/components/PartnerQuickCreateSheet"
 import type { PartnerSubject } from "@/features/partner-archives/domain/types"
 import { resolveContactPhoneVerified } from "@/features/partner-archives/lib/contact-phone-verify"
+import { PartnerChangeFocusBanner } from "@/features/partner-synergy/components/PartnerChangeFocusBanner"
+import {
+  isPartnerChangeReviewMode,
+  scrollToPartnerChangeMark,
+} from "@/features/partner-synergy/lib/partner-change-review"
+import { cn } from "@/lib/utils"
 
 export function InboundRecordFormPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const sourceRegId = searchParams.get("sourceRegId")
+  const partnerReviewActive = isPartnerChangeReviewMode(searchParams.get("review"))
+  const partnerMapId = searchParams.get("mapId")
   const [form, setForm] = useState<InboundFormState>(() => createInitialFormState())
   const [basicExpanded, setBasicExpanded] = useState(true)
-  const [goodsExpanded, setGoodsExpanded] = useState(true)
+  const [goodsExpanded, setGoodsExpanded] = useState(() => !partnerReviewActive)
   const [leaveOpen, setLeaveOpen] = useState(false)
   const [relatedOpen, setRelatedOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
@@ -125,6 +133,12 @@ export function InboundRecordFormPage() {
     showToast(`已加载暂存登记 ${sourceRegId} 快照预填（Mock）`)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅 sourceRegId 变化时整表预填
   }, [sourceRegId])
+
+  useEffect(() => {
+    if (!partnerReviewActive) return
+    const timer = window.setTimeout(() => scrollToPartnerChangeMark("inbound-owner"), 120)
+    return () => window.clearTimeout(timer)
+  }, [partnerReviewActive])
 
   const handleCancel = () => {
     if (formHasDirtyFields(form)) {
@@ -419,6 +433,10 @@ export function InboundRecordFormPage() {
             </div>
           ) : null}
 
+          {partnerReviewActive && partnerMapId ? (
+            <PartnerChangeFocusBanner mapId={partnerMapId} />
+          ) : null}
+
           {/* 基础信息卡片 */}
           <PrototypeAnnotationTarget annotationIds={["inbound-form-basic"]}>
             <InboundBasicInfoSection
@@ -435,6 +453,17 @@ export function InboundRecordFormPage() {
 
           {/* 货品明细卡片 */}
           <PrototypeAnnotationTarget annotationIds={["inbound-form-goods"]}>
+            <div
+              className={cn(
+                "rounded-xl transition-opacity",
+                partnerReviewActive && "opacity-[0.42] hover:opacity-100"
+              )}
+            >
+              {partnerReviewActive ? (
+                <p className="mb-2 px-1 text-[11px] text-muted-foreground">
+                  基准仓储能力（6.3 未改本区）：悬停可恢复清晰以便对照
+                </p>
+              ) : null}
             <InboundGoodsSection
               form={form}
               expanded={goodsExpanded}
@@ -466,6 +495,7 @@ export function InboundRecordFormPage() {
               }}
               onPreviewImage={(url) => setPreviewImageUrl(url)}
             />
+            </div>
           </PrototypeAnnotationTarget>
         </div>
 

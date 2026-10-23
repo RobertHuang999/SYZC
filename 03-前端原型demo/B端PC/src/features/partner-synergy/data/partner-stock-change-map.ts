@@ -1,3 +1,5 @@
+import { buildPartnerChangePrototypeRoute } from "../lib/partner-change-review"
+
 /** 6.3 合作方存量改造地图 · 研发索引（非业务 SSOT；真源 05 协同规格 + 08 范围） */
 
 export type PartnerChangeLevel =
@@ -59,7 +61,10 @@ export const partnerStockChangeMapRows: PartnerStockChangeMapRow[] = [
       "方案 B：分菜单独立主档，选择器按 archiveMenu 硬过滤",
       "管理端保存可未验证；改址走 PA-R06a，不回写历史快照",
     ],
-    prototypeRoute: "/用户中心/合作方档案/货主信息",
+    prototypeRoute: buildPartnerChangePrototypeRoute(
+      "/用户中心/合作方档案/货主信息",
+      "archive-four-menus"
+    ),
     prototypeStatus: "delivered-63",
     specHint: "04 公共三件套 + 04-1~04-4",
     acceptanceIds: ["PA-V03", "PA-V07d"],
@@ -73,7 +78,10 @@ export const partnerStockChangeMapRows: PartnerStockChangeMapRow[] = [
     changeLevel: "must-change",
     archiveMenus: ["货主信息"],
     summaryBullets: ["P01~P09 仅货主域；P02 开唯一前须 P03 历史冲突治理"],
-    prototypeRoute: "/配置管理/平台管理/基础配置",
+    prototypeRoute: buildPartnerChangePrototypeRoute(
+      "/配置管理/平台管理/基础配置",
+      "platform-admission"
+    ),
     prototypeStatus: "delivered-63",
     specHint: "02-基础配置三件套",
   },
@@ -91,7 +99,10 @@ export const partnerStockChangeMapRows: PartnerStockChangeMapRow[] = [
       "审批通过写库存前固化货主快照",
     ],
     doNot: ["主表平铺证件地址", "提交时再新建货主"],
-    prototypeRoute: "/仓储/入库管理/入库记录/新增",
+    prototypeRoute: buildPartnerChangePrototypeRoute(
+      "/仓储/入库管理/入库记录/新增",
+      "inbound-record"
+    ),
     prototypeStatus: "delivered-63",
     specHint: "05 §3.1 · 10-入库记录",
     acceptanceIds: ["SYN-V01", "SYN-V16", "SYN-V11"],
@@ -110,7 +121,10 @@ export const partnerStockChangeMapRows: PartnerStockChangeMapRow[] = [
       "经办人不触发货主 P02",
     ],
     doNot: ["出库页快捷新建货主", "失焦静默沉淀提货人"],
-    prototypeRoute: "/仓储/出库管理/出库记录/新增",
+    prototypeRoute: buildPartnerChangePrototypeRoute(
+      "/仓储/出库管理/出库记录/新增",
+      "outbound-record"
+    ),
     prototypeStatus: "delivered-63",
     specHint: "05 §3.3 · 11-出库记录",
     acceptanceIds: ["SYN-V17", "SYN-V05"],
@@ -207,7 +221,10 @@ export const partnerStockChangeMapRows: PartnerStockChangeMapRow[] = [
       "货主→货主信息；生单快照，主档变更不回写",
     ],
     doNot: ["监管服务界面称「资金方」", "跨域混选权人"],
-    prototypeRoute: "/融资/监管/监管业务/监管办理",
+    prototypeRoute: buildPartnerChangePrototypeRoute(
+      "/融资/监管/监管业务/监管办理",
+      "supervision-handling"
+    ),
     prototypeStatus: "delivered-63",
     specHint: "12 · 05 第八节 · 基准办理三件套",
     acceptanceIds: ["MIG-V12"],
@@ -276,6 +293,12 @@ export const partnerStockChangeMapRows: PartnerStockChangeMapRow[] = [
     acceptanceIds: ["MIG-V02", "MIG-V04", "MIG-V12"],
   },
 ]
+
+export function findPartnerStockChangeMapRow(
+  id: string
+): PartnerStockChangeMapRow | undefined {
+  return partnerStockChangeMapRows.find((r) => r.id === id)
+}
 
 export function countMapStats(rows: PartnerStockChangeMapRow[]) {
   const p0MustChange = rows.filter(

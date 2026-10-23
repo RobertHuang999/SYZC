@@ -1,4 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { useSearchParams } from "react-router-dom"
+import { PartnerChangeFocusBanner } from "@/features/partner-synergy/components/PartnerChangeFocusBanner"
+import {
+  isPartnerChangeReviewMode,
+  scrollToPartnerChangeMark,
+} from "@/features/partner-synergy/lib/partner-change-review"
 import {
   AlertTriangleIcon,
   FileTextIcon,
@@ -38,7 +44,12 @@ import { AuditedWarehouseList } from "../components/AuditedWarehouseList"
 import { CredentialCardPanel } from "../components/CredentialCardPanel"
 import { DuplicateAddressDialog } from "../components/DuplicateAddressDialog"
 import { PartnerAccessAuditPanel } from "../components/PartnerAccessAuditPanel"
+import { PartnerChangeFieldMark } from "@/components/form/PartnerChangeZone"
 import { PartnerSubjectPolicyCard } from "../components/PartnerSubjectPolicyCard"
+import {
+  PLATFORM_OWNER_POLICY_PARTNER_CHANGE_SPEC,
+  PLATFORM_OWNER_POLICY_PARTNER_CHANGE_USER,
+} from "@prototype/shared/partner-change/partner-change-ui-labels"
 import { SmtpTestMailDialog } from "../components/SmtpTestMailDialog"
 import { WarehouseAuditPickerDialog } from "../components/WarehouseAuditPickerDialog"
 import { YesNoRadio } from "../components/YesNoRadio"
@@ -136,6 +147,9 @@ function newSmtpRow(): SmtpMailboxRow {
 }
 
 export function PlatformBasicConfigPage() {
+  const [searchParams] = useSearchParams()
+  const partnerReviewActive = isPartnerChangeReviewMode(searchParams.get("review"))
+  const partnerMapId = searchParams.get("mapId")
   const [state, setState] = useState<PlatformBasicConfigState>(() =>
     buildInitialPlatformState()
   )
@@ -164,6 +178,16 @@ export function PlatformBasicConfigPage() {
   const [partnerAccessAuditLog, setPartnerAccessAuditLog] = useState<
     PartnerAccessAuditRecord[]
   >(() => [...partnerAccessAuditLogMock])
+
+  useEffect(() => {
+    if (!partnerReviewActive || partnerMapId !== "platform-admission") return
+    setCategory("partner-access")
+    const timer = window.setTimeout(
+      () => scrollToPartnerChangeMark("platform-owner-admission"),
+      200
+    )
+    return () => window.clearTimeout(timer)
+  }, [partnerReviewActive, partnerMapId])
 
   useEffect(() => {
     const syncFromWarehouseMgmt = () => {
@@ -701,6 +725,11 @@ export function PlatformBasicConfigPage() {
 
   const renderPartnerSection = () => (
     <PrototypeAnnotationTarget annotationIds={["basic-config-partner"]}>
+      <PartnerChangeFieldMark
+        markId="platform-owner-admission"
+        userHint={PLATFORM_OWNER_POLICY_PARTNER_CHANGE_USER}
+        specNote={PLATFORM_OWNER_POLICY_PARTNER_CHANGE_SPEC}
+      >
       <div className="space-y-4">
         <PartnerSubjectPolicyCard
           title="个人货主证件地址规则"
@@ -736,6 +765,7 @@ export function PlatformBasicConfigPage() {
         />
         <PartnerAccessAuditPanel records={partnerAccessAuditLog} />
       </div>
+      </PartnerChangeFieldMark>
     </PrototypeAnnotationTarget>
   )
 
@@ -1158,6 +1188,10 @@ export function PlatformBasicConfigPage() {
             集中维护仓储作业审批、货主准入、协议文件、数据源与物联网网关、邮件通知等平台运行参数
           </p>
         </PrototypeAnnotationTarget>
+
+        {partnerReviewActive && partnerMapId ? (
+          <PartnerChangeFocusBanner mapId={partnerMapId} />
+        ) : null}
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
           <PrototypeAnnotationTarget annotationIds={["basic-config-nav"]}>

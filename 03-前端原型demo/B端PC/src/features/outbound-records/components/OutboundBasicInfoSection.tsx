@@ -25,8 +25,13 @@ import { MANUAL_OUTBOUND_TYPE_OPTIONS } from "../domain/constants"
 import type { OutboundFormState } from "../domain/form-types"
 import type { OwnerType, OutboundTypeName } from "../domain/types"
 import { RELATED_ORDER_CANDIDATES, type RelatedOrderItem } from "../mock/outbound-form.mock"
+import { PartnerChangeFieldMark } from "@/components/form/PartnerChangeZone"
 import { PartnerArchiveEmbeddedPicker } from "@/features/partner-archives/components/PartnerArchiveEmbeddedPicker"
-import { OUTBOUND_OWNER_PICKER_USER_HINT } from "@/features/partner-archives/lib/partner-archive-ui-labels"
+import {
+  OUTBOUND_OWNER_PARTNER_CHANGE_SPEC,
+  OUTBOUND_OWNER_PARTNER_CHANGE_USER,
+} from "@prototype/shared/partner-change/partner-change-ui-labels"
+import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import type { PartnerSelectorValue } from "@/features/partner-archives/components/PartnerArchiveSelector"
 import { partnerArchivesMock } from "@/features/partner-archives/mock/partner-archives.mock"
 import { resolveContactPhoneVerified } from "@/features/partner-archives/lib/contact-phone-verify"
@@ -229,16 +234,24 @@ export function OutboundBasicInfoSection({
             </FormItem>
 
             <div className="sm:col-span-2 lg:col-span-4">
-              <PartnerArchiveEmbeddedPicker
-                archiveMenu="货主信息"
-                fieldLabel="货主"
-                required
-                enableQuickCreate={false}
-                userHint={OUTBOUND_OWNER_PICKER_USER_HINT}
-                value={form.ownerPartnerId || undefined}
-                selection={ownerSelection}
-                onChange={applyOwnerPartner}
-              />
+              <PrototypeAnnotationTarget annotationIds={["outbound-form-partner-owner"]}>
+                <PartnerChangeFieldMark
+                  markId="outbound-owner"
+                  userHint={OUTBOUND_OWNER_PARTNER_CHANGE_USER}
+                  specNote={OUTBOUND_OWNER_PARTNER_CHANGE_SPEC}
+                >
+                  <PartnerArchiveEmbeddedPicker
+                    archiveMenu="货主信息"
+                    fieldLabel="货主"
+                    required
+                    enableQuickCreate={false}
+                    hideEmbeddedHints
+                    value={form.ownerPartnerId || undefined}
+                    selection={ownerSelection}
+                    onChange={applyOwnerPartner}
+                  />
+                </PartnerChangeFieldMark>
+              </PrototypeAnnotationTarget>
             </div>
 
             {/* 4 & 5. 个人 vs 企业动态列 */}

@@ -1,4 +1,10 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useSearchParams } from "react-router-dom"
+import { PartnerChangeFocusBanner } from "@/features/partner-synergy/components/PartnerChangeFocusBanner"
+import {
+  isPartnerChangeReviewMode,
+  scrollToPartnerChangeMark,
+} from "@/features/partner-synergy/lib/partner-change-review"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import {
@@ -12,7 +18,14 @@ import {
   PrototypeAnnotationProvider,
   PrototypeAnnotationTarget,
 } from "@/shared/annotations/PrototypeAnnotationLayer"
+import { PartnerChangeFieldMark } from "@/components/form/PartnerChangeZone"
 import { PartnerArchiveEmbeddedPicker } from "@/features/partner-archives/components/PartnerArchiveEmbeddedPicker"
+import {
+  SUPERVISION_HOLDER_PARTNER_CHANGE_SPEC,
+  SUPERVISION_HOLDER_PARTNER_CHANGE_USER,
+  SUPERVISION_OWNER_PARTNER_CHANGE_SPEC,
+  SUPERVISION_OWNER_PARTNER_CHANGE_USER,
+} from "@prototype/shared/partner-change/partner-change-ui-labels"
 import type { PartnerSelectorValue } from "@/features/partner-archives/components/PartnerArchiveSelector"
 import {
   SUPERVISION_DOC_KIND_OPTIONS,
@@ -24,6 +37,9 @@ import { supervisionHandlingDocuments } from "../documents/supervision-handling-
 import { supervisionHandlingPartnerRefAnnotations } from "../annotations/supervision-handling-partner-ref.annotations"
 
 export function SupervisionHandlingPartnerRefPage() {
+  const [searchParams] = useSearchParams()
+  const partnerReviewActive = isPartnerChangeReviewMode(searchParams.get("review"))
+  const partnerMapId = searchParams.get("mapId")
   const [docKind, setDocKind] = useState<SupervisionDocKind>("PLEDGE")
   const [ownerId, setOwnerId] = useState<string | undefined>()
   const [ownerSelection, setOwnerSelection] = useState<PartnerSelectorValue | null>(null)
@@ -42,6 +58,15 @@ export function SupervisionHandlingPartnerRefPage() {
     setHolderSelection(null)
   }
 
+  useEffect(() => {
+    if (!partnerReviewActive) return
+    const timer = window.setTimeout(
+      () => scrollToPartnerChangeMark("supervision-owner"),
+      120
+    )
+    return () => window.clearTimeout(timer)
+  }, [partnerReviewActive])
+
   return (
     <PrototypeAnnotationProvider
       documents={supervisionHandlingDocuments}
@@ -56,6 +81,10 @@ export function SupervisionHandlingPartnerRefPage() {
             </p>
           </div>
         </PrototypeAnnotationTarget>
+
+        {partnerReviewActive && partnerMapId ? (
+          <PartnerChangeFocusBanner mapId={partnerMapId} />
+        ) : null}
 
         <Card>
           <CardHeader className="pb-3">
@@ -93,31 +122,46 @@ export function SupervisionHandlingPartnerRefPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-6">
-            <PartnerArchiveEmbeddedPicker
-              archiveMenu={SUPERVISION_OWNER_ARCHIVE_MENU}
-              fieldLabel="货主"
-              required
-              value={ownerId}
-              selection={ownerSelection}
-              onChange={(payload) => {
-                setOwnerSelection(payload)
-                setOwnerId(payload?.partnerId)
-              }}
-            />
+            <PartnerChangeFieldMark
+              markId="supervision-owner"
+              userHint={SUPERVISION_OWNER_PARTNER_CHANGE_USER}
+              specNote={SUPERVISION_OWNER_PARTNER_CHANGE_SPEC}
+            >
+              <PartnerArchiveEmbeddedPicker
+                archiveMenu={SUPERVISION_OWNER_ARCHIVE_MENU}
+                fieldLabel="货主"
+                required
+                hideEmbeddedHints
+                value={ownerId}
+                selection={ownerSelection}
+                onChange={(payload) => {
+                  setOwnerSelection(payload)
+                  setOwnerId(payload?.partnerId)
+                }}
+              />
+            </PartnerChangeFieldMark>
 
             <PrototypeAnnotationTarget annotationIds={["supervision-handling-holder-picker"]}>
               <div id="supervision-handling-holder-picker">
-              <PartnerArchiveEmbeddedPicker
-                archiveMenu={holderArchiveMenu}
-                fieldLabel={holderMeta.holderFieldLabel}
-                required
-                value={holderId}
-                selection={holderSelection}
-                onChange={(payload) => {
-                  setHolderSelection(payload)
-                  setHolderId(payload?.partnerId)
-                }}
-              />
+                <PartnerChangeFieldMark
+                  markId="supervision-holder"
+                  userHint={SUPERVISION_HOLDER_PARTNER_CHANGE_USER}
+                  specNote={SUPERVISION_HOLDER_PARTNER_CHANGE_SPEC}
+                >
+                  <PartnerArchiveEmbeddedPicker
+                    archiveMenu={holderArchiveMenu}
+                    fieldLabel={holderMeta.holderFieldLabel}
+                    required
+                    hideEmbeddedHints
+                    enableQuickCreate={false}
+                    value={holderId}
+                    selection={holderSelection}
+                    onChange={(payload) => {
+                      setHolderSelection(payload)
+                      setHolderId(payload?.partnerId)
+                    }}
+                  />
+                </PartnerChangeFieldMark>
               </div>
             </PrototypeAnnotationTarget>
           </CardContent>

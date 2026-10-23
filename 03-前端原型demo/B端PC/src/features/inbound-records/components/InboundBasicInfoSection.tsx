@@ -37,11 +37,17 @@ import {
   resolveOwnerSearchRecord,
 } from "../mock/inbound-form.mock"
 import { ProductFieldHint } from "@/components/form/ProductFieldHint"
+import { PartnerChangeFieldMark } from "@/components/form/PartnerChangeZone"
 import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
+import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import {
   INBOUND_FINANCIAL_OWNER_SMS_SPEC,
   INBOUND_FINANCIAL_OWNER_SMS_USER,
 } from "@prototype/shared/inbound/owner-ui-labels"
+import {
+  INBOUND_OWNER_PARTNER_CHANGE_ZONE_SPEC,
+  INBOUND_OWNER_PARTNER_CHANGE_ZONE_USER,
+} from "@prototype/shared/partner-change/partner-change-ui-labels"
 import {
   STAGING_P01_FORM_HINT_SPEC,
   STAGING_P01_FORM_HINT_USER,
@@ -346,9 +352,15 @@ export function InboundBasicInfoSection({
               </Select>
             </Field>
 
-            {/* 3. 货主（合作方引用） */}
+            {/* 3. 货主（合作方引用 · 6.3 改造点） */}
             <Field label="货主" required className="sm:col-span-2 lg:col-span-2">
-              <div className="flex flex-col gap-2">
+              <PrototypeAnnotationTarget annotationIds={["inbound-form-partner-63"]}>
+              <PartnerChangeFieldMark
+                markId="inbound-owner"
+                userHint={INBOUND_OWNER_PARTNER_CHANGE_ZONE_USER}
+                specNote={INBOUND_OWNER_PARTNER_CHANGE_ZONE_SPEC}
+              >
+              <div className="flex flex-col gap-2 p-2">
               <div className="flex gap-1.5">
                 <div className="min-w-0 flex-1">
                   <OwnerNameSearchSelect
@@ -477,16 +489,18 @@ export function InboundBasicInfoSection({
                     ) : null}
                     {matchedArchive.contactPhoneVerified === "UNVERIFIED" &&
                     isFinancialInboundType(form.inboundType) ? (
-                      <span className="block space-y-1 text-xs">
-                        <span className="text-amber-800">{INBOUND_FINANCIAL_OWNER_SMS_USER}</span>
-                        <PrototypeSpecCallout className="mt-1">
-                          {INBOUND_FINANCIAL_OWNER_SMS_SPEC}
-                        </PrototypeSpecCallout>
-                      </span>
+                      <div className="space-y-1">
+                        <ProductFieldHint className="text-amber-900 dark:text-amber-100">
+                          {INBOUND_FINANCIAL_OWNER_SMS_USER}
+                        </ProductFieldHint>
+                        <PrototypeSpecCallout>{INBOUND_FINANCIAL_OWNER_SMS_SPEC}</PrototypeSpecCallout>
+                      </div>
                     ) : null}
                   </div>
                 ) : null}
               </div>
+              </PartnerChangeFieldMark>
+              </PrototypeAnnotationTarget>
             </Field>
 
             {/* 4. 货主标识（反显时置灰不可修改，个人手机号脱敏） */}
@@ -578,7 +592,6 @@ export function InboundBasicInfoSection({
                 <Input placeholder="请先选择货主类型" disabled className="bg-muted/60 text-muted-foreground cursor-not-allowed" />
               </Field>
             )}
-
             {/* 6. 入库类型 */}
             <Field label="入库类型" required>
               <InboundTypeSelect

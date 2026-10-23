@@ -1,5 +1,10 @@
-import { useState, useMemo } from "react"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useMemo, useState } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import { PartnerChangeFocusBanner } from "@/features/partner-synergy/components/PartnerChangeFocusBanner"
+import {
+  isPartnerChangeReviewMode,
+  scrollToPartnerChangeMark,
+} from "@/features/partner-synergy/lib/partner-change-review"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -45,6 +50,9 @@ import { addDeliveryOrderFromOutbound } from "@/features/delivery-orders/mock/de
 
 export function OutboundRecordFormPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const partnerReviewActive = isPartnerChangeReviewMode(searchParams.get("review"))
+  const partnerMapId = searchParams.get("mapId")
   const [form, setForm] = useState<OutboundFormState>(() => createInitialFormState())
 
   const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false)
@@ -72,6 +80,14 @@ export function OutboundRecordFormPage() {
     setToastMessage(msg)
     window.setTimeout(() => setToastMessage(null), 2800)
   }
+
+  useEffect(() => {
+    if (!partnerReviewActive) return
+    const markId =
+      partnerMapId === "outbound-record" ? "outbound-owner" : "outbound-owner"
+    const timer = window.setTimeout(() => scrollToPartnerChangeMark(markId), 120)
+    return () => window.clearTimeout(timer)
+  }, [partnerReviewActive, partnerMapId])
 
   const patchForm = (p: Partial<OutboundFormState>) => {
     setForm((prev) => ({ ...prev, ...p }))
@@ -303,6 +319,10 @@ export function OutboundRecordFormPage() {
               </div>
             </div>
           </PrototypeAnnotationTarget>
+
+          {partnerReviewActive && partnerMapId ? (
+            <PartnerChangeFocusBanner mapId={partnerMapId} />
+          ) : null}
 
           <PrototypeAnnotationTarget annotationIds={["outbound-form-basic"]}>
             <OutboundBasicInfoSection

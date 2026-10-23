@@ -19,7 +19,13 @@ import {
 import { cn } from "@/lib/utils"
 import type { OutboundFormState } from "../domain/form-types"
 import type { PickupPersonType } from "../domain/types"
+import { PartnerChangeFieldMark } from "@/components/form/PartnerChangeZone"
 import { PartnerArchiveEmbeddedPicker } from "@/features/partner-archives/components/PartnerArchiveEmbeddedPicker"
+import {
+  OUTBOUND_PICKUP_AGENT_PARTNER_CHANGE_SPEC,
+  OUTBOUND_PICKUP_AGENT_PARTNER_CHANGE_USER,
+} from "@prototype/shared/partner-change/partner-change-ui-labels"
+import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import type { PartnerSelectorValue } from "@/features/partner-archives/components/PartnerArchiveSelector"
 import { partnerArchivesMock } from "@/features/partner-archives/mock/partner-archives.mock"
 import { resolveContactPhoneVerified } from "@/features/partner-archives/lib/contact-phone-verify"
@@ -171,14 +177,23 @@ export function OutboundPickupInfoSection({
             {isPersonal ? (
               <>
                 <div className="sm:col-span-2 lg:col-span-4">
-                  <PartnerArchiveEmbeddedPicker
-                    archiveMenu="提货人信息"
-                    fieldLabel="提货经办人"
-                    required
-                    value={form.pickupAgentPartnerId || undefined}
-                    selection={pickupSelection}
-                    onChange={applyPickupPartner}
-                  />
+                  <PrototypeAnnotationTarget annotationIds={["outbound-form-partner-pickup"]}>
+                    <PartnerChangeFieldMark
+                      markId="outbound-pickup-agent"
+                      userHint={OUTBOUND_PICKUP_AGENT_PARTNER_CHANGE_USER}
+                      specNote={OUTBOUND_PICKUP_AGENT_PARTNER_CHANGE_SPEC}
+                    >
+                      <PartnerArchiveEmbeddedPicker
+                        archiveMenu="提货人信息"
+                        fieldLabel="提货经办人"
+                        required
+                        hideEmbeddedHints
+                        value={form.pickupAgentPartnerId || undefined}
+                        selection={pickupSelection}
+                        onChange={applyPickupPartner}
+                      />
+                    </PartnerChangeFieldMark>
+                  </PrototypeAnnotationTarget>
                 </div>
                 <FormItem label="提货人姓名:" required>
                   <Input

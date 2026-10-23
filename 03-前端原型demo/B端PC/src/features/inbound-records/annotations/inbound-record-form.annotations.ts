@@ -15,9 +15,37 @@ export const inboundRecordFormAnnotations: PrototypeAnnotation[] = [
     details: [],
   },
   {
+    id: "inbound-form-partner-63",
+    targetId: "inbound-form-partner-63",
+    number: 2,
+    kind: "交互",
+    title: "6.3 货主协同改造区",
+    content:
+      "货主信息域：搜索/档案绑定、快捷建档（QCP）、查看货主 Deep link；主表不平铺证件地址；金融入库未验证货主提交前补验。",
+    documentRefs: {
+      prd: { section: "3.1", match: "入库记录", element: "text" },
+      rules: { section: "P-01", match: "单一真源", element: "text" },
+    },
+    details: [
+      {
+        title: "验收与真源",
+        items: [
+          {
+            label: "协同规格",
+            content: "05 存量改造 · 合作方改造-存量业务单据协同规格 §3.1",
+          },
+          {
+            label: "验收编号",
+            content: "SYN-V01 · SYN-V16 · SYN-V11",
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: "inbound-form-basic",
     targetId: "inbound-form-basic",
-    number: 2,
+    number: 3,
     kind: "字段",
     title: "基础信息联动",
     content:
@@ -30,7 +58,7 @@ export const inboundRecordFormAnnotations: PrototypeAnnotation[] = [
   {
     id: "inbound-form-goods",
     targetId: "inbound-form-goods",
-    number: 3,
+    number: 4,
     kind: "交互",
     title: "货品与 R13/R16",
     content:
