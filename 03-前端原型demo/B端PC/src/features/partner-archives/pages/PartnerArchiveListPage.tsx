@@ -22,6 +22,7 @@ import { PartnerVerifyDialog } from "../components/PartnerVerifyDialog"
 import {
   DEFAULT_PARTNER_ARCHIVE_FILTERS,
   PAGE_SIZE,
+  sanitizePartnerArchiveFiltersForMenu,
 } from "../domain/constants"
 import type {
   PartnerArchivePendingAction,
@@ -43,6 +44,7 @@ import {
   withPartnerFreezeDemoData,
 } from "../mock/partner-freeze-demo-rehydrate"
 import { appendLinkedPartnerMenus } from "../lib/linked-partner-archives"
+import { appendTargetMenusForPartner } from "../lib/composite-append-save"
 import {
   checkPartnerSubjectFreezeEligibility,
   type FreezeBlockReason,
@@ -93,6 +95,11 @@ export function PartnerArchiveListPage() {
     setDataList(enrichPartnerListForFreezeDemo([...partnerArchivesMock]))
   }, [location.pathname, location.key])
 
+  useEffect(() => {
+    setDraftFilters((prev) => sanitizePartnerArchiveFiltersForMenu(archiveMenuLabel, prev))
+    setAppliedFilters((prev) => sanitizePartnerArchiveFiltersForMenu(archiveMenuLabel, prev))
+  }, [archiveMenuLabel])
+
   const filteredData = useMemo(
     () => filterPartnerArchives(dataList, appliedFilters, archiveMenuLabel),
     [dataList, appliedFilters, archiveMenuLabel]
@@ -111,8 +118,12 @@ export function PartnerArchiveListPage() {
     window.dispatchEvent(new Event("partner-archive-updated"))
   }
 
-  const handleSearch = () => {
-    setAppliedFilters(draftFilters)
+  const handleSearch = (nextApplied?: PartnerArchiveFilters) => {
+    const applied = nextApplied ?? draftFilters
+    if (nextApplied) {
+      setDraftFilters(nextApplied)
+    }
+    setAppliedFilters(applied)
     setPage(1)
   }
 
@@ -207,10 +218,15 @@ export function PartnerArchiveListPage() {
     if (!activePartner || targetMenus.length === 0) {
       return
     }
-    const detail = targetMenus
+    const allowed = new Set(appendTargetMenusForPartner(activePartner))
+    const safeMenus = targetMenus.filter((menu) => allowed.has(menu))
+    if (safeMenus.length === 0) {
+      return
+    }
+    const detail = safeMenus
       .map((menu) => `在【${menu}】创建独立主档或关联已有主档`)
       .join("；")
-    const next = appendLinkedPartnerMenus(activePartner, targetMenus, detail)
+    const next = appendLinkedPartnerMenus(activePartner, safeMenus, detail)
     commitPartnerArchive(next)
     setDataList((prev) => prev.map((item) => (item.id === activePartner.id ? next : item)))
     showToast(`已为【${activePartner.name}】追加合作方档案角色`)
@@ -246,6 +262,7 @@ export function PartnerArchiveListPage() {
               onAdd={() => navigate(partnerArchiveAddPath(archiveMenuLabel))}
               addLabel={`新增${ARCHIVE_MENU_SHORT_LABEL[archiveMenuLabel]}`}
               archiveMenu={archiveMenuLabel}
+              onListOcrToast={showToast}
             />
           </PrototypeAnnotationTarget>
         </form>

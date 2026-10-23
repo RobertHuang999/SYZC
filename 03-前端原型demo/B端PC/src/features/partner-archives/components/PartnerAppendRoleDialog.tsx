@@ -14,10 +14,14 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import type { PartnerSubject } from "../domain/types"
+import { linkedArchiveMenuLabel } from "../lib/linked-partner-archives"
 import {
-  otherArchiveMenus,
-  linkedArchiveMenuLabel,
-} from "../lib/linked-partner-archives"
+  appendTargetMenusEmptyBecauseIndividualEnterpriseOnly,
+  appendTargetMenusForPartner,
+} from "../lib/composite-append-save"
+import {
+  PARTNER_APPEND_ROLE_INDIVIDUAL_USER_HINT,
+} from "../lib/partner-archive-ui-labels"
 
 type PartnerAppendRoleDialogProps = {
   partner: PartnerSubject | null
@@ -36,11 +40,12 @@ export function PartnerAppendRoleDialog({
     if (!partner) {
       return []
     }
-    const linked = new Set(
-      (partner.linkedPartnerArchives ?? []).map((item) => item.targetMenu),
-    )
-    return otherArchiveMenus(partner.archiveMenu).filter((menu) => !linked.has(menu))
+    return appendTargetMenusForPartner(partner)
   }, [partner])
+
+  const individualEnterpriseOnlyBlocked = partner
+    ? appendTargetMenusEmptyBecauseIndividualEnterpriseOnly(partner)
+    : false
 
   const [selectedMenus, setSelectedMenus] = useState<PartnerArchiveMenuLabel[]>([])
   const [confirmCreateOpen, setConfirmCreateOpen] = useState(false)
@@ -101,7 +106,9 @@ export function PartnerAppendRoleDialog({
 
             {availableMenus.length === 0 ? (
               <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
-                已关联全部可选子菜单，无需再次追加。
+                {individualEnterpriseOnlyBlocked
+                  ? PARTNER_APPEND_ROLE_INDIVIDUAL_USER_HINT
+                  : "已关联全部可选子菜单，无需再次追加。"}
               </p>
             ) : (
               <div className="space-y-2">
@@ -126,11 +133,14 @@ export function PartnerAppendRoleDialog({
                     )
                   })}
                 </div>
+                {partner.subjectType === "INDIVIDUAL" ? (
+                  <ProductFieldHint>{PARTNER_APPEND_ROLE_INDIVIDUAL_USER_HINT}</ProductFieldHint>
+                ) : null}
                 <ProductFieldHint>
                   确认后将在所选菜单为该身份创建独立主档（若该菜单已有同证号主档，则仅建立关联）。
                 </ProductFieldHint>
                 <PrototypeSpecCallout>
-                  【主体识别与库内匹配总则】(PA-R03) · 【合作方子菜单分视图与隐式角色规则】(PA-R12)
+                  【主体识别与库内匹配总则】(PA-R03) · 【合作方子菜单分视图与隐式角色规则】(PA-R12)：资金方/服务方锁定企业，个人不可追加。
                 </PrototypeSpecCallout>
               </div>
             )}

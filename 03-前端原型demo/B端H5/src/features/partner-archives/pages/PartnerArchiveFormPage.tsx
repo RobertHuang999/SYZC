@@ -17,11 +17,9 @@ import { MobileDownSelectSheet } from "@/features/inbound-records/components/Mob
 import {
   PARTNER_FORM_SUBJECT_TYPE_OPTIONS,
 } from "@prototype/B端PC/src/features/partner-archives/domain/constants"
-import {
-  ROLE_TYPE_LABELS,
-  type PartnerSubject,
-  type RoleType,
-  type SubjectType,
+import type {
+  PartnerSubject,
+  SubjectType,
 } from "@prototype/B端PC/src/features/partner-archives/domain/types"
 import { ProductFieldHint } from "@/components/form/ProductFieldHint"
 import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
@@ -32,8 +30,21 @@ import {
   findPartnerByIdNumber,
   ownerAddressConflictMessage,
   maskIdNumber,
-  rolesAllowedForSubjectType,
 } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-rules"
+import {
+  appendLinkedPartnerMenus,
+  normalizePartnerPlanB,
+  otherArchiveMenus,
+} from "@prototype/B端PC/src/features/partner-archives/lib/linked-partner-archives"
+import {
+  appendMenusSelectableForSubjectType,
+  buildCompositeAppendPlan,
+  type AppendPlanItem,
+  type CompositePrecheckFailure,
+  type CompositeSaveResultLine,
+} from "@prototype/B端PC/src/features/partner-archives/lib/composite-append-save"
+import { PartnerCompositeSaveSheet } from "../components/PartnerCompositeSaveSheet"
+import type { PartnerCompositeSaveSheetMode } from "../components/PartnerCompositeSaveSheet"
 import {
   markContactPhoneVerified,
   requiresPartnerEditPhoneSmsVerify,
@@ -73,7 +84,6 @@ import {
 import {
   canEditPartnerSubjectIdNumberOnForm,
   canEditPartnerSubjectNameOnForm,
-  collectArchiveRequiredGaps,
   isArchiveRequiredFieldsPending,
   isCertAddressSaveRequired,
   isEnterpriseOnlyArchiveMenu,
@@ -108,7 +118,6 @@ export function PartnerArchiveFormPage() {
   const editId = searchParams.get("edit")
   const archiveMenuLabel = parseArchiveMenuFromSearch(searchParams.get("archiveMenu"))
   const menuShortLabel = ARCHIVE_MENU_SHORT_LABEL[archiveMenuLabel]
-  const isOwnerArchiveMenu = archiveMenuLabel === "货主信息"
   const existing = useMemo(
     () => (editId ? getPartnerArchiveById(editId) : undefined),
     [editId],
@@ -136,9 +145,9 @@ export function PartnerArchiveFormPage() {
   const [city, setCity] = useState(existing?.certAddress.city || (isEdit ? "" : "南京市"))
   const [district, setDistrict] = useState(existing?.certAddress.district || (isEdit ? "" : "鼓楼区"))
   const [detailAddress, setDetailAddress] = useState(existing?.certAddress.detail ?? "")
-  const [selectedRoles, setSelectedRoles] = useState<RoleType[]>(
-    existing ? existing.roles.map((r) => r.roleType) : ["OWNER"],
-  )
+  const [selectedAppendMenus, setSelectedAppendMenus] = useState<
+    PartnerArchiveMenuLabel[]
+  >([])
   const [dirty, setDirty] = useState(false)
   const [leaveOpen, setLeaveOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
@@ -148,6 +157,36 @@ export function PartnerArchiveFormPage() {
     "VERIFY_CONTACT",
   )
   const [submitting, setSubmitting] = useState(false)
+  const [compositeSheetOpen, setCompositeSheetOpen] = useState(false)
+  const [compositeSheetMode, setCompositeSheetMode] =
+    useState<PartnerCompositeSaveSheetMode>("confirm")
+  const [compositePlan, setCompositePlan] = useState<AppendPlanItem[]>([])
+  const [compositeFailures, setCompositeFailures] = useState<CompositePrecheckFailure[]>(
+    [],
+  )
+  const [compositeSuccessLines, setCompositeSuccessLines] = useState<
+    CompositeSaveResultLine[]
+  >([])
+  const [pendingSaveOptions, setPendingSaveOptions] = useState<
+    { verifiedOnCreate?: boolean } | undefined
+  >(undefined)
+  const [lastCreatedPartnerId, setLastCreatedPartnerId] = useState<string | null>(null)
+  const [lastSaveVerified, setLastSaveVerified] = useState(false)
+
+  const appendMenuOptions = useMemo(
+    () =>
+      appendMenusSelectableForSubjectType(
+        otherArchiveMenus(archiveMenuLabel),
+        subjectType,
+      ),
+    [archiveMenuLabel, subjectType],
+  )
+
+  useEffect(() => {
+    setSelectedAppendMenus((current) =>
+      current.filter((menu) => appendMenuOptions.includes(menu)),
+    )
+  }, [appendMenuOptions])
 
   const isPendingCompletion = useMemo(() => {
     if (!existing) return false
@@ -206,20 +245,17 @@ export function PartnerArchiveFormPage() {
   )
 
   const detailTrimmed = detailAddress.trim()
-  const hasIndividualOwnerRole = Boolean(
-    isOwnerArchiveMenu &&
-      (existing?.roles.some((r) => r.roleType === "OWNER") ||
-        (!isEdit && selectedRoles.includes("OWNER"))),
-  )
-
-  const selectableRoles = useMemo(
-    () => rolesAllowedForSubjectType(subjectType),
-    [subjectType],
-  )
-
-  useEffect(() => {
-    setSelectedRoles((prev) => prev.filter((r) => selectableRoles.includes(r)))
-  }, [selectableRoles])
+  const touchesOwnerDomainForP02 = useMemo(() => {
+    if (archiveMenuLabel === "货主信息") {
+      if (existing) {
+        return existing.roles.some(
+          (role) => role.roleType === "OWNER" && role.roleStatus !== "INVALID",
+        )
+      }
+      return true
+    }
+    return selectedAppendMenus.includes("货主信息")
+  }, [existing, archiveMenuLabel, selectedAppendMenus])
 
   const markDirty = () => setDirty(true)
 
@@ -228,10 +264,10 @@ export function PartnerArchiveFormPage() {
     window.setTimeout(() => setToast(null), 2600)
   }
 
-  const toggleRole = (role: RoleType) => {
+  const toggleAppendMenu = (menu: PartnerArchiveMenuLabel) => {
     markDirty()
-    setSelectedRoles((prev) =>
-      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role],
+    setSelectedAppendMenus((current) =>
+      current.includes(menu) ? current.filter((m) => m !== menu) : [...current, menu],
     )
   }
 
@@ -281,7 +317,7 @@ export function PartnerArchiveFormPage() {
       }
     }
     if (
-      hasIndividualOwnerRole &&
+      touchesOwnerDomainForP02 &&
       detailTrimmed &&
       findOwnerAddressConflict(
         partnerArchivesMock,
@@ -292,93 +328,187 @@ export function PartnerArchiveFormPage() {
     ) {
       return ownerAddressConflictMessage(subjectType)
     }
+    if (!isEdit && selectedAppendMenus.length > 0) {
+      const { failures } = buildCompositeAppendPlan(
+        partnerArchivesMock,
+        {
+          archiveMenu: archiveMenuLabel,
+          subjectType,
+          name: name.trim(),
+          idNumber: idNumber.trim(),
+          contactPhone: contactPhone.trim(),
+          agentName: agentName.trim(),
+          agentIdNumber: agentIdNumber.trim(),
+          certAddressFull: `${province}${city}${district}${detailTrimmed}`,
+        },
+        selectedAppendMenus,
+      )
+      if (failures.length > 0) {
+        setCompositeFailures(failures)
+        setCompositePlan([])
+        setCompositeSheetMode("failure")
+        setCompositeSheetOpen(true)
+        return "保存未成功，请查看说明"
+      }
+    }
     return null
+  }
+
+  const buildFormSnapshot = () => {
+    const cert = buildCertAddress()
+    return {
+      archiveMenu: archiveMenuLabel,
+      subjectType,
+      name: name.trim(),
+      idNumber: idNumber.trim(),
+      contactPhone: contactPhone.trim(),
+      agentName: agentName.trim(),
+      agentIdNumber: agentIdNumber.trim(),
+      certAddressFull: cert.fullAddress,
+    }
+  }
+
+  const commitNewPartnerRecord = (options?: { verifiedOnCreate?: boolean }) => {
+    const now = new Date().toISOString().replace("T", " ").substring(0, 19)
+    const today = now.substring(0, 10)
+    const trimmedId = idNumber.trim()
+    const implicitRole = implicitRoleForArchiveMenu(archiveMenuLabel)
+
+    const draft: PartnerSubject = {
+      id: `p-${Date.now()}`,
+      archiveMenu: archiveMenuLabel,
+      partnerNo: `PA-${Date.now()}`,
+      name: name.trim(),
+      subjectType,
+      idNumber: trimmedId,
+      idNumberMasked: maskIdNumber(trimmedId),
+      certAddress: buildCertAddress(),
+      contactPhone: contactPhone.trim(),
+      contactPhoneVerified: options?.verifiedOnCreate ? "VERIFIED" : "UNVERIFIED",
+      contactPhoneVerifiedAt: options?.verifiedOnCreate ? now : undefined,
+      agentName: subjectType === "ENTERPRISE" ? agentName.trim() : undefined,
+      agentIdNumber:
+        showPickupAgentIdField && subjectType === "ENTERPRISE"
+          ? agentIdNumber.trim()
+          : undefined,
+      status: "NORMAL",
+      roles: [
+        {
+          roleType: implicitRole,
+          roleStatus: "NORMAL",
+          sourceDocType: "人工建档",
+          sourceDocNo: "——",
+          roleEffectiveTime: now,
+        },
+      ],
+      linkedPartnerArchives: [],
+      source: "MANUAL",
+      createDate: today,
+      createTime: now,
+      createdBy: "当前用户",
+      updateTime: now,
+      associatedDocs: [],
+      auditLogs: [
+        {
+          id: `log-${Date.now()}`,
+          opTime: now,
+          operator: "当前用户",
+          actionType: "CREATE",
+          actionName: "创建合作方档案",
+          detail: options?.verifiedOnCreate
+            ? "管理端人工创建：联系手机已验证并完成短信核验"
+            : "管理端人工创建：联系手机未验证",
+        },
+      ],
+    }
+    let created = normalizePartnerPlanB(draft)
+    if (selectedAppendMenus.length > 0) {
+      created = appendLinkedPartnerMenus(
+        created,
+        selectedAppendMenus,
+        "新增页一并保存追加合作方档案",
+      )
+    }
+    partnerArchivesMock.unshift(created)
+    window.dispatchEvent(new Event("partner-archive-updated"))
+    return created
+  }
+
+  const queueCreateSave = (options?: { verifiedOnCreate?: boolean }) => {
+    if (isEdit) {
+      doSave(options)
+      return
+    }
+    if (selectedAppendMenus.length === 0) {
+      doSave(options)
+      return
+    }
+    const { plan, failures } = buildCompositeAppendPlan(
+      partnerArchivesMock,
+      buildFormSnapshot(),
+      selectedAppendMenus,
+    )
+    if (failures.length > 0) {
+      setCompositePlan(plan)
+      setCompositeFailures(failures)
+      setCompositeSheetMode("failure")
+      setCompositeSheetOpen(true)
+      setSubmitting(false)
+      return
+    }
+    setCompositePlan(plan)
+    setPendingSaveOptions(options)
+    setCompositeSheetMode("confirm")
+    setCompositeSheetOpen(true)
+    setSubmitting(false)
+  }
+
+  const handleCompositeSaveConfirm = () => {
+    setCompositeSheetOpen(false)
+    setSubmitting(true)
+    const options = pendingSaveOptions
+    const created = commitNewPartnerRecord(options)
+    const verifyLabel = options?.verifiedOnCreate
+      ? "联系手机已验证"
+      : "联系手机未验证"
+    const lines: CompositeSaveResultLine[] = [
+      {
+        scopeLabel: `【${archiveMenuLabel}（本页）】`,
+        outcome: "CREATED",
+        detail: `主体标识：${created.partnerNo} · ${verifyLabel}`,
+      },
+      ...compositePlan.map((item) => ({
+        scopeLabel: `【${item.targetMenu}（追加）】`,
+        outcome: item.action === "CREATE_NEW" ? ("CREATED" as const) : ("LINKED" as const),
+      })),
+    ]
+    setLastCreatedPartnerId(created.id)
+    setLastSaveVerified(Boolean(options?.verifiedOnCreate))
+    setCompositeSuccessLines(lines)
+    setCompositeSheetMode("success")
+    setCompositeSheetOpen(true)
+    setDirty(false)
+    setSubmitting(false)
   }
 
   const doSave = (options?: { verifiedOnCreate?: boolean }) => {
     const phoneChanged = Boolean(isEdit && hasPhoneDiff)
     const oldPhoneVal = existing?.contactPhone
     const now = new Date().toISOString().replace("T", " ").substring(0, 19)
-    const today = now.substring(0, 10)
 
     if (!existing) {
-      const trimmedId = idNumber.trim()
-      const implicitRole = implicitRoleForArchiveMenu(archiveMenuLabel)
-      const roleTypes = Array.from(new Set([implicitRole, ...selectedRoles]))
-      const certAddress = buildCertAddress()
-      const draftForGaps: PartnerSubject = {
-        id: "draft",
-        archiveMenu: archiveMenuLabel,
-        partnerNo: "",
-        name: name.trim(),
-        subjectType,
-        idNumber: trimmedId,
-        idNumberMasked: maskIdNumber(trimmedId),
-        certAddress,
-        contactPhone: contactPhone.trim(),
-        agentName: subjectType === "ENTERPRISE" ? agentName.trim() : undefined,
-        agentIdNumber:
-          showPickupAgentIdField && subjectType === "ENTERPRISE"
-            ? agentIdNumber.trim()
-            : undefined,
-        status: "NORMAL",
-        roles: [],
-        source: "MANUAL",
-        createDate: today,
-        createTime: now,
-        createdBy: "当前用户",
-        updateTime: now,
-        associatedDocs: [],
-        auditLogs: [],
+      const duplicate = findPartnerByIdNumber(
+        partnerArchivesMock,
+        idNumber,
+        undefined,
+        archiveMenuLabel,
+      )
+      if (duplicate) {
+        setSubmitting(false)
+        showToast("该主体已存在，请前往详情追加角色配置")
+        return
       }
-      const gapPending = collectArchiveRequiredGaps(draftForGaps).length > 0
-
-      const newPartner: PartnerSubject = {
-        id: `p-${Date.now()}`,
-        archiveMenu: archiveMenuLabel,
-        partnerNo: `PA-${Date.now()}`,
-        name: name.trim(),
-        subjectType,
-        idNumber: trimmedId,
-        idNumberMasked: maskIdNumber(trimmedId),
-        certAddress,
-        contactPhone: contactPhone.trim(),
-        contactPhoneVerified: options?.verifiedOnCreate ? "VERIFIED" : "UNVERIFIED",
-        contactPhoneVerifiedAt: options?.verifiedOnCreate ? now : undefined,
-        agentName: subjectType === "ENTERPRISE" ? agentName.trim() : undefined,
-        agentIdNumber:
-          showPickupAgentIdField && subjectType === "ENTERPRISE"
-            ? agentIdNumber.trim()
-            : undefined,
-        status: "NORMAL",
-        roles: roleTypes.map((roleType) => ({
-          roleType,
-          roleStatus: gapPending ? ("PENDING_COMPLETION" as const) : ("NORMAL" as const),
-          sourceDocType: "人工建档",
-          sourceDocNo: "——",
-          roleEffectiveTime: now,
-        })),
-        source: "MANUAL",
-        createDate: today,
-        createTime: now,
-        createdBy: "当前用户",
-        updateTime: now,
-        associatedDocs: [],
-        auditLogs: [
-          {
-            id: `log-${Date.now()}`,
-            opTime: now,
-            operator: "当前用户",
-            actionType: "CREATE",
-            actionName: "创建合作方档案",
-            detail: options?.verifiedOnCreate
-              ? "管理端人工创建：联系手机已验证并完成短信核验"
-              : "管理端人工创建：联系手机未验证",
-          },
-        ],
-      }
-      partnerArchivesMock.unshift(newPartner)
-      window.dispatchEvent(new Event("partner-archive-updated"))
+      const newPartner = commitNewPartnerRecord(options)
       setDirty(false)
       setSubmitting(false)
       showToast(
@@ -505,7 +635,7 @@ export function PartnerArchiveFormPage() {
       return
     }
 
-    doSave()
+    queueCreateSave()
   }
 
   const handleSubmit = () => {
@@ -590,6 +720,22 @@ export function PartnerArchiveFormPage() {
       setIdNumber(demo.unifiedSocialCreditCode)
       showToast(PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_SUCCESS)
     }, 500)
+  }
+
+  if (isEdit && existing?.status === "FROZEN") {
+    return (
+      <MobileShell>
+        <NavBar
+          title="无法编辑"
+          onBack={() =>
+            navigate(partnerArchiveDetailRoute(existing.archiveMenu, existing.id))
+          }
+        />
+        <div className={`${H5_PAGE_BODY} px-4 py-10 text-center text-sm leading-relaxed text-amber-950`}>
+          该主体已冻结，暂不支持编辑或补全资料。请先解冻后再维护档案。
+        </div>
+      </MobileShell>
+    )
   }
 
   return (
@@ -757,13 +903,13 @@ export function PartnerArchiveFormPage() {
           >
           <NativeInfoCard title="证件登记地址" icon={<UserRound className="size-5" />}>
             <div className="space-y-2 px-3 pb-2">
-              {isOwnerArchiveMenu ? (
+              {archiveMenuLabel === "货主信息" ? (
                 <ProductFieldHint className="text-[#232D39]/55">
                   {partnerFormAddressUserHint(subjectType, addressRequired)}
                 </ProductFieldHint>
               ) : null}
               <PrototypeSpecCallout>
-                {isOwnerArchiveMenu
+                {archiveMenuLabel === "货主信息"
                   ? PARTNER_FORM_ADDRESS_SPEC_NOTE_OWNER
                   : PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER}
               </PrototypeSpecCallout>
@@ -834,20 +980,20 @@ export function PartnerArchiveFormPage() {
                 <PrototypeSpecCallout>{PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE}</PrototypeSpecCallout>
               </div>
               <div className="flex flex-wrap gap-2 px-3 pb-3">
-                {selectableRoles.map((role) => {
-                  const active = selectedRoles.includes(role)
+                {appendMenuOptions.map((menu) => {
+                  const active = selectedAppendMenus.includes(menu)
                   return (
                     <button
-                      key={role}
+                      key={menu}
                       type="button"
                       className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
                         active
                           ? "border-blue-600 bg-blue-50 text-blue-700"
                           : "border-gray-200 bg-white text-gray-700"
                       }`}
-                      onClick={() => toggleRole(role)}
+                      onClick={() => toggleAppendMenu(menu)}
                     >
-                      {ROLE_TYPE_LABELS[role]}
+                      {menu}
                     </button>
                   )
                 })}
@@ -942,7 +1088,11 @@ export function PartnerArchiveFormPage() {
           idNumber={idNumber.trim()}
           contactPhone={contactPhone.trim()}
           fullAddress={`${province}${city}${district}${detailTrimmed}`}
-          roles={isEdit ? existing?.roles.map((r) => r.roleType) : selectedRoles}
+          roles={
+            isEdit
+              ? existing?.roles.map((r) => r.roleType)
+              : [implicitRoleForArchiveMenu(archiveMenuLabel)]
+          }
           agentName={subjectType === "ENTERPRISE" ? agentName.trim() : undefined}
           oldPhone={verifyMode === "CHANGE_PHONE" ? existing?.contactPhone : undefined}
           onClose={() => {
@@ -951,9 +1101,35 @@ export function PartnerArchiveFormPage() {
           }}
           onConfirm={() => {
             setVerifyOpen(false)
-            doSave(
+            setSubmitting(true)
+            queueCreateSave(
               verifyMode === "VERIFY_CONTACT" ? { verifiedOnCreate: true } : undefined,
             )
+          }}
+        />
+
+        <PartnerCompositeSaveSheet
+          open={compositeSheetOpen}
+          mode={compositeSheetMode}
+          currentMenu={archiveMenuLabel}
+          plan={compositePlan}
+          appendMenus={selectedAppendMenus}
+          failures={compositeFailures}
+          successLines={compositeSuccessLines}
+          verifiedOnCreate={lastSaveVerified}
+          onClose={() => setCompositeSheetOpen(false)}
+          onConfirmComposite={handleCompositeSaveConfirm}
+          onBackToList={() => {
+            setCompositeSheetOpen(false)
+            navigate(partnerArchiveListRoute(archiveMenuLabel))
+          }}
+          onViewDetail={() => {
+            setCompositeSheetOpen(false)
+            if (lastCreatedPartnerId) {
+              navigate(partnerArchiveDetailRoute(archiveMenuLabel, lastCreatedPartnerId))
+            } else {
+              navigate(partnerArchiveListRoute(archiveMenuLabel))
+            }
           }}
         />
 

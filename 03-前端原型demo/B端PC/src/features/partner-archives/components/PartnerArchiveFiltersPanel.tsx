@@ -14,19 +14,31 @@ import { WarningFilterHeader } from "@/components/business/WarningListPrimitives
 import {
   DEFAULT_PARTNER_ARCHIVE_FILTERS,
   PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS,
+  PARTNER_PROFILE_COMPLETENESS_FILTER_OPTIONS,
+  PARTNER_SUBJECT_STATUS_FILTER_OPTIONS,
   PARTNER_SUBJECT_TYPE_FILTER_OPTIONS,
-  partnerSubjectStatusFilterOptions,
 } from "../domain/constants"
 import type { PartnerArchiveFilters } from "../domain/types"
+import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
+import { PartnerEnterpriseLicenseOcrButton } from "./PartnerEnterpriseLicenseOcrButton"
+import {
+  demoPartnerEnterpriseLicenseOcr,
+  PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_RECOGNIZING,
+  PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_SUCCESS,
+  partnerArchiveListKeywordFromLicenseOcr,
+} from "@prototype/shared/partner-archives/partner-enterprise-license-ocr.demo"
+import { ProductFieldHint } from "@/components/form/ProductFieldHint"
 
 type PartnerArchiveFiltersPanelProps = {
   value: PartnerArchiveFilters
   onChange: (value: PartnerArchiveFilters) => void
-  onSearch: () => void
+  onSearch: (nextApplied?: PartnerArchiveFilters) => void
   onReset: () => void
   onAdd: () => void
   addLabel?: string
-  archiveMenu?: string
+  /** 当前子菜单，列表 OCR Demo 按菜单回填检索关键词 */
+  archiveMenu?: PartnerArchiveMenuLabel
+  onListOcrToast?: (message: string) => void
 }
 
 export function PartnerArchiveFiltersPanel({
@@ -36,10 +48,26 @@ export function PartnerArchiveFiltersPanel({
   onReset,
   onAdd,
   addLabel = "新增合作方",
-  archiveMenu,
+  archiveMenu = "货主信息",
+  onListOcrToast,
 }: PartnerArchiveFiltersPanelProps) {
   const [expanded, setExpanded] = useState(false)
-  const subjectStatusOptions = partnerSubjectStatusFilterOptions(archiveMenu)
+
+  const runListEnterpriseLicenseOcr = () => {
+    onListOcrToast?.(PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_RECOGNIZING)
+    window.setTimeout(() => {
+      const demo = demoPartnerEnterpriseLicenseOcr(archiveMenu)
+      const keyword = partnerArchiveListKeywordFromLicenseOcr(demo)
+      const next = {
+        ...value,
+        keyword,
+        subjectType: value.subjectType === "全部" ? "企业" : value.subjectType,
+      }
+      onChange(next)
+      onListOcrToast?.(PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_SUCCESS)
+      onSearch(next)
+    }, 480)
+  }
 
   return (
     <Card>
@@ -87,27 +115,6 @@ export function PartnerArchiveFiltersPanel({
             </Select>
           </FilterField>
 
-          <FilterField label="联系手机核验">
-            <Select
-              value={value.contactPhoneVerified}
-              onValueChange={(next) => {
-                if (!next) return
-                onChange({ ...value, contactPhoneVerified: next })
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option === "全部" ? "全部核验状态" : option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FilterField>
-
           <FilterField label="主体状态">
             <Select
               value={value.subjectStatus}
@@ -120,9 +127,30 @@ export function PartnerArchiveFiltersPanel({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {subjectStatusOptions.map((option) => (
+                {PARTNER_SUBJECT_STATUS_FILTER_OPTIONS.map((option) => (
                   <SelectItem key={option} value={option}>
                     {option === "全部" ? "全部主体状态" : option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FilterField>
+
+          <FilterField label="资料完备">
+            <Select
+              value={value.profileCompleteness}
+              onValueChange={(next) => {
+                if (!next) return
+                onChange({ ...value, profileCompleteness: next })
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PARTNER_PROFILE_COMPLETENESS_FILTER_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option === "全部" ? "全部资料完备" : option}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -132,6 +160,36 @@ export function PartnerArchiveFiltersPanel({
 
         {expanded && (
           <div className="grid gap-4 border-t pt-4 lg:grid-cols-4">
+            <FilterField label="营业执照 OCR" className="lg:col-span-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <PartnerEnterpriseLicenseOcrButton onClick={runListEnterpriseLicenseOcr} />
+                <ProductFieldHint>
+                  识别成功将信用代码写入上方「主体名称/身份标识」并立即查询；识别失败可手输。
+                </ProductFieldHint>
+              </div>
+            </FilterField>
+
+            <FilterField label="联系手机核验">
+              <Select
+                value={value.contactPhoneVerified}
+                onValueChange={(next) => {
+                  if (!next) return
+                  onChange({ ...value, contactPhoneVerified: next })
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option === "全部" ? "全部核验状态" : option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FilterField>
+
             <FilterField label="联系手机">
               <Input
                 placeholder="11 位手机号精确匹配"

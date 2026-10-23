@@ -7,11 +7,17 @@ import {
 } from "./partner-freeze-blocking-mock-docs"
 
 /**
- * 合作方档案 Mock · 各业务场景各 1 条（精简）
+ * 合作方档案 Mock · 关键场景索引（PC/H5 共用）
  *
- * **H5/PC 冻结演示**
- * - 已冻结样例（筛「冻结」或列表沉底）：货主 p-12 · 提货 p-13 · 资金 p-14 · 服务 p-15
- * - PA-R02 阻断（详情/列表点【冻结主体】）：货主 p-01 赵磊 · 提货 p-05 李华 · 资金 p-08 建行 · 服务 p-10 中储
+ * | 场景 | 货主 | 提货人 | 资金方 | 服务方 |
+ * | :--- | :--- | :--- | :--- | :--- |
+ * | 正常 · 完整 · 已验证 | p-01 C端 · p-03 企业 | p-05 · p-07 企业 | p-08 | p-10 |
+ * | 正常 · 完整 · 未验证（可点【验证】） | p-04 企业 | — | — | — |
+ * | 正常 · 资料待补全（筛「资料完备=待补全」） | p-02 缺址 P01 | p-06 缺手机 · p-16 跨域仅名码 | p-17 缺信用代码 | p-18 缺信用代码 |
+ * | 正常 · 极简完整（仅名+码） | — | — | p-09 | p-11 |
+ * | 已冻结（仅详情+解冻，无编辑/验证） | p-12 | p-13 | p-14 | p-15 |
+ * | PA-R02 点【冻结】阻断 | p-01 | p-05 | p-08 | p-10 |
+ * | 其他合作档案列 | p-01↔p-05 · p-03↔p-08 | p-16↔p-11 | — | — |
  */
 const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
   // ── 货主信息 ──
@@ -299,7 +305,7 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
       detail: "",
       fullAddress: "",
     },
-    contactPhone: "13612347788",
+    contactPhone: "",
     contactPhoneVerified: "UNVERIFIED",
     status: "NORMAL",
     roles: [
@@ -326,7 +332,61 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
         operator: "系统",
         actionType: "CREATE",
         actionName: "创建合作方档案",
-        detail: "出库快捷建档：联系手机未验证",
+        detail: "出库快捷建档：缺联系手机，资料待补全（筛「资料完备=待补全」）",
+      },
+    ],
+  },
+  {
+    id: "p-16",
+    archiveMenu: "提货人信息",
+    partnerNo: "PA-202609016",
+    name: "上海自贸区大宗商品综合服务有限公司",
+    subjectType: "ENTERPRISE",
+    idNumber: "91310000MA1E000055",
+    idNumberMasked: "913100********0055",
+    certAddress: {
+      province: "",
+      city: "",
+      district: "",
+      detail: "",
+      fullAddress: "",
+    },
+    contactPhone: "",
+    contactPhoneVerified: "UNVERIFIED",
+    status: "NORMAL",
+    roles: [
+      {
+        roleType: "PICKUP_AGENT",
+        roleStatus: "NORMAL",
+        sourceDocType: "人工建档",
+        sourceDocNo: "——",
+        roleEffectiveTime: "2026-09-22 16:20:00",
+      },
+    ],
+    linkedPartnerArchives: [
+      {
+        targetMenu: "服务方信息",
+        partnerId: "p-11",
+        partnerNo: "PA-202609011",
+        name: "上海自贸区大宗商品综合服务有限公司",
+        subjectStatus: "NORMAL",
+      },
+    ],
+    source: "MANUAL",
+    createDate: "2026-09-22",
+    createTime: "2026-09-22 16:20:00",
+    createdBy: "运营专员",
+    updateTime: "2026-09-22 16:20:00",
+    associatedDocs: [],
+    auditLogs: [
+      {
+        id: "log-1601",
+        opTime: "2026-09-22 16:20:00",
+        operator: "运营专员",
+        actionType: "APPEND_ROLE",
+        actionName: "修改合作方档案",
+        detail:
+          "从服务方域追加至提货人域：仅预填企业名称与信用代码，缺经办人/手机，资料待补全",
       },
     ],
   },
@@ -476,7 +536,52 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
         operator: "运营专员",
         actionType: "CREATE",
         actionName: "创建合作方档案",
-        detail: "极简：仅企业名称+信用代码",
+        detail: "极简完整：仅企业名称+信用代码（资料完备=完整）",
+      },
+    ],
+  },
+  {
+    id: "p-17",
+    archiveMenu: "资金方信息",
+    partnerNo: "PA-202609017",
+    name: "苏州某供应链保理有限公司",
+    subjectType: "ENTERPRISE",
+    idNumber: "",
+    idNumberMasked: "——",
+    certAddress: {
+      province: "",
+      city: "",
+      district: "",
+      detail: "",
+      fullAddress: "",
+    },
+    contactPhone: "",
+    contactPhoneVerified: "UNVERIFIED",
+    status: "NORMAL",
+    roles: [
+      {
+        roleType: "FUNDER",
+        roleStatus: "NORMAL",
+        sourceDocType: "人工建档",
+        sourceDocNo: "——",
+        roleEffectiveTime: "2026-09-25 10:00:00",
+      },
+    ],
+    linkedPartnerArchives: [],
+    source: "MANUAL",
+    createDate: "2026-09-25",
+    createTime: "2026-09-25 10:00:00",
+    createdBy: "运营专员",
+    updateTime: "2026-09-25 10:00:00",
+    associatedDocs: [],
+    auditLogs: [
+      {
+        id: "log-1701",
+        opTime: "2026-09-25 10:00:00",
+        operator: "运营专员",
+        actionType: "CREATE",
+        actionName: "创建合作方档案",
+        detail: "迁移脏数据：缺统一社会信用代码，资料待补全",
       },
     ],
   },
@@ -570,12 +675,57 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
         operator: "运营专员",
         actionType: "CREATE",
         actionName: "创建合作方档案",
-        detail: "极简：仅企业名称+信用代码",
+        detail: "极简完整：仅企业名称+信用代码（资料完备=完整）",
+      },
+    ],
+  },
+  {
+    id: "p-18",
+    archiveMenu: "服务方信息",
+    partnerNo: "PA-202609018",
+    name: "浙江某港口监管服务有限公司",
+    subjectType: "ENTERPRISE",
+    idNumber: "",
+    idNumberMasked: "——",
+    certAddress: {
+      province: "",
+      city: "",
+      district: "",
+      detail: "",
+      fullAddress: "",
+    },
+    contactPhone: "",
+    contactPhoneVerified: "UNVERIFIED",
+    status: "NORMAL",
+    roles: [
+      {
+        roleType: "SERVICE_PROVIDER",
+        roleStatus: "NORMAL",
+        sourceDocType: "人工建档",
+        sourceDocNo: "——",
+        roleEffectiveTime: "2026-09-26 09:30:00",
+      },
+    ],
+    linkedPartnerArchives: [],
+    source: "MANUAL",
+    createDate: "2026-09-26",
+    createTime: "2026-09-26 09:30:00",
+    createdBy: "运营专员",
+    updateTime: "2026-09-26 09:30:00",
+    associatedDocs: [],
+    auditLogs: [
+      {
+        id: "log-1801",
+        opTime: "2026-09-26 09:30:00",
+        operator: "运营专员",
+        actionType: "CREATE",
+        actionName: "创建合作方档案",
+        detail: "迁移脏数据：缺统一社会信用代码，资料待补全",
       },
     ],
   },
 
-  // ── 主体冻结（四菜单各 1 条 · 编辑页名称/证号不可改，可维护电话/地址纠偏）──
+  // ── 主体冻结（四菜单各 1 条 · 仅详情 + 解冻，无编辑/验证/追加）──
   {
     id: "p-12",
     archiveMenu: "货主信息",

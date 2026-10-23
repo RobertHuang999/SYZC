@@ -64,10 +64,25 @@ export const PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER =
   "【货主准入与地址唯一联动规则】(PA-R04) 的 P01/P02 **仅货主信息域**；提货人/资金方/服务方保存不强制 P01。"
 
 export const PARTNER_FORM_INITIAL_ROLES_USER_HINT =
-  "可选在其他子菜单同步创建独立主档或建立关联；未选则仅在本菜单建档，可稍后在详情页追加。"
+  "勾选多项时将与本页档案一次保存；全部通过才会落库，否则会说明哪一项未通过。未选则仅在本菜单建档。"
+
+/** 追加合作方档案弹窗：个人主体不可选资金方/服务方 */
+export const PARTNER_APPEND_ROLE_INDIVIDUAL_USER_HINT =
+  "当前为个人身份，仅可追加至货主信息或提货人信息；资金方与服务方仅支持企业主体。"
 
 export const PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE =
-  "勾选货主时调用统一准入服务，执行【货主准入与地址唯一联动规则】(PA-R04) 与 P01/P02。"
+  "【追加多身份一次保存原子规则】(PA-R03a)：预检 → 一次确认 → 单事务；勾选货主域时走【货主准入与地址唯一联动规则】(PA-R04) 与 P01/P02。"
+
+export const PARTNER_COMPOSITE_SAVE_CONFIRM_USER =
+  "以下身份将在同一笔保存中一并处理；任一项无法完成时，整单都不会写入数据库（含本页档案）。"
+
+export const PARTNER_COMPOSITE_SAVE_CONFIRM_SPEC =
+  "【追加多身份一次保存原子规则】(PA-R03a) · 【主体识别与库内匹配总则】(PA-R03)"
+
+export const PARTNER_COMPOSITE_SAVE_FAILURE_INTRO =
+  "未写入任何合作方档案，请根据下列说明修改后重新保存。"
+
+export const PARTNER_COMPOSITE_SAVE_SUCCESS_INTRO = "已全部处理完成，明细如下："
 
 /** @deprecated 请改用 USER_HINT + PrototypeSpecCallout */
 export const PARTNER_FORM_INITIAL_ROLES_HINT = PARTNER_FORM_INITIAL_ROLES_USER_HINT

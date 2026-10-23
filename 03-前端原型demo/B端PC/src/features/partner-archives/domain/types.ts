@@ -139,6 +139,8 @@ export interface PartnerArchiveFilters {
   subjectType: string
   roleType: string
   subjectStatus: string
+  /** 资料完备：全部 / 待补全 / 完整（按当前菜单 04-x 必填派生判定） */
+  profileCompleteness: string
   roleStatus: string
   createTimeStart: string
   createTimeEnd: string

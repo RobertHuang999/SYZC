@@ -109,12 +109,16 @@ export function filterPartnerArchives(
   }
 
   if (!isAll(filters.subjectStatus)) {
-    if (filters.subjectStatus === "待补全") {
+    result = result.filter(
+      (item) => SUBJECT_STATUS_LABELS[item.status] === filters.subjectStatus,
+    )
+  }
+
+  if (!isAll(filters.profileCompleteness)) {
+    if (filters.profileCompleteness === "待补全") {
       result = result.filter((item) => isArchiveRequiredFieldsPending(item))
-    } else {
-      result = result.filter(
-        (item) => SUBJECT_STATUS_LABELS[item.status] === filters.subjectStatus
-      )
+    } else if (filters.profileCompleteness === "完整") {
+      result = result.filter((item) => !isArchiveRequiredFieldsPending(item))
     }
   }
 

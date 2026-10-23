@@ -59,6 +59,7 @@ import {
   appendLinkedPartnerMenus,
   formatLinkedArchiveStatus,
 } from "../lib/linked-partner-archives"
+import { appendTargetMenusForPartner } from "../lib/composite-append-save"
 import {
   checkPartnerSubjectFreezeEligibility,
   maskIdNumber,
@@ -189,15 +190,20 @@ export function PartnerArchiveDetailPage() {
   }
 
   const handleAppendRole = (targetMenus: PartnerArchiveMenuLabel[]) => {
-    if (targetMenus.length === 0) {
+    if (targetMenus.length === 0 || !partner) {
       return
     }
-    const detail = targetMenus
+    const allowed = new Set(appendTargetMenusForPartner(partner))
+    const safeMenus = targetMenus.filter((menu) => allowed.has(menu))
+    if (safeMenus.length === 0) {
+      return
+    }
+    const detail = safeMenus
       .map((menu) => `在【${menu}】创建独立主档或关联已有主档`)
       .join("；")
     setPartner((prev) => {
       if (!prev) return prev
-      return commitPartnerArchive(appendLinkedPartnerMenus(prev, targetMenus, detail))
+      return commitPartnerArchive(appendLinkedPartnerMenus(prev, safeMenus, detail))
     })
     showToast("已追加合作方档案角色")
   }
@@ -449,7 +455,9 @@ export function PartnerArchiveDetailPage() {
                     ) : partnerFieldPendingInlineHint(requiredGaps, "certAddress") ? (
                       <span className="font-medium text-amber-600">
                         {partnerFieldPendingInlineHint(requiredGaps, "certAddress")}
-                        （请使用页头【补全资料】）
+                        {partner.status === "FROZEN"
+                          ? "（请先解冻后再补全资料）"
+                          : "（请使用页头【补全资料】）"}
                       </span>
                     ) : (
                       <span className="text-muted-foreground">——</span>

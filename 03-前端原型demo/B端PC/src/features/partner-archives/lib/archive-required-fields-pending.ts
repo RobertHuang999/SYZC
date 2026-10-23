@@ -134,19 +134,13 @@ export function collectArchiveRequiredGaps(subject: PartnerSubject): ArchiveRequ
   return gaps
 }
 
-/** 货主信息、提货人信息：04-x 必填未齐时派生「待补全」；资金方/服务方不派生 */
+/** 四子菜单：当前菜单 04-x 必填未齐时派生「待补全」（货主 P01 仅影响证件地址是否计入缺口） */
 export function isArchiveRequiredFieldsPending(subject: PartnerSubject): boolean {
-  if (subject.archiveMenu !== "货主信息" && subject.archiveMenu !== "提货人信息") {
-    return false
-  }
   return collectArchiveRequiredGaps(subject).length > 0
 }
 
-/** 货主/提货人在待补全时行操作显示「补全资料」，否则「编辑」 */
+/** 待补全时行操作显示「补全资料」，否则「编辑」 */
 export function partnerArchiveEditActionLabel(subject: PartnerSubject): "编辑" | "补全资料" {
-  if (subject.archiveMenu !== "货主信息" && subject.archiveMenu !== "提货人信息") {
-    return "编辑"
-  }
   return isArchiveRequiredFieldsPending(subject) ? "补全资料" : "编辑"
 }
 

@@ -19,8 +19,10 @@ import { partnerArchivesMock } from "@prototype/B端PC/src/features/partner-arch
 import {
   DEFAULT_PARTNER_ARCHIVE_FILTERS,
   PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS,
+  PARTNER_PROFILE_COMPLETENESS_FILTER_OPTIONS,
+  PARTNER_SUBJECT_STATUS_FILTER_OPTIONS,
   PARTNER_SUBJECT_TYPE_FILTER_OPTIONS,
-  partnerSubjectStatusFilterOptions,
+  sanitizePartnerArchiveFiltersForMenu,
 } from "@prototype/B端PC/src/features/partner-archives/domain/constants"
 import type {
   PartnerArchiveFilters,
@@ -37,6 +39,7 @@ import {
 } from "@prototype/B端PC/src/features/partner-archives/lib/contact-phone-verify"
 import { filterPartnerArchives } from "@prototype/B端PC/src/features/partner-archives/lib/list-utils"
 import { appendLinkedPartnerMenus } from "@prototype/B端PC/src/features/partner-archives/lib/linked-partner-archives"
+import { appendTargetMenusForPartner } from "@prototype/B端PC/src/features/partner-archives/lib/composite-append-save"
 import {
   checkPartnerSubjectFreezeEligibility,
   type FreezeBlockReason,
@@ -56,6 +59,13 @@ import {
   PARTNER_SUBJECT_UNFREEZE_DIALOG,
   formatPartnerSubjectStatusToast,
 } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
+import { PartnerEnterpriseLicenseOcrButton } from "../components/PartnerEnterpriseLicenseOcrButton"
+import {
+  demoPartnerEnterpriseLicenseOcr,
+  PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_RECOGNIZING,
+  PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_SUCCESS,
+  partnerArchiveListKeywordFromLicenseOcr,
+} from "@prototype/shared/partner-archives/partner-enterprise-license-ocr.demo"
 import { PartnerAppendRoleSheet } from "../components/PartnerAppendRoleSheet"
 import { PartnerArchiveCard } from "../components/PartnerArchiveCard"
 import { PartnerConfirmSheet } from "../components/PartnerConfirmSheet"
@@ -70,6 +80,16 @@ const SUBJECT_TYPE_OPTIONS: DropdownOption[] = PARTNER_SUBJECT_TYPE_FILTER_OPTIO
 const PHONE_VERIFY_OPTIONS: DropdownOption[] = PARTNER_CONTACT_PHONE_VERIFY_FILTER_OPTIONS.map(
   (v) => ({ label: v === "全部" ? "全部核验" : v, value: v }),
 )
+
+const SUBJECT_STATUS_OPTIONS: DropdownOption[] = PARTNER_SUBJECT_STATUS_FILTER_OPTIONS.map(
+  (v) => ({ label: v === "全部" ? "全部状态" : v, value: v }),
+)
+
+const PROFILE_COMPLETENESS_OPTIONS: DropdownOption[] =
+  PARTNER_PROFILE_COMPLETENESS_FILTER_OPTIONS.map((v) => ({
+    label: v === "全部" ? "全部" : v,
+    value: v,
+  }))
 
 type PendingDialog = {
   action: PartnerArchivePendingAction
@@ -100,6 +120,23 @@ export function PartnerArchiveListPage() {
   const [verifyPartner, setVerifyPartner] = useState<PartnerSubject | null>(null)
   const ignoreRowActionsUntilRef = useRef(0)
 
+  const runListEnterpriseLicenseOcr = () => {
+    showToast(PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_RECOGNIZING)
+    window.setTimeout(() => {
+      const demo = demoPartnerEnterpriseLicenseOcr(archiveMenuLabel)
+      const keyword = partnerArchiveListKeywordFromLicenseOcr(demo)
+      const next = {
+        ...appliedFilters,
+        keyword,
+        subjectType:
+          appliedFilters.subjectType === "全部" ? "企业" : appliedFilters.subjectType,
+      }
+      setDraftFilters(next)
+      setAppliedFilters(next)
+      showToast(PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_SUCCESS)
+    }, 480)
+  }
+
   useEffect(() => {
     const bump = () => setMockTick((t) => t + 1)
     window.addEventListener("focus", bump)
@@ -110,11 +147,9 @@ export function PartnerArchiveListPage() {
     }
   }, [])
 
-  const subjectStatusOptions: DropdownOption[] = useMemo(() => {
-    return partnerSubjectStatusFilterOptions(archiveMenuLabel).map((v) => ({
-      label: v === "全部" ? "全部状态" : v,
-      value: v,
-    }))
+  useEffect(() => {
+    setDraftFilters((prev) => sanitizePartnerArchiveFiltersForMenu(archiveMenuLabel, prev))
+    setAppliedFilters((prev) => sanitizePartnerArchiveFiltersForMenu(archiveMenuLabel, prev))
   }, [archiveMenuLabel])
 
   const filtered = useMemo(() => {
@@ -127,6 +162,7 @@ export function PartnerArchiveListPage() {
   }, [appliedFilters, mockTick, archiveMenuLabel])
 
   const drawerActive =
+    appliedFilters.contactPhoneVerified !== "全部" ||
     Boolean(appliedFilters.contactPhone.trim()) ||
     Boolean(appliedFilters.createTimeStart) ||
     Boolean(appliedFilters.createTimeEnd)
@@ -228,10 +264,15 @@ export function PartnerArchiveListPage() {
     if (!activePartner || targetMenus.length === 0) {
       return
     }
-    const detail = targetMenus
+    const allowed = new Set(appendTargetMenusForPartner(activePartner))
+    const safeMenus = targetMenus.filter((menu) => allowed.has(menu))
+    if (safeMenus.length === 0) {
+      return
+    }
+    const detail = safeMenus
       .map((menu) => `在【${menu}】创建独立主档或关联已有主档`)
       .join("；")
-    commitPartnerArchive(appendLinkedPartnerMenus(activePartner, targetMenus, detail))
+    commitPartnerArchive(appendLinkedPartnerMenus(activePartner, safeMenus, detail))
     setAppendRoleOpen(false)
     setActivePartner(null)
     showToast("已追加合作方档案角色")
@@ -247,6 +288,7 @@ export function PartnerArchiveListPage() {
         <PrototypeAnnotationTarget annotationIds={["partner-archive-filter"]}>
         <div className={H5_FILTER_BAR}>
           <div className="flex items-center gap-2">
+            <PartnerEnterpriseLicenseOcrButton onClick={runListEnterpriseLicenseOcr} />
             <button
               type="button"
               onClick={() => {
@@ -306,7 +348,7 @@ export function PartnerArchiveListPage() {
             <DropdownFilterPill
               label="主体状态"
               value={appliedFilters.subjectStatus}
-              options={subjectStatusOptions}
+              options={SUBJECT_STATUS_OPTIONS}
               onChange={(subjectStatus) => {
                 const next = { ...appliedFilters, subjectStatus }
                 setDraftFilters(next)
@@ -314,11 +356,11 @@ export function PartnerArchiveListPage() {
               }}
             />
             <DropdownFilterPill
-              label="手机核验"
-              value={appliedFilters.contactPhoneVerified}
-              options={PHONE_VERIFY_OPTIONS}
-              onChange={(contactPhoneVerified) => {
-                const next = { ...appliedFilters, contactPhoneVerified }
+              label="资料完备"
+              value={appliedFilters.profileCompleteness}
+              options={PROFILE_COMPLETENESS_OPTIONS}
+              onChange={(profileCompleteness) => {
+                const next = { ...appliedFilters, profileCompleteness }
                 setDraftFilters(next)
                 setAppliedFilters(next)
               }}
@@ -383,6 +425,7 @@ export function PartnerArchiveListPage() {
           onReset={() => {
             setDraftFilters({
               ...appliedFilters,
+              contactPhoneVerified: "全部",
               contactPhone: "",
               createTimeStart: "",
               createTimeEnd: "",
@@ -390,6 +433,19 @@ export function PartnerArchiveListPage() {
           }}
           onConfirm={applyDrawer}
         >
+          <DrawerField label="联系手机核验">
+            <select
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+              value={draftFilters.contactPhoneVerified}
+              onChange={(e) => patchDraft({ contactPhoneVerified: e.target.value })}
+            >
+              {PHONE_VERIFY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </DrawerField>
           <DrawerField label="联系手机">
             <input
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"

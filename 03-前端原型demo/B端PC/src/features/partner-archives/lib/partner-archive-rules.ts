@@ -174,7 +174,7 @@ export function checkPartnerSubjectFreezeEligibility(
       title: "主体已处于冻结状态",
       reason: "该主体当前已经是冻结状态，无需重复操作",
       detail: "如需恢复业务资格，请在列表操作列或本详情页点击「解冻」。",
-      guide: "如需调整资料，可直接点击「编辑」进行非关键字段维护。",
+      guide: "如需调整资料，请先解冻主体后再进入编辑页。",
       blockingDocs: [],
     }
   }

@@ -14,7 +14,7 @@ export const partnerArchiveH5ListAnnotationBindings: Record<
   "partner-archive-filter": {
     targetId: "partner-archive-filter",
     contentSuffix:
-      "【H5 端差异】筛选项以顶栏关键词 + 三枚横滑筛选胶囊（主体类型、主体状态、手机核验）+ 筛选抽屉（联系手机、创建时间；无创建来源筛）；新增走右下角悬浮【+】（无 PC 筛选区右上按钮）。",
+      "【H5 端差异】筛选项以 **识别营业执照（OCR）** + 关键词 + 横滑 Pill（主体类型、主体状态、资料完备）+ 筛选抽屉（联系手机核验、联系手机、创建时间；无创建来源筛）；新增走右下角悬浮【+】（无 PC 筛选区右上按钮）。",
   },
   "partner-archive-table": {
     targetId: "partner-archive-table",
@@ -53,7 +53,7 @@ export const partnerArchiveH5DetailAnnotationBindings: Record<
   "partner-archive-detail-basic": {
     targetId: "partner-archive-detail-basic",
     contentSuffix:
-      "【H5 端差异】基础档案为纵向 DetailRow 卡片（非 PC 三行四列 DetailSection）。",
+      "【H5 端差异】基础档案为纵向 DetailRow 卡片（非 PC 三行四列 DetailSection）；证件地址待补全 inline 提示：正常态引导「返回列表卡片【补全资料】」，冻结态「请先解冻后再补全资料」（与 PC 详情 inline 口径一致，入口差异见 8.8.2）。",
   },
   "partner-archive-detail-roles": {
     targetId: "partner-archive-detail-roles",
@@ -89,6 +89,8 @@ export const partnerArchiveH5FormAnnotationBindings: Record<
   },
   "partner-archive-form-roles": {
     targetId: "partner-archive-form-roles",
+    contentSuffix:
+      "【H5 端差异】追加目标为子菜单 Pill 多选（非业务角色枚举）；多选保存走 PA-R03a 底部 Sheet（确认/失败/成功），与 PC 弹窗口径一致。",
   },
   "partner-archive-form-actions": {
     targetId: "partner-archive-form-actions",

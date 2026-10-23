@@ -18,14 +18,37 @@ export const PARTNER_SUBJECT_TYPE_FILTER_OPTIONS = ["全部", "个人", "企业"
 /** 6.3 列表由 archiveMenu 隐式分域，不再提供业务角色筛（字段清单 8.2） */
 export const PARTNER_ROLE_TYPE_FILTER_OPTIONS = ["全部", "货主", "提货经办人", "资金方", "服务方"] as const
 export const PARTNER_SUBJECT_STATUS_FILTER_OPTIONS = ["全部", "正常", "冻结"] as const
-export const PARTNER_OWNER_SUBJECT_STATUS_FILTER_OPTIONS = ["全部", "正常", "待补全", "冻结"] as const
 
-/** 主体状态筛选项：货主信息、提货人信息含「待补全」；资金方/服务方仅「正常/冻结」 */
-export function partnerSubjectStatusFilterOptions(menu?: string): readonly string[] {
-  if (menu === "货主信息" || menu === "提货人信息") {
-    return PARTNER_OWNER_SUBJECT_STATUS_FILTER_OPTIONS
+/** 资料完备：四子菜单共用；待补全/完整按当前菜单 04-x 必填派生判定 */
+export const PARTNER_PROFILE_COMPLETENESS_FILTER_OPTIONS = [
+  "全部",
+  "待补全",
+  "完整",
+] as const
+
+/** 切换菜单或旧版筛选迁移：主体状态不再含「待补全」 */
+export function sanitizePartnerArchiveFiltersForMenu(
+  _menu: string | undefined,
+  filters: PartnerArchiveFilters,
+): PartnerArchiveFilters {
+  let next = { ...filters }
+  if (next.subjectStatus === "待补全") {
+    next = {
+      ...next,
+      subjectStatus: "全部",
+      profileCompleteness:
+        next.profileCompleteness === "全部" ? "待补全" : next.profileCompleteness,
+    }
   }
-  return PARTNER_SUBJECT_STATUS_FILTER_OPTIONS
+  const statusAllowed = PARTNER_SUBJECT_STATUS_FILTER_OPTIONS as readonly string[]
+  if (!statusAllowed.includes(next.subjectStatus)) {
+    next = { ...next, subjectStatus: "全部" }
+  }
+  const completenessAllowed = PARTNER_PROFILE_COMPLETENESS_FILTER_OPTIONS as readonly string[]
+  if (!completenessAllowed.includes(next.profileCompleteness)) {
+    next = { ...next, profileCompleteness: "全部" }
+  }
+  return next
 }
 
 /** @deprecated 6.3 方案 B 已废止角色状态筛选，状态统一收敛至主体状态 */
@@ -48,6 +71,7 @@ export const DEFAULT_PARTNER_ARCHIVE_FILTERS: PartnerArchiveFilters = {
   subjectType: "全部",
   roleType: "全部",
   subjectStatus: "全部",
+  profileCompleteness: "全部",
   roleStatus: "全部",
   createTimeStart: "",
   createTimeEnd: "",

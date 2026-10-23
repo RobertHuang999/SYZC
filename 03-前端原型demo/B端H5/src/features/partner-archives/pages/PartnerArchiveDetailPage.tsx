@@ -256,7 +256,9 @@ export function PartnerArchiveDetailPage() {
                   ) : partnerFieldPendingInlineHint(requiredGaps, "certAddress") ? (
                     <span className="font-medium text-amber-600">
                       {partnerFieldPendingInlineHint(requiredGaps, "certAddress")}
-                      （请使用【补全资料】）
+                      {partner.status === "FROZEN"
+                        ? "（请先解冻后再补全资料）"
+                        : "（请返回列表卡片【补全资料】）"}
                     </span>
                   ) : (
                     "——"

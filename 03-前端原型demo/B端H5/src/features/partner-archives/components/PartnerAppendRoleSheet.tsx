@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react"
 import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
 import type { PartnerSubject } from "@prototype/B端PC/src/features/partner-archives/domain/types"
+import { linkedArchiveMenuLabel } from "@prototype/B端PC/src/features/partner-archives/lib/linked-partner-archives"
 import {
-  linkedArchiveMenuLabel,
-  otherArchiveMenus,
-} from "@prototype/B端PC/src/features/partner-archives/lib/linked-partner-archives"
+  appendTargetMenusEmptyBecauseIndividualEnterpriseOnly,
+  appendTargetMenusForPartner,
+} from "@prototype/B端PC/src/features/partner-archives/lib/composite-append-save"
+import { PARTNER_APPEND_ROLE_INDIVIDUAL_USER_HINT } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
 
 type PartnerAppendRoleSheetProps = {
   partner: PartnerSubject | null
@@ -23,10 +25,7 @@ export function PartnerAppendRoleSheet({
     if (!partner) {
       return [] as PartnerArchiveMenuLabel[]
     }
-    const linked = new Set(
-      (partner.linkedPartnerArchives ?? []).map((item) => item.targetMenu),
-    )
-    return otherArchiveMenus(partner.archiveMenu).filter((menu) => !linked.has(menu))
+    return appendTargetMenusForPartner(partner)
   }, [partner])
 
   const [selected, setSelected] = useState<PartnerArchiveMenuLabel[]>([])
@@ -40,6 +39,9 @@ export function PartnerAppendRoleSheet({
   if (!open || !partner) {
     return null
   }
+
+  const individualEnterpriseOnlyBlocked =
+    appendTargetMenusEmptyBecauseIndividualEnterpriseOnly(partner)
 
   const toggle = (menu: PartnerArchiveMenuLabel) => {
     setSelected((prev) =>
@@ -69,10 +71,17 @@ export function PartnerAppendRoleSheet({
           </div>
           {availableMenus.length === 0 ? (
             <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
-              已关联全部可选子菜单，无需再次追加。
+              {individualEnterpriseOnlyBlocked
+                ? PARTNER_APPEND_ROLE_INDIVIDUAL_USER_HINT
+                : "已关联全部可选子菜单，无需再次追加。"}
             </p>
           ) : (
             <>
+              {partner.subjectType === "INDIVIDUAL" ? (
+                <p className="text-xs leading-relaxed text-gray-600">
+                  {PARTNER_APPEND_ROLE_INDIVIDUAL_USER_HINT}
+                </p>
+              ) : null}
               <p className="text-xs font-medium text-gray-700">
                 目标菜单<span className="text-red-500"> *</span>
               </p>

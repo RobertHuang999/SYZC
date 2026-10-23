@@ -187,7 +187,7 @@ export const partnerArchiveFormAnnotationsShared: SharedPrototypeAnnotation[] = 
     number: 4,
     kind: "字段",
     title: "追加合作方档案角色（选填）· 跨菜单建档",
-    content: "新增/编辑页 **不展示**「业务角色多选」；当前菜单身份由 archiveMenu 隐式派生。可选勾选 **其他子菜单**，保存或详情确认后在目标域创建独立主档或仅关联（PA-R03 / PA-R12）。",
+    content: "新增/编辑页 **不展示**「业务角色多选」；当前菜单身份由 archiveMenu 隐式派生。新增页勾选 **多个** 其他子菜单时走 **【追加多身份一次保存原子规则】(PA-R03a)**（预检、一次确认、同事务、分项反馈）；详情【追加合作方档案】仍 **PA-R03** 单步。",
     details: [
       {
         title: "1. 可选目标菜单",
@@ -207,7 +207,7 @@ export const partnerArchiveFormAnnotationsShared: SharedPrototypeAnnotation[] = 
         items: [
           {
             label: "跨菜单创建 (PA-R03)",
-            content: "目标域无同证号主档时弹窗「将在【××信息】创建独立主档，是否继续？」；已有则仅关联。列表 **其他合作档案** 条件列与详情 Tab 2 同步展示。",
+            content: "新增页多选：**PA-R03a** 计划清单确认弹窗 + 成功/失败分项；详情单步：**PA-R03**「将在【××信息】创建独立主档，是否继续？」。列表 **其他合作档案** 条件列与详情 Tab 2 同步。",
           },
         ],
       },

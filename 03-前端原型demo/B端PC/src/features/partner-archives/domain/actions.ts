@@ -35,7 +35,7 @@ export function getPartnerArchiveRowActions(
   item: PartnerSubject,
 ): PartnerArchiveRowAction[] {
   if (item.status === "FROZEN") {
-    return ["detail", "edit", "unfreeze"]
+    return ["detail", "unfreeze"]
   }
   return ["detail", "edit", "appendRole", "freeze"]
 }
