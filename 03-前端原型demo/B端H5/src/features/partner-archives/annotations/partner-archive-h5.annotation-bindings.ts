@@ -14,7 +14,7 @@ export const partnerArchiveH5ListAnnotationBindings: Record<
   "partner-archive-filter": {
     targetId: "partner-archive-filter",
     contentSuffix:
-      "【H5 端差异】筛选项以 **识别营业执照（OCR）** + 关键词 + 横滑 Pill（主体类型、主体状态、资料完备）+ 筛选抽屉（联系手机核验、联系手机、创建时间；无创建来源筛）；新增走右下角悬浮【+】（无 PC 筛选区右上按钮）。",
+      "【H5 端差异】筛选项以顶栏关键词 + 横滑 Pill（主体类型、主体状态、资料完备）+ 筛选抽屉（联系手机核验、联系手机、创建时间；无创建来源筛）；新增走右下角悬浮【+】（无 PC 筛选区右上按钮）。",
   },
   "partner-archive-table": {
     targetId: "partner-archive-table",
@@ -25,6 +25,11 @@ export const partnerArchiveH5ListAnnotationBindings: Record<
     targetId: "partner-archive-table",
     contentSuffix:
       "【H5 端差异】方案 A 行操作在卡片 Footer 单行右对齐文字链（对齐入库/出库 H5 卡片，无胶囊栅格）；含未验证时的【验证】；与 PC 操作列位次一致；详情页只读无重复底栏。",
+  },
+  "partner-archive-row-append-pa-r03a": {
+    targetId: "partner-archive-row-append-pa-r03a",
+    contentSuffix:
+      "【H5 端差异】追加步骤 1 为 `PartnerAppendRoleSheet` Pill 多选 +【继续】；步骤 2~4 为 `PartnerCompositeSaveSheet`（flowKind=rowAppend）确认/失败/成功分项，与 PC 弹窗口径一致；详情无页头追加，仅列表卡片【追加】。",
   },
   "partner-archive-pagination": {
     targetId: "partner-archive-pagination",
@@ -46,6 +51,11 @@ export const partnerArchiveH5DetailAnnotationBindings: Record<
     targetId: "partner-archive-detail-actions",
     contentSuffix:
       "【H5 端差异】详情只读查阅，不提供冻结/解冻/追加；上述操作仅在列表卡片 Footer（与 PC 列表行操作矩阵一致）。详情 Tab 内可【验证联系手机】的显隐仍同 PA-P02（若页头未做验证入口则走列表卡片【验证】）。",
+  },
+  "partner-archive-row-append-pa-r03a": {
+    targetId: "partner-archive-detail-actions",
+    contentSuffix:
+      "【H5 端差异】本页无追加弹窗挂载点；**PA-R03a 行追加**见列表页 **7 号点**（卡片 Footer【追加】+ Composite Sheet）。",
   },
   "partner-archive-detail-tabs": {
     targetId: "partner-archive-detail-tabs",

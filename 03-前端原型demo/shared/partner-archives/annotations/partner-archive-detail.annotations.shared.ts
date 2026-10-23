@@ -50,7 +50,7 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
     number: 2,
     kind: "交互",
     title: "页头操作栏 · 状态化控制与权限隔离矩阵 (PA-P02)",
-    content: "【合作方档案操作权限矩阵】(PA-P02)：PC 详情页头与列表行操作共用 `getPartnerArchiveRowActions`（去掉【详情】+ 加【返回】）；H5 仅在列表卡片 Footer 提供冻结/解冻/追加，详情只读无重复按钮；禁止删档。",
+    content: "【合作方档案操作权限矩阵】(PA-P02)：PC 详情页头与列表行操作共用 `getPartnerArchiveRowActions`（去掉【详情】+ 加【返回】）；H5 仅在列表卡片 Footer 提供冻结/解冻/追加，详情只读无重复按钮；禁止删档。页头【追加合作方档案】与列表行【追加】同 **【追加多身份一次保存原子规则】(PA-R03a)**（见 **9 号点**）。",
     details: [
       {
         title: "1. 主体操作控制矩阵",
@@ -166,8 +166,9 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
         title: "2. 追加关联（只读、不可解除）",
         items: [
           {
-            label: "跨菜单创建确认 (PA-R03)",
-            content: "页头【追加合作方档案】勾选目标子菜单；若该域尚无同证号主档，弹窗「将在【××信息】创建独立主档，是否继续？」；若已有则仅建立关联。",
+            label: "行追加多选原子 (PA-R03a)",
+            content:
+              "页头【追加合作方档案】（PC）与列表行【追加】：多选 **≥1** 目标 → 预检计划 → **一次**「确认一并追加」→ 单事务提交 → 成功/失败分项弹窗；**禁止**逐步确认与部分落库。单菜单新建/关联判定仍 **【主体识别与库内匹配总则】(PA-R03)**。",
           },
           {
             label: "不解除 (PA-R05)",
@@ -208,6 +209,31 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
     title: "关联业务单据 · 6.3 范围外",
     content: "6.3 合作方详情 **不提供**「关联业务单据」Tab；入库/出库/转让/仓单等请在各业务模块按主体标识查询。本标注保留编号占位，避免与历史 Demo 打点 id 冲突。",
     details: [],
+  },
+  {
+    id: "partner-archive-row-append-pa-r03a",
+    targetId: "partner-archive-row-append-pa-r03a",
+    number: 9,
+    kind: "规则",
+    title: "页头追加 · 多选原子提交 (PA-R03a)",
+    content:
+      "PC 详情页头【追加合作方档案】与列表行【追加】共用 PA-R03a 链路；成功刷新 Tab2「其他合作档案」与列表「其他合作档案」条件列。H5 仅在列表卡片 Footer【追加】走同一规则（底部 Sheet）。",
+    details: [
+      {
+        title: "交互与线框",
+        items: [
+          {
+            label: "弹窗步骤",
+            content:
+              "步骤 1：`PartnerAppendRoleDialog` 多选 +【继续】；步骤 2~4：`PartnerCompositeSaveDialog`（`flowKind=rowAppend`）确认 / 失败 / 成功分项。ASCII：**列表 §3~3.4**、**详情 §4.3**。",
+          },
+          {
+            label: "冻结态",
+            content: "主体冻结时页头与列表 **均不展示**【追加】；与 PA-P02 矩阵一致。",
+          },
+        ],
+      },
+    ],
   },
   {
     id: "partner-archive-detail-logs",

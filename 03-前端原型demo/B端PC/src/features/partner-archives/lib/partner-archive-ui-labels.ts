@@ -84,6 +84,18 @@ export const PARTNER_COMPOSITE_SAVE_FAILURE_INTRO =
 
 export const PARTNER_COMPOSITE_SAVE_SUCCESS_INTRO = "已全部处理完成，明细如下："
 
+export const PARTNER_COMPOSITE_ROW_APPEND_CONFIRM_USER =
+  "以下菜单将在同一笔操作中一并处理；任一项无法完成时，整单都不会更新关联（本主档保持原状）。"
+
+export const PARTNER_COMPOSITE_ROW_APPEND_FAILURE_INTRO =
+  "未更新任何合作方档案关联，请根据下列说明修改后重试。"
+
+export const PARTNER_COMPOSITE_ROW_APPEND_SUCCESS_INTRO =
+  "追加已全部处理完成，明细如下："
+
+export const PARTNER_APPEND_ROLE_MULTI_USER_HINT =
+  "可多选目标菜单；确认后将一并预检并提交，全部通过才生效，否则会说明哪一项未通过。"
+
 /** @deprecated 请改用 USER_HINT + PrototypeSpecCallout */
 export const PARTNER_FORM_INITIAL_ROLES_HINT = PARTNER_FORM_INITIAL_ROLES_USER_HINT
 

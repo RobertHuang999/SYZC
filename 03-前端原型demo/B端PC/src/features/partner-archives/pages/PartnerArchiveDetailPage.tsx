@@ -26,6 +26,7 @@ import { getPartnerArchiveDocuments } from "../documents/partner-archive-documen
 import { parsePartnerArchiveMenuFromPathname } from "@prototype/shared/partner-archives/partner-archive-routes"
 import { partnerArchiveDetailAnnotations } from "../annotations/partner-archive-detail.annotations"
 import { PartnerAppendRoleDialog } from "../components/PartnerAppendRoleDialog"
+import { PartnerCompositeSaveDialog } from "../components/PartnerCompositeSaveDialog"
 import { PartnerConfirmDialog } from "../components/PartnerConfirmDialog"
 import { PartnerFreezeBlockedDialog } from "../components/PartnerFreezeBlockedDialog"
 import { PartnerVerifyDialog } from "../components/PartnerVerifyDialog"
@@ -55,11 +56,8 @@ import {
   resolveContactPhoneVerified,
   resolveContactPhoneVerifiedAt,
 } from "../lib/contact-phone-verify"
-import {
-  appendLinkedPartnerMenus,
-  formatLinkedArchiveStatus,
-} from "../lib/linked-partner-archives"
-import { appendTargetMenusForPartner } from "../lib/composite-append-save"
+import { formatLinkedArchiveStatus } from "../lib/linked-partner-archives"
+import { usePartnerCompositeRowAppend } from "../lib/use-partner-composite-row-append"
 import {
   checkPartnerSubjectFreezeEligibility,
   maskIdNumber,
@@ -115,6 +113,18 @@ export function PartnerArchiveDetailPage() {
   useEffect(() => {
     setPartner(getPartnerArchiveById(id))
   }, [id])
+
+  const showToast = (message: string) => {
+    setToastMessage(message)
+    window.setTimeout(() => setToastMessage(null), 2500)
+  }
+
+  const compositeRowAppend = usePartnerCompositeRowAppend({
+    getPartnerList: () => partnerArchivesMock,
+    onPartnerUpdated: (next) => {
+      setPartner(next)
+    },
+  })
 
   const headerActions = useMemo(
     () => (partner ? getPartnerDetailHeaderActions(partner) : ["back"]),
@@ -184,28 +194,11 @@ export function PartnerArchiveDetailPage() {
     )
   }
 
-  const showToast = (message: string) => {
-    setToastMessage(message)
-    window.setTimeout(() => setToastMessage(null), 2500)
-  }
-
   const handleAppendRole = (targetMenus: PartnerArchiveMenuLabel[]) => {
     if (targetMenus.length === 0 || !partner) {
       return
     }
-    const allowed = new Set(appendTargetMenusForPartner(partner))
-    const safeMenus = targetMenus.filter((menu) => allowed.has(menu))
-    if (safeMenus.length === 0) {
-      return
-    }
-    const detail = safeMenus
-      .map((menu) => `在【${menu}】创建独立主档或关联已有主档`)
-      .join("；")
-    setPartner((prev) => {
-      if (!prev) return prev
-      return commitPartnerArchive(appendLinkedPartnerMenus(prev, safeMenus, detail))
-    })
-    showToast("已追加合作方档案角色")
+    compositeRowAppend.submitAppendSelection(partner, targetMenus)
   }
 
   const handleFreezeClick = () => {
@@ -692,12 +685,34 @@ export function PartnerArchiveDetailPage() {
           onConfirm={confirmPendingAction}
         />
 
-        <PartnerAppendRoleDialog
-          partner={partner}
-          open={appendRoleOpen}
-          onOpenChange={setAppendRoleOpen}
-          onConfirm={handleAppendRole}
-        />
+        <PrototypeAnnotationTarget annotationIds={["partner-archive-row-append-pa-r03a"]}>
+          <PartnerAppendRoleDialog
+            partner={partner}
+            open={appendRoleOpen}
+            onOpenChange={setAppendRoleOpen}
+            onConfirm={handleAppendRole}
+          />
+
+          <PartnerCompositeSaveDialog
+            open={compositeRowAppend.compositeOpen}
+            mode={compositeRowAppend.compositeMode}
+            flowKind="rowAppend"
+            currentMenu={compositeRowAppend.rowPartner?.archiveMenu ?? archiveMenuLabel}
+            plan={compositeRowAppend.compositePlan}
+            appendMenus={compositeRowAppend.pendingMenus}
+            failures={compositeRowAppend.compositeFailures}
+            successLines={compositeRowAppend.compositeSuccessLines}
+            onOpenChange={(open) => {
+              compositeRowAppend.setCompositeOpen(open)
+              if (!open) {
+                compositeRowAppend.resetCompositeFlow()
+              }
+            }}
+            onConfirmComposite={compositeRowAppend.confirmCompositeAppend}
+            onBackToList={() => compositeRowAppend.resetCompositeFlow()}
+            onViewDetail={() => compositeRowAppend.resetCompositeFlow()}
+          />
+        </PrototypeAnnotationTarget>
 
         <PartnerVerifyDialog
           open={verifyContactOpen}

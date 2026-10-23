@@ -18,6 +18,9 @@ import {
  * | 已冻结（仅详情+解冻，无编辑/验证） | p-12 | p-13 | p-14 | p-15 |
  * | PA-R02 点【冻结】阻断 | p-01 | p-05 | p-08 | p-10 |
  * | 其他合作档案列 | p-01↔p-05 · p-03↔p-08 | p-16↔p-11 | — | — |
+ * | **PA-R03a 行追加·多选成功** | p-03 可追加提货人+服务方 | **p-07** 可追加货主+资方/服务方 | — | — |
+ * | **PA-R03a 行追加·预检失败** | — | **p-06** 缺手机，追加货主失败 | — | — |
+ * | **PA-R03a 行追加·仅关联** | p-03 追加资金方（已关联则拦截） | — | — | — |
  */
 const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
   // ── 货主信息 ──
@@ -332,7 +335,8 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
         operator: "系统",
         actionType: "CREATE",
         actionName: "创建合作方档案",
-        detail: "出库快捷建档：缺联系手机，资料待补全（筛「资料完备=待补全」）",
+        detail:
+          "出库快捷建档：缺联系手机，资料待补全（筛「资料完备=待补全」）；**Mock**：列表【追加】货主等域时 PA-R03a 预检失败",
       },
     ],
   },
@@ -434,7 +438,8 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
         operator: "张调度",
         actionType: "CREATE",
         actionName: "创建合作方档案",
-        detail: "企业提货人五要素已验证",
+        detail:
+          "企业提货人五要素已验证；**Mock**：列表【追加】多选走 PA-R03a（如同时追加货主信息+服务方信息）",
       },
     ],
   },

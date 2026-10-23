@@ -38,8 +38,8 @@ import {
   markContactPhoneVerified,
 } from "@prototype/B端PC/src/features/partner-archives/lib/contact-phone-verify"
 import { filterPartnerArchives } from "@prototype/B端PC/src/features/partner-archives/lib/list-utils"
-import { appendLinkedPartnerMenus } from "@prototype/B端PC/src/features/partner-archives/lib/linked-partner-archives"
-import { appendTargetMenusForPartner } from "@prototype/B端PC/src/features/partner-archives/lib/composite-append-save"
+import { usePartnerCompositeRowAppend } from "@prototype/B端PC/src/features/partner-archives/lib/use-partner-composite-row-append"
+import { PartnerCompositeSaveSheet } from "../components/PartnerCompositeSaveSheet"
 import {
   checkPartnerSubjectFreezeEligibility,
   type FreezeBlockReason,
@@ -59,19 +59,12 @@ import {
   PARTNER_SUBJECT_UNFREEZE_DIALOG,
   formatPartnerSubjectStatusToast,
 } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
-import { PartnerEnterpriseLicenseOcrButton } from "../components/PartnerEnterpriseLicenseOcrButton"
-import {
-  demoPartnerEnterpriseLicenseOcr,
-  PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_RECOGNIZING,
-  PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_SUCCESS,
-  partnerArchiveListKeywordFromLicenseOcr,
-} from "@prototype/shared/partner-archives/partner-enterprise-license-ocr.demo"
 import { PartnerAppendRoleSheet } from "../components/PartnerAppendRoleSheet"
 import { PartnerArchiveCard } from "../components/PartnerArchiveCard"
 import { PartnerConfirmSheet } from "../components/PartnerConfirmSheet"
 import { PartnerFreezeBlockedSheet } from "../components/PartnerFreezeBlockedSheet"
 import { PartnerVerifySheet } from "../components/PartnerVerifySheet"
-import { partnerArchiveFormRoute } from "../domain/constants"
+import { partnerArchiveDetailRoute, partnerArchiveFormRoute } from "../domain/constants"
 import { WORKSPACE_ROUTE } from "@/features/inbound-records/domain/constants"
 
 const SUBJECT_TYPE_OPTIONS: DropdownOption[] = PARTNER_SUBJECT_TYPE_FILTER_OPTIONS.map(
@@ -119,23 +112,6 @@ export function PartnerArchiveListPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [verifyPartner, setVerifyPartner] = useState<PartnerSubject | null>(null)
   const ignoreRowActionsUntilRef = useRef(0)
-
-  const runListEnterpriseLicenseOcr = () => {
-    showToast(PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_RECOGNIZING)
-    window.setTimeout(() => {
-      const demo = demoPartnerEnterpriseLicenseOcr(archiveMenuLabel)
-      const keyword = partnerArchiveListKeywordFromLicenseOcr(demo)
-      const next = {
-        ...appliedFilters,
-        keyword,
-        subjectType:
-          appliedFilters.subjectType === "全部" ? "企业" : appliedFilters.subjectType,
-      }
-      setDraftFilters(next)
-      setAppliedFilters(next)
-      showToast(PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_SUCCESS)
-    }, 480)
-  }
 
   useEffect(() => {
     const bump = () => setMockTick((t) => t + 1)
@@ -187,6 +163,14 @@ export function PartnerArchiveListPage() {
     window.setTimeout(() => setToastMessage(null), 2600)
     window.dispatchEvent(new Event("partner-archive-updated"))
   }
+
+  const compositeRowAppend = usePartnerCompositeRowAppend({
+    getPartnerList: () => partnerArchivesMock,
+    onPartnerUpdated: () => {
+      setMockTick((t) => t + 1)
+      window.dispatchEvent(new Event("partner-archive-updated"))
+    },
+  })
 
   const handleRowAction = (action: PartnerArchiveRowAction, item: PartnerSubject) => {
     if (Date.now() < ignoreRowActionsUntilRef.current) {
@@ -264,18 +248,9 @@ export function PartnerArchiveListPage() {
     if (!activePartner || targetMenus.length === 0) {
       return
     }
-    const allowed = new Set(appendTargetMenusForPartner(activePartner))
-    const safeMenus = targetMenus.filter((menu) => allowed.has(menu))
-    if (safeMenus.length === 0) {
-      return
-    }
-    const detail = safeMenus
-      .map((menu) => `在【${menu}】创建独立主档或关联已有主档`)
-      .join("；")
-    commitPartnerArchive(appendLinkedPartnerMenus(activePartner, safeMenus, detail))
+    compositeRowAppend.submitAppendSelection(activePartner, targetMenus)
     setAppendRoleOpen(false)
     setActivePartner(null)
-    showToast("已追加合作方档案角色")
   }
 
   return (
@@ -288,7 +263,6 @@ export function PartnerArchiveListPage() {
         <PrototypeAnnotationTarget annotationIds={["partner-archive-filter"]}>
         <div className={H5_FILTER_BAR}>
           <div className="flex items-center gap-2">
-            <PartnerEnterpriseLicenseOcrButton onClick={runListEnterpriseLicenseOcr} />
             <button
               type="button"
               onClick={() => {
@@ -479,15 +453,41 @@ export function PartnerArchiveListPage() {
           blockInfo={blockedDialog?.blockInfo ?? null}
         />
 
-        <PartnerAppendRoleSheet
-          partner={activePartner}
-          open={appendRoleOpen}
-          onClose={() => {
-            setAppendRoleOpen(false)
-            setActivePartner(null)
-          }}
-          onConfirm={handleAppendRoleConfirm}
-        />
+        <PrototypeAnnotationTarget annotationIds={["partner-archive-row-append-pa-r03a"]}>
+          <PartnerAppendRoleSheet
+            partner={activePartner}
+            open={appendRoleOpen}
+            onClose={() => {
+              setAppendRoleOpen(false)
+              setActivePartner(null)
+            }}
+            onConfirm={handleAppendRoleConfirm}
+          />
+
+          <PartnerCompositeSaveSheet
+            open={compositeRowAppend.compositeOpen}
+            mode={compositeRowAppend.compositeMode}
+            flowKind="rowAppend"
+            currentMenu={compositeRowAppend.rowPartner?.archiveMenu ?? archiveMenuLabel}
+            plan={compositeRowAppend.compositePlan}
+            appendMenus={compositeRowAppend.pendingMenus}
+            failures={compositeRowAppend.compositeFailures}
+            successLines={compositeRowAppend.compositeSuccessLines}
+            onClose={() => {
+              compositeRowAppend.setCompositeOpen(false)
+              compositeRowAppend.resetCompositeFlow()
+            }}
+            onConfirmComposite={compositeRowAppend.confirmCompositeAppend}
+            onBackToList={() => compositeRowAppend.resetCompositeFlow()}
+            onViewDetail={() => {
+              const partner = compositeRowAppend.rowPartner
+              compositeRowAppend.resetCompositeFlow()
+              if (partner) {
+                navigate(partnerArchiveDetailRoute(partner.archiveMenu, partner.id))
+              }
+            }}
+          />
+        </PrototypeAnnotationTarget>
 
         {pendingDialog?.action === "freeze" ? (
           <PartnerConfirmSheet

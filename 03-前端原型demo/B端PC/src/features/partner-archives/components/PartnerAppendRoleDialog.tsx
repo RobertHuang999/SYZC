@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type MouseEvent } from "react"
+import { useEffect, useMemo, useState } from "react"
 import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
 import {
   Dialog,
@@ -21,6 +21,7 @@ import {
 } from "../lib/composite-append-save"
 import {
   PARTNER_APPEND_ROLE_INDIVIDUAL_USER_HINT,
+  PARTNER_APPEND_ROLE_MULTI_USER_HINT,
 } from "../lib/partner-archive-ui-labels"
 
 type PartnerAppendRoleDialogProps = {
@@ -48,12 +49,10 @@ export function PartnerAppendRoleDialog({
     : false
 
   const [selectedMenus, setSelectedMenus] = useState<PartnerArchiveMenuLabel[]>([])
-  const [confirmCreateOpen, setConfirmCreateOpen] = useState(false)
 
   useEffect(() => {
     if (open) {
       setSelectedMenus([])
-      setConfirmCreateOpen(false)
     }
   }, [open, partner?.id])
 
@@ -67,18 +66,11 @@ export function PartnerAppendRoleDialog({
     )
   }
 
-  const handlePrimaryConfirm = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    event.stopPropagation()
+  const handlePrimaryConfirm = () => {
     if (selectedMenus.length === 0) {
       return
     }
-    setConfirmCreateOpen(true)
-  }
-
-  const handleCreateConfirm = () => {
     onConfirm(selectedMenus)
-    setConfirmCreateOpen(false)
     onOpenChange(false)
   }
 
@@ -88,8 +80,7 @@ export function PartnerAppendRoleDialog({
       : "——"
 
   return (
-    <>
-      <Dialog open={open && !confirmCreateOpen} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>追加合作方档案角色</DialogTitle>
@@ -136,11 +127,9 @@ export function PartnerAppendRoleDialog({
                 {partner.subjectType === "INDIVIDUAL" ? (
                   <ProductFieldHint>{PARTNER_APPEND_ROLE_INDIVIDUAL_USER_HINT}</ProductFieldHint>
                 ) : null}
-                <ProductFieldHint>
-                  确认后将在所选菜单为该身份创建独立主档（若该菜单已有同证号主档，则仅建立关联）。
-                </ProductFieldHint>
+                <ProductFieldHint>{PARTNER_APPEND_ROLE_MULTI_USER_HINT}</ProductFieldHint>
                 <PrototypeSpecCallout>
-                  【主体识别与库内匹配总则】(PA-R03) · 【合作方子菜单分视图与隐式角色规则】(PA-R12)：资金方/服务方锁定企业，个人不可追加。
+                  【追加多身份一次保存原子规则】(PA-R03a) · 【主体识别与库内匹配总则】(PA-R03) · 【合作方子菜单分视图与隐式角色规则】(PA-R12)
                 </PrototypeSpecCallout>
               </div>
             )}
@@ -155,31 +144,10 @@ export function PartnerAppendRoleDialog({
               disabled={availableMenus.length === 0 || selectedMenus.length === 0}
               onClick={handlePrimaryConfirm}
             >
-              下一步
+              继续
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <Dialog open={confirmCreateOpen} onOpenChange={setConfirmCreateOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>确认创建独立主档</DialogTitle>
-            <DialogDescription>
-              {selectedMenus.map((m) => `将在【${m}】为该身份创建独立主档（或关联已有主档）`).join("；")}
-              。是否继续？
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setConfirmCreateOpen(false)}>
-              取消
-            </Button>
-            <Button type="button" onClick={handleCreateConfirm}>
-              确认创建
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
   )
 }

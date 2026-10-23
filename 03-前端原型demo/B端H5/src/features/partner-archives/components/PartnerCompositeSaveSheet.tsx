@@ -13,15 +13,20 @@ import {
 import {
   PARTNER_COMPOSITE_SAVE_CONFIRM_SPEC,
   PARTNER_COMPOSITE_SAVE_CONFIRM_USER,
+  PARTNER_COMPOSITE_ROW_APPEND_CONFIRM_USER,
+  PARTNER_COMPOSITE_ROW_APPEND_FAILURE_INTRO,
+  PARTNER_COMPOSITE_ROW_APPEND_SUCCESS_INTRO,
   PARTNER_COMPOSITE_SAVE_FAILURE_INTRO,
   PARTNER_COMPOSITE_SAVE_SUCCESS_INTRO,
 } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
 
 export type PartnerCompositeSaveSheetMode = "confirm" | "failure" | "success"
+export type PartnerCompositeSaveFlowKind = "create" | "rowAppend"
 
 type PartnerCompositeSaveSheetProps = {
   open: boolean
   mode: PartnerCompositeSaveSheetMode
+  flowKind?: PartnerCompositeSaveFlowKind
   currentMenu: PartnerArchiveMenuLabel
   plan?: AppendPlanItem[]
   appendMenus?: PartnerArchiveMenuLabel[]
@@ -37,6 +42,7 @@ type PartnerCompositeSaveSheetProps = {
 export function PartnerCompositeSaveSheet({
   open,
   mode,
+  flowKind = "create",
   currentMenu,
   plan = [],
   appendMenus = [],
@@ -52,12 +58,20 @@ export function PartnerCompositeSaveSheet({
     return null
   }
 
+  const isRowAppend = flowKind === "rowAppend"
+
   const title =
     mode === "confirm"
-      ? "确认一并保存合作方档案"
+      ? isRowAppend
+        ? "确认一并追加合作方档案"
+        : "确认一并保存合作方档案"
       : mode === "failure"
-        ? "保存未成功"
-        : "保存成功"
+        ? isRowAppend
+          ? "追加未成功"
+          : "保存未成功"
+        : isRowAppend
+          ? "追加成功"
+          : "保存成功"
 
   return (
     <div className="fixed inset-0 z-[60] flex flex-col justify-end">
@@ -67,27 +81,41 @@ export function PartnerCompositeSaveSheet({
           <p className="text-base font-semibold text-gray-900">{title}</p>
           {mode === "confirm" ? (
             <p className="mt-1 text-xs leading-relaxed text-gray-500">
-              {PARTNER_COMPOSITE_SAVE_CONFIRM_USER}
+              {isRowAppend
+                ? PARTNER_COMPOSITE_ROW_APPEND_CONFIRM_USER
+                : PARTNER_COMPOSITE_SAVE_CONFIRM_USER}
             </p>
           ) : mode === "failure" ? (
-            <p className="mt-1 text-xs text-amber-800">{PARTNER_COMPOSITE_SAVE_FAILURE_INTRO}</p>
+            <p className="mt-1 text-xs text-amber-800">
+              {isRowAppend
+                ? PARTNER_COMPOSITE_ROW_APPEND_FAILURE_INTRO
+                : PARTNER_COMPOSITE_SAVE_FAILURE_INTRO}
+            </p>
           ) : (
-            <p className="mt-1 text-xs text-gray-500">{PARTNER_COMPOSITE_SAVE_SUCCESS_INTRO}</p>
+            <p className="mt-1 text-xs text-gray-500">
+              {isRowAppend
+                ? PARTNER_COMPOSITE_ROW_APPEND_SUCCESS_INTRO
+                : PARTNER_COMPOSITE_SAVE_SUCCESS_INTRO}
+            </p>
           )}
         </div>
 
         <div className="space-y-3 px-4 py-3 text-sm">
           {mode === "confirm" ? (
             <>
-              <div>
-                <p className="mb-1 text-xs font-medium text-gray-500">本页（当前菜单）</p>
-                <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
-                  · 【{currentMenu}】 → 新建档案（隐式身份）
+              {!isRowAppend ? (
+                <div>
+                  <p className="mb-1 text-xs font-medium text-gray-500">本页（当前菜单）</p>
+                  <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                    · 【{currentMenu}】 → 新建档案（隐式身份）
+                  </div>
                 </div>
-              </div>
+              ) : null}
               {plan.length > 0 ? (
                 <div>
-                  <p className="mb-1 text-xs font-medium text-gray-500">同时追加的其他合作档案</p>
+                  <p className="mb-1 text-xs font-medium text-gray-500">
+                    {isRowAppend ? "将要追加的目标菜单" : "同时追加的其他合作档案"}
+                  </p>
                   <ul className="space-y-1 rounded-lg border border-gray-100 px-3 py-2">
                     {plan.map((item) => (
                       <li key={item.targetMenu}>
@@ -108,10 +136,12 @@ export function PartnerCompositeSaveSheet({
               <div>
                 <p className="mb-1 text-xs font-medium text-gray-500">处理结果</p>
                 <ul className="space-y-1 rounded-lg border border-red-100 bg-red-50/80 px-3 py-2 text-red-900">
-                  <li>· 【{currentMenu}（本页）】 ✗ 未保存</li>
+                  {!isRowAppend ? (
+                    <li>· 【{currentMenu}（本页）】 ✗ 未保存</li>
+                  ) : null}
                   {appendMenus.map((menu) => (
                     <li key={menu}>
-                      · 【{menu}（追加）】 ✗ 未保存
+                      · 【{menu}（追加）】 ✗ {isRowAppend ? "未更新" : "未保存"}
                     </li>
                   ))}
                 </ul>
@@ -169,7 +199,7 @@ export function PartnerCompositeSaveSheet({
                 className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white"
                 onClick={onConfirmComposite}
               >
-                确认一并保存
+                {isRowAppend ? "确认一并追加" : "确认一并保存"}
               </button>
             </>
           ) : null}
@@ -196,7 +226,7 @@ export function PartnerCompositeSaveSheet({
                 className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white"
                 onClick={onViewDetail}
               >
-                查看详情
+                {isRowAppend ? "查看详情" : "查看本菜单详情"}
               </button>
             </>
           ) : null}

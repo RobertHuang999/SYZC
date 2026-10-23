@@ -19,26 +19,16 @@ import {
   PARTNER_SUBJECT_TYPE_FILTER_OPTIONS,
 } from "../domain/constants"
 import type { PartnerArchiveFilters } from "../domain/types"
-import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
-import { PartnerEnterpriseLicenseOcrButton } from "./PartnerEnterpriseLicenseOcrButton"
-import {
-  demoPartnerEnterpriseLicenseOcr,
-  PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_RECOGNIZING,
-  PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_SUCCESS,
-  partnerArchiveListKeywordFromLicenseOcr,
-} from "@prototype/shared/partner-archives/partner-enterprise-license-ocr.demo"
-import { ProductFieldHint } from "@/components/form/ProductFieldHint"
 
 type PartnerArchiveFiltersPanelProps = {
   value: PartnerArchiveFilters
   onChange: (value: PartnerArchiveFilters) => void
-  onSearch: (nextApplied?: PartnerArchiveFilters) => void
+  onSearch: () => void
   onReset: () => void
   onAdd: () => void
   addLabel?: string
-  /** 当前子菜单，列表 OCR Demo 按菜单回填检索关键词 */
-  archiveMenu?: PartnerArchiveMenuLabel
-  onListOcrToast?: (message: string) => void
+  /** @deprecated 列表域由路由决定，筛选项四菜单一致 */
+  archiveMenu?: string
 }
 
 export function PartnerArchiveFiltersPanel({
@@ -48,26 +38,8 @@ export function PartnerArchiveFiltersPanel({
   onReset,
   onAdd,
   addLabel = "新增合作方",
-  archiveMenu = "货主信息",
-  onListOcrToast,
 }: PartnerArchiveFiltersPanelProps) {
   const [expanded, setExpanded] = useState(false)
-
-  const runListEnterpriseLicenseOcr = () => {
-    onListOcrToast?.(PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_RECOGNIZING)
-    window.setTimeout(() => {
-      const demo = demoPartnerEnterpriseLicenseOcr(archiveMenu)
-      const keyword = partnerArchiveListKeywordFromLicenseOcr(demo)
-      const next = {
-        ...value,
-        keyword,
-        subjectType: value.subjectType === "全部" ? "企业" : value.subjectType,
-      }
-      onChange(next)
-      onListOcrToast?.(PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_SUCCESS)
-      onSearch(next)
-    }, 480)
-  }
 
   return (
     <Card>
@@ -160,15 +132,6 @@ export function PartnerArchiveFiltersPanel({
 
         {expanded && (
           <div className="grid gap-4 border-t pt-4 lg:grid-cols-4">
-            <FilterField label="营业执照 OCR" className="lg:col-span-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <PartnerEnterpriseLicenseOcrButton onClick={runListEnterpriseLicenseOcr} />
-                <ProductFieldHint>
-                  识别成功将信用代码写入上方「主体名称/身份标识」并立即查询；识别失败可手输。
-                </ProductFieldHint>
-              </div>
-            </FilterField>
-
             <FilterField label="联系手机核验">
               <Select
                 value={value.contactPhoneVerified}

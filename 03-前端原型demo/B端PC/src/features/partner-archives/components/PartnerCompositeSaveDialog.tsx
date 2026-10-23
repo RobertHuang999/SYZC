@@ -19,15 +19,20 @@ import { planActionLabel, resultOutcomeLabel } from "../lib/composite-append-sav
 import {
   PARTNER_COMPOSITE_SAVE_CONFIRM_SPEC,
   PARTNER_COMPOSITE_SAVE_CONFIRM_USER,
+  PARTNER_COMPOSITE_ROW_APPEND_CONFIRM_USER,
+  PARTNER_COMPOSITE_ROW_APPEND_FAILURE_INTRO,
+  PARTNER_COMPOSITE_ROW_APPEND_SUCCESS_INTRO,
   PARTNER_COMPOSITE_SAVE_FAILURE_INTRO,
   PARTNER_COMPOSITE_SAVE_SUCCESS_INTRO,
 } from "../lib/partner-archive-ui-labels"
 
 export type PartnerCompositeSaveDialogMode = "confirm" | "failure" | "success"
+export type PartnerCompositeSaveFlowKind = "create" | "rowAppend"
 
 type PartnerCompositeSaveDialogProps = {
   open: boolean
   mode: PartnerCompositeSaveDialogMode
+  flowKind?: PartnerCompositeSaveFlowKind
   currentMenu: PartnerArchiveMenuLabel
   plan?: AppendPlanItem[]
   appendMenus?: PartnerArchiveMenuLabel[]
@@ -43,6 +48,7 @@ type PartnerCompositeSaveDialogProps = {
 export function PartnerCompositeSaveDialog({
   open,
   mode,
+  flowKind = "create",
   currentMenu,
   plan = [],
   appendMenus = [],
@@ -54,27 +60,37 @@ export function PartnerCompositeSaveDialog({
   onViewDetail,
   onBackToList,
 }: PartnerCompositeSaveDialogProps) {
+  const isRowAppend = flowKind === "rowAppend"
+
   if (mode === "confirm") {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>确认一并保存合作方档案</DialogTitle>
-            <DialogDescription>{PARTNER_COMPOSITE_SAVE_CONFIRM_USER}</DialogDescription>
+            <DialogTitle>
+              {isRowAppend ? "确认一并追加合作方档案" : "确认一并保存合作方档案"}
+            </DialogTitle>
+            <DialogDescription>
+              {isRowAppend
+                ? PARTNER_COMPOSITE_ROW_APPEND_CONFIRM_USER
+                : PARTNER_COMPOSITE_SAVE_CONFIRM_USER}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 text-sm">
-            <div>
-              <div className="mb-1.5 text-xs font-medium text-muted-foreground">
-                本页（当前菜单）
+            {!isRowAppend ? (
+              <div>
+                <div className="mb-1.5 text-xs font-medium text-muted-foreground">
+                  本页（当前菜单）
+                </div>
+                <div className="rounded-md border bg-muted/30 px-3 py-2">
+                  · 【{currentMenu}】 → 新建档案（隐式身份）
+                </div>
               </div>
-              <div className="rounded-md border bg-muted/30 px-3 py-2">
-                · 【{currentMenu}】 → 新建档案（隐式身份）
-              </div>
-            </div>
+            ) : null}
             {plan.length > 0 && (
               <div>
                 <div className="mb-1.5 text-xs font-medium text-muted-foreground">
-                  同时追加的其他合作档案
+                  {isRowAppend ? "将要追加的目标菜单" : "同时追加的其他合作档案"}
                 </div>
                 <ul className="space-y-1.5 rounded-md border px-3 py-2">
                   {plan.map((item) => (
@@ -92,7 +108,7 @@ export function PartnerCompositeSaveDialog({
               取消
             </Button>
             <Button type="button" onClick={onConfirmComposite}>
-              确认一并保存
+              {isRowAppend ? "确认一并追加" : "确认一并保存"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -101,19 +117,28 @@ export function PartnerCompositeSaveDialog({
   }
 
   if (mode === "failure") {
-    const scopes = [
-      { label: `【${currentMenu}（本页）】`, failed: true },
-      ...appendMenus.map((menu) => ({
-        label: `【${menu}（追加）】`,
-        failed: true,
-      })),
-    ]
+    const scopes = isRowAppend
+      ? appendMenus.map((menu) => ({
+          label: `【${menu}（追加）】`,
+          failed: true,
+        }))
+      : [
+          { label: `【${currentMenu}（本页）】`, failed: true },
+          ...appendMenus.map((menu) => ({
+            label: `【${menu}（追加）】`,
+            failed: true,
+          })),
+        ]
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>保存未成功</DialogTitle>
-            <DialogDescription>{PARTNER_COMPOSITE_SAVE_FAILURE_INTRO}</DialogDescription>
+            <DialogTitle>{isRowAppend ? "追加未成功" : "保存未成功"}</DialogTitle>
+            <DialogDescription>
+              {isRowAppend
+                ? PARTNER_COMPOSITE_ROW_APPEND_FAILURE_INTRO
+                : PARTNER_COMPOSITE_SAVE_FAILURE_INTRO}
+            </DialogDescription>
           </DialogHeader>
           <div className="max-h-[min(50vh,320px)] space-y-3 overflow-y-auto text-sm">
             <div>
@@ -121,7 +146,7 @@ export function PartnerCompositeSaveDialog({
               <ul className="space-y-1 rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2">
                 {scopes.map((row) => (
                   <li key={row.label}>
-                    · {row.label} ✗ 未保存
+                    · {row.label} ✗ {isRowAppend ? "未更新" : "未保存"}
                   </li>
                 ))}
               </ul>
@@ -152,8 +177,12 @@ export function PartnerCompositeSaveDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>保存成功</DialogTitle>
-          <DialogDescription>{PARTNER_COMPOSITE_SAVE_SUCCESS_INTRO}</DialogDescription>
+          <DialogTitle>{isRowAppend ? "追加成功" : "保存成功"}</DialogTitle>
+          <DialogDescription>
+            {isRowAppend
+              ? PARTNER_COMPOSITE_ROW_APPEND_SUCCESS_INTRO
+              : PARTNER_COMPOSITE_SAVE_SUCCESS_INTRO}
+          </DialogDescription>
         </DialogHeader>
         <ul className="space-y-2 text-sm">
           {successLines.map((line) => (
@@ -176,7 +205,7 @@ export function PartnerCompositeSaveDialog({
             返回列表
           </Button>
           <Button type="button" onClick={onViewDetail}>
-            查看本菜单详情
+            {isRowAppend ? "查看详情" : "查看本菜单详情"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -6,7 +6,10 @@ import {
   appendTargetMenusEmptyBecauseIndividualEnterpriseOnly,
   appendTargetMenusForPartner,
 } from "@prototype/B端PC/src/features/partner-archives/lib/composite-append-save"
-import { PARTNER_APPEND_ROLE_INDIVIDUAL_USER_HINT } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
+import {
+  PARTNER_APPEND_ROLE_INDIVIDUAL_USER_HINT,
+  PARTNER_APPEND_ROLE_MULTI_USER_HINT,
+} from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
 
 type PartnerAppendRoleSheetProps = {
   partner: PartnerSubject | null
@@ -77,6 +80,9 @@ export function PartnerAppendRoleSheet({
             </p>
           ) : (
             <>
+              <p className="text-xs leading-relaxed text-gray-600">
+                {PARTNER_APPEND_ROLE_MULTI_USER_HINT}
+              </p>
               {partner.subjectType === "INDIVIDUAL" ? (
                 <p className="text-xs leading-relaxed text-gray-600">
                   {PARTNER_APPEND_ROLE_INDIVIDUAL_USER_HINT}

@@ -179,6 +179,107 @@ function precheckTargetMenu(
   return null
 }
 
+export function snapshotFromPartner(partner: PartnerSubject): CompositeFormSnapshot {
+  return {
+    archiveMenu: partner.archiveMenu,
+    subjectType: partner.subjectType,
+    name: partner.name,
+    idNumber: partner.idNumber,
+    contactPhone: partner.contactPhone,
+    agentName: partner.agentName ?? "",
+    agentIdNumber: partner.agentIdNumber ?? "",
+    certAddressFull: partner.certAddress.fullAddress,
+  }
+}
+
+function buildAppendTargetPlan(
+  list: PartnerSubject[],
+  snapshot: CompositeFormSnapshot,
+  appendMenus: PartnerArchiveMenuLabel[],
+): { plan: AppendPlanItem[]; failures: CompositePrecheckFailure[] } {
+  const failures: CompositePrecheckFailure[] = []
+  const plan: AppendPlanItem[] = []
+
+  for (const targetMenu of appendMenus) {
+    if (
+      snapshot.subjectType === "INDIVIDUAL" &&
+      (targetMenu === "资金方信息" || targetMenu === "服务方信息")
+    ) {
+      failures.push({
+        scopeLabel: scopeLabel(targetMenu, false),
+        reason: "个人身份不能追加至资金方或服务方（两菜单仅支持企业主体）",
+      })
+      continue
+    }
+    const existing = findPartnerByIdNumber(
+      list,
+      snapshot.idNumber,
+      undefined,
+      targetMenu,
+    )
+    if (existing) {
+      plan.push({ targetMenu, action: "LINK_EXISTING" })
+      continue
+    }
+    const failure = precheckTargetMenu(list, targetMenu, snapshot)
+    if (failure) {
+      failures.push(failure)
+      continue
+    }
+    plan.push({ targetMenu, action: "CREATE_NEW" })
+  }
+
+  return { plan, failures }
+}
+
+/** 列表/详情【追加合作方档案】· 多选目标预检（不含本菜单新建） */
+export function buildCompositeAppendPlanForRowAppend(
+  list: PartnerSubject[],
+  partner: PartnerSubject,
+  appendMenus: PartnerArchiveMenuLabel[],
+): { plan: AppendPlanItem[]; failures: CompositePrecheckFailure[] } {
+  const failures: CompositePrecheckFailure[] = []
+
+  if (partner.status === "FROZEN") {
+    failures.push({
+      scopeLabel: `【${partner.archiveMenu}】`,
+      reason: "主体已冻结，无法追加合作方档案角色",
+    })
+    return { plan: [], failures }
+  }
+
+  const linked = new Set(
+    (partner.linkedPartnerArchives ?? []).map((item) => item.targetMenu),
+  )
+  for (const menu of appendMenus) {
+    if (linked.has(menu)) {
+      failures.push({
+        scopeLabel: scopeLabel(menu, false),
+        reason: `已与【${menu}】建立关联，无需重复追加`,
+      })
+    }
+  }
+  if (failures.length > 0) {
+    return { plan: [], failures }
+  }
+
+  return buildAppendTargetPlan(list, snapshotFromPartner(partner), appendMenus)
+}
+
+export function successLinesFromAppendPlan(
+  plan: AppendPlanItem[],
+  options?: { primaryLine?: CompositeSaveResultLine },
+): CompositeSaveResultLine[] {
+  const lines = options?.primaryLine ? [options.primaryLine] : []
+  for (const item of plan) {
+    lines.push({
+      scopeLabel: `【${item.targetMenu}（追加）】`,
+      outcome: item.action === "CREATE_NEW" ? "CREATED" : "LINKED",
+    })
+  }
+  return lines
+}
+
 export function buildCompositeAppendPlan(
   list: PartnerSubject[],
   snapshot: CompositeFormSnapshot,
@@ -221,35 +322,12 @@ export function buildCompositeAppendPlan(
     }
   }
 
-  const plan: AppendPlanItem[] = []
-  for (const targetMenu of appendMenus) {
-    if (
-      snapshot.subjectType === "INDIVIDUAL" &&
-      (targetMenu === "资金方信息" || targetMenu === "服务方信息")
-    ) {
-      failures.push({
-        scopeLabel: scopeLabel(targetMenu, false),
-        reason: "个人身份不能追加至资金方或服务方（两菜单仅支持企业主体）",
-      })
-      continue
-    }
-    const existing = findPartnerByIdNumber(
-      list,
-      snapshot.idNumber,
-      undefined,
-      targetMenu,
-    )
-    if (existing) {
-      plan.push({ targetMenu, action: "LINK_EXISTING" })
-      continue
-    }
-    const failure = precheckTargetMenu(list, targetMenu, snapshot)
-    if (failure) {
-      failures.push(failure)
-      continue
-    }
-    plan.push({ targetMenu, action: "CREATE_NEW" })
-  }
+  const { plan, failures: appendFailures } = buildAppendTargetPlan(
+    list,
+    snapshot,
+    appendMenus,
+  )
+  failures.push(...appendFailures)
 
   return { plan, failures }
 }

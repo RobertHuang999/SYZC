@@ -56,7 +56,7 @@ export const partnerArchiveListAnnotationsShared: SharedPrototypeAnnotation[] = 
           },
           {
             label: "主体类型与资料完备",
-            content: "主体类型为单选下拉（个人 / 企业）；默认区第四项为 **资料完备**（全部 / 待补全 / 完整）。PC 展开区含 **识别营业执照（OCR）**（【企业营业执照 OCR 识别规则】(PA-R13)）回填关键词并查询；H5 关键词行左侧 OCR 按钮。**无业务角色筛**（PA-R12）。",
+            content: "主体类型为单选下拉（个人 / 企业）；默认区第四项为 **资料完备**（全部 / 待补全 / 完整）。联系手机核验在 PC 展开区。**列表筛选不提供 OCR**（【企业营业执照 OCR 识别规则】(PA-R13) 仅新增/编辑表单）。**无业务角色筛**（PA-R12）。",
           },
           {
             label: "主体状态筛选",
@@ -117,7 +117,7 @@ export const partnerArchiveListAnnotationsShared: SharedPrototypeAnnotation[] = 
     number: 4,
     kind: "规则",
     title: "主体状态 × 行操作控制矩阵 (PA-P02)",
-    content: "【合作方档案操作权限矩阵】(PA-P02)：主列表方案 A（详情/验证/编辑或补全/追加/冻结或解冻）；未验证且可补验时展示【验证】，无则不占格；操作区每行最多 3 钮；**无删除、无解除关联**。",
+    content: "【合作方档案操作权限矩阵】(PA-P02)：主列表方案 A（详情/验证/编辑或补全/追加/冻结或解冻）；未验证且可补验时展示【验证】，无则不占格；操作区每行最多 3 钮；**无删除、无解除关联**。【追加合作方档案】多选走 **【追加多身份一次保存原子规则】(PA-R03a)**（见 **7 号点**）。",
     details: [
       {
         title: "1. 操作列状态化控制矩阵",
@@ -158,6 +158,54 @@ export const partnerArchiveListAnnotationsShared: SharedPrototypeAnnotation[] = 
           {
             label: "货主有货",
             content: "在库库存、未出清入库、有效在押仓单 → 弹出本弹窗；对齐 ASCII 列表页 1.0 节。原型可测：货主「赵磊」、提货人「李华」、资金方「建行无锡分行」。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "partner-archive-row-append-pa-r03a",
+    targetId: "partner-archive-row-append-pa-r03a",
+    number: 7,
+    kind: "规则",
+    title: "行追加 · 多选原子提交 (PA-R03a)",
+    content:
+      "列表行【追加合作方档案】与 PC 详情页头【追加合作方档案】共用：多选目标 → 预检计划（只读）→ 一次确认 → 单事务提交 → 成功/失败 **分项弹窗**；禁止部分成功。",
+    details: [
+      {
+        title: "1. 流程与弹窗口径",
+        items: [
+          {
+            label: "PA-R03a 行追加链路",
+            content: `flowchart TD
+    A["【追加】打开多选弹窗"] --> B["【继续】"]
+    B --> C["预检 assemblePlan（不写库）"]
+    C -->|"任一失败"| D["追加未成功 · 分项原因"]
+    C -->|"全部通过"| E["确认一并追加 · 计划清单"]
+    E -->|"取消"| F["关闭，不写库"]
+    E -->|"确认"| G["单事务 compositeAppend"]
+    G -->|"失败回滚"| D
+    G -->|"成功"| H["追加成功 · 分项 + 刷新关联列/Tab2"]`,
+          },
+          {
+            label: "与 PA-R03 分工",
+            content:
+              "域内 **同证号匹配、新建 vs 仅关联** 判定仍走 **【主体识别与库内匹配总则】(PA-R03)**；**PA-R03a** 约束 **一次提交的原子边界与分项反馈**。新增页多选追加 + 行追加 **同一套** 确认/失败/成功组件（`flowKind=create | rowAppend`）。",
+          },
+          {
+            label: "ASCII 线框",
+            content:
+              "列表页 **§3~3.4**、详情页 **§4.3**；新增页多选见新增编辑页 **6.5**（文案「保存」vs「追加」差异）。",
+          },
+        ],
+      },
+      {
+        title: "2. 原型 Mock 自测",
+        items: [
+          {
+            label: "推荐样例",
+            content:
+              "**p-07**（提货人·五要素齐·无关联）：多选追加成功；**p-06**（缺手机）：追加货主等预检失败；**p-03**（货主·已有资金方关联）：多选新建/关联与重复拦截。",
           },
         ],
       },

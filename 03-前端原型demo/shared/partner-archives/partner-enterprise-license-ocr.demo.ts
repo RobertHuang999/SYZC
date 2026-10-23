@@ -31,13 +31,6 @@ export function demoPartnerEnterpriseLicenseOcr(
   return DEMO_BY_MENU[archiveMenu]
 }
 
-/** 列表/检索区 OCR 成功后写入关键词（OR 匹配主体名称或身份标识） */
-export function partnerArchiveListKeywordFromLicenseOcr(
-  result: PartnerEnterpriseLicenseOcrDemoResult,
-): string {
-  return result.unifiedSocialCreditCode.trim() || result.enterpriseName.trim()
-}
-
 export const PARTNER_ENTERPRISE_LICENSE_OCR_BUTTON_LABEL = "识别营业执照"
 export const PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_RECOGNIZING =
   "正在进行营业执照 OCR 图像识别…"
