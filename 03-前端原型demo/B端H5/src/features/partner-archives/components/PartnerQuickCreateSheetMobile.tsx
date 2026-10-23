@@ -7,6 +7,9 @@ import {
   quickCreatePartnerFromJob,
 } from "@prototype/B端PC/src/features/partner-archives/lib/quick-create-partner"
 import {
+  PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER,
+  PARTNER_FORM_ADDRESS_USER_HINT_OTHER,
+  PARTNER_QUICK_CREATE_CERT_ADDRESS_SPEC_NOTE,
   PARTNER_QUICK_CREATE_CERT_ADDRESS_USER_HINT,
   PARTNER_QUICK_CREATE_INBOUND_SPEC,
   PARTNER_QUICK_CREATE_INBOUND_USER,
@@ -131,7 +134,16 @@ export function PartnerQuickCreateSheetMobile({
 
   if (!open) return null
 
-  const showAddress = scene === "INBOUND_OWNER"
+  const showAddress =
+    scene === "INBOUND_OWNER" || scene === "OUTBOUND_PICKUP_AGENT"
+  const certAddressUserHint =
+    scene === "INBOUND_OWNER"
+      ? PARTNER_QUICK_CREATE_CERT_ADDRESS_USER_HINT
+      : PARTNER_FORM_ADDRESS_USER_HINT_OTHER
+  const certAddressSpecNote =
+    scene === "INBOUND_OWNER"
+      ? PARTNER_QUICK_CREATE_CERT_ADDRESS_SPEC_NOTE
+      : PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER
   const roleReadonly = copy.roleReadonly
 
   const validate = (): string | null => {
@@ -375,7 +387,7 @@ export function PartnerQuickCreateSheetMobile({
                 />
               </NativeFormRow>
               <ProductFieldHint className="mt-1.5 text-[#232D39]/55">
-                {PARTNER_QUICK_CREATE_CERT_ADDRESS_USER_HINT}
+                {certAddressUserHint}
               </ProductFieldHint>
             </section>
           ) : null}
@@ -383,6 +395,7 @@ export function PartnerQuickCreateSheetMobile({
           <PrototypeSpecCallout className="mt-4">
             <div className="space-y-1">
               <p>{copy.hintSpec}</p>
+              {showAddress ? <p>{certAddressSpecNote}</p> : null}
               <p>落库创建来源固定为「人工建档」；本弹窗为{copy.entryName}入口。</p>
             </div>
           </PrototypeSpecCallout>

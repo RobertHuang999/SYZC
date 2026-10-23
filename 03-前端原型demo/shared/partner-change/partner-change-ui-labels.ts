@@ -17,6 +17,9 @@ export const OUTBOUND_PICKUP_AGENT_PARTNER_CHANGE_USER =
 export const OUTBOUND_PICKUP_AGENT_PARTNER_CHANGE_SPEC =
   "【作业嵌入快捷建档规则】(O06a)：提货人信息域 + 快捷建档；禁止失焦静默沉淀第二套提货人台账。经办人不触发货主【货主准入与地址唯一联动规则】(P02)。真源：05 §3.3。"
 
+/** 出库制单 · 个人提货经办人快捷建档按钮（对齐入库「+ 快速添加货主」） */
+export const OUTBOUND_PICKUP_QUICK_CREATE_BUTTON_LABEL = "+ 快速添加提货经办人"
+
 export const PLATFORM_OWNER_POLICY_PARTNER_CHANGE_USER =
   "以下规则仅作用于「货主信息」档案保存与作业快捷建档绑货主；入库/出库/仓单引用货主时不因缺址阻断提交。"
 

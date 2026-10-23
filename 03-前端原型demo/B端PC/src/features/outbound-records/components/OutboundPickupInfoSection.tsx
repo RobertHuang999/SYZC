@@ -24,6 +24,7 @@ import { PartnerArchiveEmbeddedPicker } from "@/features/partner-archives/compon
 import {
   OUTBOUND_PICKUP_AGENT_PARTNER_CHANGE_SPEC,
   OUTBOUND_PICKUP_AGENT_PARTNER_CHANGE_USER,
+  OUTBOUND_PICKUP_QUICK_CREATE_BUTTON_LABEL,
 } from "@prototype/shared/partner-change/partner-change-ui-labels"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import type { PartnerSelectorValue } from "@/features/partner-archives/components/PartnerArchiveSelector"
@@ -176,7 +177,7 @@ export function OutboundPickupInfoSection({
             {/* 个人提货人字段 */}
             {isPersonal ? (
               <>
-                <div className="sm:col-span-2 lg:col-span-4">
+                <FormItem label="提货经办人:" required className="sm:col-span-2 lg:col-span-2">
                   <PrototypeAnnotationTarget annotationIds={["outbound-form-partner-pickup"]}>
                     <PartnerChangeFieldMark
                       markId="outbound-pickup-agent"
@@ -187,14 +188,17 @@ export function OutboundPickupInfoSection({
                         archiveMenu="提货人信息"
                         fieldLabel="提货经办人"
                         required
+                        embedLayout="job-embed"
+                        showFieldLabel={false}
                         hideEmbeddedHints
+                        quickCreateButtonLabel={OUTBOUND_PICKUP_QUICK_CREATE_BUTTON_LABEL}
                         value={form.pickupAgentPartnerId || undefined}
                         selection={pickupSelection}
                         onChange={applyPickupPartner}
                       />
                     </PartnerChangeFieldMark>
                   </PrototypeAnnotationTarget>
-                </div>
+                </FormItem>
                 <FormItem label="提货人姓名:" required>
                   <Input
                     value={form.pickupName}

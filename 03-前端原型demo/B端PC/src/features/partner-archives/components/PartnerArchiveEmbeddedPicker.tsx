@@ -18,6 +18,7 @@ import {
   partnerEmbeddedPickerSpecNote,
   partnerEmbeddedPickerUserHint,
 } from "../lib/partner-archive-ui-labels"
+import { cn } from "@/lib/utils"
 
 type PartnerArchiveEmbeddedPickerProps = {
   archiveMenu: PartnerArchiveMenuLabel
@@ -31,7 +32,40 @@ type PartnerArchiveEmbeddedPickerProps = {
   userHint?: string
   /** 外层已用 PartnerChangeFieldMark 时设为 true，避免重复琥珀说明 */
   hideEmbeddedHints?: boolean
+  /**
+   * 作业页嵌入（入库货主 / 出库提货经办人）：内层 p-2 + 横排选择器与快捷按钮，与入库新增页一致。
+   * 此时外层 FormItem/Field 应自带标签，并设 showFieldLabel=false。
+   */
+  embedLayout?: "default" | "job-embed"
+  showFieldLabel?: boolean
+  /** 快捷建档按钮文案；job-embed 默认对齐入库「+ 快速添加货主」风格 */
+  quickCreateButtonLabel?: string
   className?: string
+}
+
+function SelectionSummary({
+  archiveMenu,
+  selection,
+}: {
+  archiveMenu: PartnerArchiveMenuLabel
+  selection: PartnerSelectorValue
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+      <span>
+        已选：{selection.name} · {selection.idNumberMasked}
+      </span>
+      <Link
+        to={partnerArchiveDetailPath(archiveMenu, selection.partnerId)}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center text-primary hover:underline"
+      >
+        查看档案
+        <ExternalLink className="ml-0.5 h-3 w-3" />
+      </Link>
+    </div>
+  )
 }
 
 export function PartnerArchiveEmbeddedPicker({
@@ -44,63 +78,92 @@ export function PartnerArchiveEmbeddedPicker({
   enableQuickCreate = true,
   userHint,
   hideEmbeddedHints = false,
+  embedLayout = "default",
+  showFieldLabel = true,
+  quickCreateButtonLabel,
   className,
 }: PartnerArchiveEmbeddedPickerProps) {
   const [quickOpen, setQuickOpen] = useState(false)
   const quickScene = enableQuickCreate ? quickCreateSceneForArchiveMenu(archiveMenu) : null
+  const isJobEmbed = embedLayout === "job-embed"
 
-  return (
-    <div className={className}>
-      <div className="space-y-1.5">
+  const quickButtonLabel =
+    quickCreateButtonLabel ?? (isJobEmbed ? "+ 快捷建档" : "快捷建档")
+
+  const quickCreateButton = quickScene ? (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className={cn("shrink-0", isJobEmbed ? "text-xs" : "")}
+      onClick={() => setQuickOpen(true)}
+    >
+      {isJobEmbed || quickCreateButtonLabel ? (
+        quickButtonLabel
+      ) : (
+        <>
+          <Plus className="mr-1 h-3.5 w-3.5" />
+          {quickButtonLabel}
+        </>
+      )}
+    </Button>
+  ) : null
+
+  const selectorRow = (
+    <div className={cn(isJobEmbed ? "flex gap-1.5" : "flex flex-col gap-2 sm:flex-row sm:items-center")}>
+      <div className="min-w-0 flex-1">
+        <PartnerArchiveSelector
+          archiveMenu={archiveMenu}
+          value={value}
+          onChange={onChange}
+          placeholder={`请选择${fieldLabel}`}
+        />
+      </div>
+      {quickCreateButton}
+    </div>
+  )
+
+  const hintsBlock =
+    hideEmbeddedHints ? null : (
+      <>
+        <ProductFieldHint>{userHint ?? partnerEmbeddedPickerUserHint(archiveMenu)}</ProductFieldHint>
+        <PrototypeSpecCallout>{partnerEmbeddedPickerSpecNote(archiveMenu)}</PrototypeSpecCallout>
+      </>
+    )
+
+  const body = isJobEmbed ? (
+    <div className="flex flex-col gap-2 p-2">
+      {selectorRow}
+      {selection ? <SelectionSummary archiveMenu={archiveMenu} selection={selection} /> : null}
+      {hintsBlock}
+    </div>
+  ) : (
+    <div className="space-y-1.5">
+      {showFieldLabel ? (
         <Label>
           {required ? <span className="text-destructive">* </span> : null}
           {fieldLabel}
         </Label>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <div className="min-w-0 flex-1">
-            <PartnerArchiveSelector
-              archiveMenu={archiveMenu}
-              value={value}
-              onChange={onChange}
-              placeholder={`请选择${fieldLabel}`}
-            />
-          </div>
-          {quickScene ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="shrink-0"
-              onClick={() => setQuickOpen(true)}
-            >
-              <Plus className="mr-1 h-3.5 w-3.5" />
-              快捷建档
-            </Button>
-          ) : null}
+      ) : null}
+      {selectorRow}
+      {selection ? <SelectionSummary archiveMenu={archiveMenu} selection={selection} /> : null}
+      {hintsBlock}
+    </div>
+  )
+
+  return (
+    <div className={className}>
+      {isJobEmbed && showFieldLabel ? (
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium text-foreground">
+            {required ? <span className="text-destructive">* </span> : null}
+            {fieldLabel}
+          </Label>
+          {body}
         </div>
-        {selection ? (
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span>
-              已选：{selection.name} · {selection.idNumberMasked}
-            </span>
-            <Link
-              to={partnerArchiveDetailPath(archiveMenu, selection.partnerId)}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center text-primary hover:underline"
-            >
-              查看档案
-              <ExternalLink className="ml-0.5 h-3 w-3" />
-            </Link>
-          </div>
-        ) : null}
-        {hideEmbeddedHints ? null : (
-          <>
-            <ProductFieldHint>{userHint ?? partnerEmbeddedPickerUserHint(archiveMenu)}</ProductFieldHint>
-            <PrototypeSpecCallout>{partnerEmbeddedPickerSpecNote(archiveMenu)}</PrototypeSpecCallout>
-          </>
-        )}
-      </div>
+      ) : (
+        body
+      )}
 
       {quickScene ? (
         <PartnerQuickCreateSheet

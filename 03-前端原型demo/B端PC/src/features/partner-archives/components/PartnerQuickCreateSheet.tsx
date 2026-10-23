@@ -35,6 +35,8 @@ import {
   quickCreatePartnerFromJob,
 } from "../lib/quick-create-partner"
 import {
+  PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER,
+  PARTNER_FORM_ADDRESS_USER_HINT_OTHER,
   PARTNER_QUICK_CREATE_CERT_ADDRESS_LABEL,
   PARTNER_QUICK_CREATE_CERT_ADDRESS_SPEC_NOTE,
   PARTNER_QUICK_CREATE_CERT_ADDRESS_USER_HINT,
@@ -128,6 +130,16 @@ export function PartnerQuickCreateSheet({
   onError,
 }: PartnerQuickCreateSheetProps) {
   const copy = SCENE_COPY[scene]
+  const showCertAddressSection =
+    scene === "INBOUND_OWNER" || scene === "OUTBOUND_PICKUP_AGENT"
+  const certAddressUserHint =
+    scene === "INBOUND_OWNER"
+      ? PARTNER_QUICK_CREATE_CERT_ADDRESS_USER_HINT
+      : PARTNER_FORM_ADDRESS_USER_HINT_OTHER
+  const certAddressSpecNote =
+    scene === "INBOUND_OWNER"
+      ? PARTNER_QUICK_CREATE_CERT_ADDRESS_SPEC_NOTE
+      : PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER
   const [subjectTypeLabel, setSubjectTypeLabel] = useState<"个人" | "企业">("个人")
   const subjectType: SubjectType = subjectTypeLabel === "企业" ? "ENTERPRISE" : "INDIVIDUAL"
   const [name, setName] = useState("")
@@ -340,7 +352,7 @@ export function PartnerQuickCreateSheet({
               </div>
             </QuickCreateSection>
 
-            {scene === "INBOUND_OWNER" ? (
+            {showCertAddressSection ? (
               <QuickCreateSection title={PARTNER_QUICK_CREATE_CERT_ADDRESS_LABEL}>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="grid grid-cols-3 gap-3 sm:col-span-2">
@@ -425,7 +437,7 @@ export function PartnerQuickCreateSheet({
                         markDirty()
                       }}
                     />
-                    <ProductFieldHint>{PARTNER_QUICK_CREATE_CERT_ADDRESS_USER_HINT}</ProductFieldHint>
+                    <ProductFieldHint>{certAddressUserHint}</ProductFieldHint>
                   </div>
                 </div>
               </QuickCreateSection>
@@ -434,7 +446,7 @@ export function PartnerQuickCreateSheet({
             <PrototypeSpecCallout>
               <div className="space-y-1">
                 <p>{copy.hintSpec}</p>
-                {scene === "INBOUND_OWNER" ? <p>{PARTNER_QUICK_CREATE_CERT_ADDRESS_SPEC_NOTE}</p> : null}
+                {showCertAddressSection ? <p>{certAddressSpecNote}</p> : null}
                 <p>
                   落库创建来源固定为「人工建档」；本弹窗为{copy.entryName}入口（入口差异见
                   【操作审批日志生成与防篡改规则】(PA-R07)，非上线用户文案）。
