@@ -109,9 +109,7 @@ function firstFieldErrorMessage(
       ? snapshot.agentName
       : undefined,
     agentIdNumber:
-      archiveMenu === "提货人信息" && snapshot.subjectType === "ENTERPRISE"
-        ? snapshot.agentIdNumber
-        : undefined,
+      snapshot.subjectType === "ENTERPRISE" ? snapshot.agentIdNumber : undefined,
     certAddressFull: snapshot.certAddressFull,
   })
   const first = Object.values(errors)[0]

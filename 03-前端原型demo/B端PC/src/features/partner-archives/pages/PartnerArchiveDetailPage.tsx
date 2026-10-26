@@ -398,22 +398,21 @@ export function PartnerArchiveDetailPage() {
                     </DetailField>
                   </div>
                 )}
-                {partner.archiveMenu === "提货人信息" &&
-                  partner.subjectType === "ENTERPRISE" && (
-                    <div className="md:col-span-1">
-                      <DetailField label="经办人身份证号">
-                        {partnerFieldPendingInlineHint(requiredGaps, "agentIdNumber") ? (
-                          <span className="font-medium text-amber-600">
-                            {partnerFieldPendingInlineHint(requiredGaps, "agentIdNumber")}
-                          </span>
-                        ) : partner.agentIdNumber ? (
-                          maskIdNumber(partner.agentIdNumber)
-                        ) : (
-                          "——"
-                        )}
-                      </DetailField>
-                    </div>
-                  )}
+                {partner.subjectType === "ENTERPRISE" && (
+                  <div className="md:col-span-1">
+                    <DetailField label="经办人身份证号">
+                      {partnerFieldPendingInlineHint(requiredGaps, "agentIdNumber") ? (
+                        <span className="font-medium text-amber-600">
+                          {partnerFieldPendingInlineHint(requiredGaps, "agentIdNumber")}
+                        </span>
+                      ) : partner.agentIdNumber ? (
+                        maskIdNumber(partner.agentIdNumber)
+                      ) : (
+                        "——"
+                      )}
+                    </DetailField>
+                  </div>
+                )}
                 <div className="md:col-span-1">
                   <DetailField
                     label={

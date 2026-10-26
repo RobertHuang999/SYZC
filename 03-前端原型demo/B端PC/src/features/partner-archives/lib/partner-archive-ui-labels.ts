@@ -128,6 +128,34 @@ export const PARTNER_PENDING_COMPLETION_SPEC_NOTE =
 export const PARTNER_OWNER_ENTERPRISE_AGENT_USER_HINT =
   "选填。可不填经办人姓名；填写后用于详情展示，已验证企业改经办人须短信确认。"
 
+/** 提货人信息 · 企业主体 · 经办人身份证号（必填） */
+export const PARTNER_PICKUP_ENTERPRISE_AGENT_ID_USER_HINT =
+  "请填写现场提货经办人的18位居民身份证号，须与经办人姓名、联系电话一致，用于出库核验。"
+
+export const PARTNER_PICKUP_ENTERPRISE_AGENT_ID_SPEC_NOTE =
+  "提货人信息 · 企业必填；参与【提货人信息库内匹配规则】(PP-R01)；列表与筛选不提供本字段。"
+
+/** 货主 / 资金方 / 服务方 · 企业 · 经办人身份证号（选填） */
+export const PARTNER_OPTIONAL_ENTERPRISE_AGENT_ID_USER_HINT =
+  "选填。可录入企业业务对接人的18位居民身份证号，便于详情核对；不填不影响保存与待补全判定。"
+
+export const PARTNER_OPTIONAL_ENTERPRISE_AGENT_ID_SPEC_NOTE =
+  "货主信息 / 资金方信息 / 服务方信息 · 企业选填；列表与筛选不提供本字段；填写时须为18位有效证号。"
+
+export function partnerEnterpriseAgentIdUserHint(
+  menu: PartnerArchiveMenuLabel,
+): string {
+  return menu === "提货人信息"
+    ? PARTNER_PICKUP_ENTERPRISE_AGENT_ID_USER_HINT
+    : PARTNER_OPTIONAL_ENTERPRISE_AGENT_ID_USER_HINT
+}
+
+export function partnerEnterpriseAgentIdSpecNote(menu: PartnerArchiveMenuLabel): string {
+  return menu === "提货人信息"
+    ? PARTNER_PICKUP_ENTERPRISE_AGENT_ID_SPEC_NOTE
+    : PARTNER_OPTIONAL_ENTERPRISE_AGENT_ID_SPEC_NOTE
+}
+
 /** @deprecated 使用 partnerPendingCompletionUserBanner(archiveMenu) */
 export const PARTNER_PENDING_COMPLETION_USER_BANNER =
   PARTNER_PENDING_COMPLETION_OWNER_USER_BANNER

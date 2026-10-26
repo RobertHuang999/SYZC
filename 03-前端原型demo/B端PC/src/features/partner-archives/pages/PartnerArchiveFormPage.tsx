@@ -69,6 +69,8 @@ import {
   partnerPendingCompletionUserBanner,
   PARTNER_PENDING_COMPLETION_SPEC_NOTE,
   PARTNER_OWNER_ENTERPRISE_AGENT_USER_HINT,
+  partnerEnterpriseAgentIdSpecNote,
+  partnerEnterpriseAgentIdUserHint,
   partnerFormPageTitle,
 } from "../lib/partner-archive-ui-labels"
 import type { PartnerSubject, SubjectType } from "../domain/types"
@@ -91,8 +93,10 @@ import {
   isArchiveRequiredFieldsPending,
   isCertAddressSaveRequired,
   isEnterpriseOnlyArchiveMenu,
+  isPickupEnterpriseAgentIdRequired,
   isPickupEnterpriseAgentNameRequired,
   partnerArchiveMenuForFormValidation,
+  showEnterpriseAgentIdNumberField,
   validateArchiveMenuRequiredFields,
 } from "../lib/archive-required-fields-pending"
 import { PARTNER_FORM_LOCKED_FIELD_PC } from "@prototype/shared/partner-archives/partner-form-field-styles"
@@ -335,8 +339,11 @@ export function PartnerArchiveFormPage() {
 
   /** 仅货主信息 + 基础配置 P01 开启时保存必录证件地址 */
   const addressRequired = isCertAddressSaveRequired(archiveMenuLabel, subjectType)
-  const showPickupAgentIdField =
-    menuForValidation === "提货人信息" && subjectType === "ENTERPRISE"
+  const showEnterpriseAgentIdField = showEnterpriseAgentIdNumberField(subjectType)
+  const pickupEnterpriseAgentIdRequired = isPickupEnterpriseAgentIdRequired(
+    menuForValidation,
+    subjectType,
+  )
   const pickupEnterpriseAgentNameRequired = isPickupEnterpriseAgentNameRequired(
     menuForValidation,
     subjectType,
@@ -406,9 +413,7 @@ export function PartnerArchiveFormPage() {
       contactPhoneVerifiedAt: options?.verifiedOnCreate ? now : undefined,
       agentName: subjectType === "ENTERPRISE" ? agentName.trim() : undefined,
       agentIdNumber:
-        showPickupAgentIdField && subjectType === "ENTERPRISE"
-          ? agentIdNumber.trim()
-          : undefined,
+        showEnterpriseAgentIdField ? agentIdNumber.trim() || undefined : undefined,
       status: "NORMAL",
       roles: [
         {
@@ -548,8 +553,9 @@ export function PartnerArchiveFormPage() {
       }
       if (!isFrozenLimitedEdit && subjectType === "ENTERPRISE") {
         existing.agentName = agentName.trim()
-        if (showPickupAgentIdField) {
-          existing.agentIdNumber = agentIdNumber.trim()
+        if (showEnterpriseAgentIdField) {
+          const trimmedAgentId = agentIdNumber.trim()
+          existing.agentIdNumber = trimmedAgentId || undefined
         }
       }
       if (
@@ -638,7 +644,7 @@ export function PartnerArchiveFormPage() {
       idNumber,
       contactPhone,
       agentName: pickupEnterpriseAgentNameRequired ? agentName : undefined,
-      agentIdNumber: showPickupAgentIdField ? agentIdNumber : undefined,
+      agentIdNumber: showEnterpriseAgentIdField ? agentIdNumber : undefined,
       certAddressFull: certFull,
     })
 
@@ -1016,10 +1022,12 @@ export function PartnerArchiveFormPage() {
                       </div>
                     )}
 
-                    {showPickupAgentIdField && (
+                    {showEnterpriseAgentIdField && (
                       <div className="space-y-2">
                         <Label htmlFor="partner-agent-id">
-                          <span className="mr-1 font-bold text-destructive">*</span>
+                          {pickupEnterpriseAgentIdRequired && (
+                            <span className="mr-1 font-bold text-destructive">*</span>
+                          )}
                           经办人身份证号
                         </Label>
                         <Input
@@ -1044,6 +1052,12 @@ export function PartnerArchiveFormPage() {
                         {errors.agentIdNumber && (
                           <p className="text-xs text-destructive">{errors.agentIdNumber}</p>
                         )}
+                        <ProductFieldHint>
+                          {partnerEnterpriseAgentIdUserHint(menuForValidation)}
+                        </ProductFieldHint>
+                        <PrototypeSpecCallout>
+                          {partnerEnterpriseAgentIdSpecNote(menuForValidation)}
+                        </PrototypeSpecCallout>
                       </div>
                     )}
 

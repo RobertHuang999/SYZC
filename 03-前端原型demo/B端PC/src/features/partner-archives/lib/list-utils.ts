@@ -76,10 +76,11 @@ export function filterPartnerArchives(
 
   if (filters.keyword.trim()) {
     const keyword = filters.keyword.trim().toLowerCase()
+    // 对齐公共字段清单 8.2：OR 检索仅主体名称与身份标识，不含经办人身份证号
     result = result.filter(
       (item) =>
         item.name.toLowerCase().includes(keyword) ||
-        item.idNumber.toLowerCase().includes(keyword)
+        item.idNumber.toLowerCase().includes(keyword),
     )
   }
 

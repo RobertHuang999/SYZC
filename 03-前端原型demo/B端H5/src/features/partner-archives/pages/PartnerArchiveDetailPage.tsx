@@ -216,7 +216,7 @@ export function PartnerArchiveDetailPage() {
                   }
                 />
               ) : null}
-              {partner.archiveMenu === "提货人信息" && partner.subjectType === "ENTERPRISE" ? (
+              {partner.subjectType === "ENTERPRISE" ? (
                 <DetailRow
                   label="经办人身份证号"
                   value={

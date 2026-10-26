@@ -26,6 +26,19 @@ export function isPickupEnterpriseAgentNameRequired(
   return menu === "提货人信息" && subjectType === "ENTERPRISE"
 }
 
+/** 四子菜单 · 企业主体：新增/编辑/详情展示经办人身份证号 */
+export function showEnterpriseAgentIdNumberField(subjectType: SubjectType): boolean {
+  return subjectType === "ENTERPRISE"
+}
+
+/** 提货人信息 · 企业：经办人身份证号必填（货主/资金方/服务方企业选填） */
+export function isPickupEnterpriseAgentIdRequired(
+  menu: PartnerArchiveMenuLabel,
+  subjectType: SubjectType,
+): boolean {
+  return menu === "提货人信息" && subjectType === "ENTERPRISE"
+}
+
 /**
  * 编辑页：主体名称是否允许改。
  * 【已验证主体核心字段锁定规则】(PA-R04c)：联系手机已验证时置灰只读；未验证可改（冻结态除外）。
@@ -220,6 +233,14 @@ export function validateArchiveMenuRequiredFields(input: {
 
   if (gaps.includes("contactPhone") && input.contactPhone.trim() && !PHONE_PATTERN.test(input.contactPhone.trim())) {
     errors.contactPhone = "请输入11位大陆标准有效手机号码（用于接收短信验证码）"
+  }
+
+  if (
+    showEnterpriseAgentIdNumberField(input.subjectType) &&
+    input.agentIdNumber?.trim() &&
+    !ID_18(input.agentIdNumber)
+  ) {
+    errors.agentIdNumber = "请输入18位经办人身份证号"
   }
 
   return errors

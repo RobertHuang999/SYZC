@@ -65,6 +65,8 @@ import {
   partnerContactPhoneFormLabel,
   partnerFormPageTitle,
   PARTNER_OWNER_ENTERPRISE_AGENT_USER_HINT,
+  partnerEnterpriseAgentIdSpecNote,
+  partnerEnterpriseAgentIdUserHint,
 } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
 import { PartnerVerifySheet } from "../components/PartnerVerifySheet"
 import { handleStackBack } from "@/shared/navigation/stack-back"
@@ -87,7 +89,9 @@ import {
   isArchiveRequiredFieldsPending,
   isCertAddressSaveRequired,
   isEnterpriseOnlyArchiveMenu,
+  isPickupEnterpriseAgentIdRequired,
   isPickupEnterpriseAgentNameRequired,
+  showEnterpriseAgentIdNumberField,
   partnerArchiveMenuForFormValidation,
   validateArchiveMenuRequiredFields,
 } from "@prototype/B端PC/src/features/partner-archives/lib/archive-required-fields-pending"
@@ -205,8 +209,11 @@ export function PartnerArchiveFormPage() {
   })
 
   const addressRequired = isCertAddressSaveRequired(menuForValidation, subjectType)
-  const showPickupAgentIdField =
-    menuForValidation === "提货人信息" && subjectType === "ENTERPRISE"
+  const showEnterpriseAgentIdField = showEnterpriseAgentIdNumberField(subjectType)
+  const pickupEnterpriseAgentIdRequired = isPickupEnterpriseAgentIdRequired(
+    menuForValidation,
+    subjectType,
+  )
   const pickupEnterpriseAgentNameRequired = isPickupEnterpriseAgentNameRequired(
     menuForValidation,
     subjectType,
@@ -301,7 +308,7 @@ export function PartnerArchiveFormPage() {
       idNumber,
       contactPhone,
       agentName: pickupEnterpriseAgentNameRequired ? agentName : undefined,
-      agentIdNumber: showPickupAgentIdField ? agentIdNumber : undefined,
+      agentIdNumber: showEnterpriseAgentIdField ? agentIdNumber : undefined,
       certAddressFull: certFull,
     })
     const firstMsg = Object.values(fieldErrors)[0]
@@ -389,9 +396,7 @@ export function PartnerArchiveFormPage() {
       contactPhoneVerifiedAt: options?.verifiedOnCreate ? now : undefined,
       agentName: subjectType === "ENTERPRISE" ? agentName.trim() : undefined,
       agentIdNumber:
-        showPickupAgentIdField && subjectType === "ENTERPRISE"
-          ? agentIdNumber.trim()
-          : undefined,
+        showEnterpriseAgentIdField ? agentIdNumber.trim() || undefined : undefined,
       status: "NORMAL",
       roles: [
         {
@@ -540,8 +545,9 @@ export function PartnerArchiveFormPage() {
     }
     if (!isFrozenLimitedEdit && subjectType === "ENTERPRISE") {
       existing.agentName = agentName.trim()
-      if (showPickupAgentIdField) {
-        existing.agentIdNumber = agentIdNumber.trim()
+      if (showEnterpriseAgentIdField) {
+        const trimmedAgentId = agentIdNumber.trim()
+        existing.agentIdNumber = trimmedAgentId || undefined
       }
     }
     if (
@@ -872,23 +878,36 @@ export function PartnerArchiveFormPage() {
                     ) : null}
                   </>
                 ) : null}
-                {showPickupAgentIdField ? (
-                  <NativeFormRow label="经办人身份证号" required>
-                    <input
-                      data-partner-form-locked={
-                        isFrozenLimitedEdit ? "true" : undefined
-                      }
-                      className={h5FieldInputClass(isFrozenLimitedEdit)}
-                      value={agentIdNumber}
-                      maxLength={18}
-                      readOnly={isFrozenLimitedEdit}
-                      disabled={isFrozenLimitedEdit}
-                      onChange={(e) => {
-                        markDirty()
-                        setAgentIdNumber(e.target.value)
-                      }}
-                    />
-                  </NativeFormRow>
+                {showEnterpriseAgentIdField ? (
+                  <>
+                    <NativeFormRow
+                      label="经办人身份证号"
+                      required={pickupEnterpriseAgentIdRequired}
+                    >
+                      <input
+                        data-partner-form-locked={
+                          isFrozenLimitedEdit ? "true" : undefined
+                        }
+                        className={h5FieldInputClass(isFrozenLimitedEdit)}
+                        value={agentIdNumber}
+                        maxLength={18}
+                        readOnly={isFrozenLimitedEdit}
+                        disabled={isFrozenLimitedEdit}
+                        onChange={(e) => {
+                          markDirty()
+                          setAgentIdNumber(e.target.value)
+                        }}
+                      />
+                    </NativeFormRow>
+                    <div className="border-b border-[#232D39]/10 px-3 pb-3 last:border-b-0">
+                      <ProductFieldHint className="text-[#232D39]/55">
+                        {partnerEnterpriseAgentIdUserHint(menuForValidation)}
+                      </ProductFieldHint>
+                      <PrototypeSpecCallout className="mt-2">
+                        {partnerEnterpriseAgentIdSpecNote(menuForValidation)}
+                      </PrototypeSpecCallout>
+                    </div>
+                  </>
                 ) : null}
                 <NativeFormRow
                   label={partnerContactPhoneFormLabel(subjectType)}
