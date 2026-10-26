@@ -38,7 +38,7 @@ import {
   markContactPhoneVerified,
 } from "@prototype/B端PC/src/features/partner-archives/lib/contact-phone-verify"
 import { filterPartnerArchives } from "@prototype/B端PC/src/features/partner-archives/lib/list-utils"
-import { usePartnerCompositeRowAppend } from "@prototype/B端PC/src/features/partner-archives/lib/use-partner-composite-row-append"
+import { usePartnerCompositeRowAppend } from "../lib/use-partner-composite-row-append"
 import { PartnerCompositeSaveSheet } from "../components/PartnerCompositeSaveSheet"
 import {
   checkPartnerSubjectFreezeEligibility,

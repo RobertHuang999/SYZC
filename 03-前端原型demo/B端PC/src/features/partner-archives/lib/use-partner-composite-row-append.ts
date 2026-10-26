@@ -77,7 +77,7 @@ export function usePartnerCompositeRowAppend({
       return
     }
     const detail = `追加合作方档案：${pendingMenus
-      .map((menu) => `【${menu}】`)
+      .map((menu: PartnerArchiveMenuLabel) => `【${menu}】`)
       .join("、")}`
     const next = appendLinkedPartnerMenus(rowPartner, pendingMenus, detail)
     commitPartnerArchive(next)
