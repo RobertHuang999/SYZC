@@ -39,5 +39,6 @@ npm run dev
 | 07/05 我的申请管理 | `unlock-applies` → `ApprovalCenterPage` | — | `07-审批中心/03-业务审批/04-我的申请管理/` |
 | 08/开锁审核（其他审批·审批人） | `unlock-applies` → 列表/详情（`/工作中心/审批中心/其他审批/开锁审核`） | `unlock-applies`（`/m/approval/unlock-applies`） | `07-审批中心/05-其他审批/03-开锁审核/` |
 | 07/04 开锁申请（申请人侧） | —（待建：我的申请管理 Tab） | —（待建：我的申请记录 + 详情） | `07-审批中心/04开锁申请/` |
+| 02/05 仓单管理（最新基准版） | `warehouse-receipts` → `/仓储/仓单管理`、`/仓储/仓单管理/详情/:id` | `warehouse-receipts`（`/m/workspace/warehouse-receipts`、`/m/receipts/initiate`、`/m/receipts/:id/{outbound,relocate,replenish,remove,cancel,inbound}`） | `🌟🌟🌟-最新基准版/B端PC/02-仓储/05-仓单管理/` |
 
 H5 模块 PRD 目录按 `mobileMenuData.ts` 板块分类维护于 `🌟🌟🌟-最新基准版/B端H5/`（`01-首页/` … `03-业务办理/`）；菜单全量见 `B端H5/01-功能清单与原型路由.md`。

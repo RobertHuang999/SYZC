@@ -59,6 +59,8 @@ import { OutboundRecordListPage } from "@/features/outbound-records/pages/Outbou
 import { OutboundRecordFormPage } from "@/features/outbound-records/pages/OutboundRecordFormPage"
 import { OutboundRecordDetailPage } from "@/features/outbound-records/pages/OutboundRecordDetailPage"
 import { DeliveryOrderListPage } from "@/features/delivery-orders/pages/DeliveryOrderListPage"
+import { WarehouseReceiptListPage } from "@/features/warehouse-receipts/pages/WarehouseReceiptListPage"
+import { WarehouseReceiptDetailPage } from "@/features/warehouse-receipts/pages/WarehouseReceiptDetailPage"
 import { SupervisionHandlingPartnerRefPage } from "@/features/supervision-handling/pages/SupervisionHandlingPartnerRefPage"
 import { InboundStagingPrototypeGate } from "@/features/inbound-staging-reg/components/InboundStagingPrototypeGate"
 import { InboundStagingListPage } from "@/features/inbound-staging-reg/pages/InboundStagingListPage"
@@ -394,6 +396,16 @@ export function AppRoutes() {
         <Route
           path="仓储/出库管理/出库记录/详情/:id"
           element={<OutboundRecordDetailPage />}
+        />
+
+        {/* 仓储 - 仓单管理 */}
+        <Route
+          path="仓储/仓单管理"
+          element={<WarehouseReceiptListPage />}
+        />
+        <Route
+          path="仓储/仓单管理/详情/:id"
+          element={<WarehouseReceiptDetailPage />}
         />
 
         {/* 仓储 - 提货单 */}

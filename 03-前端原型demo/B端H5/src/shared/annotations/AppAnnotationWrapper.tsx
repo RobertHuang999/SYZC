@@ -48,6 +48,13 @@ import {
 } from "@/features/outbound-records/annotations/outbound-record.annotations"
 import { outboundRecordH5Documents } from "@/features/outbound-records/documents/outbound-record-documents"
 import {
+  warehouseReceiptH5DetailAnnotations,
+  warehouseReceiptH5InitiateAnnotations,
+  warehouseReceiptH5ListAnnotations,
+  warehouseReceiptH5OpsAnnotations,
+} from "@/features/warehouse-receipts/annotations/warehouse-receipt-h5.annotations"
+import { warehouseReceiptH5Documents } from "@/features/warehouse-receipts/documents/warehouse-receipt-h5-documents"
+import {
   partnerArchiveH5DetailAnnotations,
   partnerArchiveH5FormAnnotations,
   partnerArchiveH5ListAnnotations,
@@ -170,6 +177,22 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
     pageTitle = "入库暂存登记 · H5 新增 · PRD 标注"
     currentAnnotations = inboundStagingH5FormAnnotations
     currentDocuments = inboundStagingRegH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/warehouse-receipts/")) {
+    pageTitle = "仓单详情 · 移动端交互与 PRD 标注"
+    currentAnnotations = warehouseReceiptH5DetailAnnotations
+    currentDocuments = warehouseReceiptH5Documents
+  } else if (location.pathname === "/m/workspace/warehouse-receipts") {
+    pageTitle = "仓单管理 · 移动端交互与 PRD 标注"
+    currentAnnotations = warehouseReceiptH5ListAnnotations
+    currentDocuments = warehouseReceiptH5Documents
+  } else if (location.pathname.startsWith("/m/receipts/initiate")) {
+    pageTitle = "仓单开立 · 移动端交互与 PRD 标注"
+    currentAnnotations = warehouseReceiptH5InitiateAnnotations
+    currentDocuments = warehouseReceiptH5Documents
+  } else if (location.pathname.startsWith("/m/receipts/")) {
+    pageTitle = "仓单动碰办理 · 移动端交互与 PRD 标注"
+    currentAnnotations = warehouseReceiptH5OpsAnnotations
+    currentDocuments = warehouseReceiptH5Documents
   } else if (location.pathname.startsWith("/m/workspace/inbound-staging/")) {
     pageTitle = "入库暂存登记 · H5 详情 · PRD 标注"
     currentAnnotations = inboundStagingH5DetailAnnotations

@@ -28,6 +28,16 @@ import { WarehouseFormPage } from "@/features/warehouse-management/pages/Warehou
 import { WarehouseDetailPage } from "@/features/warehouse-management/pages/WarehouseDetailPage"
 import { WarehouseEditPage } from "@/features/warehouse-management/pages/WarehouseEditPage"
 import { InboundRecordListPage } from "@/features/inbound-records/pages/InboundRecordListPage"
+import { WarehouseReceiptListPage } from "@/features/warehouse-receipts/pages/WarehouseReceiptListPage"
+import { WarehouseReceiptDetailPage } from "@/features/warehouse-receipts/pages/WarehouseReceiptDetailPage"
+import { ReceiptInitiateOwnerPage } from "@/features/warehouse-receipts/pages/initiate/ReceiptInitiateOwnerPage"
+import { ReceiptInitiateGoodsPage } from "@/features/warehouse-receipts/pages/initiate/ReceiptInitiateGoodsPage"
+import { ReceiptOutboundPage } from "@/features/warehouse-receipts/pages/ops/ReceiptOutboundPage"
+import { ReceiptRelocatePage } from "@/features/warehouse-receipts/pages/ops/ReceiptRelocatePage"
+import { ReceiptReplenishPage } from "@/features/warehouse-receipts/pages/ops/ReceiptReplenishPage"
+import { ReceiptRemovePage } from "@/features/warehouse-receipts/pages/ops/ReceiptRemovePage"
+import { ReceiptCancelPage } from "@/features/warehouse-receipts/pages/ops/ReceiptCancelPage"
+import { ReceiptInboundPage } from "@/features/warehouse-receipts/pages/ops/ReceiptInboundPage"
 import { InboundInitiateGoodsPage } from "@/features/inbound-records/pages/InboundInitiateGoodsPage"
 import { InboundInitiatePage } from "@/features/inbound-records/pages/InboundInitiatePage"
 import { InboundRecordDetailPage } from "@/features/inbound-records/pages/InboundRecordDetailPage"
@@ -146,6 +156,31 @@ export function AppRoutes() {
           </InboundStagingPrototypeGate>
         }
       />
+
+      <Route path="/m/workspace/warehouse-receipts" element={<WarehouseReceiptListPage />} />
+      <Route
+        path="/m/workspace/warehouse-receipts/:id"
+        element={<WarehouseReceiptDetailPage />}
+      />
+      <Route path="/m/receipts/initiate" element={<ReceiptInitiateOwnerPage />} />
+      <Route
+        path="/m/receipts/initiate/goods"
+        element={<ReceiptInitiateGoodsPage />}
+      />
+      <Route
+        path="/m/receipts/initiate/confirm"
+        element={<Navigate to="/m/receipts/initiate/goods" replace />}
+      />
+      <Route
+        path="/m/receipts/initiate/sign"
+        element={<Navigate to="/m/receipts/initiate/goods" replace />}
+      />
+      <Route path="/m/receipts/:id/outbound" element={<ReceiptOutboundPage />} />
+      <Route path="/m/receipts/:id/relocate" element={<ReceiptRelocatePage />} />
+      <Route path="/m/receipts/:id/replenish" element={<ReceiptReplenishPage />} />
+      <Route path="/m/receipts/:id/remove" element={<ReceiptRemovePage />} />
+      <Route path="/m/receipts/:id/cancel" element={<ReceiptCancelPage />} />
+      <Route path="/m/receipts/:id/inbound" element={<ReceiptInboundPage />} />
 
       <Route path="/m/workspace/outbound-records" element={<OutboundRecordListPage />} />
       <Route

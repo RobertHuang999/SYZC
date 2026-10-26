@@ -96,6 +96,8 @@ export const partnerArchiveH5FormAnnotationBindings: Record<
   },
   "partner-archive-form-base": {
     targetId: "partner-archive-form-base",
+    contentSuffix:
+      "【H5 端差异】已验证企业主体在「经办人姓名」上方提供文字链【调整经办人信息】（非 PC 行内 Link）；展开后可编辑经办人姓名与联系电话（经办人手机），保存前短信核验口径同 PC（【合作方短信二元身份核验规则】(PA-R04a)）。",
   },
   "partner-archive-form-address": {
     targetId: "partner-archive-form-address",

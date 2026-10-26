@@ -96,6 +96,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "1、开立申请可选仓库为账号权限内仓库；2、可见数据为账号赋予的仓库权限决定",
     remark: "支持物权全链条追溯",
     iconType: "FileText",
+    customRoute: "/m/workspace/warehouse-receipts",
   },
   {
     id: "ws-cargo-rights",
@@ -785,6 +786,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "账号赋予的仓库权限",
     remark: "优化页面",
     badge: "优化",
+    customRoute: "/m/receipts/initiate",
     iconType: "FileBadge",
   },
   {

@@ -141,6 +141,7 @@ export function PartnerArchiveFormPage() {
   const [contactPhone, setContactPhone] = useState(existing?.contactPhone ?? "")
   const [agentName, setAgentName] = useState(existing?.agentName ?? "")
   const [agentIdNumber, setAgentIdNumber] = useState(existing?.agentIdNumber ?? "")
+  const [adjustAgentMode, setAdjustAgentMode] = useState(false)
   const [province, setProvince] = useState(existing?.certAddress.province || (isEdit ? "" : "江苏省"))
   const [city, setCity] = useState(existing?.certAddress.city || (isEdit ? "" : "南京市"))
   const [district, setDistrict] = useState(existing?.certAddress.district || (isEdit ? "" : "鼓楼区"))
@@ -543,7 +544,10 @@ export function PartnerArchiveFormPage() {
         existing.agentIdNumber = agentIdNumber.trim()
       }
     }
-    if (wasVerifiedBeforeEdit && (phoneChanged || hasAgentDiff)) {
+    if (
+      wasVerifiedBeforeEdit &&
+      (phoneChanged || (adjustAgentMode && hasAgentDiff))
+    ) {
       markContactPhoneVerified(existing, now)
     } else if (phoneChanged && !wasVerifiedBeforeEdit) {
       existing.contactPhoneVerified = "UNVERIFIED"
@@ -619,6 +623,7 @@ export function PartnerArchiveFormPage() {
       hasPhoneDiff,
       hasAgentDiff,
       subjectType,
+      adjustAgentMode,
     })
 
     if (needsPhoneVerify) {
@@ -692,12 +697,21 @@ export function PartnerArchiveFormPage() {
   const subjectTypeLocked = Boolean(
     isEdit || isEnterpriseOnlyArchiveMenu(archiveMenuLabel),
   )
-  const agentNameLocked = Boolean(isFrozenLimitedEdit || coreIdentityLocked)
-  const enterprisePhoneLocked = Boolean(
-    subjectType === "ENTERPRISE" && coreIdentityLocked,
+  const agentNameLocked = Boolean(
+    isFrozenLimitedEdit || (coreIdentityLocked && !adjustAgentMode),
   )
-  /** 冻结态仍可改电话；仅已验证企业经办人手机锁定 */
+  const enterprisePhoneLocked = Boolean(
+    subjectType === "ENTERPRISE" && coreIdentityLocked && !adjustAgentMode,
+  )
+  /** 冻结态仍可改电话；已验证企业须先【调整经办人信息】再改经办人手机 */
   const contactPhoneLocked = enterprisePhoneLocked
+  const showAdjustAgentEntry = Boolean(
+    isEdit &&
+      subjectType === "ENTERPRISE" &&
+      coreIdentityLocked &&
+      !adjustAgentMode &&
+      !isFrozenLimitedEdit,
+  )
 
   const h5FieldInputClass = (
     locked: boolean,
@@ -813,6 +827,25 @@ export function PartnerArchiveFormPage() {
                 </NativeFormRow>
                 {subjectType === "ENTERPRISE" ? (
                   <>
+                    {showAdjustAgentEntry ? (
+                      <div className="flex justify-end border-b border-[#232D39]/10 px-3 py-2">
+                        <button
+                          type="button"
+                          className="text-sm font-medium text-blue-600 active:opacity-70"
+                          onClick={() => {
+                            setAdjustAgentMode(true)
+                            markDirty()
+                          }}
+                        >
+                          调整经办人信息
+                        </button>
+                      </div>
+                    ) : null}
+                    {adjustAgentMode ? (
+                      <div className="border-b border-[#232D39]/10 px-3 py-2 text-xs leading-relaxed text-blue-900/80">
+                        可修改经办人姓名或经办人手机；保存前将向当前录入的手机号发送短信验证码。
+                      </div>
+                    ) : null}
                     <NativeFormRow
                       label="经办人姓名"
                       required={pickupEnterpriseAgentNameRequired}
