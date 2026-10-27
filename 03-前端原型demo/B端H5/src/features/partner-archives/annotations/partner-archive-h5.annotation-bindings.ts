@@ -19,7 +19,7 @@ export const partnerArchiveH5ListAnnotationBindings: Record<
   "partner-archive-table": {
     targetId: "partner-archive-table",
     contentSuffix:
-      "【H5 端差异】列表为卡片流（非表格）；点名称/【详情】进详情页。",
+      "【H5 端差异】列表为卡片流（非表格）；点名称/【详情】进详情页。Mock 数据与 PC 同源（`partner-archives.mock.ts`），卡片 Footer 文案【编辑】/【补全资料】与 PC 操作列一致。",
   },
   "partner-archive-row-actions": {
     targetId: "partner-archive-table",

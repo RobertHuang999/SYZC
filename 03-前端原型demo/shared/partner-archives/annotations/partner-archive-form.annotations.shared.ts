@@ -247,6 +247,11 @@ export const partnerArchiveFormAnnotationsShared: SharedPrototypeAnnotation[] = 
             content:
               "见详情 **8 号点**：**增**→徽章「创建合作方档案」+ **C01/C02**；**改**→「修改合作方档案」+ **M** 子句（；连接）。单据带出创建也用 **增·C04**，不写单据审批。",
           },
+          {
+            label: "原型 Mock · 编辑 / 补全同路由",
+            content:
+              "PC/H5 共用 `partner-archives.mock.ts`。**p-02 孙浩**（待补全）→ 页标题「补全货主档案」、底栏「补全并生效」；**p-19 张明**（必填已齐）→「编辑货主」、底栏「保存修改」。列表/H5 卡片入口文案与页头一致（【补全资料】/【编辑】）。",
+          },
         ],
       },
     ],

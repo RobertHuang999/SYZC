@@ -66,6 +66,13 @@ import { InboundStagingPrototypeGate } from "@/features/inbound-staging-reg/comp
 import { InboundStagingListPage } from "@/features/inbound-staging-reg/pages/InboundStagingListPage"
 import { InboundStagingFormPage } from "@/features/inbound-staging-reg/pages/InboundStagingFormPage"
 import { InboundStagingDetailPage } from "@/features/inbound-staging-reg/pages/InboundStagingDetailPage"
+import {
+  MajorCategoryListPage,
+  SubcategoryListPage,
+  GoodsListPage,
+  GoodsFormPage,
+  GoodsDetailPage,
+} from "@/features/goods-specifications/pages"
 import { getAllMenuPaths, topModules } from "@/config/navigation"
 import { isImplementedRoute } from "@/config/implemented-routes"
 import { lazy } from "react"
@@ -306,6 +313,32 @@ export function AppRoutes() {
         <Route
           path="配置管理/平台管理/基础配置"
           element={<PlatformBasicConfigPage />}
+        />
+
+        {/* 配置管理 - 货品规格管理（大类管理 + 品类管理 + 货品管理） */}
+        <Route
+          path="配置管理/货品规格管理/大类管理"
+          element={<MajorCategoryListPage />}
+        />
+        <Route
+          path="配置管理/货品规格管理/品类管理"
+          element={<SubcategoryListPage />}
+        />
+        <Route
+          path="配置管理/货品规格管理/货品管理"
+          element={<GoodsListPage />}
+        />
+        <Route
+          path="配置管理/货品规格管理/货品管理/新增"
+          element={<GoodsFormPage />}
+        />
+        <Route
+          path="配置管理/货品规格管理/货品管理/编辑/:id"
+          element={<GoodsFormPage />}
+        />
+        <Route
+          path="配置管理/货品规格管理/货品管理/详情/:id"
+          element={<GoodsDetailPage />}
         />
 
         <Route

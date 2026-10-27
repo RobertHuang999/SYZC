@@ -64,6 +64,11 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
 | **正常 · 已验证** | 【返回】、【编辑】、【追加】、【冻结】 | PA-R04c 已锁定核心字段；冻结须录入原因 | 写入审计 |
 | **冻结** | 【返回】、【解冻】 | **不提供** 编辑/补全/验证/追加；直达编辑 URL 拦截；解冻录入原因后即时生效 | 恢复业务准入 |`,
           },
+          {
+            label: "原型 Mock 对照（PC 页头 / H5 列表卡片）",
+            content:
+              "Mock 真源同列表 **1 号点**（PC/H5 共用 `partner-archives.mock.ts`）。**p-19 张明**：页头【编辑】+【验证联系手机】（必填已齐）。**p-02 孙浩**：页头【补全资料】。**p-12~p-15**：仅【返回】【解冻】。H5 详情只读，补全/编辑从列表卡片进入。",
+          },
         ],
       },
       {

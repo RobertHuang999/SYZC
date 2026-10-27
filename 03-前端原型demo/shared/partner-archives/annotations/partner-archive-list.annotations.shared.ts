@@ -35,6 +35,11 @@ export const partnerArchiveListAnnotationsShared: SharedPrototypeAnnotation[] = 
             label: "跨模块快照不可变约束 (C08)",
             content: "下游入库、出库、转让、仓单审批通过且写库存时，原子固化发生时主体身份标识与证件地址快照，主档后续修改绝不回写历史业务流水。",
           },
+          {
+            label: "原型 Mock 数据真源（PC / H5 共用）",
+            content:
+              "双端列表/详情/表单均读取 **同一** `03-前端原型demo/B端PC/src/features/partner-archives/mock/partner-archives.mock.ts`（H5 通过 `@prototype/B端PC/...` 引用，**无**独立 H5 mock）。编辑位文案由 `partnerArchiveEditActionLabel` 派生：**必填未齐 →【补全资料】**，**已齐 →【编辑】**，同路由 `/编辑/:id`。",
+          },
         ],
       },
     ],
@@ -136,6 +141,11 @@ export const partnerArchiveListAnnotationsShared: SharedPrototypeAnnotation[] = 
             content: "【分菜单主体冻结与在途在库前置校验规则】(PA-R02)：行操作【冻结】前先查在库/在途。命中则弹出精简阻断弹窗（非冻结原因弹窗）。**原型 Mock**：货主 p-01 赵磊、提货 p-05 李华、资金 p-08 建行无锡分行、服务 p-10 中储发展；已冻结样例 p-12~p-15 四菜单各 1 条。",
           },
           {
+            label: "编辑 / 补全资料 Mock 对照",
+            content:
+              "**p-19 张明**（货主·个人·04-x 已齐·未验证）→ 行操作【编辑】+【验证】，无待补全徽章（对齐沙盘 PS-001 / 场景十一补验）。**p-02 孙浩**（货主·缺证件地址 P01）→【补全资料】+ 未验证时可【验证】。**p-06 马俊**（提货人·缺手机）→【补全资料】。PC 详情页头同文案；H5 改资料在列表卡片入口。",
+          },
+          {
             label: "冻结/解冻成功后审计文案",
             content:
               "见详情 **8 号点**：**冻**→「冻结主体」+ **S01**；**解**→「解冻主体」+ **S02**（弹窗原文写入 {原因}/{说明}）。",
@@ -206,6 +216,18 @@ export const partnerArchiveListAnnotationsShared: SharedPrototypeAnnotation[] = 
             label: "推荐样例",
             content:
               "**p-07**（提货人·五要素齐·无关联）：多选追加成功；**p-06**（缺手机）：追加货主等预检失败；**p-03**（货主·已有资金方关联）：多选新建/关联与重复拦截。",
+          },
+          {
+            label: "关键场景索引（四菜单）",
+            content: `| 场景 | 货主 | 提货人 | 资金方 | 服务方 |
+| :--- | :--- | :--- | :--- | :--- |
+| 正常 · 完整 · 已验证 | p-01 · p-03 | p-05 · p-07 | p-08 | p-10 |
+| 正常 · 完整 · 未验证（【验证】） | p-19 个人 · p-04 企业 | — | — | — |
+| 正常 · 资料待补全（筛「资料完备=待补全」） | p-02 孙浩 缺址 P01 | p-06 · p-16 | p-17 | p-18 |
+| 正常 · 极简完整（仅名+码） | — | — | p-09 | p-11 |
+| 已冻结（仅详情+解冻） | p-12 | p-13 | p-14 | p-15 |
+| PA-R02 点【冻结】阻断 | p-01 | p-05 | p-08 | p-10 |
+| PA-R03a 行追加 | p-03 | p-07 / p-06 | — | — |`,
           },
         ],
       },

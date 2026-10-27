@@ -12,7 +12,7 @@ import {
  * | 场景 | 货主 | 提货人 | 资金方 | 服务方 |
  * | :--- | :--- | :--- | :--- | :--- |
  * | 正常 · 完整 · 已验证 | p-01 C端 · p-03 企业 | p-05 · p-07 企业 | p-08 | p-10 |
- * | 正常 · 完整 · 未验证（可点【验证】） | p-04 企业 | — | — | — |
+ * | 正常 · 完整 · 未验证（可点【验证】） | p-19 个人 · p-04 企业 | — | — | — |
  * | 正常 · 资料待补全（筛「资料完备=待补全」） | p-02 缺址 P01 | p-06 缺手机 · p-16 跨域仅名码 | p-17 缺信用代码 | p-18 缺信用代码 |
  * | 正常 · 极简完整（仅名+码） | — | — | p-09 | p-11 |
  * | 已冻结（仅详情+解冻，无编辑/验证） | p-12 | p-13 | p-14 | p-15 |
@@ -99,7 +99,7 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
     id: "p-02",
     archiveMenu: "货主信息",
     partnerNo: "PA-202609002",
-    name: "张明",
+    name: "孙浩",
     subjectType: "INDIVIDUAL",
     idNumber: "320106199203084567",
     idNumberMasked: "320106********4567",
@@ -136,7 +136,54 @@ const partnerArchivesMockRaw: PartnerSubjectMockInput[] = [
         operator: "王运营",
         actionType: "CREATE",
         actionName: "创建合作方档案",
-        detail: "联系手机未验证；缺证件地址（P01 待补全）；编辑可改姓名/证号",
+        detail:
+          "联系手机未验证；缺证件地址（P01 待补全）；行操作为【补全资料】，未验证时可【验证】",
+      },
+    ],
+  },
+  {
+    id: "p-19",
+    archiveMenu: "货主信息",
+    partnerNo: "PA-202609019",
+    name: "张明",
+    subjectType: "INDIVIDUAL",
+    idNumber: "320106198812034567",
+    idNumberMasked: "320106********4567",
+    certAddress: {
+      province: "江苏省",
+      city: "无锡市",
+      district: "滨湖区",
+      detail: "阳光花园 12 栋 302 室",
+      fullAddress: "江苏省无锡市滨湖区阳光花园 12 栋 302 室",
+    },
+    contactPhone: "13812345678",
+    contactPhoneVerified: "UNVERIFIED",
+    status: "NORMAL",
+    roles: [
+      {
+        roleType: "OWNER",
+        roleStatus: "NORMAL",
+        sourceDocType: "人工建档",
+        sourceDocNo: "——",
+        roleEffectiveTime: "2026-09-10 08:15:00",
+      },
+    ],
+    linkedPartnerArchives: [],
+    source: "MANUAL",
+    createDate: "2026-09-10",
+    createTime: "2026-09-10 08:15:00",
+    createdBy: "王运营",
+    updateTime: "2026-09-10 08:15:00",
+    associatedDocs: [],
+    auditLogs: [
+      {
+        id: "log-1901",
+        opTime: "2026-09-10 08:15:00",
+        operator: "王运营",
+        actionType: "CREATE",
+        actionName: "创建合作方档案",
+        detail:
+          "人工建档「保存并提交」：04-x 必填已齐、联系手机未验证；行操作为【编辑】+【验证】（对齐用例沙盘 PS-001 / 场景十一补验）",
       },
     ],
   },
