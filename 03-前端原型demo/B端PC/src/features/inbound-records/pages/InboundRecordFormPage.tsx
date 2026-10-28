@@ -22,6 +22,7 @@ import { markContactPhoneVerified } from "@/features/partner-archives/lib/contac
 import { ApprovalFlowSelectDialog } from "../components/ApprovalFlowSelectDialog"
 import { ImageViewerModal } from "../components/ImageViewerModal"
 import { INBOUND_FORM_MESSAGES } from "@prototype/shared/inbound/form-messages"
+import { getSkuById } from "@prototype/shared/goods/goods-sku-catalog"
 import { generateMockInboundOrderNo } from "@prototype/shared/inbound/mock-inbound-order-no"
 import { INBOUND_RECORD_LIST_PATH } from "../domain/constants"
 import type { InboundFormState } from "../domain/form-types"
@@ -237,6 +238,45 @@ export function InboundRecordFormPage() {
       setHighlightGoodsId(emptyMeasure.id)
       showToast(INBOUND_FORM_MESSAGES.needMeasure)
       return
+    }
+
+    // 入库收集项：必填强校验 + 区间/日期常识校验
+    for (const line of form.goodsLines) {
+      const sku = getSkuById(line.skuId)
+      if (!sku) continue
+
+      for (const field of sku.inboundCollect) {
+        const value = (line.collectValues[field.fieldKey] ?? "").trim()
+        if (field.required && !value) {
+          setHighlightGoodsId(line.id)
+          showToast(`请填写「${field.label}」`)
+          return
+        }
+      }
+
+      const rangeField = sku.inboundCollect.find((field) => field.control === "range")
+      if (rangeField) {
+        const [min, max] = (line.collectValues[rangeField.fieldKey] ?? "").split("|")
+        if (min && max && Number(min) > Number(max)) {
+          setHighlightGoodsId(line.id)
+          showToast(`「${rangeField.label}」最小值不能大于最大值，请核对`)
+          return
+        }
+      }
+
+      const productionField = sku.inboundCollect.find(
+        (field) => field.label === "生产日期"
+      )
+      const expiryField = sku.inboundCollect.find((field) => field.label === "过期时间")
+      if (productionField && expiryField) {
+        const productionDate = line.collectValues[productionField.fieldKey]
+        const expiryDate = line.collectValues[expiryField.fieldKey]
+        if (productionDate && expiryDate && expiryDate <= productionDate) {
+          setHighlightGoodsId(line.id)
+          showToast("过期时间必须晚于生产日期，请核对实物包装")
+          return
+        }
+      }
     }
 
     // 未堆放数量清零强阻断校验（对齐 11yuanma store-apply-info.vue line 2489）

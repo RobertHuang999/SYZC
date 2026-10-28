@@ -63,6 +63,8 @@ export type TableRowActionItem = {
   to?: string
   icon?: ComponentType<{ className?: string }>
   isPlaceholder?: boolean
+  /** 置灰禁用：仍展示文案，鼠标悬停可见 title 说明（浏览器对 disabled 按钮不触发悬浮，故用外层 span 承载） */
+  disabled?: boolean
 }
 
 const toneClass: Record<TableRowActionTone, string> = {
@@ -87,6 +89,17 @@ function ActionControl({ item }: { item: TableRowActionItem }) {
   }
   const className = actionControlClass(item.tone)
   const displayTitle = item.title ?? item.label
+  if (item.disabled) {
+    return (
+      <span
+        className="inline-flex min-h-[var(--table-row-action-row-h)] w-full cursor-not-allowed items-center justify-center text-sm font-normal leading-none text-muted-foreground/40"
+        title={displayTitle}
+        aria-disabled="true"
+      >
+        <span className="block max-w-full truncate text-center">{item.label}</span>
+      </span>
+    )
+  }
   if (item.to) {
     return (
       <Link to={item.to} className={className} title={displayTitle}>

@@ -6,12 +6,28 @@
  * 重量/数量双计量、丰富入库收集项，以及 1 条停用 SKU（valid: false 不入库可选）。
  */
 
+/** 入库单现场控件形态（对应货品管理配置的控件类型） */
+export type InboundCollectControlKind =
+  | "text"
+  | "select"
+  | "date"
+  | "range"
+  | "percent"
+  | "period"
+  | "region"
+
 export type InboundCollectFieldDef = {
   fieldKey: string
   label: string
   required: boolean
-  control: "text" | "select" | "date"
+  control: InboundCollectControlKind
   options?: readonly string[]
+  /** 区间/百分比的后缀单位，或保质期的固定单位（如 ℃、%RH、%、个月） */
+  unit?: string
+  /** true = 单位只读锁定（保质期）；false/缺省 = 现场可改（老货品未指定固定单位） */
+  unitLocked?: boolean
+  /** 保质期建议默认数值，选中货品时自动回填 */
+  suggestedValue?: string
 }
 
 export type GoodsSkuRecord = {
@@ -255,6 +271,19 @@ export const GOODS_SKU_CATALOG: readonly GoodsSkuRecord[] = [
     inboundCollect: [
       { fieldKey: "packaging", label: "包装方式", required: true, control: "select", options: PACKAGING_OPTS },
       { fieldKey: "storage", label: "存储方式", required: true, control: "select", options: STORAGE_OPTS },
+      {
+        fieldKey: "temperature",
+        label: "温度要求",
+        required: true,
+        control: "range",
+        unit: "℃",
+      },
+      {
+        fieldKey: "origin",
+        label: "产地",
+        required: false,
+        control: "region",
+      },
     ],
     valid: true,
   },
@@ -271,6 +300,17 @@ export const GOODS_SKU_CATALOG: readonly GoodsSkuRecord[] = [
       { fieldKey: "packaging", label: "包装方式", required: true, control: "select", options: PACKAGING_OPTS },
       { fieldKey: "storage", label: "存储方式", required: true, control: "select", options: ["冷冻"] },
       { fieldKey: "inspectOrg", label: "检验机构", required: false, control: "text" },
+      {
+        fieldKey: "shelfLife",
+        label: "保质期",
+        required: true,
+        control: "period",
+        unit: "个月",
+        unitLocked: true,
+        suggestedValue: "36",
+      },
+      { fieldKey: "productionDate", label: "生产日期", required: true, control: "date" },
+      { fieldKey: "expiryDate", label: "过期时间", required: false, control: "date" },
     ],
     valid: true,
   },
@@ -285,6 +325,16 @@ export const GOODS_SKU_CATALOG: readonly GoodsSkuRecord[] = [
     inboundCollect: [
       { fieldKey: "productionDate", label: "生产日期", required: true, control: "date" },
       { fieldKey: "reportNo", label: "检验报告编号", required: false, control: "text" },
+      {
+        fieldKey: "shelfLife",
+        label: "保质期",
+        required: true,
+        control: "period",
+        unit: "个月",
+        unitLocked: true,
+        suggestedValue: "24",
+      },
+      { fieldKey: "expiryDate", label: "过期时间", required: false, control: "date" },
     ],
     valid: true,
   },

@@ -21,6 +21,7 @@ import {
   isSkuCombinationTaken,
   listMajorCategories,
   listSubcategories,
+  resolveCollectField,
   updateSku,
   useGoodsSpecRevision,
 } from "../lib/store"
@@ -224,6 +225,24 @@ export function GoodsFormPage() {
     if (!measureUnit.trim()) {
       setErrorMessage("请输入或选择单位")
       return
+    }
+
+    // 入库收集项：保质期必须指定固定单位，建议默认数值必须为 1~9999 的正整数
+    for (const item of inboundCollect) {
+      const field = resolveCollectField(item.fieldId)
+      if (field?.isShelfLife) {
+        if (!item.shelfLifeUnit) {
+          setErrorMessage("请为保质期指定固定单位")
+          return
+        }
+        if (item.suggestedValue?.trim()) {
+          const value = Number(item.suggestedValue)
+          if (!Number.isInteger(value) || value < 1 || value > 9999) {
+            setErrorMessage("建议默认保质期数值需为 1 至 9999 的正整数")
+            return
+          }
+        }
+      }
     }
 
     // 组合唯一性校验 (同一品类下规格组合+计量不可重复)

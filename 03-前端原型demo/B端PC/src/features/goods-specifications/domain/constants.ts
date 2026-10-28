@@ -1,6 +1,6 @@
 import type {
   GoodsStatus,
-  InboundCollectItemDef,
+  InboundCollectFilter,
   MajorCategoryFilter,
   SubcategoryFilter,
 } from "./types"
@@ -13,6 +13,47 @@ export const GOODS_LIST_PATH = `${GOODS_SPEC_BASE_PATH}/货品管理`
 export const GOODS_ADD_PATH = `${GOODS_LIST_PATH}/新增`
 export const goodsEditPath = (id: string) => `${GOODS_LIST_PATH}/编辑/${id}`
 export const goodsDetailPath = (id: string) => `${GOODS_LIST_PATH}/详情/${id}`
+
+export const INBOUND_COLLECT_CONFIG_PATH = `${GOODS_SPEC_BASE_PATH}/入库收集项配置`
+export const inboundCollectDetailPath = (id: string) =>
+  `${INBOUND_COLLECT_CONFIG_PATH}/详情/${id}`
+export const INBOUND_COLLECT_CREATE_PATH = `${INBOUND_COLLECT_CONFIG_PATH}/新增`
+export const inboundCollectEditPath = (id: string) =>
+  `${INBOUND_COLLECT_CONFIG_PATH}/编辑/${id}`
+
+export const CONTROL_TYPE_OPTIONS: Array<{
+  value: string
+  label: string
+  description?: string
+}> = [
+  { value: "单行文本输入框", label: "单行文本输入框", description: "常规文本信息" },
+  { value: "下拉单选框", label: "下拉单选框", description: "预设固定枚举选项" },
+  { value: "日期选择器", label: "日期选择器", description: "标准年月日日期" },
+  { value: "数字区间框", label: "数字区间框", description: "指标数值范围，如温度、湿度" },
+  { value: "百分比数值框", label: "百分比数值框", description: "0~100 比率参数，如含水量" },
+  { value: "周期组合项", label: "周期组合项", description: "保质期专属：正整数 + 固定单位" },
+  { value: "省市区三级联动", label: "省市区三级联动", description: "省 → 市 → 区逐级选择，如产地" },
+]
+
+/**
+ * 新增/编辑页可选的控件类型。
+ * 【周期组合项】为保质期专属（字段清单 6.1），只能在系统预置项上出现，
+ * 不允许管理员自建，因此从新建选项里剔除；筛选下拉仍保留全量。
+ */
+export const CREATABLE_CONTROL_TYPE_OPTIONS = CONTROL_TYPE_OPTIONS.filter(
+  (option) => option.value !== "周期组合项"
+)
+
+export const COMMON_UNIT_SUGGESTIONS = ["℃", "%RH", "kg", "%", "g", "mg/kg", "mm"]
+
+export const DEFAULT_INBOUND_COLLECT_FILTER: InboundCollectFilter = {
+  name: "",
+  controlType: "",
+  status: "",
+  createdAtRange: ["", ""],
+}
+
+
 
 export const DEFAULT_MAJOR_CATEGORY_FILTER: MajorCategoryFilter = {
   name: "",
@@ -54,176 +95,50 @@ export const PRICE_DISPLAY_OPTIONS = [
 ] as const
 
 /**
- * 入库收集信息 17 项预置项。
- * 口径来源：货品管理字段清单「1.1 入库收集信息 16 项预置字段规格清单」
- * （表头写 16 项，实际清单为 17 项，本原型按 17 项落地）。
+ * 06 存量货品收集项标识 → 07 字段池字段 ID 的迁移对照。
+ * 存量数据里同时存在 camelCase 与 snake_case 两套写法，这里全部覆盖。
  */
-export const INBOUND_COLLECT_ITEMS: readonly InboundCollectItemDef[] = [
-  {
-    key: "packaging",
-    label: "包装方式",
-    group: "货品基础类",
-    control: "select",
-    controlLabel: "下拉单选",
-    options: ["箱装/盒装", "袋装", "散装", "桶装", "集装箱", "托盘"],
-    description: "货品实体包装形态，入库提交强校验枚举合规性。",
-  },
-  {
-    key: "origin",
-    label: "产地",
-    group: "货品基础类",
-    control: "region",
-    controlLabel: "省市区三级联动",
-    description: "规范化行政区划，溯源真实货源地。",
-  },
-  {
-    key: "batchNo",
-    label: "批次号",
-    group: "货品基础类",
-    control: "text",
-    controlLabel: "单行文本",
-    description: "核心溯源追踪编号，仓储货位与批次管理依据，1~50 字符。",
-  },
-  {
-    key: "producer",
-    label: "生产企业",
-    group: "货品基础类",
-    control: "text",
-    controlLabel: "单行文本",
-    description: "生产加工厂全称，1~100 字符。",
-  },
-  {
-    key: "hazardLevel",
-    label: "危险品等级",
-    group: "货品基础类",
-    control: "select",
-    controlLabel: "下拉单选",
-    options: [
-      "非危",
-      "第1类 爆炸品",
-      "第2类 压缩气体和液化气体",
-      "第3类 易燃液体",
-      "第4类 易燃固体",
-      "第5类 氧化剂",
-      "第6类 毒害品",
-      "第7类 放射性物品",
-      "第8类 腐蚀品",
-      "第9类 杂类",
-    ],
-    description: "危险化学品安全监管分类。",
-  },
-  {
-    key: "qualityGrade",
-    label: "质量等级",
-    group: "生产质检类",
-    control: "select",
-    controlLabel: "下拉单选",
-    options: ["特级", "一级", "二级", "三级", "国标", "优等品", "合格品"],
-    description: "行业标准质量评定等级。",
-  },
-  {
-    key: "productionDate",
-    label: "生产日期",
-    group: "生产质检类",
-    control: "date",
-    controlLabel: "日期选择器",
-    description: "货物出厂生产日期，格式为年-月-日。",
-  },
-  {
-    key: "expiryDate",
-    label: "过期时间",
-    group: "生产质检类",
-    control: "date",
-    controlLabel: "日期选择器",
-    description: "到期时间；与生产日期、保质期同时填写时需满足日期关系。",
-  },
-  {
-    key: "shelfLife",
-    label: "保质期",
-    group: "生产质检类",
-    control: "period",
-    controlLabel: "周期组合（数值 + 天/月/年）",
-    description: "货物保质期限，正整数数值配天、月、年单位。",
-  },
-  {
-    key: "inspectDate",
-    label: "检验日期",
-    group: "生产质检类",
-    control: "date",
-    controlLabel: "日期选择器",
-    description: "质检完成报告日期。",
-  },
-  {
-    key: "inspectOrg",
-    label: "检验机构",
-    group: "生产质检类",
-    control: "text",
-    controlLabel: "单行文本",
-    description: "第三方检测机构全称，1~50 字符。",
-  },
-  {
-    key: "inspectReportNo",
-    label: "检验报告编号",
-    group: "生产质检类",
-    control: "text",
-    controlLabel: "单行文本",
-    description: "检测报告编号，检验报告溯源唯一索引，1~50 字符。",
-  },
-  {
-    key: "storageMode",
-    label: "存储方式",
-    group: "仓储要求类",
-    control: "select",
-    controlLabel: "下拉单选",
-    options: ["常温", "冷藏", "冷冻"],
-    description: "仓储环境温控类型标准。",
-  },
-  {
-    key: "temperature",
-    label: "温度要求",
-    group: "仓储要求类",
-    control: "range",
-    controlLabel: "双数值区间",
-    unit: "℃",
-    description: "温度控制标准，允许只填一侧，最小值不得大于最大值。",
-  },
-  {
-    key: "humidity",
-    label: "湿度要求",
-    group: "仓储要求类",
-    control: "range",
-    controlLabel: "双数值区间",
-    unit: "%RH",
-    description: "湿度控制标准，允许只填一侧，最小值不得大于最大值。",
-  },
-  {
-    key: "moisture",
-    label: "水分含量",
-    group: "仓储要求类",
-    control: "number",
-    controlLabel: "单行数字",
-    unit: "%",
-    description: "农粮与矿产重要质量指标，范围 0~100，最多 2 位小数。",
-  },
-  {
-    key: "impurity",
-    label: "杂质率",
-    group: "仓储要求类",
-    control: "number",
-    controlLabel: "单行数字",
-    unit: "%",
-    description: "质检纯度与杂质率扣减指标，范围 0~100，最多 2 位小数。",
-  },
-]
+export const LEGACY_COLLECT_KEY_MAP: Record<string, string> = {
+  shelfLife: "col-shelf-life",
+  shelf_life: "col-shelf-life",
+  packaging: "col-packaging",
+  packaging_type: "col-packaging",
+  origin: "col-origin",
+  batchNo: "col-batch-no",
+  batch_no: "col-batch-no",
+  heat_no: "col-heat-no",
+  heatNo: "col-heat-no",
+  producer: "col-producer",
+  hazardLevel: "col-hazard-level",
+  hazard_level: "col-hazard-level",
+  qualityGrade: "col-quality-grade",
+  quality_grade: "col-quality-grade",
+  productionDate: "col-prod-date",
+  production_date: "col-prod-date",
+  expiryDate: "col-exp-date",
+  expiry_date: "col-exp-date",
+  inspectDate: "col-inspect-date",
+  inspect_date: "col-inspect-date",
+  inspectOrg: "col-inspect-org",
+  inspect_org: "col-inspect-org",
+  inspectReportNo: "col-inspect-report",
+  inspect_report_no: "col-inspect-report",
+  storageMode: "col-storage-mode",
+  storage_mode: "col-storage-mode",
+  temperature: "col-temp",
+  humidity: "col-humidity",
+  moisture: "col-moisture",
+  impurity: "col-impurity",
+}
 
-export const INBOUND_COLLECT_ITEM_MAP = new Map(
-  INBOUND_COLLECT_ITEMS.map((item) => [item.key, item])
-)
-
-export const INBOUND_COLLECT_GROUPS: Array<{
-  group: InboundCollectItemDef["group"]
-  items: InboundCollectItemDef[]
-}> = ["货品基础类", "生产质检类", "仓储要求类"].map((group) => ({
-  group: group as InboundCollectItemDef["group"],
-  items: INBOUND_COLLECT_ITEMS.filter((item) => item.group === group),
-}))
+/** 07 字段池里可被 06 勾选时的控件类型筛选项（周期组合项只给保质期，不单列） */
+export const COLLECT_CONTROL_TABS = [
+  "全部",
+  "单行文本输入框",
+  "下拉单选框",
+  "日期选择器",
+  "数字区间框",
+  "百分比数值框",
+  "省市区三级联动",
+  "周期组合项",
+] as const

@@ -1,18 +1,25 @@
 import { cn } from "@/lib/utils"
 
-type ToggleSwitchProps = {
+export type SwitchProps = {
   checked: boolean
   onCheckedChange: (checked: boolean) => void
   disabled?: boolean
   id?: string
+  className?: string
 }
 
-export function ToggleSwitch({
+/**
+ * 全站统一开关。
+ * 原先 platform-basic-config 自带一份 ToggleSwitch，与本组件重复且关闭态配色不一致，
+ * 已收敛到这里作为唯一实现。
+ */
+export function Switch({
   checked,
   onCheckedChange,
   disabled,
   id,
-}: ToggleSwitchProps) {
+  className,
+}: SwitchProps) {
   return (
     <button
       type="button"
@@ -23,7 +30,8 @@ export function ToggleSwitch({
       onClick={() => onCheckedChange(!checked)}
       className={cn(
         "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
-        checked ? "bg-emerald-500" : "bg-muted"
+        checked ? "bg-emerald-500" : "bg-muted",
+        className
       )}
     >
       <span

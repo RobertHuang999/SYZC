@@ -214,7 +214,9 @@ export function applyGoodsSku(line: GoodsLineForm, sku: GoodsSkuRecord): GoodsLi
   const spec = formatSpecSummary(sku.specValues)
   const collectValues: Record<string, string> = {}
   for (const field of sku.inboundCollect) {
-    collectValues[field.fieldKey] = line.collectValues[field.fieldKey] ?? ""
+    // 保质期等带建议默认值的字段，选中货品时自动回填，现场可按实物微调
+    collectValues[field.fieldKey] =
+      line.collectValues[field.fieldKey] ?? field.suggestedValue ?? ""
   }
   return {
     ...line,

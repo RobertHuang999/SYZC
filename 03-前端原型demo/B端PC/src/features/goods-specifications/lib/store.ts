@@ -1,15 +1,20 @@
 import { useSyncExternalStore } from "react"
 import {
   MOCK_GOODS_SKUS,
+  MOCK_INBOUND_COLLECT_FIELDS,
   MOCK_MAJOR_CATEGORIES,
+  MOCK_SHELF_LIFE_UNIT_CONFIG,
   MOCK_SUBCATEGORIES,
 } from "../mock/goods-spec.mock"
 import type {
   GoodsInboundCollectConfig,
   GoodsSku,
   GoodsStatus,
+  InboundCollectControlType,
+  InboundCollectFieldConfig,
   MajorCategory,
   PriceTrendPoint,
+  ShelfLifeUnitConfig,
   Subcategory,
 } from "../domain/types"
 
@@ -29,6 +34,16 @@ let skus: GoodsSku[] = MOCK_GOODS_SKUS.map((item) => ({
   priceHistory: item.priceHistory.map((entry) => ({ ...entry })),
   priceTrend: item.priceTrend.map((point) => ({ ...point })),
 }))
+let inboundCollectFields: InboundCollectFieldConfig[] = MOCK_INBOUND_COLLECT_FIELDS.map(
+  (item) => ({
+    ...item,
+    options: item.options ? [...item.options] : undefined,
+  })
+)
+let shelfLifeUnitConfig: ShelfLifeUnitConfig = {
+  ...MOCK_SHELF_LIFE_UNIT_CONFIG,
+}
+
 
 let revision = 0
 const listeners = new Set<() => void>()
@@ -593,3 +608,329 @@ export function setSkuPrice(id: string, price: number, operator = DEFAULT_OPERAT
   })
   emit()
 }
+
+// ==================== 入库收集项配置业务 Store (6.3) ====================
+
+/**
+ * 统计某个收集项被多少个货品引用（06 货品主档的未删除货品）。
+ * 这是 07「两阶段安全删除」与「有引用锁定控件类型」的真实数据来源，
+ * 不再依赖 mock 里写死的 hasDownstreamRef。
+ */
+export function countGoodsReferences(fieldId: string): number {
+  return skus.reduce(
+    (count, sku) =>
+      sku.inboundCollect.some((item) => item.fieldId === fieldId)
+        ? count + 1
+        : count,
+    0
+  )
+}
+
+/** 给字段补上实时引用状态，避免各处重复计算 */
+function withRefCount(field: InboundCollectFieldConfig): InboundCollectFieldConfig {
+  return { ...field, hasDownstreamRef: countGoodsReferences(field.id) > 0 }
+}
+
+export function listInboundCollectFields(): InboundCollectFieldConfig[] {
+  return inboundCollectFields.map(withRefCount)
+}
+
+/** 供 06 货品管理新建/编辑时勾选：只列启用中的收集项 */
+export function listSelectableCollectFields(): InboundCollectFieldConfig[] {
+  return inboundCollectFields
+    .filter((item) => item.status === "ENABLED")
+    .map(withRefCount)
+}
+
+export function findInboundCollectField(
+  id?: string
+): InboundCollectFieldConfig | undefined {
+  if (!id) return undefined
+  const field = inboundCollectFields.find((item) => item.id === id)
+  return field ? withRefCount(field) : undefined
+}
+
+/** 06 侧读取字段元数据的统一入口，语义等价于按 ID 引用 07 字段池 */
+export const resolveCollectField = findInboundCollectField
+
+function computeCollectSummary(
+  controlType: InboundCollectControlType,
+  unitLabel?: string,
+  options?: string[]
+): string {
+  if (controlType === "周期组合项") {
+    const units: string[] = []
+    if (shelfLifeUnitConfig.allowMonth) units.push("月")
+    if (shelfLifeUnitConfig.allowDay) units.push("天")
+    if (shelfLifeUnitConfig.allowYear) units.push("年")
+    return `支持: ${units.join(" / ")}`
+  }
+  if (controlType === "下拉单选框") {
+    if (options && options.length > 0) {
+      return options.slice(0, 2).join(", ")
+    }
+    return "—"
+  }
+  if (controlType === "数字区间框" || controlType === "百分比数值框") {
+    return unitLabel?.trim() || "—"
+  }
+  return "—"
+}
+
+export type CollectFieldInput = {
+  name: string
+  controlType: InboundCollectControlType
+  unitLabel?: string
+  options?: string[]
+  placeholder?: string
+  remark?: string
+}
+
+export function addInboundCollectField(
+  input: CollectFieldInput,
+  operator = DEFAULT_OPERATOR
+): { success: boolean; error?: string; id?: string } {
+  const cleanName = input.name.trim()
+  if (!cleanName) {
+    return { success: false, error: "收集项名称不能为空" }
+  }
+
+  // 周期组合项为保质期专属，不允许管理员自建（字段清单 6.1）
+  if (input.controlType === "周期组合项") {
+    return {
+      success: false,
+      error: "周期组合项为保质期专属控件，不支持自行新建",
+    }
+  }
+
+  // R01: 收集项名称租户内唯一性校验
+  const duplicate = inboundCollectFields.some(
+    (item) => item.name.toLowerCase() === cleanName.toLowerCase()
+  )
+  if (duplicate) {
+    return { success: false, error: "收集项名称已存在，请重新输入" }
+  }
+
+  const stamp = nowStamp()
+  const newId = `col-${Date.now()}`
+  const summary = computeCollectSummary(
+    input.controlType,
+    input.unitLabel,
+    input.options
+  )
+
+  const newField: InboundCollectFieldConfig = {
+    id: newId,
+    name: cleanName,
+    controlType: input.controlType,
+    summary,
+    unitLabel: input.unitLabel?.trim() || undefined,
+    options: input.options ? [...input.options] : undefined,
+    placeholder: input.placeholder?.trim() || undefined,
+    remark: input.remark?.trim() || undefined,
+    isCore: false,
+    isShelfLife: false,
+    status: "ENABLED",
+    createdBy: operator,
+    createdAt: stamp,
+    updatedBy: operator,
+    updatedAt: stamp,
+    version: 1,
+    hasDownstreamRef: false,
+  }
+
+  inboundCollectFields = [...inboundCollectFields, newField]
+  emit()
+  return { success: true, id: newId }
+}
+
+export function updateInboundCollectField(
+  id: string,
+  input: CollectFieldInput,
+  operator = DEFAULT_OPERATOR,
+  expectedVersion?: number
+): { success: boolean; error?: string } {
+  const current = findInboundCollectField(id)
+  if (!current) {
+    return { success: false, error: "收集项不存在" }
+  }
+
+  if (
+    expectedVersion !== undefined &&
+    current.version !== expectedVersion
+  ) {
+    return { success: false, error: "数据已被他人修改，请刷新后重试" }
+  }
+
+  const cleanName = input.name.trim()
+  if (!cleanName) {
+    return { success: false, error: "收集项名称不能为空" }
+  }
+
+  // R02: 系统核心项只允许改输入提示与备注，名称固定沿用原值
+  const finalName = current.isCore ? current.name : cleanName
+
+  // R01: 排除自身名称唯一性
+  const duplicate = inboundCollectFields.some(
+    (item) =>
+      item.id !== id && item.name.toLowerCase() === finalName.toLowerCase()
+  )
+  if (duplicate) {
+    return { success: false, error: "收集项名称已存在，请重新输入" }
+  }
+
+  // 周期组合项为保质期专属，不允许把普通项改成周期组合项
+  if (
+    input.controlType === "周期组合项" &&
+    current.controlType !== "周期组合项"
+  ) {
+    return {
+      success: false,
+      error: "周期组合项为保质期专属控件，其他收集项不能改成该类型",
+    }
+  }
+
+  // R02: 核心项与引用项保护，控件类型锁定为原值
+  const lockedType =
+    current.isCore || current.hasDownstreamRef
+      ? current.controlType
+      : input.controlType
+
+  // 引用态的度量单位标签随控件类型一并锁定，避免上下游口径错位
+  const finalUnitLabel =
+    current.hasDownstreamRef || current.isCore
+      ? current.unitLabel
+      : input.unitLabel
+
+  const summary = computeCollectSummary(
+    lockedType,
+    finalUnitLabel,
+    input.options
+  )
+  const stamp = nowStamp()
+
+  inboundCollectFields = inboundCollectFields.map((item) => {
+    if (item.id !== id) return item
+    return {
+      ...item,
+      name: finalName,
+      controlType: lockedType,
+      summary,
+      unitLabel: finalUnitLabel?.trim() || undefined,
+      options: input.options ? [...input.options] : undefined,
+      placeholder: input.placeholder?.trim() || undefined,
+      remark: input.remark?.trim() || undefined,
+      updatedBy: operator,
+      updatedAt: stamp,
+      version: item.version + 1,
+    }
+  })
+
+  emit()
+  return { success: true }
+}
+
+export function setInboundCollectFieldStatus(
+  id: string,
+  nextStatus: GoodsStatus,
+  operator = DEFAULT_OPERATOR
+) {
+  const stamp = nowStamp()
+  inboundCollectFields = inboundCollectFields.map((item) => {
+    if (item.id !== id) return item
+    return {
+      ...item,
+      status: nextStatus,
+      updatedBy: operator,
+      updatedAt: stamp,
+      version: item.version + 1,
+    }
+  })
+  emit()
+}
+
+export type DeleteFieldResult =
+  | { success: true }
+  | {
+      success: false
+      reason: "CORE" | "ENABLED" | "HAS_REF"
+      message: string
+    }
+
+/**
+ * 两阶段安全删除控制（R04 / R02）
+ * 1. 核心项检查：系统核心字段禁止删除
+ * 2. 阶段一自身状态检查：处于启用中不可删除，提示先停用
+ * 3. 阶段二下游引用检查：已被使用不可删除，提示先解绑
+ */
+export function deleteInboundCollectField(id: string): DeleteFieldResult {
+  const field = findInboundCollectField(id)
+  if (!field) {
+    return { success: false, reason: "HAS_REF", message: "收集项不存在" }
+  }
+
+  // R02: 系统核心内置项保护
+  if (field.isCore) {
+    return {
+      success: false,
+      reason: "CORE",
+      message: "系统核心字段，禁止删除",
+    }
+  }
+
+  // R04 阶段一: 自身状态检查
+  if (field.status === "ENABLED") {
+    return {
+      success: false,
+      reason: "ENABLED",
+      message: "启用状态下的收集项不可删除，请先停用。",
+    }
+  }
+
+  // R04 阶段二: 后台快速探测下游引用
+  if (field.hasDownstreamRef) {
+    return {
+      success: false,
+      reason: "HAS_REF",
+      message: "该收集项已被使用，不可删除！请先前往解绑。",
+    }
+  }
+
+  inboundCollectFields = inboundCollectFields.filter((item) => item.id !== id)
+  emit()
+  return { success: true }
+}
+
+export function getShelfLifeUnitConfig(): ShelfLifeUnitConfig {
+  return { ...shelfLifeUnitConfig }
+}
+
+export function updateShelfLifeUnitConfig(
+  config: ShelfLifeUnitConfig
+): { success: boolean; error?: string } {
+  // R05: 保底强校验，至少保留一个可用单位
+  if (!config.allowDay && !config.allowMonth && !config.allowYear) {
+    return { success: false, error: "至少保留一个可用保质期单位" }
+  }
+
+  shelfLifeUnitConfig = { ...config }
+
+  // 联动更新保质期项的 summary
+  inboundCollectFields = inboundCollectFields.map((item) => {
+    if (item.controlType !== "周期组合项") return item
+    const units: string[] = []
+    if (config.allowMonth) units.push("月")
+    if (config.allowDay) units.push("天")
+    if (config.allowYear) units.push("年")
+    return {
+      ...item,
+      summary: `支持: ${units.join(" / ")}`,
+      version: item.version + 1,
+      updatedAt: nowStamp(),
+    }
+  })
+
+  emit()
+  return { success: true }
+}
+

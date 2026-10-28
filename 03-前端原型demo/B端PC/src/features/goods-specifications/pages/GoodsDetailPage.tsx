@@ -22,7 +22,6 @@ import {
 import { TableDateTimeCell } from "@/shared/components/TableCells"
 import {
   GOODS_LIST_PATH,
-  INBOUND_COLLECT_ITEMS,
   goodsEditPath,
 } from "../domain/constants"
 import {
@@ -31,6 +30,7 @@ import {
   findSku,
   findSubcategory,
   isSkuEffectivelyEnabled,
+  resolveCollectField,
   setSkuPrice,
   useGoodsSpecRevision,
 } from "../lib/store"
@@ -38,6 +38,12 @@ import { formatSpecSummary } from "../lib/format"
 import { StatusBadge } from "../components/StatusBadge"
 import { PriceDialog } from "../components/PriceDialog"
 import { PriceTrendDialog } from "../components/PriceTrendDialog"
+
+const SHELF_LIFE_UNIT_LABEL = {
+  DAY: "天",
+  MONTH: "个月",
+  YEAR: "年",
+} as const
 import { ConfirmActionDialog } from "../components/ConfirmActionDialog"
 import { goodsDetailAnnotations } from "../annotations/goods-detail.annotations"
 import { goodsDocuments } from "../documents/goods-spec-documents"
@@ -274,25 +280,28 @@ export function GoodsDetailPage() {
                   </TableHeader>
                   <TableBody>
                     {sku.inboundCollect.map((item, index) => {
-                      const def = INBOUND_COLLECT_ITEMS.find((c) => c.key === item.key)
-                      const isShelfLife = item.key === "shelfLife"
+                      const field = resolveCollectField(item.fieldId)
+                      const isShelfLife = Boolean(field?.isShelfLife)
+                      const unitLabel = item.shelfLifeUnit
+                        ? SHELF_LIFE_UNIT_LABEL[item.shelfLifeUnit]
+                        : ""
                       return (
-                        <TableRow key={item.key}>
+                        <TableRow key={item.fieldId}>
                           <TableCell className="text-center text-muted-foreground">
                             {index + 1}
                           </TableCell>
                           <TableCell className="font-medium text-foreground">
                             <div className="flex items-center gap-2">
-                              <span>{item.label}</span>
-                              {def?.group && (
+                              <span>{field?.name ?? "已删除的收集项"}</span>
+                              {field?.status === "DISABLED" && (
                                 <Badge variant="secondary" className="text-[11px] font-normal">
-                                  {def.group}
+                                  底座已停用
                                 </Badge>
                               )}
                             </div>
                           </TableCell>
                           <TableCell className="text-sm text-foreground">
-                            {def?.controlLabel || "单行文本"}
+                            {field?.controlType ?? "—"}
                           </TableCell>
                           <TableCell className="text-center">
                             <Badge
@@ -308,12 +317,12 @@ export function GoodsDetailPage() {
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">
                             {isShelfLife
-                              ? "固定单位：年，建议数值：2 年（入库单已锁定为年，只填数值）"
-                              : item.key === "origin"
-                              ? "全国省-市-区三级联动选择"
-                              : item.key === "packaging"
-                              ? "箱装/盒装、袋装、散装、桶装等枚举校验"
-                              : def?.description || "入库现场按实物或单据录入"}
+                              ? `固定单位：${unitLabel || "未指定"}${
+                                  item.suggestedValue
+                                    ? `，建议数值：${item.suggestedValue} ${unitLabel}`
+                                    : "，未设建议值"
+                                }（入库单单位只读，现场只填数值）`
+                              : field?.placeholder || field?.remark || "入库现场按实物或单据录入"}
                           </TableCell>
                         </TableRow>
                       )

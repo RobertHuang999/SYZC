@@ -4,7 +4,7 @@ import { SearchIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { ToggleSwitch } from "./ToggleSwitch"
+import { Switch } from "@/components/ui/switch"
 import { YesNoRadio } from "./YesNoRadio"
 import type { PartnerSubjectAccessPolicy, YesNo } from "../domain/types"
 
@@ -65,7 +65,7 @@ export function PartnerSubjectPolicyCard({
             证件地址防重复
           </Label>
           <div className="flex flex-wrap items-center gap-3">
-            <ToggleSwitch
+            <Switch
               checked={policy.addressDuplicatePrevent}
               onCheckedChange={(checked) => {
                 if (onDuplicatePreventChange) {

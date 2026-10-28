@@ -308,10 +308,6 @@ export const generatedSidebarGroupsByModule: Record<string, SidebarGroup[]> = {
         {
           "label": "监管办理",
           "path": "/融资/监管/监管业务/监管办理"
-        },
-        {
-          "label": "监管管理",
-          "path": "/融资/监管/监管业务/监管管理"
         }
       ]
     },
@@ -698,7 +694,6 @@ export const generatedMenuPaths: readonly string[] = [
   "/融资/监管/融资管理/被拒退回记录池",
   "/融资/监管/融资管理/线上监管业务办理",
   "/融资/监管/监管业务/监管办理",
-  "/融资/监管/监管业务/监管管理",
   "/融资/监管/合同管理/融资合同管理",
   "/融资/监管/货权管理/货权档案",
   "/融资/监管/货权管理/货权公示",

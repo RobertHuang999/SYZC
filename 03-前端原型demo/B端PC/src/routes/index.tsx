@@ -72,6 +72,9 @@ import {
   GoodsListPage,
   GoodsFormPage,
   GoodsDetailPage,
+  InboundCollectListPage,
+  InboundCollectDetailPage,
+  InboundCollectFormPage,
 } from "@/features/goods-specifications/pages"
 import { getAllMenuPaths, topModules } from "@/config/navigation"
 import { isImplementedRoute } from "@/config/implemented-routes"
@@ -340,6 +343,23 @@ export function AppRoutes() {
           path="配置管理/货品规格管理/货品管理/详情/:id"
           element={<GoodsDetailPage />}
         />
+        <Route
+          path="配置管理/货品规格管理/入库收集项配置"
+          element={<InboundCollectListPage />}
+        />
+        <Route
+          path="配置管理/货品规格管理/入库收集项配置/新增"
+          element={<InboundCollectFormPage />}
+        />
+        <Route
+          path="配置管理/货品规格管理/入库收集项配置/编辑/:id"
+          element={<InboundCollectFormPage />}
+        />
+        <Route
+          path="配置管理/货品规格管理/入库收集项配置/详情/:id"
+          element={<InboundCollectDetailPage />}
+        />
+
 
         <Route
           path="配置管理/仓库管理/仓库管理"

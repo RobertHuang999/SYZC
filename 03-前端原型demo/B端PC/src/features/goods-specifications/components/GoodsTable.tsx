@@ -10,7 +10,7 @@ import {
 import { TableRowActionPanel } from "@/shared/components/TableRowActionPanel"
 import type { GoodsSku, PriceDisplayUnit, Subcategory } from "../domain/types"
 import { formatPriceDisplay } from "../lib/format"
-import { effectiveInvalidReason, isSkuEffectivelyEnabled } from "../lib/store"
+import { effectiveInvalidReason, isSkuEffectivelyEnabled, resolveCollectField } from "../lib/store"
 import { StatusBadge } from "./StatusBadge"
 
 type GoodsTableProps = {
@@ -171,16 +171,27 @@ function InboundSummaryCell({ sku }: { sku: GoodsSku }) {
     return <span className="text-muted-foreground">--</span>
   }
 
-  const textSummary = sku.inboundCollect.map((item) => item.label).join("、")
+  const entries = sku.inboundCollect.map((item) => {
+    const field = resolveCollectField(item.fieldId)
+    return {
+      label: field?.name ?? "已删除的收集项",
+      disabled: field?.status === "DISABLED",
+      required: item.required,
+    }
+  })
+  const requiredCount = entries.filter((item) => item.required).length
 
   return (
     <span
       className="text-sm text-foreground/90"
-      title={sku.inboundCollect
-        .map((item) => `${item.label}${item.required ? "（必填）" : ""}`)
+      title={entries
+        .map(
+          (item) =>
+            `${item.label}${item.required ? "（必填）" : ""}${item.disabled ? "（底座已停用）" : ""}`
+        )
         .join("，")}
     >
-      {textSummary}
+      已配 {entries.length} 项（必填 {requiredCount} 项）
     </span>
   )
 }
