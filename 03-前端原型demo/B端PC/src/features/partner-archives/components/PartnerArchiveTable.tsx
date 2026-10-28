@@ -21,6 +21,7 @@ import {
   type TableRowActionItem,
 } from "@/shared/components/TableRowActionPanel"
 import { ContactPhoneVerifyBadge } from "./ContactPhoneVerifyBadge"
+import { resolvePartnerIdentityDisplay } from "../lib/partner-archive-rules"
 import {
   getPartnerArchiveRowActions,
   isArchiveRequiredFieldsPending,
@@ -49,11 +50,15 @@ const COL = {
 
 const cellBase = "align-middle px-3 py-2.5"
 
+/** 冻结行底色（须不透明，sticky 列禁止半透明以免横向滚动时透底） */
+const FROZEN_ROW_SURFACE_CLASS =
+  "bg-slate-100 dark:bg-slate-800 group-hover:bg-slate-100 dark:group-hover:bg-slate-800"
+
 const stickyIndexBodyClass = (isFrozen: boolean) =>
   cn(
     "sticky left-0 z-[1]",
     isFrozen
-      ? "bg-muted/30 group-hover:bg-muted/30"
+      ? FROZEN_ROW_SURFACE_CLASS
       : "bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800"
   )
 
@@ -63,7 +68,7 @@ const actionCell = (isFrozen: boolean) =>
     STICKY_ACTION_CLASS,
     "whitespace-normal align-middle px-2 py-2 text-center",
     isFrozen
-      ? "bg-muted/30 group-hover:bg-muted/30"
+      ? FROZEN_ROW_SURFACE_CLASS
       : "bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800 transition-colors"
   )
 
@@ -218,8 +223,10 @@ export function PartnerArchiveTable({
                 <TableRow
                   key={item.id}
                   className={cn(
-                    "group align-middle hover:bg-muted/50 transition-colors",
-                    isFrozen && "bg-muted/30"
+                    "group align-middle transition-colors",
+                    isFrozen
+                      ? "bg-slate-100 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-800"
+                      : "hover:bg-muted/50"
                   )}
                 >
                   <TableCell
@@ -246,7 +253,7 @@ export function PartnerArchiveTable({
                         </Link>
                       </HoverOverflowText>
                       <span className="whitespace-nowrap text-xs tabular-nums text-muted-foreground">
-                        {item.idNumberMasked}
+                        {resolvePartnerIdentityDisplay(item)}
                       </span>
                     </div>
                   </TableCell>

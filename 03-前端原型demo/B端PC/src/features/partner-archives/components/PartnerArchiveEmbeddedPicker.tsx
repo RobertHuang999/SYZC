@@ -18,6 +18,7 @@ import {
   partnerEmbeddedPickerSpecNote,
   partnerEmbeddedPickerUserHint,
 } from "../lib/partner-archive-ui-labels"
+import { resolvePartnerIdentityDisplay } from "../lib/partner-archive-rules"
 import { cn } from "@/lib/utils"
 
 type PartnerArchiveEmbeddedPickerProps = {
@@ -53,7 +54,7 @@ function SelectionSummary({
   return (
     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
       <span>
-        已选：{selection.name} · {selection.idNumberMasked}
+        已选：{selection.name} · {resolvePartnerIdentityDisplay(selection)}
       </span>
       <Link
         to={partnerArchiveDetailPath(archiveMenu, selection.partnerId)}
@@ -185,6 +186,7 @@ export function PartnerArchiveEmbeddedPicker({
               partnerId: partner.id,
               partnerNo: partner.partnerNo,
               name: partner.name,
+              idNumber: partner.idNumber,
               idNumberMasked: partner.idNumberMasked,
               subjectType: partner.subjectType,
               roleType: role.roleType,

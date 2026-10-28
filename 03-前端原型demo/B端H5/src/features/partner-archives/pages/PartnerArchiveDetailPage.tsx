@@ -17,7 +17,10 @@ import {
   getPartnerArchiveById,
   maskLoginPhone,
 } from "@prototype/B端PC/src/features/partner-archives/lib/detail-utils"
-import { maskIdNumber } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-rules"
+import {
+  maskIdNumber,
+  resolvePartnerIdentityDisplay,
+} from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-rules"
 import { resolvePartnerSubjectFreezeReason } from "@prototype/B端PC/src/features/partner-archives/lib/partner-subject-freeze-state"
 import {
   CONTACT_PHONE_VERIFY_BADGE_CLASS,
@@ -146,9 +149,15 @@ export function PartnerArchiveDetailPage() {
                 badgeOutline("border-sky-200 bg-sky-50 text-sky-700", "待补全")
               ) : null}
             </div>
-            <p className="text-[11px] leading-relaxed text-[#232D39]/55">
-              身份标识：{partner.idNumberMasked}
-            </p>
+            <div className="space-y-0.5 text-[11px] leading-relaxed text-[#232D39]/55">
+              <p>
+                ID：
+                <span className="whitespace-nowrap font-medium text-[#232D39]">
+                  {partner.partnerNo || "——"}
+                </span>
+              </p>
+              <p>身份标识：{resolvePartnerIdentityDisplay(partner)}</p>
+            </div>
           </div>
         </section>
         </PrototypeAnnotationTarget>
@@ -192,6 +201,20 @@ export function PartnerArchiveDetailPage() {
                 />
               ) : null}
               <DetailRow
+                label={partnerContactPhoneDetailLabel(partner.subjectType)}
+                value={
+                  partnerFieldPendingInlineHint(requiredGaps, "contactPhone") ? (
+                    <span className="font-medium text-amber-600">
+                      {partnerFieldPendingInlineHint(requiredGaps, "contactPhone")}
+                    </span>
+                  ) : partner.contactPhone.length >= 11 ? (
+                    maskLoginPhone(partner.contactPhone)
+                  ) : (
+                    partner.contactPhone || "——"
+                  )
+                }
+              />
+              <DetailRow
                 label="联系手机核验"
                 value={badgeOutline(
                   CONTACT_PHONE_VERIFY_BADGE_CLASS[resolveContactPhoneVerified(partner)],
@@ -232,20 +255,6 @@ export function PartnerArchiveDetailPage() {
                   }
                 />
               ) : null}
-              <DetailRow
-                label={partnerContactPhoneDetailLabel(partner.subjectType)}
-                value={
-                  partnerFieldPendingInlineHint(requiredGaps, "contactPhone") ? (
-                    <span className="font-medium text-amber-600">
-                      {partnerFieldPendingInlineHint(requiredGaps, "contactPhone")}
-                    </span>
-                  ) : partner.contactPhone.length >= 11 ? (
-                    maskLoginPhone(partner.contactPhone)
-                  ) : (
-                    partner.contactPhone || "——"
-                  )
-                }
-              />
               <DetailRow
                 label="证件地址"
                 value={

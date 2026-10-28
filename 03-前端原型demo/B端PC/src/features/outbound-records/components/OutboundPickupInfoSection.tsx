@@ -30,6 +30,7 @@ import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotat
 import type { PartnerSelectorValue } from "@/features/partner-archives/components/PartnerArchiveSelector"
 import { partnerArchivesMock } from "@/features/partner-archives/mock/partner-archives.mock"
 import { resolveContactPhoneVerified } from "@/features/partner-archives/lib/contact-phone-verify"
+import { resolvePartnerIdentityDisplay } from "@/features/partner-archives/lib/partner-archive-rules"
 
 interface OutboundPickupInfoSectionProps {
   form: OutboundFormState
@@ -78,6 +79,7 @@ export function OutboundPickupInfoSection({
       partnerId: partner.id,
       partnerNo: partner.partnerNo,
       name: partner.name,
+      idNumber: partner.idNumber,
       idNumberMasked: partner.idNumberMasked,
       subjectType: partner.subjectType,
       roleType: "PICKUP_AGENT",
@@ -103,7 +105,7 @@ export function OutboundPickupInfoSection({
       pickupPersonType: "个人",
       pickupAgentPartnerId: partner.id,
       pickupName: partner.name,
-      pickupIdCardNo: partner.idNumberMasked,
+      pickupIdCardNo: resolvePartnerIdentityDisplay(partner),
       pickupPhone: partner.contactPhone,
     })
   }

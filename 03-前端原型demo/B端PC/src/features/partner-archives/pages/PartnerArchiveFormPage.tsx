@@ -57,7 +57,7 @@ import {
   findOwnerAddressConflict,
   ownerAddressConflictMessage,
   findPartnerByIdNumber,
-  maskIdNumber,
+  maskPartnerIdentityIdentifier,
 } from "../lib/partner-archive-rules"
 import {
   PARTNER_FORM_ADDRESS_SPEC_NOTE_OWNER,
@@ -406,7 +406,7 @@ export function PartnerArchiveFormPage() {
       name: name.trim(),
       subjectType,
       idNumber: trimmedId,
-      idNumberMasked: maskIdNumber(trimmedId),
+      idNumberMasked: maskPartnerIdentityIdentifier(trimmedId, subjectType),
       certAddress: buildCertAddress(),
       contactPhone: contactPhone.trim(),
       contactPhoneVerified: options?.verifiedOnCreate ? "VERIFIED" : "UNVERIFIED",
@@ -546,7 +546,7 @@ export function PartnerArchiveFormPage() {
       if (canEditSubjectId) {
         const trimmedId = idNumber.trim()
         existing.idNumber = trimmedId
-        existing.idNumberMasked = maskIdNumber(trimmedId)
+        existing.idNumberMasked = maskPartnerIdentityIdentifier(trimmedId, subjectType)
       }
       if (!isFrozenLimitedEdit) {
         existing.contactPhone = contactPhone.trim()

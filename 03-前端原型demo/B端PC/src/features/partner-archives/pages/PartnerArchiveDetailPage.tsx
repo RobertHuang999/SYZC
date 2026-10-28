@@ -61,6 +61,7 @@ import { usePartnerCompositeRowAppend } from "../lib/use-partner-composite-row-a
 import {
   checkPartnerSubjectFreezeEligibility,
   maskIdNumber,
+  resolvePartnerIdentityDisplay,
   type FreezeBlockReason,
 } from "../lib/partner-archive-rules"
 import {
@@ -255,11 +256,19 @@ export function PartnerArchiveDetailPage() {
                     待补全
                   </Badge>
                 )}
-                <Badge variant="secondary">档案归属：{partner.archiveMenu}</Badge>
               </div>
-              <p className="text-sm text-muted-foreground">
-                身份标识：<span>{partner.idNumberMasked}</span>
-              </p>
+              <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
+                <p>
+                  ID：
+                  <span className="whitespace-nowrap font-medium text-foreground">
+                    {partner.partnerNo || "——"}
+                  </span>
+                </p>
+                <p>
+                  身份标识：
+                  <span>{resolvePartnerIdentityDisplay(partner)}</span>
+                </p>
+              </div>
             </div>
 
             <div className="flex shrink-0 flex-wrap gap-2 lg:justify-end">
@@ -353,8 +362,29 @@ export function PartnerArchiveDetailPage() {
         {activeTab === "basic" && (
           <PrototypeAnnotationTarget annotationIds={["partner-archive-detail-basic"]}>
             <DetailSection title="基础档案">
-              {/* 第一行：主体关联信息（联系电话、证件地址） */}
+              {/* 第一行：手机号 → 核验状态 → 核验时间；企业经办人；证件地址 */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="md:col-span-1">
+                  <DetailField
+                    label={
+                      partner.subjectType === "INDIVIDUAL"
+                        ? "手机号"
+                        : "联系电话（经办人手机）"
+                    }
+                  >
+                    {partnerFieldPendingInlineHint(requiredGaps, "contactPhone") ? (
+                      <span className="font-medium text-amber-600">
+                        {partnerFieldPendingInlineHint(requiredGaps, "contactPhone")}
+                      </span>
+                    ) : (
+                      <span>
+                        {partner.contactPhone.length >= 11
+                          ? maskLoginPhone(partner.contactPhone)
+                          : partner.contactPhone || "——"}
+                      </span>
+                    )}
+                  </DetailField>
+                </div>
                 <div className="md:col-span-1">
                   <DetailField label="联系手机核验">
                     <Badge
@@ -413,27 +443,6 @@ export function PartnerArchiveDetailPage() {
                     </DetailField>
                   </div>
                 )}
-                <div className="md:col-span-1">
-                  <DetailField
-                    label={
-                      partner.subjectType === "INDIVIDUAL"
-                        ? "手机号"
-                        : "联系电话（经办人手机）"
-                    }
-                  >
-                    {partnerFieldPendingInlineHint(requiredGaps, "contactPhone") ? (
-                      <span className="font-medium text-amber-600">
-                        {partnerFieldPendingInlineHint(requiredGaps, "contactPhone")}
-                      </span>
-                    ) : (
-                      <span>
-                        {partner.contactPhone.length >= 11
-                          ? maskLoginPhone(partner.contactPhone)
-                          : partner.contactPhone || "——"}
-                      </span>
-                    )}
-                  </DetailField>
-                </div>
                 <div className="md:col-span-3">
                   <DetailField label="证件地址">
                     {partner.certAddress.fullAddress ? (

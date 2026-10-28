@@ -21,11 +21,13 @@ import { PARTNER_ARCHIVE_EMPTY_FILTERS } from "../lib/partner-archive-empty-filt
 import { filterPartnerArchives } from "../lib/list-utils"
 import { cn } from "@/lib/utils"
 import { PARTNER_SELECTOR_DEFAULT_PLACEHOLDER } from "../lib/partner-archive-ui-labels"
+import { resolvePartnerIdentityDisplay } from "../lib/partner-archive-rules"
 
 export type PartnerSelectorValue = {
   partnerId: string
   partnerNo: string
   name: string
+  idNumber: string
   idNumberMasked: string
   subjectType: PartnerSubject["subjectType"]
   roleType: RoleType
@@ -99,6 +101,7 @@ export function PartnerArchiveSelector({
           partnerId: item.id,
           partnerNo: item.partnerNo,
           name: item.name,
+          idNumber: item.idNumber,
           idNumberMasked: item.idNumberMasked,
           subjectType: item.subjectType,
           roleType,
@@ -116,7 +119,7 @@ export function PartnerArchiveSelector({
           const role = item.roles.find((r) => r.roleType === roleType)!
           return (
             <SelectItem key={item.id} value={item.id}>
-              {item.name} · {item.idNumberMasked} · {ROLE_TYPE_LABELS[roleType]}·
+              {item.name} · {resolvePartnerIdentityDisplay(item)} · {ROLE_TYPE_LABELS[roleType]}·
               {ROLE_STATUS_LABELS[role.roleStatus]}
             </SelectItem>
           )

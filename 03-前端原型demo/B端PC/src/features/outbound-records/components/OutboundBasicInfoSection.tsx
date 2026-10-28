@@ -35,6 +35,8 @@ import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotat
 import type { PartnerSelectorValue } from "@/features/partner-archives/components/PartnerArchiveSelector"
 import { partnerArchivesMock } from "@/features/partner-archives/mock/partner-archives.mock"
 import { resolveContactPhoneVerified } from "@/features/partner-archives/lib/contact-phone-verify"
+import { maskLoginPhone } from "@/features/partner-archives/lib/detail-utils"
+import { resolvePartnerIdentityDisplay } from "@/features/partner-archives/lib/partner-archive-rules"
 
 interface OutboundBasicInfoSectionProps {
   form: OutboundFormState
@@ -89,6 +91,7 @@ export function OutboundBasicInfoSection({
       partnerId: partner.id,
       partnerNo: partner.partnerNo,
       name: partner.name,
+      idNumber: partner.idNumber,
       idNumberMasked: partner.idNumberMasked,
       subjectType: partner.subjectType,
       roleType: "OWNER",
@@ -140,16 +143,14 @@ export function OutboundBasicInfoSection({
       )
       return
     }
-    const phoneMasked =
-      partner.contactPhone.length >= 11
-        ? `${partner.contactPhone.slice(0, 3)}****${partner.contactPhone.slice(-4)}`
-        : partner.contactPhone
+    const identityDisplay = resolvePartnerIdentityDisplay(partner)
+    const phoneMasked = maskLoginPhone(partner.contactPhone)
     onPatch({
       ownerPartnerId: partner.id,
       ownerName: partner.name,
       ownerIdentifier:
-        partner.subjectType === "INDIVIDUAL" ? phoneMasked : partner.idNumberMasked,
-      ownerIdCard: partner.idNumberMasked,
+        partner.subjectType === "INDIVIDUAL" ? phoneMasked : identityDisplay,
+      ownerIdCard: identityDisplay,
       contactPhone: partner.contactPhone,
       relatedNo: "",
       goodsList: [],

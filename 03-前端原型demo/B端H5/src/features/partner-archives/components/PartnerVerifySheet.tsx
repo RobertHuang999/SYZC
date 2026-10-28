@@ -8,14 +8,10 @@ import {
 } from "@prototype/B端PC/src/features/partner-archives/domain/types"
 import { partnerVerifyDialogCopy } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-ui-labels"
 import { maskLoginPhone } from "@prototype/B端PC/src/features/partner-archives/lib/detail-utils"
+import { maskPartnerIdentityIdentifier } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-rules"
 import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 
 const DEFAULT_MOCK_CODE = "888888"
-
-function maskIdNumber(idNumber: string): string {
-  if (idNumber.length !== 18) return idNumber
-  return `${idNumber.slice(0, 6)}********${idNumber.slice(-4)}`
-}
 
 export type PartnerVerifySheetProps = {
   open: boolean
@@ -104,7 +100,7 @@ export function PartnerVerifySheet({
   }
 
   const maskedPhone = maskLoginPhone(contactPhone)
-  const maskedId = maskIdNumber(idNumber)
+  const maskedId = maskPartnerIdentityIdentifier(idNumber, subjectType)
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">

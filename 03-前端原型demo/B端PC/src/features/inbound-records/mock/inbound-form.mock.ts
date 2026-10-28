@@ -2,6 +2,8 @@ import type { OwnerType, RelatedOrderOption } from "../domain/form-types"
 import { partnerArchivesMock } from "@/features/partner-archives/mock/partner-archives.mock"
 import { resolveContactPhoneVerified } from "@/features/partner-archives/lib/contact-phone-verify"
 import type { ContactPhoneVerifyStatus } from "@/features/partner-archives/domain/types"
+import { resolvePartnerIdentityDisplay } from "@/features/partner-archives/lib/partner-archive-rules"
+import { maskLoginPhone } from "@/features/partner-archives/lib/detail-utils"
 
 export type OwnerSearchRecord = {
   id: string
@@ -34,10 +36,12 @@ function buildPartnerOwnerSearchRecords(): OwnerSearchRecord[] {
         ownerType: isEnterprise ? "企业货主" : "个人货主",
         name: partner.name,
         ownerIdentifier: isEnterprise ? partner.idNumber : partner.contactPhone,
-        identifierMasked: partner.idNumberMasked,
+        identifierMasked: isEnterprise
+          ? resolvePartnerIdentityDisplay(partner)
+          : maskLoginPhone(partner.contactPhone),
         contactPhone: partner.contactPhone,
         idCardNo: isEnterprise ? undefined : partner.idNumber,
-        idCardMasked: isEnterprise ? undefined : partner.idNumberMasked,
+        idCardMasked: isEnterprise ? undefined : resolvePartnerIdentityDisplay(partner),
         contactPhoneVerified: resolveContactPhoneVerified(partner),
       }
     })

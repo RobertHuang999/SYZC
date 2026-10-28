@@ -18,6 +18,7 @@ import {
   CONTACT_PHONE_VERIFY_LABELS,
   resolveContactPhoneVerified,
 } from "@prototype/B端PC/src/features/partner-archives/lib/contact-phone-verify"
+import { resolvePartnerIdentityDisplay } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-rules"
 import { partnerArchiveDetailRoute, partnerArchiveFormRoute } from "../domain/constants"
 
 type PartnerArchiveCardProps = {
@@ -84,7 +85,9 @@ export function PartnerArchiveCard({ item, onRowAction }: PartnerArchiveCardProp
         </div>
         <div className="flex justify-between gap-2">
           <dt className="text-[#232D39]/55 shrink-0">身份标识</dt>
-          <dd className="font-medium text-[#232D39] text-right">{item.idNumberMasked}</dd>
+          <dd className="font-medium text-[#232D39] text-right">
+            {resolvePartnerIdentityDisplay(item)}
+          </dd>
         </div>
         {(item.linkedPartnerArchives?.length ?? 0) > 0 && (
           <div className="flex justify-between gap-2">

@@ -21,6 +21,7 @@ import {
 import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { partnerVerifyDialogCopy } from "../lib/partner-archive-ui-labels"
 import { maskLoginPhone } from "../lib/detail-utils"
+import { maskPartnerIdentityIdentifier } from "../lib/partner-archive-rules"
 
 export type PartnerVerifyDialogProps = {
   open: boolean
@@ -41,11 +42,6 @@ export type PartnerVerifyDialogProps = {
 }
 
 const DEFAULT_MOCK_CODE = "888888"
-
-function maskIdNumber(idNumber: string): string {
-  if (idNumber.length !== 18) return idNumber
-  return `${idNumber.slice(0, 6)}********${idNumber.slice(-4)}`
-}
 
 export function PartnerVerifyDialog({
   open,
@@ -112,7 +108,7 @@ export function PartnerVerifyDialog({
   }
 
   const maskedPhone = maskLoginPhone(contactPhone)
-  const maskedId = maskIdNumber(idNumber)
+  const maskedId = maskPartnerIdentityIdentifier(idNumber, subjectType)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

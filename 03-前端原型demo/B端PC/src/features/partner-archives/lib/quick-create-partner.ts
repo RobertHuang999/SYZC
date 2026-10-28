@@ -4,7 +4,7 @@ import { partnerArchivesMock } from "../mock/partner-archives.mock"
 import {
   findOwnerAddressConflict,
   findPartnerByIdNumber,
-  maskIdNumber,
+  maskPartnerIdentityIdentifier,
   ownerAddressConflictMessage,
 } from "./partner-archive-rules"
 import { collectArchiveRequiredGaps } from "./archive-required-fields-pending"
@@ -112,7 +112,7 @@ export function quickCreatePartnerFromJob(
     name: input.name.trim(),
     subjectType: input.subjectType,
     idNumber: trimmedId,
-    idNumberMasked: maskIdNumber(trimmedId),
+    idNumberMasked: maskPartnerIdentityIdentifier(trimmedId, input.subjectType),
     certAddress,
     contactPhone: input.contactPhone.trim(),
     agentName: input.subjectType === "ENTERPRISE" ? input.agentName?.trim() : undefined,
@@ -146,7 +146,7 @@ export function quickCreatePartnerFromJob(
     name: input.name.trim(),
     subjectType: input.subjectType,
     idNumber: trimmedId,
-    idNumberMasked: maskIdNumber(trimmedId),
+    idNumberMasked: maskPartnerIdentityIdentifier(trimmedId, input.subjectType),
     certAddress,
     contactPhone: input.contactPhone.trim(),
     contactPhoneVerified: input.verifiedOnCreate ? "VERIFIED" : "UNVERIFIED",

@@ -143,7 +143,9 @@ export function InboundInitiatePage() {
     patch({
       ownerType: isEnterprise ? "企业货主" : "个人货主",
       ownerName: partner.name,
-      ownerIdentifier: isEnterprise ? partner.idNumberMasked : partner.contactPhone.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2"),
+      ownerIdentifier: isEnterprise
+        ? partner.idNumber.trim().toUpperCase()
+        : partner.contactPhone.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2"),
       contactPhone: partner.contactPhone,
       idCardNo: isEnterprise ? "" : partner.idNumber,
       partnerId: partner.id,

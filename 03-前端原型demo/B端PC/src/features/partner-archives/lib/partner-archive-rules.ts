@@ -143,11 +143,37 @@ export function buildAppendedRole(
   }
 }
 
+/** 个人 18 位居民身份证：列表/详情只读展示脱敏 */
 export function maskIdNumber(idNumber: string): string {
   if (idNumber.length !== 18) {
     return idNumber
   }
   return `${idNumber.slice(0, 6)}********${idNumber.slice(-4)}`
+}
+
+/** 主体身份标识：企业统一社会信用代码明文；个人身份证脱敏 */
+export function maskPartnerIdentityIdentifier(
+  idNumber: string,
+  subjectType: SubjectType,
+): string {
+  const trimmed = idNumber.trim()
+  if (!trimmed) {
+    return "——"
+  }
+  if (subjectType === "ENTERPRISE") {
+    return trimmed.toUpperCase()
+  }
+  return maskIdNumber(trimmed)
+}
+
+export function resolvePartnerIdentityDisplay(
+  partner: Pick<PartnerSubject, "idNumber" | "idNumberMasked" | "subjectType">,
+): string {
+  const trimmed = partner.idNumber.trim()
+  if (trimmed) {
+    return maskPartnerIdentityIdentifier(trimmed, partner.subjectType)
+  }
+  return partner.idNumberMasked || "——"
 }
 
 export type FreezeBlockReason = {

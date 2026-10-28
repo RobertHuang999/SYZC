@@ -29,7 +29,7 @@ import {
   findOwnerAddressConflict,
   findPartnerByIdNumber,
   ownerAddressConflictMessage,
-  maskIdNumber,
+  maskPartnerIdentityIdentifier,
 } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-rules"
 import {
   appendLinkedPartnerMenus,
@@ -389,7 +389,7 @@ export function PartnerArchiveFormPage() {
       name: name.trim(),
       subjectType,
       idNumber: trimmedId,
-      idNumberMasked: maskIdNumber(trimmedId),
+      idNumberMasked: maskPartnerIdentityIdentifier(trimmedId, subjectType),
       certAddress: buildCertAddress(),
       contactPhone: contactPhone.trim(),
       contactPhoneVerified: options?.verifiedOnCreate ? "VERIFIED" : "UNVERIFIED",
@@ -538,7 +538,7 @@ export function PartnerArchiveFormPage() {
     if (canEditSubjectId) {
       const trimmedId = idNumber.trim()
       existing.idNumber = trimmedId
-      existing.idNumberMasked = maskIdNumber(trimmedId)
+      existing.idNumberMasked = maskPartnerIdentityIdentifier(trimmedId, subjectType)
     }
     if (!isFrozenLimitedEdit) {
       existing.contactPhone = contactPhone.trim()
