@@ -73,10 +73,10 @@ export function GoodsFormPage() {
     mode === "edit" && currentSku ? { ...currentSku.specValues } : {}
   )
   const [measureParam, setMeasureParam] = useState<string>(() =>
-    mode === "edit" && currentSku ? currentSku.measureParam : "重量"
+    mode === "edit" && currentSku ? currentSku.measureParam : ""
   )
   const [measureUnit, setMeasureUnit] = useState<string>(() =>
-    mode === "edit" && currentSku ? currentSku.measureUnit : "吨"
+    mode === "edit" && currentSku ? currentSku.measureUnit : ""
   )
   const [inboundCollect, setInboundCollect] = useState<GoodsInboundCollectConfig[]>(() =>
     mode === "edit" && currentSku
@@ -405,76 +405,38 @@ export function GoodsFormPage() {
                 </Select>
               </div>
 
-              {/* 计量参数 - 复合输入框（左侧自由输入，右侧无缝内嵌预设下拉） */}
+              {/* 计量参数 · 与单位同为手动录入（SKU-F02 分离维护） */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-foreground">
                   <span className="text-destructive mr-1">*</span>计量参数:
                 </Label>
-                <div className="flex h-9 rounded-md border border-input bg-background shadow-xs transition-colors focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary">
-                  <input
-                    disabled={isLocked}
-                    value={measureParam}
-                    placeholder="如：重量、数量"
-                    className="flex-1 min-w-0 bg-transparent px-3 py-1 text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
-                    onChange={(e) => setMeasureParam(e.target.value)}
-                  />
-                  <div className="flex items-center border-l border-input/60 bg-muted/30 hover:bg-muted/60 transition-colors">
-                    <Select
-                      disabled={isLocked}
-                      value={measureParam}
-                      onValueChange={(val) => {
-                        if (val) setMeasureParam(val)
-                      }}
-                    >
-                      <SelectTrigger className="h-full border-0 bg-transparent px-2 text-xs font-normal shadow-none hover:bg-transparent focus:ring-0 gap-1 text-foreground">
-                        <SelectValue placeholder="预设" />
-                      </SelectTrigger>
-                      <SelectContent align="end">
-                        {["重量", "数量", "个数", "体积", "长度"].map((opt) => (
-                          <SelectItem key={opt} value={opt}>
-                            {opt}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                <Input
+                  disabled={isLocked}
+                  value={measureParam}
+                  placeholder="如：重量、个数、体积"
+                  className="h-9"
+                  onChange={(e) => {
+                    setMeasureParam(e.target.value)
+                    setDirty(true)
+                  }}
+                />
               </div>
 
-              {/* 单位 - 复合输入框（左侧自由输入，右侧红框内嵌后缀单位选择） */}
+              {/* 计量单位 · 字段清单：单行文本（ASCII 如「包」） */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-foreground">
                   <span className="text-destructive mr-1">*</span>单位:
                 </Label>
-                <div className="flex h-9 rounded-md border border-input bg-background shadow-xs transition-colors focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary">
-                  <input
-                    disabled={isLocked}
-                    value={measureUnit}
-                    placeholder="如：吨、包、桶"
-                    className="flex-1 min-w-0 bg-transparent px-3 py-1 text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
-                    onChange={(e) => setMeasureUnit(e.target.value)}
-                  />
-                  <div className="flex items-center border-l border-input/60 bg-muted/30 hover:bg-muted/60 transition-colors">
-                    <Select
-                      disabled={isLocked}
-                      value={measureUnit}
-                      onValueChange={(val) => {
-                        if (val) setMeasureUnit(val)
-                      }}
-                    >
-                      <SelectTrigger className="h-full border-0 bg-transparent px-2 text-xs font-normal shadow-none hover:bg-transparent focus:ring-0 gap-1 text-foreground">
-                        <SelectValue placeholder="常用" />
-                      </SelectTrigger>
-                      <SelectContent align="end">
-                        {["吨", "千克", "包", "桶", "件", "箱", "米", "卷"].map((u) => (
-                          <SelectItem key={u} value={u}>
-                            {u}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                <Input
+                  disabled={isLocked}
+                  value={measureUnit}
+                  placeholder="如：吨、包、桶"
+                  className="h-9"
+                  onChange={(e) => {
+                    setMeasureUnit(e.target.value)
+                    setDirty(true)
+                  }}
+                />
               </div>
             </div>
 
