@@ -177,7 +177,7 @@ export function PartnerArchiveFormPage() {
   >(undefined)
   const [lastCreatedPartnerId, setLastCreatedPartnerId] = useState<string | null>(null)
   const [lastSaveVerified, setLastSaveVerified] = useState(false)
-  const [activeRoleInfo, setActiveRoleInfo] = useState<string | null>(null)
+  const [activeRoleInfo, setActiveRoleInfo] = useState<PartnerArchiveMenuLabel | null>(null)
 
   const appendMenuOptions = useMemo(
     () =>
