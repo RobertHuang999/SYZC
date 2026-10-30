@@ -193,12 +193,19 @@ textarea {
   height: 100vh;
   min-height: 620px;
   flex-direction: column;
+  /* 顶栏固定在视口顶部，这里预留出它的高度 */
+  padding-top: 64px;
   overflow: hidden;
   color: #1d2129;
 }
 
 .header-bar {
-  position: relative;
+  /* 固定在视口宽度上：窗口窄于整页最小宽度时，右侧按钮仍在可视区内，
+     不会被整页的 960/1080px 宽度顶出屏幕 */
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
   z-index: 10;
   display: flex;
   height: 64px;
@@ -255,8 +262,21 @@ textarea {
 }
 
 .header-actions {
+  position: relative;
   height: 100%;
   gap: 8px;
+}
+
+/* 顶部模块导航在窄窗口下横向滚动时，用一层白色渐隐与右侧按钮隔开，避免文字被生硬切断 */
+.header-actions::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: -20px;
+  width: 20px;
+  background: linear-gradient(90deg, rgb(255 255 255 / 0%), #fff);
+  pointer-events: none;
 }
 
 .profile-button {
