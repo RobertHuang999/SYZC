@@ -277,60 +277,61 @@ textarea {
   font-size: 12px;
 }
 
-.permission-reference-button {
+.version-view-trigger {
   display: inline-flex;
   height: 32px;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   padding: 0 10px;
   color: #4e5969;
   font-size: 12px;
   font-weight: 500;
-  text-decoration: none;
+  white-space: nowrap;
   background: transparent;
   border: 1px solid #e5e6eb;
   border-radius: 8px;
+  cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.permission-reference-button:hover {
+.version-view-trigger:hover {
   color: #1d2129;
   background: #f7f8fa;
   border-color: #c9cdd4;
 }
 
-.permission-reference-button.is-active {
+.version-view-trigger.is-highlight-on {
+  color: #ad6800;
+  background: #fff7e8;
+  border-color: #ffd591;
+}
+
+.version-view-trigger.is-highlight-on:hover {
+  background: #fff1d6;
+  border-color: #ffc069;
+}
+
+.version-view-trigger.is-on-reference {
   color: #165dff;
   background: #e8f3ff;
   border-color: #bedaff;
 }
 
-.iteration-changelog-button {
-  display: inline-flex;
-  height: 32px;
-  align-items: center;
-  gap: 6px;
-  padding: 0 10px;
-  color: #4e5969;
-  font-size: 12px;
-  font-weight: 500;
-  background: transparent;
-  border: 1px solid #e5e6eb;
-  border-radius: 8px;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-  cursor: pointer;
+.version-view-trigger-dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 9999px;
+  background: #ff9a2e;
 }
 
-.iteration-changelog-button:hover {
-  color: #1d2129;
-  background: #f7f8fa;
-  border-color: #c9cdd4;
+.version-view-trigger-dot.is-off {
+  background: #c9cdd4;
 }
 
-.iteration-changelog-button.is-active {
-  color: #722ed1;
-  background: #f9f0ff;
-  border-color: #d3adf7;
+.version-view-trigger-caret {
+  flex: none;
+  opacity: 0.65;
 }
 
 .main-area-full {

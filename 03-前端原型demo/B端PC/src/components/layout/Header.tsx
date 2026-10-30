@@ -1,19 +1,9 @@
-import { ChevronDown, KeyRound, Package } from "lucide-react"
-import { NavLink, useLocation } from "react-router-dom"
+import { ChevronDown, Package } from "lucide-react"
 import { TopModuleNav } from "@/components/layout/TopModuleNav"
-import { IterationRecordButton } from "@/features/permission-reference/components/IterationRecordButton"
-import { IterationViewSwitch } from "@/shared/components/IterationHighlight"
-import {
-  PERMISSION_REFERENCE_PATH,
-  type TopModule,
-} from "@/config/navigation"
-import { cn } from "@/lib/utils"
+import { VersionViewMenu } from "@/components/layout/VersionViewMenu"
+import type { TopModule } from "@/config/navigation"
 
 export function Header({ activeModule }: { activeModule: TopModule }) {
-  const { pathname } = useLocation()
-  const onPermissionPage =
-    pathname === PERMISSION_REFERENCE_PATH || pathname.startsWith(`${PERMISSION_REFERENCE_PATH}/`)
-
   return (
     <header className="header-bar">
       <div className="header-left">
@@ -29,17 +19,7 @@ export function Header({ activeModule }: { activeModule: TopModule }) {
       </div>
 
       <div className="header-actions">
-        <IterationViewSwitch />
-        <IterationRecordButton />
-
-        <NavLink
-          to={PERMISSION_REFERENCE_PATH}
-          className={cn("permission-reference-button", onPermissionPage && "is-active")}
-          title="查看全系统页面路径、操作按钮与数据可见范围对照表"
-        >
-          <KeyRound size={14} strokeWidth={1.8} />
-          <span>功能与数据权限</span>
-        </NavLink>
+        <VersionViewMenu />
 
         <button className="profile-button" type="button" aria-label="个人菜单">
           <span className="profile-avatar">管</span>
