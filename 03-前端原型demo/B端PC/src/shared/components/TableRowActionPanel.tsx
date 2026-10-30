@@ -220,7 +220,13 @@ export function TableRowActionPanel({ actions, fixedCols }: TableRowActionPanelP
   }
 
   return (
-    <div className={cn("mx-auto py-0.5", TABLE_ROW_ACTION_PANEL_WIDTH_CLASS)} style={rootStyle}>
+    <div
+      className={cn(
+        "table-row-action-panel mx-auto py-0.5",
+        TABLE_ROW_ACTION_PANEL_WIDTH_CLASS
+      )}
+      style={rootStyle}
+    >
       <div className="grid justify-items-stretch" style={gridStyle}>
         {cells.map((cell, index) => (
           <div

@@ -1,7 +1,18 @@
 import { useEffect, useMemo, useState } from "react"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { partnerArchiveBaseFromPathname } from "@prototype/shared/partner-archives/partner-archive-routes"
-import { AlertTriangleIcon, ArrowLeftIcon } from "lucide-react"
+import {
+  AlertCircleIcon,
+  AlertTriangleIcon,
+  ArrowLeftIcon,
+  CheckCircle2Icon,
+  InfoIcon,
+} from "lucide-react"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   demoPartnerEnterpriseLicenseOcr,
   PARTNER_ENTERPRISE_LICENSE_OCR_TOAST_RECOGNIZING,
@@ -1253,20 +1264,226 @@ export function PartnerArchiveFormPage() {
                 <CardContent className="space-y-3">
                   <ProductFieldHint>{PARTNER_FORM_INITIAL_ROLES_USER_HINT}</ProductFieldHint>
                   <PrototypeSpecCallout>{PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE}</PrototypeSpecCallout>
-                  <div className="flex flex-wrap gap-2 pt-1">
+                  
+                  {/* 追加角色选择区：支持气泡提醒与叹号缺项诊断 */}
+                  <div className="flex flex-wrap items-center gap-3 pt-1">
                     {appendMenuOptions.map((menu) => {
                       const isSelected = selectedAppendMenus.includes(menu)
+                      
+                      // 动态计算该角色所需必填要素
+                      const reqInfo: {
+                        title: string
+                        items: { label: string; ready: boolean; fieldId?: string }[]
+                        missingCount: number
+                        businessTip: string
+                      } = (() => {
+                        if (menu === "提货人信息") {
+                          const items =
+                            subjectType === "ENTERPRISE"
+                              ? [
+                                  { label: "企业全称", ready: Boolean(name.trim()), fieldId: "partner-name" },
+                                  { label: "统一社会信用代码", ready: Boolean(idNumber.trim()), fieldId: "partner-idNumber" },
+                                  { label: "提货经办人姓名", ready: Boolean(agentName.trim()), fieldId: "partner-agent" },
+                                  { label: "提货经办人手机", ready: Boolean(contactPhone.trim()), fieldId: "partner-phone" },
+                                  { label: "经办人身份证号", ready: Boolean(agentIdNumber.trim()), fieldId: "partner-agent-id" },
+                                ]
+                              : [
+                                  { label: "真实姓名", ready: Boolean(name.trim()), fieldId: "partner-name" },
+                                  { label: "公民身份证号", ready: Boolean(idNumber.trim()), fieldId: "partner-idNumber" },
+                                  { label: "联系手机", ready: Boolean(contactPhone.trim()), fieldId: "partner-phone" },
+                                ]
+                          const missing = items.filter((i) => !i.ready).length
+                          return {
+                            title: "【提货人档案】业务要求与必填核验",
+                            items,
+                            missingCount: missing,
+                            businessTip: "提货人在仓储出库提货核销时必须核验经办人身份证与人脸比对（PP-R01）。",
+                          }
+                        }
+
+                        if (menu === "资金方信息" || menu === "服务方信息") {
+                          const items = [
+                            { label: "企业全称", ready: Boolean(name.trim()), fieldId: "partner-name" },
+                            { label: "统一社会信用代码", ready: Boolean(idNumber.trim()), fieldId: "partner-idNumber" },
+                          ]
+                          const missing = items.filter((i) => !i.ready).length
+                          return {
+                            title: `【${menu}】业务要求与要素核验`,
+                            items,
+                            missingCount: missing,
+                            businessTip: "资金方与服务方仅支持企业主体；保存时仅校验企业名称与统一社会信用代码，无需额外经办人身份证或证件地址。",
+                          }
+                        }
+
+                        // 默认货主信息
+                        const items = [
+                          { label: "主体名称", ready: Boolean(name.trim()), fieldId: "partner-name" },
+                          { label: "身份标识", ready: Boolean(idNumber.trim()), fieldId: "partner-idNumber" },
+                          { label: "联系手机", ready: Boolean(contactPhone.trim()), fieldId: "partner-phone" },
+                          { label: "证件登记地址", ready: Boolean(detailAddress.trim()), fieldId: "partner-detailAddress" },
+                        ]
+                        const missing = items.filter((i) => !i.ready).length
+                        return {
+                          title: "【货主档案】业务要求与必填核验",
+                          items,
+                          missingCount: missing,
+                          businessTip: "货权归属与质押业务主体，受货主准入证件登记地址一人一址规则管控（P01/P02）。",
+                        }
+                      })()
+
+                      const hasMissing = reqInfo.missingCount > 0
+
+                      const handleFocusField = (fieldId?: string) => {
+                        if (!fieldId) return
+                        const el = document.getElementById(fieldId)
+                        if (el) {
+                          el.scrollIntoView({ behavior: "smooth", block: "center" })
+                          el.focus()
+                        }
+                      }
+
                       return (
-                        <Button
+                        <div
                           key={menu}
-                          type="button"
-                          variant={isSelected ? "default" : "outline"}
-                          size="sm"
-                          className={cn(!isSelected && "bg-background")}
-                          onClick={() => toggleAppendMenu(menu)}
+                          className={cn(
+                            "inline-flex items-center rounded-lg border text-sm transition-all shadow-sm",
+                            isSelected
+                              ? hasMissing
+                                ? "border-amber-300 bg-amber-50/70 text-amber-900 ring-1 ring-amber-300/60"
+                                : "border-primary bg-primary/10 text-primary ring-1 ring-primary/40 font-medium"
+                              : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50",
+                          )}
                         >
-                          {menu}
-                        </Button>
+                          {/* 角色点击选择区 */}
+                          <button
+                            type="button"
+                            onClick={() => toggleAppendMenu(menu)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 font-medium hover:opacity-85"
+                          >
+                            <span>{menu}</span>
+                            {isSelected && (
+                              <span className="text-xs">
+                                {hasMissing ? (
+                                  <span className="rounded bg-amber-200/80 px-1 py-0.2 text-[11px] font-semibold text-amber-800">
+                                    缺{reqInfo.missingCount}项
+                                  </span>
+                                ) : (
+                                  <span className="rounded bg-emerald-100 px-1 py-0.2 text-[11px] font-semibold text-emerald-700">
+                                    已齐备
+                                  </span>
+                                )}
+                              </span>
+                            )}
+                          </button>
+
+                          {/* 叹号气泡提示触发区 */}
+                          <div className="border-l border-current/15 px-1.5 py-1">
+                            <Popover>
+                              <PopoverTrigger
+                                render={
+                                  <button
+                                    type="button"
+                                    aria-label={`查看${menu}要求`}
+                                    className={cn(
+                                      "inline-flex size-6 items-center justify-center rounded-full transition-colors",
+                                      isSelected
+                                        ? hasMissing
+                                          ? "text-amber-600 hover:bg-amber-100/80"
+                                          : "text-emerald-600 hover:bg-emerald-100/80"
+                                        : "text-slate-400 hover:bg-slate-100 hover:text-slate-600",
+                                    )}
+                                  />
+                                }
+                              >
+                                {isSelected ? (
+                                  hasMissing ? (
+                                    <AlertCircleIcon className="size-4 animate-pulse text-amber-600" />
+                                  ) : (
+                                    <CheckCircle2Icon className="size-4 text-emerald-600" />
+                                  )
+                                ) : (
+                                  <InfoIcon className="size-3.5" />
+                                )}
+                              </PopoverTrigger>
+                              <PopoverContent
+                                align="start"
+                                side="top"
+                                className="w-80 space-y-2.5 rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-xl text-slate-800"
+                              >
+                                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                                  <span className="font-semibold text-xs text-slate-900">
+                                    {reqInfo.title}
+                                  </span>
+                                  {isSelected && (
+                                    <span
+                                      className={cn(
+                                        "text-[11px] font-medium px-1.5 py-0.5 rounded",
+                                        hasMissing
+                                          ? "bg-amber-100 text-amber-800"
+                                          : "bg-emerald-100 text-emerald-800",
+                                      )}
+                                    >
+                                      {hasMissing ? `缺 ${reqInfo.missingCount} 项必填` : "全部就绪"}
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="space-y-1.5 text-xs">
+                                  <div className="text-[11px] font-medium text-slate-500">
+                                    对应业务要素检查状态：
+                                  </div>
+                                  <ul className="space-y-1 rounded-md bg-slate-50/80 p-2 border border-slate-100">
+                                    {reqInfo.items.map((item) => (
+                                      <li
+                                        key={item.label}
+                                        className="flex items-center justify-between py-0.5"
+                                      >
+                                        <span className="flex items-center gap-1.5">
+                                          {item.ready ? (
+                                            <span className="text-emerald-600 text-xs font-bold">✓</span>
+                                          ) : (
+                                            <span className="text-amber-500 text-xs font-bold">✗</span>
+                                          )}
+                                          <span
+                                            className={cn(
+                                              item.ready ? "text-slate-700" : "text-amber-900 font-medium",
+                                            )}
+                                          >
+                                            {item.label}
+                                          </span>
+                                        </span>
+                                        {!item.ready && item.fieldId ? (
+                                          <button
+                                            type="button"
+                                            onClick={() => handleFocusField(item.fieldId)}
+                                            className="text-[11px] text-primary hover:underline"
+                                          >
+                                            去录入 →
+                                          </button>
+                                        ) : (
+                                          <span className="text-[10px] text-slate-400">已就绪</span>
+                                        )}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+
+                                <div className="rounded bg-blue-50/70 p-2 text-[11px] text-blue-900/90 leading-relaxed border border-blue-100/60">
+                                  <div className="font-semibold mb-0.5 flex items-center gap-1">
+                                    <InfoIcon className="size-3 text-blue-600" />
+                                    业务规则说明
+                                  </div>
+                                  <p>{reqInfo.businessTip}</p>
+                                  {menu === "提货人信息" && (
+                                    <p className="mt-1 text-slate-500">
+                                      💡 暂无完整资料？亦可勾选直接提交，系统将以「待补全」状态建立档案，后续出库前补齐即可。
+                                    </p>
+                                  )}
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                        </div>
                       )
                     })}
                   </div>

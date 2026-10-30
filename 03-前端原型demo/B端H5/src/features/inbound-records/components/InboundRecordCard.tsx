@@ -1,172 +1,91 @@
 import { useState } from "react"
-import { AlertCircle, ChevronRight, Download, Clock, User } from "lucide-react"
-import { Link } from "react-router-dom"
-import { inboundDetailRoute } from "../domain/constants"
+import { AlertCircle } from "lucide-react"
+import { inboundDetailRoute, FLOW_STATUS_LABEL } from "../domain/constants"
 import type { MobileInboundRecord } from "../domain/types"
 import { MobileGoodsNamesSheet } from "./MobileGoodsNamesSheet"
-import { H5_CARD } from "@/shared/h5-ui-theme"
-import { DocumentManagementSheet } from "@/shared/document-management"
+import {
+  RecordCard,
+  RecordCardMetricRow,
+  type RecordCardStatusTone,
+} from "@/shared/components/RecordCard"
 
 type Props = {
   item: MobileInboundRecord
   onDownload?: (kind: "excel" | "pdf", item: MobileInboundRecord) => void
 }
 
+/** 流水状态 → 语义色（见 05 第 3 节） */
+const STATUS_TONE: Record<MobileInboundRecord["flowStatus"], RecordCardStatusTone> = {
+  PENDING: "amber",
+  PROCESSING: "blue",
+  APPROVED: "emerald",
+  REJECTED: "rose",
+  WITHDRAWN: "slate",
+}
+
 export function InboundRecordCard({ item, onDownload }: Props) {
-  const [downloadToast, setDownloadToast] = useState<string | null>(null)
   const [goodsSheetOpen, setGoodsSheetOpen] = useState(false)
-  const [docsOpen, setDocsOpen] = useState(false)
   const multiGoods = item.goodsNames.length > 1
-
-  const handleDownloadDoc = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (onDownload) {
-      onDownload("pdf", item)
-    } else {
-      setDownloadToast(`单据下载中: ${item.orderNo}`)
-      setTimeout(() => setDownloadToast(null), 2000)
-    }
-  }
-
-  const handleDownloadRecord = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (onDownload) {
-      onDownload("excel", item)
-    } else {
-      setDownloadToast(`下载记录中: ${item.orderNo}`)
-      setTimeout(() => setDownloadToast(null), 2000)
-    }
-  }
-
-  const ownerFirstChar = item.ownerName ? item.ownerName.charAt(0) : "货"
+  // creatorDisplay 形如「张三(森云监管服务有限公司)」
+  const creatorMatch = item.creatorDisplay.match(/^(.+?)\((.+)\)$/)
 
   return (
-    <div className={`${H5_CARD} mb-3 hover:border-blue-200 hover:shadow-sm`}>
-      <div className="flex items-center justify-between border-b border-gray-100/80 bg-[#f8fafc]/80 px-3.5 py-2">
-        <span className="text-xs font-medium text-gray-700">入库·{item.inboundType}</span>
-        {item.hasUnprintedQrCode && (
-          <div className="flex items-center text-amber-500" title="未打印二维码">
+    <RecordCard
+      orderNo={item.orderNo}
+      detailTo={inboundDetailRoute(item.id, "goods")}
+      typeLabel={item.inboundType}
+      statusLabel={FLOW_STATUS_LABEL[item.flowStatus]}
+      statusTone={STATUS_TONE[item.flowStatus]}
+      ownerName={item.ownerName}
+      ownerIdentifier={item.ownerIdentifierMasked}
+      person={creatorMatch?.[1] ?? item.creatorDisplay}
+      personOrg={creatorMatch?.[2]}
+      time={item.createdAt}
+      alert={
+        item.hasUnprintedQrCode ? (
+          <span className="flex items-center text-amber-500" title="未打印二维码">
             <AlertCircle className="size-4 stroke-[2.2]" />
-          </div>
-        )}
-      </div>
-
-      <div className="space-y-2.5 p-3.5">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-2">
-            <div className="flex size-5 shrink-0 items-center justify-center rounded bg-blue-600 text-[11px] font-bold text-white">
-              {ownerFirstChar}
-            </div>
-            <div className="min-w-0 truncate text-sm font-semibold text-gray-900">
-              {item.ownerName}{" "}
-              <span className="ml-1 text-xs font-medium text-gray-500">
-                {item.ownerIdentifierMasked}
-              </span>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={handleDownloadDoc}
-            className="ml-2 flex shrink-0 cursor-pointer items-center gap-1 text-xs font-medium text-blue-600 active:opacity-75"
-          >
-            <Download className="size-3.5" />
-            <span>单据</span>
-          </button>
-        </div>
-
-        <div className="rounded-lg bg-[#232D39]/5 p-3 space-y-2 text-xs">
-          <div className="flex items-baseline justify-between">
-            <span className="shrink-0 text-[#232D39]/60">入库单号</span>
-            <Link
-              to={inboundDetailRoute(item.id)}
-              className="max-w-[65%] truncate pl-2 text-right font-medium text-blue-600"
-            >
-              {item.orderNo}
-            </Link>
-          </div>
-          <div className="flex items-baseline justify-between">
-            <span className="shrink-0 text-[#232D39]/60">仓库名称</span>
-            <span className="truncate pl-2 text-right text-[#232D39]">{item.warehouseName}</span>
-          </div>
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="shrink-0 text-[#232D39]/60">入库货品</span>
-            {multiGoods ? (
-              <button
-                type="button"
-                className="flex min-w-0 items-center gap-0.5 text-right text-[#232D39]"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  setGoodsSheetOpen(true)
-                }}
-              >
-                <span className="truncate">{item.goodsSummary}</span>
-                <ChevronRight className="size-3.5 shrink-0 text-[#232D39]/40" />
-              </button>
-            ) : (
-              <span className="truncate pl-2 text-right text-[#232D39]">{item.goodsSummary}</span>
-            )}
-          </div>
-          <div className="flex items-baseline justify-between">
-            <span className="shrink-0 text-[#232D39]/60">入库日期</span>
-            <span className="pl-2 text-right text-[#232D39]">{item.inboundDate}</span>
-          </div>
-          <div className="flex items-baseline justify-between">
-            <span className="shrink-0 text-[#232D39]/60">入库数量</span>
-            <span className="pl-2 text-right font-medium text-[#232D39]">
-              {item.quantityLabel}
-              {item.unit ? ` ${item.unit}` : ""}
-            </span>
-          </div>
-        </div>
-
-        <div className="space-y-1 pt-0.5 text-xs text-[#232D39]/50">
-          <div className="flex items-center gap-1.5">
-            <User className="size-3 shrink-0 text-[#232D39]/35" />
-            <span className="truncate">制单人: {item.creatorDisplay}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Clock className="size-3 shrink-0 text-[#232D39]/35" />
-            <span>制单时间: {item.createdAt}</span>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-end gap-4 pt-2 text-xs font-medium">
-          <button
-            type="button"
-            onClick={handleDownloadRecord}
-            className="cursor-pointer text-blue-600 active:opacity-75"
-          >
-            下载记录
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              setDocsOpen(true)
-            }}
-            className="cursor-pointer text-blue-600 active:opacity-75"
-          >
-            资料管理
-          </button>
-          <Link
-            to={inboundDetailRoute(item.id)}
-            className="text-blue-600 active:opacity-75"
-          >
-            查看详情
-          </Link>
-        </div>
-      </div>
-
-      {downloadToast && (
-        <div className="fixed bottom-20 left-1/2 z-50 -translate-x-1/2 rounded-full bg-black/80 px-3 py-1.5 text-xs text-white">
-          {downloadToast}
-        </div>
-      )}
-
+          </span>
+        ) : null
+      }
+      metrics={
+        <>
+          <RecordCardMetricRow label="仓库名称" value={item.warehouseName} />
+          <RecordCardMetricRow
+            label="入库货品"
+            value={item.goodsSummary}
+            onClick={multiGoods ? () => setGoodsSheetOpen(true) : undefined}
+          />
+          <RecordCardMetricRow label="入库日期" value={item.inboundDate} />
+          <RecordCardMetricRow
+            label="入库数量"
+            value={`${item.quantityLabel}${item.unit ? ` ${item.unit}` : ""}`}
+          />
+        </>
+      }
+      actions={[
+        {
+          key: "doc",
+          label: "单据下载",
+          onClick: () => onDownload?.("pdf", item),
+        },
+        {
+          key: "docs",
+          label: "资料管理",
+          to: inboundDetailRoute(item.id, "documents"),
+        },
+        {
+          key: "detail",
+          label: "查看详情",
+          to: inboundDetailRoute(item.id, "goods"),
+        },
+        {
+          key: "record",
+          label: "下载记录",
+          onClick: () => onDownload?.("excel", item),
+        },
+      ]}
+    >
       <MobileGoodsNamesSheet
         open={goodsSheetOpen}
         orderNo={item.orderNo}
@@ -174,14 +93,6 @@ export function InboundRecordCard({ item, onDownload }: Props) {
         onClose={() => setGoodsSheetOpen(false)}
       />
 
-      <DocumentManagementSheet
-        open={docsOpen}
-        orderNo={item.orderNo}
-        orderType="inbound"
-        ownerName={item.ownerName}
-        warehouseName={item.warehouseName}
-        onClose={() => setDocsOpen(false)}
-      />
-    </div>
+    </RecordCard>
   )
 }

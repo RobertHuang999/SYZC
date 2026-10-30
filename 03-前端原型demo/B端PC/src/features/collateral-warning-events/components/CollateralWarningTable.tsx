@@ -231,7 +231,7 @@ export function CollateralWarningTable({
                       )}
                     </TableCell>
                     <TableCell>
-                      <TableDateTimeCell value={event.warningTime} plain />
+                      <TableDateTimeCell value={event.warningTime} stackedPlain />
                     </TableCell>
                     <TableCell>
                       <TableProcessedInfoCell

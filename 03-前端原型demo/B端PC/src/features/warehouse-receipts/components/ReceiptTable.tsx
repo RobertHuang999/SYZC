@@ -155,7 +155,7 @@ export function ReceiptTable({
                   <GoodsCell receipt={row} />
 
                   <TableCell className={cn(cellBase, "whitespace-nowrap")}>
-                    <TableDateTimeCell value={row.establishedAt} plain />
+                    <TableDateTimeCell value={row.establishedAt} stackedPlain />
                   </TableCell>
 
                   <TableCell className={cellBase}>

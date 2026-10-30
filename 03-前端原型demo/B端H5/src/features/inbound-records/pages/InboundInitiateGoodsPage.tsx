@@ -103,26 +103,53 @@ export function InboundInitiateGoodsPage() {
       return false
     }
 
-    // 入库收集项：必填强校验 + 区间/日期常识校验
+    // 入库收集项：必填强校验 + 区间/百分比/保质期/日期常识校验（对齐 06/07 全链路规则）
     for (const line of form.goodsLines) {
       const sku = getSkuById(line.skuId)
       if (!sku) continue
 
-      const emptyRequired = sku.inboundCollect.find(
-        (field) =>
-          field.required && !(line.collectValues[field.fieldKey] ?? "").trim()
-      )
-      if (emptyRequired) {
-        showToast(`请填写「${emptyRequired.label}」`)
-        return false
-      }
+      for (const field of sku.inboundCollect) {
+        const raw = (line.collectValues[field.fieldKey] ?? "").trim()
+        if (field.control === "range") {
+          const [min = "", max = ""] = raw.split("|").map((s) => s.trim())
+          if (field.required && (!min || !max)) {
+            showToast(`请完整填写「${field.label}」的最小值和最大值`)
+            return false
+          }
+          if ((min && !max) || (!min && max)) {
+            showToast(`请完整填写「${field.label}」的最小值和最大值`)
+            return false
+          }
+          if (min && max && Number(min) > Number(max)) {
+            showToast(`「${field.label}」最小值不能大于最大值，请核对`)
+            return false
+          }
+          continue
+        }
 
-      const rangeField = sku.inboundCollect.find((field) => field.control === "range")
-      if (rangeField) {
-        const [min, max] = (line.collectValues[rangeField.fieldKey] ?? "").split("|")
-        if (min && max && Number(min) > Number(max)) {
-          showToast(`「${rangeField.label}」最小值不能大于最大值，请核对`)
+        if (field.required && !raw) {
+          showToast(`请填写「${field.label}」`)
           return false
+        }
+
+        if (field.control === "percent" && raw) {
+          const n = Number(raw)
+          if (!Number.isFinite(n) || n < 0 || n > 100) {
+            showToast(`「${field.label}」须为 0 至 100 之间的有效百分比数值`)
+            return false
+          }
+        }
+
+        if (field.control === "period" && raw) {
+          const n = Number(raw)
+          if (!Number.isInteger(n) || n < 1 || n > 9999) {
+            showToast(`「${field.label}」须为 1 至 9999 的正整数`)
+            return false
+          }
+          if (!field.unitLocked && !(line.collectValues[`${field.fieldKey}Unit`] ?? field.unit ?? "").trim()) {
+            showToast(`请选择「${field.label}」的单位`)
+            return false
+          }
         }
       }
 

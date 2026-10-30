@@ -16,6 +16,8 @@ export type GoodsInboundCollectConfig = {
   shelfLifeUnit?: ShelfLifeUnit
   /** 保质期专属：建议默认数值（正整数 1~9999） */
   suggestedValue?: string
+  /** 下拉单选框专属：从 07 字段池枚举选项中勾选的当前货品适用候选项列表 */
+  customOptions?: string[]
 }
 
 export type PriceHistoryEntry = {
@@ -99,6 +101,14 @@ export type SubcategoryFilter = {
 
 export type PriceDisplayUnit = "YUAN" | "WAN"
 
+/** 业务属性域分类（左树 5 大业务域） */
+export type InboundCollectDomain =
+  | "TIME_AND_SHELF_LIFE"
+  | "TRACEABILITY"
+  | "QUALITY_AND_PHYSICAL"
+  | "STORAGE_AND_SAFETY"
+  | "PACKAGING_AND_SPEC"
+
 /** 入库收集项标准控件类型（对应字段清单 6.1 节） */
 export type InboundCollectControlType =
   | "周期组合项"
@@ -114,6 +124,10 @@ export type InboundCollectFieldConfig = {
   id: string
   /** 收集项名称，租户内全局唯一，2~30 字符 */
   name: string
+  /** 所属业务域分类 */
+  domain?: InboundCollectDomain
+  /** 业务域中文标签 */
+  domainLabel?: string
   /** 控件类型 */
   controlType: InboundCollectControlType
   /** 度量单位 / 选项摘要（如“支持: 月 / 天 / 年”、“℃”、“%”、“A级优等品, B级合格品”、“—”） */
@@ -144,6 +158,8 @@ export type InboundCollectFieldConfig = {
   version: number
   /** 是否已被下游品类或货品引用（用于编辑锁定与两阶段删除阻断） */
   hasDownstreamRef: boolean
+  /** 下游引用品类数量统计 */
+  downstreamCategoryCount?: number
 }
 
 /** 保质期专项度量单位白名单配置（R05） */
@@ -160,6 +176,7 @@ export type ShelfLifeUnitConfig = {
 
 export type InboundCollectFilter = {
   name: string
+  domain?: string
   controlType: string
   status: "" | GoodsStatus
   createdAtRange?: [string, string]

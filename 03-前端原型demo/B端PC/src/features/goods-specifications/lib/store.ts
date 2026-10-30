@@ -1,5 +1,12 @@
 import { useSyncExternalStore } from "react"
 import {
+  syncDynamicGoodsSkuCatalog,
+  type GoodsSkuRecord,
+  type InboundCollectControlKind,
+  type InboundCollectFieldDef,
+  type SyncedCollectFieldOverride,
+} from "@prototype/shared/goods/goods-sku-catalog"
+import {
   MOCK_GOODS_SKUS,
   MOCK_INBOUND_COLLECT_FIELDS,
   MOCK_MAJOR_CATEGORIES,
@@ -19,6 +26,55 @@ import type {
 } from "../domain/types"
 
 const DEFAULT_OPERATOR = "当前用户"
+
+const FIELD_ID_TO_CATALOG_KEY: Record<string, string> = {
+  "col-shelf-life": "shelfLife",
+  "col-prod-date": "productionDate",
+  "col-exp-date": "expiryDate",
+  "col-packaging": "packaging",
+  "col-origin": "origin",
+  "col-batch-no": "batchNo",
+  "col-heat-no": "furnaceNo",
+  "col-producer": "producer",
+  "col-hazard-level": "hazard",
+  "col-quality-grade": "qualityGrade",
+  "col-inspect-date": "inspectDate",
+  "col-inspect-org": "inspectOrg",
+  "col-inspect-report": "reportNo",
+  "col-storage-mode": "storage",
+  "col-temp": "temperatureRange",
+  "col-humidity": "humidityRange",
+  "col-moisture": "moisture",
+  "col-impurity": "impurity",
+  "col-pkg-grade": "packageGrade",
+}
+
+function mapControlTypeToCatalogKind(
+  controlType: InboundCollectControlType
+): InboundCollectControlKind {
+  switch (controlType) {
+    case "下拉单选框":
+      return "select"
+    case "日期选择器":
+      return "date"
+    case "数字区间框":
+      return "range"
+    case "百分比数值框":
+      return "percent"
+    case "周期组合项":
+      return "period"
+    case "省市区三级联动":
+      return "region"
+    default:
+      return "text"
+  }
+}
+
+function mapShelfLifeUnitLabel(unit?: "DAY" | "MONTH" | "YEAR"): string {
+  if (unit === "DAY") return "天"
+  if (unit === "YEAR") return "年"
+  return "个月"
+}
 
 let categories: MajorCategory[] = MOCK_MAJOR_CATEGORIES.map((item) => ({
   ...item,
@@ -44,11 +100,97 @@ let shelfLifeUnitConfig: ShelfLifeUnitConfig = {
   ...MOCK_SHELF_LIFE_UNIT_CONFIG,
 }
 
+function syncToDownstreamCatalog() {
+  const fieldOverrides: SyncedCollectFieldOverride[] = inboundCollectFields.map(
+    (field) => ({
+      fieldKey: FIELD_ID_TO_CATALOG_KEY[field.id] ?? field.id,
+      label: field.name,
+      control: mapControlTypeToCatalogKind(field.controlType),
+      unit: field.unitLabel,
+      options: field.options ? [...field.options] : undefined,
+      placeholder: field.placeholder,
+    })
+  )
+
+  const dynamicSkus: GoodsSkuRecord[] = skus.map((sku) => {
+    const sub = subcategories.find((s) => s.id === sku.subcategoryId)
+    const cat = sub ? categories.find((c) => c.id === sub.categoryId) : undefined
+    const valid = Boolean(
+      sku.status === "ENABLED" &&
+      sub?.status === "ENABLED" &&
+      cat?.status === "ENABLED"
+    )
+    const measureParam: GoodsSkuRecord["measureParam"] =
+      sku.measureParam === "体积"
+        ? "体积"
+        : sku.measureParam === "重量"
+          ? "重量"
+          : "数量"
+
+    const inboundCollect: InboundCollectFieldDef[] = sku.inboundCollect
+      .map((item): InboundCollectFieldDef | null => {
+        const meta = inboundCollectFields.find((f) => f.id === item.fieldId)
+        if (!meta) return null
+        const control = mapControlTypeToCatalogKind(meta.controlType)
+        const fieldKey = FIELD_ID_TO_CATALOG_KEY[item.fieldId] ?? item.fieldId
+        if (control === "period") {
+          return {
+            fieldKey,
+            label: meta.name,
+            required: item.required,
+            control,
+            unit: mapShelfLifeUnitLabel(
+              item.shelfLifeUnit ?? shelfLifeUnitConfig.recommendedUnit
+            ),
+            unitLocked: true,
+            suggestedValue: item.suggestedValue,
+            placeholder: meta.placeholder,
+          } satisfies InboundCollectFieldDef
+        }
+        return {
+          fieldKey,
+          label: meta.name,
+          required: item.required,
+          control,
+          options:
+            item.customOptions && item.customOptions.length > 0
+              ? [...item.customOptions]
+              : meta.options
+                ? [...meta.options]
+                : undefined,
+          unit:
+            control === "percent"
+              ? meta.unitLabel || "%"
+              : meta.unitLabel,
+          placeholder: meta.placeholder,
+        } satisfies InboundCollectFieldDef
+      })
+      .filter((x): x is InboundCollectFieldDef => x !== null)
+
+    return {
+      skuId: sku.id,
+      category: cat?.name ?? "未分类大类",
+      variety: sub?.name ?? "未分类品类",
+      specValues: { ...sku.specValues },
+      measureParam,
+      measureUnit: sku.measureUnit,
+      measureUnits: [sku.measureUnit],
+      inboundCollect,
+      valid,
+    }
+  })
+
+  syncDynamicGoodsSkuCatalog(dynamicSkus, fieldOverrides)
+}
+
+// 初始加载时同步一次至下游入库单目录
+syncToDownstreamCatalog()
 
 let revision = 0
 const listeners = new Set<() => void>()
 
 function emit() {
+  syncToDownstreamCatalog()
   revision += 1
   listeners.forEach((listener) => listener())
 }
@@ -243,12 +385,12 @@ export function updateMajorCategory(
   categories = categories.map((item) =>
     item.id === id
       ? {
-          ...item,
-          name: name.trim(),
-          updatedBy: operator,
-          updatedAt: stamp,
-          version: item.version + 1,
-        }
+        ...item,
+        name: name.trim(),
+        updatedBy: operator,
+        updatedAt: stamp,
+        version: item.version + 1,
+      }
       : item
   )
   emit()
@@ -270,13 +412,13 @@ export function disableMajorCategory(id: string, operator = DEFAULT_OPERATOR) {
   categories = categories.map((item) =>
     item.id === id
       ? {
-          ...item,
-          status: "DISABLED",
-          statusSnapshot: snapshot,
-          updatedBy: operator,
-          updatedAt: stamp,
-          version: item.version + 1,
-        }
+        ...item,
+        status: "DISABLED",
+        statusSnapshot: snapshot,
+        updatedBy: operator,
+        updatedAt: stamp,
+        version: item.version + 1,
+      }
       : item
   )
 
@@ -284,23 +426,23 @@ export function disableMajorCategory(id: string, operator = DEFAULT_OPERATOR) {
   subcategories = subcategories.map((item) =>
     subcategoryIds.has(item.id)
       ? {
-          ...item,
-          status: "DISABLED",
-          updatedBy: operator,
-          updatedAt: stamp,
-          version: item.version + 1,
-        }
+        ...item,
+        status: "DISABLED",
+        updatedBy: operator,
+        updatedAt: stamp,
+        version: item.version + 1,
+      }
       : item
   )
   skus = skus.map((item) =>
     subcategoryIds.has(item.subcategoryId)
       ? {
-          ...item,
-          status: "DISABLED",
-          updatedBy: operator,
-          updatedAt: stamp,
-          version: item.version + 1,
-        }
+        ...item,
+        status: "DISABLED",
+        updatedBy: operator,
+        updatedAt: stamp,
+        version: item.version + 1,
+      }
       : item
   )
   emit()
@@ -316,36 +458,36 @@ export function enableMajorCategory(id: string, operator = DEFAULT_OPERATOR) {
   categories = categories.map((item) =>
     item.id === id
       ? {
-          ...item,
-          status: "ENABLED",
-          statusSnapshot: undefined,
-          updatedBy: operator,
-          updatedAt: stamp,
-          version: item.version + 1,
-        }
+        ...item,
+        status: "ENABLED",
+        statusSnapshot: undefined,
+        updatedBy: operator,
+        updatedAt: stamp,
+        version: item.version + 1,
+      }
       : item
   )
 
   subcategories = subcategories.map((item) =>
     subcategoryIds.has(item.id)
       ? {
-          ...item,
-          status: snapshot[item.id] ?? item.status,
-          updatedBy: operator,
-          updatedAt: stamp,
-          version: item.version + 1,
-        }
+        ...item,
+        status: snapshot[item.id] ?? item.status,
+        updatedBy: operator,
+        updatedAt: stamp,
+        version: item.version + 1,
+      }
       : item
   )
   skus = skus.map((item) =>
     subcategoryIds.has(item.subcategoryId)
       ? {
-          ...item,
-          status: snapshot[item.id] ?? item.status,
-          updatedBy: operator,
-          updatedAt: stamp,
-          version: item.version + 1,
-        }
+        ...item,
+        status: snapshot[item.id] ?? item.status,
+        updatedBy: operator,
+        updatedAt: stamp,
+        version: item.version + 1,
+      }
       : item
   )
   emit()
@@ -392,14 +534,14 @@ export function updateSubcategory(
   subcategories = subcategories.map((item) =>
     item.id === id
       ? {
-          ...item,
-          name: input.name.trim(),
-          categoryId: input.categoryId,
-          specDimensions: nextDimensions,
-          updatedBy: operator,
-          updatedAt: stamp,
-          version: item.version + 1,
-        }
+        ...item,
+        name: input.name.trim(),
+        categoryId: input.categoryId,
+        specDimensions: nextDimensions,
+        updatedBy: operator,
+        updatedAt: stamp,
+        version: item.version + 1,
+      }
       : item
   )
 
@@ -430,24 +572,24 @@ export function disableSubcategory(id: string, operator = DEFAULT_OPERATOR) {
   subcategories = subcategories.map((item) =>
     item.id === id
       ? {
-          ...item,
-          status: "DISABLED",
-          statusSnapshot: snapshot,
-          updatedBy: operator,
-          updatedAt: stamp,
-          version: item.version + 1,
-        }
+        ...item,
+        status: "DISABLED",
+        statusSnapshot: snapshot,
+        updatedBy: operator,
+        updatedAt: stamp,
+        version: item.version + 1,
+      }
       : item
   )
   skus = skus.map((item) =>
     item.subcategoryId === id
       ? {
-          ...item,
-          status: "DISABLED",
-          updatedBy: operator,
-          updatedAt: stamp,
-          version: item.version + 1,
-        }
+        ...item,
+        status: "DISABLED",
+        updatedBy: operator,
+        updatedAt: stamp,
+        version: item.version + 1,
+      }
       : item
   )
   emit()
@@ -462,24 +604,24 @@ export function enableSubcategory(id: string, operator = DEFAULT_OPERATOR) {
   subcategories = subcategories.map((item) =>
     item.id === id
       ? {
-          ...item,
-          status: "ENABLED",
-          statusSnapshot: undefined,
-          updatedBy: operator,
-          updatedAt: stamp,
-          version: item.version + 1,
-        }
+        ...item,
+        status: "ENABLED",
+        statusSnapshot: undefined,
+        updatedBy: operator,
+        updatedAt: stamp,
+        version: item.version + 1,
+      }
       : item
   )
   skus = skus.map((item) =>
     item.subcategoryId === id
       ? {
-          ...item,
-          status: snapshot[item.id] ?? item.status,
-          updatedBy: operator,
-          updatedAt: stamp,
-          version: item.version + 1,
-        }
+        ...item,
+        status: snapshot[item.id] ?? item.status,
+        updatedBy: operator,
+        updatedAt: stamp,
+        version: item.version + 1,
+      }
       : item
   )
   emit()
@@ -535,26 +677,36 @@ export function updateSku(
     measureUnit: string
     inboundCollect: GoodsInboundCollectConfig[]
   },
-  operator = DEFAULT_OPERATOR
-) {
+  operator = DEFAULT_OPERATOR,
+  expectedVersion?: number
+): { success: boolean; error?: string } {
+  const current = findSku(id)
+  if (!current) {
+    return { success: false, error: "货品不存在" }
+  }
+  if (expectedVersion !== undefined && current.version !== expectedVersion) {
+    return { success: false, error: "数据已被他人修改，请刷新后重试" }
+  }
+
   const stamp = nowStamp()
   skus = skus.map((item) =>
     item.id === id
       ? {
-          ...item,
-          subcategoryId: input.subcategoryId,
-          specValues: { ...input.specValues },
-          measureParam: input.measureParam,
-          measureUnit: input.measureUnit,
-          inboundCollect: input.inboundCollect.map((collect) => ({ ...collect })),
-          updatedBy: operator,
-          updatedAt: stamp,
-          version: item.version + 1,
-        }
+        ...item,
+        subcategoryId: input.subcategoryId,
+        specValues: { ...input.specValues },
+        measureParam: input.measureParam,
+        measureUnit: input.measureUnit,
+        inboundCollect: input.inboundCollect.map((collect) => ({ ...collect })),
+        updatedBy: operator,
+        updatedAt: stamp,
+        version: item.version + 1,
+      }
       : item
   )
   refreshInboundFlags()
   emit()
+  return { success: true }
 }
 
 export function setSkuStatus(id: string, status: GoodsStatus, operator = DEFAULT_OPERATOR) {
@@ -562,12 +714,12 @@ export function setSkuStatus(id: string, status: GoodsStatus, operator = DEFAULT
   skus = skus.map((item) =>
     item.id === id
       ? {
-          ...item,
-          status,
-          updatedBy: operator,
-          updatedAt: stamp,
-          version: item.version + 1,
-        }
+        ...item,
+        status,
+        updatedBy: operator,
+        updatedAt: stamp,
+        version: item.version + 1,
+      }
       : item
   )
   emit()
@@ -616,6 +768,36 @@ export function setSkuPrice(id: string, price: number, operator = DEFAULT_OPERAT
  * 这是 07「两阶段安全删除」与「有引用锁定控件类型」的真实数据来源，
  * 不再依赖 mock 里写死的 hasDownstreamRef。
  */
+export type ReferencingSkuSummary = {
+  id: string
+  subcategoryId: string
+  categoryName: string
+  subcategoryName: string
+  specSummary: string
+  hasInboundOrders: boolean
+}
+
+export function listReferencingSkus(fieldId: string): ReferencingSkuSummary[] {
+  return skus
+    .filter((sku) => sku.inboundCollect.some((item) => item.fieldId === fieldId))
+    .map((sku) => {
+      const sub = findSubcategory(sku.subcategoryId)
+      const cat = sub ? findMajorCategory(sub.categoryId) : undefined
+      const specSummary = Object.values(sku.specValues)
+        .map((v) => v.trim())
+        .filter(Boolean)
+        .join(" / ")
+      return {
+        id: sku.id,
+        subcategoryId: sku.subcategoryId,
+        categoryName: cat?.name ?? "—",
+        subcategoryName: sub?.name ?? "—",
+        specSummary: specSummary || sku.id,
+        hasInboundOrders: sku.hasInboundOrders,
+      }
+    })
+}
+
 export function countGoodsReferences(fieldId: string): number {
   return skus.reduce(
     (count, sku) =>
@@ -852,10 +1034,10 @@ export function setInboundCollectFieldStatus(
 export type DeleteFieldResult =
   | { success: true }
   | {
-      success: false
-      reason: "CORE" | "ENABLED" | "HAS_REF"
-      message: string
-    }
+    success: false
+    reason: "CORE" | "ENABLED" | "HAS_REF"
+    message: string
+  }
 
 /**
  * 两阶段安全删除控制（R04 / R02）

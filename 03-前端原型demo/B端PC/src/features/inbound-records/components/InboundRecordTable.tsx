@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { TableDateTimeCell } from "@/shared/components/TableCells"
+import { TableDateTimeCell, TablePersonOrgTimeCell } from "@/shared/components/TableCells"
 import {
   TableRowActionPanel,
   TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX,
@@ -26,7 +26,6 @@ import type { InboundRecord, InboundRecordRowAction } from "../domain/types"
 import {
   formatInboundQuantity,
   formatGoodsNamesForList,
-  splitDateTime,
 } from "../lib/list-utils"
 
 const STICKY_ACTION_CLASS =
@@ -38,15 +37,15 @@ const ACTION_COL_CLASS =
 /** 列宽锁定 + 充裕呼吸感（对齐合作方档案列表 2×2 紧凑操作列与 AGENTS.md 规范） */
 const COL = {
   index: "w-16 min-w-16",
-  orderNo: "w-[200px] min-w-[200px]",
+  orderNo: "w-[150px] min-w-[150px]",
   owner: "w-[210px] min-w-[210px]",
   type: "w-[100px] min-w-[100px]",
   inboundDate: "w-[110px] min-w-[110px]",
   warehouse: "w-[150px] min-w-[150px]",
-  related: "hidden xl:table-cell w-[180px] min-w-[180px]",
+  related: "hidden xl:table-cell w-[130px] min-w-[130px]",
   goods: "w-[180px] min-w-[180px]",
   quantity: "w-[100px] min-w-[100px]",
-  creator: "w-[140px] min-w-[140px]",
+  creator: "w-[180px] min-w-[180px]",
   actions: ACTION_COL_CLASS,
 } as const
 
@@ -131,7 +130,7 @@ function buildInboundRowActions(
       key: "detail",
       label: "详情",
       title: "查看入库详情",
-      to: inboundRecordDetailPath(row.id),
+      to: inboundRecordDetailPath(row.id, "goods"),
     },
     {
       key: "pdf",
@@ -163,7 +162,7 @@ export function InboundRecordTable({
   return (
     <div className="overflow-x-auto rounded-md border bg-card">
       <Table
-        className="w-full table-fixed text-sm min-w-[1380px] xl:min-w-[1560px]"
+        className="w-full table-fixed text-sm min-w-[1260px] xl:min-w-[1516px]"
         style={
           {
             "--inbound-action-col-w": `${TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX}px`,
@@ -172,15 +171,15 @@ export function InboundRecordTable({
       >
         <colgroup>
           <col className="w-16" />
-          <col className="w-[200px]" />
+          <col className="w-[150px]" />
           <col className="w-[210px]" />
           <col className="w-[100px]" />
           <col className="w-[110px]" />
           <col className="w-[150px]" />
-          <col className="w-[180px]" />
+          <col className="hidden w-[130px] xl:table-column" />
           <col className="w-[180px]" />
           <col className="w-[100px]" />
-          <col className="w-[140px]" />
+          <col className="w-[180px]" />
           <col style={{ width: TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX }} />
         </colgroup>
         <TableHeader>
@@ -245,12 +244,10 @@ export function InboundRecordTable({
             </TableRow>
           ) : (
             data.map((row, index) => {
-              const createdParts = splitDateTime(row.createdAt)
-
               return (
                 <TableRow
                   key={row.id}
-                  className="group align-middle hover:bg-muted/50 transition-colors"
+                  className="group h-[72px] align-middle hover:bg-muted/50 transition-colors"
                 >
                   <TableCell
                     className={cn(
@@ -264,7 +261,8 @@ export function InboundRecordTable({
                   <TableCell className={cellBase}>
                     <InboundDocNoCell
                       docNo={row.orderNo}
-                      linkTo={inboundRecordDetailPath(row.id)}
+                      linkTo={inboundRecordDetailPath(row.id, "goods")}
+                      wrap
                     />
                   </TableCell>
                   <TableCell className={cellBase}>
@@ -288,7 +286,7 @@ export function InboundRecordTable({
                   </TableCell>
                   <TableCell className={cn(COL.related, cellBase)}>
                     {row.relatedOrderNo ? (
-                      <InboundDocNoCell docNo={row.relatedOrderNo} />
+                      <InboundDocNoCell docNo={row.relatedOrderNo} wrap />
                     ) : (
                       <span className="text-sm text-muted-foreground">—</span>
                     )}
@@ -305,10 +303,11 @@ export function InboundRecordTable({
                     </span>
                   </TableCell>
                   <TableCell className={cellBase}>
-                    <div className="flex flex-col gap-0.5 leading-snug">
-                      <span className="line-clamp-1 text-sm text-foreground">{row.creatorDisplay}</span>
-                      <span className="text-xs text-muted-foreground tabular-nums">{createdParts.date}</span>
-                    </div>
+                    <TablePersonOrgTimeCell
+                      person={row.createByName}
+                      org={row.createOrgName}
+                      time={row.createdAt}
+                    />
                   </TableCell>
                   <TableCell className={actionCell}>
                     <TableRowActionPanel

@@ -99,6 +99,20 @@ export const MOCK_SUBCATEGORIES: Subcategory[] = [
     version: 1,
     hasInboundOrders: false,
   },
+  // 场景 2b (6.3 标杆验收 SKU-V03): 香辛调味料（花椒配年、八角配月）
+  {
+    id: "sub-spices",
+    name: "香辛调味料",
+    categoryId: "cat-dryfood",
+    specDimensions: ["品名", "产地", "等级"],
+    status: "ENABLED",
+    createdBy: "王档案员",
+    createdAt: "2026-09-20 10:00:00",
+    updatedBy: "王档案员",
+    updatedAt: "2026-10-28 11:00:00",
+    version: 1,
+    hasInboundOrders: false,
+  },
   // 场景 3: 自身停用 · 所属大类启用（演示独立停用）
   {
     id: "sub-compressed-biscuit",
@@ -203,6 +217,7 @@ export const MOCK_GOODS_SKUS: GoodsSku[] = [
     inboundCollect: [
       { fieldId: "col-batch-no", required: true },
       { fieldId: "col-heat-no", required: true },
+      { fieldId: "col-legacy-inspector", required: false },
     ],
     price: 3880,
     status: "ENABLED",
@@ -310,6 +325,99 @@ export const MOCK_GOODS_SKUS: GoodsSku[] = [
     priceHistory: [],
     priceTrend: [],
   },
+  // 6.3 标杆案例 1 (SKU-V03): 花椒 · 保质期固定单位【年】+ 建议默认数值 2
+  {
+    id: "sku-spices-huajiao",
+    subcategoryId: "sub-spices",
+    specValues: {
+      品名: "汉源红花椒",
+      产地: "四川雅安",
+      等级: "特级大红袍",
+    },
+    measureParam: "重量",
+    measureUnit: "吨",
+    inboundCollect: [
+      {
+        fieldId: "col-shelf-life",
+        required: true,
+        shelfLifeUnit: "YEAR",
+        suggestedValue: "2",
+      },
+      { fieldId: "col-prod-date", required: true },
+      { fieldId: "col-exp-date", required: true },
+      { fieldId: "col-moisture", required: true },
+      { fieldId: "col-impurity", required: false },
+      { fieldId: "col-packaging", required: true },
+    ],
+    price: 68000,
+    status: "ENABLED",
+    createdBy: "王档案员",
+    createdAt: "2026-09-20 10:15:00",
+    updatedBy: "王档案员",
+    updatedAt: "2026-10-28 11:10:00",
+    version: 2,
+    hasInboundOrders: false,
+    priceHistory: [
+      {
+        id: "hist-huajiao-1",
+        price: 68000,
+        unit: "吨",
+        operator: "王档案员",
+        operatedAt: "2026-10-28 11:10:00",
+      },
+    ],
+    priceTrend: [
+      { date: "2026-10-01", price: 66500 },
+      { date: "2026-10-15", price: 67200 },
+      { date: "2026-10-28", price: 68000 },
+    ],
+  },
+  // 6.3 标杆案例 2 (SKU-V03): 八角 · 保质期固定单位【月】+ 建议默认数值 24
+  {
+    id: "sku-spices-bajiao",
+    subcategoryId: "sub-spices",
+    specValues: {
+      品名: "广西大红八角",
+      产地: "广西玉林",
+      等级: "国标一等干枝",
+    },
+    measureParam: "重量",
+    measureUnit: "吨",
+    inboundCollect: [
+      {
+        fieldId: "col-shelf-life",
+        required: true,
+        shelfLifeUnit: "MONTH",
+        suggestedValue: "24",
+      },
+      { fieldId: "col-prod-date", required: true },
+      { fieldId: "col-exp-date", required: true },
+      { fieldId: "col-moisture", required: true },
+      { fieldId: "col-packaging", required: true },
+    ],
+    price: 42000,
+    status: "ENABLED",
+    createdBy: "王档案员",
+    createdAt: "2026-09-20 10:30:00",
+    updatedBy: "王档案员",
+    updatedAt: "2026-10-28 11:20:00",
+    version: 1,
+    hasInboundOrders: false,
+    priceHistory: [
+      {
+        id: "hist-bajiao-1",
+        price: 42000,
+        unit: "吨",
+        operator: "王档案员",
+        operatedAt: "2026-10-28 11:20:00",
+      },
+    ],
+    priceTrend: [
+      { date: "2026-10-01", price: 41000 },
+      { date: "2026-10-15", price: 41500 },
+      { date: "2026-10-28", price: 42000 },
+    ],
+  },
   // 其他场景备用: 热轧卷板 (所属品类与大类均停用)
   {
     id: "sku-hotrolled-01",
@@ -342,6 +450,9 @@ export const MOCK_GOODS_SKUS: GoodsSku[] = [
 export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   {
     id: "col-shelf-life",
+    domain: "TIME_AND_SHELF_LIFE",
+    domainLabel: "时间效期",
+    downstreamCategoryCount: 28,
     name: "保质期",
     controlType: "周期组合项",
     summary: "支持: 月 / 天 / 年",
@@ -361,6 +472,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-prod-date",
+    domain: "TIME_AND_SHELF_LIFE",
+    domainLabel: "时间效期",
+    downstreamCategoryCount: 28,
     name: "生产日期",
     controlType: "日期选择器",
     summary: "—",
@@ -377,6 +491,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-exp-date",
+    domain: "TIME_AND_SHELF_LIFE",
+    domainLabel: "时间效期",
+    downstreamCategoryCount: 28,
     name: "过期时间",
     controlType: "日期选择器",
     summary: "—",
@@ -393,6 +510,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-packaging",
+    domain: "PACKAGING_AND_SPEC",
+    domainLabel: "包装形态",
+    downstreamCategoryCount: 16,
     name: "包装方式",
     controlType: "下拉单选框",
     summary: "箱装/盒装, 袋装",
@@ -410,6 +530,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-origin",
+    domain: "TRACEABILITY",
+    domainLabel: "生产溯源",
+    downstreamCategoryCount: 22,
     name: "产地",
     controlType: "省市区三级联动",
     summary: "—",
@@ -426,6 +549,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-batch-no",
+    domain: "TRACEABILITY",
+    domainLabel: "生产溯源",
+    downstreamCategoryCount: 28,
     name: "批次号",
     controlType: "单行文本输入框",
     summary: "—",
@@ -442,6 +568,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-heat-no",
+    domain: "TRACEABILITY",
+    domainLabel: "生产溯源",
+    downstreamCategoryCount: 6,
     name: "炉号",
     controlType: "单行文本输入框",
     summary: "—",
@@ -458,6 +587,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-producer",
+    domain: "TRACEABILITY",
+    domainLabel: "生产溯源",
+    downstreamCategoryCount: 18,
     name: "生产企业",
     controlType: "单行文本输入框",
     summary: "—",
@@ -474,6 +606,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-hazard-level",
+    domain: "STORAGE_AND_SAFETY",
+    domainLabel: "仓储环境",
+    downstreamCategoryCount: 4,
     name: "危险品等级",
     controlType: "下拉单选框",
     summary: "非危, 第1类 爆炸品",
@@ -502,6 +637,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-quality-grade",
+    domain: "QUALITY_AND_PHYSICAL",
+    domainLabel: "质检理化",
+    downstreamCategoryCount: 15,
     name: "质量等级",
     controlType: "下拉单选框",
     summary: "特级, 一级",
@@ -519,6 +657,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-inspect-date",
+    domain: "QUALITY_AND_PHYSICAL",
+    domainLabel: "质检理化",
+    downstreamCategoryCount: 12,
     name: "检验日期",
     controlType: "日期选择器",
     summary: "—",
@@ -535,6 +676,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-inspect-org",
+    domain: "PACKAGING_AND_SPEC",
+    domainLabel: "包装形态",
+    downstreamCategoryCount: 8,
     name: "检验机构",
     controlType: "单行文本输入框",
     summary: "—",
@@ -551,6 +695,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-inspect-report",
+    domain: "PACKAGING_AND_SPEC",
+    domainLabel: "包装形态",
+    downstreamCategoryCount: 8,
     name: "检验报告编号",
     controlType: "单行文本输入框",
     summary: "—",
@@ -567,6 +714,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-storage-mode",
+    domain: "STORAGE_AND_SAFETY",
+    domainLabel: "仓储环境",
+    downstreamCategoryCount: 10,
     name: "存储方式",
     controlType: "下拉单选框",
     summary: "常温, 冷藏",
@@ -584,6 +734,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-temp",
+    domain: "STORAGE_AND_SAFETY",
+    domainLabel: "仓储环境",
+    downstreamCategoryCount: 5,
     name: "温度要求",
     controlType: "数字区间框",
     summary: "℃",
@@ -602,6 +755,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-humidity",
+    domain: "STORAGE_AND_SAFETY",
+    domainLabel: "仓储环境",
+    downstreamCategoryCount: 4,
     name: "湿度要求",
     controlType: "数字区间框",
     summary: "%RH",
@@ -619,6 +775,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-moisture",
+    domain: "QUALITY_AND_PHYSICAL",
+    domainLabel: "质检理化",
+    downstreamCategoryCount: 7,
     name: "水分含量",
     controlType: "百分比数值框",
     summary: "%",
@@ -636,6 +795,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-impurity",
+    domain: "QUALITY_AND_PHYSICAL",
+    domainLabel: "质检理化",
+    downstreamCategoryCount: 5,
     name: "杂质率",
     controlType: "百分比数值框",
     summary: "%",
@@ -653,6 +815,9 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
   },
   {
     id: "col-pkg-grade",
+    domain: "PACKAGING_AND_SPEC",
+    domainLabel: "包装形态",
+    downstreamCategoryCount: 6,
     name: "包装外观等级",
     controlType: "下拉单选框",
     summary: "A级优等品, B级合格品",
@@ -667,6 +832,25 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
     updatedAt: "2026-08-20 16:45:00",
     version: 1,
     hasDownstreamRef: false,
+  },
+  {
+    id: "col-legacy-inspector",
+    domain: "QUALITY_AND_PHYSICAL",
+    domainLabel: "质检理化",
+    downstreamCategoryCount: 1,
+    name: "出厂检验员",
+    controlType: "单行文本输入框",
+    summary: "—",
+    isCore: false,
+    status: "DISABLED",
+    placeholder: "请输入出厂检验员姓名",
+    remark: "6.3 演示样本：该收集项已在 07 底座停用，但仍被 06 存量货品（螺纹钢 HRB400E Φ25mm 永钢）引用，用于验证【收集项引用联动规则】(SKU-F12) 与【两阶段安全删除控制规则】(R04)。",
+    createdBy: "李质检员",
+    createdAt: "2026-08-05 10:30:00",
+    updatedBy: "王管理员",
+    updatedAt: "2026-10-20 16:00:00",
+    version: 2,
+    hasDownstreamRef: true,
   },
 ]
 

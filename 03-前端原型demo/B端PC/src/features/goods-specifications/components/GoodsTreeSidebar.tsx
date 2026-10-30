@@ -93,7 +93,7 @@ export function GoodsTreeSidebar({
 
 
   return (
-    <aside className="flex w-[268px] shrink-0 flex-col rounded-xl border bg-card">
+    <aside className="flex h-full min-h-[calc(100vh-12rem)] w-[220px] shrink-0 flex-col rounded-xl border bg-card">
       <div className="border-b p-3">
         <div className="relative">
           <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />

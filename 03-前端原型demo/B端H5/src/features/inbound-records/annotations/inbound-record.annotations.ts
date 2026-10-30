@@ -56,7 +56,7 @@ export const inboundH5DetailAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "入库管理 · 详情",
     content:
-      "仅已通过归档单：入库明细按货品行展示现场照片(R16)、补充资料(R17含PDF预览)、设备抓拍(R18/P07)；与 PC 查看附件弹窗三分区同口径；不提供撤销。",
+      "仅已通过归档单：货物明细 Tab 按货品行展示现场照片(R16)、补充资料(R17含PDF预览)、设备抓拍(R18/P07)；Tab 名带货品行数；与 PC 查看附件弹窗三分区同口径；不提供撤销。",
     documentRefs: {
       prd: { section: "3.3 入库管理详情", match: "已通过", element: "text" },
       rules: { section: "【详情货品行附件与 IoT 只读】(P07)", match: "P07", element: "text" },

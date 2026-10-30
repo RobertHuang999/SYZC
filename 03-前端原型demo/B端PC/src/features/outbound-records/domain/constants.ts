@@ -1,9 +1,15 @@
+import type { OutboundRecordDetailTabKey } from "@prototype/shared/outbound/outbound-record-detail-ui-labels"
+import { withOutboundRecordDetailTabQuery } from "@prototype/shared/outbound/outbound-record-detail-nav"
 import type { OutboundRecordFilters, OutboundTypeName } from "./types"
 
 export const OUTBOUND_RECORD_LIST_PATH = "/仓储/出库管理/出库记录"
 export const OUTBOUND_RECORD_ADD_PATH = "/仓储/出库管理/出库记录/新增"
 export const OUTBOUND_RECORD_DETAIL_PREFIX = "/仓储/出库管理/出库记录/详情"
-export const outboundRecordDetailPath = (id: string) => `${OUTBOUND_RECORD_DETAIL_PREFIX}/${id}`
+export function outboundRecordDetailPath(id: string, tab?: OutboundRecordDetailTabKey) {
+  const base = `${OUTBOUND_RECORD_DETAIL_PREFIX}/${id}`
+  if (!tab) return base
+  return withOutboundRecordDetailTabQuery(base, tab)
+}
 
 export const PAGE_SIZE = 10
 

@@ -63,7 +63,7 @@ export function InboundCollectFields({ fields, values, onChange, allOptional }: 
             {field.control === "select" ? (
               <Select value={value} onValueChange={(v) => v && patch(field.fieldKey, v)}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={`请选择${field.label}`} />
+                  <SelectValue placeholder={field.placeholder || `请选择${field.label}`} />
                 </SelectTrigger>
                 <SelectContent>
                   {(field.options ?? []).map((opt) => (
@@ -81,35 +81,40 @@ export function InboundCollectFields({ fields, values, onChange, allOptional }: 
                 onChange={(e) => patch(field.fieldKey, e.target.value)}
               />
             ) : field.control === "range" ? (
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  className="text-sm"
-                  placeholder="最小值"
-                  value={splitRange(value)[0]}
-                  onChange={(e) =>
-                    patch(
-                      field.fieldKey,
-                      `${e.target.value}|${splitRange(value)[1]}`
-                    )
-                  }
-                />
-                <span className="shrink-0 text-xs text-muted-foreground">至</span>
-                <Input
-                  type="number"
-                  className="text-sm"
-                  placeholder="最大值"
-                  value={splitRange(value)[1]}
-                  onChange={(e) =>
-                    patch(
-                      field.fieldKey,
-                      `${splitRange(value)[0]}|${e.target.value}`
-                    )
-                  }
-                />
-                <span className="shrink-0 text-sm text-foreground">
-                  {field.unit ?? ""}
-                </span>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    className="text-sm"
+                    placeholder="最小值"
+                    value={splitRange(value)[0]}
+                    onChange={(e) =>
+                      patch(
+                        field.fieldKey,
+                        `${e.target.value}|${splitRange(value)[1]}`
+                      )
+                    }
+                  />
+                  <span className="shrink-0 text-xs text-muted-foreground">至</span>
+                  <Input
+                    type="number"
+                    className="text-sm"
+                    placeholder="最大值"
+                    value={splitRange(value)[1]}
+                    onChange={(e) =>
+                      patch(
+                        field.fieldKey,
+                        `${splitRange(value)[0]}|${e.target.value}`
+                      )
+                    }
+                  />
+                  <span className="shrink-0 text-sm text-foreground">
+                    {field.unit ?? ""}
+                  </span>
+                </div>
+                {field.placeholder && (
+                  <p className="text-[11px] text-muted-foreground">{field.placeholder}</p>
+                )}
               </div>
             ) : field.control === "percent" ? (
               <div className="flex items-center gap-2">
@@ -119,7 +124,7 @@ export function InboundCollectFields({ fields, values, onChange, allOptional }: 
                   max={100}
                   step="0.01"
                   className="text-sm"
-                  placeholder={`请输入${field.label}`}
+                  placeholder={field.placeholder || `请输入${field.label}`}
                   value={value}
                   onChange={(e) => patch(field.fieldKey, e.target.value)}
                 />
@@ -135,17 +140,17 @@ export function InboundCollectFields({ fields, values, onChange, allOptional }: 
                     min={1}
                     step={1}
                     className="text-sm"
-                    placeholder={`请输入${field.label}数值`}
+                    placeholder={field.placeholder || `请输入${field.label}数值`}
                     value={value}
                     onChange={(e) => patch(field.fieldKey, e.target.value)}
                   />
                   {field.unitLocked && field.unit ? (
-                    <span className="shrink-0 whitespace-nowrap text-sm font-medium text-foreground">
-                      {field.unit}
+                    <span className="shrink-0 whitespace-nowrap rounded bg-muted px-2 py-1 text-xs font-medium text-foreground">
+                      {field.unit}（货品固定）
                     </span>
                   ) : (
                     <Select
-                      value={field.unit ?? ""}
+                      value={values[`${field.fieldKey}Unit`] ?? field.unit ?? ""}
                       onValueChange={(v) => v && patch(`${field.fieldKey}Unit`, v)}
                     >
                       <SelectTrigger className="w-24 shrink-0">
@@ -174,7 +179,7 @@ export function InboundCollectFields({ fields, values, onChange, allOptional }: 
               />
             ) : (
               <Input
-                placeholder={`请输入${field.label}`}
+                placeholder={field.placeholder || `请输入${field.label}`}
                 className="text-sm"
                 value={value}
                 onChange={(e) => patch(field.fieldKey, e.target.value)}

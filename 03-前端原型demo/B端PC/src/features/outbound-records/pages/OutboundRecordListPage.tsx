@@ -14,6 +14,7 @@ import { OutboundPdfDialog } from "../components/OutboundPdfDialog"
 import {
   DEFAULT_OUTBOUND_RECORD_FILTERS,
   OUTBOUND_RECORD_ADD_PATH,
+  outboundRecordDetailPath,
   PAGE_SIZE,
 } from "../domain/constants"
 import type {
@@ -27,7 +28,6 @@ import {
   sortOutboundRecords,
 } from "../lib/list-utils"
 import { outboundRecordsMock } from "../mock/outbound-records.mock"
-import { DocumentTimelineModal } from "@/shared/document-management"
 import { IterationPageTag } from "@/shared/components/IterationHighlight"
 
 export function OutboundRecordListPage() {
@@ -46,8 +46,6 @@ export function OutboundRecordListPage() {
   // 导出与单据预览弹窗状态
   const [exportTarget, setExportTarget] = useState<OutboundRecord | null>(null)
   const [pdfTarget, setPdfTarget] = useState<OutboundRecord | null>(null)
-  const [docsTarget, setDocsTarget] = useState<OutboundRecord | null>(null)
-
   const filtered = useMemo(() => {
     const matched = filterOutboundRecords(rows, appliedFilters)
     return sortOutboundRecords(matched)
@@ -86,8 +84,7 @@ export function OutboundRecordListPage() {
       return
     }
     if (action === "manageDocs") {
-      setDocsTarget(item)
-      return
+      navigate(outboundRecordDetailPath(item.id, "documents"))
     }
   }
 
@@ -181,16 +178,6 @@ export function OutboundRecordListPage() {
           onSuccess={showToast}
         />
 
-        {/* 资料管理全生命周期弹窗 */}
-        {docsTarget && (
-          <DocumentTimelineModal
-            open={!!docsTarget}
-            orderNo={docsTarget.orderNo}
-            approvalId="SP202605290001"
-            orderType="outbound"
-            onClose={() => setDocsTarget(null)}
-          />
-        )}
       </div>
     </PrototypeAnnotationProvider>
   )

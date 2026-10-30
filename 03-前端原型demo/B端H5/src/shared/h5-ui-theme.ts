@@ -37,7 +37,7 @@ export const H5_SCROLL_HOST = "relative flex min-h-0 flex-1 flex-col"
 export const H5_LIST_SCROLL = "flex-1 min-h-0 space-y-3 overflow-y-auto px-3.5 py-3 overscroll-contain"
 
 export const H5_CARD =
-  "overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-xs transition-all active:scale-[0.99]"
+  "overflow-hidden rounded-xl border border-[#232D39]/5 bg-white shadow-sm transition-all active:scale-[0.99]"
 
 /** 列表卡片底部胶囊操作（对齐出库记录 buttons-view） */
 export const H5_PILL_SECONDARY =

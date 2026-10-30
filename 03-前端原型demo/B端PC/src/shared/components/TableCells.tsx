@@ -85,3 +85,100 @@ export function TablePersonTimeCell({
 }) {
   return <PersonTimeText person={person} time={time} />
 }
+
+type PersonOrgTimeTextProps = {
+  person?: string | null
+  org?: string | null
+  time?: string | null
+  fallbackPerson?: string
+}
+
+const isEmptyValue = (value?: string | null) =>
+  !value || value.trim() === "" || value === "—"
+
+/**
+ * 人员 + 组织 + 时间单元格（对齐《06-表格行与操作列规范》3.3 节 C 模板）：
+ * - 有组织且有时间：三行 —— ① 人员 + 组织 ② 年月日 ③ 时分秒；
+ * - 只有人员（无组织）：退化为两行 —— ① 人员 ② 日期时间；
+ * - 组织缺失时整块不渲染组织；人员与时间都没有时显示「—」。
+ * 每行独立单行省略，整格 title 给出完整内容。
+ */
+export function PersonOrgTimeText({
+  person,
+  org,
+  time,
+  fallbackPerson = "系统",
+}: PersonOrgTimeTextProps) {
+  const hasPerson = !isEmptyValue(person)
+  const hasOrg = !isEmptyValue(org)
+  const hasTime = !isEmptyValue(time)
+
+  if (!hasPerson && !hasOrg && !hasTime) {
+    return <span className="text-muted-foreground">—</span>
+  }
+
+  const personText = hasPerson ? (person as string).trim() : fallbackPerson
+  const orgText = hasOrg ? (org as string).trim() : ""
+  const formattedTime = hasTime ? formatDateTime(time) : "—"
+  const [datePart, timePart] = formattedTime.split(/\s+/, 2)
+  const fullTitle = [personText, orgText, hasTime ? formattedTime : ""]
+    .filter(Boolean)
+    .join(" ")
+
+  const personLine = (
+    <span className="flex min-w-0 items-baseline gap-1.5">
+      <span className="shrink-0 truncate font-medium text-foreground">
+        {personText}
+      </span>
+      {orgText ? (
+        <span className="min-w-0 truncate text-xs text-muted-foreground">
+          {orgText}
+        </span>
+      ) : null}
+    </span>
+  )
+
+  // 三行：人员 + 组织 / 年月日 / 时分秒
+  if (hasOrg && hasTime && timePart) {
+    return (
+      <span
+        className="flex min-w-0 flex-col gap-0.5 leading-snug"
+        title={fullTitle}
+      >
+        {personLine}
+        <span className="truncate text-xs text-muted-foreground tabular-nums">
+          {datePart}
+        </span>
+        <span className="truncate text-xs text-muted-foreground tabular-nums">
+          {timePart}
+        </span>
+      </span>
+    )
+  }
+
+  // 两行：人员（+ 组织）/ 日期时间
+  return (
+    <span
+      className="flex min-w-0 flex-col gap-0.5 leading-snug"
+      title={fullTitle}
+    >
+      {personLine}
+      <span className="truncate text-xs text-muted-foreground tabular-nums">
+        {formattedTime}
+      </span>
+    </span>
+  )
+}
+
+/** 标准表格「人员 + 组织 + 时间」单元格（三行版，见 06 规范 3.3 节）。 */
+export function TablePersonOrgTimeCell({
+  person,
+  org,
+  time,
+}: {
+  person?: string | null
+  org?: string | null
+  time?: string | null
+}) {
+  return <PersonOrgTimeText person={person} org={org} time={time} />
+}

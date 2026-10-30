@@ -91,7 +91,7 @@ export const inboundRecordListAnnotations: PrototypeAnnotation[] = [
     kind: "交互",
     title: "2×2 行操作（6.3 新增【资料管理】）",
     content:
-      "四按钮按 2×2 排布：【详情】进详情页；【单据下载】导出 PDF 凭证；【下载记录】导出堆放明细 Excel；【资料管理】打开该单的资料时间轴抽屉。原型为 Mock 提示。",
+      "四按钮按 2×2 排布：【详情】进详情页并定位「货物明细」Tab（?tab=goods）；【单据下载】导出 PDF 凭证；【下载记录】导出堆放明细 Excel；【资料管理】进详情页并定位「资料管理」Tab（?tab=documents）。",
     documentRefs: {
       prd: {
         section: "6.1 入库记录 — 列表页",

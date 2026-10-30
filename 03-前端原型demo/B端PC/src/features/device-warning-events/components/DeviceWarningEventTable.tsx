@@ -22,6 +22,7 @@ import { getRowActions, canSelectForBatchRelease } from "../domain/actions"
 import type { DeviceWarningEvent } from "../domain/types"
 import { formatWarningContent, resolveEventLocationParts } from "../lib/event-utils"
 import { WarningStatusBadge } from "./WarningStatusBadge"
+import { IterationHighlight } from "@/shared/components/IterationHighlight"
 
 type DeviceWarningEventTableProps = {
   events: DeviceWarningEvent[]
@@ -247,7 +248,7 @@ function DeviceWarningEventRow({
         )}
       </TableCell>
       <TableCell>
-        <TableDateTimeCell value={event.warningTime} plain />
+        <TableDateTimeCell value={event.warningTime} stackedPlain />
       </TableCell>
       <TableCell>
         <TableProcessedInfoCell
@@ -256,19 +257,52 @@ function DeviceWarningEventRow({
         />
       </TableCell>
       <TableCell>
-        <WarningStatusBadge event={event} />
+        {event.eventId === "evt-011" || event.warningStatus === "OPEN_INVALID" ? (
+          <IterationHighlight
+            inline
+            version="6.3"
+            ruleId="DEV-C08"
+            title="规则作废"
+            description="因规则敏感配置修改，存量待处理预警批量标记为已作废并归档"
+            type="linked"
+          >
+            <WarningStatusBadge event={event} />
+          </IterationHighlight>
+        ) : (
+          <WarningStatusBadge event={event} />
+        )}
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
           {actions.includes("release") && (
-            <Button
-              variant="link"
-              size="sm"
-              className="h-auto p-0"
-              onClick={() => onRelease(event)}
-            >
-              解除
-            </Button>
+            event.eventId === "evt-001" ? (
+              <IterationHighlight
+                inline
+                version="6.3"
+                ruleId="DEV-C01"
+                title="解锁人工解除"
+                description="原恢复自动结案预警因规则变更转为人工核查，已解锁操作台【解除】入口，防止死锁"
+                type="modified"
+              >
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="h-auto p-0 font-medium text-amber-700 dark:text-amber-400"
+                  onClick={() => onRelease(event)}
+                >
+                  解除
+                </Button>
+              </IterationHighlight>
+            ) : (
+              <Button
+                variant="link"
+                size="sm"
+                className="h-auto p-0"
+                onClick={() => onRelease(event)}
+              >
+                解除
+              </Button>
+            )
           )}
           <Link
             to={`/物联网IOT与预警/预警信息/设备预警信息/详情/${event.eventId}`}

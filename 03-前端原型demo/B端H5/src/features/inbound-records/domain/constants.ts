@@ -1,3 +1,5 @@
+import type { InboundRecordDetailTabKey } from "@prototype/shared/inbound/inbound-record-detail-ui-labels"
+import { withInboundRecordDetailTabQuery } from "@prototype/shared/inbound/inbound-record-detail-nav"
 import type { InboundFlowStatusFilter } from "./types"
 
 export const WORKSPACE_ROUTE = "/m/workspace"
@@ -11,8 +13,10 @@ export const INBOUND_INITIATE_RESUME_STATE = {
   resumeInboundDraft: true,
 } as const
 
-export function inboundDetailRoute(id: string) {
-  return `/m/workspace/inbound-records/${id}`
+export function inboundDetailRoute(id: string, tab?: InboundRecordDetailTabKey) {
+  const base = `/m/workspace/inbound-records/${id}`
+  if (!tab) return base
+  return withInboundRecordDetailTabQuery(base, tab)
 }
 
 export const FLOW_STATUS_LABEL: Record<

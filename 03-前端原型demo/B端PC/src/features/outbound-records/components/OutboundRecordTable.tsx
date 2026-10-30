@@ -252,7 +252,7 @@ function buildOutboundRowActions(
       key: "detail",
       label: "详情",
       title: "查看出库详情",
-      to: outboundRecordDetailPath(row.id),
+      to: outboundRecordDetailPath(row.id, "goods"),
     },
     {
       key: "pdf",
@@ -385,7 +385,7 @@ export function OutboundRecordTable({
                   <TableCell className={cellBase}>
                     <OrderNoSingleRow
                       orderNo={row.orderNo}
-                      linkTo={outboundRecordDetailPath(row.id)}
+                      linkTo={outboundRecordDetailPath(row.id, "goods")}
                     />
                   </TableCell>
                   <TableCell className={cellBase}>

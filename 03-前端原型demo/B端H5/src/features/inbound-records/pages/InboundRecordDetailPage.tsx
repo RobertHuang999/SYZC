@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react"
-import { useLocation, useNavigate, useParams } from "react-router-dom"
+import { useEffect, useMemo, useState } from "react"
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
@@ -10,6 +10,8 @@ import { MobileQrModal } from "../components/MobileQrModal"
 import { MobileImageModal } from "../components/MobileImageModal"
 import { MobilePdfModal } from "../components/MobilePdfModal"
 import { DocumentManagementTab } from "@/shared/document-management"
+import { parseInboundRecordDetailTabParam } from "@prototype/shared/inbound/inbound-record-detail-nav"
+import { buildInboundRecordDetailTabEntries } from "@prototype/shared/inbound/inbound-record-detail-ui-labels"
 
 type TabKey = "goods" | "audit" | "modify" | "documents"
 
@@ -17,11 +19,18 @@ export function InboundRecordDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const detail = useMemo(() => getMobileInboundDetailById(id), [id])
 
   const handleBack = () => handleInboundDetailBack(navigate, location)
 
-  const [tab, setTab] = useState<TabKey>("goods")
+  const [tab, setTab] = useState<TabKey>(() =>
+    parseInboundRecordDetailTabParam(searchParams.get("tab")) ?? "goods"
+  )
+
+  useEffect(() => {
+    setTab(parseInboundRecordDetailTabParam(searchParams.get("tab")) ?? "goods")
+  }, [searchParams, id])
   const [expandedGoods, setExpandedGoods] = useState<Record<string, boolean>>({})
   const [toast, setToast] = useState<string | null>(null)
 
@@ -145,14 +154,7 @@ export function InboundRecordDetailPage() {
         </section>
 
         <div className="flex border-b border-[#232D39]/10 bg-white px-4 pt-1 shadow-xs">
-          {(
-            [
-              ["goods", "入库明细"],
-              ["audit", "审核记录"],
-              ["modify", "修改记录"],
-              ["documents", "资料管理"],
-            ] as const
-          ).map(([key, label]) => (
+          {buildInboundRecordDetailTabEntries(detail.goodsLines.length).map(([key, label]) => (
             <button
               key={key}
               type="button"

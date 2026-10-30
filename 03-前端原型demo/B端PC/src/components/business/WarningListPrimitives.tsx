@@ -109,7 +109,7 @@ export function WarningListPagination({
   const pageNumbers = getPageNumbers(currentPage, totalPages)
 
   return (
-    <div className="flex flex-col gap-3 border-t border-border pt-3 lg:flex-row lg:items-center lg:justify-between">
+    <div className="-mx-4 -mb-4 mt-3 sticky bottom-0 z-30 flex flex-col gap-3 border-t border-border bg-card px-4 pb-4 pt-3 shadow-[0_-8px_16px_-12px_rgba(15,35,95,0.18)] lg:flex-row lg:items-center lg:justify-between">
       <div className="shrink-0 text-sm text-muted-foreground">
         共 {total} {totalLabel}
       </div>

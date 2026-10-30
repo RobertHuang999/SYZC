@@ -20,9 +20,9 @@ export const inboundRecordDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "inbound-detail-tabs",
     number: 2,
     kind: "交互",
-    title: "四标签页：明细 / 审核 / 修改记录 / 资料管理（6.3 新增）",
+    title: "四标签页：货物明细 / 审核记录 / 修改记录 / 资料管理（6.3 新增）",
     content:
-      "入库明细支持货品行展开二级库位堆放；审核记录为时间轴；修改记录展示特权纠偏留痕（无数据时空态）；资料管理按流程阶段归档凭证，只有普通入库可后补资料。",
+      "货物明细支持货品行展开二级库位堆放（Tab 展示货品行数）；审核记录为时间轴；修改记录展示特权纠偏留痕（无数据时空态）；资料管理按流程阶段归档凭证，只有普通入库可后补资料。",
     documentRefs: {
       prd: { section: "6.2", match: "标签页", element: "text" },
     },
@@ -35,7 +35,7 @@ export const inboundRecordDetailAnnotations: PrototypeAnnotation[] = [
     kind: "交互",
     title: "货品行【查看附件】与 IoT 抓拍",
     content:
-      "入库明细一级表【附件信息】列【查看附件】按货品行弹出三分区弹窗：现场照片(R16)、补充资料(R17)、设备抓拍(R18，goodsLines[].iotCaptures)；无抓拍时空态「抓图失败或无监控设备接入」，不阻断归档查阅；与 H5 货品行三块同口径。",
+      "货物明细一级表【附件信息】列【查看附件】按货品行弹出三分区弹窗：现场照片(R16)、补充资料(R17)、设备抓拍(R18，goodsLines[].iotCaptures)；无抓拍时空态「抓图失败或无监控设备接入」，不阻断归档查阅；与 H5 货品行三块同口径。",
     documentRefs: {
       prd: { section: "6.2", match: "查看附件", element: "text" },
       fields: { section: "设备抓拍图", match: "R18", element: "row" },

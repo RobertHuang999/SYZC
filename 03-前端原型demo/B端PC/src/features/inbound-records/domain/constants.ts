@@ -1,3 +1,5 @@
+import type { InboundRecordDetailTabKey } from "@prototype/shared/inbound/inbound-record-detail-ui-labels"
+import { withInboundRecordDetailTabQuery } from "@prototype/shared/inbound/inbound-record-detail-nav"
 import type { InboundRecordFilters, InboundApplyFilters } from "./types"
 
 export const PAGE_SIZE = 10
@@ -12,8 +14,10 @@ export function inboundApplyDetailPath(id: string) {
   return `/仓储/入库管理/入库申请/详情/${id}`
 }
 
-export function inboundRecordDetailPath(id: string) {
-  return `/仓储/入库管理/入库记录/详情/${id}`
+export function inboundRecordDetailPath(id: string, tab?: InboundRecordDetailTabKey) {
+  const base = `/仓储/入库管理/入库记录/详情/${id}`
+  if (!tab) return base
+  return withInboundRecordDetailTabQuery(base, tab)
 }
 
 /** 11yuanma 现网 12 种入库类型 */

@@ -28,6 +28,8 @@ export type InboundCollectFieldDef = {
   unitLocked?: boolean
   /** 保质期建议默认数值，选中货品时自动回填 */
   suggestedValue?: string
+  /** 07 入库收集项配置定义的输入框引导文案（placeholder） */
+  placeholder?: string
 }
 
 export type GoodsSkuRecord = {
@@ -444,7 +446,7 @@ export const GOODS_SKU_CATALOG: readonly GoodsSkuRecord[] = [
     measureUnits: ["公斤", "吨"],
     inboundCollect: [
       { fieldKey: "packaging", label: "包装方式", required: true, control: "select", options: PACKAGING_OPTS },
-      { fieldKey: "moisture", label: "水分含量", required: false, control: "text" },
+      { fieldKey: "moisture", label: "水分含量", required: false, control: "percent", unit: "%" },
     ],
     valid: true,
   },
@@ -458,8 +460,8 @@ export const GOODS_SKU_CATALOG: readonly GoodsSkuRecord[] = [
     measureUnit: "吨",
     measureUnits: ["吨", "公斤"],
     inboundCollect: [
-      { fieldKey: "moisture", label: "水分含量", required: false, control: "text" },
-      { fieldKey: "impurity", label: "杂质率", required: false, control: "text" },
+      { fieldKey: "moisture", label: "水分含量", required: false, control: "percent", unit: "%" },
+      { fieldKey: "impurity", label: "杂质率", required: false, control: "percent", unit: "%" },
       { fieldKey: "packaging", label: "包装方式", required: true, control: "select", options: ["散装", "袋装"] },
     ],
     valid: true,
@@ -472,7 +474,7 @@ export const GOODS_SKU_CATALOG: readonly GoodsSkuRecord[] = [
     measureParam: "重量",
     measureUnit: "吨",
     measureUnits: ["吨"],
-    inboundCollect: [{ fieldKey: "moisture", label: "水分含量", required: true, control: "text" }],
+    inboundCollect: [{ fieldKey: "moisture", label: "水分含量", required: true, control: "percent", unit: "%" }],
     valid: true,
   },
   {
@@ -484,7 +486,7 @@ export const GOODS_SKU_CATALOG: readonly GoodsSkuRecord[] = [
     measureUnit: "吨",
     measureUnits: ["吨", "公斤"],
     inboundCollect: [
-      { fieldKey: "moisture", label: "水分含量", required: false, control: "text" },
+      { fieldKey: "moisture", label: "水分含量", required: false, control: "percent", unit: "%" },
       { fieldKey: "packaging", label: "包装方式", required: false, control: "select", options: ["散装", "袋装"] },
     ],
     valid: true,
@@ -499,7 +501,7 @@ export const GOODS_SKU_CATALOG: readonly GoodsSkuRecord[] = [
     measureUnit: "吨",
     measureUnits: ["吨", "公斤"],
     inboundCollect: [
-      { fieldKey: "moisture", label: "水分含量", required: false, control: "text" },
+      { fieldKey: "moisture", label: "水分含量", required: false, control: "percent", unit: "%" },
       { fieldKey: "packaging", label: "包装方式", required: true, control: "select", options: ["散装", "袋装", "箱装/盒装"] },
     ],
     valid: true,
@@ -594,6 +596,60 @@ export const GOODS_SKU_CATALOG: readonly GoodsSkuRecord[] = [
     inboundCollect: [],
     valid: true,
   },
+  // —— 6.3 标杆演示：农副产品 · 香辛调味料（花椒按年、八角按月，SKU 级固定保质期单位）——
+  {
+    skuId: "sku-spices-huajiao",
+    category: "农产品",
+    variety: "香辛调味料",
+    specValues: { 品种: "汉源红花椒", 等级: "特级", 包装规格: "25kg/袋" },
+    measureParam: "重量",
+    measureUnit: "吨",
+    measureUnits: ["吨", "千克"],
+    inboundCollect: [
+      { fieldKey: "col-prod-date", label: "生产日期", required: true, control: "date" },
+      {
+        fieldKey: "col-shelf-life",
+        label: "保质期",
+        required: true,
+        control: "period",
+        unit: "年",
+        unitLocked: true,
+        suggestedValue: "2",
+        placeholder: "请输入保质期数值",
+      },
+      { fieldKey: "col-expiry-date", label: "过期时间", required: true, control: "date" },
+      { fieldKey: "col-origin", label: "产地", required: true, control: "region" },
+      { fieldKey: "col-moisture", label: "水分含量", required: true, control: "percent", unit: "%" },
+      { fieldKey: "col-batch", label: "批次号", required: true, control: "text" },
+    ],
+    valid: true,
+  },
+  {
+    skuId: "sku-spices-bajiao",
+    category: "农产品",
+    variety: "香辛调味料",
+    specValues: { 品种: "广西大红八角", 等级: "一级", 包装规格: "20kg/箱" },
+    measureParam: "重量",
+    measureUnit: "吨",
+    measureUnits: ["吨", "千克"],
+    inboundCollect: [
+      { fieldKey: "col-prod-date", label: "生产日期", required: true, control: "date" },
+      {
+        fieldKey: "col-shelf-life",
+        label: "保质期",
+        required: true,
+        control: "period",
+        unit: "个月",
+        unitLocked: true,
+        suggestedValue: "24",
+        placeholder: "请输入保质期数值",
+      },
+      { fieldKey: "col-expiry-date", label: "过期时间", required: true, control: "date" },
+      { fieldKey: "col-origin", label: "产地", required: true, control: "region" },
+      { fieldKey: "col-moisture", label: "水分含量", required: false, control: "percent", unit: "%" },
+    ],
+    valid: true,
+  },
   // —— 停用 SKU（入库不可选，仅供配置管理对照）——
   {
     skuId: "sku-legacy-cu-disabled",
@@ -608,6 +664,94 @@ export const GOODS_SKU_CATALOG: readonly GoodsSkuRecord[] = [
   },
 ]
 
+export const GOODS_CATALOG_SYNC_STORAGE_KEY = "syzc_goods_sku_catalog_sync_v1"
+
+export type SyncedCollectFieldOverride = {
+  fieldKey: string
+  label: string
+  control: InboundCollectControlKind
+  unit?: string
+  options?: readonly string[]
+  placeholder?: string
+}
+
+type SyncedGoodsCatalogPayload = {
+  dynamicSkus: GoodsSkuRecord[]
+  fieldOverrides: SyncedCollectFieldOverride[]
+}
+
+let inMemorySyncedPayload: SyncedGoodsCatalogPayload | null = null
+
+export function syncDynamicGoodsSkuCatalog(
+  dynamicSkus: GoodsSkuRecord[],
+  fieldOverrides: SyncedCollectFieldOverride[] = [],
+) {
+  inMemorySyncedPayload = { dynamicSkus, fieldOverrides }
+  if (typeof window !== "undefined" && window.localStorage) {
+    try {
+      window.localStorage.setItem(
+        GOODS_CATALOG_SYNC_STORAGE_KEY,
+        JSON.stringify(inMemorySyncedPayload),
+      )
+    } catch {
+      // ignore storage quota errors
+    }
+  }
+}
+
+function readSyncedPayload(): SyncedGoodsCatalogPayload | null {
+  if (inMemorySyncedPayload) return inMemorySyncedPayload
+  if (typeof window !== "undefined" && window.localStorage) {
+    try {
+      const raw = window.localStorage.getItem(GOODS_CATALOG_SYNC_STORAGE_KEY)
+      if (raw) {
+        inMemorySyncedPayload = JSON.parse(raw) as SyncedGoodsCatalogPayload
+        return inMemorySyncedPayload
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }
+  return null
+}
+
+/**
+ * 合并 06/07 实时配置的货品与收集项元数据 + 静态基准目录
+ * 实现「07 入库收集项配置 ➔ 06 货品管理 ➔ PC/H5 入库单」端到端实时闭环
+ */
+export function getMergedGoodsSkuCatalog(): readonly GoodsSkuRecord[] {
+  const payload = readSyncedPayload()
+  if (!payload) return GOODS_SKU_CATALOG
+
+  const overrideMap = new Map<string, SyncedCollectFieldOverride>()
+  for (const ov of payload.fieldOverrides) {
+    overrideMap.set(ov.fieldKey, ov)
+  }
+
+  const dynamicIds = new Set(payload.dynamicSkus.map((s) => s.skuId))
+  const staticMapped = GOODS_SKU_CATALOG.filter((s) => !dynamicIds.has(s.skuId)).map(
+    (sku) => {
+      if (overrideMap.size === 0 || sku.inboundCollect.length === 0) return sku
+      return {
+        ...sku,
+        inboundCollect: sku.inboundCollect.map((field) => {
+          const ov = overrideMap.get(field.fieldKey)
+          if (!ov) return field
+          return {
+            ...field,
+            label: ov.label,
+            options: ov.options ?? field.options,
+            unit: field.control === "period" ? field.unit : (ov.unit ?? field.unit),
+            placeholder: ov.placeholder ?? field.placeholder,
+          }
+        }),
+      }
+    },
+  )
+
+  return [...payload.dynamicSkus, ...staticMapped]
+}
+
 export function formatSpecSummary(specValues: Record<string, string>): string {
   const values = Object.values(specValues).map((v) => v.trim()).filter(Boolean)
   return values.join("-")
@@ -621,7 +765,7 @@ export function measureLabelFromParam(param: GoodsSkuRecord["measureParam"]): st
 
 export function listEnabledCategories(): string[] {
   const set = new Set<string>()
-  for (const sku of GOODS_SKU_CATALOG) {
+  for (const sku of getMergedGoodsSkuCatalog()) {
     if (sku.valid) set.add(sku.category)
   }
   return [...set]
@@ -629,14 +773,14 @@ export function listEnabledCategories(): string[] {
 
 export function listVarieties(category: string): string[] {
   const set = new Set<string>()
-  for (const sku of GOODS_SKU_CATALOG) {
+  for (const sku of getMergedGoodsSkuCatalog()) {
     if (sku.valid && sku.category === category) set.add(sku.variety)
   }
   return [...set]
 }
 
 export function listSkus(category: string, variety: string): GoodsSkuRecord[] {
-  return GOODS_SKU_CATALOG.filter(
+  return getMergedGoodsSkuCatalog().filter(
     (sku) => sku.valid && sku.category === category && sku.variety === variety
   )
 }
@@ -663,7 +807,7 @@ export function buildInboundSkuCascadeTree(): InboundSkuCascadeCategory[] {
 }
 
 export function getSkuById(skuId: string): GoodsSkuRecord | undefined {
-  return GOODS_SKU_CATALOG.find((sku) => sku.skuId === skuId && sku.valid)
+  return getMergedGoodsSkuCatalog().find((sku) => sku.skuId === skuId && sku.valid)
 }
 
 /** 品类下默认维度（无选中 SKU 时预览） */
@@ -719,7 +863,7 @@ export function inferSkuIdFromStagingParts(
   const specText = spec.trim()
   if (!varName && !cat) return undefined
 
-  let candidates = GOODS_SKU_CATALOG.filter((sku) => sku.valid)
+  let candidates = getMergedGoodsSkuCatalog().filter((sku) => sku.valid)
   if (cat) {
     const byCat = candidates.filter(
       (sku) => sku.category === cat || sku.category.startsWith(cat.slice(0, 2)),

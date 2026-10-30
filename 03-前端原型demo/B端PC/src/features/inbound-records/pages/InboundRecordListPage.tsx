@@ -10,10 +10,10 @@ import { InboundRecordFiltersPanel } from "../components/InboundRecordFiltersPan
 import { InboundRecordTable } from "../components/InboundRecordTable"
 import { ExportRecordsDialog } from "../components/ExportRecordsDialog"
 import { PdfViewerDialog } from "../components/PdfViewerDialog"
-import { DocumentTimelineModal } from "@/shared/document-management"
 import {
   DEFAULT_INBOUND_RECORD_FILTERS,
   INBOUND_RECORD_ADD_PATH,
+  inboundRecordDetailPath,
   PAGE_SIZE,
 } from "../domain/constants"
 import type { InboundRecord, InboundRecordFilters, InboundRecordRowAction } from "../domain/types"
@@ -43,8 +43,6 @@ export function InboundRecordListPage() {
   // 弹窗状态
   const [exportTarget, setExportTarget] = useState<InboundRecord | null>(null)
   const [pdfTarget, setPdfTarget] = useState<InboundRecord | null>(null)
-  const [docsTarget, setDocsTarget] = useState<InboundRecord | null>(null)
-
   useEffect(() => {
     setRows([...inboundRecordsMock])
   }, [location.key])
@@ -87,7 +85,7 @@ export function InboundRecordListPage() {
       return
     }
     if (action === "manageDocs") {
-      setDocsTarget(item)
+      navigate(inboundRecordDetailPath(item.id, "documents"))
     }
   }
 
@@ -171,17 +169,6 @@ export function InboundRecordListPage() {
           fileName={`入库单_${pdfTarget?.orderNo}.pdf`}
           onClose={() => setPdfTarget(null)}
         />
-
-        {/* 资料管理全流程时间轴弹窗 */}
-        {docsTarget && (
-          <DocumentTimelineModal
-            open={docsTarget !== null}
-            orderNo={docsTarget.orderNo}
-            approvalId="SP202605280001"
-            orderType="inbound"
-            onClose={() => setDocsTarget(null)}
-          />
-        )}
 
         {toastMessage && (
           <div className="fixed right-6 bottom-6 z-50 max-w-sm rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">

@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import {
   ArrowLeft,
   ChevronDown,
@@ -34,6 +34,8 @@ import {
   PrototypeAnnotationProvider,
   PrototypeAnnotationTarget,
 } from "@/shared/annotations/PrototypeAnnotationLayer"
+import { parseInboundRecordDetailTabParam } from "@prototype/shared/inbound/inbound-record-detail-nav"
+import { buildInboundRecordDetailTabEntries } from "@prototype/shared/inbound/inbound-record-detail-ui-labels"
 import { inboundRecordDetailAnnotations } from "../annotations/inbound-record-detail.annotations"
 import { inboundRecordDocuments } from "../documents/inbound-record-documents"
 import { getInboundRecordDetailById, type InboundRecordDetail } from "../lib/detail-utils"
@@ -58,15 +60,18 @@ export function InboundRecordDetailPage() {
   const { highlightEnabled } = useIterationHighlight()
   const { id } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const initialDetail = useMemo(() => getInboundRecordDetailById(id), [id])
   const [detail, setDetail] = useState<InboundRecordDetail | undefined>(initialDetail)
+  const [tab, setTab] = useState<DetailTab>(() =>
+    parseInboundRecordDetailTabParam(searchParams.get("tab")) ?? "goods"
+  )
   // 从一条单据切到另一条时，详情数据要跟着路由 id 重置，避免沿用上一条的单据
   useEffect(() => {
     setDetail(initialDetail)
-    setTab("goods")
     setExpandedGoods({})
-  }, [initialDetail])
-  const [tab, setTab] = useState<DetailTab>("goods")
+    setTab(parseInboundRecordDetailTabParam(searchParams.get("tab")) ?? "goods")
+  }, [initialDetail, searchParams, id])
   const [expandedGoods, setExpandedGoods] = useState<Record<string, boolean>>({})
   const [toast, setToast] = useState<string | null>(null)
 
@@ -286,14 +291,7 @@ export function InboundRecordDetailPage() {
         <PrototypeAnnotationTarget annotationIds={["inbound-detail-tabs"]}>
           <div className="rounded-lg border bg-card p-5 shadow-xs space-y-4">
             <div className="flex border-b">
-              {(
-                [
-                  ["goods", "入库明细"],
-                  ["audit", "审核记录"],
-                  ["modify", "入库信息修改记录"],
-                  ["documents", "资料管理"],
-                ] as const
-              ).map(([key, label]) => (
+              {buildInboundRecordDetailTabEntries(detail.goodsLines.length).map(([key, label]) => (
                 <button
                   key={key}
                   type="button"
@@ -314,7 +312,7 @@ export function InboundRecordDetailPage() {
               ))}
             </div>
 
-            {/* Tab 1: 入库明细（对齐源码带有两级展开表格、二维码图标与【查看附件】弹窗） */}
+            {/* Tab 1: 货物明细（对齐源码带有两级展开表格、二维码图标与【查看附件】弹窗） */}
             {tab === "goods" && (
               <div className="space-y-4">
                 <div className="overflow-hidden rounded-md border bg-card">
@@ -613,7 +611,7 @@ export function InboundRecordDetailPage() {
               </div>
             )}
 
-            {/* Tab 3: 入库信息修改记录 */}
+            {/* Tab 3: 修改记录 */}
             {tab === "modify" && (
               <div className="space-y-3">
                 <div className="overflow-x-auto rounded-md border">

@@ -5,9 +5,9 @@ import majorRulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/09-配
 import subPrdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/09-配置管理/04-货品规格管理-品类管理/品类管理主PRD.md?raw"
 import subFieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/09-配置管理/04-货品规格管理-品类管理/品类管理字段清单.md?raw"
 import subRulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/09-配置管理/04-货品规格管理-品类管理/品类管理业务规则规格.md?raw"
-import goodsPrdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/09-配置管理/05-货品规格管理-货品管理/货品管理主PRD.md?raw"
-import goodsFieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/09-配置管理/05-货品规格管理-货品管理/货品管理字段清单.md?raw"
-import goodsRulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/09-配置管理/05-货品规格管理-货品管理/货品管理业务规则规格.md?raw"
+import goodsPrdMarkdown from "@docs/B-迭代需求/6.3版本（2026.09）/06-货品规格管理-货品管理/货品管理主PRD.md?raw"
+import goodsFieldsMarkdown from "@docs/B-迭代需求/6.3版本（2026.09）/06-货品规格管理-货品管理/货品管理字段清单.md?raw"
+import goodsRulesMarkdown from "@docs/B-迭代需求/6.3版本（2026.09）/06-货品规格管理-货品管理/货品管理业务规则规格.md?raw"
 
 export const majorCategoryDocuments: PrototypeDocument[] = [
   {

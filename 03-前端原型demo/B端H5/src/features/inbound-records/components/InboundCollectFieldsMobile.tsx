@@ -54,7 +54,7 @@ export function InboundCollectFieldsMobile({ fields, values, onChange, allOption
                 value={value}
                 onChange={(e) => patch(field.fieldKey, e.target.value)}
               >
-                <option value="">请选择{field.label}</option>
+                <option value="">{field.placeholder || `请选择${field.label}`}</option>
                 {(field.options ?? []).map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
@@ -62,27 +62,32 @@ export function InboundCollectFieldsMobile({ fields, values, onChange, allOption
                 ))}
               </select>
             ) : field.control === "range" ? (
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  className={fieldClass}
-                  placeholder="最小值"
-                  value={splitRange(value)[0]}
-                  onChange={(e) =>
-                    patch(field.fieldKey, `${e.target.value}|${splitRange(value)[1]}`)
-                  }
-                />
-                <span className="shrink-0 text-xs text-[#232D39]/50">至</span>
-                <input
-                  type="number"
-                  className={fieldClass}
-                  placeholder="最大值"
-                  value={splitRange(value)[1]}
-                  onChange={(e) =>
-                    patch(field.fieldKey, `${splitRange(value)[0]}|${e.target.value}`)
-                  }
-                />
-                <span className="shrink-0 text-sm text-[#232D39]">{field.unit ?? ""}</span>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    className={fieldClass}
+                    placeholder="最小值"
+                    value={splitRange(value)[0]}
+                    onChange={(e) =>
+                      patch(field.fieldKey, `${e.target.value}|${splitRange(value)[1]}`)
+                    }
+                  />
+                  <span className="shrink-0 text-xs text-[#232D39]/50">至</span>
+                  <input
+                    type="number"
+                    className={fieldClass}
+                    placeholder="最大值"
+                    value={splitRange(value)[1]}
+                    onChange={(e) =>
+                      patch(field.fieldKey, `${splitRange(value)[0]}|${e.target.value}`)
+                    }
+                  />
+                  <span className="shrink-0 text-sm text-[#232D39]">{field.unit ?? ""}</span>
+                </div>
+                {field.placeholder && (
+                  <p className="text-[11px] text-[#232D39]/55">{field.placeholder}</p>
+                )}
               </div>
             ) : field.control === "percent" ? (
               <div className="flex items-center gap-2">
@@ -92,7 +97,7 @@ export function InboundCollectFieldsMobile({ fields, values, onChange, allOption
                   max={100}
                   step="0.01"
                   className={fieldClass}
-                  placeholder={`请输入${field.label}`}
+                  placeholder={field.placeholder || `请输入${field.label}`}
                   value={value}
                   onChange={(e) => patch(field.fieldKey, e.target.value)}
                 />
@@ -106,18 +111,18 @@ export function InboundCollectFieldsMobile({ fields, values, onChange, allOption
                     min={1}
                     step={1}
                     className={fieldClass}
-                    placeholder={`请输入${field.label}数值`}
+                    placeholder={field.placeholder || `请输入${field.label}数值`}
                     value={value}
                     onChange={(e) => patch(field.fieldKey, e.target.value)}
                   />
                   {field.unitLocked && field.unit ? (
-                    <span className="shrink-0 whitespace-nowrap text-sm font-medium text-[#232D39]">
-                      {field.unit}
+                    <span className="shrink-0 whitespace-nowrap rounded bg-[#232D39]/8 px-2 py-1 text-xs font-medium text-[#232D39]">
+                      {field.unit}（固定）
                     </span>
                   ) : (
                     <select
                       className="w-24 shrink-0 rounded-lg border border-[#232D39]/15 bg-white px-2 py-2 text-sm text-[#232D39]"
-                      value={values[`${field.fieldKey}Unit`] ?? ""}
+                      value={values[`${field.fieldKey}Unit`] ?? field.unit ?? ""}
                       onChange={(e) => patch(`${field.fieldKey}Unit`, e.target.value)}
                     >
                       <option value="">单位</option>
@@ -144,7 +149,7 @@ export function InboundCollectFieldsMobile({ fields, values, onChange, allOption
               <input
                 type={field.control === "date" ? "date" : "text"}
                 className={fieldClass}
-                placeholder={`请输入${field.label}`}
+                placeholder={field.placeholder || `请输入${field.label}`}
                 value={value}
                 onChange={(e) => patch(field.fieldKey, e.target.value)}
               />

@@ -103,7 +103,7 @@ export function OutboundRecordFormPage() {
 
   const handleOpenGoodsPicker = () => {
     if (!form.ownerPartnerId && !form.ownerName) {
-      showToast("请先选择货主（C01）")
+      showToast("还没选货主，请先选好货主再继续")
       return
     }
     setPickerOpen(true)
@@ -151,7 +151,7 @@ export function OutboundRecordFormPage() {
       warehouseName: order.warehouseName,
       goodsList: convertedItems,
     }))
-    showToast(`已成功带出关联单据【${order.orderNo}】项下货物信息（O02）`)
+    showToast(`已带出关联单据【${order.orderNo}】下的货物信息`)
   }
 
   const handleRemoveGoodsLine = (goodsId: string) => {
@@ -270,7 +270,7 @@ export function OutboundRecordFormPage() {
               action: "APPROVE",
               actionName: "审批通过",
               actionTime: form.outboundDate,
-              comment: "库存行级锁短时校验通过，扣减可用库存并已生成提货单（O09/O11）",
+              comment: "库存校验通过，已扣减可用库存并生成提货单",
             },
           ],
         },

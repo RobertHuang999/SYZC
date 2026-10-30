@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useEffect, useMemo, useState } from "react"
+import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import {
   Copy,
   Check,
@@ -17,10 +17,16 @@ import { mobileOutboundRecordsMock } from "../mock/outbound-records.mock"
 import { MobileImageModal } from "@/features/inbound-records/components/MobileImageModal"
 import { MobilePdfModal } from "@/features/inbound-records/components/MobilePdfModal"
 import { DocumentManagementTab } from "@/shared/document-management"
+import { parseOutboundRecordDetailTabParam } from "@prototype/shared/outbound/outbound-record-detail-nav"
+import {
+  buildOutboundRecordDetailTabEntries,
+  OUTBOUND_RECORD_DETAIL_AUDIT_SECTION_TITLE,
+} from "@prototype/shared/outbound/outbound-record-detail-ui-labels"
 
 export function OutboundRecordDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
   const record = useMemo(() => {
     return (
@@ -32,7 +38,11 @@ export function OutboundRecordDetailPage() {
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState<
     "goods" | "pickup" | "audit" | "documents"
-  >("goods")
+  >(() => parseOutboundRecordDetailTabParam(searchParams.get("tab")) ?? "goods")
+
+  useEffect(() => {
+    setActiveTab(parseOutboundRecordDetailTabParam(searchParams.get("tab")) ?? "goods")
+  }, [searchParams, id])
   const [toast, setToast] = useState<string | null>(null)
   const [imageModalData, setImageModalData] = useState<{
     open: boolean
@@ -137,14 +147,7 @@ export function OutboundRecordDetailPage() {
 
         {/* Tab 选项卡（与入库详情同一套样式） */}
         <div className="flex border-b border-[#232D39]/10 bg-white px-4 pt-1 shadow-xs">
-          {(
-            [
-              ["goods", `货物明细 (${record.goodsList.length})`],
-              ["pickup", "提货记录"],
-              ["audit", "审批履历"],
-              ["documents", "资料管理"],
-            ] as const
-          ).map(([key, label]) => (
+          {buildOutboundRecordDetailTabEntries(record.goodsList.length).map(([key, label]) => (
             <button
               key={key}
               type="button"
@@ -228,7 +231,7 @@ export function OutboundRecordDetailPage() {
           </div>
         )}
 
-        {/* Tab 2: 提货记录 (回显提货信息与提货记录) */}
+        {/* Tab 2: 提货信息 (回显提货人与现场提货记录) */}
         {activeTab === "pickup" && (
           <div className="space-y-2.5">
             {isTransferOrAssign ? (
@@ -369,12 +372,12 @@ export function OutboundRecordDetailPage() {
           </div>
         )}
 
-        {/* Tab 3: 审批履历 */}
+        {/* Tab 3: 审核记录 */}
         {activeTab === "audit" && (
           <div className="rounded-xl border border-[#232D39]/10 bg-white p-3.5 shadow-xs text-xs space-y-3">
             <div className="font-bold text-[#232D39] pb-2 border-b border-[#232D39]/5 flex items-center gap-1.5">
               <Clock className="size-4 text-blue-600" />
-              全流程审核轨迹
+              {OUTBOUND_RECORD_DETAIL_AUDIT_SECTION_TITLE}
             </div>
 
             <div className="relative pl-5 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#232D39]/10">

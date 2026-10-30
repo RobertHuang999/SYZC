@@ -15,6 +15,7 @@ export const goodsEditPath = (id: string) => `${GOODS_LIST_PATH}/编辑/${id}`
 export const goodsDetailPath = (id: string) => `${GOODS_LIST_PATH}/详情/${id}`
 
 export const INBOUND_COLLECT_CONFIG_PATH = `${GOODS_SPEC_BASE_PATH}/入库收集项配置`
+export const INBOUND_COLLECT_LIST_PATH = INBOUND_COLLECT_CONFIG_PATH
 export const inboundCollectDetailPath = (id: string) =>
   `${INBOUND_COLLECT_CONFIG_PATH}/详情/${id}`
 export const INBOUND_COLLECT_CREATE_PATH = `${INBOUND_COLLECT_CONFIG_PATH}/新增`

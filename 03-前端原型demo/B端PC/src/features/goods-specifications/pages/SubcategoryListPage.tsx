@@ -412,10 +412,10 @@ export function SubcategoryListPage() {
                         </TableCell>
                         <TableCell className="px-3 py-2.5 text-sm">{record.createdBy}</TableCell>
                         <TableCell className="px-3 py-2.5">
-                          <TableDateTimeCell value={record.createdAt} plain />
+                          <TableDateTimeCell value={record.createdAt} stackedPlain />
                         </TableCell>
                         <TableCell className="px-3 py-2.5">
-                          <TableDateTimeCell value={record.updatedAt} plain />
+                          <TableDateTimeCell value={record.updatedAt} stackedPlain />
                         </TableCell>
                         <TableCell className="px-3 py-2.5 text-center">
                           <StatusBadge status={record.status} />

@@ -66,7 +66,7 @@ export const outboundH5DetailAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "移动端 · 出库详情",
     content:
-      "展示出库单号（带一键复制）、绿色【已通过】印章、货主信息、出库类型、货物位置与出库前后数量明细、出库现场影像、审批履历时间轴；若已完成现场提货回写，展示提货人信息及【提货记录】板块（O11/O13）。",
+      "展示出库单号（带一键复制）、绿色【已通过】印章、货主信息、出库类型、货物位置与出库前后数量明细；四 Tab：货物明细（带行数）、提货信息（Tab 角标/圆点提示提货状态）、审核记录、资料管理；提货完成后在【提货信息】Tab 展示提货人登记与现场提货记录（O11/O13）。",
     documentRefs: {
       prd: { section: "6.2 出库单详情页", match: "提货记录", element: "text" },
       rules: { section: "【提货单自动生成与现场影像存证】(O11)", match: "提货记录", element: "text" },
@@ -76,8 +76,8 @@ export const outboundH5DetailAnnotations: PrototypeAnnotation[] = [
         title: "展示闭环",
         items: [
           {
-            label: "提货记录",
-            content: "仅在提货完成后展示提货人与现场出场记录。",
+            label: "提货信息",
+            content: "Tab 保留状态提示；仅在提货完成后展示提货人与现场出场记录。",
           },
         ],
       },

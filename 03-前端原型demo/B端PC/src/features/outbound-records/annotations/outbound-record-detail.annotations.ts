@@ -60,9 +60,9 @@ export const outboundRecordDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "outbound-detail-pickup-record",
     number: 3,
     kind: "规则",
-    title: "出库详情 · 提货记录板块（条件展示）",
+    title: "出库详情 · 提货信息 Tab（条件展示）",
     content:
-      "当出库单对应的提货单完成现场提货回写后，单据展示【提货记录】板块，包含提货操作人、实际提货时间、是否本人提货、其他说明、现场照片及设备抓拍图；若提货尚未完成，则不展示该板块，防止事实混淆（O03/O11）。移库与转让出库不生成提货单，亦不展示此板块。",
+      "【提货信息】为独立标签页：移库/转让出库展示免提货说明；待提货展示核销引导；提货完成后展示提货人登记信息与现场提货记录（操作人、提货时间、是否本人提货、其他说明、现场照片及设备抓拍图）。未提货时不展示已完成记录，防止事实混淆（O03/O11）。",
     documentRefs: {
       rules: {
         section: "【提货单自动生成与现场影像存证】(O11)",
@@ -87,7 +87,7 @@ export const outboundRecordDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "outbound-detail-goods-tab",
     number: 4,
     kind: "字段",
-    title: "出库详情 · 货品明细按类型分流呈现",
+    title: "出库详情 · 货物明细按类型分流呈现",
     content:
       "普通出库：一级表格展示货物主行，首列提供展开箭头，展开后展示二级库存位置明细（位置、具体位置、入库时间、存货条码、出库数量），不提供操作列；抵押/质押/仓单出库：平铺明细表格，展示货物名称、其他信息、出库数量、仓库、库房、分区、出库前数量、出库后数量及存货条码二维码（O13）。",
     documentRefs: {

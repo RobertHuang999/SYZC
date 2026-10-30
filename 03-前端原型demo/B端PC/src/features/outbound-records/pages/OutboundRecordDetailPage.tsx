@@ -1,5 +1,5 @@
-import { useState, useMemo, Fragment } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useState, useMemo, Fragment, useEffect } from "react"
+import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import {
   ArrowLeft,
   Copy,
@@ -31,6 +31,11 @@ import {
   PrototypeAnnotationTarget,
 } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { outboundRecordDocuments } from "../documents/outbound-record-documents"
+import { parseOutboundRecordDetailTabParam } from "@prototype/shared/outbound/outbound-record-detail-nav"
+import {
+  outboundRecordDetailGoodsTabLabel,
+  OUTBOUND_RECORD_DETAIL_TAB_LABELS,
+} from "@prototype/shared/outbound/outbound-record-detail-ui-labels"
 import { outboundRecordDetailAnnotations } from "../annotations/outbound-record-detail.annotations"
 import { ImageViewerModal } from "../components/ImageViewerModal"
 import { OUTBOUND_RECORD_LIST_PATH } from "../domain/constants"
@@ -56,6 +61,7 @@ export function OutboundRecordDetailPage() {
   const { highlightEnabled } = useIterationHighlight()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [refreshKey, setRefreshKey] = useState(0)
 
   const record = useMemo(() => {
@@ -65,7 +71,13 @@ export function OutboundRecordDetailPage() {
     )
   }, [id, refreshKey])
 
-  const [tab, setTab] = useState<DetailTab>("goods")
+  const [tab, setTab] = useState<DetailTab>(() =>
+    parseOutboundRecordDetailTabParam(searchParams.get("tab")) ?? "goods"
+  )
+
+  useEffect(() => {
+    setTab(parseOutboundRecordDetailTabParam(searchParams.get("tab")) ?? "goods")
+  }, [searchParams, id])
   const [expandedGoods, setExpandedGoods] = useState<Record<string, boolean>>({})
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
@@ -287,7 +299,7 @@ export function OutboundRecordDetailPage() {
               )}
               onClick={() => setTab("goods")}
             >
-              货品明细 ({record.goodsList.length})
+              {outboundRecordDetailGoodsTabLabel(record.goodsList.length)}
             </button>
             <button
               type="button"
@@ -299,7 +311,7 @@ export function OutboundRecordDetailPage() {
               )}
               onClick={() => setTab("pickup")}
             >
-              提货记录
+              {OUTBOUND_RECORD_DETAIL_TAB_LABELS.pickup}
               {record.pickCompleted ? (
                 <span className="rounded bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0.2 font-normal">
                   已完成
@@ -324,7 +336,7 @@ export function OutboundRecordDetailPage() {
               )}
               onClick={() => setTab("audit")}
             >
-              全流程审核轨迹
+              {OUTBOUND_RECORD_DETAIL_TAB_LABELS.audit}
             </button>
             <button
               type="button"
@@ -336,7 +348,7 @@ export function OutboundRecordDetailPage() {
               )}
               onClick={() => setTab("documents")}
             >
-              资料管理
+              {OUTBOUND_RECORD_DETAIL_TAB_LABELS.documents}
               {highlightEnabled ? (
                 <span className="ml-1.5 rounded bg-amber-500 px-1 py-0.5 text-[9px] font-bold leading-none text-white">
                   6.3
@@ -345,7 +357,7 @@ export function OutboundRecordDetailPage() {
             </button>
           </div>
 
-          {/* Tab 1: 货品明细 */}
+          {/* Tab 1: 货物明细 */}
           {tab === "goods" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -562,7 +574,7 @@ export function OutboundRecordDetailPage() {
             </div>
           )}
 
-          {/* Tab 2: 提货记录 (回显提货信息与提货记录) */}
+          {/* Tab 2: 提货信息 (回显提货人与现场提货记录) */}
           {tab === "pickup" && (
             <div className="space-y-4">
               {isTransferOrAssign ? (
@@ -761,7 +773,7 @@ export function OutboundRecordDetailPage() {
             </div>
           )}
 
-          {/* Tab 3: 审核轨迹 */}
+          {/* Tab 3: 审核记录 */}
           {tab === "audit" && (
             <div className="space-y-4">
               <div className="rounded-lg border p-4">

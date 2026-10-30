@@ -25,6 +25,7 @@ import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import type { GoodsSku, Subcategory } from "../domain/types"
 import {
   formatPriceDisplay,
+  formatPriceWan,
   formatPriceYuan,
   formatSpecSummary,
   parsePriceInput,
@@ -66,8 +67,8 @@ export function PriceDialog({
     () =>
       sku
         ? [...sku.priceHistory].sort((left, right) =>
-            right.operatedAt.localeCompare(left.operatedAt)
-          )
+          right.operatedAt.localeCompare(left.operatedAt)
+        )
         : [],
     [sku]
   )
@@ -212,7 +213,7 @@ export function PriceDialog({
                             {formatPriceYuan(entry.price)} 元/{entry.unit || sku.measureUnit}
                           </span>
                           <span className="ml-2 text-xs text-muted-foreground font-normal">
-                            ({(entry.price / 10000).toFixed(6)} 万元)
+                            ({formatPriceWan(entry.price)} 万元)
                           </span>
                         </TableCell>
                         <TableCell className="text-foreground">
