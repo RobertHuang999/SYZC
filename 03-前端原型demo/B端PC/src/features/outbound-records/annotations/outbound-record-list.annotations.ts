@@ -115,9 +115,9 @@ export const outboundRecordListAnnotations: PrototypeAnnotation[] = [
     targetId: "outbound-record-row-actions",
     number: 4,
     kind: "交互",
-    title: "行操作与凭证导出审计",
+    title: "2×2 行操作与凭证导出审计（6.3 新增【资料管理】）",
     content:
-      "行操作包含：【查看详情】（跳转详情页查看出库明细、审核记录及提货记录）、【下载记录】（导出 Excel 明细清单，包含条码与库存位置）、【单据下载】（生成正式 PDF 出库凭证）。所有下载与查阅行为均受并发令牌控制并写入安全审计日志（O15）。",
+      "四按钮按 2×2 排布：【详情】跳详情页；【单据下载】生成正式 PDF 出库凭证；【下载记录】导出 Excel 明细清单（含条码与库存位置）；【资料管理】打开该单的资料时间轴抽屉。所有下载与查阅行为均受并发令牌控制并写入安全审计日志（O15）。",
     documentRefs: {
       rules: {
         section: "【并发控制幂等与操作审计】(O15)",

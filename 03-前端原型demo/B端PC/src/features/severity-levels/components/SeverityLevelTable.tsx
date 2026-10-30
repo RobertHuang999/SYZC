@@ -64,7 +64,7 @@ export function SeverityLevelTable({
     setDragOverIndex(null)
   }
   return (
-    <div className="overflow-hidden rounded-md border bg-card">
+    <div className="overflow-x-auto rounded-md border bg-card">
       <Table>
         <TableHeader>
           <TableRow>
@@ -98,7 +98,7 @@ export function SeverityLevelTable({
                 onDrop={(e) => handleDrop(index, e)}
                 onDragEnd={handleDragEnd}
                 className={cn(
-                  "transition-colors",
+                  "h-[72px] transition-colors",
                   draggedIndex === index && "opacity-40 bg-muted/60",
                   dragOverIndex === index && "border-t-2 border-t-primary bg-primary/5"
                 )}

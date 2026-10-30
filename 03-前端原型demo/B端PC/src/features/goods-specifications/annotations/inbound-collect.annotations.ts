@@ -3,6 +3,7 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const inboundCollectListAnnotations: PrototypeAnnotation[] = [
   {
     id: "collect-page-header",
+    version: "6.3",
     targetId: "collect-page-header",
     number: 1,
     kind: "页面",
@@ -48,6 +49,7 @@ export const inboundCollectListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "collect-filter",
+    version: "6.3",
     targetId: "collect-filter",
     number: 2,
     kind: "交互",
@@ -69,15 +71,16 @@ export const inboundCollectListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "collect-table",
+    version: "6.3",
     targetId: "collect-table",
     number: 3,
     kind: "字段",
-    title: "7 维精简矩阵与度量摘要",
+    title: "结构化数据矩阵与核心保护",
     content:
-      "主表格固定展示 7 维核心业务列：序号、收集项名称、控件类型、度量单位/选项摘要、状态徽章、创建时间、操作列，消除视觉噪音。",
+      "主表格展示序号、收集项名称、控件类型、度量单位/选项摘要、状态徽章、创建时间与操作列。",
     details: [
       {
-        title: "核心保护机制",
+        title: "核心保护与血缘机制",
         items: [
           {
             label: "核心内置项锁定",
@@ -90,9 +93,9 @@ export const inboundCollectListAnnotations: PrototypeAnnotation[] = [
               "【收集项名称唯一性校验规则】(R01)：租户内名称全局唯一，录入时去除首尾空格，重复阻断保存。",
           },
           {
-            label: "下游引用探测",
+            label: "引用安全保护",
             content:
-              "【两阶段安全删除控制规则】(R04)：引用数来自 06 货品主档里实际勾选了本项的未删除货品数；有引用时禁止删除并显示「当前被 N 个货品使用」。",
+              "【两阶段安全删除控制规则】(R04)：若收集项已被品类或货品引用，系统在编辑时锁定控件类型，删除时执行后台扫描并弹窗阻断，杜绝误删导致下游业务断链。",
           },
         ],
       },
@@ -100,6 +103,7 @@ export const inboundCollectListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "collect-shelf-life-action",
+    version: "6.3",
     targetId: "collect-shelf-life-action",
     number: 4,
     kind: "规则",
@@ -118,7 +122,7 @@ export const inboundCollectListAnnotations: PrototypeAnnotation[] = [
           {
             label: "下游货品主档锁定",
             content:
-              "货品管理 (SKU) 建档时从白名单中为商品指定专属固定单位（如花椒配年、八角配月），产生入库单后单位锁死只读。",
+              "【下游货品执行与入库单只读规则】(R06)：货品主档从白名单指定专属固定单位；发生入库业务后锁定，入库单单位只读锁死。",
           },
         ],
       },
@@ -126,6 +130,7 @@ export const inboundCollectListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "collect-delete-action",
+    version: "6.3",
     targetId: "collect-delete-action",
     number: 5,
     kind: "交互",
@@ -155,6 +160,7 @@ export const inboundCollectListAnnotations: PrototypeAnnotation[] = [
 export const inboundCollectDetailAnnotations: PrototypeAnnotation[] = [
   {
     id: "detail-header-card",
+    version: "6.3",
     targetId: "detail-header-card",
     number: 1,
     kind: "页面",
@@ -176,6 +182,7 @@ export const inboundCollectDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "detail-section-specs",
+    version: "6.3",
     targetId: "detail-section-specs",
     number: 2,
     kind: "字段",
@@ -197,6 +204,7 @@ export const inboundCollectDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "detail-section-shelf-life",
+    version: "6.3",
     targetId: "detail-section-shelf-life",
     number: 3,
     kind: "规则",
@@ -218,6 +226,7 @@ export const inboundCollectDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "detail-section-audit",
+    version: "6.3",
     targetId: "detail-section-audit",
     number: 4,
     kind: "字段",
@@ -247,6 +256,7 @@ export const inboundCollectDetailAnnotations: PrototypeAnnotation[] = [
 export const inboundCollectFormAnnotations: PrototypeAnnotation[] = [
   {
     id: "collect-form-header",
+    version: "6.3",
     targetId: "collect-form-header",
     number: 1,
     kind: "页面",
@@ -273,6 +283,7 @@ export const inboundCollectFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "collect-form-fields",
+    version: "6.3",
     targetId: "collect-form-fields",
     number: 2,
     kind: "字段",

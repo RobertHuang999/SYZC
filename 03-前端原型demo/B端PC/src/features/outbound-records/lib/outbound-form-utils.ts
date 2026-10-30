@@ -134,7 +134,7 @@ export function validateOutboundForm(form: OutboundFormState): ValidationResult 
   const now = new Date().getTime()
   const chosen = new Date(form.outboundDate.replace(/-/g, "/")).getTime()
   if (chosen > now + 60000) {
-    return { valid: false, message: "出库日期严禁选择未来时间（O04）" }
+    return { valid: false, message: "出库日期不能选未来时间，请改成今天或更早的日期" }
   }
 
   if (!form.ownerName) {
@@ -145,30 +145,30 @@ export function validateOutboundForm(form: OutboundFormState): ValidationResult 
     form.type === "仓单出库" || form.type === "质押出库" || form.type === "抵押出库"
 
   if (isRelated && !form.relatedNo) {
-    return { valid: false, message: "请选择有效关联单号（O02）" }
+    return { valid: false, message: "仓单/质押/抵押出库要先关联单据，请选择有效的关联单号" }
   }
 
   if (!form.goodsList || form.goodsList.length === 0) {
-    return { valid: false, message: "请添加或关联出库货品（C03）" }
+    return { valid: false, message: "还没添加出库货品，请先点【添加货品】选择要出库的货物" }
   }
 
   if (isRelated) {
     const selectedRows = form.goodsList.filter((g) => g.selected)
     if (selectedRows.length === 0) {
-      return { valid: false, message: "请至少勾选一行出库货物（O02）" }
+      return { valid: false, message: "请至少勾选一行要出库的货物" }
     }
     for (const row of selectedRows) {
       const amt = Number(row.totalOutboundAmount)
       if (!amt || amt <= 0) {
         return {
           valid: false,
-          message: `已勾选货物【${row.goodsName}】出库数量必须大于 0（O06）`,
+          message: `已勾选货物【${row.goodsName}】还没填出库数量，请填写大于 0 的数量`,
         }
       }
       if (row.availableAmount && amt > row.availableAmount) {
         return {
           valid: false,
-          message: `货物【${row.goodsName}】出库数量不得大于可用数量（C04）`,
+          message: `货物【${row.goodsName}】的出库数量超过可用库存，请调到可用数量以内`,
         }
       }
     }
@@ -185,7 +185,7 @@ export function validateOutboundForm(form: OutboundFormState): ValidationResult 
           if (amt > loc.availableAmount) {
             return {
               valid: false,
-              message: `库存位置【${loc.locationPath}】出库数量不得大于可用数量（C04）`,
+              message: `库存位置【${loc.locationPath}】的出库数量超过可用库存，请调到可用数量以内`,
             }
           }
         }
@@ -195,12 +195,20 @@ export function validateOutboundForm(form: OutboundFormState): ValidationResult 
       }
     }
     if (!hasValidAmount) {
-      return { valid: false, message: "请至少在一个库存位置录入出库数量（O06）" }
+      return { valid: false, message: "请至少在一个库存位置填写出库数量" }
     }
   }
 
   // 提货信息校验
   if (form.pickupPersonType === "个人") {
+    // O06a：禁止无引用仅手输提交，必须绑定「提货人信息」档案
+    if (!form.pickupAgentPartnerId) {
+      return {
+        valid: false,
+        message:
+          "个人提货要先选好提货经办人（或点【快速添加提货经办人】建档），只手工填姓名和证号不能提交",
+      }
+    }
     if (!form.pickupName.trim()) {
       return { valid: false, message: "请填写提货人姓名" }
     }
@@ -228,7 +236,7 @@ export function validateOutboundForm(form: OutboundFormState): ValidationResult 
 
   // C06 现场照片缺失校验
   if (!form.sitePhotos || form.sitePhotos.length === 0) {
-    return { valid: false, message: "请上传出库现场照片（C06）" }
+    return { valid: false, message: "请上传出库现场照片，至少 1 张" }
   }
 
   if (form.notes && form.notes.length > 140) {

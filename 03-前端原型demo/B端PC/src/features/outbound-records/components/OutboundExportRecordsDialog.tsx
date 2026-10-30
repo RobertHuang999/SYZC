@@ -90,7 +90,7 @@ export function OutboundExportRecordsDialog({
           </div>
 
           <p className="text-[11px] text-amber-700 bg-amber-50 p-2 rounded">
-            提示：依据金融审计要求，导出行为将自动记录操作人、时间戳与 IP 地址至系统安全审计日志中（O15）。
+            提示：按金融审计要求，每次导出都会记下操作人、操作时间和 IP 地址，写进安全审计日志。
           </p>
         </div>
 

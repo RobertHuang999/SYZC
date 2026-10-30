@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -110,7 +111,7 @@ export function ShelfLifeUnitConfigDialog({
     })
 
     if (!res.success) {
-      setErrorMessage(res.error || "保存失败")
+      setErrorMessage(res.error || "没保存成功，请重试；仍然失败请刷新页面后再提交")
       return
     }
 
@@ -136,6 +137,9 @@ export function ShelfLifeUnitConfigDialog({
               保质期度量单位配置
             </DialogTitle>
           </div>
+          <DialogDescription className="text-xs leading-relaxed text-muted-foreground">
+            这里开启的单位，货品建档时才能选；天、月、年不能全关，至少要留一个。
+          </DialogDescription>
         </DialogHeader>
 
         {errorMessage && (

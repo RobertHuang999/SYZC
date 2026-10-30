@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { useEffect, useMemo, useState } from "react"
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import {
   CopyIcon,
   TrendingUpIcon,
@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { DetailField, DetailSection } from "@/shared/components/DetailSection"
+import { IterationHighlight } from "@/shared/components/IterationHighlight"
 import {
   PrototypeAnnotationProvider,
   PrototypeAnnotationTarget,
@@ -34,35 +35,54 @@ import {
   setSkuPrice,
   useGoodsSpecRevision,
 } from "../lib/store"
-import { formatSpecSummary } from "../lib/format"
+import {
+  formatPriceWan,
+  formatPriceYuan,
+  formatSpecSummary,
+} from "../lib/format"
 import { StatusBadge } from "../components/StatusBadge"
 import { PriceDialog } from "../components/PriceDialog"
 import { PriceTrendDialog } from "../components/PriceTrendDialog"
+import { ConfirmActionDialog } from "../components/ConfirmActionDialog"
+import { goodsDetailAnnotations } from "../annotations/goods-detail.annotations"
+import { goodsDocuments } from "../documents/goods-spec-documents"
 
 const SHELF_LIFE_UNIT_LABEL = {
   DAY: "天",
   MONTH: "个月",
   YEAR: "年",
 } as const
-import { ConfirmActionDialog } from "../components/ConfirmActionDialog"
-import { goodsDetailAnnotations } from "../annotations/goods-detail.annotations"
-import { goodsDocuments } from "../documents/goods-spec-documents"
 
 export function GoodsDetailPage() {
   useGoodsSpecRevision()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
+  const [searchParams, setSearchParams] = useSearchParams()
   const sku = findSku(id)
 
   const [priceDialogOpen, setPriceDialogOpen] = useState(false)
   const [priceTrendDialogOpen, setPriceTrendDialogOpen] = useState(false)
-  const [alertState, setAlertState] = useState<{ title: string; description: string } | null>(null)
+  const [alertState, setAlertState] = useState<{
+    title: string
+    description: string
+  } | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
   const showToast = (message: string) => {
     setToastMessage(message)
     window.setTimeout(() => setToastMessage(null), 2500)
   }
+
+  useEffect(() => {
+    const toast = searchParams.get("toast")
+    if (toast === "created") {
+      showToast("添加货品成功")
+      setSearchParams({}, { replace: true })
+    } else if (toast === "updated") {
+      showToast("修改货品成功")
+      setSearchParams({}, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
 
   const subcategory = useMemo(
     () => findSubcategory(sku?.subcategoryId),
@@ -94,12 +114,13 @@ export function GoodsDetailPage() {
   }
 
   const specSummary = formatSpecSummary(sku, subcategory)
+  const listBackPath = `${GOODS_LIST_PATH}?subcategoryId=${sku.subcategoryId}`
 
   const handleEditClick = () => {
     if (sku.hasInboundOrders) {
       setAlertState({
         title: "无法编辑",
-        description: "该货品已有入库业务数据，不能编辑。",
+        description: "该货品已有业务数据产生，不可编辑！",
       })
       return
     }
@@ -113,12 +134,11 @@ export function GoodsDetailPage() {
       documents={goodsDocuments}
     >
       <div className="space-y-4 p-6">
-        {/* 页头面包屑与全局返回（对齐仓库管理与标杆详情规范） */}
-        {/* 页头面包屑（对齐标杆详情规范） */}
+        {/* 页头面包屑 */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
           <div className="space-y-0.5">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Link to={GOODS_LIST_PATH} className="hover:text-foreground">
+              <Link to={listBackPath} className="hover:text-foreground">
                 货品管理
               </Link>
               <span>/</span>
@@ -145,9 +165,8 @@ export function GoodsDetailPage() {
                   }
                 >
                   <span
-                    className={`mr-1.5 size-1.5 rounded-full ${
-                      effectivelyEnabled ? "bg-emerald-500" : "bg-slate-400"
-                    }`}
+                    className={`mr-1.5 size-1.5 rounded-full ${effectivelyEnabled ? "bg-emerald-500" : "bg-slate-400"
+                      }`}
                   />
                   {effectivelyEnabled ? "有效启用" : "无效停用"}
                 </Badge>
@@ -159,7 +178,8 @@ export function GoodsDetailPage() {
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <span>
-                  货品编号：<span className="font-medium text-foreground">{sku.id}</span>
+                  货品编号：
+                  <span className="font-medium text-foreground">{sku.id}</span>
                 </span>
                 <Button
                   type="button"
@@ -182,7 +202,7 @@ export function GoodsDetailPage() {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => navigate(GOODS_LIST_PATH)}
+                onClick={() => navigate(listBackPath)}
               >
                 返回列表
               </Button>
@@ -194,11 +214,7 @@ export function GoodsDetailPage() {
               >
                 设置价格
               </Button>
-              <Button
-                type="button"
-                size="sm"
-                onClick={handleEditClick}
-              >
+              <Button type="button" size="sm" onClick={handleEditClick}>
                 编辑货品
               </Button>
             </div>
@@ -234,10 +250,10 @@ export function GoodsDetailPage() {
               {typeof sku.price === "number" ? (
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-semibold text-foreground">
-                    ¥ {sku.price.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 6 })} 元 / {sku.measureUnit}
+                    ¥ {formatPriceYuan(sku.price)} 元 / {sku.measureUnit}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    ({(sku.price / 10000).toFixed(6)} 万元 / {sku.measureUnit})
+                    ({formatPriceWan(sku.price)} 万元 / {sku.measureUnit})
                   </span>
                   {sku.priceTrend && sku.priceTrend.length > 0 && (
                     <Button
@@ -253,7 +269,9 @@ export function GoodsDetailPage() {
                   )}
                 </div>
               ) : (
-                <span className="text-muted-foreground">--（未设置参考单价）</span>
+                <span className="text-muted-foreground">
+                  --（未设置参考单价）
+                </span>
               )}
             </DetailField>
           </DetailSection>
@@ -261,6 +279,11 @@ export function GoodsDetailPage() {
 
         {/* 板块 2: 入库收集信息配置 */}
         <PrototypeAnnotationTarget annotationIds={["goods-detail-inbound"]}>
+          <IterationHighlight
+            type="modified"
+            title="入库收集项与保质期配置"
+            description="收集项名称、控件、单位、选项由 07 字段池实时提供；此处只读展示货品侧的必填、固定单位、建议默认值与适用候选项。"
+          >
           <DetailSection title="入库收集信息配置">
             {sku.inboundCollect.length === 0 ? (
               <div className="col-span-full rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
@@ -274,7 +297,9 @@ export function GoodsDetailPage() {
                       <TableHead className="w-16 text-center">序号</TableHead>
                       <TableHead className="w-52">收集项名称</TableHead>
                       <TableHead className="w-44">控件类型</TableHead>
-                      <TableHead className="w-28 text-center">是否必填</TableHead>
+                      <TableHead className="w-28 text-center">
+                        是否必填
+                      </TableHead>
                       <TableHead>说明与业务规范</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -294,7 +319,10 @@ export function GoodsDetailPage() {
                             <div className="flex items-center gap-2">
                               <span>{field?.name ?? "已删除的收集项"}</span>
                               {field?.status === "DISABLED" && (
-                                <Badge variant="secondary" className="text-[11px] font-normal">
+                                <Badge
+                                  variant="outline"
+                                  className="border-amber-300 bg-amber-50 text-amber-800 text-[11px] font-medium"
+                                >
                                   底座已停用
                                 </Badge>
                               )}
@@ -319,10 +347,18 @@ export function GoodsDetailPage() {
                             {isShelfLife
                               ? `固定单位：${unitLabel || "未指定"}${
                                   item.suggestedValue
-                                    ? `，建议数值：${item.suggestedValue} ${unitLabel}`
+                                    ? `，建议默认数值：${item.suggestedValue} ${unitLabel}`
                                     : "，未设建议值"
-                                }（入库单单位只读，现场只填数值）`
-                              : field?.placeholder || field?.remark || "入库现场按实物或单据录入"}
+                                }（入库单单位只读锁定，现场仅填数值）`
+                              : field?.controlType === "下拉单选框"
+                                ? `可选候选项：${
+                                    (item.customOptions ?? field.options ?? []).join(
+                                      "、"
+                                    ) || "—"
+                                  }`
+                                : field?.placeholder ||
+                                  field?.remark ||
+                                  "入库现场按实物或单据录入"}
                           </TableCell>
                         </TableRow>
                       )
@@ -332,58 +368,60 @@ export function GoodsDetailPage() {
               </div>
             )}
           </DetailSection>
+          </IterationHighlight>
         </PrototypeAnnotationTarget>
 
         {/* 板块 3: 参考单价调价记录 */}
-        <PrototypeAnnotationTarget annotationIds={["goods-detail-price"]}>
-          <DetailSection title="参考单价调价记录">
-            {sku.priceHistory.length === 0 ? (
-              <div className="col-span-full rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-                暂无调价记录，点击页面顶部【设置价格】可录入基准单价。
-              </div>
-            ) : (
-              <div className="col-span-full rounded-md border border-border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-slate-100 dark:bg-slate-800">
-                      <TableHead className="w-16 text-center">序号</TableHead>
-                      <TableHead className="w-64">调整后单价</TableHead>
-                      <TableHead className="w-32">计量单位</TableHead>
-                      <TableHead className="w-40">操作人</TableHead>
-                      <TableHead>调价时间</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sku.priceHistory.map((record, index) => (
-                      <TableRow key={record.id || index}>
-                        <TableCell className="text-center text-muted-foreground">
-                          {index + 1}
-                        </TableCell>
-                        <TableCell className="font-medium text-foreground">
-                          <span>
-                            ¥ {record.price.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 6 })} 元
-                          </span>
-                          <span className="ml-2 text-xs text-muted-foreground font-normal">
-                            ({(record.price / 10000).toFixed(6)} 万元)
-                          </span>
-                        </TableCell>
-                        <TableCell>{record.unit || sku.measureUnit}</TableCell>
-                        <TableCell>{record.operator || "系统管理员"}</TableCell>
-                        <TableCell className="text-muted-foreground">
-                          <TableDateTimeCell value={record.operatedAt} plain />
-                        </TableCell>
+        <div id="goods-detail-price-history">
+          <PrototypeAnnotationTarget annotationIds={["goods-detail-price"]}>
+            <DetailSection title="参考单价修改记录">
+              {sku.priceHistory.length === 0 ? (
+                <div className="col-span-full rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+                  暂无修改记录，点击页面顶部【设置价格】可录入系统参考单价。
+                </div>
+              ) : (
+                <div className="col-span-full rounded-md border border-border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-slate-100 dark:bg-slate-800">
+                        <TableHead className="w-16 text-center">序号</TableHead>
+                        <TableHead className="w-72">调整后单价</TableHead>
+                        <TableHead className="w-32">计量单位</TableHead>
+                        <TableHead className="w-40">操作人</TableHead>
+                        <TableHead>调价时间</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </DetailSection>
-        </PrototypeAnnotationTarget>
+                    </TableHeader>
+                    <TableBody>
+                      {sku.priceHistory.map((record, index) => (
+                        <TableRow key={record.id || index}>
+                          <TableCell className="text-center text-muted-foreground">
+                            {index + 1}
+                          </TableCell>
+                          <TableCell className="font-medium text-foreground">
+                            <span>¥ {formatPriceYuan(record.price)} 元</span>
+                            <span className="ml-2 text-xs text-muted-foreground font-normal">
+                              ({formatPriceWan(record.price)} 万元)
+                            </span>
+                          </TableCell>
+                          <TableCell>{record.unit || sku.measureUnit}</TableCell>
+                          <TableCell>{record.operator || "系统管理员"}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            <TableDateTimeCell value={record.operatedAt} plain />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </DetailSection>
+          </PrototypeAnnotationTarget>
+        </div>
 
         {/* 板块 4: 系统与审计信息 */}
         <PrototypeAnnotationTarget annotationIds={["goods-detail-audit"]}>
           <DetailSection title="系统与审计信息">
+            <DetailField label="数据版本号">第 {sku.version} 版</DetailField>
             <DetailField label="创建人">
               <span>{sku.createdBy || "系统管理员"}</span>
             </DetailField>
@@ -409,6 +447,7 @@ export function GoodsDetailPage() {
             onOpenChange={setPriceDialogOpen}
             onSave={(price) => {
               setSkuPrice(sku.id, price)
+              showToast("价格设置成功，已写入修改记录")
             }}
           />
         )}

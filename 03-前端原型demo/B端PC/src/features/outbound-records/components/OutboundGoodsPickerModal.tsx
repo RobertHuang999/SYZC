@@ -291,7 +291,7 @@ export function OutboundGoodsPickerModal({
           {availableGroups.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
               <AlertCircle className="size-10 mb-2 stroke-1 text-gray-300" />
-              <p className="text-sm">暂无可用库存（C03）</p>
+              <p className="text-sm">该货主名下暂无可用库存</p>
               <p className="text-xs mt-1 text-gray-400">当前货主在已授权监管仓库内暂无在库可用货物</p>
             </div>
           ) : (

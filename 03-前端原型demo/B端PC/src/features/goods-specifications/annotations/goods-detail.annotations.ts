@@ -6,9 +6,13 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "goods-detail-header",
     number: 1,
     kind: "页面",
-    title: "货品详情与双层状态",
+    title: "货品详情与自身/有效双层状态",
     content:
-      "详情页全量只读展示货品主数据、规格、入库收集配置、单价与操作留痕，并从列表跳转而来。",
+      "详情页全量只读展示货品主数据、规格、入库收集配置、系统参考单价与操作留痕。",
+    documentRefs: {
+      prd: { section: "5. 状态机与动作能力矩阵", match: "有效启用" },
+      rules: { section: "二、状态定义与有效启用计算模型", match: "SKU-F11" },
+    },
     details: [
       {
         title: "状态口径",
@@ -31,12 +35,7 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "返回与编辑",
             content:
-              "返回货品列表；编辑进入整页表单，已产生入库单时保存会被拦截。",
-          },
-          {
-            label: "删除",
-            content:
-              "【两阶段安全删除控制规则】(SKU-F09)：启用中不可删除；已产生入库单也不可删除。",
+              "返回货品列表（保留所属品类选中态）；编辑进入整页表单，已产生入库单时点击编辑直接弹窗拦截提示「该货品已有业务数据产生，不可编辑！」。",
           },
         ],
       },
@@ -47,9 +46,13 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "goods-detail-base",
     number: 2,
     kind: "字段",
-    title: "基础信息与规格清单",
+    title: "基础规格档案与双精度单价",
     content:
-      "展示货品标识、所属大类与品类、计量参数与单位、动态规格取值、创建与更新信息。",
+      "展示所属大类与品类、计量参数与单位、动态规格取值、系统参考单价（元保留 2~6 位小数，万元保留 10 位小数）及价格趋势入口。",
+    documentRefs: {
+      fields: { section: "一、业务字段", match: "系统参考单价" },
+      rules: { section: "三、核心业务规则", match: "SKU-F05" },
+    },
     details: [
       {
         title: "字段说明",
@@ -65,9 +68,9 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
               "按品类定义的规格维度逐项展示取值；历史单据保留当时的规格快照。",
           },
           {
-            label: "审计字段",
+            label: "系统参考单价",
             content:
-              "创建人、创建时间、更新人、更新时间、数据版本号由服务端生成，前端不可篡改。",
+              "【系统参考单价维护与双精度展示规则】(SKU-F05)：支持元与万元（10 位小数）同屏对照，点击「价格趋势」可查看近期价格曲线。",
           },
         ],
       },
@@ -75,35 +78,49 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "goods-detail-inbound",
+    version: "6.3",
     targetId: "goods-detail-inbound",
     number: 3,
     kind: "字段",
-    title: "入库收集信息清单",
+    title: "6.3 变更 · 入库收集信息配置 (SKU-F03 / SKU-F04 / SKU-F12)",
     content:
-      "按配置顺序展示已勾选的收集项、控件类型和是否必填；未配置时明确提示入库单不会采集额外信息。",
+      "按配置顺序展示已勾选的 07 收集项、控件类型、是否必填、保质期固定单位与建议默认值，以及下拉单选框勾选的适用候选项。",
+    documentRefs: {
+      prd: { section: "4. 业务场景", match: "SKU-S02" },
+      fields: { section: "1.1 入库收集信息配置", match: "保质期固定单位" },
+      rules: { section: "三、核心业务规则", match: "SKU-F12" },
+    },
     details: [
       {
-        title: "配置来源",
+        title: "6.3 版本迭代调整对照（调整前 → 调整后）",
         items: [
           {
-            label: "收集项",
+            label: "详情页展示升级",
+            content: `| 展示维度 | 调整前（V2.0 基准版） | 调整后（6.3 V2.5 标准联动版） |
+| :--- | :--- | :--- |
+| **保质期说明列** | 仅显示“周期组合项” | 明确展示 **固定单位（天/个月/年）+ 建议默认数值 + 入库单单位只读锁定说明** |
+| **下拉单选框说明列** | 仅显示“下拉单选框” | 明确展示当前货品从 07 枚举池中勾选的 **可选候选项** |
+| **底座停用标识** | 无 | 当 07 收集项被停用时，详情行显示 **「底座已停用」** 徽章及降级提示（SKU-F12） |`,
+          },
+        ],
+      },
+      {
+        title: "配置来源与下游渲染",
+        items: [
+          {
+            label: "收集项来源",
             content:
-              "来自 07 字段池引用：名称、控件类型、单位与选项实时跟随底座；本页只读，编辑入口在货品编辑页。",
+              "来自 07 字段池引用：名称、控件类型、单位与枚举选项池实时跟随底座；本页只读，编辑入口在货品编辑页。",
           },
           {
             label: "底座停用",
             content:
-              "【收集项引用联动规则】(SKU-F12)：07 停用后该行标灰并显示「底座已停用」，存量货品与历史入库单不受影响。",
-          },
-          {
-            label: "必填标记",
-            content:
-              "必填项在入库单提交时强校验；选填项允许留空。",
+              "【收集项引用联动规则】(SKU-F12)：07 停用后该行显示「底座已停用」，存量货品与历史入库单不受影响。",
           },
           {
             label: "下游渲染",
             content:
-              "【入库单动态联动与强校验规则】(SKU-F04)：入库单按此清单动态生成字段，并校验温度/湿度区间、水分/杂质范围与日期关系。",
+              "【入库单动态联动与单位只读锁定规则】(SKU-F04)：入库单按此清单动态生成字段，保质期单位只读锁定，下拉单选框按适用候选项渲染，并强校验温度/湿度区间、水分/杂质百分比与生产/过期日期逻辑。",
           },
         ],
       },
@@ -114,9 +131,12 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "goods-detail-price",
     number: 4,
     kind: "交互",
-    title: "参考单价、修改记录与价格趋势",
+    title: "参考单价修改记录（元 / 万元 10 位精度）",
     content:
-      "同时展示元与万元两种口径，提供近 7 / 15 / 30 天价格趋势，并可查看完整修改记录。",
+      "按时间倒序展示历次设置价格的审计记录，同时呈现元与万元（保留 10 位小数）双口径。",
+    documentRefs: {
+      rules: { section: "三、核心业务规则", match: "SKU-F05" },
+    },
     details: [
       {
         title: "展示与留痕",
@@ -124,27 +144,12 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "双精度展示",
             content:
-              "【参考单价维护与双精度展示规则】(SKU-F05)：元展示保留 6 位小数并带千分位；万元展示保留 10 位小数。",
+              "【系统参考单价维护与双精度展示规则】(SKU-F05)：元展示保留 2~6 位小数并带千分位；万元展示严格保留 10 位小数。",
           },
           {
             label: "设置价格",
             content:
               "录入非负金额，最多 2 位小数；保存后自动写入修改记录，并刷新趋势图最后一个点。",
-          },
-          {
-            label: "未设置单价",
-            content:
-              "【未设置单价下游统一提示规则】(SKU-F06)：未设价时展示 --，下游业务单据统一提示系统未设置的单价。",
-          },
-        ],
-      },
-      {
-        title: "价格趋势",
-        items: [
-          {
-            label: "趋势来源",
-            content:
-              "趋势图按日聚合参考单价，支持近 7 / 15 / 30 天切换；仅用于辅助判断，不替代设价记录。",
           },
         ],
       },
@@ -155,22 +160,26 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "goods-detail-audit",
     number: 5,
     kind: "规则",
-    title: "操作留痕与快照边界",
+    title: "系统与审计信息（含数据版本号与快照边界）",
     content:
-      "详情页汇总创建、最近更新与每次设价记录，形成可追溯的操作留痕。",
+      "详情页底部展示数据版本号（第 N 版）、创建人、创建时间、最近更新人与更新时间，明确主档变更与历史单据不可变快照边界。",
+    documentRefs: {
+      fields: { section: "二、状态与系统字段", match: "数据版本号" },
+      rules: { section: "三、核心业务规则", match: "SKU-F10" },
+    },
     details: [
       {
         title: "留痕规则",
         items: [
           {
-            label: "全路径审计",
+            label: "并发与版本控制",
             content:
-              "新建、编辑、启停、设价、删除均记录操作人、时间、前后数据镜像；详情页展示业务可见部分。",
+              "【多人同时编辑防冲突与防重复提交规则】(SKU-F10)：新建、编辑、启停、设价均记录操作人、时间并递增数据版本号。",
           },
           {
-            label: "快照不可变",
+            label: "价格变更与历史快照",
             content:
-              "历史入库单、仓单与质押单据保留生成时刻的货品名称、规格、单位和价格快照，不随主档修改而回写。",
+              "【价格变更与存量业务计算规则】(SKU-F07)：历次单价调整记录在修改记录中永久保留；历史入库单保留生成时刻的货品名称、规格、单位快照，不随主档修改而回写。",
           },
         ],
       },

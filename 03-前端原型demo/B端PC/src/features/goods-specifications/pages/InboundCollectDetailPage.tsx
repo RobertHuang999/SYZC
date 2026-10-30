@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -39,11 +39,13 @@ import {
   Edit,
   ShieldCheck,
 } from "lucide-react"
+import { IterationPageTag } from "@/shared/components/IterationHighlight"
 
 export function InboundCollectDetailPage() {
   useGoodsSpecRevision()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const field = findInboundCollectField(id)
   const shelfLifeConfig = getShelfLifeUnitConfig()
@@ -58,6 +60,17 @@ export function InboundCollectDetailPage() {
       setToastMessage(null)
     }, 3000)
   }
+
+  useEffect(() => {
+    const toast = searchParams.get("toast")
+    if (toast === "created") {
+      showToast("新增收集项成功")
+      setSearchParams({}, { replace: true })
+    } else if (toast === "updated") {
+      showToast("保存收集项成功")
+      setSearchParams({}, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
 
   if (!field) {
     return (
@@ -100,7 +113,7 @@ export function InboundCollectDetailPage() {
       <div className="space-y-4 p-6">
         {/* 轻提示 Toast */}
         {toastMessage && (
-          <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
+          <div className="fixed bottom-6 left-1/2 z-[120] max-w-md -translate-x-1/2 rounded-md bg-foreground px-4 py-2 text-center text-sm text-background shadow-lg">
             {toastMessage}
           </div>
         )}
@@ -115,6 +128,11 @@ export function InboundCollectDetailPage() {
             <span className="font-medium text-foreground">收集项详情</span>
           </div>
         </div>
+
+        <IterationPageTag
+          title="收集项只读详情（本菜单 6.3 全新上线）"
+          description="只读展示字段元数据、保质期单位白名单与下游引用状态；删除走「停用 + 引用扫描」两阶段校验。"
+        />
 
         {/* 页头摘要卡片 */}
         <PrototypeAnnotationTarget annotationIds={["detail-header-card"]}>

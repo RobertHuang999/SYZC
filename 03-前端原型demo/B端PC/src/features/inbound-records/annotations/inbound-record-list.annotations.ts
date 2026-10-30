@@ -89,9 +89,9 @@ export const inboundRecordListAnnotations: PrototypeAnnotation[] = [
     targetId: "inbound-record-row-actions",
     number: 4,
     kind: "交互",
-    title: "行操作三件套",
+    title: "2×2 行操作（6.3 新增【资料管理】）",
     content:
-      "查看详情进入详情页；下载记录导出堆放明细 Excel；单据下载导出 PDF 凭证（原型 Mock 提示）。",
+      "四按钮按 2×2 排布：【详情】进详情页；【单据下载】导出 PDF 凭证；【下载记录】导出堆放明细 Excel；【资料管理】打开该单的资料时间轴抽屉。原型为 Mock 提示。",
     documentRefs: {
       prd: {
         section: "6.1 入库记录 — 列表页",

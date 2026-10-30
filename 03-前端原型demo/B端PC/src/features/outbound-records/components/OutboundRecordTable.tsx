@@ -371,7 +371,7 @@ export function OutboundRecordTable({
               return (
                 <TableRow
                   key={row.id}
-                  className="group align-middle hover:bg-muted/50 transition-colors"
+                  className="group h-[72px] align-middle hover:bg-muted/50 transition-colors"
                 >
                   <TableCell
                     className={cn(

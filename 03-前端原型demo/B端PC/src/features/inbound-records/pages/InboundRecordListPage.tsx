@@ -24,6 +24,7 @@ import {
   sortInboundRecords,
 } from "../lib/list-utils"
 import { inboundRecordsMock } from "../mock/inbound-records.mock"
+import { IterationPageTag } from "@/shared/components/IterationHighlight"
 
 export function InboundRecordListPage() {
   const navigate = useNavigate()
@@ -105,6 +106,12 @@ export function InboundRecordListPage() {
             </p>
           </div>
         </PrototypeAnnotationTarget>
+
+        <IterationPageTag
+          changeType="优化"
+          title="行操作改为 2×2 并新增【资料管理】"
+          description="货主改为合作方档案引用并支持快捷建档；本期不展示入库暂存登记通道。"
+        />
 
         <form
           onSubmit={(event) => {

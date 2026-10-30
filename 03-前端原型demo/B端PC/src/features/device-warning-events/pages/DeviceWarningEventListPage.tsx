@@ -176,24 +176,26 @@ export function DeviceWarningEventListPage() {
 
       <div className="space-y-4">
         <PrototypeAnnotationTarget annotationIds={["device-warning-batch-release"]}>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={selectedEvents.length === 0}
-              onClick={() => setBatchReleaseTargets(selectedEvents)}
-            >
-              批量解除
-            </Button>
-            {selectedEvents.length > 0 ? (
-              <span className="text-xs text-muted-foreground">
-                已选 {selectedEvents.length} 条可解除预警
-              </span>
-            ) : (
-              <span className="text-xs text-muted-foreground">
-                未选中或选中项不可解除时禁用
-              </span>
-            )}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={selectedEvents.length === 0}
+                onClick={() => setBatchReleaseTargets(selectedEvents)}
+              >
+                批量解除
+              </Button>
+              {selectedEvents.length > 0 ? (
+                <span className="text-xs text-muted-foreground">
+                  已选 {selectedEvents.length} 条可解除预警
+                </span>
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  未选中或选中项不可解除时禁用
+                </span>
+              )}
+            </div>
           </div>
         </PrototypeAnnotationTarget>
 

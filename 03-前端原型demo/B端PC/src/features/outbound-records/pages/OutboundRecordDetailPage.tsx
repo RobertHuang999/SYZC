@@ -47,10 +47,13 @@ import {
   UploadSupplementaryModal,
   getDocumentsByOrderNo,
 } from "@/shared/document-management"
+import { useIterationHighlight } from "@/shared/components/IterationHighlight"
+import { DetailField, DetailSection } from "@/shared/components/DetailSection"
 
 type DetailTab = "goods" | "pickup" | "audit" | "documents"
 
 export function OutboundRecordDetailPage() {
+  const { highlightEnabled } = useIterationHighlight()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [refreshKey, setRefreshKey] = useState(0)
@@ -236,96 +239,37 @@ export function OutboundRecordDetailPage() {
               </div>
             </div>
 
-            {/* 基础信息表格（对齐 detailTable 规范两行四列排版） */}
+            {/* 基础信息（上标签下取值，4 列栅格） */}
             <PrototypeAnnotationTarget annotationIds={["outbound-detail-basic"]}>
-              <div className="mt-4 overflow-hidden rounded-md border text-xs">
-                <table className="w-full border-collapse text-left">
-                  <tbody>
-                    <tr className="border-b">
-                      <th className="w-28 bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                        制单人：
-                      </th>
-                      <td className="w-[35%] p-2.5 font-medium text-foreground border-r">
-                        {record.createdByName}
-                        {record.createdByOrg && (
-                          <span className="text-muted-foreground ml-1">
-                            ({record.createdByOrg})
-                          </span>
-                        )}
-                      </td>
-                      <th className="w-28 bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                        制单时间：
-                      </th>
-                      <td className="p-2.5 text-foreground">
-                        {record.createTime}
-                      </td>
-                    </tr>
-
-                    <tr className="border-b">
-                      <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                        货主名称：
-                      </th>
-                      <td className="p-2.5 font-medium text-foreground border-r">
-                        {record.ownerName}
-                      </td>
-                      <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                        货主标识：
-                      </th>
-                      <td className="p-2.5 text-foreground">
-                        {record.ownerIdentifier}
-                      </td>
-                    </tr>
-
-                    <tr className="border-b">
-                      <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                        出库日期：
-                      </th>
-                      <td className="p-2.5 text-foreground border-r">
-                        {record.outboundTime}
-                      </td>
-                      <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                        出库类型：
-                      </th>
-                      <td className="p-2.5 font-medium text-primary">
-                        {record.type}
-                      </td>
-                    </tr>
-
-                    <tr className="border-b">
-                      <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                        监管仓库：
-                      </th>
-                      <td className="p-2.5 font-medium text-foreground border-r">
-                        {record.warehouseName}
-                      </td>
-                      <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                        关联业务单：
-                      </th>
-                      <td className="p-2.5 text-foreground">
-                        {record.relatedNo && record.relatedNo !== "—" ? (
-                          <span className="font-semibold text-primary">
-                            {record.relatedNo}
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                        出库备注：
-                      </th>
-                      <td
-                        colSpan={3}
-                        className="p-2.5 text-muted-foreground leading-relaxed"
-                      >
-                        {record.notes || "无特别说明"}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <DetailSection title="单据信息">
+                <DetailField label="制单人">
+                  {record.createdByName}
+                  {record.createdByOrg ? (
+                    <span className="text-muted-foreground ml-1">({record.createdByOrg})</span>
+                  ) : null}
+                </DetailField>
+                <DetailField label="制单时间">{record.createTime}</DetailField>
+                <DetailField label="货主名称">{record.ownerName}</DetailField>
+                <DetailField label="货主类型">{record.ownerType}货主</DetailField>
+                <DetailField label="货主标识">{record.ownerIdentifier}</DetailField>
+                <DetailField label="出库日期">{record.outboundTime}</DetailField>
+                <DetailField label="出库类型">
+                  <span className="font-medium text-primary">{record.type}</span>
+                </DetailField>
+                <DetailField label="仓库名称">{record.warehouseName}</DetailField>
+                <DetailField label="关联单号">
+                  {record.relatedNo && record.relatedNo !== "—" ? (
+                    <span className="font-semibold text-primary">{record.relatedNo}</span>
+                  ) : (
+                    <span className="text-muted-foreground">——</span>
+                  )}
+                </DetailField>
+                <div>
+                  <DetailField label="备注信息">
+                    {record.notes || "——"}
+                  </DetailField>
+                </div>
+              </DetailSection>
             </PrototypeAnnotationTarget>
           </div>
         </PrototypeAnnotationTarget>
@@ -393,6 +337,11 @@ export function OutboundRecordDetailPage() {
               onClick={() => setTab("documents")}
             >
               资料管理
+              {highlightEnabled ? (
+                <span className="ml-1.5 rounded bg-amber-500 px-1 py-0.5 text-[9px] font-bold leading-none text-white">
+                  6.3
+                </span>
+              ) : null}
             </button>
           </div>
 
@@ -906,6 +855,7 @@ export function OutboundRecordDetailPage() {
               orderNo={record.orderNo}
               approvalId="SP202605290001"
               orderType="outbound"
+              allowSupplement={record.type === "普通出库"}
             />
           )}
         </div>

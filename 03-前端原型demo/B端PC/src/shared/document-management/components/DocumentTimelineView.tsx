@@ -22,6 +22,8 @@ interface DocumentTimelineViewProps {
   orderNo: string
   approvalId?: string
   orderType?: "inbound" | "outbound"
+  /** 是否允许事后补充资料；质押/抵押/仓单等金融类单据传 false（R33 / O18） */
+  allowSupplement?: boolean
   className?: string
 }
 
@@ -29,6 +31,7 @@ export function DocumentTimelineView({
   orderNo,
   approvalId = "SP202605280001",
   orderType = "inbound",
+  allowSupplement = true,
   className = "",
 }: DocumentTimelineViewProps) {
   const [searchKeyword, setSearchKeyword] = useState("")
@@ -129,16 +132,18 @@ export function DocumentTimelineView({
             />
           </div>
 
-          <Button
-            size="sm"
-            className="h-8 px-4 text-xs font-medium text-white bg-amber-600 hover:bg-amber-700 transition-colors shadow-2xs cursor-pointer"
-            onClick={() => {
-              setUploadTargetFlowType("2")
-              setUploadOpen(true)
-            }}
-          >
-            上传补充资料
-          </Button>
+          {allowSupplement ? (
+            <Button
+              size="sm"
+              className="h-8 px-4 text-xs font-medium text-white bg-amber-600 hover:bg-amber-700 transition-colors shadow-2xs cursor-pointer"
+              onClick={() => {
+                setUploadTargetFlowType("2")
+                setUploadOpen(true)
+              }}
+            >
+              上传补充资料
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -200,20 +205,22 @@ export function DocumentTimelineView({
 
                   {/* 右侧资料份数、补充本阶段资料按钮与折叠指示 */}
                   <div className="flex items-center gap-2 shrink-0">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 px-2 text-[11px] font-normal text-blue-600 hover:text-blue-700 hover:bg-blue-50/80 cursor-pointer rounded"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setUploadTargetFlowType(step.flowType)
-                        setUploadOpen(true)
-                      }}
-                    >
-                      <Plus className="w-3 h-3 mr-0.5" />
-                      补充本阶段资料
-                    </Button>
+                    {allowSupplement ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 px-2 text-[11px] font-normal text-blue-600 hover:text-blue-700 hover:bg-blue-50/80 cursor-pointer rounded"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setUploadTargetFlowType(step.flowType)
+                          setUploadOpen(true)
+                        }}
+                      >
+                        <Plus className="w-3 h-3 mr-0.5" />
+                        补充本阶段资料
+                      </Button>
+                    ) : null}
 
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs bg-blue-50 text-blue-600 border border-blue-100">
                       <FileText className="w-3 h-3 text-blue-500" />
@@ -317,7 +324,7 @@ export function DocumentTimelineView({
                     )}
 
                     {/* 补充资料节点的底部快捷上传区域 */}
-                    {isSupplementNode && (
+                    {isSupplementNode && allowSupplement && (
                       <div className="pt-1">
                         <div
                           onClick={() => setUploadOpen(true)}

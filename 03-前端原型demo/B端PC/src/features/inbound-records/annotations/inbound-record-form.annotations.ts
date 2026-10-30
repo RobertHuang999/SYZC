@@ -16,6 +16,7 @@ export const inboundRecordFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "inbound-form-partner-63",
+    version: "6.3",
     targetId: "inbound-form-partner-63",
     number: 2,
     kind: "交互",

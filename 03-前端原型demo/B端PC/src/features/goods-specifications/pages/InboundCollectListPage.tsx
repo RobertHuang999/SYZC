@@ -41,7 +41,6 @@ import type {
   InboundCollectFilter,
 } from "../domain/types"
 import {
-  countGoodsReferences,
   listInboundCollectFields,
   setInboundCollectFieldStatus,
   useGoodsSpecRevision,
@@ -57,7 +56,7 @@ import { ShelfLifeUnitConfigDialog } from "../components/ShelfLifeUnitConfigDial
 import { InboundCollectDeleteDialog } from "../components/InboundCollectDeleteDialog"
 import { ConfirmActionDialog } from "../components/ConfirmActionDialog"
 import { StatusBadge } from "../components/StatusBadge"
-
+import { IterationPageTag } from "@/shared/components/IterationHighlight"
 export function InboundCollectListPage() {
   useGoodsSpecRevision()
   const navigate = useNavigate()
@@ -91,10 +90,11 @@ export function InboundCollectListPage() {
     }, 3000)
   }
 
-  // 筛选过滤（默认按创建时间倒序，与字段清单口径一致）
+  // 4 列筛选条件过滤
   const filteredFields = useMemo(() => {
     const kw = filter.name.trim().toLowerCase()
     const [createdStart, createdEnd] = filter.createdAtRange ?? ["", ""]
+
     return allFields
       .filter((item) => {
         if (kw && !item.name.toLowerCase().includes(kw)) return false
@@ -146,22 +146,33 @@ export function InboundCollectListPage() {
       <div className="space-y-4 p-6">
         {/* 轻提示 Toast */}
         {toastMessage && (
-          <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
+          <div className="fixed bottom-6 left-1/2 z-[120] max-w-md -translate-x-1/2 rounded-md bg-foreground px-4 py-2 text-center text-sm text-background shadow-lg">
             {toastMessage}
           </div>
         )}
 
         {/* 页面标题与导引 */}
         <PrototypeAnnotationTarget annotationIds={["collect-page-header"]}>
-          <h1 className="text-2xl font-semibold tracking-tight">入库收集项配置</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            维护全租户通用的货品入库数据采集标准池，规范控件类型与保质期度量单位，为品类与货品提供统一元数据底座
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                入库收集项配置
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                维护全租户通用的货品入库数据采集标准池，规范控件类型与保质期度量单位，为下游品类与货品主档提供标准元数据底座
+              </p>
+            </div>
+          </div>
         </PrototypeAnnotationTarget>
+
+        <IterationPageTag
+          title="字段池底座（本菜单 6.3 全新上线）"
+          description="7 种控件、保质期天/月/年白名单、核心项保护与两阶段安全删除；配置变更只对后续新建入库业务生效。"
+        />
 
         {/* 筛选区域（标准 4 项栅格） */}
         <PrototypeAnnotationTarget annotationIds={["collect-filter"]}>
-          <Card>
+          <Card className="shadow-xs">
             <CardContent className="space-y-4 pt-4">
               <WarningFilterHeader
                 addLabel="新增收集项"
@@ -191,6 +202,7 @@ export function InboundCollectListPage() {
                       onChange={(e) =>
                         setQueryInput((prev) => ({ ...prev, name: e.target.value }))
                       }
+                      className="h-8 text-xs"
                     />
                   </div>
 
@@ -206,7 +218,7 @@ export function InboundCollectListPage() {
                         }))
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="h-8 text-xs">
                         <SelectValue placeholder="全部控件类型">
                           {(val) =>
                             CONTROL_TYPE_OPTIONS.find(
@@ -241,24 +253,21 @@ export function InboundCollectListPage() {
                         }))
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="h-8 text-xs">
                         <SelectValue placeholder="全部状态">
-                          {(val) => {
-                            if (val === "ENABLED") return "启用"
-                            if (val === "DISABLED") return "停用"
-                            return "全部状态"
-                          }}
+                          {(val) =>
+                            STATUS_OPTIONS.find((option) => option.value === val)
+                              ?.label ?? "全部状态"
+                          }
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="ALL">全部状态</SelectItem>
-                        {STATUS_OPTIONS.filter((opt) => opt.value !== "").map(
-                          (opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </SelectItem>
-                          )
-                        )}
+                        {STATUS_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -271,9 +280,8 @@ export function InboundCollectListPage() {
                     <div className="flex items-center gap-1.5">
                       <Input
                         type="date"
-                        aria-label="创建时间开始日期"
+                        className="h-8 text-xs"
                         value={queryInput.createdAtRange?.[0] ?? ""}
-                        className="min-w-0 flex-1 px-2 text-xs"
                         onChange={(event) =>
                           setQueryInput((prev) => ({
                             ...prev,
@@ -284,14 +292,11 @@ export function InboundCollectListPage() {
                           }))
                         }
                       />
-                      <span className="shrink-0 text-xs text-muted-foreground">
-                        至
-                      </span>
+                      <span className="text-xs text-muted-foreground">至</span>
                       <Input
                         type="date"
-                        aria-label="创建时间结束日期"
+                        className="h-8 text-xs"
                         value={queryInput.createdAtRange?.[1] ?? ""}
-                        className="min-w-0 flex-1 px-2 text-xs"
                         onChange={(event) =>
                           setQueryInput((prev) => ({
                             ...prev,
@@ -310,7 +315,7 @@ export function InboundCollectListPage() {
           </Card>
         </PrototypeAnnotationTarget>
 
-        {/* 7 维主表格展示 */}
+        {/* 结构化主数据表格 Card */}
         <PrototypeAnnotationTarget
           annotationIds={[
             "collect-table",
@@ -318,31 +323,31 @@ export function InboundCollectListPage() {
             "collect-delete-action",
           ]}
         >
-          <Card>
+          <Card className="shadow-xs">
             <CardContent className="space-y-3 pt-4">
-              <div className="overflow-hidden rounded-lg border">
-                <Table className="min-w-[1080px]">
+              <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800">
+                <Table className="min-w-[1000px]">
                   <TableHeader>
                     <TableRow className="h-10 hover:bg-transparent bg-slate-100 dark:bg-slate-800">
-                      <TableHead className="w-16 px-3 py-2.5 text-center">
+                      <TableHead className="w-14 px-3 py-2.5 text-center">
                         序号
                       </TableHead>
                       <TableHead className="min-w-44 px-3 py-2.5">
                         收集项名称
                       </TableHead>
-                      <TableHead className="w-40 px-3 py-2.5 whitespace-nowrap">
+                      <TableHead className="w-36 px-3 py-2.5 whitespace-nowrap">
                         控件类型
                       </TableHead>
-                      <TableHead className="min-w-52 px-3 py-2.5">
+                      <TableHead className="min-w-48 px-3 py-2.5">
                         度量单位 / 选项摘要
                       </TableHead>
                       <TableHead className="w-24 px-3 py-2.5 text-center">
                         状态
                       </TableHead>
-                      <TableHead className="w-48 px-3 py-2.5 whitespace-nowrap">
+                      <TableHead className="w-44 px-3 py-2.5 whitespace-nowrap">
                         创建时间
                       </TableHead>
-                      <TableHead className="w-[218px] px-3 py-2.5 text-center sticky right-0 bg-slate-100 dark:bg-slate-800 z-10 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.05)]">
+                      <TableHead className="w-[218px] px-3 py-2.5 text-center sticky right-0 border-l border-border/80 bg-slate-100 dark:bg-slate-800 z-10 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.05)]">
                         操作
                       </TableHead>
                     </TableRow>
@@ -384,14 +389,14 @@ export function InboundCollectListPage() {
                           },
                           ...(isShelfLife
                             ? [
-                                {
-                                  key: "unit",
-                                  label: "配置单位",
-                                  title:
-                                    "集中维护全平台/租户允许使用的保质期单位白名单与推荐基准单位",
-                                  onClick: () => setUnitConfigOpen(true),
-                                },
-                              ]
+                              {
+                                key: "unit",
+                                label: "配置单位",
+                                title:
+                                  "集中维护全平台/租户允许使用的保质期单位白名单与推荐基准单位",
+                                onClick: () => setUnitConfigOpen(true),
+                              },
+                            ]
                             : []),
                           {
                             key: "status",
@@ -401,23 +406,23 @@ export function InboundCollectListPage() {
                           },
                           item.isCore
                             ? {
-                                key: "delete",
-                                label: "删除",
-                                disabled: true,
-                                title: "系统核心字段，禁止删除",
-                              }
+                              key: "delete",
+                              label: "删除",
+                              disabled: true,
+                              title: "系统核心字段，禁止删除",
+                            }
                             : {
-                                key: "delete",
-                                label: "删除",
-                                tone: "danger",
-                                onClick: () => setDeleteTarget(item),
-                              },
+                              key: "delete",
+                              label: "删除",
+                              tone: "danger",
+                              onClick: () => setDeleteTarget(item),
+                            },
                         ]
 
                         return (
                           <TableRow
                             key={item.id}
-                            className="group h-12 hover:bg-muted/40"
+                            className="group h-[72px] transition-colors hover:bg-muted/40"
                           >
                             <TableCell className="px-3 py-2.5 text-center text-muted-foreground">
                               {rowNum}
@@ -441,14 +446,6 @@ export function InboundCollectListPage() {
                                     核心
                                   </span>
                                 )}
-                                {item.hasDownstreamRef && (
-                                  <span
-                                    className="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-1.5 py-0.2 text-[11px] font-normal text-slate-600"
-                                    title={`当前被 ${countGoodsReferences(item.id)} 个货品使用，不可删除`}
-                                  >
-                                    已引用
-                                  </span>
-                                )}
                               </div>
                             </TableCell>
                             <TableCell className="px-3 py-2.5 text-sm whitespace-nowrap">
@@ -466,9 +463,11 @@ export function InboundCollectListPage() {
                               <StatusBadge status={item.status} />
                             </TableCell>
                             <TableCell className="px-3 py-2.5 whitespace-nowrap">
-                              <TableDateTimeCell value={item.createdAt} plain />
+                              <TableDateTimeCell value={item.createdAt} stackedPlain />
                             </TableCell>
-                            <TableCell className="px-3 py-2.5 text-center sticky right-0 bg-white dark:bg-slate-900 group-hover:bg-slate-50 z-10 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.05)]">
+                            <TableCell
+                              className="px-3 py-2.5 text-center sticky right-0 border-l border-border/80 z-10 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.05)] bg-white dark:bg-slate-900 group-hover:bg-slate-50"
+                            >
                               <TableRowActionPanel
                                 actions={rowActions}
                                 fixedCols={3}

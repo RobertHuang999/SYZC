@@ -30,7 +30,7 @@ export function RevokeConfirmDialog({
         <DialogHeader>
           <div className="flex items-center gap-2 text-amber-600">
             <AlertTriangle className="size-5" />
-            <DialogTitle>系统提示</DialogTitle>
+            <DialogTitle>确认撤销这张入库单？</DialogTitle>
           </div>
           <DialogDescription className="pt-2 text-sm text-foreground">
             您确认要撤销货主（<span className="font-semibold">{ownerName}</span>）单号为{" "}

@@ -28,6 +28,7 @@ import {
 } from "../lib/list-utils"
 import { outboundRecordsMock } from "../mock/outbound-records.mock"
 import { DocumentTimelineModal } from "@/shared/document-management"
+import { IterationPageTag } from "@/shared/components/IterationHighlight"
 
 export function OutboundRecordListPage() {
   const navigate = useNavigate()
@@ -106,6 +107,12 @@ export function OutboundRecordListPage() {
             </p>
           </div>
         </PrototypeAnnotationTarget>
+
+        <IterationPageTag
+          changeType="优化"
+          title="行操作改为 2×2 并新增【资料管理】"
+          description="制单页货主只从「货主信息」档案选择、不提供快捷建档；个人提货人改为引用提货人档案。"
+        />
 
         {/* 筛选区打点 */}
         <form

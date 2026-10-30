@@ -18,6 +18,7 @@ type GoodsTableProps = {
   skus: GoodsSku[]
   pageStart: number
   priceUnit: PriceDisplayUnit
+  onTogglePriceUnit: () => void
   onOpenPriceTrend: (sku: GoodsSku) => void
   onDetail: (sku: GoodsSku) => void
   onEdit: (sku: GoodsSku) => void
@@ -31,6 +32,7 @@ export function GoodsTable({
   skus,
   pageStart,
   priceUnit,
+  onTogglePriceUnit,
   onOpenPriceTrend,
   onDetail,
   onEdit,
@@ -53,11 +55,23 @@ export function GoodsTable({
                 {dimension}
               </TableHead>
             ))}
-            <TableHead className="w-32 whitespace-nowrap px-3 py-2.5">计量参数</TableHead>
+            <TableHead className="w-32 whitespace-nowrap px-3 py-2.5">计量参数（单位）</TableHead>
             <TableHead className="min-w-36 px-3 py-2.5">其他收集信息</TableHead>
-            <TableHead className="w-40 whitespace-nowrap px-3 py-2.5">单价</TableHead>
+            <TableHead className="w-40 whitespace-nowrap px-3 py-2.5">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-left font-medium text-foreground hover:text-primary"
+                title="点击切换元 / 万元展示"
+                onClick={onTogglePriceUnit}
+              >
+                系统参考单价
+                <span className="text-[11px] font-normal text-muted-foreground">
+                  ({priceUnit === "YUAN" ? "元" : "万元"})
+                </span>
+              </button>
+            </TableHead>
             <TableHead className="w-20 px-3 py-2.5 text-center">状态</TableHead>
-            <TableHead className="w-52 px-3 py-2.5 text-center sticky right-0 bg-slate-100 dark:bg-slate-800 z-10 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.05)]">
+            <TableHead className="w-52 px-3 py-2.5 text-center sticky right-0 border-l border-border/80 bg-slate-100 dark:bg-slate-800 z-10 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.05)]">
               操作
             </TableHead>
           </TableRow>
@@ -78,7 +92,7 @@ export function GoodsTable({
               const invalidReason = effectiveInvalidReason(sku)
 
               return (
-                <TableRow key={sku.id} className="group h-14 hover:bg-muted/40">
+                <TableRow key={sku.id} className="group h-[72px] hover:bg-muted/40">
                   <TableCell className="px-3 py-2.5 text-center text-muted-foreground">
                     {pageStart + index + 1}
                   </TableCell>
@@ -98,17 +112,28 @@ export function GoodsTable({
                   </TableCell>
                   <TableCell className="whitespace-nowrap px-3 py-2.5">
                     {sku.price != null ? (
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1.5 text-left font-medium text-foreground hover:text-primary transition-colors"
-                        title="查看价格趋势"
-                        onClick={() => onOpenPriceTrend(sku)}
-                      >
-                        <span>
-                          {formatPriceDisplay(sku.price, sku.measureUnit, priceUnit)}
-                        </span>
-                        <LineChartIcon className="size-3.5 text-primary" />
-                      </button>
+                      <span className="inline-flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          className="text-left font-medium text-foreground hover:text-primary transition-colors"
+                          title="点击切换元 / 万元展示"
+                          onClick={onTogglePriceUnit}
+                        >
+                          {formatPriceDisplay(
+                            sku.price,
+                            sku.measureUnit,
+                            priceUnit
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          className="inline-flex shrink-0 text-primary hover:text-primary/80"
+                          title="查看价格趋势"
+                          onClick={() => onOpenPriceTrend(sku)}
+                        >
+                          <LineChartIcon className="size-3.5" />
+                        </button>
+                      </span>
                     ) : (
                       <span className="text-muted-foreground">--</span>
                     )}
@@ -123,12 +148,12 @@ export function GoodsTable({
                       ) : null}
                     </div>
                   </TableCell>
-                  <TableCell className="px-3 py-2.5 text-center sticky right-0 bg-white dark:bg-slate-900 group-hover:bg-slate-50 z-10 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.05)]">
+                  <TableCell className="px-3 py-2.5 text-center sticky right-0 border-l border-border/80 bg-white dark:bg-slate-900 group-hover:bg-slate-50 z-10 shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.05)]">
                     <TableRowActionPanel
                       actions={[
                         {
                           key: "detail",
-                          label: "详情",
+                          label: "预览",
                           onClick: () => onDetail(sku),
                         },
                         {
@@ -171,27 +196,37 @@ function InboundSummaryCell({ sku }: { sku: GoodsSku }) {
     return <span className="text-muted-foreground">--</span>
   }
 
+  const unitLabelMap: Record<string, string> = {
+    DAY: "天",
+    MONTH: "个月",
+    YEAR: "年",
+  }
+
   const entries = sku.inboundCollect.map((item) => {
     const field = resolveCollectField(item.fieldId)
     return {
       label: field?.name ?? "已删除的收集项",
       disabled: field?.status === "DISABLED",
       required: item.required,
+      shelfLifeUnit: item.shelfLifeUnit ? unitLabelMap[item.shelfLifeUnit] : undefined,
+      suggestedValue: item.suggestedValue,
     }
   })
-  const requiredCount = entries.filter((item) => item.required).length
+
+  const summaryText = entries.map((item) => item.label).join("、")
+  const tooltipText = entries
+    .map(
+      (item) =>
+        `${item.label}${item.shelfLifeUnit ? `（${item.suggestedValue ?? ""}${item.shelfLifeUnit}）` : ""}${item.required ? " [必填]" : ""}${item.disabled ? " [已停用]" : ""}`
+    )
+    .join("、")
 
   return (
     <span
-      className="text-sm text-foreground/90"
-      title={entries
-        .map(
-          (item) =>
-            `${item.label}${item.required ? "（必填）" : ""}${item.disabled ? "（底座已停用）" : ""}`
-        )
-        .join("，")}
+      className="block max-w-[220px] truncate text-sm text-foreground/90"
+      title={tooltipText}
     >
-      已配 {entries.length} 项（必填 {requiredCount} 项）
+      {summaryText}
     </span>
   )
 }

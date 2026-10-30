@@ -2,6 +2,7 @@ import { ChevronDown, KeyRound, Package } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { TopModuleNav } from "@/components/layout/TopModuleNav"
 import { IterationRecordButton } from "@/features/permission-reference/components/IterationRecordButton"
+import { IterationViewSwitch } from "@/shared/components/IterationHighlight"
 import {
   PERMISSION_REFERENCE_PATH,
   type TopModule,
@@ -28,6 +29,7 @@ export function Header({ activeModule }: { activeModule: TopModule }) {
       </div>
 
       <div className="header-actions">
+        <IterationViewSwitch />
         <IterationRecordButton />
 
         <NavLink

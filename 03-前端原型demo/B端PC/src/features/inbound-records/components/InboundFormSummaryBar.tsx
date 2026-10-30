@@ -38,9 +38,9 @@ export function InboundFormSummaryBar({
       <span className="mx-3 text-border">|</span>
       货品总数量 {goodsTotal.toFixed(4)}
       <span className="mx-3 text-border">|</span>
-      理货堆放数：{stackedTotal.toFixed(4)}
+      堆放总数量：{stackedTotal.toFixed(4)}
       <span className="mx-3 text-border">|</span>
-      无需理货堆放数：{noStackTotal.toFixed(4)}
+      无需堆放总数量：{noStackTotal.toFixed(4)}
     </div>
   )
 }

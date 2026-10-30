@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from "react"
+import { Fragment, useEffect, useMemo, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
   ArrowLeft,
@@ -49,14 +49,23 @@ import {
   UploadSupplementaryModal,
   getDocumentsByOrderNo,
 } from "@/shared/document-management"
+import { useIterationHighlight } from "@/shared/components/IterationHighlight"
+import { DetailField, DetailSection } from "@/shared/components/DetailSection"
 
 type DetailTab = "goods" | "audit" | "modify" | "documents"
 
 export function InboundRecordDetailPage() {
+  const { highlightEnabled } = useIterationHighlight()
   const { id } = useParams()
   const navigate = useNavigate()
   const initialDetail = useMemo(() => getInboundRecordDetailById(id), [id])
   const [detail, setDetail] = useState<InboundRecordDetail | undefined>(initialDetail)
+  // 从一条单据切到另一条时，详情数据要跟着路由 id 重置，避免沿用上一条的单据
+  useEffect(() => {
+    setDetail(initialDetail)
+    setTab("goods")
+    setExpandedGoods({})
+  }, [initialDetail])
   const [tab, setTab] = useState<DetailTab>("goods")
   const [expandedGoods, setExpandedGoods] = useState<Record<string, boolean>>({})
   const [toast, setToast] = useState<string | null>(null)
@@ -234,90 +243,42 @@ export function InboundRecordDetailPage() {
               </div>
             </div>
 
-            {/* 基础信息表格（对齐 store-apply-info-detail.vue 的 table.detailTable 规范两行四列排版） */}
-            <div className="mt-4 overflow-hidden rounded-md border text-xs">
-              <table className="w-full border-collapse text-left">
-                <tbody>
-                  <tr className="border-b">
-                    <th className="w-28 bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                      制单人：
-                    </th>
-                    <td className="w-[35%] p-2.5 font-medium text-foreground border-r">
-                      {detail.creatorDisplay}
-                    </td>
-                    <th className="w-28 bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                      制单时间：
-                    </th>
-                    <td className="p-2.5 text-foreground">{detail.createdAt}</td>
-                  </tr>
-
-                  <tr className="border-b">
-                    <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                      货主名称：
-                    </th>
-                    <td className="p-2.5 font-medium text-foreground border-r">
-                      {detail.ownerName}
-                    </td>
-                    <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                      货主标识：
-                    </th>
-                    <td className="p-2.5 text-foreground">
-                      {detail.ownerIdentifierMasked}
-                    </td>
-                  </tr>
-
-                  <tr className="border-b">
-                    <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                      入库日期：
-                    </th>
-                    <td className="p-2.5 text-foreground border-r">
-                      {detail.inboundDate}
-                    </td>
-                    <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                      入库类型：
-                    </th>
-                    <td className="p-2.5 font-medium text-foreground">{detail.inboundType}</td>
-                  </tr>
-
-                  <tr className="border-b">
-                    <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                      仓库名称：
-                    </th>
-                    <td className="p-2.5 font-medium text-foreground border-r">
-                      {detail.warehouseName}
-                      {detail.houseNames ? ` - ${detail.houseNames}` : ""}
-                    </td>
-                    <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                      关联单号：
-                    </th>
-                    <td className="p-2.5 text-foreground">
-                      {detail.relatedOrderNo ? (
-                        <div className="flex items-center gap-1.5">
-                          <span>{detail.relatedOrderNo}</span>
-                          <span
-                            className="cursor-pointer text-primary hover:underline text-[11px]"
-                            onClick={() => setRelatedOrderModalOpen(true)}
-                          >
-                            【查看】
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">--</span>
-                      )}
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <th className="bg-muted/40 p-2.5 font-medium text-muted-foreground border-r">
-                      备注信息：
-                    </th>
-                    <td colSpan={3} className="p-2.5 text-foreground leading-relaxed">
-                      {detail.remark || "--"}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            {/* 基础信息（上标签下取值，4 列栅格） */}
+            <DetailSection title="单据信息">
+              <DetailField label="制单人">{detail.creatorDisplay}</DetailField>
+              <DetailField label="制单时间">{detail.createdAt}</DetailField>
+              <DetailField label="货主名称">{detail.ownerName}</DetailField>
+              <DetailField label="货主类型">
+                {detail.ownerType === "2" ? "企业货主" : "个人货主"}
+              </DetailField>
+              <DetailField label="货主标识">{detail.ownerIdentifierMasked}</DetailField>
+              <DetailField label="入库日期">{detail.inboundDate}</DetailField>
+              <DetailField label="入库类型">{detail.inboundType}</DetailField>
+              <DetailField label="仓库名称">
+                {detail.warehouseName}
+                {detail.houseNames ? ` - ${detail.houseNames}` : ""}
+              </DetailField>
+              <DetailField label="关联单号">
+                {detail.relatedOrderNo ? (
+                  <div className="flex items-center gap-1.5">
+                    <span>{detail.relatedOrderNo}</span>
+                    <span
+                      className="cursor-pointer text-primary hover:underline text-[11px]"
+                      onClick={() => setRelatedOrderModalOpen(true)}
+                    >
+                      【查看】
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">——</span>
+                )}
+              </DetailField>
+              <div>
+                <DetailField label="备注信息">
+                  {detail.remark || "——"}
+                </DetailField>
+              </div>
+            </DetailSection>
           </div>
         </PrototypeAnnotationTarget>
 
@@ -344,6 +305,11 @@ export function InboundRecordDetailPage() {
                   onClick={() => setTab(key)}
                 >
                   {label}
+                  {key === "documents" && highlightEnabled ? (
+                    <span className="ml-1.5 rounded bg-amber-500 px-1 py-0.5 text-[9px] font-bold leading-none text-white">
+                      6.3
+                    </span>
+                  ) : null}
                 </button>
               ))}
             </div>
@@ -701,6 +667,7 @@ export function InboundRecordDetailPage() {
                 orderNo={detail.orderNo}
                 approvalId="SP202605280001"
                 orderType="inbound"
+                allowSupplement={detail.inboundType === "普通入库" || detail.inboundType === "NORMAL"}
               />
             )}
           </div>

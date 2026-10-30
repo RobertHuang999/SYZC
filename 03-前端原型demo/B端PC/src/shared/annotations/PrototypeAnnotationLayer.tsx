@@ -41,6 +41,7 @@ import remarkGfm from "remark-gfm"
 import rehypeRaw from "rehype-raw"
 import { cn } from "@/lib/utils"
 import { isMermaidCode, MermaidDiagram } from "@/shared/components/MermaidDiagram"
+import { useIterationHighlight } from "@/shared/components/IterationHighlight"
 import type { PrototypeDocument } from "@/shared/components/DocumentViewerModal"
 
 export type { PrototypeDocument }
@@ -62,6 +63,8 @@ export type PrototypeAnnotation = {
   kind: AnnotationKind
   title: string
   content: string
+  /** 打点归属版本：6.3 为本轮改动，未填视为历史沿用（6.2 及更早） */
+  version?: "6.3" | "6.2"
   documentRefs?: Partial<Record<DocumentTabKey, DocumentLocator>>
   details: Array<{
     title: string
@@ -535,10 +538,15 @@ export function PrototypeAnnotationProvider({
  */
 function RightEdgeFoldTab() {
   const context = useAnnotationContext()
+  const { viewMode } = useIterationHighlight()
 
   if (context.drawerOpen) {
     return null
   }
+
+  const historyCount = context.annotations.filter((item) => item.version !== "6.3").length
+  const focusCount = context.annotations.length - historyCount
+  const badgeCount = viewMode === "focus63" ? focusCount : context.annotations.length
 
   return (
     <div
@@ -594,8 +602,13 @@ function RightEdgeFoldTab() {
               ? "bg-blue-600 shadow-[0_2px_6px_rgba(37,99,235,0.4)]"
               : "bg-slate-400 dark:bg-slate-700 text-slate-100"
           )}
+          title={
+            viewMode === "focus63" && historyCount > 0
+              ? `当前只看 6.3 变更点位（${focusCount} 处）；另有 ${historyCount} 处历史沿用点位已收起，切到「全部原型」可查看`
+              : undefined
+          }
         >
-          {context.annotations.length}
+          {badgeCount}
         </span>
       </button>
 
@@ -665,6 +678,7 @@ export function PrototypeAnnotationTarget({
   markerPosition?: "top-left" | "top-right"
 }) {
   const context = useContext(AnnotationContext)
+  const { viewMode } = useIterationHighlight()
   if (!context) {
     return <div className={className}>{children}</div>
   }
@@ -672,6 +686,10 @@ export function PrototypeAnnotationTarget({
   const annotations = annotationIds
     .map((id) => context.annotations.find((annotation) => annotation.id === id))
     .filter((annotation): annotation is PrototypeAnnotation => Boolean(annotation))
+  const visibleAnnotations =
+    viewMode === "focus63"
+      ? annotations.filter((annotation) => annotation.version === "6.3")
+      : annotations
   const targetId = annotations[0]?.targetId ?? annotations[0]?.id
   const activeAnnotation = annotations.find(
     (annotation) => annotation.id === context.activePopupAnnotationId
@@ -691,27 +709,33 @@ export function PrototypeAnnotationTarget({
     >
       {children}
 
-      {/* On-Page Red Markers (仅在 showMarkers 为 true 时渲染) */}
-      {context.enabled && context.showMarkers && annotations.length > 0 && (
+      {/* On-Page Red Markers (仅在 showMarkers 为 true 时渲染；6.3 琥珀、历史浅灰) */}
+      {context.enabled && context.showMarkers && viewMode !== "off" && visibleAnnotations.length > 0 && (
         <div
           className={cn(
             "absolute z-[60] flex items-center gap-1.5",
             markerPosition === "top-left" ? "top-1 left-1" : "top-1 right-1"
           )}
         >
-          {annotations.map((annotation) => {
+          {visibleAnnotations.map((annotation) => {
             const isPopupOpen = annotation.id === context.activePopupAnnotationId
+            const is63 = annotation.version === "6.3"
             return (
               <button
                 key={annotation.id}
                 type="button"
                 className={cn(
-                  "flex size-6 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs font-bold text-white shadow-lg transition-all hover:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 active:scale-95",
+                  "flex size-6 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs font-bold text-white shadow-lg transition-all hover:scale-125 focus-visible:outline-none focus-visible:ring-2 active:scale-95",
+                  is63 ? "focus-visible:ring-amber-400" : "focus-visible:ring-slate-300",
                   isPopupOpen
-                    ? "bg-rose-600 ring-4 ring-rose-400/40 scale-110"
-                    : "bg-rose-500 hover:bg-rose-600"
+                    ? is63
+                      ? "bg-amber-600 ring-4 ring-amber-400/40 scale-110"
+                      : "bg-slate-600 ring-4 ring-slate-400/40 scale-110"
+                    : is63
+                      ? "bg-amber-500 hover:bg-amber-600"
+                      : "bg-slate-400 hover:bg-slate-500"
                 )}
-                title={`需求打点 #${annotation.number}：${annotation.title}（点击就近弹出查看）`}
+                title={`${is63 ? "6.3 改动点" : "历史沿用点位"} #${annotation.number}：${annotation.title}（点击就近弹出查看）`}
                 onClick={(e) => {
                   e.stopPropagation()
                   context.openInPlacePopup(annotation.id)
@@ -725,7 +749,7 @@ export function PrototypeAnnotationTarget({
       )}
 
       {/* 就近原位弹出卡片 (In-Place Floating Popup Card) */}
-      {context.enabled && context.showMarkers && activeAnnotation && (
+      {context.enabled && context.showMarkers && viewMode !== "off" && activeAnnotation && (
         <InPlaceAnnotationCard
           annotation={activeAnnotation}
           targetId={targetId}

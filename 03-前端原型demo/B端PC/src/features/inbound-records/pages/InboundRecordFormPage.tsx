@@ -23,8 +23,9 @@ import { ApprovalFlowSelectDialog } from "../components/ApprovalFlowSelectDialog
 import { ImageViewerModal } from "../components/ImageViewerModal"
 import { INBOUND_FORM_MESSAGES } from "@prototype/shared/inbound/form-messages"
 import { getSkuById } from "@prototype/shared/goods/goods-sku-catalog"
+import "@/features/goods-specifications/lib/store"
 import { generateMockInboundOrderNo } from "@prototype/shared/inbound/mock-inbound-order-no"
-import { INBOUND_RECORD_LIST_PATH } from "../domain/constants"
+import { INBOUND_APPLY_LIST_PATH } from "../domain/constants"
 import type { InboundFormState } from "../domain/form-types"
 import { inboundRecordDocuments } from "../documents/inbound-record-documents"
 import { inboundRecordFormAnnotations } from "../annotations/inbound-record-form.annotations"
@@ -45,9 +46,6 @@ import { needsOwnerSmsAtSubmit } from "../lib/inbound-owner-verify"
 import { partnerArchivesMock } from "@/features/partner-archives/mock/partner-archives.mock"
 import {
   inboundAppliesMock,
-  inboundRecordsMock,
-  CURRENT_USER_NAME,
-  CURRENT_USER_ORG,
 } from "../mock/inbound-records.mock"
 import { InboundStagingSwitchDialog } from "@/features/inbound-staging-reg/components/InboundStagingSwitchDialog"
 import { INBOUND_STAGING_FORM_PATH } from "@/features/inbound-staging-reg/domain/constants"
@@ -201,7 +199,7 @@ export function InboundRecordFormPage() {
     const needSystemRelated =
       Boolean(form.inboundType) && form.inboundType !== "普通入库"
     if (needSystemRelated && !form.relatedOrderNo.trim()) {
-      showToast("请选择关联单号（非普通入库须绑定系统有效单据，P06）")
+      showToast("普通入库以外的类型要关联系统有效单据，请先选择关联单号")
       return
     }
     if (needSystemRelated && form.relatedOrderNo.trim()) {
@@ -240,27 +238,60 @@ export function InboundRecordFormPage() {
       return
     }
 
-    // 入库收集项：必填强校验 + 区间/日期常识校验
+    // 入库收集项：必填强校验 + 区间/百分比/保质期/日期常识校验（对齐 06/07 全链路规则）
     for (const line of form.goodsLines) {
       const sku = getSkuById(line.skuId)
       if (!sku) continue
 
       for (const field of sku.inboundCollect) {
-        const value = (line.collectValues[field.fieldKey] ?? "").trim()
-        if (field.required && !value) {
+        const raw = (line.collectValues[field.fieldKey] ?? "").trim()
+        if (field.control === "range") {
+          const [min = "", max = ""] = raw.split("|").map((s) => s.trim())
+          if (field.required && (!min || !max)) {
+            setHighlightGoodsId(line.id)
+            showToast(`请完整填写「${field.label}」的最小值和最大值`)
+            return
+          }
+          if ((min && !max) || (!min && max)) {
+            setHighlightGoodsId(line.id)
+            showToast(`请完整填写「${field.label}」的最小值和最大值`)
+            return
+          }
+          if (min && max && Number(min) > Number(max)) {
+            setHighlightGoodsId(line.id)
+            showToast(`「${field.label}」最小值不能大于最大值，请核对`)
+            return
+          }
+          continue
+        }
+
+        if (field.required && !raw) {
           setHighlightGoodsId(line.id)
           showToast(`请填写「${field.label}」`)
           return
         }
-      }
 
-      const rangeField = sku.inboundCollect.find((field) => field.control === "range")
-      if (rangeField) {
-        const [min, max] = (line.collectValues[rangeField.fieldKey] ?? "").split("|")
-        if (min && max && Number(min) > Number(max)) {
-          setHighlightGoodsId(line.id)
-          showToast(`「${rangeField.label}」最小值不能大于最大值，请核对`)
-          return
+        if (field.control === "percent" && raw) {
+          const n = Number(raw)
+          if (!Number.isFinite(n) || n < 0 || n > 100) {
+            setHighlightGoodsId(line.id)
+            showToast(`「${field.label}」须为 0 至 100 之间的有效百分比数值`)
+            return
+          }
+        }
+
+        if (field.control === "period" && raw) {
+          const n = Number(raw)
+          if (!Number.isInteger(n) || n < 1 || n > 9999) {
+            setHighlightGoodsId(line.id)
+            showToast(`「${field.label}」须为 1 至 9999 的正整数`)
+            return
+          }
+          if (!field.unitLocked && !(line.collectValues[`${field.fieldKey}Unit`] ?? field.unit ?? "").trim()) {
+            setHighlightGoodsId(line.id)
+            showToast(`请选择「${field.label}」的单位`)
+            return
+          }
         }
       }
 
@@ -375,10 +406,10 @@ export function InboundRecordFormPage() {
           form.inboundType === "质押入库"
             ? "PLEDGE"
             : form.inboundType === "抵押入库"
-            ? "MORTGAGE"
-            : form.inboundType === "监管服务入库"
-            ? "SUPERVISION_SERVICE"
-            : "NORMAL",
+              ? "MORTGAGE"
+              : form.inboundType === "监管服务入库"
+                ? "SUPERVISION_SERVICE"
+                : "NORMAL",
         inboundTypeLabel: form.inboundType || "普通入库",
         repoName: FORM_WAREHOUSES.find((w) => w.id === form.warehouseId)?.name || "默认仓库",
         houseName: "1号库房, 2号库房",
@@ -392,40 +423,17 @@ export function InboundRecordFormPage() {
       }
       inboundAppliesMock.unshift(newApplyRow)
 
-      // 同步插入到入库记录 Mock 列表最前列
-      inboundRecordsMock.unshift({
-        id: `inbound-${Date.now()}`,
-        orderNo: newApplyOrderNo,
-        ownerName: form.ownerName,
-        ownerType: form.ownerType === "企业货主" ? "2" : "1",
-        ownerIdentifierMasked:
-          form.ownerType === "个人货主"
-            ? form.ownerIdentifier.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2")
-            : form.ownerIdentifier,
-        inboundType: form.inboundType || "普通入库",
-        inboundDate: form.inboundDate,
-        warehouseName: FORM_WAREHOUSES.find((w) => w.id === form.warehouseId)?.name || "默认仓库",
-        houseName: "1号库房",
-        relatedOrderNo: form.relatedOrderNo || null,
-        goodsNames: form.goodsLines.map((g) => `${g.category}-${g.variety}-${g.spec}`),
-        inboundQuantity: totals.goodsTotal,
-        unit: firstLine?.measureUnit || "吨",
-        creatorDisplay: `${CURRENT_USER_NAME}(${CURRENT_USER_ORG})`,
-        createByName: CURRENT_USER_NAME,
-        createOrgName: CURRENT_USER_ORG,
-        createdAt: form.inboundDate,
-        checkStatus: 2,
-      })
-
       if (sourceRegId) {
         markStagingConverted(sourceRegId, newApplyOrderNo)
       }
 
-      showToast(`提交审核成功！入库申请单号 ${newApplyOrderNo} 已进入审批流程。`)
+      showToast(
+        `已提交审核，入库申请单号 ${newApplyOrderNo}。审批通过后才会进入「入库记录」台账。`
+      )
 
-      // 平滑跳转至入库记录台账
+      // 待审单据只进「入库申请」，不进已通过台账
       window.setTimeout(() => {
-        navigate(INBOUND_RECORD_LIST_PATH)
+        navigate(INBOUND_APPLY_LIST_PATH)
       }, 1000)
     }, 600)
   }
@@ -504,37 +512,37 @@ export function InboundRecordFormPage() {
                   基准仓储能力（6.3 未改本区）：悬停可恢复清晰以便对照
                 </p>
               ) : null}
-            <InboundGoodsSection
-              form={form}
-              expanded={goodsExpanded}
-              highlightGoodsId={highlightGoodsId}
-              onToggle={() => setGoodsExpanded((v) => !v)}
-              onAddGoods={() => {
-                if (!form.warehouseId || form.storeroomIds.length === 0) {
-                  showToast("请先在基础信息中选择入库仓库与库房")
-                  return
-                }
-                patchForm({
-                  goodsLines: [
-                    ...form.goodsLines,
-                    createEmptyGoodsLine(),
-                  ],
-                })
-              }}
-              onUpdateLine={(lineId, nextLine) => {
-                patchForm({
-                  goodsLines: form.goodsLines.map((line) =>
-                    line.id === lineId ? nextLine : line
-                  ),
-                })
-              }}
-              onRemoveLine={(lineId) => {
-                patchForm({
-                  goodsLines: form.goodsLines.filter((l) => l.id !== lineId),
-                })
-              }}
-              onPreviewImage={(url) => setPreviewImageUrl(url)}
-            />
+              <InboundGoodsSection
+                form={form}
+                expanded={goodsExpanded}
+                highlightGoodsId={highlightGoodsId}
+                onToggle={() => setGoodsExpanded((v) => !v)}
+                onAddGoods={() => {
+                  if (!form.warehouseId || form.storeroomIds.length === 0) {
+                    showToast("请先在基础信息中选择入库仓库与库房")
+                    return
+                  }
+                  patchForm({
+                    goodsLines: [
+                      ...form.goodsLines,
+                      createEmptyGoodsLine(),
+                    ],
+                  })
+                }}
+                onUpdateLine={(lineId, nextLine) => {
+                  patchForm({
+                    goodsLines: form.goodsLines.map((line) =>
+                      line.id === lineId ? nextLine : line
+                    ),
+                  })
+                }}
+                onRemoveLine={(lineId) => {
+                  patchForm({
+                    goodsLines: form.goodsLines.filter((l) => l.id !== lineId),
+                  })
+                }}
+                onPreviewImage={(url) => setPreviewImageUrl(url)}
+              />
             </div>
           </PrototypeAnnotationTarget>
         </div>

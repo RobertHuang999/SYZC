@@ -33,8 +33,8 @@ export function OrderWarningConfigTable({
   onAction,
 }: OrderWarningConfigTableProps) {
   return (
-    <div className="overflow-hidden rounded-md border bg-card">
-      <Table>
+    <div className="overflow-x-auto rounded-md border bg-card">
+      <Table className="min-w-[1400px]">
         <TableHeader>
           <TableRow>
             <TableHead className="w-16">序号</TableHead>
@@ -46,7 +46,7 @@ export function OrderWarningConfigTable({
             <TableHead className="w-24">状态</TableHead>
             <TableHead className="w-32">创建人/时间</TableHead>
             <TableHead className="w-32">更新人/时间</TableHead>
-            <TableHead className="w-32">操作</TableHead>
+            <TableHead className="w-32 min-w-[128px]">操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -61,7 +61,7 @@ export function OrderWarningConfigTable({
               const actions = getOrderWarningConfigActions(config.status)
 
               return (
-                <TableRow key={config.configId}>
+                <TableRow key={config.configId} className="h-[72px]">
                   <TableCell>{(page - 1) * pageSize + index + 1}</TableCell>
                   <TableCell>
                     <HoverOverflowText
@@ -95,15 +95,15 @@ export function OrderWarningConfigTable({
                     </HoverOverflowText>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-1">
                       {config.enabledItems.map((item) => (
                         <Badge
                           key={`${config.configId}-${item.type}`}
                           variant="outline"
-                          className={
+                          className={`h-5 px-1.5 text-[11px] leading-none ${
                             ORDER_WARNING_ITEM_BADGE_CLASS[item.type] ??
                             "border-slate-200 bg-slate-50 text-slate-700"
-                          }
+                          }`}
                         >
                           {item.type}({item.levels})
                         </Badge>

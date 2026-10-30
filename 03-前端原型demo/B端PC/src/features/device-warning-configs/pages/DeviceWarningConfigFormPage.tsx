@@ -28,6 +28,8 @@ import { deviceWarningConfigFormAnnotations } from "../annotations/device-warnin
 import { deviceWarningConfigDocuments } from "../documents/device-warning-config-documents"
 import { DeviceSelectDialog } from "../components/DeviceSelectDialog"
 import { ConfigConfirmDialog } from "../components/ConfigConfirmDialog"
+import { StockWarningDispositionDialog } from "../components/StockWarningDispositionDialog"
+import { IterationHighlight } from "@/shared/components/IterationHighlight"
 import { OrgUserSelect } from "@/shared/components/OrgUserSelect"
 import { cn } from "@/lib/utils"
 
@@ -68,6 +70,7 @@ export function DeviceWarningConfigFormPage() {
   const [deviceDialogOpen, setDeviceDialogOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [dispositionConfirmOpen, setDispositionConfirmOpen] = useState(false)
+  const [stockDispositionOpen, setStockDispositionOpen] = useState(false)
   const [dirty, setDirty] = useState(false)
 
   useEffect(() => {
@@ -156,9 +159,9 @@ export function DeviceWarningConfigFormPage() {
       // sync with legacy thresholdMin/thresholdMax if temperature is edited
       ...(metric === "temperature"
         ? {
-            thresholdMin: patch.min ?? current.thresholdMin,
-            thresholdMax: patch.max ?? current.thresholdMax,
-          }
+          thresholdMin: patch.min ?? current.thresholdMin,
+          thresholdMax: patch.max ?? current.thresholdMax,
+        }
         : {}),
     }))
   }
@@ -260,29 +263,32 @@ export function DeviceWarningConfigFormPage() {
         notifyChannels: nextChannels,
         ...(clearingExternal
           ? {
-              notifyTargets: [],
-              upgradeEnabled: false,
-              upgradeDays: "0",
-              upgradeTargets: [],
-            }
+            notifyTargets: [],
+            upgradeEnabled: false,
+            upgradeDays: "0",
+            upgradeTargets: [],
+          }
           : {}),
       }
     })
   }
 
-  const performSave = () => {
+  const performSave = (stockFeedback?: string) => {
     const nextVersion =
       isEdit && id
         ? incrementDeviceWarningConfigVersion(id, form.version ?? existing?.version ?? 0)
         : 1
     setForm((current) => ({ ...current, version: nextVersion }))
     setDirty(false)
-    setToastMessage(
-      isEdit ? `保存成功，规则 Version 已更新为 v${nextVersion}` : "保存成功，规则 Version v1"
-    )
+    const successMsg = stockFeedback
+      ? `保存成功(v${nextVersion})：${stockFeedback}`
+      : isEdit
+        ? `保存成功，数据版本号已更新为 v${nextVersion}`
+        : "保存成功，已创建第 1 版"
+    setToastMessage(successMsg)
     window.setTimeout(() => {
       navigate(DEVICE_WARNING_CONFIG_LIST_PATH)
-    }, 800)
+    }, 1000)
   }
 
   const handleNavigateAway = () => {
@@ -298,6 +304,19 @@ export function DeviceWarningConfigFormPage() {
     if (validationError) {
       setToastMessage(validationError)
       window.setTimeout(() => setToastMessage(null), 3000)
+      return
+    }
+
+    // 6.3 迭代：编辑修改敏感配置且名下存在存量预警，唤起存量处置方式确认
+    const hasSensitiveChanges =
+      isEdit &&
+      (existing?.dispositionMode !== form.dispositionMode ||
+        JSON.stringify(
+          (existing as { metricThresholds?: unknown } | undefined)?.metricThresholds ?? []
+        ) !== JSON.stringify(form.metricThresholds ?? []))
+
+    if (hasSensitiveChanges) {
+      setStockDispositionOpen(true)
       return
     }
 
@@ -321,12 +340,21 @@ export function DeviceWarningConfigFormPage() {
             <h1 className="text-2xl font-semibold tracking-tight">
               {pageTitle}
             </h1>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 items-center">
               <Button variant="outline" onClick={handleNavigateAway}>
                 <ArrowLeftIcon />
                 取消
               </Button>
-              <Button onClick={handleSave}>保存并生效</Button>
+              <IterationHighlight
+                inline
+                version="6.3"
+                ruleId="DEV-C08"
+                title="存量处置引导"
+                description="编辑敏感配置且有关联待结案预警时，保存拦截并触发存量处置引导弹窗"
+                type="added"
+              >
+                <Button onClick={handleSave}>保存并生效</Button>
+              </IterationHighlight>
             </div>
           </div>
         </PrototypeAnnotationTarget>
@@ -425,77 +453,77 @@ export function DeviceWarningConfigFormPage() {
                 </p>
               </div>
               <div className="space-y-3 md:col-span-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Label>
-                    <span className="text-destructive font-bold mr-1">*</span>
-                    处置策略
-                  </Label>
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
-                    系统推荐：{DISPOSITION_MODE_LABELS[recommendedDisposition]}
-                  </span>
-                </div>
-                <div className="grid gap-3 md:grid-cols-3">
-                  {DISPOSITION_MODES.map((mode) => {
-                    const selected = form.dispositionMode === mode
-                    const isRecommended = mode === recommendedDisposition
-                    const disabled =
-                      mode === "AUTO_RECOVER" && !autoRecoverSelectable
-                    return (
-                      <label
-                        key={mode}
-                        className={cn(
-                          "flex gap-3 rounded-lg border p-3 transition-colors",
-                          disabled
-                            ? "cursor-not-allowed border-border/70 bg-muted/30 opacity-70"
-                            : "cursor-pointer",
-                          !disabled &&
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    <Label>
+                      <span className="text-destructive font-bold mr-1">*</span>
+                      处置策略
+                    </Label>
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+                      系统推荐：{DISPOSITION_MODE_LABELS[recommendedDisposition]}
+                    </span>
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {DISPOSITION_MODES.map((mode) => {
+                      const selected = form.dispositionMode === mode
+                      const isRecommended = mode === recommendedDisposition
+                      const disabled =
+                        mode === "AUTO_RECOVER" && !autoRecoverSelectable
+                      return (
+                        <label
+                          key={mode}
+                          className={cn(
+                            "flex gap-3 rounded-lg border p-3 transition-colors",
+                            disabled
+                              ? "cursor-not-allowed border-border/70 bg-muted/30 opacity-70"
+                              : "cursor-pointer",
+                            !disabled &&
                             (selected
                               ? "border-primary bg-primary/5 ring-1 ring-primary/30"
                               : "border-border bg-card hover:bg-muted/30")
-                        )}
-                      >
-                        <input
-                          type="radio"
-                          name="dispositionMode"
-                          className="mt-1 size-4"
-                          checked={selected}
-                          disabled={disabled}
-                          onChange={() => {
-                            if (!disabled) {
-                              handleDispositionChange(mode)
-                            }
-                          }}
-                        />
-                        <div className="space-y-1">
-                          <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
-                            <span>{DISPOSITION_MODE_LABELS[mode]}</span>
-                            {isRecommended && (
-                              <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-normal text-primary">
-                                推荐
-                              </span>
-                            )}
-                            {disabled && (
-                              <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-normal text-muted-foreground">
-                                不可用
-                              </span>
-                            )}
+                          )}
+                        >
+                          <input
+                            type="radio"
+                            name="dispositionMode"
+                            className="mt-1 size-4"
+                            checked={selected}
+                            disabled={disabled}
+                            onChange={() => {
+                              if (!disabled) {
+                                handleDispositionChange(mode)
+                              }
+                            }}
+                          />
+                          <div className="space-y-1">
+                            <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                              <span>{DISPOSITION_MODE_LABELS[mode]}</span>
+                              {isRecommended && (
+                                <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-normal text-primary">
+                                  推荐
+                                </span>
+                              )}
+                              {disabled && (
+                                <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-normal text-muted-foreground">
+                                  不可用
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs leading-relaxed text-muted-foreground">
+                              {disabled
+                                ? "当前所选预警子类型无设备状态恢复信号，暂不支持此策略。"
+                                : DISPOSITION_MODE_HINTS[mode]}
+                            </p>
                           </div>
-                          <p className="text-xs leading-relaxed text-muted-foreground">
-                            {disabled
-                              ? "当前所选预警子类型无设备状态恢复信号，暂不支持此策略。"
-                              : DISPOSITION_MODE_HINTS[mode]}
-                          </p>
-                        </div>
-                      </label>
-                    )
-                  })}
-                </div>
-                {dispositionDeviates && (
-                  <p className="flex items-center gap-1.5 rounded-md border border-amber-200/80 bg-amber-50/60 px-3 py-1.5 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-400">
-                    <InfoIcon className="size-3.5 shrink-0" />
-                    <span>当前选择与系统推荐（{DISPOSITION_MODE_LABELS[recommendedDisposition]}）不同，保存时将进行二次确认。</span>
-                  </p>
-                )}
+                        </label>
+                      )
+                    })}
+                  </div>
+                  {dispositionDeviates && (
+                    <p className="mt-3 flex items-center gap-1.5 rounded-md border border-amber-200/80 bg-amber-50/60 px-3 py-1.5 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-400">
+                      <InfoIcon className="size-3.5 shrink-0" />
+                      <span>当前选择与系统推荐（{DISPOSITION_MODE_LABELS[recommendedDisposition]}）不同，保存时将进行二次确认。</span>
+                    </p>
+                  )}
               </div>
               <div className="space-y-2">
                 <Label>
@@ -534,12 +562,12 @@ export function DeviceWarningConfigFormPage() {
               </div>
               {isEdit && (
                 <div className="space-y-2">
-                  <Label>当前规则 Version</Label>
+                  <Label>当前数据版本号</Label>
                   <div className="flex h-10 items-center rounded-md border bg-muted/30 px-3 text-sm font-semibold">
                     v{form.version ?? existing?.version ?? 1}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    本次保存成功后 Version +1，既有未处理预警流水不回写。
+                    保存后版本号 +1。如果这次改了处置策略、阈值或解绑了设备，且名下还有未结案预警，系统会先让你选择这些存量预警怎么处理。
                   </p>
                 </div>
               )}
@@ -966,6 +994,25 @@ export function DeviceWarningConfigFormPage() {
           onOpenChange={setDeviceDialogOpen}
           onConfirm={(summary) => {
             updateForm({ selectedDevices: summary })
+          }}
+        />
+
+        <StockWarningDispositionDialog
+          open={stockDispositionOpen}
+          onOpenChange={setStockDispositionOpen}
+          pendingCount={3}
+          ruleName={form.ruleName || "温湿度监控预警规则"}
+          devicesCount={form.selectedDevices?.length || 2}
+          onConfirm={(choice) => {
+            let msg = ""
+            if (choice === "CONVERT_MANUAL") {
+              msg = "存量预警已平滑转为人工处置结案"
+            } else if (choice === "INVALIDATE_STOCK") {
+              msg = "存量预警已批量作废归档"
+            } else {
+              msg = "存量预警保持原样，不做处理"
+            }
+            performSave(msg)
           }}
         />
 

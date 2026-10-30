@@ -20,9 +20,9 @@ export const inboundRecordDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "inbound-detail-tabs",
     number: 2,
     kind: "交互",
-    title: "三标签页：明细 / 审核 / 修改记录",
+    title: "四标签页：明细 / 审核 / 修改记录 / 资料管理（6.3 新增）",
     content:
-      "入库明细支持货品行展开二级库位堆放；审核记录为时间轴；修改记录展示特权纠偏留痕（无数据时空态）。",
+      "入库明细支持货品行展开二级库位堆放；审核记录为时间轴；修改记录展示特权纠偏留痕（无数据时空态）；资料管理按流程阶段归档凭证，只有普通入库可后补资料。",
     documentRefs: {
       prd: { section: "6.2", match: "标签页", element: "text" },
     },

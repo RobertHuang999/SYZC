@@ -127,10 +127,14 @@ export function DeviceWarningConfigListPage() {
     >
       <div className="space-y-4 p-6">
         <PrototypeAnnotationTarget annotationIds={["device-warning-config-page"]}>
-          <h1 className="text-2xl font-semibold tracking-tight">设备预警配置</h1>
-          <p className="text-sm text-muted-foreground">
-            配置设备侧预警规则，管理触发条件、关联设备与启停状态
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight">设备预警配置</h1>
+              <p className="text-sm text-muted-foreground">
+                配置设备侧预警规则，管理触发条件、关联设备与启停状态
+              </p>
+            </div>
+          </div>
         </PrototypeAnnotationTarget>
 
         <form

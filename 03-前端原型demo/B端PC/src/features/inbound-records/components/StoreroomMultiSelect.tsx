@@ -111,7 +111,7 @@ export function StoreroomMultiSelect({
       >
         {auditLock ? (
           <p className="border-b px-2 py-1.5 text-[11px] text-muted-foreground">
-            已锁定为「{auditTagLabel(auditLock)}」库房，仅可继续选择同属性库房（R06）
+            已锁定为「{auditTagLabel(auditLock)}」库房，只能再选审核属性相同的库房
           </p>
         ) : null}
         {options.length === 0 ? (

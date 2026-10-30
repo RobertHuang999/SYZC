@@ -268,7 +268,7 @@ export function buildTimelineSteps(
     return [
       {
         stepIndex: 1,
-        title: "入库申请",
+        title: "入库申请初审",
         flowType: "1",
         statusText: "已通过",
         statusType: "success",
@@ -292,7 +292,7 @@ export function buildTimelineSteps(
       },
       {
         stepIndex: 3,
-        title: "入库终审",
+        title: "入库终审与质检",
         flowType: "3",
         statusText: "已通过",
         statusType: "success",
@@ -304,7 +304,7 @@ export function buildTimelineSteps(
       },
       {
         stepIndex: 4,
-        title: "补充资料",
+        title: "事后补充资料",
         flowType: "9527",
         statusText: "",
         statusType: "info",
@@ -321,7 +321,7 @@ export function buildTimelineSteps(
   return [
     {
       stepIndex: 1,
-      title: "出库申请",
+      title: "出库申请审核",
       flowType: "1",
       statusText: "已通过",
       statusType: "success",
@@ -333,7 +333,7 @@ export function buildTimelineSteps(
     },
     {
       stepIndex: 2,
-      title: "出场核验",
+      title: "出场过磅核验",
       flowType: "2",
       statusText: "已通过",
       statusType: "success",
@@ -345,7 +345,7 @@ export function buildTimelineSteps(
     },
     {
       stepIndex: 3,
-      title: "出库终审",
+      title: "出库终审放行",
       flowType: "3",
       statusText: "已通过",
       statusType: "success",
@@ -357,7 +357,7 @@ export function buildTimelineSteps(
     },
     {
       stepIndex: 4,
-      title: "补充资料",
+      title: "事后补充资料",
       flowType: "9527",
       statusText: "",
       statusType: "info",

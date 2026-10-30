@@ -38,8 +38,8 @@ export function DeviceWarningConfigTable({
   onAction,
 }: DeviceWarningConfigTableProps) {
   return (
-    <div className="overflow-hidden rounded-md border bg-card">
-      <Table>
+    <div className="overflow-x-auto rounded-md border bg-card">
+      <Table className="min-w-[1360px]">
         <TableHeader>
           <TableRow>
             <TableHead className="w-16">序号</TableHead>
@@ -52,7 +52,7 @@ export function DeviceWarningConfigTable({
             <TableHead className="w-24">状态</TableHead>
             <TableHead className="w-32">创建人/时间</TableHead>
             <TableHead className="w-32">更新人/时间</TableHead>
-            <TableHead className="w-44">操作</TableHead>
+            <TableHead className="w-44 min-w-[176px]">操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -68,7 +68,7 @@ export function DeviceWarningConfigTable({
               const actions = getDeviceWarningConfigActions(config.status)
 
               return (
-                <TableRow key={config.configId}>
+                <TableRow key={config.configId} className="h-[72px]">
                   <TableCell>{(page - 1) * pageSize + index + 1}</TableCell>
                   <TableCell>
                     <HoverOverflowText

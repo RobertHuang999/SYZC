@@ -30,6 +30,7 @@ export const outboundRecordFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "outbound-form-partner-owner",
+    version: "6.3",
     targetId: "outbound-form-partner-owner",
     number: 2,
     kind: "交互",
@@ -109,6 +110,7 @@ export const outboundRecordFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "outbound-form-partner-pickup",
+    version: "6.3",
     targetId: "outbound-form-partner-pickup",
     number: 5,
     kind: "交互",
