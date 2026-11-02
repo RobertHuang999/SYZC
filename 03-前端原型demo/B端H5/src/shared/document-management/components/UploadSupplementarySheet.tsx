@@ -457,7 +457,7 @@ export function UploadSupplementarySheet({
                   className="flex w-full items-center justify-between py-2.5 text-left active:bg-gray-50"
                 >
                   <div>
-                    <p className="text-xs font-medium text-[#232D39]">{st.stageText}</p>
+                    <p className="text-xs font-medium text-[#232D39]">{st.label}</p>
                     <p className="mt-0.5 text-[10px] text-[#232D39]/45">{st.hint}</p>
                   </div>
                   {selectedFlowType === st.value && (

@@ -14,7 +14,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import type { DocumentItem, DocFileType } from "../types"
+import type { DocumentItem } from "../types"
 import { buildTimelineSteps, getDocumentsByOrderNo } from "../mock"
 import { UploadSupplementaryModal } from "./UploadSupplementaryModal"
 import { PdfViewerDialog } from "@/features/inbound-records/components/PdfViewerDialog"
