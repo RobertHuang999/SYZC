@@ -122,19 +122,6 @@ export function DocumentTimelineView({
     }
   }
 
-  const renderFileIcon = (fileType: string) => {
-    if (fileType === "jpg" || fileType === "png" || fileType === "jpeg") {
-      return <FileImage className="w-5 h-5 text-emerald-500" />
-    }
-    if (fileType === "zip" || fileType === "rar") {
-      return <Archive className="w-5 h-5 text-amber-500" />
-    }
-    if (fileType === "doc" || fileType === "docx") {
-      return <FileText className="w-5 h-5 text-blue-500" />
-    }
-    return <FileText className="w-5 h-5 text-rose-500" />
-  }
-
   return (
     <div className={`doc-container ${className}`}>
       {/* 顶部轻量汇总与操作栏 (对齐 see-dialog.vue 的 doc-header) */}

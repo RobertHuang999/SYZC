@@ -5,7 +5,6 @@ import {
   ChevronDown,
   ChevronUp,
   Download,
-  Eye,
   FileImage,
   FileText,
   Plus,
@@ -246,9 +245,6 @@ function groupDocumentsIntoBatches(docs: DocumentItem[]): DocumentBatch[] {
   }
   return Array.from(map.values())
 }
-
-const FALLBACK_THUMB =
-  "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=300&auto=format&fit=crop&q=60"
 
 function DocumentBatchCardMobile({
   batch,
