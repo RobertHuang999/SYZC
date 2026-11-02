@@ -4,6 +4,7 @@ import {
 } from "@prototype/shared/inbound/inbound-633-delivery"
 
 const implementedRoutePrefixes = [
+  "/仓储/库存查询/",
   "/物联网IOT与预警/预警信息/",
   "/物联网IOT与预警/预警配置/",
   "/物联网IOT与预警/物联网IOT管理/",
@@ -22,6 +23,10 @@ const implementedRoutePrefixes = [
 ] as const
 
 const implementedExactRoutes = new Set<string>([
+  "/仓储/库存查询/存货管理",
+  "/仓储/库存查询/理货堆放",
+  "/仓储/库存查询/库存明细",
+  "/仓储/库存查询/库存流水",
   "/物联网IOT与预警/物联网IOT管理/门禁设备",
   "/系统参考/功能与数据权限",
   "/系统参考/迭代记录",
@@ -39,6 +44,7 @@ const implementedExactRoutes = new Set<string>([
 ])
 
 const implementedDetailPrefixes = [
+  "/仓储/库存查询/库存明细/详情/",
   "/仓储/仓单管理/详情/",
   "/仓储/入库管理/入库记录/详情/",
   "/仓储/入库管理/入库申请/详情/",

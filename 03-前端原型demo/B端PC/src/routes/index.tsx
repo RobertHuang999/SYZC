@@ -61,6 +61,11 @@ import { OutboundRecordDetailPage } from "@/features/outbound-records/pages/Outb
 import { DeliveryOrderListPage } from "@/features/delivery-orders/pages/DeliveryOrderListPage"
 import { WarehouseReceiptListPage } from "@/features/warehouse-receipts/pages/WarehouseReceiptListPage"
 import { WarehouseReceiptDetailPage } from "@/features/warehouse-receipts/pages/WarehouseReceiptDetailPage"
+import { InventoryManagementPage } from "@/features/inventory-management/pages/InventoryManagementPage"
+import { TallyStackingListPage } from "@/features/tally-stacking/pages/TallyStackingListPage"
+import { InventoryDetailsListPage } from "@/features/inventory-details/pages/InventoryDetailsListPage"
+import { InventoryDetailsDetailPage } from "@/features/inventory-details/pages/InventoryDetailsDetailPage"
+import { InventoryTransactionsListPage } from "@/features/inventory-transactions/pages/InventoryTransactionsListPage"
 import { SupervisionHandlingPartnerRefPage } from "@/features/supervision-handling/pages/SupervisionHandlingPartnerRefPage"
 import { InboundStagingPrototypeGate } from "@/features/inbound-staging-reg/components/InboundStagingPrototypeGate"
 import { InboundStagingListPage } from "@/features/inbound-staging-reg/pages/InboundStagingListPage"
@@ -376,6 +381,28 @@ export function AppRoutes() {
         <Route
           path="配置管理/仓库管理/仓库管理/详情/:id"
           element={<WarehouseDetailPage />}
+        />
+
+        {/* 仓储 - 库存查询（存货管理、理货堆放、库存明细、库存流水） */}
+        <Route
+          path="仓储/库存查询/存货管理"
+          element={<InventoryManagementPage />}
+        />
+        <Route
+          path="仓储/库存查询/理货堆放"
+          element={<TallyStackingListPage />}
+        />
+        <Route
+          path="仓储/库存查询/库存明细"
+          element={<InventoryDetailsListPage />}
+        />
+        <Route
+          path="仓储/库存查询/库存明细/详情/:id"
+          element={<InventoryDetailsDetailPage />}
+        />
+        <Route
+          path="仓储/库存查询/库存流水"
+          element={<InventoryTransactionsListPage />}
         />
 
         {/* 仓储 - 入库管理（入库申请 + 入库记录） */}
