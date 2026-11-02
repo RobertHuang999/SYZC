@@ -258,75 +258,149 @@ export function DocumentTimelineView({
                   </div>
                 </div>
 
-                {/* 展开的单据卡片列表 */}
+                {/* 展开的单据批次卡片列表 */}
                 {isExpanded && (
-                  <div className="mt-2.5 pl-4 sm:pl-7 space-y-2">
+                  <div className="mt-3 pl-4 sm:pl-7 space-y-3">
                     {step.documents.length > 0 ? (
-                      step.documents.map((doc) => {
+                      groupDocumentsIntoBatchesPC(step.documents).map((batch) => {
                         return (
                           <div
-                            key={doc.id}
-                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white rounded-lg border border-slate-100 hover:border-slate-200 shadow-2xs transition-all"
+                            key={batch.batchKey}
+                            className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden transition-all hover:border-slate-300"
                           >
-                            {/* 左侧图标与信息 */}
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div className="w-10 h-10 rounded-lg bg-blue-50/80 flex items-center justify-center shrink-0">
-                                {renderFileIcon(doc.fileType)}
-                              </div>
-
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <h4
-                                    className="text-sm font-medium text-slate-800 truncate"
-                                    title={doc.name}
-                                  >
-                                    {doc.name}
-                                  </h4>
-                                  {doc.nature === "ADDITION" && (
-                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-normal bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
-                                      事后补录
-                                    </span>
-                                  )}
-                                </div>
-
-                                <div className="text-xs text-slate-400 flex flex-wrap items-center gap-x-4 gap-y-1 mt-0.5">
-                                  <span>{doc.fileType}</span>
-                                  <span>{doc.fileSize}</span>
-                                  <span>产生时间：{doc.createTime}</span>
-                                  <span>
-                                    上传人：{doc.uploader}
-                                    {doc.uploaderOrg && ` (${doc.uploaderOrg})`}
+                            {/* 1. 顶部：上传人员与单据属性 */}
+                            <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 bg-slate-50/80 border-b border-slate-100 text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-slate-800">
+                                  上传人：{batch.uploader}
+                                </span>
+                                {batch.uploaderOrg && (
+                                  <span className="text-slate-400">
+                                    ({batch.uploaderOrg})
                                   </span>
-                                </div>
-                                {doc.description && (
-                                  <p className="text-xs text-slate-500 mt-1 line-clamp-1 bg-slate-50/80 px-2 py-0.5 rounded border border-slate-100/80">
-                                    说明：{doc.description}
-                                  </p>
+                                )}
+                                {batch.nature === "ADDITION" ? (
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                    事后补录
+                                  </span>
+                                ) : (
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                    随单提交
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3 text-slate-400">
+                                <span className="text-slate-500 font-medium">共 {batch.documents.length} 份文件</span>
+                                {batch.documents.length > 1 && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-6 px-2 text-[11px] text-blue-600 hover:text-blue-700 hover:bg-blue-50 cursor-pointer"
+                                    onClick={() => handleDownload(batch.documents[0])}
+                                  >
+                                    <Download className="w-3 h-3 mr-1" />
+                                    打包下载全部
+                                  </Button>
                                 )}
                               </div>
                             </div>
 
-                            {/* 右侧轻量操作按钮 */}
-                            <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 px-3 text-xs text-blue-600 bg-blue-50/70 border-blue-200 hover:bg-blue-100 hover:text-blue-700 cursor-pointer"
-                                onClick={() => handlePreview(doc)}
-                              >
-                                <Eye className="w-3.5 h-3.5 mr-1 text-blue-500" />
-                                预览
-                              </Button>
+                            {/* 2. 中间：格式 ICON 标识平铺区（所有文件均以格式ICON展示，4列平铺自适应网格） */}
+                            <div className="p-3.5">
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                {batch.documents.map((doc) => {
+                                  const isImg = doc.fileType === "jpg" || doc.fileType === "png"
+                                  const isArchive = doc.fileType === "rar" || doc.fileType === "zip"
+                                  const isPdf = doc.fileType === "pdf"
 
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 px-3 text-xs text-emerald-600 bg-emerald-50/70 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-700 cursor-pointer"
-                                onClick={() => handleDownload(doc)}
-                              >
-                                <Download className="w-3.5 h-3.5 mr-1 text-emerald-500" />
-                                下载
-                              </Button>
+                                  return (
+                                    <div
+                                      key={doc.id}
+                                      className="group relative flex flex-col justify-between rounded-lg border border-slate-200/70 bg-slate-50/50 p-2 hover:border-blue-300 hover:bg-blue-50/20 transition-all"
+                                    >
+                                      {/* 格式 ICON 容器（统一纯格式ICON标识） */}
+                                      <div
+                                        onClick={() => handlePreview(doc)}
+                                        className="relative aspect-4/3 w-full rounded-md bg-white border border-slate-100 flex items-center justify-center overflow-hidden cursor-pointer"
+                                      >
+                                        {isImg ? (
+                                          <div className="flex flex-col items-center justify-center text-emerald-600">
+                                            <FileImage className="w-8 h-8" />
+                                            <span className="text-[10px] font-bold tracking-tight mt-1">{doc.fileType.toUpperCase()}</span>
+                                          </div>
+                                        ) : isPdf ? (
+                                          <div className="flex flex-col items-center justify-center text-rose-600">
+                                            <FileText className="w-8 h-8" />
+                                            <span className="text-[10px] font-bold tracking-tight mt-1">PDF</span>
+                                          </div>
+                                        ) : isArchive ? (
+                                          <div className="flex flex-col items-center justify-center text-amber-600">
+                                            <Archive className="w-8 h-8" />
+                                            <span className="text-[10px] font-bold tracking-tight mt-1">ZIP</span>
+                                          </div>
+                                        ) : (
+                                          <div className="flex flex-col items-center justify-center text-blue-600">
+                                            <FileText className="w-8 h-8" />
+                                            <span className="text-[10px] font-bold tracking-tight mt-1">{doc.fileType.toUpperCase()}</span>
+                                          </div>
+                                        )}
+
+                                        {/* 悬浮轻量快捷查看遮罩 */}
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                          <span className="p-1.5 rounded-full bg-white/90 text-slate-800 hover:bg-white cursor-pointer shadow-xs" title="在线预览">
+                                            <Eye className="w-4 h-4" />
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      {/* 文件信息 */}
+                                      <div className="mt-2 min-w-0">
+                                        <h5
+                                          className="text-xs font-medium text-slate-800 truncate"
+                                          title={doc.name}
+                                        >
+                                          {doc.name}
+                                        </h5>
+                                        <div className="flex items-center justify-between text-[11px] text-slate-400 mt-1">
+                                          <span>{doc.fileSize}</span>
+                                          <div className="flex items-center gap-1.5">
+                                            <button
+                                              type="button"
+                                              onClick={() => handlePreview(doc)}
+                                              className="text-blue-600 hover:underline cursor-pointer"
+                                            >
+                                              预览
+                                            </button>
+                                            <span className="text-slate-300">·</span>
+                                            <button
+                                              type="button"
+                                              onClick={() => handleDownload(doc)}
+                                              className="text-slate-600 hover:text-blue-600 cursor-pointer"
+                                            >
+                                              下载
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            </div>
+
+                            {/* 3. 底部：说明样式 + 时间跟在说明下面（补充说明不加图标） */}
+                            <div className="px-4 py-3 bg-slate-50 border-t border-slate-100 text-xs text-slate-600 leading-relaxed">
+                              {batch.description ? (
+                                <div className="text-slate-700">
+                                  <span className="font-semibold text-slate-800">补充说明：</span>
+                                  <span>{batch.description}</span>
+                                </div>
+                              ) : (
+                                <div className="text-slate-400">无补充说明</div>
+                              )}
+                              <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px] text-slate-400">
+                                <span>上传时间：{batch.createTime}</span>
+                              </div>
                             </div>
                           </div>
                         )
@@ -394,3 +468,34 @@ export function DocumentTimelineView({
     </div>
   )
 }
+
+type DocumentBatchPC = {
+  batchKey: string
+  uploader: string
+  uploaderOrg: string
+  createTime: string
+  nature: string
+  description?: string
+  documents: DocumentItem[]
+}
+
+function groupDocumentsIntoBatchesPC(docs: DocumentItem[]): DocumentBatchPC[] {
+  const map = new Map<string, DocumentBatchPC>()
+  for (const doc of docs) {
+    const key = `${doc.uploader}__${doc.createTime}__${doc.description || ""}`
+    if (!map.has(key)) {
+      map.set(key, {
+        batchKey: key,
+        uploader: doc.uploader,
+        uploaderOrg: doc.uploaderOrg,
+        createTime: doc.createTime,
+        nature: doc.nature,
+        description: doc.description,
+        documents: [],
+      })
+    }
+    map.get(key)!.documents.push(doc)
+  }
+  return Array.from(map.values())
+}
+

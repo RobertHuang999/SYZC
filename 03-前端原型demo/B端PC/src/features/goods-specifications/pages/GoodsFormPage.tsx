@@ -282,22 +282,21 @@ export function GoodsFormPage() {
       return
     }
 
-    // 入库收集项：保质期必须指定固定单位，建议默认数值必须为 1~9999 的正整数；下拉单选框至少保留 1 个候选项
+    // 入库收集项：保质期与下拉选择器均需至少勾选 1 项适用配置
     for (const item of inboundCollect) {
       const field = resolveCollectField(item.fieldId)
       if (field?.isShelfLife) {
-        if (!item.shelfLifeUnit) {
-          setErrorMessage("请为保质期指定固定单位")
+        const units =
+          item.shelfLifeUnits && item.shelfLifeUnits.length > 0
+            ? item.shelfLifeUnits
+            : item.shelfLifeUnit
+              ? [item.shelfLifeUnit]
+              : []
+        if (units.length === 0) {
+          setErrorMessage("请为【保质期】至少勾选 1 个适用单位")
           return
         }
-        if (item.suggestedValue?.trim()) {
-          const value = Number(item.suggestedValue)
-          if (!Number.isInteger(value) || value < 1 || value > 9999) {
-            setErrorMessage("建议默认保质期数值需为 1 至 9999 的正整数")
-            return
-          }
-        }
-      } else if (field?.controlType === "下拉单选框") {
+      } else if (field?.controlType === "下拉选择器") {
         const activeOpts = item.customOptions ?? field.options ?? []
         if (activeOpts.length === 0) {
           setErrorMessage(`请为【${field.name}】至少勾选 1 个适用候选项`)
@@ -586,7 +585,7 @@ export function GoodsFormPage() {
             <IterationHighlight
               type="modified"
               title="入库收集项与保质期配置"
-              description="收集项由 07 字段池实时提供；货品侧只配是否必填、保质期固定单位、建议默认数值，以及下拉单选框的适用候选项。"
+              description="收集项由 07 字段池实时提供；货品侧只配是否必填，以及保质期单位、下拉选择器的适用候选项等多选配置。"
             >
               <Card className="p-6">
                 <InboundCollectEditor

@@ -25,7 +25,7 @@ function MockBox({
 
 function renderMock(field: InboundCollectFieldConfig) {
   switch (field.controlType) {
-    case "下拉单选框":
+    case "下拉选择器":
       return (
         <div className="space-y-1.5">
           <MockBox className="justify-between">

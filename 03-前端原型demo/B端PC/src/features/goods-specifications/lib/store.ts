@@ -53,7 +53,7 @@ function mapControlTypeToCatalogKind(
   controlType: InboundCollectControlType
 ): InboundCollectControlKind {
   switch (controlType) {
-    case "下拉单选框":
+    case "下拉选择器":
       return "select"
     case "日期选择器":
       return "date"
@@ -847,7 +847,7 @@ function computeCollectSummary(
     if (shelfLifeUnitConfig.allowYear) units.push("年")
     return `支持: ${units.join(" / ")}`
   }
-  if (controlType === "下拉单选框") {
+  if (controlType === "下拉选择器") {
     if (options && options.length > 0) {
       return options.slice(0, 2).join(", ")
     }

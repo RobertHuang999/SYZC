@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -34,17 +34,21 @@ import {
   INBOUND_COLLECT_SPEC_CONTROL_NOTE,
   INBOUND_COLLECT_SPEC_MINUS_NOTE,
   INBOUND_COLLECT_SPEC_NAME_NOTE,
-  INBOUND_COLLECT_USER_CONTROL_HINT,
   INBOUND_COLLECT_USER_CONTROL_LOCKED_BY_CORE,
   INBOUND_COLLECT_USER_CONTROL_LOCKED_BY_REF,
   INBOUND_COLLECT_USER_NAME_HINT,
   INBOUND_COLLECT_USER_NAME_LOCKED_HINT,
   INBOUND_COLLECT_USER_OPTIONS_HINT,
-  INBOUND_COLLECT_USER_PLACEHOLDER_HINT,
   INBOUND_COLLECT_USER_REMARK_HINT,
   INBOUND_COLLECT_USER_UNIT_HINT,
   INBOUND_COLLECT_USER_UNIT_LOCKED_HINT,
+  inboundCollectControlTypeUserHint,
+  inboundCollectPlaceholderInputPlaceholder,
+  inboundCollectPlaceholderQuickExamples,
+  inboundCollectPlaceholderUserHint,
+  inboundCollectShowMinusShortcut,
 } from "../lib/inbound-collect-ui-labels"
+import { InboundCollectPreviewCard } from "../components/InboundCollectPreviewCard"
 import {
   PrototypeAnnotationProvider,
   PrototypeAnnotationTarget,
@@ -136,6 +140,41 @@ export function InboundCollectFormPage() {
 
   const backPath = isEdit && id ? inboundCollectDetailPath(id) : INBOUND_COLLECT_CONFIG_PATH
 
+  const previewField = useMemo((): InboundCollectFieldConfig => {
+    const trimmedOptions = options.map((item) => item.trim()).filter(Boolean)
+    const displayName = name.trim() || "收集项名称"
+    return {
+      id: field?.id ?? "collect-form-preview",
+      name: displayName,
+      controlType,
+      summary: "—",
+      unitLabel: unitLabel.trim() || undefined,
+      options: trimmedOptions.length > 0 ? trimmedOptions : undefined,
+      placeholder: placeholder.trim() || undefined,
+      remark: remark.trim() || undefined,
+      isCore: field?.isCore ?? false,
+      isShelfLife: field?.isShelfLife,
+      status: field?.status ?? "ENABLED",
+      createdBy: field?.createdBy ?? "—",
+      createdAt: field?.createdAt ?? "—",
+      updatedBy: field?.updatedBy ?? "—",
+      updatedAt: field?.updatedAt ?? "—",
+      version: field?.version ?? 1,
+      hasDownstreamRef: field?.hasDownstreamRef ?? false,
+    }
+  }, [
+    controlType,
+    field,
+    name,
+    options,
+    placeholder,
+    remark,
+    unitLabel,
+  ])
+
+  const placeholderExamples = inboundCollectPlaceholderQuickExamples(controlType)
+  const showMinusShortcut = inboundCollectShowMinusShortcut(controlType)
+
   const handleCancel = () => {
     if (isDirty && !window.confirm("当前有未保存的修改，确认离开吗？")) return
     navigate(backPath)
@@ -193,7 +232,7 @@ export function InboundCollectFormPage() {
       return
     }
     const validOptions = options.map((item) => item.trim()).filter(Boolean)
-    if (controlType === "下拉单选框" && validOptions.length === 0) {
+    if (controlType === "下拉选择器" && validOptions.length === 0) {
       setErrorMessage("请至少配置 1 个有效下拉选项")
       return
     }
@@ -320,7 +359,8 @@ export function InboundCollectFormPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-semibold">字段配置</CardTitle>
               </CardHeader>
-              <CardContent className="grid gap-4 p-6 pt-0 sm:grid-cols-2">
+              <CardContent className="grid gap-6 p-6 pt-0 lg:grid-cols-[minmax(0,1fr)_380px]">
+                <div className="grid gap-4 sm:grid-cols-2">
                 {/* 收集项名称 */}
                 <div className="space-y-1.5">
                   <Label htmlFor="field-name" className="text-sm font-medium">
@@ -396,7 +436,7 @@ export function InboundCollectFormPage() {
                         </SelectContent>
                       </Select>
                       <ProductFieldHint>
-                        {INBOUND_COLLECT_USER_CONTROL_HINT}
+                        {inboundCollectControlTypeUserHint(controlType)}
                       </ProductFieldHint>
                     </div>
                   )}
@@ -452,48 +492,56 @@ export function InboundCollectFormPage() {
                   <Input
                     id="field-placeholder"
                     ref={placeholderInputRef}
-                    placeholder="例如：-18 至 -15"
+                    placeholder={inboundCollectPlaceholderInputPlaceholder(controlType)}
                     value={placeholder}
                     onChange={(e) => handlePlaceholderChange(e.target.value)}
                     maxLength={50}
                   />
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-muted-foreground">快捷符号:</span>
-                      <button
-                        type="button"
-                        onClick={insertMinus}
-                        className="inline-flex cursor-pointer items-center rounded border border-primary/20 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
-                        title="点击直接在光标处插入英文半角减号，杜绝误敲下划线"
-                      >
-                        - 减号
-                      </button>
+                  {(showMinusShortcut || placeholderExamples.length > 0) && (
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      {showMinusShortcut ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-muted-foreground">
+                            快捷符号:
+                          </span>
+                          <button
+                            type="button"
+                            onClick={insertMinus}
+                            className="inline-flex cursor-pointer items-center rounded border border-primary/20 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
+                            title="点击直接在光标处插入英文半角减号，杜绝误敲下划线"
+                          >
+                            - 减号
+                          </button>
+                        </div>
+                      ) : (
+                        <span />
+                      )}
+                      {placeholderExamples.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="text-xs text-muted-foreground">
+                            快捷示例:
+                          </span>
+                          {placeholderExamples.map((example) => (
+                            <button
+                              key={example.label}
+                              type="button"
+                              onClick={() => applyPlaceholderExample(example.value)}
+                              className="inline-flex cursor-pointer items-center rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-700 transition-colors hover:bg-slate-200"
+                            >
+                              {example.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-muted-foreground">快捷示例:</span>
-                      <button
-                        type="button"
-                        onClick={() => applyPlaceholderExample("例如：-18 至 -15")}
-                        className="inline-flex cursor-pointer items-center rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-700 transition-colors hover:bg-slate-200"
-                      >
-                        -18 至 -15
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => applyPlaceholderExample("例如：12.5%")}
-                        className="inline-flex cursor-pointer items-center rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-700 transition-colors hover:bg-slate-200"
-                      >
-                        12.5%
-                      </button>
-                    </div>
-                  </div>
+                  )}
                   <ProductFieldHint>
-                    {INBOUND_COLLECT_USER_PLACEHOLDER_HINT}
+                    {inboundCollectPlaceholderUserHint(controlType)}
                   </ProductFieldHint>
                 </div>
 
                 {/* 下拉选项集合 */}
-                {controlType === "下拉单选框" && (
+                {controlType === "下拉选择器" && (
                   <div className="space-y-1.5 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 sm:col-span-2">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium">
@@ -564,6 +612,17 @@ export function InboundCollectFormPage() {
                     className="resize-none text-sm"
                   />
                   <ProductFieldHint>{INBOUND_COLLECT_USER_REMARK_HINT}</ProductFieldHint>
+                </div>
+                </div>
+
+                <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-5 lg:sticky lg:top-4 lg:self-start">
+                  <div className="mb-1 text-sm font-medium text-slate-700">
+                    入库单录入样式
+                  </div>
+                  <p className="mb-4 text-xs text-muted-foreground">
+                    仓储入库单示意 · 随左侧配置实时更新，保存前即可预览效果
+                  </p>
+                  <InboundCollectPreviewCard field={previewField} compact />
                 </div>
               </CardContent>
             </Card>

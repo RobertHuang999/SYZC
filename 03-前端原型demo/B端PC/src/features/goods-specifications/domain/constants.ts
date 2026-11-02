@@ -27,8 +27,8 @@ export const CONTROL_TYPE_OPTIONS: Array<{
   label: string
   description?: string
 }> = [
-  { value: "单行文本输入框", label: "单行文本输入框", description: "常规文本信息" },
-  { value: "下拉单选框", label: "下拉单选框", description: "预设固定枚举选项" },
+  { value: "文本输入框", label: "文本输入框", description: "常规文本信息" },
+  { value: "下拉选择器", label: "下拉选择器", description: "预设固定枚举选项" },
   { value: "日期选择器", label: "日期选择器", description: "标准年月日日期" },
   { value: "数字区间框", label: "数字区间框", description: "指标数值范围，如温度、湿度" },
   { value: "百分比数值框", label: "百分比数值框", description: "0~100 比率参数，如含水量" },
@@ -135,8 +135,8 @@ export const LEGACY_COLLECT_KEY_MAP: Record<string, string> = {
 /** 07 字段池里可被 06 勾选时的控件类型筛选项（周期组合项只给保质期，不单列） */
 export const COLLECT_CONTROL_TABS = [
   "全部",
-  "单行文本输入框",
-  "下拉单选框",
+  "文本输入框",
+  "下拉选择器",
   "日期选择器",
   "数字区间框",
   "百分比数值框",

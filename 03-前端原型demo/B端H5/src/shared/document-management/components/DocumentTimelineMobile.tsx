@@ -190,18 +190,18 @@ export function DocumentTimelineMobile({
                 </div>
 
                 {expanded && (
-                  <div className="mt-2 space-y-2">
+                  <div className="mt-2 space-y-2.5">
                     {step.documents.length === 0 ? (
                       <p className="rounded-lg border border-dashed border-[#232D39]/10 py-3 text-center text-[10px] text-[#232D39]/35">
                         暂无资料
                       </p>
                     ) : (
-                      step.documents.map((doc) => (
-                        <DocumentCard
-                          key={doc.id}
-                          doc={doc}
-                          onPreview={() => onPreview(doc)}
-                          onDownload={() => onDownload(doc)}
+                      groupDocumentsIntoBatches(step.documents).map((batch) => (
+                        <DocumentBatchCardMobile
+                          key={batch.batchKey}
+                          batch={batch}
+                          onPreview={onPreview}
+                          onDownload={onDownload}
                         />
                       ))
                     )}
@@ -217,73 +217,182 @@ export function DocumentTimelineMobile({
   )
 }
 
-function DocumentCard({
-  doc,
+type DocumentBatch = {
+  batchKey: string
+  uploader: string
+  uploaderOrg: string
+  createTime: string
+  nature: string
+  description?: string
+  documents: DocumentItem[]
+}
+
+function groupDocumentsIntoBatches(docs: DocumentItem[]): DocumentBatch[] {
+  const map = new Map<string, DocumentBatch>()
+  for (const doc of docs) {
+    const key = `${doc.uploader}__${doc.createTime}__${doc.description || ""}`
+    if (!map.has(key)) {
+      map.set(key, {
+        batchKey: key,
+        uploader: doc.uploader,
+        uploaderOrg: doc.uploaderOrg,
+        createTime: doc.createTime,
+        nature: doc.nature,
+        description: doc.description,
+        documents: [],
+      })
+    }
+    map.get(key)!.documents.push(doc)
+  }
+  return Array.from(map.values())
+}
+
+const FALLBACK_THUMB =
+  "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=300&auto=format&fit=crop&q=60"
+
+function DocumentBatchCardMobile({
+  batch,
   onPreview,
   onDownload,
 }: {
-  doc: DocumentItem
-  onPreview: () => void
-  onDownload: () => void
+  batch: DocumentBatch
+  onPreview: (doc: DocumentItem) => void
+  onDownload: (doc: DocumentItem) => void
 }) {
-  const isImage = isImageDocument(doc)
-  const isArchive = doc.fileType === "rar" || doc.fileType === "zip"
+  const isAddition = batch.nature === "ADDITION"
 
   return (
-    <div className="rounded-lg border border-[#232D39]/10 bg-[#232D39]/[0.02] p-2.5">
-      <div className="flex items-start gap-2">
-        <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded bg-slate-100">
-          {isImage ? (
-            <FileImage className="size-4 text-emerald-600" />
-          ) : isArchive ? (
-            <Archive className="size-4 text-amber-600" />
+    <div className="rounded-xl border border-[#232D39]/10 bg-white p-2.5 shadow-2xs">
+      {/* 1. 顶部：上传人员与单据属性 */}
+      <div className="flex items-center justify-between pb-2 border-b border-[#232D39]/5 text-[11px]">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="font-semibold text-[#232D39] truncate">
+            上传人：{batch.uploader}
+          </span>
+          {batch.uploaderOrg && (
+            <span className="text-[10px] text-[#232D39]/45 truncate max-w-[120px]">
+              ({batch.uploaderOrg})
+            </span>
+          )}
+          {isAddition ? (
+            <span className="shrink-0 rounded border border-amber-200 bg-amber-50 px-1 py-0.5 text-[9px] font-medium text-amber-600">
+              事后补录
+            </span>
           ) : (
-            <FileText className="size-4 text-blue-600" />
+            <span className="shrink-0 rounded border border-blue-200 bg-blue-50 px-1 py-0.5 text-[9px] font-medium text-blue-600">
+              随单提交
+            </span>
           )}
-        </span>
+        </div>
+        <div className="flex items-center gap-1 shrink-0 text-[10px] text-[#232D39]/50">
+          <span>共 {batch.documents.length} 份</span>
+        </div>
+      </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start gap-1.5">
-            <p className="min-w-0 flex-1 break-all text-xs font-medium leading-snug text-[#232D39]">
-              {doc.name}
-            </p>
-            {doc.nature === "ADDITION" && (
-              <span className="shrink-0 rounded border border-amber-200 bg-amber-50 px-1 py-0.5 text-[9px] font-medium text-amber-600">
-                事后补录
-              </span>
-            )}
-          </div>
+      {/* 2. 中间：格式 ICON 标识平铺区（所有文件均以格式ICON展示，4列自适应网格） */}
+      <div className="pt-2">
+        <div className="grid grid-cols-4 gap-1.5">
+          {batch.documents.map((doc) => {
+            const isImg = isImageDocument(doc)
+            const isArchive = doc.fileType === "rar" || doc.fileType === "zip"
+            const isPdf = doc.fileType === "pdf"
+            const isDoc = doc.fileType === "doc" || doc.fileType === "docx"
 
-          <p className="mt-0.5 text-[10px] text-[#232D39]/45">
-            {doc.fileType.toUpperCase()} · {doc.fileSize} · {doc.createTime}
-          </p>
-          <p className="text-[10px] text-[#232D39]/45">
-            上传人：{doc.uploader}（{doc.uploaderOrg}）
-          </p>
-          {doc.description && (
-            <p className="mt-0.5 line-clamp-2 text-[10px] leading-relaxed text-[#232D39]/55">
-              说明：{doc.description}
-            </p>
-          )}
+            return (
+              <div
+                key={doc.id}
+                onClick={() => onPreview(doc)}
+                className="group relative flex flex-col items-center justify-between rounded-lg border border-[#232D39]/10 bg-[#232D39]/[0.02] p-1.5 active:scale-98 transition-transform cursor-pointer"
+              >
+                {/* 格式 ICON 容器（统一纯格式ICON标识） */}
+                <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded bg-slate-100">
+                  {isImg ? (
+                    <div className="flex flex-col items-center justify-center text-emerald-600">
+                      <FileImage className="size-5" />
+                      <span className="text-[8px] font-bold tracking-tight">
+                        {doc.fileType.toUpperCase()}
+                      </span>
+                    </div>
+                  ) : isPdf ? (
+                    <div className="flex flex-col items-center justify-center text-rose-600">
+                      <FileText className="size-5" />
+                      <span className="text-[8px] font-bold tracking-tight">PDF</span>
+                    </div>
+                  ) : isArchive ? (
+                    <div className="flex flex-col items-center justify-center text-amber-600">
+                      <Archive className="size-5" />
+                      <span className="text-[8px] font-bold tracking-tight">ZIP</span>
+                    </div>
+                  ) : isDoc ? (
+                    <div className="flex flex-col items-center justify-center text-blue-600">
+                      <FileText className="size-5" />
+                      <span className="text-[8px] font-bold tracking-tight">DOC</span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-slate-600">
+                      <FileText className="size-5" />
+                      <span className="text-[8px] font-bold tracking-tight">
+                        {doc.fileType.toUpperCase()}
+                      </span>
+                    </div>
+                  )}
 
-          <div className="mt-1.5 flex items-center gap-2">
+                  {/* 悬停/常驻下载小按钮 */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onDownload(doc)
+                    }}
+                    className="absolute right-0.5 bottom-0.5 rounded bg-black/60 p-0.5 text-white active:bg-blue-600"
+                    title="下载此文件"
+                  >
+                    <Download className="size-2.5" />
+                  </button>
+                </div>
+
+                {/* 文件名与大小 */}
+                <p
+                  className="mt-1 w-full truncate text-center text-[9.5px] font-medium leading-tight text-[#232D39]"
+                  title={doc.name}
+                >
+                  {doc.name}
+                </p>
+                <span className="mt-0.5 text-[8.5px] text-[#232D39]/40 leading-none">
+                  {doc.fileSize}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* 批量打包下载入口 */}
+        {batch.documents.length > 1 && (
+          <div className="mt-2 flex items-center justify-end text-[10px]">
             <button
               type="button"
-              onClick={onPreview}
-              className="inline-flex items-center gap-0.5 rounded-md border border-blue-200 bg-white px-2 py-1 text-[10px] font-medium text-blue-600 active:bg-blue-50"
-            >
-              <Eye className="size-3" />
-              预览
-            </button>
-            <button
-              type="button"
-              onClick={onDownload}
-              className="inline-flex items-center gap-0.5 rounded-md border border-[#232D39]/15 bg-white px-2 py-1 text-[10px] font-medium text-[#232D39]/70 active:bg-gray-50"
+              onClick={() => onDownload(batch.documents[0])}
+              className="inline-flex items-center gap-1 font-medium text-blue-600 active:underline"
             >
               <Download className="size-3" />
-              下载
+              打包下载全部 ({batch.documents.length})
             </button>
           </div>
+        )}
+      </div>
+
+      {/* 3. 底部：说明样式 + 时间跟在说明下面（补充说明不加图标） */}
+      <div className="mt-2 rounded-md border border-[#232D39]/5 bg-slate-50 p-2 text-[10.5px] leading-relaxed">
+        {batch.description ? (
+          <div className="text-[#232D39]/80">
+            <span className="font-semibold text-[#232D39]">补充说明：</span>
+            <span>{batch.description}</span>
+          </div>
+        ) : (
+          <div className="text-[#232D39]/40">无补充说明</div>
+        )}
+        <div className="mt-1.5 pt-1.5 border-t border-[#232D39]/5 flex items-center justify-between text-[9.5px] text-[#232D39]/45">
+          <span>上传时间：{batch.createTime}</span>
         </div>
       </div>
     </div>

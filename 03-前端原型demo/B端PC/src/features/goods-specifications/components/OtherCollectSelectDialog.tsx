@@ -153,10 +153,11 @@ export function OtherCollectSelectDialog({
         fieldId: field.id,
         required: selectedMap.get(field.id) ?? previous?.required ?? false,
         shelfLifeUnit: previous?.shelfLifeUnit,
+        shelfLifeUnits: previous?.shelfLifeUnits,
         suggestedValue: previous?.suggestedValue,
         customOptions:
           previous?.customOptions ??
-          (field.controlType === "下拉单选框" && field.options
+          (field.controlType === "下拉选择器" && field.options
             ? [...field.options]
             : undefined),
       })

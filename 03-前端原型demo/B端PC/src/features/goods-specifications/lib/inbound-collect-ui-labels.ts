@@ -6,14 +6,48 @@
  * - `INBOUND_COLLECT_SPEC_*` 只给 PrototypeSpecCallout 使用，可写【规则名称】(编号)。
  */
 
+import type { InboundCollectControlType } from "../domain/types"
+
+export type InboundCollectPlaceholderExample = {
+  label: string
+  value: string
+}
+
 export const INBOUND_COLLECT_USER_NAME_HINT =
   "用来区分不同的采集项，2～30 个字，同一租户内不能重名。"
 
 export const INBOUND_COLLECT_USER_NAME_LOCKED_HINT =
   "系统核心字段，名称不可修改，只能调整输入提示和备注。"
 
+/** 未选具体控件时的兜底说明（一般不用，表单侧按控件类型走联动文案） */
 export const INBOUND_COLLECT_USER_CONTROL_HINT =
   "决定仓库现场录单时这一项怎么填；确认保存后如果已经被货品使用，就不能再改。"
+
+const CONTROL_TYPE_LOCKED_TAIL =
+  "保存后若已被货品引用，控件类型将锁定不可改。"
+
+export function inboundCollectControlTypeUserHint(
+  controlType: InboundCollectControlType
+): string {
+  switch (controlType) {
+    case "文本输入框":
+      return `适合批次号、厂家名称等自由文本，现场一个输入框直接填写。${CONTROL_TYPE_LOCKED_TAIL}`
+    case "下拉选择器":
+      return `适合包装方式、等级等固定选项，需在下文配置至少 1 个候选项。${CONTROL_TYPE_LOCKED_TAIL}`
+    case "日期选择器":
+      return `适合生产日期、检验日期等，现场点选年月日。${CONTROL_TYPE_LOCKED_TAIL}`
+    case "数字区间框":
+      return `适合温湿度等指标范围，需配置单位，并在输入提示里写清区间示例。${CONTROL_TYPE_LOCKED_TAIL}`
+    case "百分比数值框":
+      return `适合水分、杂质等 0～100 的比率，单位一般为 %。${CONTROL_TYPE_LOCKED_TAIL}`
+    case "省市区三级联动":
+      return `适合产地等，现场按省、市、区三级下拉选择，无需配置单位与选项。${CONTROL_TYPE_LOCKED_TAIL}`
+    case "周期组合项":
+      return "保质期专属控件，正整数 + 固定单位；系统预置，不支持自建。"
+    default:
+      return INBOUND_COLLECT_USER_CONTROL_HINT
+  }
+}
 
 export const INBOUND_COLLECT_USER_CONTROL_LOCKED_BY_REF =
   "该项已被使用，控件类型已锁定"
@@ -28,10 +62,85 @@ export const INBOUND_COLLECT_USER_UNIT_LOCKED_HINT =
   "该项已被使用，单位标签已锁定，不能修改。"
 
 export const INBOUND_COLLECT_USER_OPTIONS_HINT =
-  "至少配 1 个选项，现场录单时从这里单选一个。"
+  "至少配 1 个选项，现场录单时从下拉选择器里单选一项。"
 
 export const INBOUND_COLLECT_USER_PLACEHOLDER_HINT =
   "仓库现场输入框里的灰色提示文字，最多 50 个字。误敲的下划线或全角减号会自动纠正成半角「-」。"
+
+export function inboundCollectPlaceholderUserHint(
+  controlType: InboundCollectControlType
+): string {
+  switch (controlType) {
+    case "文本输入框":
+      return "显示在文本输入框内的灰色引导语，如「请输入炉号」，最多 50 个字。"
+    case "下拉选择器":
+      return "下拉未选择时的占位文案，如「请选择包装方式」，最多 50 个字；下方选项列表决定可选项。"
+    case "日期选择器":
+      return "未选日期时的占位文案，如「请选择生产日期」，最多 50 个字。"
+    case "数字区间框":
+      return "数字区间两个输入框下方补充说明，如「例如：-18 至 -15」；误敲下划线或全角减号会自动纠正为半角「-」。"
+    case "百分比数值框":
+      return "百分比输入框内的灰色引导语，如「请输入实测水分含量」，最多 50 个字。"
+    case "省市区三级联动":
+      return "三级联动使用系统固定「请选择省/市/区」文案，此项一般留空即可。"
+    case "周期组合项":
+      return "保质期数值框内的引导语，如「请输入保质期」，单位由货品主档指定且只读。"
+    default:
+      return INBOUND_COLLECT_USER_PLACEHOLDER_HINT
+  }
+}
+
+export function inboundCollectPlaceholderInputPlaceholder(
+  controlType: InboundCollectControlType
+): string {
+  switch (controlType) {
+    case "文本输入框":
+      return "例如：请输入批次号"
+    case "下拉选择器":
+      return "例如：请选择包装方式"
+    case "日期选择器":
+      return "例如：请选择生产日期"
+    case "数字区间框":
+      return "例如：-18 至 -15"
+    case "百分比数值框":
+      return "例如：请输入实测水分含量"
+    case "省市区三级联动":
+      return "一般留空，使用系统默认文案"
+    case "周期组合项":
+      return "例如：请输入保质期"
+    default:
+      return "例如：-18 至 -15"
+  }
+}
+
+export function inboundCollectPlaceholderQuickExamples(
+  controlType: InboundCollectControlType
+): InboundCollectPlaceholderExample[] {
+  switch (controlType) {
+    case "数字区间框":
+      return [{ label: "-18 至 -15", value: "例如：-18 至 -15" }]
+    case "百分比数值框":
+      return [{ label: "12.5%", value: "例如：12.5%" }]
+    case "文本输入框":
+      return [{ label: "炉号", value: "例如：请输入炉号" }]
+    case "下拉选择器":
+      return [{ label: "包装方式", value: "请选择包装方式" }]
+    case "日期选择器":
+      return [{ label: "生产日期", value: "请选择生产日期" }]
+    default:
+      return []
+  }
+}
+
+export function inboundCollectShowMinusShortcut(
+  controlType: InboundCollectControlType
+): boolean {
+  return (
+    controlType === "数字区间框" ||
+    controlType === "百分比数值框" ||
+    controlType === "文本输入框"
+  )
+}
 
 export const INBOUND_COLLECT_USER_REMARK_HINT =
   "记录这一项的业务背景或行业标准要求，最多 200 个字。"

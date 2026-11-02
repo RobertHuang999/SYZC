@@ -307,9 +307,15 @@ export function GoodsDetailPage() {
                     {sku.inboundCollect.map((item, index) => {
                       const field = resolveCollectField(item.fieldId)
                       const isShelfLife = Boolean(field?.isShelfLife)
-                      const unitLabel = item.shelfLifeUnit
-                        ? SHELF_LIFE_UNIT_LABEL[item.shelfLifeUnit]
-                        : ""
+                      const shelfUnits =
+                        item.shelfLifeUnits && item.shelfLifeUnits.length > 0
+                          ? item.shelfLifeUnits
+                          : item.shelfLifeUnit
+                            ? [item.shelfLifeUnit]
+                            : []
+                      const unitSummary = shelfUnits
+                        .map((u) => SHELF_LIFE_UNIT_LABEL[u])
+                        .join("、")
                       return (
                         <TableRow key={item.fieldId}>
                           <TableCell className="text-center text-muted-foreground">
@@ -345,12 +351,8 @@ export function GoodsDetailPage() {
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">
                             {isShelfLife
-                              ? `固定单位：${unitLabel || "未指定"}${
-                                  item.suggestedValue
-                                    ? `，建议默认数值：${item.suggestedValue} ${unitLabel}`
-                                    : "，未设建议值"
-                                }（入库单单位只读锁定，现场仅填数值）`
-                              : field?.controlType === "下拉单选框"
+                              ? `可选单位：${unitSummary || "—"}（入库单单位只读锁定，现场仅填数值）`
+                              : field?.controlType === "下拉选择器"
                                 ? `可选候选项：${
                                     (item.customOptions ?? field.options ?? []).join(
                                       "、"

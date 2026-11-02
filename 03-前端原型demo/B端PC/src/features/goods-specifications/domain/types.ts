@@ -12,9 +12,11 @@ export type GoodsInboundCollectConfig = {
   /** 引用 07 字段池的字段 ID */
   fieldId: string
   required: boolean
-  /** 保质期专属：该货品的固定单位 */
+  /** 保质期专属：该货品勾选的可用固定单位（至少 1 项，样式同下拉选择器适用项） */
+  shelfLifeUnits?: ShelfLifeUnit[]
+  /** 保质期专属：入库单只读锁定的首选单位（与 shelfLifeUnits 按天→月→年排序后的首项同步） */
   shelfLifeUnit?: ShelfLifeUnit
-  /** 保质期专属：建议默认数值（正整数 1~9999） */
+  /** @deprecated 原型已不在货品建档页维护建议默认数值，保留字段兼容存量 Mock */
   suggestedValue?: string
   /** 下拉单选框专属：从 07 字段池枚举选项中勾选的当前货品适用候选项列表 */
   customOptions?: string[]
@@ -113,8 +115,8 @@ export type InboundCollectDomain =
 export type InboundCollectControlType =
   | "周期组合项"
   | "日期选择器"
-  | "单行文本输入框"
-  | "下拉单选框"
+  | "文本输入框"
+  | "下拉选择器"
   | "数字区间框"
   | "百分比数值框"
   | "省市区三级联动"

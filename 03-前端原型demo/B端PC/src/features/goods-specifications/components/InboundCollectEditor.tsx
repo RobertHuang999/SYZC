@@ -43,6 +43,40 @@ function shelfLifeUnitOptions(): ShelfLifeUnit[] {
   return UNIT_ORDER.filter((unit) => allowed.includes(unit))
 }
 
+function normalizeShelfLifeUnits(units: ShelfLifeUnit[]): ShelfLifeUnit[] {
+  const set = new Set(units)
+  return UNIT_ORDER.filter((unit) => set.has(unit))
+}
+
+function resolveShelfLifeUnits(item: GoodsInboundCollectConfig): ShelfLifeUnit[] {
+  if (item.shelfLifeUnits && item.shelfLifeUnits.length > 0) {
+    return normalizeShelfLifeUnits(item.shelfLifeUnits)
+  }
+  if (item.shelfLifeUnit) {
+    return [item.shelfLifeUnit]
+  }
+  return []
+}
+
+function patchShelfLifeUnits(units: ShelfLifeUnit[]): Partial<GoodsInboundCollectConfig> {
+  const normalized = normalizeShelfLifeUnits(units)
+  return {
+    shelfLifeUnits: normalized,
+    shelfLifeUnit: normalized[0],
+  }
+}
+
+function shelfLifeUnitsToLabels(units: ShelfLifeUnit[]): string[] {
+  return normalizeShelfLifeUnits(units).map((unit) => UNIT_LABEL[unit])
+}
+
+function shelfLifeLabelsToUnits(
+  labels: string[],
+  unitOptions: ShelfLifeUnit[]
+): ShelfLifeUnit[] {
+  return unitOptions.filter((unit) => labels.includes(UNIT_LABEL[unit]))
+}
+
 function renderInputMock(controlType: InboundCollectControlType, unitLabel?: string) {
   if (controlType === "日期选择器") {
     return (
@@ -245,15 +279,15 @@ export function InboundCollectEditor({
     onChange(value.filter((item) => item.fieldId !== fieldId))
   }
 
-  // 新勾选的保质期自动带出 07 的推荐基准单位，避免空值
+  // 新勾选保质期：默认全选 07 白名单内单位（与下拉选择器默认全选枚举项一致）
   const handleConfirmSelect = (next: GoodsInboundCollectConfig[]) => {
     if (disabled) return
-    const recommended = getShelfLifeUnitConfig().recommendedUnit
+    const whitelist = shelfLifeUnitOptions()
     onChange(
       next.map((item) => {
         const field = resolveCollectField(item.fieldId)
-        if (field?.isShelfLife && !item.shelfLifeUnit) {
-          return { ...item, shelfLifeUnit: recommended }
+        if (field?.isShelfLife && resolveShelfLifeUnits(item).length === 0) {
+          return { ...item, ...patchShelfLifeUnits(whitelist) }
         }
         return item
       })
@@ -277,7 +311,7 @@ export function InboundCollectEditor({
           )}
           <span className="text-sm font-semibold text-slate-900">入库收集信息</span>
           <span className="text-xs text-slate-500 font-normal hidden sm:inline ml-2">
-            从「入库收集项配置」字段池勾选，货品侧只需设置必填；保质期可指定专属固定单位与建议默认数值。
+            从「入库收集项配置」字段池勾选，货品侧只需设置必填；保质期与下拉类字段一样勾选适用单位或候选项。
           </span>
         </div>
 
@@ -307,15 +341,17 @@ export function InboundCollectEditor({
                 const field = resolveCollectField(item.fieldId)
                 const fieldDisabled = field?.status === "DISABLED"
                 const isShelfLife = Boolean(field?.isShelfLife)
-                const isSelectType = field?.controlType === "下拉单选框"
+                const isSelectType = field?.controlType === "下拉选择器"
                 const baseOptions = field?.options ?? []
                 const activeSelectOptions =
                   item.customOptions ?? baseOptions
                 const description = field?.placeholder || field?.remark || "—"
-                const currentUnit = item.shelfLifeUnit
-                const unitNotInWhitelist = Boolean(
-                  currentUnit && !unitOptions.includes(currentUnit)
+                const activeShelfLifeLabels = shelfLifeUnitsToLabels(
+                  resolveShelfLifeUnits(item).filter((unit) =>
+                    unitOptions.includes(unit)
+                  )
                 )
+                const shelfLifeBaseLabels = unitOptions.map((unit) => UNIT_LABEL[unit])
 
                 return (
                   <div
@@ -351,45 +387,22 @@ export function InboundCollectEditor({
                       </label>
                     </div>
 
-                    {/* 保质期：专属固定单位 + 建议默认数值 */}
                     {isShelfLife ? (
                       <div className="space-y-1.5">
                         <div className="flex items-center gap-1.5">
-                          <input
-                            type="number"
-                            min={1}
-                            max={9999}
+                          <SelectOptionsMultiPicker
+                            baseOptions={shelfLifeBaseLabels}
+                            selectedOptions={activeShelfLifeLabels}
                             disabled={disabled}
-                            value={item.suggestedValue ?? ""}
-                            placeholder="建议默认数值"
-                            onChange={(e) =>
-                              patchItem(item.fieldId, {
-                                suggestedValue: e.target.value,
-                              })
+                            onChange={(nextLabels) =>
+                              patchItem(
+                                item.fieldId,
+                                patchShelfLifeUnits(
+                                  shelfLifeLabelsToUnits(nextLabels, unitOptions)
+                                )
+                              )
                             }
-                            className="h-8.5 w-full min-w-0 rounded border border-slate-200 bg-white px-2 text-xs text-slate-700 focus:outline-none focus:border-primary disabled:bg-slate-50 disabled:cursor-not-allowed"
                           />
-                          <select
-                            disabled={disabled}
-                            value={currentUnit ?? unitOptions[0] ?? "MONTH"}
-                            onChange={(e) =>
-                              patchItem(item.fieldId, {
-                                shelfLifeUnit: e.target.value as ShelfLifeUnit,
-                              })
-                            }
-                            className="h-8.5 shrink-0 rounded border border-slate-200 bg-white px-1.5 text-xs text-slate-700 focus:outline-none focus:border-primary disabled:bg-slate-50 disabled:cursor-not-allowed"
-                          >
-                            {unitNotInWhitelist && currentUnit && (
-                              <option value={currentUnit}>
-                                {UNIT_LABEL[currentUnit]}（白名单已关闭）
-                              </option>
-                            )}
-                            {unitOptions.map((unit) => (
-                              <option key={unit} value={unit}>
-                                {UNIT_LABEL[unit]}
-                              </option>
-                            ))}
-                          </select>
                           <button
                             type="button"
                             disabled={disabled}
@@ -402,9 +415,15 @@ export function InboundCollectEditor({
                         </div>
                         <p
                           className="text-[11px] text-slate-400 leading-tight truncate"
-                          title="固定单位入库只读锁定；建议默认数值自动预填"
+                          title={
+                            activeShelfLifeLabels.length > 0
+                              ? `点击下拉可多选适用单位，当前可选：${activeShelfLifeLabels.join("、")}`
+                              : "请点击上方下拉框勾选至少 1 个适用单位"
+                          }
                         >
-                          固定单位入库只读锁定；建议值自动预填
+                          {activeShelfLifeLabels.length > 0
+                            ? `可选：${activeShelfLifeLabels.join("、")}`
+                            : "请至少勾选 1 个适用单位"}
                         </p>
                       </div>
                     ) : isSelectType ? (
@@ -448,7 +467,7 @@ export function InboundCollectEditor({
                         <div className="flex items-center gap-1.5">
                           <div className="flex-1 h-8.5 rounded border border-slate-200 bg-[#f9fafb] px-3 flex items-center text-xs text-slate-400 select-none shadow-2xs">
                             {renderInputMock(
-                              field?.controlType ?? "单行文本输入框",
+                              field?.controlType ?? "文本输入框",
                               field?.unitLabel
                             )}
                           </div>
