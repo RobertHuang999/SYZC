@@ -55,8 +55,12 @@ export function DocumentManagementTab({
       setImageDoc(doc)
       return
     }
-    if (doc.fileType === "zip" || doc.fileType === "docx") {
-      showToast("该文件格式暂不支持在线预览，请下载后查看")
+    if (doc.fileType === "zip" || doc.fileType === "rar") {
+      showToast("压缩包文件暂不支持在线预览，请下载后查看")
+      return
+    }
+    if (doc.fileType === "doc" || doc.fileType === "docx") {
+      showToast("Word 文档请下载后使用本地办公软件查阅，或转 PDF 在线预览")
       return
     }
     setPdfDoc(doc)
@@ -71,11 +75,18 @@ export function DocumentManagementTab({
     setUploadOpen(true)
   }
 
-  const handleSubmitted = (doc: DocumentItem) => {
+  const handleSubmitted = (docs: DocumentItem[]) => {
     setRefreshKey((prev) => prev + 1)
-    setLastUploadedFlowType(doc.flowType)
-    const stage = getStageOptions(orderType).find((s) => s.value === doc.flowType)
-    showToast(`资料已补充挂载至【${stage?.label ?? doc.flowNodeTitle}】阶段`)
+    const primary = docs[0]
+    if (primary) {
+      setLastUploadedFlowType(primary.flowType)
+      const stage = getStageOptions(orderType).find((s) => s.value === primary.flowType)
+      showToast(
+        docs.length > 1
+          ? `已批量补充 ${docs.length} 份资料至【${stage?.label ?? primary.flowNodeTitle}】阶段`
+          : `资料已补充挂载至【${stage?.label ?? primary.flowNodeTitle}】阶段`
+      )
+    }
   }
 
   return (

@@ -1,16 +1,19 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import {
   AlertCircle,
+  Archive,
   Check,
   ChevronRight,
+  FileImage,
   FileText,
+  Plus,
   Trash2,
   UploadCloud,
   X,
 } from "lucide-react"
-import { addDocumentItem } from "../mock"
+import { addDocumentItems } from "../mock"
 import { getStageOptions } from "../stages"
-import type { DocumentItem } from "../types"
+import type { DocumentItem, DocFileType } from "../types"
 
 type UploadSupplementarySheetProps = {
   open: boolean
@@ -20,34 +23,50 @@ type UploadSupplementarySheetProps = {
   /** 从某个节点「+ 本阶段资料」进来时预选该阶段 */
   defaultFlowType?: string
   onClose: () => void
-  onSubmitted: (doc: DocumentItem) => void
+  onSubmitted: (docs: DocumentItem[]) => void
 }
 
 type PickedFile = {
+  id: string
   name: string
   size: string
-  type: DocumentItem["fileType"]
+  sizeBytes: number
+  type: DocFileType
+  file?: File
 }
 
-/** 演示用的样例盖章件 */
-const SAMPLE_FILE: PickedFile = {
-  name: "20260601_现场补充情况说明函_盖章件.pdf",
-  size: "1.18 MB",
-  type: "pdf",
-}
+const ALLOWED_EXTENSIONS = ["rar", "zip", "doc", "docx", "pdf", "jpg", "jpeg", "png"]
+const MAX_DOC_COUNT = 10
+const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024
 
 function formatSize(bytes: number): string {
   if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(2)} MB`
   return `${Math.max(1, Math.round(bytes / 1024))} KB`
 }
 
-function guessFileType(fileName: string): DocumentItem["fileType"] {
+function guessFileType(fileName: string): DocFileType {
   const ext = fileName.split(".").pop()?.toLowerCase() ?? ""
+  if (ext === "rar") return "rar"
+  if (ext === "zip") return "zip"
+  if (ext === "doc") return "doc"
+  if (ext === "docx") return "docx"
+  if (ext === "pdf") return "pdf"
   if (ext === "jpg" || ext === "jpeg") return "jpg"
   if (ext === "png") return "png"
-  if (ext === "zip") return "zip"
-  if (ext === "docx" || ext === "doc") return "docx"
   return "pdf"
+}
+
+function getMobileFileIcon(type: DocFileType) {
+  if (type === "jpg" || type === "png") {
+    return <FileImage className="size-4 text-emerald-600" />
+  }
+  if (type === "zip" || type === "rar") {
+    return <Archive className="size-4 text-amber-600" />
+  }
+  if (type === "doc" || type === "docx") {
+    return <FileText className="size-4 text-blue-600" />
+  }
+  return <FileText className="size-4 text-rose-600" />
 }
 
 export function UploadSupplementarySheet({
@@ -63,16 +82,17 @@ export function UploadSupplementarySheet({
 
   const [selectedFlowType, setSelectedFlowType] = useState(defaultFlowType)
   const [stagePickerOpen, setStagePickerOpen] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<PickedFile | null>(null)
+  const [selectedFiles, setSelectedFiles] = useState<PickedFile[]>([])
   const [description, setDescription] = useState("")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   // 每次打开时重置表单，并按入口预选阶段
   useEffect(() => {
     if (!open) return
     setSelectedFlowType(defaultFlowType)
     setStagePickerOpen(false)
-    setSelectedFile(null)
+    setSelectedFiles([])
     setDescription("")
     setErrorMessage(null)
   }, [open, defaultFlowType])
@@ -82,31 +102,122 @@ export function UploadSupplementarySheet({
   const matchedStage =
     stageOptions.find((s) => s.value === selectedFlowType) ?? stageOptions[0]
 
+  const processIncomingFiles = (incomingList: FileList | File[]) => {
+    const list = Array.from(incomingList)
+    if (list.length === 0) return
+
+    const validNewFiles: PickedFile[] = []
+    const warnings: string[] = []
+
+    for (const file of list) {
+      const ext = file.name.split(".").pop()?.toLowerCase() || ""
+      if (!ALLOWED_EXTENSIONS.includes(ext)) {
+        warnings.push(`【${file.name}】格式不支持，仅支持 .rar、.zip、.doc、.docx、.pdf、.jpg`)
+        continue
+      }
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        warnings.push(
+          `【${file.name}】超过 50MB 限制（当前 ${(file.size / (1024 * 1024)).toFixed(2)} MB）`
+        )
+        continue
+      }
+      validNewFiles.push({
+        id: `m-file-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        name: file.name,
+        size: formatSize(file.size),
+        sizeBytes: file.size,
+        type: guessFileType(file.name),
+        file,
+      })
+    }
+
+    if (warnings.length > 0) {
+      setErrorMessage(warnings.join("；"))
+    } else {
+      setErrorMessage(null)
+    }
+
+    if (validNewFiles.length > 0) {
+      setSelectedFiles((prev) => {
+        const remaining = MAX_DOC_COUNT - prev.length
+        if (remaining <= 0) {
+          setErrorMessage(`已达到单次最多 ${MAX_DOC_COUNT} 份文件上传限制`)
+          return prev
+        }
+        if (validNewFiles.length > remaining) {
+          setErrorMessage(
+            `本次还能添加 ${remaining} 份（最多 ${MAX_DOC_COUNT} 份），已截取前 ${remaining} 份`
+          )
+          return [...prev, ...validNewFiles.slice(0, remaining)]
+        }
+        return [...prev, ...validNewFiles]
+      })
+    }
+  }
+
+  const handleSimulateSample = () => {
+    setErrorMessage(null)
+    const samples: PickedFile[] = [
+      {
+        id: `m-sample-1-${Date.now()}`,
+        name: "20260601_现场情况更正说明函_盖章件.pdf",
+        size: "1.82 MB",
+        sizeBytes: 1.82 * 1024 * 1024,
+        type: "pdf",
+      },
+      {
+        id: `m-sample-2-${Date.now()}`,
+        name: "现场理货过磅实物抓拍交接照.jpg",
+        size: "3.45 MB",
+        sizeBytes: 3.45 * 1024 * 1024,
+        type: "jpg",
+      },
+      {
+        id: `m-sample-3-${Date.now()}`,
+        name: "权威第三方检验化验单据包.zip",
+        size: "4.20 MB",
+        sizeBytes: 4.2 * 1024 * 1024,
+        type: "zip",
+      },
+    ]
+    setSelectedFiles(samples)
+    if (!description) {
+      setDescription("移动端现场初审后置补充盖章复磅单与交接实物照片凭据归档。")
+    }
+  }
+
   const handleSubmit = () => {
-    if (!selectedFile) {
+    if (selectedFiles.length === 0) {
       setErrorMessage("请先上传附件文件")
       return
     }
 
-    const newDoc = addDocumentItem({
+    if (selectedFiles.length > MAX_DOC_COUNT) {
+      setErrorMessage(`最多支持上传 ${MAX_DOC_COUNT} 份文件`)
+      return
+    }
+
+    const newDocsToInsert = selectedFiles.map((f) => ({
       orderNo,
       approvalId,
       orderType,
       flowType: selectedFlowType,
       flowNodeTitle: matchedStage.label,
-      nature: "ADDITION",
-      category: "OTHER",
-      name: selectedFile.name,
+      nature: "ADDITION" as const,
+      category: "OTHER" as const,
+      name: f.name,
       version: "V1.0",
-      fileType: selectedFile.type,
-      fileSize: selectedFile.size,
+      fileType: f.type,
+      fileSize: f.size,
       uploader: "当前经办人",
       uploaderOrg: "四川享宇科技有限公司",
       description: description.trim(),
       statusText: "有效补充",
-    })
+    }))
 
-    onSubmitted(newDoc)
+    const inserted = addDocumentItems(newDocsToInsert)
+
+    onSubmitted(inserted)
     onClose()
   }
 
@@ -165,174 +276,196 @@ export function UploadSupplementarySheet({
 
           {/* 附件上传 */}
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-[#232D39]">
-              <span className="mr-0.5 text-rose-500">*</span>附件上传
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-[#232D39]">
+                <span className="mr-0.5 text-rose-500">*</span>附件上传
+              </p>
+              <span className="text-[10px] text-[#232D39]/50">
+                已选{" "}
+                <strong
+                  className={
+                    selectedFiles.length >= MAX_DOC_COUNT
+                      ? "text-amber-600"
+                      : "text-blue-600"
+                  }
+                >
+                  {selectedFiles.length}
+                </strong>{" "}
+                / {MAX_DOC_COUNT} 份
+              </span>
+            </div>
 
-            {selectedFile ? (
-              <div className="flex items-center justify-between rounded-lg border border-[#232D39]/10 bg-[#232D39]/[0.02] p-2.5">
-                <div className="flex min-w-0 items-center gap-2">
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded bg-blue-50 text-blue-600">
-                    <FileText className="size-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="truncate text-xs font-medium text-[#232D39]">
-                      {selectedFile.name}
-                    </p>
-                    <p className="text-[10px] text-[#232D39]/45">{selectedFile.size}</p>
-                  </div>
-                </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              accept=".rar,.zip,.doc,.docx,.pdf,.jpg,.jpeg,.png"
+              onChange={(e) => {
+                if (e.target.files) {
+                  processIncomingFiles(e.target.files)
+                  e.target.value = ""
+                }
+              }}
+            />
+
+            {/* 上传触碰框 */}
+            {selectedFiles.length < MAX_DOC_COUNT && (
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-lg border border-dashed border-[#232D39]/20 bg-[#232D39]/[0.02] p-3 text-center cursor-pointer active:bg-blue-50/20"
+              >
+                <UploadCloud className="mx-auto size-5 text-[#232D39]/30" />
+                <p className="mt-1 text-[11px] font-medium text-[#232D39]/70">
+                  点击浏览本地文件或拍照上传
+                </p>
+                <p className="mt-0.5 text-[10px] text-[#232D39]/45 leading-tight">
+                  支持 .rar .zip .doc .docx .pdf .jpg，单份 ≤ 50MB，最多 10 份
+                </p>
+              </div>
+            )}
+
+            {/* 样例与继续添加快捷按钮 */}
+            <div className="flex items-center justify-between pt-0.5">
+              <button
+                type="button"
+                onClick={handleSimulateSample}
+                className="text-[11px] font-medium text-blue-600 active:opacity-70"
+              >
+                载入样例盖章包 (3份)
+              </button>
+
+              {selectedFiles.length > 0 && selectedFiles.length < MAX_DOC_COUNT && (
                 <button
                   type="button"
-                  onClick={() => setSelectedFile(null)}
-                  className="ml-2 inline-flex shrink-0 items-center gap-0.5 text-[10px] text-rose-500 active:opacity-70"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="inline-flex items-center gap-0.5 rounded-full border border-gray-200 px-2 py-0.5 text-[10px] text-gray-700 active:bg-gray-100"
                 >
-                  <Trash2 className="size-3" />
-                  删除
+                  <Plus className="size-3" />
+                  继续添加
                 </button>
-              </div>
-            ) : (
-              <div className="rounded-lg border border-dashed border-[#232D39]/20 bg-[#232D39]/[0.02] p-3.5 text-center">
-                <UploadCloud className="mx-auto size-6 text-[#232D39]/30" />
-                <p className="mt-1 text-[11px] font-medium text-[#232D39]/70">
-                  点击上传或拖拽文件到此处
-                </p>
-                <p className="mt-0.5 text-[10px] text-[#232D39]/40">
-                  支持 PDF、JPG、PNG、ZIP、DOCX，单个不超过 50MB
-                </p>
-                <div className="mt-2.5 flex items-center justify-center gap-2">
-                  <label className="cursor-pointer rounded-full border border-[#232D39]/15 bg-white px-3 py-1.5 text-[11px] font-medium text-[#232D39]/80 active:bg-gray-50">
-                    浏览本地文件
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept=".pdf,.jpg,.jpeg,.png,.zip,.docx"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        if (!file) return
-                        setSelectedFile({
-                          name: file.name,
-                          size: formatSize(file.size),
-                          type: guessFileType(file.name),
-                        })
-                        setErrorMessage(null)
-                      }}
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedFile(SAMPLE_FILE)
-                      if (!description) {
-                        setDescription("现场补充情况说明及加盖公章函件，后置归档存证。")
-                      }
-                      setErrorMessage(null)
-                    }}
-                    className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-600 active:bg-blue-100"
+              )}
+            </div>
+
+            {/* 已选文件清单 */}
+            {selectedFiles.length > 0 && (
+              <div className="space-y-1.5 max-h-44 overflow-y-auto pt-1">
+                {selectedFiles.map((f, i) => (
+                  <div
+                    key={f.id}
+                    className="flex items-center justify-between rounded-lg border border-[#232D39]/10 bg-[#232D39]/[0.02] p-2"
                   >
-                    载入样例盖章件
-                  </button>
-                </div>
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded bg-slate-100">
+                        {getMobileFileIcon(f.type)}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1">
+                          <span className="text-[10px] text-gray-400 font-mono">
+                            {i + 1}.
+                          </span>
+                          <p className="truncate text-xs font-medium text-[#232D39] max-w-[220px]">
+                            {f.name}
+                          </p>
+                        </div>
+                        <p className="text-[9.5px] text-[#232D39]/45">{f.size}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSelectedFiles((prev) => prev.filter((item) => item.id !== f.id))
+                      }
+                      className="ml-2 inline-flex shrink-0 items-center p-1 text-gray-400 hover:text-rose-500 active:opacity-70"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
+          {/* 错误提示 */}
+          {errorMessage && (
+            <div className="flex items-start gap-1 rounded-lg border border-amber-200 bg-amber-50 p-2 text-[11px] text-amber-800">
+              <AlertCircle className="size-3.5 shrink-0 mt-0.5 text-amber-600" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           {/* 补充说明 */}
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-[#232D39]">补充说明（选填）</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-[#232D39]">
+                补充说明 <span className="text-[10px] text-[#232D39]/40">(选填)</span>
+              </p>
+              <span className="text-[10px] text-[#232D39]/35">
+                {description.length}/150
+              </span>
+            </div>
             <textarea
               value={description}
-              onChange={(e) => setDescription(e.target.value.slice(0, 150))}
-              rows={3}
-              placeholder="可输入补充说明备注、出具单位或后置补录原因"
-              className="w-full resize-none rounded-lg border border-[#232D39]/15 px-3 py-2 text-xs text-[#232D39] placeholder:text-[#232D39]/30 focus:border-blue-400 focus:outline-hidden"
+              maxLength={150}
+              rows={2}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="请输入本次后置补充原因、出具单位或特殊情况说明"
+              className="w-full resize-none rounded-lg border border-[#232D39]/15 bg-white p-2.5 text-xs text-[#232D39] outline-none placeholder:text-[#232D39]/30 focus:border-blue-500"
             />
-            <p className="text-right text-[10px] text-[#232D39]/35">
-              {description.length}/150
-            </p>
           </div>
-
-          {errorMessage && (
-            <p className="flex items-center gap-1 text-[11px] text-rose-500">
-              <AlertCircle className="size-3.5 shrink-0" />
-              {errorMessage}
-            </p>
-          )}
         </div>
 
-        {/* 吸底操作 */}
-        <div className="flex shrink-0 gap-2 border-t border-gray-100 px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+        {/* 底部按钮 */}
+        <div className="flex shrink-0 items-center gap-2.5 border-t border-gray-100 p-3">
           <button
             type="button"
             onClick={onClose}
-            className="h-10 flex-1 rounded-lg border border-[#232D39]/20 text-xs font-medium text-[#232D39] active:bg-gray-50"
+            className="flex-1 rounded-xl border border-[#232D39]/15 py-2.5 text-center text-xs font-medium text-[#232D39]/70 active:bg-gray-50"
           >
-            取 消
+            取消
           </button>
           <button
             type="button"
             onClick={handleSubmit}
-            className="h-10 flex-[1.3] rounded-lg bg-blue-600 text-xs font-medium text-white active:bg-blue-700"
+            disabled={selectedFiles.length === 0}
+            className="flex-1 rounded-xl bg-blue-600 py-2.5 text-center text-xs font-medium text-white shadow-xs active:bg-blue-700 disabled:opacity-40"
           >
-            确 定
+            确认上传 ({selectedFiles.length} 份)
           </button>
         </div>
       </div>
 
-      {/* 阶段选择：超过 3 项走底部列表 */}
+      {/* 阶段选择器 */}
       {stagePickerOpen && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center">
+        <div className="fixed inset-0 z-60 flex items-end justify-center">
           <button
             type="button"
-            aria-label="关闭阶段选择"
             onClick={() => setStagePickerOpen(false)}
             className="absolute inset-0 bg-black/40"
           />
-          <div className="relative z-10 w-full max-w-[430px] rounded-t-3xl bg-white p-3 shadow-2xl animate-slide-up">
-            <p className="mb-2 text-center text-xs font-bold text-[#232D39]">
-              选择关联流程阶段
-            </p>
-            <div className="space-y-1.5">
-              {stageOptions.map((stage) => {
-                const active = stage.value === selectedFlowType
-                return (
-                  <button
-                    key={stage.value}
-                    type="button"
-                    onClick={() => {
-                      setSelectedFlowType(stage.value)
-                      setStagePickerOpen(false)
-                    }}
-                    className={`flex w-full items-start justify-between gap-2 rounded-xl px-3 py-2.5 text-left active:scale-[0.99] ${
-                      active
-                        ? "border border-blue-200 bg-blue-50"
-                        : "bg-gray-50/80 active:bg-gray-100"
-                    }`}
-                  >
-                    <span className="min-w-0">
-                      <span
-                        className={`block text-xs font-semibold ${
-                          active ? "text-blue-700" : "text-[#232D39]"
-                        }`}
-                      >
-                        【{stage.label}】
-                      </span>
-                      <span className="mt-0.5 block text-[10px] text-[#232D39]/45">
-                        {stage.hint}
-                      </span>
-                    </span>
-                    {active && <Check className="mt-0.5 size-4 shrink-0 text-blue-600" />}
-                  </button>
-                )
-              })}
+          <div className="relative z-10 w-full max-w-[430px] rounded-t-2xl bg-white p-4 shadow-xl">
+            <h4 className="text-xs font-bold text-[#232D39]">选择关联流程阶段</h4>
+            <div className="mt-2.5 divide-y divide-gray-100">
+              {stageOptions.map((st) => (
+                <button
+                  key={st.value}
+                  type="button"
+                  onClick={() => {
+                    setSelectedFlowType(st.value)
+                    setStagePickerOpen(false)
+                  }}
+                  className="flex w-full items-center justify-between py-2.5 text-left active:bg-gray-50"
+                >
+                  <div>
+                    <p className="text-xs font-medium text-[#232D39]">{st.stageText}</p>
+                    <p className="mt-0.5 text-[10px] text-[#232D39]/45">{st.hint}</p>
+                  </div>
+                  {selectedFlowType === st.value && (
+                    <Check className="size-4 shrink-0 text-blue-600" />
+                  )}
+                </button>
+              ))}
             </div>
-            <button
-              type="button"
-              onClick={() => setStagePickerOpen(false)}
-              className="mt-2.5 w-full rounded-xl bg-gray-100 py-2.5 text-center text-xs font-semibold text-[#232D39]/70 active:bg-gray-200"
-            >
-              取消
-            </button>
           </div>
         </div>
       )}

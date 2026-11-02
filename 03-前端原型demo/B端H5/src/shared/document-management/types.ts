@@ -19,6 +19,8 @@ export const DOC_CATEGORY_LABELS: Record<DocCategory, string> = {
   OTHER: "其他杂项证明",
 }
 
+export type DocFileType = "pdf" | "jpg" | "png" | "zip" | "rar" | "doc" | "docx"
+
 export interface DocumentItem {
   id: string
   orderNo: string
@@ -31,7 +33,7 @@ export interface DocumentItem {
   category: DocCategory
   name: string
   version: string
-  fileType: "pdf" | "jpg" | "png" | "zip" | "docx"
+  fileType: DocFileType
   fileSize: string
   createTime: string
   uploader: string

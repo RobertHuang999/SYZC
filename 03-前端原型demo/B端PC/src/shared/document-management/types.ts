@@ -24,6 +24,8 @@ export const DOC_NATURE_LABELS: Record<DocNature, { label: string; variant: "def
   ADDITION: { label: "事后补充资料", variant: "default" },
 }
 
+export type DocFileType = "pdf" | "jpg" | "png" | "zip" | "rar" | "doc" | "docx"
+
 export interface DocumentItem {
   id: string
   orderNo: string
@@ -35,7 +37,7 @@ export interface DocumentItem {
   category: DocCategory
   name: string
   version: string // "V1.0", "V1.1"
-  fileType: "pdf" | "jpg" | "png" | "zip" | "docx"
+  fileType: DocFileType
   fileSize: string
   createTime: string
   uploader: string

@@ -288,6 +288,20 @@ export function addDocumentItem(
   return newDoc
 }
 
+export function addDocumentItems(
+  docs: Omit<DocumentItem, "id" | "createTime" | "hash">[]
+): DocumentItem[] {
+  const timeText = nowLocalText()
+  const newDocs = docs.map((doc, idx) => ({
+    ...doc,
+    id: `doc-${Date.now()}-${idx}-${Math.floor(Math.random() * 1000)}`,
+    createTime: timeText,
+    hash: Math.random().toString(16).substring(2) + Math.random().toString(16).substring(2),
+  }))
+  documentsState = [...newDocs, ...documentsState]
+  return newDocs
+}
+
 export function buildTimelineSteps(
   orderNo: string,
   orderType: "inbound" | "outbound" = "inbound"

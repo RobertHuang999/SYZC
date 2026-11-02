@@ -9,11 +9,12 @@ import {
   ChevronUp,
   Check,
   FileImage,
+  Archive,
   UploadCloud,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import type { DocumentItem } from "../types"
+import type { DocumentItem, DocFileType } from "../types"
 import { buildTimelineSteps, getDocumentsByOrderNo } from "../mock"
 import { UploadSupplementaryModal } from "./UploadSupplementaryModal"
 import { PdfViewerDialog } from "@/features/inbound-records/components/PdfViewerDialog"
@@ -96,6 +97,14 @@ export function DocumentTimelineView({
   }, [filteredSteps])
 
   const handlePreview = (doc: DocumentItem) => {
+    if (doc.fileType === "rar" || doc.fileType === "zip") {
+      showToast("压缩包文件暂不支持直接在线预览，请点击下载查阅")
+      return
+    }
+    if (doc.fileType === "doc" || doc.fileType === "docx") {
+      showToast("Word 格式凭证请点击下载后通过本地办公软件查阅，或转 PDF 在线预览")
+      return
+    }
     setPreviewPdfName(doc.name)
     setPreviewPdfOpen(true)
   }
@@ -104,9 +113,26 @@ export function DocumentTimelineView({
     showToast(`正在下载文件：${doc.name}`)
   }
 
-  const handleUploadSuccess = (newDoc: DocumentItem) => {
+  const handleUploadSuccess = (newDocs: DocumentItem[]) => {
     setRefreshKey((k) => k + 1)
-    showToast(`已成功补充资料：${newDoc.name}`)
+    if (newDocs.length > 1) {
+      showToast(`已成功批量补充 ${newDocs.length} 份资料`)
+    } else if (newDocs[0]) {
+      showToast(`已成功补充资料：${newDocs[0].name}`)
+    }
+  }
+
+  const renderFileIcon = (fileType: string) => {
+    if (fileType === "jpg" || fileType === "png" || fileType === "jpeg") {
+      return <FileImage className="w-5 h-5 text-emerald-500" />
+    }
+    if (fileType === "zip" || fileType === "rar") {
+      return <Archive className="w-5 h-5 text-amber-500" />
+    }
+    if (fileType === "doc" || fileType === "docx") {
+      return <FileText className="w-5 h-5 text-blue-500" />
+    }
+    return <FileText className="w-5 h-5 text-rose-500" />
   }
 
   return (
@@ -132,18 +158,17 @@ export function DocumentTimelineView({
             />
           </div>
 
-          {allowSupplement ? (
-            <Button
-              size="sm"
-              className="h-8 px-4 text-xs font-medium text-white bg-amber-600 hover:bg-amber-700 transition-colors shadow-2xs cursor-pointer"
-              onClick={() => {
-                setUploadTargetFlowType("2")
-                setUploadOpen(true)
-              }}
-            >
-              上传补充资料
-            </Button>
-          ) : null}
+          <Button
+            size="sm"
+            className="h-8 px-4 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-2xs cursor-pointer"
+            onClick={() => {
+              setUploadTargetFlowType("2")
+              setUploadOpen(true)
+            }}
+          >
+            <Plus className="w-3.5 h-3.5 mr-1" />
+            上传补充资料
+          </Button>
         </div>
       </div>
 
@@ -205,22 +230,20 @@ export function DocumentTimelineView({
 
                   {/* 右侧资料份数、补充本阶段资料按钮与折叠指示 */}
                   <div className="flex items-center gap-2 shrink-0">
-                    {allowSupplement ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        className="h-6 px-2 text-[11px] font-normal text-blue-600 hover:text-blue-700 hover:bg-blue-50/80 cursor-pointer rounded"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setUploadTargetFlowType(step.flowType)
-                          setUploadOpen(true)
-                        }}
-                      >
-                        <Plus className="w-3 h-3 mr-0.5" />
-                        补充本阶段资料
-                      </Button>
-                    ) : null}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 px-2 text-[11px] font-normal text-blue-600 hover:text-blue-700 hover:bg-blue-50/80 cursor-pointer rounded"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setUploadTargetFlowType(step.flowType)
+                        setUploadOpen(true)
+                      }}
+                    >
+                      <Plus className="w-3 h-3 mr-0.5" />
+                      补充本阶段资料
+                    </Button>
 
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs bg-blue-50 text-blue-600 border border-blue-100">
                       <FileText className="w-3 h-3 text-blue-500" />
@@ -240,11 +263,6 @@ export function DocumentTimelineView({
                   <div className="mt-2.5 pl-4 sm:pl-7 space-y-2">
                     {step.documents.length > 0 ? (
                       step.documents.map((doc) => {
-                        const isImage =
-                          doc.fileType.includes("png") ||
-                          doc.fileType.includes("jpg") ||
-                          doc.fileType.includes("jpeg")
-
                         return (
                           <div
                             key={doc.id}
@@ -252,12 +270,8 @@ export function DocumentTimelineView({
                           >
                             {/* 左侧图标与信息 */}
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="w-10 h-10 rounded-lg bg-blue-50/80 text-blue-500 flex items-center justify-center shrink-0">
-                                {isImage ? (
-                                  <FileImage className="w-5 h-5 text-blue-500" />
-                                ) : (
-                                  <FileText className="w-5 h-5 text-blue-500" />
-                                )}
+                              <div className="w-10 h-10 rounded-lg bg-blue-50/80 flex items-center justify-center shrink-0">
+                                {renderFileIcon(doc.fileType)}
                               </div>
 
                               <div className="min-w-0">

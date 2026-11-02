@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import {
+  Archive,
   Check,
   ChevronDown,
   ChevronUp,
@@ -226,12 +227,19 @@ function DocumentCard({
   onDownload: () => void
 }) {
   const isImage = isImageDocument(doc)
+  const isArchive = doc.fileType === "rar" || doc.fileType === "zip"
 
   return (
     <div className="rounded-lg border border-[#232D39]/10 bg-[#232D39]/[0.02] p-2.5">
       <div className="flex items-start gap-2">
-        <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded bg-blue-50 text-blue-600">
-          {isImage ? <FileImage className="size-4" /> : <FileText className="size-4" />}
+        <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded bg-slate-100">
+          {isImage ? (
+            <FileImage className="size-4 text-emerald-600" />
+          ) : isArchive ? (
+            <Archive className="size-4 text-amber-600" />
+          ) : (
+            <FileText className="size-4 text-blue-600" />
+          )}
         </span>
 
         <div className="min-w-0 flex-1">

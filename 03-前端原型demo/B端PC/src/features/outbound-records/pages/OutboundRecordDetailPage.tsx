@@ -867,7 +867,7 @@ export function OutboundRecordDetailPage() {
               orderNo={record.orderNo}
               approvalId="SP202605290001"
               orderType="outbound"
-              allowSupplement={record.type === "普通出库"}
+              allowSupplement={true}
             />
           )}
         </div>
@@ -903,9 +903,13 @@ export function OutboundRecordDetailPage() {
             orderType="outbound"
             defaultFlowType={auditUploadFlowType}
             onClose={() => setAuditUploadFlowType(null)}
-            onSuccess={(newDoc) => {
+            onSuccess={(newDocs) => {
               setDocsRefreshKey((k) => k + 1)
-              showToast(`资料已成功补充挂载至本流程节点：${newDoc.name}`)
+              showToast(
+                newDocs.length > 1
+                  ? `已成功批量补充 ${newDocs.length} 份资料至本流程节点`
+                  : `资料已成功补充挂载至本流程节点：${newDocs[0]?.name}`
+              )
             }}
           />
         )}

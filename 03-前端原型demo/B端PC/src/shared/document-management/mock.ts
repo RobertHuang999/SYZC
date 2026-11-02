@@ -257,6 +257,20 @@ export function addDocumentItem(doc: Omit<DocumentItem, "id" | "createTime" | "h
   return newDoc
 }
 
+export function addDocumentItems(
+  docs: Omit<DocumentItem, "id" | "createTime" | "hash">[]
+): DocumentItem[] {
+  const now = new Date().toISOString().replace("T", " ").substring(0, 19)
+  const newDocs = docs.map((doc, idx) => ({
+    ...doc,
+    id: `doc-${Date.now()}-${idx}-${Math.floor(Math.random() * 1000)}`,
+    createTime: now,
+    hash: Math.random().toString(16).substring(2) + Math.random().toString(16).substring(2),
+  }))
+  documentsState = [...newDocs, ...documentsState]
+  return newDocs
+}
+
 export function buildTimelineSteps(
   orderNo: string,
   _approvalId: string,
