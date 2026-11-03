@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react"
 import { useSearchParams } from "react-router-dom"
 import { Download, FileSpreadsheet } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { WarningListPagination } from "@/components/business/WarningListPrimitives"
 import {
   PrototypeAnnotationProvider,
   PrototypeAnnotationTarget,
@@ -12,29 +13,81 @@ import { InventoryTransactionStatsBar } from "../components/InventoryTransaction
 import { InventoryTransactionFiltersPanel } from "../components/InventoryTransactionFiltersPanel"
 import { InventoryTransactionsTable } from "../components/InventoryTransactionsTable"
 import { TransactionPdfViewerDialog } from "../components/TransactionPdfViewerDialog"
+import { ExportRecordsDialog } from "@/features/inventory-management/components/ExportRecordsDialog"
 import {
   SHARED_INVENTORY_TRANSACTIONS,
+  SHARED_OWNERS,
   type InventoryTransactionRecord,
 } from "@/features/shared/mock/inventory-shared-seed"
+import {
+  GOODS_CASCADE_TREE,
+  WAREHOUSE_CASCADE_TREE,
+  goodsKeyOf,
+  leafKeysOf,
+  warehouseKeyOf,
+} from "@/features/shared/lib/inventory-cascade"
 import type { InventoryTransactionFilters } from "../domain/types"
+import type { ExportRecordItem } from "@/features/inventory-management/domain/types"
+
+const DEFAULT_FILTERS: InventoryTransactionFilters = {
+  orderNo: "",
+  startDate: "",
+  endDate: "",
+  ownerKeyword: "",
+  warehouseKeys: [],
+  goodsKeys: [],
+  businessType: "",
+  createTimeStart: "",
+  createTimeEnd: "",
+  lockedField: null,
+  lockedValue: null,
+}
+
+/** 仓库参数 → 该仓库下全部「库房 · 分区」叶子键 */
+function resolveWarehouseKeys(warehouseName: string): string[] {
+  const node = WAREHOUSE_CASCADE_TREE.find((item) => item.name === warehouseName)
+  return node ? leafKeysOf(node.children) : []
+}
+
+/** 货品参数 → 命中的规格叶子键 */
+function resolveGoodsKeys(keyword: string): string[] {
+  const keys: string[] = []
+  GOODS_CASCADE_TREE.forEach((category) => {
+    category.children?.forEach((variety) => {
+      variety.children?.forEach((spec) => {
+        if (
+          spec.name.includes(keyword) ||
+          keyword.includes(spec.name) ||
+          keyword.includes(variety.name) ||
+          variety.name.includes(keyword)
+        ) {
+          keys.push(spec.id)
+        }
+      })
+    })
+  })
+  return keys
+}
+
+function inDateRange(value: string | undefined, start: string, end: string) {
+  if (!value) return true
+  const date = value.slice(0, 10)
+  if (start && date < start) return false
+  if (end && date > end) return false
+  return true
+}
 
 export const InventoryTransactionsListPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [pdfModalRecord, setPdfModalRecord] = useState<InventoryTransactionRecord | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [exportModalOpen, setExportModalOpen] = useState(false)
+  const [exportRecords, setExportRecords] = useState<ExportRecordItem[]>([])
 
-  const [filters, setFilters] = useState<InventoryTransactionFilters>({
-    startDate: "2026-05-01",
-    endDate: "2026-10-31",
-    direction: "ALL",
-    businessType: "",
-    warehouseName: "",
-    goodsSpec: "",
-    ownerName: "",
-    orderNo: "",
-    lockedField: null,
-    lockedValue: null,
-  })
+  const [draftFilters, setDraftFilters] = useState<InventoryTransactionFilters>(DEFAULT_FILTERS)
+  const [appliedFilters, setAppliedFilters] = useState<InventoryTransactionFilters>(DEFAULT_FILTERS)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   // 监听 URL Query 参数穿透与锁定
   useEffect(() => {
@@ -42,87 +95,82 @@ export const InventoryTransactionsListPage: React.FC = () => {
     const goodsParam = searchParams.get("goods")
     const ownerParam = searchParams.get("owner")
 
+    let next: InventoryTransactionFilters | null = null
     if (whParam) {
-      setFilters((prev) => ({
-        ...prev,
-        warehouseName: whParam,
+      next = {
+        ...DEFAULT_FILTERS,
+        warehouseKeys: resolveWarehouseKeys(whParam),
         lockedField: "warehouse",
         lockedValue: whParam,
-      }))
+      }
     } else if (goodsParam) {
-      setFilters((prev) => ({
-        ...prev,
-        goodsSpec: goodsParam,
+      next = {
+        ...DEFAULT_FILTERS,
+        goodsKeys: resolveGoodsKeys(goodsParam),
         lockedField: "goods",
         lockedValue: goodsParam,
-      }))
+      }
     } else if (ownerParam) {
-      setFilters((prev) => ({
-        ...prev,
-        ownerName: ownerParam,
+      next = {
+        ...DEFAULT_FILTERS,
+        ownerKeyword: ownerParam,
         lockedField: "owner",
         lockedValue: ownerParam,
-      }))
+      }
+    }
+
+    if (next) {
+      setDraftFilters(next)
+      setAppliedFilters(next)
+      setPage(1)
     }
   }, [searchParams])
 
-  const handleUnlock = () => {
-    setSearchParams({})
-    setFilters((prev) => ({
-      ...prev,
-      lockedField: null,
-      lockedValue: null,
-      warehouseName: "",
-      goodsSpec: "",
-      ownerName: "",
-    }))
-  }
-
-  const handleReset = () => {
-    setFilters({
-      startDate: "2026-05-01",
-      endDate: "2026-10-31",
-      direction: "ALL",
-      businessType: "",
-      warehouseName: filters.lockedField === "warehouse" ? filters.lockedValue || "" : "",
-      goodsSpec: filters.lockedField === "goods" ? filters.lockedValue || "" : "",
-      ownerName: filters.lockedField === "owner" ? filters.lockedValue || "" : "",
-      orderNo: "",
-      lockedField: filters.lockedField,
-      lockedValue: filters.lockedValue,
-    })
-  }
-
-  // 数据过滤
   const filteredData = useMemo(() => {
     return SHARED_INVENTORY_TRANSACTIONS.filter((item) => {
-      if (filters.direction !== "ALL" && item.direction !== filters.direction) {
+      if (appliedFilters.orderNo && !item.businessNo.includes(appliedFilters.orderNo)) {
         return false
       }
-      if (filters.businessType && item.businessType !== filters.businessType) {
+      if (!inDateRange(item.businessDate, appliedFilters.startDate, appliedFilters.endDate)) {
         return false
       }
-      if (filters.warehouseName && item.warehouseName !== filters.warehouseName) {
-        return false
+      if (appliedFilters.ownerKeyword) {
+        const keyword = appliedFilters.ownerKeyword.toLowerCase()
+        const owner = SHARED_OWNERS.find((entry) => entry.id === item.ownerId)
+        const ownerHit =
+          item.ownerName.toLowerCase().includes(keyword) ||
+          (owner?.identifier ?? "").toLowerCase().includes(keyword) ||
+          (owner?.identifierMasked ?? "").toLowerCase().includes(keyword)
+        if (!ownerHit) {
+          return false
+        }
       }
       if (
-        filters.goodsSpec &&
-        !item.specification.toLowerCase().includes(filters.goodsSpec.toLowerCase())
+        appliedFilters.warehouseKeys.length > 0 &&
+        !appliedFilters.warehouseKeys.includes(warehouseKeyOf(item))
       ) {
         return false
       }
-      if (filters.ownerName && item.ownerName !== filters.ownerName) {
+      if (
+        appliedFilters.goodsKeys.length > 0 &&
+        !appliedFilters.goodsKeys.includes(goodsKeyOf(item))
+      ) {
         return false
       }
-      if (
-        filters.orderNo &&
-        !item.orderNo.toLowerCase().includes(filters.orderNo.toLowerCase())
-      ) {
+      if (appliedFilters.businessType && item.businessType !== appliedFilters.businessType) {
+        return false
+      }
+      if (!inDateRange(item.createTime, appliedFilters.createTimeStart, appliedFilters.createTimeEnd)) {
         return false
       }
       return true
     })
-  }, [filters])
+  }, [appliedFilters])
+
+  const currentSlice = useMemo(() => {
+    const start = (page - 1) * pageSize
+    return filteredData.slice(start, start + pageSize)
+  }, [filteredData, page, pageSize])
 
   // 看板条指标计算
   const stats = useMemo(() => {
@@ -149,9 +197,65 @@ export const InventoryTransactionsListPage: React.FC = () => {
     }
   }, [filteredData])
 
-  const handleExportExcel = () => {
-    const msg = `【模拟导出 Excel】正在导出库存流水明细清单（共 ${filteredData.length} 笔流水记录）...`
-    setToastMessage(msg)
+  const handleSearch = () => {
+    setAppliedFilters({ ...draftFilters })
+    setPage(1)
+  }
+
+  const handleUnlock = () => {
+    setSearchParams({})
+    setDraftFilters(DEFAULT_FILTERS)
+    setAppliedFilters(DEFAULT_FILTERS)
+    setPage(1)
+  }
+
+  const handleReset = () => {
+    const resetValues: InventoryTransactionFilters = {
+      ...DEFAULT_FILTERS,
+      lockedField: appliedFilters.lockedField,
+      lockedValue: appliedFilters.lockedValue,
+    }
+    if (appliedFilters.lockedField === "warehouse") {
+      resetValues.warehouseKeys = resolveWarehouseKeys(appliedFilters.lockedValue || "")
+    }
+    if (appliedFilters.lockedField === "goods") {
+      resetValues.goodsKeys = resolveGoodsKeys(appliedFilters.lockedValue || "")
+    }
+    if (appliedFilters.lockedField === "owner") {
+      resetValues.ownerKeyword = appliedFilters.lockedValue || ""
+    }
+    setDraftFilters(resetValues)
+    setAppliedFilters(resetValues)
+    setPage(1)
+  }
+
+  const handleBatchExport = () => {
+    const now = new Date()
+    const pad = (value: number) => String(value).padStart(2, "0")
+    const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+    const time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`
+    const compact = `${date.replace(/-/g, "")}${time.replace(/:/g, "")}`
+
+    const record: ExportRecordItem = {
+      id: `EXP-${compact}`,
+      fileName: `库存流水-${compact}.xlsx`,
+      viewDimension: "库存流水",
+      filterSummary: `筛选后共 ${filteredData.length} 笔流水`,
+      recordCount: filteredData.length,
+      fileSize: "96.2 KB",
+      creator: "李晓云",
+      creatorOrg: "四川享宇科技有限公司",
+      createTime: `${date} ${time}`,
+      status: "SUCCESS",
+      downloadUrl: "#",
+    }
+    setExportRecords((current) => [record, ...current])
+    setToastMessage(`已提交异步导出任务【${record.fileName}】，请点击「导出记录」查看并下载！`)
+    setTimeout(() => setToastMessage(null), 4000)
+  }
+
+  const handleExportRecord = (record: InventoryTransactionRecord) => {
+    setToastMessage(`正在导出单据 ${record.businessNo} 的堆放 / 扣减明细…`)
     setTimeout(() => setToastMessage(null), 3000)
   }
 
@@ -163,32 +267,18 @@ export const InventoryTransactionsListPage: React.FC = () => {
       <div className="space-y-4 p-6">
         {/* Toast 提示 */}
         {toastMessage && (
-          <div className="fixed top-16 right-8 z-50 rounded-lg bg-slate-900 text-white px-4 py-2.5 shadow-xl text-xs flex items-center gap-2 border border-slate-700 animate-in fade-in slide-in-from-top-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            <span>{toastMessage}</span>
+          <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
+            {toastMessage}
           </div>
         )}
 
-        {/* 顶部标题与导出按钮 */}
+        {/* 顶部标题 */}
         <PrototypeAnnotationTarget annotationIds={["tx-list-page"]}>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
-            <div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-                库存流水
-              </h1>
-              <p className="text-xs text-slate-500 mt-1">
-                仓储业务统一出入库单据合并台账与进出存全息追溯中枢，19 种业务流向全息归集。
-              </p>
-            </div>
-
-            <Button
-              size="sm"
-              onClick={handleExportExcel}
-              className="h-8 text-xs gap-1.5 bg-primary text-white"
-            >
-              <Download className="h-3.5 w-3.5" />
-              导出明细 Excel
-            </Button>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">库存流水</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              仓储业务统一出入库单据合并台账与进出存全息追溯中枢，19 种业务流向全息归集。
+            </p>
           </div>
         </PrototypeAnnotationTarget>
 
@@ -204,21 +294,61 @@ export const InventoryTransactionsListPage: React.FC = () => {
 
         {/* 筛选区与穿透锁定 */}
         <PrototypeAnnotationTarget annotationIds={["tx-penetrate-lock"]}>
-          <InventoryTransactionFiltersPanel
-            filters={filters}
-            onChange={setFilters}
-            onReset={handleReset}
-            onUnlock={handleUnlock}
-            onSearch={() => {}}
-          />
+          <form
+            onSubmit={(event) => {
+              event.preventDefault()
+              handleSearch()
+            }}
+          >
+            <InventoryTransactionFiltersPanel
+              filters={draftFilters}
+              onChange={setDraftFilters}
+              onReset={handleReset}
+              onUnlock={handleUnlock}
+              onSearch={handleSearch}
+              extraActions={
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setExportModalOpen(true)}
+                  >
+                    <FileSpreadsheet className="size-4" />
+                    导出记录
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleBatchExport}>
+                    <Download className="size-4" />
+                    批量导出
+                  </Button>
+                </>
+              }
+            />
+          </form>
         </PrototypeAnnotationTarget>
 
         {/* 流水表格 */}
         <PrototypeAnnotationTarget annotationIds={["tx-table", "tx-pdf-preview"]}>
-          <InventoryTransactionsTable
-            data={filteredData}
-            onViewPdf={(rec) => setPdfModalRecord(rec)}
-          />
+          <div className="space-y-3">
+            <InventoryTransactionsTable
+              data={currentSlice}
+              page={page}
+              pageSize={pageSize}
+              onViewPdf={(rec) => setPdfModalRecord(rec)}
+              onExportRecord={handleExportRecord}
+            />
+
+            <WarningListPagination
+              total={filteredData.length}
+              page={page}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize)
+                setPage(1)
+              }}
+              totalLabel="笔流水"
+            />
+          </div>
         </PrototypeAnnotationTarget>
 
         {/* 单据 PDF 预览弹窗 */}
@@ -227,8 +357,14 @@ export const InventoryTransactionsListPage: React.FC = () => {
           onOpenChange={(open) => !open && setPdfModalRecord(null)}
           record={pdfModalRecord}
         />
+
+        {/* 导出记录弹窗 */}
+        <ExportRecordsDialog
+          open={exportModalOpen}
+          onOpenChange={setExportModalOpen}
+          records={exportRecords}
+        />
       </div>
     </PrototypeAnnotationProvider>
   )
 }
-

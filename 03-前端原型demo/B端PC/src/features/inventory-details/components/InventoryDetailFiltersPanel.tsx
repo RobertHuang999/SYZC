@@ -1,7 +1,9 @@
-import React, { useState } from "react"
-import { Search, RotateCcw, ChevronDown, ChevronUp, Lock, Unlock } from "lucide-react"
+import React, { useState, type ReactNode } from "react"
+import { Lock, Unlock } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -9,7 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { SHARED_WAREHOUSES, SHARED_GOODS, SHARED_OWNERS } from "@/features/shared/mock/inventory-shared-seed"
+import { WarningFilterHeader } from "@/components/business/WarningListPrimitives"
+import { cn } from "@/lib/utils"
+import {
+  CREATOR_OPTIONS,
+  GOODS_STATUS_OPTIONS,
+  INBOUND_TYPE_OPTIONS,
+} from "@/features/shared/mock/inventory-shared-seed"
+import {
+  GOODS_CASCADE_TREE,
+  WAREHOUSE_CASCADE_TREE,
+} from "@/features/shared/lib/inventory-cascade"
+import { InventoryCascadeSelect } from "@/features/shared/components/InventoryCascadeSelect"
 import type { InventoryDetailFilters } from "../domain/types"
 
 interface InventoryDetailFiltersPanelProps {
@@ -18,7 +31,17 @@ interface InventoryDetailFiltersPanelProps {
   onReset: () => void
   onUnlock: () => void
   onSearch: () => void
+  /** 与重置 / 查询同排的额外操作（导出记录、批量导出） */
+  extraActions?: ReactNode
 }
+
+const LOCK_LABEL: Record<string, string> = {
+  warehouse: "实体仓库",
+  goods: "货品",
+  owner: "存货权属方",
+}
+
+const ALL = "ALL"
 
 export const InventoryDetailFiltersPanel: React.FC<InventoryDetailFiltersPanelProps> = ({
   filters,
@@ -26,236 +49,259 @@ export const InventoryDetailFiltersPanel: React.FC<InventoryDetailFiltersPanelPr
   onReset,
   onUnlock,
   onSearch,
+  extraActions,
 }) => {
   const [expanded, setExpanded] = useState(false)
 
-  const handleFieldChange = (field: keyof InventoryDetailFilters, value: string) => {
-    onChange({
-      ...filters,
-      [field]: value,
-    })
+  const patch = (partial: Partial<InventoryDetailFilters>) => {
+    onChange({ ...filters, ...partial })
   }
 
-  const categoryOptions = Array.from(new Set(SHARED_GOODS.map((g) => g.category)))
-
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm mb-4">
-      {/* 穿透锁定提示横幅 */}
-      {filters.lockedField && (
-        <div className="flex items-center justify-between bg-sky-50 border border-sky-200 rounded-md px-3 py-2 text-xs text-sky-800 mb-3">
-          <div className="flex items-center gap-1.5 font-medium">
-            <Lock className="h-4 w-4 text-sky-600 shrink-0" />
-            <span>
-              已从存货管理锁定【
-              {filters.lockedField === "warehouse"
-                ? "实体仓库"
-                : filters.lockedField === "goods"
-                ? "货品规格"
-                : "存货权属方"}
-              】：
-            </span>
-            <strong className="text-sky-900 bg-white/80 px-1.5 py-0.5 rounded border border-sky-300">
-              {filters.lockedValue}
-            </strong>
-            <span className="text-slate-500 font-normal">（当前仅展示该主体下的具体货位明细）</span>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onUnlock}
-            className="h-6 px-2 text-xs text-sky-700 hover:text-sky-900 hover:bg-sky-100 gap-1"
-          >
-            <Unlock className="h-3 w-3" />
-            解除锁定
-          </Button>
-        </div>
-      )}
-
-      {/* 默认前 4 项栅格 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
-        {/* 1. 监管仓库（若锁定则 disabled） */}
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-slate-600">实体监管仓库</label>
-            {filters.lockedField === "warehouse" && (
-              <span className="text-[10px] text-sky-600 flex items-center gap-0.5">
-                <Lock className="h-2.5 w-2.5" /> 锁定
+    <Card>
+      <CardContent className="space-y-4 pt-4">
+        {/* 穿透锁定提示横幅 */}
+        {filters.lockedField && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-800">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Lock className="size-4 shrink-0 text-sky-600" />
+              <span>已从存货管理锁定【{LOCK_LABEL[filters.lockedField] ?? "筛选条件"}】：</span>
+              <span className="rounded border border-sky-300 bg-background px-1.5 py-0.5 font-medium">
+                {filters.lockedValue}
               </span>
-            )}
+              <span className="text-muted-foreground">（当前仅展示该主体下的具体货位明细）</span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={onUnlock} className="text-sky-700">
+              <Unlock className="size-4" />
+              解除锁定
+            </Button>
           </div>
-          <Select
-            disabled={filters.lockedField === "warehouse"}
-            value={filters.warehouseName || "ALL"}
-            onValueChange={(val) =>
-              handleFieldChange("warehouseName", !val || val === "ALL" ? "" : val)
-            }
-          >
-            <SelectTrigger className="h-9 text-xs">
-              <SelectValue placeholder="全部仓库" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">全部仓库</SelectItem>
-              {SHARED_WAREHOUSES.map((wh) => (
-                <SelectItem key={wh.id} value={wh.name}>
-                  {wh.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        )}
 
-        {/* 2. 货品规格/品类 */}
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-slate-600">货品大类</label>
-            {filters.lockedField === "goods" && (
-              <span className="text-[10px] text-sky-600 flex items-center gap-0.5">
-                <Lock className="h-2.5 w-2.5" /> 锁定
-              </span>
-            )}
-          </div>
-          <Select
-            disabled={filters.lockedField === "goods"}
-            value={filters.goodsCategory || "ALL"}
-            onValueChange={(val) =>
-              handleFieldChange("goodsCategory", !val || val === "ALL" ? "" : val)
-            }
-          >
-            <SelectTrigger className="h-9 text-xs">
-              <SelectValue placeholder="全部大类" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">全部大类</SelectItem>
-              {categoryOptions.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <WarningFilterHeader
+          expanded={expanded}
+          onToggle={() => setExpanded((current) => !current)}
+          onReset={onReset}
+          onSearch={onSearch}
+          extraActions={extraActions}
+        />
 
-        {/* 3. 权属货主 */}
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-slate-600">权属货主</label>
-            {filters.lockedField === "owner" && (
-              <span className="text-[10px] text-sky-600 flex items-center gap-0.5">
-                <Lock className="h-2.5 w-2.5" /> 锁定
-              </span>
-            )}
-          </div>
-          <Select
-            disabled={filters.lockedField === "owner"}
-            value={filters.ownerName || "ALL"}
-            onValueChange={(val) =>
-              handleFieldChange("ownerName", !val || val === "ALL" ? "" : val)
-            }
-          >
-            <SelectTrigger className="h-9 text-xs">
-              <SelectValue placeholder="全部货主" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">全部货主</SelectItem>
-              {SHARED_OWNERS.map((own) => (
-                <SelectItem key={own.id} value={own.name}>
-                  {own.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* 4. 存货状态 */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-slate-600">存货状态</label>
-          <Select
-            value={filters.status || "ALL"}
-            onValueChange={(val) =>
-              handleFieldChange("status", !val || val === "ALL" ? "" : val)
-            }
-          >
-            <SelectTrigger className="h-9 text-xs">
-              <SelectValue placeholder="全部状态" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">全部状态</SelectItem>
-              <SelectItem value="NORMAL">正常在库</SelectItem>
-              <SelectItem value="FROZEN">审批冻结中</SelectItem>
-              <SelectItem value="EMPTY">已出库</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* 展开区域：条码、规格输入 */}
-      {expanded && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-center mt-3 pt-3 border-t border-slate-100">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-slate-600">存货条码编号</label>
+        <div className="grid gap-4 lg:grid-cols-4">
+          <FilterField label="入库单号">
             <Input
               type="text"
-              placeholder="输入存货条码精准搜索"
-              value={filters.barcode}
-              onChange={(e) => handleFieldChange("barcode", e.target.value)}
-              className="h-9 text-xs"
+              placeholder="请输入入库单号"
+              value={filters.inboundOrderNo}
+              onChange={(e) => patch({ inboundOrderNo: e.target.value })}
+              onKeyDown={(e) => e.key === "Enter" && onSearch()}
             />
-          </div>
+          </FilterField>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-slate-600">货品规格模糊搜索</label>
+          <FilterField label="入库日期" className="lg:col-span-2">
+            <DateRange
+              start={filters.inboundDateStart}
+              end={filters.inboundDateEnd}
+              onStartChange={(value) => patch({ inboundDateStart: value })}
+              onEndChange={(value) => patch({ inboundDateEnd: value })}
+              startLabel="入库开始日期"
+              endLabel="入库结束日期"
+            />
+          </FilterField>
+
+          <FilterField label="货主名称 / 标识" locked={filters.lockedField === "owner"}>
             <Input
               type="text"
-              placeholder="输入规格型号搜索"
-              value={filters.goodsSpec}
-              onChange={(e) => handleFieldChange("goodsSpec", e.target.value)}
-              className="h-9 text-xs"
+              placeholder="请输入货主名称/标识"
+              disabled={filters.lockedField === "owner"}
+              value={filters.ownerKeyword}
+              onChange={(e) => patch({ ownerKeyword: e.target.value })}
+              onKeyDown={(e) => e.key === "Enter" && onSearch()}
             />
-          </div>
-        </div>
-      )}
+          </FilterField>
 
-      {/* 底部按钮栏 */}
-      <div className="flex items-center justify-between mt-3 pt-2">
-        <button
-          type="button"
-          onClick={() => setExpanded(!expanded)}
-          className="text-xs text-primary flex items-center gap-1 hover:underline cursor-pointer"
-        >
-          {expanded ? (
+          {expanded && (
             <>
-              <ChevronUp className="h-3.5 w-3.5" />
-              收起筛选
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-3.5 w-3.5" />
-              展开高级筛选
+          <FilterField label="入库类型">
+            <Select
+              value={filters.inboundType || ALL}
+              onValueChange={(value) => patch({ inboundType: !value || value === ALL ? "" : value })}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="请选择入库类型">
+                  {filters.inboundType || "全部"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>全部</SelectItem>
+                {INBOUND_TYPE_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FilterField>
+
+              <FilterField label="仓库名称" locked={filters.lockedField === "warehouse"}>
+                <InventoryCascadeSelect
+                  tree={WAREHOUSE_CASCADE_TREE}
+                  selectedKeys={filters.warehouseKeys}
+                  onChange={(keys) => patch({ warehouseKeys: keys })}
+                  disabled={filters.lockedField === "warehouse"}
+                  placeholder={
+                    filters.lockedField === "warehouse" && filters.lockedValue
+                      ? (filters.lockedValue ?? "")
+                      : "请选择仓库"
+                  }
+                  levelHint="实体仓库 · 库房 · 分区"
+                />
+              </FilterField>
+
+              <FilterField label="货品名称" locked={filters.lockedField === "goods"}>
+                <InventoryCascadeSelect
+                  tree={GOODS_CASCADE_TREE}
+                  selectedKeys={filters.goodsKeys}
+                  onChange={(keys) => patch({ goodsKeys: keys })}
+                  disabled={filters.lockedField === "goods"}
+                  placeholder={
+                    filters.lockedField === "goods" && filters.lockedValue
+                      ? (filters.lockedValue ?? "")
+                      : "请选择货品"
+                  }
+                  levelHint="货品大类 · 品类 · 规格"
+                />
+              </FilterField>
+
+              <FilterField label="货品状态">
+                <Select
+                  value={filters.goodsStatus || ALL}
+                  onValueChange={(value) =>
+                    patch({ goodsStatus: !value || value === ALL ? "" : value })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="请选择货品状态">
+                      {filters.goodsStatus || "全部"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={ALL}>全部</SelectItem>
+                    {GOODS_STATUS_OPTIONS.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FilterField>
+
+              <FilterField label="制单人">
+                <Select
+                  value={filters.creator || ALL}
+                  onValueChange={(value) => patch({ creator: !value || value === ALL ? "" : value })}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="请选择制单人">
+                      {filters.creator || "全部"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={ALL}>全部</SelectItem>
+                    {CREATOR_OPTIONS.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FilterField>
+
+              <FilterField label="制单时间" className="lg:col-span-2">
+                <DateRange
+                  start={filters.createTimeStart}
+                  end={filters.createTimeEnd}
+                  onStartChange={(value) => patch({ createTimeStart: value })}
+                  onEndChange={(value) => patch({ createTimeEnd: value })}
+                  startLabel="制单开始日期"
+                  endLabel="制单结束日期"
+                />
+              </FilterField>
+
+              <div className="flex items-end pb-2">
+                <label className="flex w-fit cursor-pointer items-center gap-2 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={filters.onlyInStock}
+                    onChange={(event) => patch({ onlyInStock: event.target.checked })}
+                  />
+                  仅查看有库存的
+                </label>
+              </div>
             </>
           )}
-        </button>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onReset}
-            className="h-8 text-xs gap-1"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            重置
-          </Button>
-          <Button
-            size="sm"
-            onClick={onSearch}
-            className="h-8 text-xs gap-1 bg-primary text-white"
-          >
-            <Search className="h-3.5 w-3.5" />
-            查询
-          </Button>
         </div>
-      </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function DateRange({
+  start,
+  end,
+  onStartChange,
+  onEndChange,
+  startLabel,
+  endLabel,
+}: {
+  start: string
+  end: string
+  onStartChange: (value: string) => void
+  onEndChange: (value: string) => void
+  startLabel: string
+  endLabel: string
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <Input
+        type="date"
+        aria-label={startLabel}
+        value={start}
+        onChange={(event) => onStartChange(event.target.value)}
+      />
+      <span className="shrink-0 text-sm text-muted-foreground">至</span>
+      <Input
+        type="date"
+        aria-label={endLabel}
+        value={end}
+        onChange={(event) => onEndChange(event.target.value)}
+      />
     </div>
   )
 }
 
+function FilterField({
+  label,
+  children,
+  className,
+  locked,
+}: {
+  label: string
+  children: ReactNode
+  className?: string
+  locked?: boolean
+}) {
+  return (
+    <div className={cn("space-y-2", className)}>
+      <div className="flex items-center justify-between">
+        <Label>{label}</Label>
+        {locked && (
+          <span className="inline-flex items-center gap-0.5 text-muted-foreground">
+            <Lock className="size-3" />
+            锁定
+          </span>
+        )}
+      </div>
+      {children}
+    </div>
+  )
+}

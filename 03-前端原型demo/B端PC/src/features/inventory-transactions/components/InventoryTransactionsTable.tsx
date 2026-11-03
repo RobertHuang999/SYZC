@@ -1,29 +1,58 @@
-import React, { useState } from "react"
+import React from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowDownLeft, ArrowUpRight, FileText, Copy, Check } from "lucide-react"
-import type { InventoryTransactionRecord } from "@/features/shared/mock/inventory-shared-seed"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { TableDateTimeCell } from "@/shared/components/TableCells"
+import {
+  TableRowActionPanel,
+  TABLE_ROW_ACTION_COL_TOTAL_PX,
+  type TableRowActionItem,
+} from "@/shared/components/TableRowActionPanel"
+import { InboundDocNoCell } from "@/features/inbound-records/components/InboundDocNoCell"
+import {
+  SHARED_OWNERS,
+  type InventoryTransactionRecord,
+} from "@/features/shared/mock/inventory-shared-seed"
 
 interface InventoryTransactionsTableProps {
   data: InventoryTransactionRecord[]
   onViewPdf: (record: InventoryTransactionRecord) => void
+  onExportRecord: (record: InventoryTransactionRecord) => void
+  page?: number
+  pageSize?: number
+}
+
+const NUMERIC = "text-right tabular-nums"
+const STICKY_ACTION_CLASS =
+  "sticky right-0 z-10 border-l border-border/60 bg-card px-2 py-2 text-center group-hover:bg-[#f7faff]"
+
+function formatQuantity(value: number) {
+  return value.toLocaleString("zh-CN", { maximumFractionDigits: 4 })
 }
 
 export const InventoryTransactionsTable: React.FC<InventoryTransactionsTableProps> = ({
   data,
   onViewPdf,
+  onExportRecord,
+  page = 1,
+  pageSize = 10,
 }) => {
   const navigate = useNavigate()
-  const [copiedNo, setCopiedNo] = useState<string | null>(null)
 
-  const handleCopyNo = (e: React.MouseEvent, no: string) => {
-    e.stopPropagation()
-    navigator.clipboard?.writeText(no)
-    setCopiedNo(no)
-    setTimeout(() => setCopiedNo(null), 2000)
+  const actionColStyle = {
+    width: TABLE_ROW_ACTION_COL_TOTAL_PX,
+    minWidth: TABLE_ROW_ACTION_COL_TOTAL_PX,
+    maxWidth: TABLE_ROW_ACTION_COL_TOTAL_PX,
   }
 
   // 单据穿透跳转
-  const handleGoOrder = (record: InventoryTransactionRecord) => {
+  const goOrder = (record: InventoryTransactionRecord) => {
     if (record.direction === "IN") {
       navigate(`/仓储/入库管理/入库记录/详情/${record.orderNo}`)
     } else {
@@ -32,166 +61,118 @@ export const InventoryTransactionsTable: React.FC<InventoryTransactionsTableProp
   }
 
   return (
-    <div className="relative overflow-x-auto rounded-lg border border-slate-200 bg-white">
-      <table className="w-full text-left text-xs border-collapse">
-        <thead className="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-          <tr className="h-11">
-            <th className="px-3 py-2 w-10 text-center">序号</th>
-            <th className="px-4 py-2 min-w-[150px]">流水编号</th>
-            <th className="px-3 py-2 min-w-[80px] text-center">流向</th>
-            <th className="px-3 py-2 min-w-[100px]">细分业务类型</th>
-            <th className="px-4 py-2 min-w-[190px]">关联业务单据号</th>
-            <th className="px-4 py-2 min-w-[200px]">货品规格名称</th>
-            <th className="px-4 py-2 min-w-[110px] text-right">变动数量(吨)</th>
-            <th className="px-4 py-2 min-w-[110px] text-right">结存余量(吨)</th>
-            <th className="px-4 py-2 min-w-[170px]">实体监管仓</th>
-            <th className="px-4 py-2 min-w-[170px]">存货权属货主</th>
-            <th className="px-4 py-2 min-w-[110px]">业务日期</th>
-            <th className="px-4 py-2 w-[140px] text-center sticky right-0 bg-slate-100 shadow-[-4px_0_8px_rgba(0,0,0,0.05)] z-20">
-              操作
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {data.length === 0 ? (
-            <tr>
-              <td colSpan={12} className="h-32 text-center text-slate-400">
-                暂无匹配出入库流水数据
-              </td>
-            </tr>
-          ) : (
-            data.map((row, idx) => (
-              <tr
-                key={row.id}
-                className="group h-[72px] hover:bg-slate-50/80 transition-colors"
-              >
-                <td className="px-3 py-2 text-center text-slate-400">{idx + 1}</td>
+    <Table className="min-w-[1780px]">
+      <TableHeader>
+        <TableRow className="hover:bg-transparent">
+          <TableHead className="w-16 min-w-16 text-center">序号</TableHead>
+          <TableHead className="w-[190px] min-w-[190px]">业务单号</TableHead>
+          <TableHead className="w-[160px] min-w-[160px]">业务时间</TableHead>
+          <TableHead className="w-[120px] min-w-[120px]">业务类型</TableHead>
+          <TableHead className="w-[160px] min-w-[160px]">关联单据</TableHead>
+          <TableHead className="w-[190px] min-w-[190px]">货主</TableHead>
+          <TableHead className="w-[180px] min-w-[180px]">货物名称</TableHead>
+          <TableHead className={`${NUMERIC} w-[110px] min-w-[110px]`}>数量</TableHead>
+          <TableHead className="w-[130px] min-w-[130px]">仓库</TableHead>
+          <TableHead className="w-[100px] min-w-[100px]">制单人</TableHead>
+          <TableHead className="w-[160px] min-w-[160px]">制单时间</TableHead>
+          <TableHead className={STICKY_ACTION_CLASS} style={actionColStyle}>
+            操作
+          </TableHead>
+        </TableRow>
+      </TableHeader>
 
-                {/* 流水号 */}
-                <td className="px-4 py-2 font-mono text-slate-800">
-                  {row.transactionNo}
-                </td>
+      <TableBody>
+        {data.length === 0 ? (
+          <TableRow className="hover:bg-transparent">
+            <TableCell colSpan={12} className="h-32 text-center text-muted-foreground">
+              暂无匹配出入库流水数据
+            </TableCell>
+          </TableRow>
+        ) : (
+          data.map((row, index) => {
+            const owner = SHARED_OWNERS.find((entry) => entry.id === row.ownerId)
+            const actions: TableRowActionItem[] = [
+              {
+                key: "detail",
+                label: "详情",
+                title: "查看关联业务单据详情",
+                onClick: () => goOrder(row),
+              },
+              {
+                key: "doc",
+                label: "单据下载",
+                title: "下载带章标准 PDF 单据凭证",
+                onClick: () => onViewPdf(row),
+              },
+              {
+                key: "record",
+                label: "下载记录",
+                title: "导出该单据的底层堆放 / 扣减明细",
+                onClick: () => onExportRecord(row),
+              },
+            ]
 
-                {/* 流向 Tag */}
-                <td className="px-3 py-2 text-center">
-                  {row.direction === "IN" ? (
-                    <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      <ArrowDownLeft className="h-3 w-3" />
-                      入库
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-                      <ArrowUpRight className="h-3 w-3" />
-                      出库
-                    </span>
-                  )}
-                </td>
+            return (
+              <TableRow key={row.id} className="group h-[72px]">
+                <TableCell className="text-center text-muted-foreground">
+                  {(page - 1) * pageSize + index + 1}
+                </TableCell>
 
-                {/* 细分业务类型 */}
-                <td className="px-3 py-2">
-                  <span className="inline-block px-1.5 py-0.5 rounded text-[11px] bg-slate-100 text-slate-700">
-                    {row.businessType}
-                  </span>
-                </td>
+                <TableCell>
+                  <InboundDocNoCell
+                    docNo={row.businessNo}
+                    linkTo={
+                      row.direction === "IN"
+                        ? `/仓储/入库管理/入库记录/详情/${row.orderNo}`
+                        : `/仓储/出库管理/出库记录/详情/${row.orderNo}`
+                    }
+                    wrap
+                  />
+                </TableCell>
 
-                {/* 关联单据号（支持 Deep link 穿透与悬停复制） */}
-                <td className="px-4 py-2">
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => handleGoOrder(row)}
-                      className="font-mono text-primary font-medium hover:underline text-left break-all cursor-pointer"
-                      title="点击直接穿透到单据详情"
-                    >
-                      {row.orderNo}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => handleCopyNo(e, row.orderNo)}
-                      className="text-slate-400 hover:text-slate-600 cursor-pointer p-0.5 shrink-0"
-                      title="复制单据号"
-                    >
-                      {copiedNo === row.orderNo ? (
-                        <Check className="h-3.5 w-3.5 text-emerald-600" />
-                      ) : (
-                        <Copy className="h-3.5 w-3.5" />
-                      )}
-                    </button>
+                <TableCell>
+                  <TableDateTimeCell value={row.businessDate} stackedPlain />
+                </TableCell>
+
+                <TableCell className="text-foreground">{row.businessType}</TableCell>
+
+                <TableCell className="whitespace-normal break-all text-muted-foreground">
+                  {row.relatedId || "——"}
+                </TableCell>
+
+                <TableCell>
+                  <div className="text-foreground">{row.ownerName}</div>
+                  <div className="mt-0.5 text-[13px] text-muted-foreground">
+                    {owner?.identifierMasked ?? "——"}
                   </div>
-                  <div className="text-[11px] text-slate-400">经办：{row.operatorName}</div>
-                </td>
+                </TableCell>
 
-                {/* 货品全称 */}
-                <td className="px-4 py-2">
-                  <div className="font-semibold text-slate-900 leading-snug">
+                <TableCell>
+                  <div className="whitespace-normal break-words text-foreground">
                     {row.specification}
                   </div>
-                  <div className="text-[11px] text-slate-500">
-                    {row.category} / {row.variety}
-                  </div>
-                </td>
+                </TableCell>
 
-                {/* 变动数量 */}
-                <td className="px-4 py-2 text-right">
-                  <span
-                    className={`font-bold ${
-                      row.direction === "IN" ? "text-emerald-600" : "text-rose-600"
-                    }`}
-                  >
-                    {row.direction === "IN"
-                      ? `+${row.changeQuantity.toFixed(3)}`
-                      : `-${row.changeQuantity.toFixed(3)}`}
-                  </span>
-                </td>
+                <TableCell className={`${NUMERIC} text-foreground`}>
+                  {formatQuantity(row.changeQuantity)}
+                  {row.unit}
+                </TableCell>
 
-                {/* 结存数量 */}
-                <td className="px-4 py-2 text-right font-medium text-slate-900">
-                  {row.balanceQuantity.toFixed(3)}
-                </td>
+                <TableCell className="text-foreground">{row.warehouseName}</TableCell>
+                <TableCell className="text-foreground">{row.createByName}</TableCell>
 
-                {/* 仓库 */}
-                <td className="px-4 py-2 text-slate-800">
-                  {row.warehouseName}
-                </td>
+                <TableCell>
+                  <TableDateTimeCell value={row.createTime} stackedPlain />
+                </TableCell>
 
-                {/* 货主 */}
-                <td className="px-4 py-2 text-slate-800">
-                  {row.ownerName}
-                </td>
-
-                {/* 业务发生日期 */}
-                <td className="px-4 py-2 text-slate-600">
-                  {row.businessDate}
-                </td>
-
-                {/* Sticky 操作列 */}
-                <td className="px-4 py-2 text-center sticky right-0 bg-white group-hover:bg-slate-50 transition-colors shadow-[-4px_0_8px_rgba(0,0,0,0.05)] z-10">
-                  <div className="flex items-center justify-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleGoOrder(row)}
-                      className="text-primary hover:underline font-medium inline-flex items-center gap-0.5 cursor-pointer"
-                    >
-                      <span>单据详情</span>
-                      <ArrowUpRight className="h-3 w-3" />
-                    </button>
-                    <span className="text-slate-300">|</span>
-                    <button
-                      type="button"
-                      onClick={() => onViewPdf(row)}
-                      className="text-primary hover:underline font-medium inline-flex items-center gap-0.5 cursor-pointer"
-                    >
-                      <FileText className="h-3 w-3" />
-                      <span>凭证PDF</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+                <TableCell className={STICKY_ACTION_CLASS} style={actionColStyle}>
+                  <TableRowActionPanel actions={actions} fixedCols={3} />
+                </TableCell>
+              </TableRow>
+            )
+          })
+        )}
+      </TableBody>
+    </Table>
   )
 }
-

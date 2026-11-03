@@ -1,244 +1,227 @@
 import React, { useState } from "react"
-import { ChevronRight, ChevronDown, QrCode, Building, Layers, MapPin, Copy, Check } from "lucide-react"
+import { ChevronDown, ChevronRight } from "lucide-react"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { TableDateTimeCell } from "@/shared/components/TableCells"
+import {
+  TableRowActionPanel,
+  TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX,
+  type TableRowActionItem,
+} from "@/shared/components/TableRowActionPanel"
+import { InboundDocNoCell } from "@/features/inbound-records/components/InboundDocNoCell"
 import type { TallyStackingMainItem } from "@/features/shared/mock/inventory-shared-seed"
 
 interface TallyStackingTableProps {
   data: TallyStackingMainItem[]
   onViewQr: (item: TallyStackingMainItem) => void
+  page?: number
+  pageSize?: number
 }
+
+const NUMERIC = "text-right tabular-nums"
+const STICKY_ACTION_CLASS =
+  "sticky right-0 z-10 border-l border-border/60 bg-card px-2 py-2 text-center group-hover:bg-[#f7faff]"
 
 export const TallyStackingTable: React.FC<TallyStackingTableProps> = ({
   data,
   onViewQr,
+  page = 1,
+  pageSize = 10,
 }) => {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(
-    new Set(data.map((d) => d.id)) // 默认全展开方便查阅
+    new Set(data.map((d) => d.id))
   )
-  const [copiedNo, setCopiedNo] = useState<string | null>(null)
 
   const toggleExpand = (id: string) => {
-    const next = new Set(expandedIds)
-    if (next.has(id)) {
-      next.delete(id)
-    } else {
-      next.add(id)
-    }
-    setExpandedIds(next)
+    setExpandedIds((current) => {
+      const next = new Set(current)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
   }
 
-  const handleCopyNo = (e: React.MouseEvent, no: string) => {
-    e.stopPropagation()
-    navigator.clipboard?.writeText(no)
-    setCopiedNo(no)
-    setTimeout(() => setCopiedNo(null), 2000)
+  const actionColStyle = {
+    width: TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX,
+    minWidth: TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX,
+    maxWidth: TABLE_ROW_ACTION_COL_COMPACT_TOTAL_PX,
   }
 
   return (
-    <div className="relative overflow-x-auto rounded-lg border border-slate-200 bg-white">
-      <table className="w-full text-left text-xs border-collapse">
-        <thead className="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-          <tr className="h-11">
-            <th className="px-3 py-2 w-10 text-center">展开</th>
-            <th className="px-4 py-2 min-w-[190px]">源头入库单号</th>
-            <th className="px-4 py-2 min-w-[210px]">货品全称与规格</th>
-            <th className="px-4 py-2 min-w-[180px]">实体监管仓库</th>
-            <th className="px-4 py-2 min-w-[180px]">存货权属货主</th>
-            <th className="px-4 py-2 min-w-[120px] text-right">批次入库(吨)</th>
-            <th className="px-4 py-2 min-w-[120px] text-right font-medium text-emerald-600">
-              当前可用(吨)
-            </th>
-            <th className="px-4 py-2 min-w-[120px] text-right font-medium text-amber-600">
-              流转冻结(吨)
-            </th>
-            <th className="px-4 py-2 min-w-[140px]">入库时间</th>
-            <th className="px-4 py-2 w-[130px] text-center sticky right-0 bg-slate-100 shadow-[-4px_0_8px_rgba(0,0,0,0.05)] z-20">
-              操作
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {data.length === 0 ? (
-            <tr>
-              <td colSpan={10} className="h-32 text-center text-slate-400">
-                暂无匹配理货堆放数据
-              </td>
-            </tr>
-          ) : (
-            data.map((mainItem) => {
-              const isExpanded = expandedIds.has(mainItem.id)
+    <Table className="min-w-[1250px]">
+      <TableHeader>
+        <TableRow className="hover:bg-transparent">
+          <TableHead className="w-12 min-w-12 text-center">展开</TableHead>
+          <TableHead className="w-[190px] min-w-[190px]">源头入库单号</TableHead>
+          <TableHead className="w-[210px] min-w-[210px]">货品全称与规格</TableHead>
+          <TableHead className="w-[150px] min-w-[150px]">实体监管仓库</TableHead>
+          <TableHead className="w-[170px] min-w-[170px]">权属货主</TableHead>
+          <TableHead className={`${NUMERIC} w-[110px] min-w-[110px]`}>批次入库(吨)</TableHead>
+          <TableHead className={`${NUMERIC} w-[110px] min-w-[110px]`}>当前可用(吨)</TableHead>
+          <TableHead className={`${NUMERIC} w-[110px] min-w-[110px]`}>流转冻结(吨)</TableHead>
+          <TableHead className="w-[130px] min-w-[130px]">入库时间</TableHead>
+          <TableHead
+            className="sticky right-0 z-10 border-l border-border/60 bg-[#f7f8fa] px-2 text-center"
+            style={actionColStyle}
+          >
+            操作
+          </TableHead>
+        </TableRow>
+      </TableHeader>
 
-              return (
-                <React.Fragment key={mainItem.id}>
-                  {/* 主码行 */}
-                  <tr className="group h-[72px] hover:bg-slate-50/80 transition-colors bg-white font-medium">
-                    <td className="px-3 py-2 text-center">
-                      <button
-                        type="button"
-                        onClick={() => toggleExpand(mainItem.id)}
-                        className="p-1 rounded hover:bg-slate-200 text-slate-500 cursor-pointer"
-                        title={isExpanded ? "收起明细货位" : "展开明细货位"}
-                      >
-                        {isExpanded ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                      </button>
-                    </td>
+      <TableBody>
+        {data.length === 0 ? (
+          <TableRow className="hover:bg-transparent">
+            <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
+              暂无匹配理货堆放数据
+            </TableCell>
+          </TableRow>
+        ) : (
+          data.map((mainItem, index) => {
+            const isExpanded = expandedIds.has(mainItem.id)
+            const actions: TableRowActionItem[] = [
+              {
+                key: "qr",
+                label: "二维码",
+                title: "查看该批次垛位的防伪二维码",
+                onClick: () => onViewQr(mainItem),
+              },
+            ]
 
-                    {/* 入库单号完整展示 */}
-                    <td className="px-4 py-2">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-slate-900 break-all">
-                          {mainItem.inboundOrderNo}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={(e) => handleCopyNo(e, mainItem.inboundOrderNo)}
-                          className="text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
-                          title="复制单号"
-                        >
-                          {copiedNo === mainItem.inboundOrderNo ? (
-                            <Check className="h-3.5 w-3.5 text-emerald-600" />
-                          ) : (
-                            <Copy className="h-3.5 w-3.5" />
-                          )}
-                        </button>
-                      </div>
-                      <div className="text-[11px] text-slate-400 font-normal">
-                        主码：{mainItem.mainCode}
-                      </div>
-                    </td>
+            return (
+              <React.Fragment key={mainItem.id}>
+                <TableRow className="group h-[72px]">
+                  <TableCell className="text-center">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 text-muted-foreground"
+                      onClick={() => toggleExpand(mainItem.id)}
+                      title={isExpanded ? "收起子码明细" : "展开子码明细"}
+                    >
+                      {isExpanded ? (
+                        <ChevronDown className="size-4" />
+                      ) : (
+                        <ChevronRight className="size-4" />
+                      )}
+                    </Button>
+                  </TableCell>
 
-                    {/* 货品规格 */}
-                    <td className="px-4 py-2">
-                      <div className="text-slate-900 font-semibold leading-snug">
-                        {mainItem.specification}
-                      </div>
-                      <div className="text-[11px] text-slate-500 font-normal">
-                        {mainItem.category} / {mainItem.variety}
-                      </div>
-                    </td>
+                  <TableCell>
+                    <InboundDocNoCell docNo={mainItem.inboundOrderNo} wrap />
+                    <div className="mt-0.5 text-[13px] text-muted-foreground">
+                      主码：{mainItem.mainCode}
+                    </div>
+                  </TableCell>
 
-                    {/* 仓库 */}
-                    <td className="px-4 py-2 text-slate-800">
-                      <div className="flex items-center gap-1">
-                        <Building className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                        <span>{mainItem.warehouseName}</span>
-                      </div>
-                    </td>
+                  <TableCell>
+                    <div className="text-foreground">{mainItem.specification}</div>
+                    <div className="mt-0.5 text-[13px] text-muted-foreground">
+                      {mainItem.category} / {mainItem.variety}
+                    </div>
+                  </TableCell>
 
-                    {/* 货主 */}
-                    <td className="px-4 py-2 text-slate-800">
-                      <div>{mainItem.ownerName}</div>
-                      <div className="text-[11px] font-mono text-slate-400">
-                        {mainItem.ownerIdentifierMasked}
-                      </div>
-                    </td>
+                  <TableCell className="text-foreground">{mainItem.warehouseName}</TableCell>
 
-                    {/* 数量指标 */}
-                    <td className="px-4 py-2 text-right font-medium text-slate-800">
-                      {mainItem.initialQuantity.toFixed(3)}
-                    </td>
+                  <TableCell>
+                    <div className="text-foreground">{mainItem.ownerName}</div>
+                    <div className="mt-0.5 text-[13px] text-muted-foreground">
+                      {mainItem.ownerIdentifierMasked}
+                    </div>
+                  </TableCell>
 
-                    <td className="px-4 py-2 text-right font-medium text-emerald-600">
-                      {mainItem.availableQuantity.toFixed(3)}
-                    </td>
+                  <TableCell className={NUMERIC}>{mainItem.initialQuantity.toFixed(3)}</TableCell>
+                  <TableCell className={`${NUMERIC} text-foreground`}>
+                    {mainItem.availableQuantity.toFixed(3)}
+                  </TableCell>
+                  <TableCell className={`${NUMERIC} text-amber-600`}>
+                    {mainItem.frozenQuantity.toFixed(3)}
+                  </TableCell>
 
-                    <td className="px-4 py-2 text-right font-medium text-amber-600">
-                      {mainItem.frozenQuantity.toFixed(3)}
-                    </td>
+                  <TableCell>
+                    <TableDateTimeCell value={mainItem.inboundDate} stackedPlain />
+                  </TableCell>
 
-                    <td className="px-4 py-2 text-slate-600 text-[11px]">
-                      {mainItem.inboundDate}
-                    </td>
+                  <TableCell className={STICKY_ACTION_CLASS} style={actionColStyle}>
+                    <TableRowActionPanel actions={actions} fixedCols={1} />
+                  </TableCell>
+                </TableRow>
 
-                    {/* Sticky 操作列（无去盘点、无详情页） */}
-                    <td className="px-4 py-2 text-center sticky right-0 bg-white group-hover:bg-slate-50 transition-colors shadow-[-4px_0_8px_rgba(0,0,0,0.05)] z-10">
-                      <button
-                        type="button"
-                        onClick={() => onViewQr(mainItem)}
-                        className="text-primary hover:underline font-medium inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        <QrCode className="h-3.5 w-3.5" />
-                        <span>查看二维码</span>
-                      </button>
-                    </td>
-                  </tr>
-
-                  {/* 展开的子码货位明细 */}
-                  {isExpanded && (
-                    <tr className="bg-slate-50/60 border-t border-b border-slate-200">
-                      <td colSpan={10} className="p-3 pl-12 pr-6">
-                        <div className="rounded-md border border-slate-200 bg-white shadow-xs overflow-hidden">
-                          <div className="bg-slate-100/70 px-3 py-1.5 text-xs font-semibold text-slate-600 flex items-center gap-1.5 border-b border-slate-200">
-                            <Layers className="h-3.5 w-3.5 text-slate-500" />
-                            <span>物理货位堆放子码明细（共 {mainItem.subItems.length} 个垛位）</span>
+                {isExpanded && (
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={10} className="bg-muted/20 p-0">
+                      <div className="px-6 py-4">
+                        <div className="overflow-hidden rounded-md border border-border bg-card">
+                          <div className="border-b border-border bg-[#f7f8fa] px-4 py-2.5 text-[13px] font-semibold text-foreground">
+                            物理货位堆放子码明细（共 {mainItem.subItems.length} 个垛位）
                           </div>
-
-                          <table className="w-full text-left text-xs border-collapse">
-                            <thead className="bg-slate-50 text-slate-500 text-[11px] border-b border-slate-100">
-                              <tr className="h-8">
-                                <th className="px-3 py-1 min-w-[150px]">货位存货条码 (子码)</th>
-                                <th className="px-3 py-1 min-w-[220px]">物理空间落位 (库房/分区/垛位)</th>
-                                <th className="px-3 py-1 min-w-[100px] text-right">期初堆放(吨)</th>
-                                <th className="px-3 py-1 min-w-[100px] text-right font-medium text-emerald-600">当前可用(吨)</th>
-                                <th className="px-3 py-1 min-w-[100px] text-right font-medium text-amber-600">审批冻结(吨)</th>
-                                <th className="px-3 py-1 min-w-[140px]">状态说明</th>
+                          <table className="w-full border-collapse text-[13px] text-foreground">
+                            <thead>
+                              <tr className="h-10 bg-[#f7f8fa] text-left text-[13px] font-semibold text-[#4e5969]">
+                                <th className="px-4 font-semibold">货位存货条码（子码）</th>
+                                <th className="px-4 font-semibold">物理空间落位（库房 / 分区 / 垛位）</th>
+                                <th className="px-4 text-right font-semibold">期初堆放(吨)</th>
+                                <th className="px-4 text-right font-semibold">当前可用(吨)</th>
+                                <th className="px-4 text-right font-semibold">审批冻结(吨)</th>
+                                <th className="px-4 font-semibold">状态说明</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody>
                               {mainItem.subItems.map((sub) => (
-                                <tr key={sub.subId} className="h-9 hover:bg-slate-50/80">
-                                  <td className="px-3 py-1 font-mono text-slate-700">
-                                    {sub.subCode}
-                                  </td>
-
-                                  <td className="px-3 py-1">
-                                    <div className="flex items-center gap-1">
-                                      <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                                      {sub.isVirtual ? (
-                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] bg-amber-50 text-amber-700 font-medium">
-                                          未指定库房/虚拟未分配垛位 (兜底)
+                                <tr
+                                  key={sub.subId}
+                                  className="h-11 border-t border-[#f2f3f5] hover:bg-[#f7faff]"
+                                >
+                                  <td className="px-4 text-foreground">{sub.subCode}</td>
+                                  <td className="px-4">
+                                    {sub.isVirtual ? (
+                                      <span className="inline-flex rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[13px] text-amber-700">
+                                        未指定库房 / 虚拟未分配垛位（兜底）
+                                      </span>
+                                    ) : (
+                                      <span>
+                                        {sub.houseName} · {sub.partitionName} ·{" "}
+                                        <span className="font-medium text-foreground">
+                                          {sub.locationCode}
                                         </span>
-                                      ) : (
-                                        <span className="text-slate-800">
-                                          {sub.houseName} · {sub.partitionName} · <strong className="text-slate-900">{sub.locationCode}</strong>
-                                        </span>
-                                      )}
-                                    </div>
+                                      </span>
+                                    )}
                                   </td>
-
-                                  <td className="px-3 py-1 text-right text-slate-700">
+                                  <td className="px-4 text-right tabular-nums">
                                     {sub.initialQuantity.toFixed(3)}
                                   </td>
-
-                                  <td className="px-3 py-1 text-right text-emerald-600 font-medium">
+                                  <td className="px-4 text-right tabular-nums text-foreground">
                                     {sub.availableQuantity.toFixed(3)}
                                   </td>
-
-                                  <td className="px-3 py-1 text-right text-amber-600 font-medium">
+                                  <td className="px-4 text-right tabular-nums text-amber-600">
                                     {sub.frozenQuantity.toFixed(3)}
                                   </td>
-
-                                  <td className="px-3 py-1 text-slate-500 text-[11px]">
-                                    {sub.statusText}
-                                  </td>
+                                  <td className="px-4 text-muted-foreground">{sub.statusText}</td>
                                 </tr>
                               ))}
                             </tbody>
                           </table>
                         </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              )
-            })
-          )}
-        </tbody>
-      </table>
-    </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </React.Fragment>
+            )
+          })
+        )}
+      </TableBody>
+    </Table>
   )
 }
-

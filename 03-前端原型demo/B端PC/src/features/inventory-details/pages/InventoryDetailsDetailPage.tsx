@@ -1,244 +1,327 @@
-import React from "react"
+import React, { useState } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
-import { ArrowLeft, Building2, MapPin, Package, Users, FileText, ArrowUpRight, Copy, Check } from "lucide-react"
+import { FileText, ImageIcon, QrCode } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { DetailSection, DetailField } from "@/shared/components/DetailSection"
+import {
+  SnapshotImageModal,
+  type SnapshotPreviewData,
+} from "@/shared/components/SnapshotImageModal"
 import {
   PrototypeAnnotationProvider,
   PrototypeAnnotationTarget,
 } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { inventoryDetailsDocuments } from "../documents/inventory-details-documents"
 import { inventoryDetailsDetailAnnotations } from "../annotations/inventory-details-detail.annotations"
+import { InventoryBarcodeQrDialog } from "../components/InventoryBarcodeQrDialog"
 import { SHARED_INVENTORY_DETAILS } from "@/features/shared/mock/inventory-shared-seed"
+
+const CREATOR_ORG = "四川享宇科技有限公司"
+const STICKY_ACTION_CLASS =
+  "sticky right-0 z-10 border-l border-border/60 bg-card px-2 py-2 text-center"
+
+function StatusBadge({ status, label }: { status: string; label: string }) {
+  if (status === "NORMAL") {
+    return (
+      <span className="inline-flex rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[13px] text-emerald-700">
+        {label}
+      </span>
+    )
+  }
+  if (status === "FROZEN") {
+    return (
+      <span className="inline-flex rounded border border-amber-200 bg-amber-50 px-2 py-0.5 text-[13px] text-amber-700">
+        {label}
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex rounded border border-border bg-muted px-2 py-0.5 text-[13px] text-muted-foreground">
+      {label}
+    </span>
+  )
+}
+
+function AttachmentBlock({
+  label,
+  emptyText,
+  children,
+}: {
+  label: string
+  emptyText: string
+  children?: React.ReactNode
+}) {
+  return (
+    <div>
+      <div className="detail-field-label mb-2">{label}</div>
+      {children ?? <span className="text-sm text-muted-foreground">{emptyText}</span>}
+    </div>
+  )
+}
+
+function PhotoCard({
+  name,
+  caption,
+  onClick,
+}: {
+  name: string
+  caption?: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex h-[104px] w-[150px] cursor-pointer flex-col items-center justify-center gap-1.5 overflow-hidden rounded-md border border-border bg-muted/40 px-2 transition-colors hover:border-primary/40 hover:bg-muted"
+      title={name}
+    >
+      <ImageIcon className="size-6 text-muted-foreground" />
+      <span className="w-full truncate text-center text-[13px] text-muted-foreground">{name}</span>
+      {caption && (
+        <span className="w-full truncate text-center text-[12px] text-muted-foreground/80">
+          {caption}
+        </span>
+      )}
+    </button>
+  )
+}
 
 export const InventoryDetailsDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [copied, setCopied] = React.useState(false)
+  const [qrOpen, setQrOpen] = useState(false)
+  const [preview, setPreview] = useState<SnapshotPreviewData | null>(null)
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
 
   const record = SHARED_INVENTORY_DETAILS.find((item) => item.id === id) || SHARED_INVENTORY_DETAILS[0]
 
-  const handleCopyBarcode = () => {
-    navigator.clipboard?.writeText(record.barcode)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const showToast = (message: string) => {
+    setToastMessage(message)
+    setTimeout(() => setToastMessage(null), 3000)
   }
+
+  const locationText = `${record.warehouseName} ${record.houseName} ${record.partitionName}`
 
   return (
     <PrototypeAnnotationProvider
       documents={inventoryDetailsDocuments}
       annotations={inventoryDetailsDetailAnnotations}
     >
-      <div className="space-y-4 p-6 max-w-7xl mx-auto">
-        {/* 顶部导航与状态条 */}
+      <div className="space-y-4 p-6">
+        {/* Toast 提示 */}
+        {toastMessage && (
+          <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
+            {toastMessage}
+          </div>
+        )}
+
+        {/* 顶部标题与返回 */}
         <PrototypeAnnotationTarget annotationIds={["inv-details-detail-page"]}>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate(-1)}
-                className="h-8 w-8 p-0"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-lg font-bold text-slate-900 tracking-tight">
-                    存货明细详情
-                  </h1>
-                  <span className="font-mono text-sm text-slate-500">
-                    ({record.barcode})
-                  </span>
-                  {record.status === "NORMAL" && (
-                    <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                      正常在库
-                    </Badge>
-                  )}
-                  {record.status === "FROZEN" && (
-                    <Badge className="bg-amber-50 text-amber-700 border-amber-200">
-                      审批冻结中
-                    </Badge>
-                  )}
-                  {record.status === "EMPTY" && (
-                    <Badge variant="outline" className="text-slate-500">
-                      已出库
-                    </Badge>
-                  )}
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                {record.specification} — {record.totalQuantity}
+                {record.unit}
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                入库批次 {record.inboundOrderNo} · {locationText}
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
+              返回
+            </Button>
+          </div>
+        </PrototypeAnnotationTarget>
+
+        {/* 基础信息 */}
+        <DetailSection title="基础信息">
+          <DetailField label="货主">
+            <div className="text-foreground">{record.ownerName}</div>
+            <div className="text-[13px] text-muted-foreground">{record.ownerIdentifierMasked}</div>
+          </DetailField>
+          <DetailField label="制单人">
+            {record.creator}（{CREATOR_ORG}）
+          </DetailField>
+          <DetailField label="制单时间">{record.createTime}</DetailField>
+          <DetailField label="入库类型">{record.inboundType}</DetailField>
+          <DetailField label="货物信息">
+            {record.specification} — {record.totalQuantity}
+            {record.unit}
+          </DetailField>
+          <DetailField label="入库日期">{record.inboundDate}</DetailField>
+          <DetailField label="入库单号">
+            <PrototypeAnnotationTarget annotationIds={["inv-details-detail-order-link"]}>
+              <span className="inline-flex items-center gap-2">
+                <span className="text-foreground">{record.inboundOrderNo}</span>
+                <Link
+                  to={`/仓储/入库管理/入库记录/详情/${record.inboundOrderNo}`}
+                  className="text-primary hover:underline"
+                >
+                  查看
+                </Link>
+              </span>
+            </PrototypeAnnotationTarget>
+          </DetailField>
+          <DetailField label="备注信息">{record.remark || "——"}</DetailField>
+          <DetailField label="仓库">{record.warehouseName}</DetailField>
+          <DetailField label="库房">
+            {record.houseName}
+            <span className="ml-1 text-[13px] text-muted-foreground">
+              {record.houseAuditStatus === "auditing" ? "（需审核）" : "（不审核）"}
+            </span>
+          </DetailField>
+          <DetailField label="分区">{record.partitionName}</DetailField>
+          <DetailField label="其他信息">{record.collectInfo || "——"}</DetailField>
+        </DetailSection>
+
+        {/* 附件信息 */}
+        <DetailSection title="附件信息">
+          <div className="space-y-5">
+            <AttachmentBlock
+              label="现场照片"
+              emptyText="无现场照片"
+            >
+              {record.scenePhotos?.length ? (
+                <div className="flex flex-wrap gap-3">
+                  {record.scenePhotos.map((name) => (
+                    <PhotoCard
+                      key={name}
+                      name={name}
+                      onClick={() =>
+                        setPreview({
+                          title: `现场照片 — ${name}`,
+                          desc: "货物入库时的现场实物照片",
+                          time: record.inboundDate,
+                          location: locationText,
+                        })
+                      }
+                    />
+                  ))}
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  物理货位最细粒度台账画像与批次全息生命周期追溯。
-                </p>
-              </div>
-            </div>
+              ) : undefined}
+            </AttachmentBlock>
 
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopyBarcode}
-                className="h-8 text-xs gap-1.5"
-              >
-                {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
-                {copied ? "已复制条码" : "复制存货条码"}
-              </Button>
-            </div>
-          </div>
-        </PrototypeAnnotationTarget>
+            <AttachmentBlock label="补充资料" emptyText="无补充资料">
+              {record.supplementaryDocs?.length ? (
+                <div className="flex flex-wrap gap-3">
+                  {record.supplementaryDocs.map((name) => (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => showToast(`正在在线预览补充资料：${name}`)}
+                      className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/40 hover:bg-muted"
+                    >
+                      <FileText className="size-4 text-primary" />
+                      {name}
+                    </button>
+                  ))}
+                </div>
+              ) : undefined}
+            </AttachmentBlock>
 
-        {/* 1. 基础物理空间落位 */}
-        <DetailSection title="物理空间与货位画像">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <DetailField label="实体监管仓库">
-              <span className="font-medium text-slate-900">{record.warehouseName}</span>
-            </DetailField>
-            <DetailField label="具体库房">
-              <span>{record.houseName}</span>
-            </DetailField>
-            <DetailField label="存储分区">
-              <span>{record.partitionName}</span>
-            </DetailField>
-            <DetailField label="货位/垛位编号">
-              {record.isVirtual ? (
-                <span className="text-amber-600 font-medium">虚拟未分配垛位 (兜底)</span>
-              ) : (
-                <strong className="text-slate-900 font-bold">{record.locationCode}</strong>
-              )}
-            </DetailField>
-            <DetailField label="存货条码编号">
-              <span className="font-mono text-slate-900 font-medium">{record.barcode}</span>
-            </DetailField>
-            <DetailField label="物联网 RFID 标签">
-              <span className="font-mono text-slate-600">{record.rfidTag || "--"}</span>
-            </DetailField>
-            <DetailField label="入库上架时间">
-              <span className="text-slate-700">{record.inboundDate}</span>
-            </DetailField>
-            <DetailField label="最后动碰/移库时间">
-              <span className="text-slate-700">{record.lastMoveDate}</span>
-            </DetailField>
+            <AttachmentBlock label="设备抓拍图" emptyText="无设备抓拍图">
+              {record.capturePhotos?.length ? (
+                <div className="flex flex-wrap gap-3">
+                  {record.capturePhotos.map((photo) => (
+                    <PhotoCard
+                      key={`${photo.deviceName}-${photo.time}`}
+                      name={photo.deviceName}
+                      caption={photo.time}
+                      onClick={() =>
+                        setPreview({
+                          title: `设备抓拍图 — ${photo.deviceName}`,
+                          desc: "物联网摄像头自动抓拍存证",
+                          time: photo.time,
+                          location: locationText,
+                        })
+                      }
+                    />
+                  ))}
+                </div>
+              ) : undefined}
+            </AttachmentBlock>
           </div>
         </DetailSection>
 
-        {/* 2. 存货与货主信息 */}
-        <DetailSection title="货品规格与权属货主">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <DetailField label="货品全称与规格">
-              <span className="font-semibold text-slate-900">{record.specification}</span>
-            </DetailField>
-            <DetailField label="所属品类 / 大类">
-              <span>{record.variety} / {record.category}</span>
-            </DetailField>
-            <DetailField label="计量单位">
-              <span>{record.unit}</span>
-            </DetailField>
-            <DetailField label="参考单价(万元)">
-              {record.unitPrice !== null ? (
-                <span className="font-medium text-slate-900">¥{record.unitPrice.toFixed(2)} 万元/{record.unit}</span>
-              ) : (
-                <span className="text-amber-600">待点价结算中 (未定价)</span>
-              )}
-            </DetailField>
-            <DetailField label="存货权属货主">
-              <span className="font-medium text-slate-900">{record.ownerName}</span>
-            </DetailField>
-            <DetailField label="货主身份标识">
-              <span className="font-mono text-slate-700">{record.ownerIdentifierMasked}</span>
-            </DetailField>
-            <DetailField label="联系方式">
-              <span className="text-slate-700">{record.ownerPhoneMasked}</span>
-            </DetailField>
-            <DetailField label="主体类型">
-              <span>{record.ownerType === "2" ? "企业法人货主" : "个人独资/自然人"}</span>
-            </DetailField>
+        {/* 存货信息 */}
+        <DetailSection title="存货信息">
+          <div className="w-full">
+            <Table className="min-w-[1020px]">
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-16 min-w-16 text-center">序号</TableHead>
+                  <TableHead className="w-[160px] min-w-[160px]">库房</TableHead>
+                  <TableHead className="w-[120px] min-w-[120px]">分区</TableHead>
+                  <TableHead className="w-[130px] min-w-[130px]">具体位置</TableHead>
+                  <TableHead className="w-[120px] min-w-[120px] text-right">期初堆放数量</TableHead>
+                  <TableHead className="w-[110px] min-w-[110px] text-right">可用数量</TableHead>
+                  <TableHead className="w-[110px] min-w-[110px] text-right">冻结数量</TableHead>
+                  <TableHead className="w-[100px] min-w-[100px] text-center">存货条码</TableHead>
+                  <TableHead className="w-[110px] min-w-[110px] text-center">状态</TableHead>
+                  <TableHead className={STICKY_ACTION_CLASS} style={{ width: 72, minWidth: 72 }}>
+                    操作
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="text-center text-muted-foreground">1</TableCell>
+                  <TableCell className="text-foreground">{record.houseName}</TableCell>
+                  <TableCell className="text-foreground">{record.partitionName}</TableCell>
+                  <TableCell className="text-foreground">
+                    {record.isVirtual ? "——" : record.locationCode}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums text-foreground">
+                    {record.initialQuantity.toFixed(3)} {record.unit}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums text-foreground">
+                    {record.availableQuantity.toFixed(3)} {record.unit}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums text-amber-600">
+                    {record.frozenQuantity.toFixed(3)} {record.unit}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 text-primary"
+                      title="查看存货条码二维码"
+                      onClick={() => setQrOpen(true)}
+                    >
+                      <QrCode className="size-4" />
+                    </Button>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <StatusBadge status={record.status} label={record.goodsStatus} />
+                  </TableCell>
+                  <TableCell className={STICKY_ACTION_CLASS} style={{ width: 72, minWidth: 72 }}>
+                    <span className="text-muted-foreground">——</span>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </div>
         </DetailSection>
 
-        {/* 3. 数量核算与资产价值 */}
-        <DetailSection title="资产数量与货值核算">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <DetailField label="期初入库堆放数量">
-              <span className="font-medium text-slate-800">{record.initialQuantity.toFixed(3)} {record.unit}</span>
-            </DetailField>
-            <DetailField label="当前在库可用数量">
-              <span className="font-semibold text-emerald-600">{record.availableQuantity.toFixed(3)} {record.unit}</span>
-            </DetailField>
-            <DetailField label="当前审批冻结数量">
-              <span className="font-semibold text-amber-600">{record.frozenQuantity.toFixed(3)} {record.unit}</span>
-            </DetailField>
-            <DetailField label="当前库存总数">
-              <span className="font-bold text-slate-900">{record.totalQuantity.toFixed(3)} {record.unit}</span>
-            </DetailField>
-            <DetailField label="当前货值总额估值">
-              {record.totalPrice !== null ? (
-                <span className="font-bold text-slate-900">
-                  ¥{record.totalPrice.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 4 })} 万元
-                </span>
-              ) : (
-                <span className="text-amber-600 font-medium">暂无估值 (未定价货物)</span>
-              )}
-            </DetailField>
-            <DetailField label="冻结占用说明">
-              <span className="text-slate-600">{record.freezeReason || "无流转冻结，全量可用"}</span>
-            </DetailField>
-          </div>
-        </DetailSection>
+        {/* 图片预览 */}
+        <SnapshotImageModal data={preview} onClose={() => setPreview(null)} />
 
-        {/* 4. 关联单据溯源 */}
-        <PrototypeAnnotationTarget annotationIds={["inv-details-detail-order-link"]}>
-          <DetailSection title="关联单据链与履约追溯">
-            <div className="rounded-lg border border-slate-200 overflow-hidden">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
-                  <tr className="h-9">
-                    <th className="px-3 py-1.5 min-w-[120px]">单据关系类型</th>
-                    <th className="px-3 py-1.5 min-w-[200px]">业务单号</th>
-                    <th className="px-3 py-1.5 min-w-[140px]">关联变动数量</th>
-                    <th className="px-3 py-1.5 min-w-[140px]">发生时间</th>
-                    <th className="px-3 py-1.5 w-24 text-center">操作</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  <tr className="h-10 hover:bg-slate-50">
-                    <td className="px-3 py-1.5 font-medium text-slate-700">源头入库单据</td>
-                    <td className="px-3 py-1.5 font-mono text-slate-900">{record.inboundOrderNo}</td>
-                    <td className="px-3 py-1.5 text-slate-800 font-medium">+{record.initialQuantity.toFixed(3)} {record.unit}</td>
-                    <td className="px-3 py-1.5 text-slate-500">{record.inboundDate}</td>
-                    <td className="px-3 py-1.5 text-center">
-                      <Link
-                        to={`/仓储/入库管理/入库记录/详情/${record.inboundOrderNo}`}
-                        className="text-primary hover:underline font-medium inline-flex items-center gap-0.5"
-                      >
-                        <span>查看入库</span>
-                        <ArrowUpRight className="h-3 w-3" />
-                      </Link>
-                    </td>
-                  </tr>
-                  {record.freezeOrderNo && (
-                    <tr className="h-10 hover:bg-slate-50">
-                      <td className="px-3 py-1.5 font-medium text-amber-700">流转冻结单据</td>
-                      <td className="px-3 py-1.5 font-mono text-slate-900">{record.freezeOrderNo}</td>
-                      <td className="px-3 py-1.5 text-amber-600 font-medium">锁定 {record.frozenQuantity.toFixed(3)} {record.unit}</td>
-                      <td className="px-3 py-1.5 text-slate-500">{record.lastMoveDate}</td>
-                      <td className="px-3 py-1.5 text-center">
-                        <Link
-                          to={`/仓储/出库管理/出库记录`}
-                          className="text-primary hover:underline font-medium inline-flex items-center gap-0.5"
-                        >
-                          <span>查看业务</span>
-                          <ArrowUpRight className="h-3 w-3" />
-                        </Link>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </DetailSection>
-        </PrototypeAnnotationTarget>
+        {/* 存货条码弹窗 */}
+        <InventoryBarcodeQrDialog
+          open={qrOpen}
+          onOpenChange={setQrOpen}
+          item={record}
+        />
       </div>
     </PrototypeAnnotationProvider>
   )
 }
-

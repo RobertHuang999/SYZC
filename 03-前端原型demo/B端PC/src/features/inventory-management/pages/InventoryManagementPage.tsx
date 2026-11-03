@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from "react"
 import { Download, FileSpreadsheet } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { WarningListPagination } from "@/components/business/WarningListPrimitives"
 import {
   PrototypeAnnotationProvider,
@@ -178,93 +177,49 @@ export const InventoryManagementPage: React.FC = () => {
       <div className="space-y-4 p-6">
         {/* Toast 提示 */}
         {toastMessage && (
-          <div className="fixed top-16 right-8 z-50 rounded-lg bg-slate-900 text-white px-4 py-2.5 shadow-xl text-xs flex items-center gap-2 border border-slate-700 animate-in fade-in slide-in-from-top-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            <span>{toastMessage}</span>
+          <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
+            {toastMessage}
           </div>
         )}
 
-        {/* 顶部标题与导出按钮栏 */}
+        {/* 顶部标题 */}
         <PrototypeAnnotationTarget annotationIds={["inv-mgmt-page"]}>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
-            <div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-                存货管理
-              </h1>
-              <p className="text-xs text-slate-500 mt-1">
-                仓储资产实时监控与核算中枢，汇总全平台物理库存、可用数量与冻结资产。
-              </p>
-            </div>
-
-            <PrototypeAnnotationTarget annotationIds={["inv-mgmt-export"]}>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setExportModalOpen(true)}
-                  className="h-8 text-xs gap-1.5 border-slate-300"
-                >
-                  <FileSpreadsheet className="h-3.5 w-3.5 text-slate-600" />
-                  导出记录
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleBatchExport}
-                  className="h-8 text-xs gap-1.5 bg-[#e6a23c] hover:bg-[#d48e24] text-white"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  批量导出
-                </Button>
-              </div>
-            </PrototypeAnnotationTarget>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              存货管理
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              仓储资产实时监控与核算中枢，汇总全平台物理库存、可用数量与冻结资产。
+            </p>
           </div>
         </PrototypeAnnotationTarget>
 
-        {/* 视图切换 Tabs（100% 对齐系统经典下划线高亮风格） */}
+        {/* 视图切换页签（橙色只用于页签激活，符合色彩规范） */}
         <PrototypeAnnotationTarget annotationIds={["inv-mgmt-tabs"]}>
-          <div className="flex items-center gap-8 border-b border-slate-200 text-xs">
-            <button
-              type="button"
-              onClick={() => handleTabChange("repo")}
-              className={`pb-2 font-medium transition-colors cursor-pointer relative ${
-                viewMode === "repo"
-                  ? "text-[#e6a23c] font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              仓库
-              {viewMode === "repo" && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#e6a23c]" />
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() => handleTabChange("goods")}
-              className={`pb-2 font-medium transition-colors cursor-pointer relative ${
-                viewMode === "goods"
-                  ? "text-[#e6a23c] font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              货物
-              {viewMode === "goods" && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#e6a23c]" />
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() => handleTabChange("owner")}
-              className={`pb-2 font-medium transition-colors cursor-pointer relative ${
-                viewMode === "owner"
-                  ? "text-[#e6a23c] font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              货主
-              {viewMode === "owner" && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#e6a23c]" />
-              )}
-            </button>
+          <div className="flex items-center gap-8 border-b border-border text-sm">
+            {(
+              [
+                { key: "repo", label: "仓库" },
+                { key: "goods", label: "货物" },
+                { key: "owner", label: "货主" },
+              ] as const
+            ).map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => handleTabChange(tab.key)}
+                className={`relative cursor-pointer pb-2 transition-colors ${
+                  viewMode === tab.key
+                    ? "font-semibold text-[#d99020]"
+                    : "font-normal text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {tab.label}
+                {viewMode === tab.key && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#d99020]" />
+                )}
+              </button>
+            ))}
           </div>
         </PrototypeAnnotationTarget>
 
@@ -281,32 +236,50 @@ export const InventoryManagementPage: React.FC = () => {
             onChange={setDraftFilters}
             onReset={handleReset}
             onSearch={handleSearch}
+            extraActions={
+              <PrototypeAnnotationTarget annotationIds={["inv-mgmt-export"]}>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setExportModalOpen(true)}>
+                    <FileSpreadsheet className="size-4" />
+                    导出记录
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleBatchExport}>
+                    <Download className="size-4" />
+                    批量导出
+                  </Button>
+                </div>
+              </PrototypeAnnotationTarget>
+            }
           />
         </PrototypeAnnotationTarget>
 
-        {/* 列表区 Card + Table + Pagination */}
+        {/* 列表区：标准表格 + 吸底分页 */}
         <PrototypeAnnotationTarget annotationIds={["inv-mgmt-table", "inv-mgmt-ops"]}>
-          <Card className="shadow-xs border-border">
-            <CardContent className="p-4 space-y-4">
-              {viewMode === "repo" && <InventoryRepoTable data={currentRepoSlice} />}
-              {viewMode === "goods" && <InventoryGoodsTable data={currentGoodsSlice} />}
-              {viewMode === "owner" && <InventoryOwnerTable data={currentOwnerSlice} />}
+          <div className="space-y-3">
+            {viewMode === "repo" && (
+              <InventoryRepoTable data={currentRepoSlice} page={page} pageSize={pageSize} />
+            )}
+            {viewMode === "goods" && (
+              <InventoryGoodsTable data={currentGoodsSlice} page={page} pageSize={pageSize} />
+            )}
+            {viewMode === "owner" && (
+              <InventoryOwnerTable data={currentOwnerSlice} page={page} pageSize={pageSize} />
+            )}
 
-              {/* 标准分页器 */}
-              <WarningListPagination
-                total={currentTotal}
-                page={page}
-                pageSize={pageSize}
-                onPageChange={setPage}
-                onPageSizeChange={(newSize) => {
-                  setPageSize(newSize)
-                  setPage(1)
-                }}
-                pageSizes={[10, 20, 50]}
-                totalLabel="条"
-              />
-            </CardContent>
-          </Card>
+            {/* 标准分页器 */}
+            <WarningListPagination
+              total={currentTotal}
+              page={page}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize)
+                setPage(1)
+              }}
+              pageSizes={[10, 20, 50]}
+              totalLabel="条"
+            />
+          </div>
         </PrototypeAnnotationTarget>
 
         {/* 导出记录弹窗 */}
