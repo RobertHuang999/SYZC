@@ -26,35 +26,24 @@ export const PARTNER_POLICY_ENTERPRISE_FOOTNOTE_USER =
   "企业货主以统一社会信用代码实名；登记地址防重复与个人货主分别校验。"
 
 export const PARTNER_POLICY_DUP_AUDIT_SPEC =
-  "【策略放宽强控变更原因审计规则】(P04)：必填改「选填」或关闭防重复时须录变更原因。"
+  "【策略放宽强控变更原因审计规则】(P04)：修改证件是否必填或防重复后保存，须录变更原因。"
 
-export const PARTNER_POLICY_DUP_SCAN_ORDER_USER =
-  "开启前先点「排查历史重复地址」；还有重复就开不了。保存时会再确认一次。"
+/** 防重复区：个人/企业各自开关，页内说明保持笼统 */
+export const PARTNER_POLICY_DUP_EFFECT_USER =
+  "某侧防重复为「开启」时，该侧同一证件地址只能绑定一家货主（个人与企业分开算）。"
 
-export const PARTNER_POLICY_DUP_ENABLE_DIALOG_TITLE_USER = "确认开启防重复"
-
-export const PARTNER_POLICY_DUP_ENABLE_DIALOG_DESCRIPTION_USER =
-  "开启后，同类货主不能共用同一证件地址，冲突会直接拦截。请确认已排查过，且没有重复地址。"
-
-export const PARTNER_POLICY_DUP_ENABLE_DIALOG_CONFIRM_USER = "确认保存"
+export const PARTNER_POLICY_DUP_POLICY_HINT_USER =
+  "个人与企业分别配置，互不影响。保存时会确认变更并填写原因；某侧若要新开启防重复，须先排查该侧重复地址。"
 
 export const PARTNER_POLICY_DUP_SCAN_ORDER_SPEC =
   "【存量数据检测排查规则】(P03)：防重复开关开启或关闭时均可排查；由关改开须先排查且分池无冲突方可开启。"
 
-/** 防重复开关旁：放宽必填或关闭防重复时保存须录原因（P04 页内说明） */
-export const PARTNER_POLICY_DUP_RELAX_SAVE_USER =
-  "关闭防重复，或证件地址改为不必填，保存时要写变更原因。"
+export const PARTNER_POLICY_SAVE_DIALOG_TITLE_USER = "确认保存策略变更"
 
-export const PARTNER_POLICY_RISK_RELAX_DIALOG_TITLE_USER = "确认放宽风控"
+export const PARTNER_POLICY_SAVE_DIALOG_DESCRIPTION_USER =
+  "您正在修改货主证件地址准入策略（是否必填、是否防重复）。请填写变更原因说明，保存后会记入「策略变更审计」。"
 
-export const PARTNER_POLICY_RISK_RELAX_DIALOG_DESCRIPTION_USER =
-  "放宽后，冒用地址、虚假建档的风险会变大。请填写变更原因，会记在下方「策略变更审计」里。"
+export const PARTNER_POLICY_SAVE_DIALOG_CONFIRM_USER = "确认保存"
 
-export const PARTNER_POLICY_RISK_RELAX_REASON_PLACEHOLDER_USER =
-  "例：经风控审批，因存量地址重叠，暂关闭防重复。"
-
-export const PARTNER_POLICY_INDIVIDUAL_DUP_WARNING_USER =
-  "开启后，一个证件地址只能绑一个个人货主，重复会拦截。"
-
-export const PARTNER_POLICY_ENTERPRISE_DUP_WARNING_USER =
-  "开启后，企业之间同一登记地址只能对应一家企业（与个人分开校验）。"
+export const PARTNER_POLICY_SAVE_DIALOG_REASON_PLACEHOLDER_USER =
+  "例：个人开启防重复、企业暂不开启，经风控同意。"

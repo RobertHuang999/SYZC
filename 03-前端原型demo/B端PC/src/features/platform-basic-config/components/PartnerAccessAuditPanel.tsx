@@ -17,7 +17,7 @@ export function PartnerAccessAuditPanel({ records }: PartnerAccessAuditPanelProp
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          放宽风控并保存后，变更原因和时间会显示在这里。
+          保存策略变更后，变更原因和时间会显示在这里。
         </CardContent>
       </Card>
     )

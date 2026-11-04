@@ -59,41 +59,23 @@ export const BULK_SAVE_CATEGORIES: ConfigCategoryId[] = [
   "agreements",
 ]
 
-function isSubjectPolicyRelaxed(
+function isSubjectPolicyFieldChanged(
   baseline: PartnerSubjectAccessPolicy,
   current: PartnerSubjectAccessPolicy
 ) {
-  const requiredRelaxed =
-    baseline.certAddressRequired === "是" && current.certAddressRequired === "否"
-  const duplicateRelaxed =
-    baseline.addressDuplicatePrevent && !current.addressDuplicatePrevent
-  return requiredRelaxed || duplicateRelaxed
-}
-
-export function isPartnerAccessRelaxed(
-  baseline: PartnerAccessConfig,
-  current: PartnerAccessConfig
-) {
   return (
-    isSubjectPolicyRelaxed(baseline.individual, current.individual) ||
-    isSubjectPolicyRelaxed(baseline.enterprise, current.enterprise)
+    baseline.certAddressRequired !== current.certAddressRequired ||
+    baseline.addressDuplicatePrevent !== current.addressDuplicatePrevent
   )
 }
 
-function isSubjectDuplicateTightened(
-  baseline: PartnerSubjectAccessPolicy,
-  current: PartnerSubjectAccessPolicy
-) {
-  return !baseline.addressDuplicatePrevent && current.addressDuplicatePrevent
-}
-
-/** 任一主体类型防重复由关改开（保存前弹确认，P03 存量须已通过校验） */
-export function isPartnerAccessDuplicateTightened(
+/** 个人或企业任一「必填 / 防重复」相对已保存值有改动 → 保存前统一确认并录原因 */
+export function isPartnerAccessPolicyChanged(
   baseline: PartnerAccessConfig,
   current: PartnerAccessConfig
 ) {
   return (
-    isSubjectDuplicateTightened(baseline.individual, current.individual) ||
-    isSubjectDuplicateTightened(baseline.enterprise, current.enterprise)
+    isSubjectPolicyFieldChanged(baseline.individual, current.individual) ||
+    isSubjectPolicyFieldChanged(baseline.enterprise, current.enterprise)
   )
 }
