@@ -14,17 +14,15 @@ import { InventoryRepoTable } from "../components/InventoryRepoTable"
 import { InventoryGoodsTable } from "../components/InventoryGoodsTable"
 import { InventoryOwnerTable } from "../components/InventoryOwnerTable"
 import { ExportRecordsDialog } from "../components/ExportRecordsDialog"
+import { InventoryCrossExportDialog } from "@/features/shared/inventory-cross-export/InventoryCrossExportDialog"
+import { useInventoryExportRecords } from "@/features/shared/inventory-cross-export/useInventoryExportRecords"
+import { INVENTORY_CROSS_EXPORT_USER_TOAST } from "@/features/shared/inventory-cross-export/inventory-cross-export-ui-labels"
 import {
   REPO_ROWS_MOCK,
   GOODS_ROWS_MOCK,
   OWNER_ROWS_MOCK,
 } from "../mock/inventory-management.mock"
-import { DEFAULT_EXPORT_RECORDS } from "../domain/constants"
-import type {
-  InventoryManagementFilters,
-  InventoryViewMode,
-  ExportRecordItem,
-} from "../domain/types"
+import type { InventoryManagementFilters, InventoryViewMode } from "../domain/types"
 
 const DEFAULT_FILTERS: InventoryManagementFilters = {
   viewMode: "repo",
@@ -40,7 +38,8 @@ const DEFAULT_FILTERS: InventoryManagementFilters = {
 export const InventoryManagementPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<InventoryViewMode>("repo")
   const [exportModalOpen, setExportModalOpen] = useState(false)
-  const [exportRecords, setExportRecords] = useState<ExportRecordItem[]>(DEFAULT_EXPORT_RECORDS)
+  const [crossExportOpen, setCrossExportOpen] = useState(false)
+  const { records: exportRecords } = useInventoryExportRecords()
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
   // 翻页状态
@@ -138,30 +137,6 @@ export const InventoryManagementPage: React.FC = () => {
     setPage(1)
   }
 
-  // 批量导出
-  const handleBatchExport = () => {
-    const dimText =
-      viewMode === "repo" ? "仓库视图" : viewMode === "goods" ? "货物视图" : "货主视图"
-    const now = new Date()
-    const timeStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(now.getSeconds()).padStart(2, "0")}`
-    const newRecord: ExportRecordItem = {
-      id: `EXP-${timeStr}`,
-      fileName: `库存统计-${dimText}-${timeStr}.xlsx`,
-      viewDimension: dimText,
-      filterSummary: `业务时间: ${appliedFilters.startDate} 至 ${appliedFilters.endDate}`,
-      recordCount: currentTotal,
-      fileSize: "152.0 KB",
-      creator: "李晓云",
-      creatorOrg: "四川享宇科技有限公司",
-      createTime: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`,
-      status: "SUCCESS",
-      downloadUrl: "#",
-    }
-
-    setExportRecords([newRecord, ...exportRecords])
-    showToast(`已提交异步导出任务【${newRecord.fileName}】，请点击“导出记录”查看并下载！`)
-  }
-
   const showToast = (msg: string) => {
     setToastMessage(msg)
     setTimeout(() => {
@@ -237,13 +212,13 @@ export const InventoryManagementPage: React.FC = () => {
             onReset={handleReset}
             onSearch={handleSearch}
             extraActions={
-              <PrototypeAnnotationTarget annotationIds={["inv-mgmt-export"]}>
+              <PrototypeAnnotationTarget annotationIds={["inv-cross-export-actions"]}>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={() => setExportModalOpen(true)}>
                     <FileSpreadsheet className="size-4" />
                     导出记录
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleBatchExport}>
+                  <Button variant="outline" size="sm" onClick={() => setCrossExportOpen(true)}>
                     <Download className="size-4" />
                     批量导出
                   </Button>
@@ -282,7 +257,15 @@ export const InventoryManagementPage: React.FC = () => {
           </div>
         </PrototypeAnnotationTarget>
 
-        {/* 导出记录弹窗 */}
+        <PrototypeAnnotationTarget annotationIds={["inv-cross-export-dialog"]}>
+          <InventoryCrossExportDialog
+            open={crossExportOpen}
+            onOpenChange={setCrossExportOpen}
+            sourceMenu="存货管理"
+            onSubmitted={() => showToast(INVENTORY_CROSS_EXPORT_USER_TOAST)}
+          />
+        </PrototypeAnnotationTarget>
+
         <ExportRecordsDialog
           open={exportModalOpen}
           onOpenChange={setExportModalOpen}

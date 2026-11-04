@@ -155,7 +155,7 @@ export function OutboundInitiateGoodsPage() {
   return (
     <MobileShell>
       <div className="flex min-h-0 flex-1 flex-col bg-[#F2F3F7]">
-        <PrototypeAnnotationTarget annotationIds={["outbound-h5-initiate-goods"]}>
+        <PrototypeAnnotationTarget annotationIds={["outbound-h5-initiate"]}>
           <NavBar
             title="出库货物明细"
             onBack={() => navigate(OUTBOUND_INITIATE_ROUTE)}

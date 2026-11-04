@@ -1,13 +1,12 @@
 import { Construction } from "lucide-react"
 import { BottomTabBar } from "@/components/layout/BottomTabBar"
 import { MobileShell } from "@/components/layout/MobileShell"
+import { NavBar } from "@/components/layout/NavBar"
 
 export function ProfilePage() {
   return (
     <MobileShell>
-      <header className="flex h-12 shrink-0 items-center justify-center border-b border-gray-200/90 bg-white/95 px-4 backdrop-blur-md">
-        <h1 className="text-base font-bold text-gray-900">我的</h1>
-      </header>
+      <NavBar title="我的" showBack={false} />
 
       <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
         <div className="flex size-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">

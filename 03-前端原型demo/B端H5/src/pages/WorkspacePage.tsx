@@ -1,7 +1,7 @@
-import { LayoutGrid } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { BottomTabBar } from "@/components/layout/BottomTabBar"
 import { MobileShell } from "@/components/layout/MobileShell"
+import { NavBar } from "@/components/layout/NavBar"
 import { MOBILE_MENU_ITEMS, type MenuItemData } from "@/data/mobileMenuData"
 import { collateralWarningEventsMock } from "@/features/collateral-warning-events/mock/collateral-warning-events.mock"
 import { deviceWarningEventsMock } from "@/features/device-warning-events/mock/device-warning-events.mock"
@@ -87,16 +87,7 @@ export function WorkspacePage() {
 
   return (
     <MobileShell>
-      {/* 顶部标题栏 */}
-      <div className="flex h-11 shrink-0 items-center justify-between px-4">
-        <h1 className="text-lg font-bold text-gray-900">工作台</h1>
-        <button
-          type="button"
-          className="flex size-8 items-center justify-center text-gray-700"
-        >
-          <LayoutGrid className="size-5" />
-        </button>
-      </div>
+      <NavBar title="工作台" showBack={false} />
 
       {/* 滚动工作台分组列表 */}
       <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 space-y-3 overscroll-contain">

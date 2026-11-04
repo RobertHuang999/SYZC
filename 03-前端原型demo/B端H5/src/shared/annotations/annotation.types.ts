@@ -1,5 +1,8 @@
 export type AnnotationKind = "页面" | "交互" | "字段" | "规则" | "待确认"
 
+/** 标注视图三档：只看 6.3 变更 / 全部原型 / 还原线上（与 PC 一致） */
+export type IterationViewMode = "focus63" | "all" | "off"
+
 export type DrawerTabKey = "annotations" | "fields" | "prd" | "rules"
 
 export type DocumentTabKey = Exclude<DrawerTabKey, "annotations">
@@ -17,6 +20,8 @@ export type PrototypeAnnotation = {
   kind: AnnotationKind
   title: string
   content: string
+  /** 打点归属版本：6.3 为本轮改动，未填视为历史沿用（6.2 及更早） */
+  version?: "6.3" | "6.2"
   documentRefs?: Partial<Record<DocumentTabKey, DocumentLocator>>
   details: Array<{
     title: string

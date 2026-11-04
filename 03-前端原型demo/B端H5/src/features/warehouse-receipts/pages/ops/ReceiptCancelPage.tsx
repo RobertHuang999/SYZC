@@ -55,7 +55,7 @@ export function ReceiptCancelPage() {
     <MobileShell>
       <div className="flex min-h-0 flex-1 flex-col bg-[#edf2f8]">
         <PrototypeAnnotationTarget
-          annotationIds={["receipt-h5-ops-cancel"]}
+          annotationIds={["receipt-ops-cancel"]}
           className="flex min-h-0 flex-1 flex-col"
         >
           <NavBar

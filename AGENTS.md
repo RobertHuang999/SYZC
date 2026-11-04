@@ -222,6 +222,10 @@ PRD、ASCII、Demo 与规范文档互相引用章节时**不使用章节符**，
 
 **Agent 硬性约定**：交付任意新列表/详情/表单页前，必须满足速查文档 **第 5 节检查清单**；PC 详情禁止默认左右 Label-Value 表；PC 列表筛选默认 **4 项 + 展开**；H5 多步单据必须 **步骤条 + 分组 Card**。
 
+**H5 外壳按小程序写（2026-11 起）**：手机机身、iOS 状态栏由标注工作台统一提供；页面导航统一用 `NavBar`（44px 高、17px 标题居中、右上角固定胶囊按钮，带右侧按钮时标题自动让位）；四个主 Tab 页用 `showBack={false}`；底部 Tab 栏 50px 并带 `env(safe-area-inset-bottom)`；导航栏右侧只放短按钮或图标。
+
+**H5 发起类入口**：开立、新增等"发起单据"的入口统一放「业务办理 → 业务发起」，列表页（如仓单管理）只做查询与单据操作，不在列表或导航栏重复放「开立 / 新增」按钮。
+
 **工程复用（PC）**：`DetailSection` / `DetailField`、`WarningFilterHeader`、`WarningListPagination`（`B端PC/src/`）；样式类 `.detail-section`、`.detail-field`（`index.css`）。
 
 ### 4.1.2 全局字体与排版约束（PingFang SC 与表格防穿透）
@@ -311,6 +315,7 @@ PRD、ASCII、Demo 与规范文档互相引用章节时**不使用章节符**，
 3. **H5 仅两类补丁**：在 `{feature}-h5.annotation-bindings.ts` 中为对应 `id` 配置 **`targetId`**（DOM 挂载点）与可选 **`contentSuffix`**（必须以 **`【H5 端差异】`** 开头，一句说清入口/控件/底栏与 PC 不同之处）；用 `applyH5PrototypeAnnotationBindings()` 生成 H5 最终数组。
 4. **禁止**：H5 单独改规则结论、单独编号、单独 Mermaid/字段表（除非三件套已先改 shared）；三件套挂载路径双端一致。
 5. **交付自检**：见对齐说明第 4 节；派生原型时纳入 [5-1 交付检查](./05-常用模板/需求处理/5-1%20(输入)交付检查与原型派生.md) **D6**。
+6. **标注视图（H5）**：右侧悬浮栏顶部提供与 PC 一致的「只看 6.3 变更 / 全部原型 / 还原线上」三档，H5 不挂「迭代记录」「功能与数据权限」。6.3 归属按 `03-前端原型demo/B端H5/src/shared/annotations/annotation-versions.ts` 的前缀口径（真源为 `02-PRD文档/B-迭代需求/6.3版本（2026.09）/00-菜单迭代记录.md`），新版本上线时只改这一处。
 
 ### 4.3 PC 工作中心 · 审批中心首页布局（原型与线上一致）
 

@@ -88,7 +88,7 @@ export function ReceiptRelocatePage() {
     <MobileShell>
       <div className="flex min-h-0 flex-1 flex-col bg-[#edf2f8]">
         <PrototypeAnnotationTarget
-          annotationIds={["receipt-h5-ops-relocate"]}
+          annotationIds={["receipt-ops-relocate"]}
           className="flex min-h-0 flex-1 flex-col"
         >
           <NavBar title="仓单移库" onBack={() => navigate(-1)} />

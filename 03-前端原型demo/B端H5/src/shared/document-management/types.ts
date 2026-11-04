@@ -26,7 +26,7 @@ export interface DocumentItem {
   orderNo: string
   approvalId: string
   orderType: "inbound" | "outbound"
-  /** "1" 申请阶段 / "2" 核验阶段 / "3" 终审阶段 / "9527" 事后综合补充 */
+  /** "1" 入/出库发起 · "9527" 补充资料（与上传关联流程、时间轴节点一致） */
   flowType: string
   flowNodeTitle: string
   nature: DocNature

@@ -25,9 +25,9 @@ export const warehouseReceiptH5ListAnnotationBindings: Record<
       "【H5 端差异】卡片仅保留「详情」与「··· 更多」，8 项操作统一在底部操作面板展开，避免卡片高度跳动。",
   },
   "receipt-list-issue-guide": {
-    targetId: "receipt-h5-list-issue",
+    targetId: "receipt-h5-list-page",
     contentSuffix:
-      "【H5 端差异】移动端直接提供「开立」入口，进入四步开立流程，不再展示扫码引导弹窗。",
+      "【H5 端差异】移动端不在仓单管理列表里重复放「开立」按钮，统一从「业务办理 → 业务发起 → 仓单开立」进入两步开立流程，仓单管理只做查询与仓单操作。",
   },
 }
 

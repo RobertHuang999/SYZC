@@ -118,6 +118,36 @@
       "recordStatus": "6.3-delivered",
       "changeNote": "6.3：权人/质权人嵌入式选择器（资金方信息·服务方信息域；archiveMenu 隔离）",
       "updatedAt": "2026-10-20"
+    },
+    {
+      "platform": "PC",
+      "level1Menu": "库存查询",
+      "level2Menu": "存货管理",
+      "recordStatus": "6.3-delivered",
+      "actionPermissions": "查看页面、存货详情、批量导出、导出记录",
+      "dataPermission": "1、可见数据为账号上赋予的仓库权限决定；2、货品价格为登录账号归属机构设置的单价；3、组合导出全量为权限内全量，不受当前列表筛选（明细 Sheet 同「仅查看有库存的」）",
+      "changeNote": "6.3 P1：跨菜单批量导出弹窗（本菜单/其他菜单，默认仅本菜单）；与库存明细、库存流水共用导出记录队列；跨多类菜单为 zip",
+      "updatedAt": "2026-11-04"
+    },
+    {
+      "platform": "PC",
+      "level1Menu": "库存查询",
+      "level2Menu": "库存明细",
+      "recordStatus": "6.3-delivered",
+      "actionPermissions": "查看页面、详情、批量导出、导出记录",
+      "dataPermission": "仓库权限；组合导出全量为权限内仍有库存余量的明细，不受当前列表筛选",
+      "changeNote": "6.3 P1：新增批量导出与导出记录；跨菜单组合导出与存货管理、库存流水共用任务队列",
+      "updatedAt": "2026-11-04"
+    },
+    {
+      "platform": "PC",
+      "level1Menu": "库存查询",
+      "level2Menu": "库存流水",
+      "recordStatus": "6.3-delivered",
+      "actionPermissions": "查看页面、详情、批量导出、导出记录",
+      "dataPermission": "仓库权限；组合导出全量为权限内流水全量，不受当前列表筛选（与行级【下载记录】区分）",
+      "changeNote": "6.3 P1：新增批量导出与导出记录；跨菜单组合导出与存货管理、库存明细共用任务队列",
+      "updatedAt": "2026-11-04"
     }
   ],
   "append": [

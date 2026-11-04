@@ -87,6 +87,8 @@ export type WarehouseReceipt = {
   creatorDisplay: string
   createdAt: string
   cancelledAt?: string
+  /** 关联单号（如抵质押申请单号，存在时可在详情页穿透查看） */
+  relatedId?: string
   /** 当前在途未办结流程（用于演示 R-DWR-04 互斥拦截） */
   currentFlow?: ReceiptFlowType
   goodsGroups: ReceiptGoodsGroup[]
@@ -173,6 +175,8 @@ export const RECEIPT_NORMAL_ACTIONS: ReceiptRowAction[] = [
 ]
 
 export const RECEIPT_READONLY_ACTIONS: ReceiptRowAction[] = ["detail", "download"]
+/** 审批中状态仅允许查看详情，严禁下载与动碰（对齐源码 status==3） */
+export const RECEIPT_PENDING_ACTIONS: ReceiptRowAction[] = ["detail"]
 
 export const RECEIPT_ACTION_LABEL: Record<ReceiptRowAction, string> = {
   detail: "详情",
@@ -196,12 +200,15 @@ export const RECEIPT_MOBILE_FACE_ACTIONS: ReceiptRowAction[] = [
 ]
 
 export function receiptActionsForStatus(status: ReceiptStatus): ReceiptRowAction[] {
-  return status === "NORMAL" ? RECEIPT_NORMAL_ACTIONS : RECEIPT_READONLY_ACTIONS
+  if (status === "NORMAL") return RECEIPT_NORMAL_ACTIONS
+  if (status === "PENDING") return RECEIPT_PENDING_ACTIONS
+  return RECEIPT_READONLY_ACTIONS
 }
 
-/** 四位小数以内，去掉无意义末尾 0 */
-export function formatReceiptQuantity(value: number): string {
-  return Number(value.toFixed(4)).toString()
+/** 四位小数以内，去掉无意义末尾 0（防御性处理，防止 undefined 崩溃） */
+export function formatReceiptQuantity(value: number | undefined | null): string {
+  if (value === undefined || value === null || Number.isNaN(Number(value))) return "0"
+  return Number(Number(value).toFixed(4)).toString()
 }
 
 /** 列表「货物名称」单行：大类-品类-规格-数量单位 */

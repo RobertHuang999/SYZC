@@ -106,6 +106,24 @@ export function WarehouseReceiptDetailPage() {
       showToast(`电子仓单正本 ${receipt.code}.pdf 生成中`)
       return
     }
+
+    // 检查持有人不一致限制
+    const isHolderDifferent =
+      receipt.holder.name !== receipt.owner.name ||
+      receipt.holder.identifier !== receipt.owner.identifier
+
+    if (
+      isHolderDifferent &&
+      (action === "replenish" || action === "relocate" || action === "inbound")
+    ) {
+      setNotice({
+        title: "操作受限",
+        description:
+          "当前仓单持有人与原始存货人不一致。依据存货监管合规风控规则，仅允许原始存货人办理补货、移库或入库业务。",
+      })
+      return
+    }
+
     if (
       receipt.currentFlow &&
       ["replenish", "outbound", "relocate", "cancel"].includes(action)
@@ -133,7 +151,7 @@ export function WarehouseReceiptDetailPage() {
 
   return (
     <MobileShell>
-      <PrototypeAnnotationTarget annotationIds={["receipt-h5-detail-page"]}>
+      <PrototypeAnnotationTarget annotationIds={["receipt-detail-page"]}>
         <NavBar
           title="仓单详情"
           backTo={RECEIPT_H5_LIST_ROUTE}
@@ -156,7 +174,7 @@ export function WarehouseReceiptDetailPage() {
       </PrototypeAnnotationTarget>
 
       <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto bg-[#edf2f8] p-3 pb-24">
-        <PrototypeAnnotationTarget annotationIds={["receipt-h5-detail-basic"]}>
+        <PrototypeAnnotationTarget annotationIds={["receipt-detail-basic"]}>
           <section className="rounded-xl border border-[#232D39]/10 bg-white p-3.5 shadow-xs">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -168,7 +186,7 @@ export function WarehouseReceiptDetailPage() {
                   制单人：{receipt.creatorDisplay} · {receipt.createdAt}
                 </p>
               </div>
-              <PrototypeAnnotationTarget annotationIds={["receipt-h5-detail-seal"]}>
+              <PrototypeAnnotationTarget annotationIds={["receipt-detail-seal"]}>
                 <div
                   className="flex size-16 shrink-0 flex-col items-center justify-center rounded-full text-white shadow-sm"
                   style={{ backgroundColor: seal.background }}
@@ -218,6 +236,30 @@ export function WarehouseReceiptDetailPage() {
                   </span>
                 }
               />
+              {receipt.relatedId ? (
+                <DetailRow
+                  label="关联单号"
+                  value={
+                    <span className="flex items-center justify-end gap-1.5">
+                      <span className="font-mono text-blue-600 font-medium">
+                        {receipt.relatedId}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setNotice({
+                            title: "抵质押关联单据穿透",
+                            description: `当前仓单已关联至业务单号【${receipt.relatedId}】。系统已锁定监管仓单状态，任何物权转移或动碰均需同步通知授信金融机构。`,
+                          })
+                        }
+                        className="rounded bg-blue-50 px-1.5 py-0.5 text-[11px] font-medium text-blue-600 active:bg-blue-100"
+                      >
+                        查看
+                      </button>
+                    </span>
+                  }
+                />
+              ) : null}
               <DetailRow label="三方登记" value={receipt.thirdPartyRegistered ? "是" : "否"} />
               {receipt.cancelledAt ? (
                 <DetailRow label="注销时间" value={receipt.cancelledAt} />
@@ -279,7 +321,7 @@ export function WarehouseReceiptDetailPage() {
 
         {tab === "goods" ? (
           <PrototypeAnnotationTarget
-            annotationIds={["receipt-h5-detail-goods", "receipt-h5-detail-barcode"]}
+            annotationIds={["receipt-detail-goods", "receipt-detail-barcode"]}
           >
             <div className="space-y-2.5">
               {receipt.goodsGroups.map((group, index) => {
@@ -370,7 +412,7 @@ export function WarehouseReceiptDetailPage() {
             </div>
           </PrototypeAnnotationTarget>
         ) : (
-          <PrototypeAnnotationTarget annotationIds={["receipt-h5-detail-changes"]}>
+          <PrototypeAnnotationTarget annotationIds={["receipt-detail-changes"]}>
             <div className="space-y-2.5">
               {receipt.changes.length === 0 ? (
                 <p className="rounded-xl bg-white py-10 text-center text-xs text-[#232D39]/40">

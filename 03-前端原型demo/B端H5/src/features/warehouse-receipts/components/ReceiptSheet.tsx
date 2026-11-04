@@ -95,14 +95,8 @@ export function ReceiptSelectSheet({
   onSelect: (option: ReceiptSelectOption) => void
   theme?: "blue" | "gold"
 }) {
-  const activeClass =
-    theme === "gold"
-      ? "border-[#E6C98F] bg-[#FBF4E6]"
-      : "border-blue-300 bg-blue-50/70"
-  const radioClass =
-    theme === "gold"
-      ? "border-[#E0A23C] bg-[#E0A23C]"
-      : "border-blue-600 bg-blue-600"
+  const activeClass = "border-blue-300 bg-blue-50/70"
+  const radioClass = "border-blue-600 bg-blue-600"
 
   return (
     <ReceiptSheet open={open} title={title} description={description} onClose={onClose}>

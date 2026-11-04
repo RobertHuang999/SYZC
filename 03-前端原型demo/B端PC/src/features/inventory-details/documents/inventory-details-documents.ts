@@ -1,9 +1,10 @@
 import type { PrototypeDocument } from "@/shared/annotations/PrototypeAnnotationLayer"
+import { withInventoryCrossExportDelta } from "@/features/shared/inventory-cross-export/inventory-cross-export-documents"
 import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/02-仓储/03-库存查询-库存明细/库存明细主PRD.md?raw"
 import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/02-仓储/03-库存查询-库存明细/库存明细字段清单.md?raw"
 import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/02-仓储/03-库存查询-库存明细/库存明细业务规则规格.md?raw"
 
-export const inventoryDetailsDocuments: PrototypeDocument[] = [
+const inventoryDetailsDocumentsBase: PrototypeDocument[] = [
   {
     id: "prd",
     title: "主PRD规格",
@@ -23,4 +24,8 @@ export const inventoryDetailsDocuments: PrototypeDocument[] = [
     category: "状态机与业务规则",
   },
 ]
+
+export const inventoryDetailsDocuments = withInventoryCrossExportDelta(
+  inventoryDetailsDocumentsBase
+)
 

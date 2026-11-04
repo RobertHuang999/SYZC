@@ -28,6 +28,12 @@ import {
 } from "lucide-react"
 import type { DocumentItem, DocFileType } from "../types"
 import { addDocumentItems } from "../mock"
+import {
+  getUploadFlowOptions,
+  INBOUND_UPLOAD_FLOW_OPTIONS,
+  OUTBOUND_UPLOAD_FLOW_OPTIONS,
+  resolveUploadFlowType,
+} from "@prototype/shared/document-management/upload-flow-options"
 
 interface UploadSupplementaryModalProps {
   open: boolean
@@ -48,61 +54,11 @@ export const MAX_DOC_COUNT = 10
 /** 单个文件最大体积 (50MB) */
 export const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024
 
-/** 入库业务流程阶段选项 */
-export const INBOUND_STAGE_OPTIONS = [
-  {
-    value: "1",
-    label: "入库申请初审",
-    stageText: "【入库申请初审】阶段",
-    hint: "现场随车送货单、进场交接单、实物照片等",
-  },
-  {
-    value: "2",
-    label: "过磅核验",
-    stageText: "【过磅核验】阶段",
-    hint: "现场地磅过磅单、复磅更正函、称重凭据等",
-  },
-  {
-    value: "3",
-    label: "入库终审与质检",
-    stageText: "【入库终审与质检】阶段",
-    hint: "SGS第三方化验单、商检证书、品质报告等",
-  },
-  {
-    value: "9527",
-    label: "事后补充资料",
-    stageText: "【事后综合补充】节点",
-    hint: "仓储费结算发票、货转协议等通用补充",
-  },
-]
+/** @deprecated 请使用 shared `INBOUND_UPLOAD_FLOW_OPTIONS` */
+export const INBOUND_STAGE_OPTIONS = INBOUND_UPLOAD_FLOW_OPTIONS
 
-/** 出库业务流程阶段选项 */
-export const OUTBOUND_STAGE_OPTIONS = [
-  {
-    value: "1",
-    label: "出库申请审核",
-    stageText: "【出库申请审核】阶段",
-    hint: "出库申请单、提货委托书、货权人证明等",
-  },
-  {
-    value: "2",
-    label: "出场过磅核验",
-    stageText: "【出场过磅核验】阶段",
-    hint: "出库地磅单、出场实车交接单据等",
-  },
-  {
-    value: "3",
-    label: "出库终审放行",
-    stageText: "【出库终审放行】阶段",
-    hint: "放行确认单、出库品质检验单据等",
-  },
-  {
-    value: "9527",
-    label: "事后补充资料",
-    stageText: "【事后综合补充】节点",
-    hint: "运费结算单、运单发票等通用补充",
-  },
-]
+/** @deprecated 请使用 shared `OUTBOUND_UPLOAD_FLOW_OPTIONS` */
+export const OUTBOUND_STAGE_OPTIONS = OUTBOUND_UPLOAD_FLOW_OPTIONS
 
 export interface SelectedFileItem {
   id: string
@@ -163,13 +119,15 @@ export function UploadSupplementaryModal({
   orderNo,
   approvalId = "SP202605280001",
   orderType,
-  defaultFlowType = "2",
+  defaultFlowType = "1",
   onClose,
   onSuccess,
 }: UploadSupplementaryModalProps) {
-  const stageOptions = orderType === "outbound" ? OUTBOUND_STAGE_OPTIONS : INBOUND_STAGE_OPTIONS
+  const stageOptions = getUploadFlowOptions(orderType)
 
-  const [selectedFlowType, setSelectedFlowType] = useState<string>(defaultFlowType)
+  const [selectedFlowType, setSelectedFlowType] = useState<string>(() =>
+    resolveUploadFlowType(defaultFlowType),
+  )
   const [description, setDescription] = useState("")
   const [selectedFiles, setSelectedFiles] = useState<SelectedFileItem[]>([])
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -180,7 +138,7 @@ export function UploadSupplementaryModal({
   // 当弹窗打开或传入阶段发生变化时同步默认阶段并重置状态
   useEffect(() => {
     if (open) {
-      setSelectedFlowType(defaultFlowType || "2")
+      setSelectedFlowType(resolveUploadFlowType(defaultFlowType))
       setDescription("")
       setSelectedFiles([])
       setErrorMessage(null)
@@ -399,10 +357,10 @@ export function UploadSupplementaryModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-1">
-          {/* 关联流程阶段 */}
+          {/* 关联流程 */}
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-slate-700">
-              <span className="text-destructive mr-1">*</span>关联流程阶段：
+              <span className="text-destructive mr-1">*</span>关联流程：
             </Label>
 
             <Select
@@ -416,7 +374,7 @@ export function UploadSupplementaryModal({
                 <SelectValue>
                   {(value) => {
                     const matched = stageOptions.find((s) => s.value === value)
-                    return matched ? matched.stageText : "请选择关联流程阶段"
+                    return matched ? matched.stageText : "请选择关联流程"
                   }}
                 </SelectValue>
               </SelectTrigger>

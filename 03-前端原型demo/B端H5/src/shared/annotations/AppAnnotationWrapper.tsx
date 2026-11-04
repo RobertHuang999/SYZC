@@ -245,13 +245,17 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
     const isNewWarehouse =
       location.pathname === "/m/workspace/config/new-warehouse" ||
       location.pathname === "/m/config/warehouses/new"
+    const isWarehouseForm =
+      isNewWarehouse || location.pathname.endsWith("/edit")
     const isList =
       location.pathname === "/m/workspace/config/warehouse-management" ||
       location.pathname === "/m/config/warehouses"
     pageTitle = isNewWarehouse
       ? "新增仓库 · 移动端交互与 PRD 标注"
-      : "仓库管理 · 移动端交互与 PRD 标注"
-    currentAnnotations = isNewWarehouse
+      : location.pathname.endsWith("/edit")
+        ? "编辑仓库 · 移动端交互与 PRD 标注"
+        : "仓库管理 · 移动端交互与 PRD 标注"
+    currentAnnotations = isWarehouseForm
       ? warehouseH5FormAnnotations
       : isList
         ? warehouseH5ListAnnotations

@@ -16,6 +16,7 @@ export const RECEIPT_H5_INITIATE_PATH = "/m/receipts/initiate"
 export const RECEIPT_H5_INITIATE_GOODS_PATH = "/m/receipts/initiate/goods"
 export const RECEIPT_H5_INITIATE_CONFIRM_PATH = "/m/receipts/initiate/confirm"
 export const RECEIPT_H5_INITIATE_SIGN_PATH = "/m/receipts/initiate/sign"
+export const RECEIPT_H5_INITIATE_SUCCESS_PATH = "/m/receipts/initiate/success"
 
 export const RECEIPT_H5_WORKSPACE_PATH = "/m/workspace"
 

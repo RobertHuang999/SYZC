@@ -58,6 +58,9 @@ import { InboundRecordDetailPage } from "@/features/inbound-records/pages/Inboun
 import { OutboundRecordListPage } from "@/features/outbound-records/pages/OutboundRecordListPage"
 import { OutboundRecordFormPage } from "@/features/outbound-records/pages/OutboundRecordFormPage"
 import { OutboundRecordDetailPage } from "@/features/outbound-records/pages/OutboundRecordDetailPage"
+import { TransferRecordListPage } from "@/features/inventory-transfer-records/pages/TransferRecordListPage"
+import { TransferRecordFormPage } from "@/features/inventory-transfer-records/pages/TransferRecordFormPage"
+import { TransferRecordDetailPage } from "@/features/inventory-transfer-records/pages/TransferRecordDetailPage"
 import { DeliveryOrderListPage } from "@/features/delivery-orders/pages/DeliveryOrderListPage"
 import { WarehouseReceiptListPage } from "@/features/warehouse-receipts/pages/WarehouseReceiptListPage"
 import { WarehouseReceiptDetailPage } from "@/features/warehouse-receipts/pages/WarehouseReceiptDetailPage"
@@ -478,6 +481,20 @@ export function AppRoutes() {
           element={<OutboundRecordDetailPage />}
         />
 
+        {/* 仓储 - 移库管理（移库记录） */}
+        <Route
+          path="仓储/移库管理/移库记录"
+          element={<TransferRecordListPage />}
+        />
+        <Route
+          path="仓储/移库管理/移库记录/新增"
+          element={<TransferRecordFormPage />}
+        />
+        <Route
+          path="仓储/移库管理/移库记录/详情/:id"
+          element={<TransferRecordDetailPage />}
+        />
+
         {/* 仓储 - 仓单管理 */}
         <Route
           path="仓储/仓单管理"
@@ -492,6 +509,16 @@ export function AppRoutes() {
         <Route
           path="仓储/提货单"
           element={<DeliveryOrderListPage />}
+        />
+
+        {/* 6.2 菜单更名：旧路径书签兼容 */}
+        <Route
+          path="融资/监管/抵质押业务/抵质押业务管理"
+          element={<Navigate to="/融资/监管/监管业务/监管管理" replace />}
+        />
+        <Route
+          path="融资/监管/监管业务/抵质押业务管理"
+          element={<Navigate to="/融资/监管/监管业务/监管管理" replace />}
         />
 
         {/* 融资监管 · 监管办理（6.3 合作方权人/质权人引用切片） */}

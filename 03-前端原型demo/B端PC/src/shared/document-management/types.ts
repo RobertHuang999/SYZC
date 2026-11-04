@@ -31,7 +31,7 @@ export interface DocumentItem {
   orderNo: string
   approvalId: string
   orderType: "inbound" | "outbound"
-  flowType: string // "1": 申请, "2": 库管审核, "9528": 基础资料, "9527": 补充资料
+  flowType: string // "1" 入/出库发起 · "9527" 补充资料（与上传关联流程、时间轴节点一致）
   flowNodeTitle: string
   nature: DocNature
   category: DocCategory

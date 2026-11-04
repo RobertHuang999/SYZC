@@ -40,6 +40,103 @@ export const GOODS_VARIETY_MAP: Record<string, string[]> = {
   橡胶: ["天然橡胶"],
 }
 
+export type CascaderOption = {
+  value: string
+  label: string
+  children?: CascaderOption[]
+}
+
+/** 货品三级级联选择树：大类 -> 品类 -> 规格（对齐现网源码与真实业务大宗商品） */
+export const GOODS_CASCADER_OPTIONS: CascaderOption[] = [
+  {
+    value: "冻货",
+    label: "冻货",
+    children: [
+      {
+        value: "牛肉",
+        label: "牛肉",
+        children: [{ value: "36个月", label: "36个月" }],
+      },
+      {
+        value: "鸡翅",
+        label: "鸡翅",
+        children: [{ value: "四川-特级-2025", label: "四川-特级-2025" }],
+      },
+    ],
+  },
+  {
+    value: "橡胶",
+    label: "橡胶",
+    children: [
+      {
+        value: "天然橡胶",
+        label: "天然橡胶",
+        children: [{ value: "STR20", label: "STR20" }],
+      },
+    ],
+  },
+  {
+    value: "水果",
+    label: "水果",
+    children: [
+      {
+        value: "西瓜",
+        label: "西瓜",
+        children: [{ value: "超级-宁夏", label: "超级-宁夏" }],
+      },
+      {
+        value: "香蕉",
+        label: "香蕉",
+        children: [{ value: "进口-一级", label: "进口-一级" }],
+      },
+    ],
+  },
+  {
+    value: "蔬菜",
+    label: "蔬菜",
+    children: [
+      {
+        value: "辣椒",
+        label: "辣椒",
+        children: [{ value: "云南-有机", label: "云南-有机" }],
+      },
+    ],
+  },
+  {
+    value: "金属",
+    label: "金属",
+    children: [
+      {
+        value: "电解铜",
+        label: "电解铜",
+        children: [{ value: "阴极铜-A级", label: "阴极铜-A级" }],
+      },
+    ],
+  },
+  {
+    value: "钢材",
+    label: "钢材",
+    children: [
+      {
+        value: "热轧卷板",
+        label: "热轧卷板",
+        children: [{ value: "Q235B-3.5*1500*C", label: "Q235B-3.5*1500*C" }],
+      },
+    ],
+  },
+  {
+    value: "铝锭",
+    label: "铝锭",
+    children: [
+      {
+        value: "铝锭",
+        label: "铝锭",
+        children: [{ value: "AL99.70", label: "AL99.70" }],
+      },
+    ],
+  },
+]
+
 export const THIRD_PARTY_OPTIONS = ["全部", "是", "否"] as const
 
 export const STATUS_FILTER_OPTIONS: Array<{

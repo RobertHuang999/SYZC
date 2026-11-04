@@ -24,6 +24,16 @@ export const warehouseH5FormAnnotations: PrototypeAnnotation[] = [
       "字段分区与校验与 PC「添加仓库」全页一致（基础信息、管理方、中仓登及 F04/F05 附件）；布局为 H5 卡片 + 底部抽屉选型。",
     details: [],
   },
+  {
+    id: "wh-h5-form-edit",
+    targetId: "wh-h5-form-edit",
+    number: 2,
+    kind: "页面",
+    title: "移动端编辑仓库",
+    content:
+      "复用新增仓库的字段分区与校验，标题改为「编辑仓库」；库房、分区与设备设施仍回到仓库详情页维护，不在编辑页重复录入。",
+    details: [],
+  },
 ]
 
 export const warehouseH5DetailAnnotations: PrototypeAnnotation[] = [

@@ -105,8 +105,31 @@ const configSidebarGroupsWith63: SidebarGroup[] = (
   return group
 })
 
+/** 权限 CSV 多行字段导致「监管管理」未进生成菜单；侧栏与占位路由须与权限表、6.2 路径一致 */
+const SUPERVISION_MANAGEMENT_PC_PATH = "/融资/监管/监管业务/监管管理"
+
+const financeSidebarGroupsWithSupervisionMgmt: SidebarGroup[] = (
+  generatedSidebarGroupsByModule.finance ?? []
+).map((group) => {
+  if (group.id !== "监管业务" && group.label !== "监管业务") {
+    return group
+  }
+  const items = [...group.items]
+  if (items.some((item) => item.path === SUPERVISION_MANAGEMENT_PC_PATH)) {
+    return group
+  }
+  const handlingIndex = items.findIndex((item) => item.label === "监管办理")
+  items.splice(
+    handlingIndex >= 0 ? handlingIndex + 1 : items.length,
+    0,
+    { label: "监管管理", path: SUPERVISION_MANAGEMENT_PC_PATH },
+  )
+  return { ...group, items }
+})
+
 const sidebarGroupsByModule: Record<string, SidebarGroup[]> = {
   ...generatedSidebarGroupsByModule,
+  finance: financeSidebarGroupsWithSupervisionMgmt,
   "user-center": [
     {
       id: "partner-archive",
@@ -192,6 +215,7 @@ const PAGE_TAB_TITLE_OVERRIDES: Record<string, string> = {
   "/仓储/入库管理/入库记录/新增": "新增入库",
   "/仓储/入库管理/入库暂存登记/新增": "新增暂存登记",
   "/仓储/出库管理/出库记录/新增": "新增出库",
+  "/仓储/移库管理/移库记录/新增": "新增移库",
   "/仓储/仓单管理": "仓单管理",
 }
 
@@ -205,6 +229,9 @@ function inboundDetailTabTitle(pathname: string): string | undefined {
   }
   if (decoded.includes("/仓储/出库管理/出库记录/详情/")) {
     return "出库单详情"
+  }
+  if (decoded.includes("/仓储/移库管理/移库记录/详情/")) {
+    return "移库单详情"
   }
   if (decoded.includes("/仓储/仓单管理/详情/")) {
     return "仓单详情"

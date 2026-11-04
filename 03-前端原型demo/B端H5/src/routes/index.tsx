@@ -32,6 +32,8 @@ import { WarehouseReceiptListPage } from "@/features/warehouse-receipts/pages/Wa
 import { WarehouseReceiptDetailPage } from "@/features/warehouse-receipts/pages/WarehouseReceiptDetailPage"
 import { ReceiptInitiateOwnerPage } from "@/features/warehouse-receipts/pages/initiate/ReceiptInitiateOwnerPage"
 import { ReceiptInitiateGoodsPage } from "@/features/warehouse-receipts/pages/initiate/ReceiptInitiateGoodsPage"
+import { ReceiptInitiateConfirmPage } from "@/features/warehouse-receipts/pages/initiate/ReceiptInitiateConfirmPage"
+import { ReceiptInitiateSuccessPage } from "@/features/warehouse-receipts/pages/initiate/ReceiptInitiateSuccessPage"
 import { ReceiptOutboundPage } from "@/features/warehouse-receipts/pages/ops/ReceiptOutboundPage"
 import { ReceiptRelocatePage } from "@/features/warehouse-receipts/pages/ops/ReceiptRelocatePage"
 import { ReceiptReplenishPage } from "@/features/warehouse-receipts/pages/ops/ReceiptReplenishPage"
@@ -63,6 +65,9 @@ import {
 } from "@prototype/shared/partner-archives/partner-archive-routes"
 
 const midLoanMenuItem = MOBILE_MENU_ITEMS.find((item) => item.id === "ws-risk-in-loan")
+const supervisionManagementMenuItem = MOBILE_MENU_ITEMS.find(
+  (item) => item.id === "ws-pledge-order-mgr",
+)
 
 function LegacyWarehouseDetailRedirect() {
   const { id } = useParams()
@@ -169,11 +174,15 @@ export function AppRoutes() {
       />
       <Route
         path="/m/receipts/initiate/confirm"
-        element={<Navigate to="/m/receipts/initiate/goods" replace />}
+        element={<ReceiptInitiateConfirmPage />}
+      />
+      <Route
+        path="/m/receipts/initiate/success"
+        element={<ReceiptInitiateSuccessPage />}
       />
       <Route
         path="/m/receipts/initiate/sign"
-        element={<Navigate to="/m/receipts/initiate/goods" replace />}
+        element={<Navigate to="/m/receipts/initiate/confirm" replace />}
       />
       <Route path="/m/receipts/:id/outbound" element={<ReceiptOutboundPage />} />
       <Route path="/m/receipts/:id/relocate" element={<ReceiptRelocatePage />} />
@@ -310,6 +319,22 @@ export function AppRoutes() {
       <Route
         path="/m/finance/pledge-orders"
         element={<PledgeOrderPlaceholderPage />}
+      />
+      <Route
+        path="/m/finance/supervision-management"
+        element={
+          <PrototypeEmptyPage
+            title="监管管理"
+            menuItem={supervisionManagementMenuItem}
+            backTo="/m/workspace"
+          />
+        }
+      />
+      <Route
+        path="/m/module/ws-supervision-order-mgr"
+        element={
+          <Navigate to="/m/finance/supervision-management" replace />
+        }
       />
 
       <Route path="*" element={<Navigate to="/" replace />} />

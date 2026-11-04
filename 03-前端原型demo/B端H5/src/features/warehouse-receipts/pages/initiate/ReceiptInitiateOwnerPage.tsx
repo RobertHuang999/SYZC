@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {
-  ChevronRight,
   UserRound,
   Users,
   Warehouse,
@@ -13,7 +12,6 @@ import { ReceiptSelectSheet } from "../../components/ReceiptSheet"
 import { ReceiptStepBar } from "../../components/ReceiptStepBar"
 import {
   RECEIPT_H5_INITIATE_GOODS_ROUTE,
-  RECEIPT_H5_LIST_ROUTE,
 } from "../../domain/constants"
 import {
   loadReceiptDraft,
@@ -23,10 +21,8 @@ import {
   mobileIssuanceCandidates,
   RECEIPT_OWNER_OPTIONS,
 } from "../../mock/warehouse-receipts.mock"
-import { cn } from "@/lib/utils"
 
-const GOLD_BUTTON =
-  "flex h-12 w-full items-center justify-center rounded-lg bg-[#E0A23C] text-base font-medium text-white active:bg-[#CE8F2C]"
+const INITIATE_STEPS = ["货主主体", "圈选货品", "协议与认证", "完成凭证"] as const
 
 export function ReceiptInitiateOwnerPage() {
   const navigate = useNavigate()
@@ -47,28 +43,30 @@ export function ReceiptInitiateOwnerPage() {
 
   const switchOwnerType = (type: "ENTERPRISE" | "PERSON") => {
     if (type === draft.ownerType) return
+    const isEnterprise = type === "ENTERPRISE"
     setDraft((prev) => ({
       ...prev,
       ownerType: type,
-      ownerId: "",
-      ownerName: "",
-      ownerIdentifier: "",
-      idCardNo: "",
-      warehouseName: "",
+      ownerId: isEnterprise ? "owner-fuyang" : "owner-yuanyuan",
+      ownerName: isEnterprise ? "阜阳市大数据资产运营有限公司" : "张园园",
+      ownerIdentifier: isEnterprise ? "91341202MA2U0JHJ3F" : "138****0001",
+      idCardNo: isEnterprise ? "" : "341202199001011234",
+      warehouseName: "生鲜仓库",
       deductMode: "FIFO",
       fifoGoodsKey: "",
       fifoTotal: "",
       selectedCandidateIds: [],
       allocations: {},
-      handledBy: "",
-      handledMobile: "",
-      handledByNo: "",
+      handledBy: isEnterprise ? "王建国" : "",
+      handledMobile: isEnterprise ? "13800138001" : "",
+      handledByNo: isEnterprise ? "341202198501011234" : "",
     }))
   }
 
   const pickOwner = (ownerId: string) => {
     const owner = RECEIPT_OWNER_OPTIONS.find((item) => item.id === ownerId)
     if (!owner) return
+    const isEnterprise = owner.type === "ENTERPRISE"
     setDraft((prev) => ({
       ...prev,
       ownerId: owner.id,
@@ -76,12 +74,15 @@ export function ReceiptInitiateOwnerPage() {
       ownerName: owner.name,
       ownerIdentifier: owner.identifier,
       idCardNo: owner.idCardNo,
-      warehouseName: "",
+      warehouseName: "生鲜仓库",
       deductMode: "FIFO",
       fifoGoodsKey: "",
       fifoTotal: "",
       selectedCandidateIds: [],
       allocations: {},
+      handledBy: isEnterprise ? (prev.handledBy || (owner.id === "owner-fuyang" ? "王建国" : "李明德")) : "",
+      handledMobile: isEnterprise ? (prev.handledMobile || (owner.id === "owner-fuyang" ? "13800138001" : "13912345678")) : "",
+      handledByNo: isEnterprise ? (prev.handledByNo || (owner.id === "owner-fuyang" ? "341202198501011234" : "320214198205051234")) : "",
     }))
   }
 
@@ -117,19 +118,22 @@ export function ReceiptInitiateOwnerPage() {
 
   return (
     <MobileShell>
-      <div className="flex min-h-0 flex-1 flex-col bg-gradient-to-b from-[#FBF3E3] via-[#FDF9F0] to-[#F2F3F7]">
-        <PrototypeAnnotationTarget annotationIds={["receipt-h5-initiate-page"]}>
-          <NavBar title="仓单开立" backTo={RECEIPT_H5_LIST_ROUTE} />
+      {/* 统一为全站标准底色 bg-[#edf2f8] */}
+      <div className="flex min-h-0 flex-1 flex-col bg-[#edf2f8]">
+        {/* 顶部导航 */}
+        <PrototypeAnnotationTarget annotationIds={["receipt-initiate-page"]}>
+          <NavBar title="仓单开立" backTo="/m/tasks" />
         </PrototypeAnnotationTarget>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-28">
-          <ReceiptStepBar current={0} theme="gold" />
+          {/* 4 步步骤条：对齐经典蓝 theme="blue" */}
+          <ReceiptStepBar current={0} steps={INITIATE_STEPS} theme="blue" />
 
-          <PrototypeAnnotationTarget annotationIds={["receipt-h5-initiate-owner"]}>
-            <section className="rounded-2xl bg-white p-4 shadow-sm">
+          <PrototypeAnnotationTarget annotationIds={["receipt-initiate-owner"]}>
+            <section className="rounded-2xl border border-[#232D39]/8 bg-white p-4 shadow-xs">
               <h3 className="flex items-center gap-2 text-base font-semibold text-[#232D39]">
-                <UserRound className="size-5 text-[#E0A23C]" />
-                货主信息
+                <UserRound className="size-5 text-blue-600" />
+                货主主体信息
               </h3>
 
               <div className="mt-3 divide-y divide-[#232D39]/6">
@@ -148,12 +152,11 @@ export function ReceiptInitiateOwnerPage() {
                           key={value}
                           type="button"
                           onClick={() => switchOwnerType(value)}
-                          className={cn(
-                            "min-w-[68px] rounded-md px-4 py-1.5 text-sm",
+                          className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all ${
                             active
-                              ? "bg-[#FBF0D9] font-medium text-[#C98A1E] ring-1 ring-[#EFD9AE]"
-                              : "bg-[#F2F3F5] text-[#232D39]/55",
-                          )}
+                              ? "bg-blue-600 text-white shadow-2xs"
+                              : "bg-[#232D39]/5 text-[#232D39]/65 active:bg-[#232D39]/10"
+                          }`}
                         >
                           {label}
                         </button>
@@ -168,19 +171,18 @@ export function ReceiptInitiateOwnerPage() {
                   className="flex w-full items-center justify-between gap-3 py-3 text-left"
                 >
                   <FieldLabel>货主名称</FieldLabel>
-                  <span className="flex min-w-0 items-center gap-1">
+                  <div className="flex min-w-0 items-center gap-1">
                     <span
-                      className={cn(
-                        "truncate text-sm",
+                      className={`truncate text-sm ${
                         draft.ownerName
                           ? "font-medium text-[#232D39]"
-                          : "text-[#232D39]/30",
-                      )}
+                          : "text-[#232D39]/30"
+                      }`}
                     >
                       {draft.ownerName || "请选择货主"}
                     </span>
-                    <ChevronRight className="size-4 shrink-0 text-[#232D39]/30" />
-                  </span>
+                    <span className="text-xs text-blue-600">修改</span>
+                  </div>
                 </button>
 
                 <ReadonlyRow
@@ -198,22 +200,22 @@ export function ReceiptInitiateOwnerPage() {
             </section>
 
             {draft.ownerType === "ENTERPRISE" ? (
-              <section className="mt-3 rounded-2xl bg-white p-4 shadow-sm">
+              <section className="mt-3 rounded-2xl border border-[#232D39]/8 bg-white p-4 shadow-xs">
                 <h3 className="flex items-center gap-2 text-base font-semibold text-[#232D39]">
-                  <Users className="size-5 text-[#E0A23C]" />
-                  经办人信息
+                  <Users className="size-5 text-blue-600" />
+                  经办人信息（企业办理人）
                 </h3>
                 <div className="mt-3 divide-y divide-[#232D39]/6">
                   <InputRow
                     label="经办人姓名"
                     value={draft.handledBy}
-                    placeholder="请填写"
+                    placeholder="请填写真实姓名"
                     onChange={(value) => patch({ handledBy: value })}
                   />
                   <InputRow
                     label="经办人手机号"
                     value={draft.handledMobile}
-                    placeholder="请输入 11 位手机号"
+                    placeholder="请输入 11 位手机号（接收验证码）"
                     maxLength={11}
                     inputMode="numeric"
                     onChange={(value) =>
@@ -223,7 +225,7 @@ export function ReceiptInitiateOwnerPage() {
                   <InputRow
                     label="经办人身份证号"
                     value={draft.handledByNo}
-                    placeholder="请输入 18 位身份证号"
+                    placeholder="请输入 18 位二代身份证号码"
                     maxLength={18}
                     onChange={(value) =>
                       patch({ handledByNo: value.replace(/\s/g, "") })
@@ -234,38 +236,45 @@ export function ReceiptInitiateOwnerPage() {
             ) : null}
 
             {draft.ownerId && candidateWarehouses.length > 0 ? (
-              <p className="mt-3 flex items-center gap-1 px-1 text-[11px] text-[#232D39]/45">
-                <Warehouse className="size-3.5" />
+              <p className="mt-3 flex items-center gap-1 px-1 text-[11px] text-[#232D39]/50">
+                <Warehouse className="size-3.5 text-blue-600" />
                 该货主在 {new Set(candidateWarehouses.map((item) => item.warehouseName)).size}{" "}
-                个仓库有可开立的在库库存，下一步选择货品
+                个仓库有可开立的在库合规库存，点击下一步进入货品圈选
               </p>
             ) : null}
           </PrototypeAnnotationTarget>
         </div>
 
+        {/* 底部吸底主按钮：统一经典蓝 blue-600 */}
         <div className="absolute inset-x-0 bottom-0 z-20 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(35,45,57,0.06)]">
-          <button type="button" onClick={goNext} className={GOLD_BUTTON}>
-            下一步
+          <button
+            type="button"
+            onClick={goNext}
+            className="flex h-12 w-full items-center justify-center rounded-xl bg-blue-600 text-base font-semibold text-white shadow-md active:bg-blue-700"
+          >
+            下一步：圈选货品
           </button>
         </div>
 
+        {/* 货主选择 Sheet：对齐经典蓝 theme="blue" */}
         <ReceiptSelectSheet
           open={ownerSheetOpen}
           title={`选择${draft.ownerType === "ENTERPRISE" ? "企业" : "个人"}货主`}
-          description="货主标识由档案自动带出"
+          description="货主标识与资质由机构档案中心自动带出"
           options={ownerOptions.map((owner) => ({
             id: owner.id,
             label: owner.name,
-            description: `货主标识：${owner.identifier}`,
+            description: `标识：${owner.identifier}`,
           }))}
           selectedId={draft.ownerId}
           onClose={() => setOwnerSheetOpen(false)}
           onSelect={(option) => pickOwner(option.id)}
-          theme="gold"
+          theme="blue"
         />
 
+        {/* 轻提示 Toast */}
         {toast ? (
-          <div className="fixed bottom-24 left-1/2 z-50 max-w-[90%] -translate-x-1/2 rounded-full bg-black/80 px-4 py-1.5 text-center text-xs text-white">
+          <div className="fixed bottom-24 left-1/2 z-50 max-w-[90%] -translate-x-1/2 rounded-full bg-black/85 px-4 py-2 text-center text-xs text-white shadow-lg">
             {toast}
           </div>
         ) : null}
@@ -276,7 +285,7 @@ export function ReceiptInitiateOwnerPage() {
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="shrink-0 text-sm text-[#232D39]">
+    <span className="shrink-0 text-sm font-medium text-[#232D39]">
       <span className="mr-0.5 text-[#EF3E3E]">*</span>
       {children}
     </span>
@@ -293,7 +302,7 @@ function ReadonlyRow({
   return (
     <div className="flex items-center justify-between gap-3 py-3">
       <FieldLabel>{label}</FieldLabel>
-      <span className="min-w-0 truncate text-sm text-[#232D39]">{value}</span>
+      <span className="min-w-0 truncate text-sm font-medium text-[#232D39]">{value}</span>
     </div>
   )
 }

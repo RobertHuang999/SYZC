@@ -475,6 +475,20 @@ export const iterationRecords: IterationRecordEntry[] = [
   },
   {
     "id": "28",
+    "version": "6.3",
+    "platform": "PC",
+    "type": "新增能力",
+    "title": "库存查询 · 跨菜单批量导出",
+    "before": "仓储 / 库存查询 / 存货管理（三 Tab）、库存明细、库存流水",
+    "after": "任一入口【批量导出】→ 弹窗「请选择要导出的内容」；本菜单/其他菜单两区，默认仅本菜单；异步 + 统一导出记录；明细全量 = 仅查看有库存的",
+    "priority": "P1",
+    "deliveryTag": "必交付",
+    "note": "增量 SSOT：[15-仓储-库存查询-跨菜单批量导出规格.md](./15-仓储-库存查询-跨菜单批量导出规格.md)；不复制基准三件套，上线后回写最新基准版",
+    "date": "2026-11-04",
+    "sourceDoc": "15-仓储-库存查询-跨菜单批量导出规格.md"
+  },
+  {
+    "id": "29",
     "version": "6.2",
     "platform": "PC",
     "type": "更名",
@@ -488,7 +502,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "B端PC/00-菜单地图.md"
   },
   {
-    "id": "29",
+    "id": "30",
     "version": "6.2",
     "platform": "双端",
     "type": "新增",
@@ -502,7 +516,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "06-门禁开锁审批/门禁开锁审批总索引.md"
   },
   {
-    "id": "30",
+    "id": "31",
     "version": "6.2",
     "platform": "PC",
     "type": "新增",
@@ -516,7 +530,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "03-预警配置/01预警等级/预警等级主PRD.md"
   },
   {
-    "id": "31",
+    "id": "32",
     "version": "6.2",
     "platform": "PC",
     "type": "结构",
@@ -530,7 +544,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "00-PC菜单地图（目标态）.md"
   },
   {
-    "id": "32",
+    "id": "33",
     "version": "6.2",
     "platform": "PC",
     "type": "迁移",
@@ -544,7 +558,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "01-物联网IOT管理/物联网IOT管理总索引.md"
   },
   {
-    "id": "33",
+    "id": "34",
     "version": "6.2",
     "platform": "PC",
     "type": "迁移",
@@ -558,7 +572,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "02-预警信息/预警信息总索引.md"
   },
   {
-    "id": "34",
+    "id": "35",
     "version": "6.2",
     "platform": "PC",
     "type": "迁移",
@@ -572,7 +586,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "03-预警配置/预警配置总索引.md"
   },
   {
-    "id": "35",
+    "id": "36",
     "version": "6.2",
     "platform": "PC",
     "type": "取消",
@@ -586,7 +600,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "04-历史迁移与割接方案/6.1→6.2 三旧模块兼容总说明.md"
   },
   {
-    "id": "36",
+    "id": "37",
     "version": "6.2",
     "platform": "PC",
     "type": "取消",
@@ -600,7 +614,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "同上"
   },
   {
-    "id": "37",
+    "id": "38",
     "version": "6.2",
     "platform": "PC",
     "type": "下线",
@@ -614,7 +628,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "功能与数据权限清单.csv"
   },
   {
-    "id": "38",
+    "id": "39",
     "version": "6.2",
     "platform": "PC",
     "type": "重命名",
@@ -628,7 +642,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "[04-融资监管-菜单更名与监管管理口径.md](./04-融资监管-菜单更名与监管管理口径.md)"
   },
   {
-    "id": "39",
+    "id": "40",
     "version": "6.2",
     "platform": "PC",
     "type": "重命名",
@@ -642,7 +656,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "同上"
   },
   {
-    "id": "40",
+    "id": "41",
     "version": "6.2",
     "platform": "移动",
     "type": "结构合并",
@@ -656,7 +670,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "同上"
   },
   {
-    "id": "41",
+    "id": "42",
     "version": "6.2",
     "platform": "移动",
     "type": "重命名",
@@ -670,7 +684,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "同上"
   },
   {
-    "id": "42",
+    "id": "43",
     "version": "6.2",
     "platform": "移动",
     "type": "更名",
@@ -684,7 +698,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "B端H5/00-菜单地图.md"
   },
   {
-    "id": "43",
+    "id": "44",
     "version": "6.2",
     "platform": "双端",
     "type": "更名",
@@ -698,7 +712,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "功能与数据权限清单.csv"
   },
   {
-    "id": "44",
+    "id": "45",
     "version": "6.2",
     "platform": "双端",
     "type": "更名",
@@ -712,7 +726,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "功能与数据权限清单.csv"
   },
   {
-    "id": "45",
+    "id": "46",
     "version": "6.2",
     "platform": "PC",
     "type": "新增",
@@ -726,7 +740,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "02-预警信息/04风险公示/风险公示主PRD.md"
   },
   {
-    "id": "46",
+    "id": "47",
     "version": "6.1",
     "platform": "双端",
     "type": "新增",
@@ -740,7 +754,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "加工管理/加工管理主PRD.md"
   },
   {
-    "id": "47",
+    "id": "48",
     "version": "6.1",
     "platform": "双端",
     "type": "新增",
@@ -754,7 +768,7 @@ export const iterationRecords: IterationRecordEntry[] = [
     "sourceDoc": "融资管理/04线上抵质押办理/线上抵质押办理主PRD.md"
   },
   {
-    "id": "48",
+    "id": "49",
     "version": "6.1",
     "platform": "PC",
     "type": "新增",

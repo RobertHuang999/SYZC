@@ -34,7 +34,7 @@ export function DocumentManagementTab({
   const [refreshKey, setRefreshKey] = useState(0)
   const [lastUploadedFlowType, setLastUploadedFlowType] = useState<string | null>(null)
   const [uploadOpen, setUploadOpen] = useState(false)
-  const [uploadFlowType, setUploadFlowType] = useState("2")
+  const [uploadFlowType, setUploadFlowType] = useState("1")
 
   const [pdfDoc, setPdfDoc] = useState<DocumentItem | null>(null)
   const [imageDoc, setImageDoc] = useState<DocumentItem | null>(null)
@@ -83,8 +83,8 @@ export function DocumentManagementTab({
       const stage = getStageOptions(orderType).find((s) => s.value === primary.flowType)
       showToast(
         docs.length > 1
-          ? `已批量补充 ${docs.length} 份资料至【${stage?.label ?? primary.flowNodeTitle}】阶段`
-          : `资料已补充挂载至【${stage?.label ?? primary.flowNodeTitle}】阶段`
+          ? `已批量补充 ${docs.length} 份资料至关联流程「${stage?.label ?? primary.flowNodeTitle}」`
+          : `资料已补充挂载至关联流程「${stage?.label ?? primary.flowNodeTitle}」`
       )
     }
   }

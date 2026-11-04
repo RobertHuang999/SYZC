@@ -334,6 +334,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     ],
     dataPermission: "任务发起人及处理人可见；其他人员需对应机构数据权限；盘点限有权限货物",
     iconType: "BadgePercent",
+    customRoute: "/m/finance/supervision-management",
   },
   {
     id: "ws-supervision-order-mgr",

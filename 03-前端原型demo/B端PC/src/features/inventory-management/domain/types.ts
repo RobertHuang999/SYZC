@@ -59,6 +59,15 @@ export interface OwnerViewRow {
   hasUnpricedGoods?: boolean
 }
 
+export type InventoryExportSourceMenu = "存货管理" | "库存明细" | "库存流水"
+
+export type InventoryCrossExportTargetId =
+  | "STAT_REPO"
+  | "STAT_GOODS"
+  | "STAT_OWNER"
+  | "DETAIL"
+  | "FLOW"
+
 export interface ExportRecordItem {
   id: string
   fileName: string
@@ -71,5 +80,12 @@ export interface ExportRecordItem {
   createTime: string
   status: "SUCCESS" | "GENERATING" | "FAILED"
   downloadUrl?: string
+  /** 6.3 组合导出（服务端审计字段，导出记录弹窗不展示） */
+  exportKind?: "combined" | "legacy"
+  contentSummary?: string
+  sourceMenu?: InventoryExportSourceMenu
+  selectedTargets?: InventoryCrossExportTargetId[]
+  /** 6.3 跨菜单时为 true，文件名为 .zip */
+  crossMenuPackaged?: boolean
 }
 

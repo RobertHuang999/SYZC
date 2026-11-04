@@ -37,9 +37,9 @@ export const warehouseReceiptDetailAnnotationsShared: SharedPrototypeAnnotation[
     targetId: "receipt-detail-basic",
     number: 2,
     kind: "字段",
-    title: "基础信息：制单人 / 存货人 / 持有人 / 仓库",
+    title: "基础信息：制单人 / 存货人 / 持有人 / 关联单号 / 仓库",
     content:
-      "四行结构化基础信息：制单人 + 制单时间、存货人及标识 + 开立时间、持有人及标识、仓库名称 + 注销时间；未注销时注销时间固定展示「--」。",
+      "四行结构化基础信息（严格对齐源码 cd-detail）：第1行制单人+制单时间；第2行存货人及标识+开立时间；第3行持有人及标识+关联单号(支持【查看】穿透)；第4行仓库名称(含准入徽章)+注销时间；未注销时固定展示「--」。",
     documentRefs: {
       prd: { section: "6.2 仓单管理 — 详情页", match: "基础信息卡片" },
       fields: { section: "一、仓单单据与列表台账字段", match: "注销时间" },

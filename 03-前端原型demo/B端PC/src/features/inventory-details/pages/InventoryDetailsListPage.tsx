@@ -13,6 +13,9 @@ import { InventoryDetailFiltersPanel } from "../components/InventoryDetailFilter
 import { InventoryDetailsTable } from "../components/InventoryDetailsTable"
 import { InventoryBarcodeQrDialog } from "../components/InventoryBarcodeQrDialog"
 import { ExportRecordsDialog } from "@/features/inventory-management/components/ExportRecordsDialog"
+import { InventoryCrossExportDialog } from "@/features/shared/inventory-cross-export/InventoryCrossExportDialog"
+import { useInventoryExportRecords } from "@/features/shared/inventory-cross-export/useInventoryExportRecords"
+import { INVENTORY_CROSS_EXPORT_USER_TOAST } from "@/features/shared/inventory-cross-export/inventory-cross-export-ui-labels"
 import { SHARED_INVENTORY_DETAILS, type InventoryDetailRecord } from "@/features/shared/mock/inventory-shared-seed"
 import {
   GOODS_CASCADE_TREE,
@@ -22,7 +25,6 @@ import {
   warehouseKeyOf,
 } from "@/features/shared/lib/inventory-cascade"
 import type { InventoryDetailFilters } from "../domain/types"
-import type { ExportRecordItem } from "@/features/inventory-management/domain/types"
 
 const DEFAULT_FILTERS: InventoryDetailFilters = {
   inboundOrderNo: "",
@@ -41,15 +43,8 @@ const DEFAULT_FILTERS: InventoryDetailFilters = {
   lockedValue: null,
 }
 
-function nowStamp() {
-  const now = new Date()
-  const pad = (value: number) => String(value).padStart(2, "0")
-  const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
-  const time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`
-  return { date, time, compact: `${date.replace(/-/g, "")}${time.replace(/:/g, "")}` }
-}
-
-/** 仓库参数 → 该仓库下全部「库房 · 分区」叶子键 */function resolveWarehouseKeys(warehouseName: string): string[] {
+/** 仓库参数 → 该仓库下全部「库房 · 分区」叶子键 */
+function resolveWarehouseKeys(warehouseName: string): string[] {
   const node = WAREHOUSE_CASCADE_TREE.find((item) => item.name === warehouseName)
   return node ? leafKeysOf(node.children) : []
 }
@@ -92,7 +87,8 @@ export const InventoryDetailsListPage: React.FC = () => {
 
   const [qrModalItem, setQrModalItem] = useState<InventoryDetailRecord | null>(null)
   const [exportModalOpen, setExportModalOpen] = useState(false)
-  const [exportRecords, setExportRecords] = useState<ExportRecordItem[]>([])
+  const [crossExportOpen, setCrossExportOpen] = useState(false)
+  const { records: exportRecords } = useInventoryExportRecords()
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
   // 监听 URL Query 参数穿透与锁定
@@ -231,25 +227,6 @@ export const InventoryDetailsListPage: React.FC = () => {
     setTimeout(() => setToastMessage(null), 4000)
   }
 
-  const handleBatchExport = () => {
-    const stamp = nowStamp()
-    const record: ExportRecordItem = {
-      id: `EXP-${stamp.compact}`,
-      fileName: `库存明细-${stamp.compact}.xlsx`,
-      viewDimension: "库存明细",
-      filterSummary: `筛选后共 ${filteredData.length} 条货位明细`,
-      recordCount: filteredData.length,
-      fileSize: "164.8 KB",
-      creator: "李晓云",
-      creatorOrg: "四川享宇科技有限公司",
-      createTime: `${stamp.date} ${stamp.time}`,
-      status: "SUCCESS",
-      downloadUrl: "#",
-    }
-    setExportRecords((current) => [record, ...current])
-    showToast(`已提交异步导出任务【${record.fileName}】，请点击「导出记录」查看并下载！`)
-  }
-
   return (
     <PrototypeAnnotationProvider
       documents={inventoryDetailsDocuments}
@@ -288,20 +265,22 @@ export const InventoryDetailsListPage: React.FC = () => {
               onUnlock={handleUnlock}
               onSearch={handleSearch}
               extraActions={
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setExportModalOpen(true)}
-                  >
-                    <FileSpreadsheet className="size-4" />
-                    导出记录
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={handleBatchExport}>
-                    <Download className="size-4" />
-                    批量导出
-                  </Button>
-                </>
+                <PrototypeAnnotationTarget annotationIds={["inv-cross-export-actions"]}>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setExportModalOpen(true)}
+                    >
+                      <FileSpreadsheet className="size-4" />
+                      导出记录
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setCrossExportOpen(true)}>
+                      <Download className="size-4" />
+                      批量导出
+                    </Button>
+                  </div>
+                </PrototypeAnnotationTarget>
               }
             />
           </form>
@@ -338,7 +317,15 @@ export const InventoryDetailsListPage: React.FC = () => {
           item={qrModalItem}
         />
 
-        {/* 导出记录弹窗 */}
+        <PrototypeAnnotationTarget annotationIds={["inv-cross-export-dialog"]}>
+          <InventoryCrossExportDialog
+            open={crossExportOpen}
+            onOpenChange={setCrossExportOpen}
+            sourceMenu="库存明细"
+            onSubmitted={() => showToast(INVENTORY_CROSS_EXPORT_USER_TOAST)}
+          />
+        </PrototypeAnnotationTarget>
+
         <ExportRecordsDialog
           open={exportModalOpen}
           onOpenChange={setExportModalOpen}

@@ -106,7 +106,7 @@ export const warehouseReceiptListAnnotationsShared: SharedPrototypeAnnotation[] 
     kind: "规则",
     title: "四态操作能力矩阵与移动端人脸绑定（R-DWR-05 / R-DWR-03）",
     content:
-      "正常态展示详情、仓单补货、仓单出库、仓单入库、仓单移库、仓单移除、注销、下载 8 项；审批中、冻结、注销三态严格只留详情与下载。动碰类操作在 PC 端点击后弹出移动端办理引导。",
+      "正常态根据存货人/持有人一致性控制权限（不一致时补货/移库置灰禁用）；审批中仅保留详情；冻结与注销保留详情与下载。动碰类操作在 PC 端点击后弹出移动端办理引导。",
     documentRefs: {
       prd: { section: "5.2 操作按钮能力矩阵", match: "正常" },
       rules: { section: "2. 规则详细规格", match: "R-DWR-05" },
@@ -119,12 +119,17 @@ export const warehouseReceiptListAnnotationsShared: SharedPrototypeAnnotation[] 
           {
             label: "正常态",
             content:
-              "存货人与持有人无论是否一致，8 项操作全部高亮可用。",
+              "持有人与存货人一致时，8 项操作全部高亮可用；持有人与存货人不一致时（货权流转或质押至资方），【仓单补货】与【仓单移库】置灰禁用，悬停提示‘持有人非原始存货人，禁止办理补货/移库’。",
           },
           {
-            label: "非正常态",
+            label: "审批中",
             content:
-              "审批中（被抵质押申请占用）、冻结（质押生效/司法冻结）、注销（终态）仅保留【详情】【下载】。",
+              "被抵质押申请占用中，对齐现网源码 status==3，仅保留【详情】按钮，严禁下载与动碰。",
+          },
+          {
+            label: "冻结与注销",
+            content:
+              "冻结（质押生效/司法冻结）、注销（终态）仅保留【详情】【下载】。",
           },
           {
             label: "单流程互斥",

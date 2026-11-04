@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react"
 import { addDocumentItems } from "../mock"
-import { getStageOptions } from "../stages"
+import { getStageOptions, resolveUploadFlowType } from "../stages"
 import type { DocumentItem, DocFileType } from "../types"
 
 type UploadSupplementarySheetProps = {
@@ -74,13 +74,15 @@ export function UploadSupplementarySheet({
   orderNo,
   approvalId = "SP202605280001",
   orderType = "inbound",
-  defaultFlowType = "2",
+  defaultFlowType = "1",
   onClose,
   onSubmitted,
 }: UploadSupplementarySheetProps) {
   const stageOptions = getStageOptions(orderType)
 
-  const [selectedFlowType, setSelectedFlowType] = useState(defaultFlowType)
+  const [selectedFlowType, setSelectedFlowType] = useState(() =>
+    resolveUploadFlowType(defaultFlowType),
+  )
   const [stagePickerOpen, setStagePickerOpen] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<PickedFile[]>([])
   const [description, setDescription] = useState("")
@@ -90,7 +92,7 @@ export function UploadSupplementarySheet({
   // 每次打开时重置表单，并按入口预选阶段
   useEffect(() => {
     if (!open) return
-    setSelectedFlowType(defaultFlowType)
+    setSelectedFlowType(resolveUploadFlowType(defaultFlowType))
     setStagePickerOpen(false)
     setSelectedFiles([])
     setDescription("")
@@ -252,10 +254,10 @@ export function UploadSupplementarySheet({
         </div>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto border-t border-gray-100 px-4 py-3">
-          {/* 关联流程阶段 */}
+          {/* 关联流程 */}
           <div className="space-y-1.5">
             <p className="text-xs font-medium text-[#232D39]">
-              <span className="mr-0.5 text-rose-500">*</span>关联流程阶段
+              <span className="mr-0.5 text-rose-500">*</span>关联流程
             </p>
             <button
               type="button"
@@ -264,7 +266,7 @@ export function UploadSupplementarySheet({
             >
               <span className="min-w-0">
                 <span className="block text-xs font-medium text-[#232D39]">
-                  【{matchedStage.label}】
+                  {matchedStage.label}
                 </span>
                 <span className="mt-0.5 block truncate text-[10px] text-[#232D39]/45">
                   {matchedStage.hint}
@@ -444,7 +446,7 @@ export function UploadSupplementarySheet({
             className="absolute inset-0 bg-black/40"
           />
           <div className="relative z-10 w-full max-w-[430px] rounded-t-2xl bg-white p-4 shadow-xl">
-            <h4 className="text-xs font-bold text-[#232D39]">选择关联流程阶段</h4>
+            <h4 className="text-xs font-bold text-[#232D39]">选择关联流程</h4>
             <div className="mt-2.5 divide-y divide-gray-100">
               {stageOptions.map((st) => (
                 <button

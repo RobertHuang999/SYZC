@@ -5,8 +5,6 @@ import {
   CompassIcon,
   CopyIcon,
   DownloadIcon,
-  EyeIcon,
-  EyeOffIcon,
   FileSpreadsheetIcon,
   FileTextIcon,
   Maximize2Icon,
@@ -27,6 +25,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -34,6 +33,7 @@ import {
   type RefObject,
 } from "react"
 import ReactMarkdown from "react-markdown"
+import { createPortal } from "react-dom"
 import remarkGfm from "remark-gfm"
 import rehypeRaw from "rehype-raw"
 import { useLocation, useNavigate } from "react-router-dom"
@@ -43,17 +43,28 @@ import type {
   DrawerTabKey,
   DocumentLocator,
   DocumentTabKey,
+  IterationViewMode,
   PrototypeAnnotation,
   PrototypeDocument,
 } from "./annotation.types"
+import { inferAnnotationVersion } from "./annotation-versions"
 
 export type {
   AnnotationKind,
   DocumentLocator,
   DocumentTabKey,
   DrawerTabKey,
+  IterationViewMode,
   PrototypeAnnotation,
   PrototypeDocument,
+}
+
+const H5_VIEW_MODE_STORAGE_KEY = "syzc-h5-annotation-view-mode"
+
+function readInitialH5ViewMode(): IterationViewMode {
+  if (typeof window === "undefined") return "all"
+  const saved = window.localStorage.getItem(H5_VIEW_MODE_STORAGE_KEY)
+  return saved === "focus63" || saved === "all" || saved === "off" ? saved : "all"
 }
 
 function cn(...classes: (string | boolean | undefined | null)[]) {
@@ -79,6 +90,7 @@ type AnnotationContextValue = {
   isWideDrawer: boolean
   activeDrawerTab: DrawerTabKey
   showMarkers: boolean
+  viewMode: IterationViewMode
   activePopupAnnotationId: string | null
   filterKind: AnnotationKind | "全部"
   selectedPreset: PhoneDevicePreset
@@ -94,6 +106,7 @@ type AnnotationContextValue = {
   openDocumentTarget: (tab: DocumentTabKey, locator?: DocumentLocator) => void
   setShowMarkers: (show: boolean) => void
   toggleShowMarkers: () => void
+  setViewMode: (mode: IterationViewMode) => void
   openInPlacePopup: (annotationId: string) => void
   closeInPlacePopup: () => void
   locateAndOpenPopup: (annotationId: string) => void
@@ -360,7 +373,12 @@ export function PrototypeAnnotationProvider({
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isWideDrawer, setIsWideDrawer] = useState(false)
   const [activeDrawerTab, setActiveDrawerTab] = useState<DrawerTabKey>("annotations")
-  const [showMarkers, setShowMarkers] = useState(true)
+  const [viewMode, setViewModeState] = useState<IterationViewMode>(readInitialH5ViewMode)
+  const showMarkers = viewMode !== "off"
+
+  useEffect(() => {
+    window.localStorage.setItem(H5_VIEW_MODE_STORAGE_KEY, viewMode)
+  }, [viewMode])
   const [activePopupAnnotationId, setActivePopupAnnotationId] = useState<string | null>(null)
   const [filterKind, setFilterKind] = useState<AnnotationKind | "全部">("全部")
   const [selectedPreset, setSelectedPreset] = useState<PhoneDevicePreset>(PHONE_PRESETS[0])
@@ -381,14 +399,37 @@ export function PrototypeAnnotationProvider({
   }, [])
 
   const toggleShowMarkers = useCallback(() => {
-    setShowMarkers((prev) => {
-      const next = !prev
-      if (!next) {
-        setActivePopupAnnotationId(null)
-      }
-      return next
-    })
+    const next = viewMode === "off" ? "all" : "off"
+    setViewModeState(next)
+    if (next === "off") {
+      setActivePopupAnnotationId(null)
+    }
+  }, [viewMode])
+
+  const setShowMarkers = useCallback((next: boolean) => {
+    setViewModeState(next ? "all" : "off")
+    if (!next) {
+      setActivePopupAnnotationId(null)
+    }
   }, [])
+
+  const setViewMode = useCallback((mode: IterationViewMode) => {
+    setViewModeState(mode)
+    if (mode === "off") {
+      setActivePopupAnnotationId(null)
+    }
+  }, [])
+
+  /** 标注补上版本归属：页面文件不写版本，这里统一按 6.3 菜单口径推断 */
+  const versionedAnnotations = useMemo(
+    () =>
+      annotations.map((annotation) =>
+        annotation.version
+          ? annotation
+          : { ...annotation, version: inferAnnotationVersion(annotation.id) }
+      ),
+    [annotations]
+  )
 
   const toggleDrawer = useCallback(() => {
     setDrawerOpen((prev) => !prev)
@@ -430,7 +471,7 @@ export function PrototypeAnnotationProvider({
     (annotationId: string) => {
       setShowMarkers(true)
       setActivePopupAnnotationId(annotationId)
-      const annotation = annotations.find((item) => item.id === annotationId)
+      const annotation = versionedAnnotations.find((item) => item.id === annotationId)
       if (annotation) {
         const targetId = annotation.targetId ?? annotation.id
         window.requestAnimationFrame(() => {
@@ -445,7 +486,7 @@ export function PrototypeAnnotationProvider({
         })
       }
     },
-    [annotations]
+    [versionedAnnotations]
   )
 
   const contextValue = useMemo(
@@ -456,10 +497,11 @@ export function PrototypeAnnotationProvider({
       isWideDrawer,
       activeDrawerTab,
       showMarkers,
+      viewMode,
       activePopupAnnotationId,
       filterKind,
       selectedPreset,
-      annotations,
+      annotations: versionedAnnotations,
       documents,
       documentTargetRequest,
       setEnabled,
@@ -471,6 +513,7 @@ export function PrototypeAnnotationProvider({
       openDocumentTarget,
       setShowMarkers,
       toggleShowMarkers,
+      setViewMode,
       openInPlacePopup,
       closeInPlacePopup,
       locateAndOpenPopup,
@@ -484,10 +527,11 @@ export function PrototypeAnnotationProvider({
       isWideDrawer,
       activeDrawerTab,
       showMarkers,
+      viewMode,
       activePopupAnnotationId,
       filterKind,
       selectedPreset,
-      annotations,
+      versionedAnnotations,
       documents,
       documentTargetRequest,
       setEnabled,
@@ -498,6 +542,7 @@ export function PrototypeAnnotationProvider({
       openDocumentTarget,
       setShowMarkers,
       toggleShowMarkers,
+      setViewMode,
       openInPlacePopup,
       closeInPlacePopup,
       locateAndOpenPopup,
@@ -768,7 +813,7 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
   const [autoScale, setAutoScale] = useState(1)
   const [manualScale, setManualScale] = useState(1)
   // 无机壳纯屏模式（Frameless）：隐藏外壳黑边框、iOS 状态栏与灵动岛、底部小黑条，纯净展示页面
-  const [isFrameless, setIsFrameless] = useState(true)
+  const [isFrameless, setIsFrameless] = useState(false)
   // 分类大类的展开/收起状态（默认全部展开，key 为 group.label）
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
 
@@ -1101,14 +1146,22 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
             <span className="font-bold text-emerald-600 font-mono">{context.documents.length} 篇</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-slate-400">打点状态：</span>
+            <span className="text-slate-400">标注视图：</span>
             <span
               className={cn(
                 "font-bold",
-                context.showMarkers ? "text-rose-600" : "text-slate-400"
+                context.viewMode === "off"
+                  ? "text-slate-400"
+                  : context.viewMode === "focus63"
+                    ? "text-amber-600"
+                    : "text-rose-600"
               )}
             >
-              {context.showMarkers ? "已开启" : "已隐藏"}
+              {context.viewMode === "off"
+                ? "还原线上"
+                : context.viewMode === "focus63"
+                  ? "只看 6.3 变更"
+                  : "全部原型"}
             </span>
           </div>
         </div>
@@ -1187,6 +1240,179 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
   )
 }
 
+/* 标注视图三档：与 PC 顶栏「全部原型」下拉同口径，H5 不挂迭代记录与权限页 */
+const ANNOTATION_VIEW_OPTIONS: Array<{
+  value: IterationViewMode
+  label: string
+  shortLabel: string
+  desc: string
+}> = [
+  {
+    value: "focus63",
+    label: "只看 6.3 变更",
+    shortLabel: "6.3",
+    desc: "只留 6.3 变更的点位，历史沿用先收起",
+  },
+  {
+    value: "all",
+    label: "全部原型",
+    shortLabel: "全部原型",
+    desc: "显示全部点位，新旧版本一起看",
+  },
+  {
+    value: "off",
+    label: "还原线上",
+    shortLabel: "还原线上",
+    desc: "隐藏全部点位，还原真实小程序界面",
+  },
+]
+
+/**
+ * 标注视图切换（对应 PC 顶栏的「全部原型」按钮）
+ *
+ * 放在右侧悬浮条最上面，点开向左弹出三档；手机屏幕本身不占位置。
+ */
+function AnnotationViewControl() {
+  const context = useAnnotationContext()
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node
+      if (
+        !containerRef.current?.contains(target) &&
+        !panelRef.current?.contains(target)
+      ) {
+        setOpen(false)
+      }
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false)
+    }
+    document.addEventListener("pointerdown", handlePointerDown)
+    document.addEventListener("keydown", handleKeyDown)
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown)
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [open])
+
+  const current =
+    ANNOTATION_VIEW_OPTIONS.find((option) => option.value === context.viewMode) ??
+    ANNOTATION_VIEW_OPTIONS[1]
+  const v63Count = context.annotations.filter((item) => item.version === "6.3").length
+
+  return (
+    <div ref={containerRef} className="relative border-b border-blue-100/90">
+      <button
+        type="button"
+        className={cn(
+          "flex w-11 cursor-pointer flex-col items-center justify-center gap-1 py-2 transition-all hover:brightness-105 active:scale-95 focus-visible:outline-none",
+          context.viewMode === "off"
+            ? "bg-slate-100/70 text-slate-400 hover:bg-slate-200/80"
+            : "bg-blue-500/15 text-blue-600"
+        )}
+        onClick={() => setOpen((prev) => !prev)}
+        title={`标注视图：${current.label}`}
+        aria-expanded={open}
+        aria-haspopup="true"
+      >
+        <span
+          className={cn(
+            "size-2 rounded-full",
+            context.viewMode === "focus63"
+              ? "bg-amber-500"
+              : context.viewMode === "all"
+                ? "bg-blue-600"
+                : "bg-slate-400"
+          )}
+        />
+        <span className="flex flex-col items-center text-[10px] font-bold leading-tight">
+          {Array.from(current.shortLabel).map((char, index) => (
+            <span key={`${char}-${index}`}>{char}</span>
+          ))}
+        </span>
+        <ChevronDownIcon
+          className={cn("size-3 opacity-70 transition-transform", open && "rotate-180")}
+        />
+      </button>
+
+      {open &&
+        createPortal(
+          <div
+            ref={panelRef}
+            className="fixed right-14 top-1/2 z-[75] w-[248px] -translate-y-1/2 rounded-xl border border-slate-200 bg-white p-1.5 text-slate-800 shadow-[0_18px_45px_rgba(15,23,42,0.2)]"
+          >
+          <div className="flex items-center justify-between px-2 pt-1 pb-1.5">
+            <span className="text-[11px] font-semibold text-slate-400">标注显示</span>
+            <span className="text-[10px] text-slate-400">
+              共 {context.annotations.length} 个点位
+            </span>
+          </div>
+
+          <div role="radiogroup" aria-label="标注视图">
+            {ANNOTATION_VIEW_OPTIONS.map((option) => {
+              const active = option.value === context.viewMode
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => {
+                    context.setViewMode(option.value)
+                    setOpen(false)
+                  }}
+                  className={cn(
+                    "flex w-full cursor-pointer items-start gap-2 rounded-lg px-2 py-2 text-left transition-colors",
+                    active ? "bg-amber-50" : "hover:bg-slate-50"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "mt-[3px] grid size-3.5 shrink-0 place-items-center rounded-full border bg-white",
+                      active ? "border-amber-500" : "border-slate-300"
+                    )}
+                    aria-hidden="true"
+                  >
+                    {active ? <span className="size-1.5 rounded-full bg-amber-500" /> : null}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span
+                      className={cn(
+                        "flex items-center gap-1.5 text-[12.5px] leading-5",
+                        active ? "font-semibold text-slate-900" : "font-medium text-slate-600"
+                      )}
+                    >
+                      {option.label}
+                      {option.value === "focus63" && (
+                        <span className="rounded-full bg-amber-100 px-1.5 text-[9px] font-bold leading-4 text-amber-700">
+                          {v63Count}
+                        </span>
+                      )}
+                    </span>
+                    <span className="mt-0.5 block text-[11px] leading-[1.45] text-slate-400">
+                      {option.desc}
+                    </span>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          <p className="mt-1 border-t border-slate-100 px-2 py-1.5 text-[10px] leading-relaxed text-slate-400">
+            6.3 口径见「6.3 版本 · 00-菜单迭代记录」；迭代记录与功能数据权限在 PC 端查看。
+          </p>
+          </div>,
+          document.body
+        )}
+    </div>
+  )
+}
+
 /**
  * 右侧常驻折叠悬浮栏
  */
@@ -1202,33 +1428,8 @@ function RightEdgeFoldTab() {
       className="fixed right-0 top-1/2 -translate-y-1/2 z-[65] flex flex-col items-center overflow-hidden rounded-l-2xl border-2 border-r-0 border-blue-400/80 bg-white/95 text-slate-800 shadow-[0_10px_35px_rgba(37,99,235,0.22)] backdrop-blur-xl transition-all select-none"
       aria-label="需求与设计悬浮导航栏"
     >
-      {/* 1. 顶部打点开关 */}
-      <button
-        type="button"
-        className={cn(
-          "flex w-11 cursor-pointer flex-col items-center justify-center gap-0.5 border-b border-blue-100/90 py-2 transition-all hover:brightness-105 active:scale-90 focus-visible:outline-none",
-          context.showMarkers
-            ? "bg-blue-500/15 text-blue-600"
-            : "bg-slate-100/70 text-slate-400 hover:bg-slate-200/80"
-        )}
-        onClick={(e) => {
-          e.stopPropagation()
-          context.toggleShowMarkers()
-        }}
-        title={context.showMarkers ? "快捷关闭打点数字" : "快捷开启打点数字"}
-      >
-        {context.showMarkers ? (
-          <>
-            <EyeIcon className="size-3.5 text-blue-600" />
-            <span className="text-[8px] font-extrabold leading-none text-blue-600">ON</span>
-          </>
-        ) : (
-          <>
-            <EyeOffIcon className="size-3.5 text-slate-400" />
-            <span className="text-[8px] font-extrabold leading-none text-slate-400">OFF</span>
-          </>
-        )}
-      </button>
+      {/* 1. 标注视图（对应 PC 顶栏「全部原型」） */}
+      <AnnotationViewControl />
 
       {/* 2. 【需求打点】 */}
       <button
@@ -1310,6 +1511,42 @@ function RightEdgeFoldTab() {
 /**
  * 页面元素原位打点包装器（纯净无遮挡，点击触发外侧大画布检查器）
  */
+/**
+ * 打点小红点位于页面顶部导航栏区域时，往下让一格，
+ * 避免压住小程序右上角的胶囊按钮或导航栏右侧按钮。
+ */
+function useMarkerBelowNavBar(
+  ref: RefObject<HTMLDivElement | null>,
+  active: boolean,
+) {
+  const [belowNavBar, setBelowNavBar] = useState(false)
+
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el || !active) {
+      setBelowNavBar(false)
+      return
+    }
+
+    const update = () => {
+      const target = el.parentElement
+      if (!target) return
+      const viewport = el.closest<HTMLElement>("[data-overlay-root]")
+      const viewportTop = viewport?.getBoundingClientRect().top ?? 0
+      setBelowNavBar(
+        Math.abs(target.getBoundingClientRect().top - viewportTop) <= 4,
+      )
+    }
+
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [ref, active])
+
+  return belowNavBar
+}
+
 export function PrototypeAnnotationTarget({
   annotationIds,
   children,
@@ -1332,6 +1569,15 @@ export function PrototypeAnnotationTarget({
   const isTargetActive = annotations.some(
     (annotation) => annotation.id === context.activePopupAnnotationId
   )
+  /** 「只看 6.3 变更」时，只保留版本为 6.3 的点位 */
+  const visibleAnnotations =
+    context.viewMode === "focus63"
+      ? annotations.filter((annotation) => annotation.version === "6.3")
+      : annotations
+  const markerRef = useRef<HTMLDivElement>(null)
+  const showMarkers =
+    context.enabled && context.showMarkers && visibleAnnotations.length > 0
+  const markerBelowNavBar = useMarkerBelowNavBar(markerRef, showMarkers)
 
   return (
     <div
@@ -1347,14 +1593,19 @@ export function PrototypeAnnotationTarget({
       {children}
 
       {/* On-Page Red Markers (仅在 showMarkers 为 true 时渲染) */}
-      {context.enabled && context.showMarkers && annotations.length > 0 && (
+      {showMarkers && (
         <div
+          ref={markerRef}
           className={cn(
             "absolute z-30 flex items-center gap-1",
-            markerPosition === "top-left" ? "top-1 left-1" : "top-1 right-1"
+            markerPosition === "top-left"
+              ? "top-1 left-1"
+              : markerBelowNavBar
+                ? "top-[50px] left-1"
+                : "top-1 right-1"
           )}
         >
-          {annotations.map((annotation) => {
+          {visibleAnnotations.map((annotation) => {
             const isActive = annotation.id === context.activePopupAnnotationId
             return (
               <button
@@ -1620,7 +1871,15 @@ function AnnotationSidebarDrawer() {
   }
 
   const tabs: Array<{ key: DrawerTabKey; label: string; icon: any; count?: number }> = [
-    { key: "annotations", label: "需求打点", icon: PinIcon, count: context.annotations.length },
+    {
+      key: "annotations",
+      label: "需求打点",
+      icon: PinIcon,
+      count:
+        context.viewMode === "focus63"
+          ? context.annotations.filter((item) => item.version === "6.3").length
+          : context.annotations.length,
+    },
     {
       key: "fields",
       label: "字段清单",
@@ -1643,11 +1902,12 @@ function AnnotationSidebarDrawer() {
 
   const filteredAnnotations = context.annotations.filter((item) => {
     const matchKind = context.filterKind === "全部" || item.kind === context.filterKind
+    const matchVersion = context.viewMode !== "focus63" || item.version === "6.3"
     const matchQuery =
       !searchQuery ||
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.content.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchKind && matchQuery
+    return matchKind && matchVersion && matchQuery
   })
 
   return (

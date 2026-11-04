@@ -62,6 +62,7 @@ export function WarehouseReceiptDetailPage() {
   const [tab, setTab] = useState<TabKey>("goods")
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [barcodeTarget, setBarcodeTarget] = useState<BarcodeTarget | null>(null)
+  const [relatedOrderTarget, setRelatedOrderTarget] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
   const showToast = (message: string) => {
@@ -158,44 +159,77 @@ export function WarehouseReceiptDetailPage() {
 
         <PrototypeAnnotationTarget annotationIds={["receipt-detail-basic"]}>
           <DetailSection title="基础信息">
-            <DetailField label="制单人">{receipt.creatorDisplay}</DetailField>
-            <DetailField label="制单时间">
-              <TableDateTimeCell value={receipt.createdAt} plain />
-            </DetailField>
-            <DetailField label="存货人（货主）">{receipt.owner.name}</DetailField>
-            <DetailField label="存货人标识">{receipt.owner.identifier}</DetailField>
-            <DetailField label="开立时间">
-              <TableDateTimeCell value={receipt.establishedAt} plain />
-            </DetailField>
-            <DetailField label="持有人">{receipt.holder.name}</DetailField>
-            <DetailField label="持有人标识">{receipt.holder.identifier}</DetailField>
-            <DetailField label="仓库名称">{receipt.warehouseName}</DetailField>
-            <DetailField label="三方登记">
-              <Badge
-                variant="outline"
-                className={
-                  receipt.thirdPartyRegistered
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                    : "border-slate-200 bg-slate-50 text-slate-600"
-                }
-              >
-                {receipt.thirdPartyRegistered ? "是（中仓登已准入）" : "否"}
-              </Badge>
-            </DetailField>
-            <DetailField label="注销时间">
-              {receipt.cancelledAt ? (
-                <TableDateTimeCell value={receipt.cancelledAt} plain />
-              ) : (
-                <span className="text-muted-foreground">--</span>
-              )}
-            </DetailField>
-            <DetailField label="在途流程">
-              {receipt.currentFlow ? (
-                <span className="text-amber-700">{receipt.currentFlow}（审批中）</span>
-              ) : (
-                <span className="text-muted-foreground">无</span>
-              )}
-            </DetailField>
+            <div className="space-y-4">
+              {/* 第 1 行：制单人、制单时间 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <DetailField label="制单人">{receipt.creatorDisplay}</DetailField>
+                <DetailField label="制单时间">
+                  <TableDateTimeCell value={receipt.createdAt} plain />
+                </DetailField>
+              </div>
+
+              {/* 第 2 行：存货人(货主)、存货人标识、开立时间 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-3 border-t border-border/40">
+                <DetailField label="存货人(货主)">{receipt.owner.name}</DetailField>
+                <DetailField label="存货人(货主)标识">{receipt.owner.identifier}</DetailField>
+                <DetailField label="开立时间">
+                  <TableDateTimeCell value={receipt.establishedAt} plain />
+                </DetailField>
+              </div>
+
+              {/* 第 3 行：持有人、持有人标识、关联单号（穿透提示） */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-3 border-t border-border/40">
+                <DetailField label="持有人">{receipt.holder.name}</DetailField>
+                <DetailField label="持有人标识">{receipt.holder.identifier}</DetailField>
+                <DetailField label="关联单号">
+                  {receipt.relatedId ? (
+                    <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
+                      <span>{receipt.relatedId}</span>
+                      <button
+                        type="button"
+                        className="text-xs text-primary hover:underline font-normal ml-0.5 cursor-pointer"
+                        onClick={() => setRelatedOrderTarget(receipt.relatedId ?? null)}
+                      >
+                        【查看】
+                      </button>
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">--</span>
+                  )}
+                </DetailField>
+              </div>
+
+              {/* 第 4 行：仓库名称(含准入徽章)、注销时间、在途流程 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-3 border-t border-border/40">
+                <DetailField label="仓库名称">
+                  <span className="inline-flex items-center gap-2">
+                    <span>{receipt.warehouseName}</span>
+                    {receipt.thirdPartyRegistered ? (
+                      <Badge
+                        variant="outline"
+                        className="border-emerald-200 bg-emerald-50 text-emerald-700 text-xs font-normal"
+                      >
+                        准入
+                      </Badge>
+                    ) : null}
+                  </span>
+                </DetailField>
+                <DetailField label="注销时间">
+                  {receipt.cancelledAt ? (
+                    <TableDateTimeCell value={receipt.cancelledAt} plain />
+                  ) : (
+                    <span className="text-muted-foreground">--</span>
+                  )}
+                </DetailField>
+                {receipt.currentFlow ? (
+                  <DetailField label="在途审批流程">
+                    <span className="text-amber-700 font-medium">
+                      {receipt.currentFlow}（审批中）
+                    </span>
+                  </DetailField>
+                ) : null}
+              </div>
+            </div>
           </DetailSection>
         </PrototypeAnnotationTarget>
 
@@ -378,6 +412,13 @@ export function WarehouseReceiptDetailPage() {
           target={barcodeTarget}
           onClose={() => setBarcodeTarget(null)}
           onCopy={(text) => copyText(text, "条码编号已复制到剪贴板！")}
+        />
+      ) : null}
+
+      {relatedOrderTarget ? (
+        <RelatedOrderDialog
+          orderId={relatedOrderTarget}
+          onClose={() => setRelatedOrderTarget(null)}
         />
       ) : null}
 
@@ -597,3 +638,51 @@ function BarcodeDialog({
     </Dialog>
   )
 }
+
+function RelatedOrderDialog({
+  orderId,
+  onClose,
+}: {
+  orderId: string | null
+  onClose: () => void
+}) {
+  if (!orderId) return null
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>关联抵质押业务单据穿透</DialogTitle>
+          <DialogDescription>
+            该数字仓单已被供应链金融抵质押业务圈选或占用中。
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-2.5 rounded-lg border bg-muted/40 p-4 text-xs">
+          <div className="flex justify-between items-center py-1 border-b border-border/60">
+            <span className="text-muted-foreground">关联业务类型</span>
+            <span className="font-medium text-foreground">货权质押融资 / 监管质押</span>
+          </div>
+          <div className="flex justify-between items-center py-1 border-b border-border/60">
+            <span className="text-muted-foreground">关联单号</span>
+            <span className="font-mono font-medium text-primary select-all">{orderId}</span>
+          </div>
+          <div className="flex justify-between items-center py-1 border-b border-border/60">
+            <span className="text-muted-foreground">风控锁定状态</span>
+            <span className="font-medium text-amber-600">质押锁定期 / 资产预锁定</span>
+          </div>
+          <p className="text-muted-foreground pt-1 leading-relaxed">
+            提示：在生产环境中，点击此链接将通过路由深链穿透跳转至【金融服务 → 抵质押管理 → 抵质押详情（/dzyDetail?id={orderId}&type=cd）】查看授信合同与风控全息档案。
+          </p>
+        </div>
+
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onClose}>
+            我知道了
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+

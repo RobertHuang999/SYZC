@@ -14,6 +14,9 @@ import { InventoryTransactionFiltersPanel } from "../components/InventoryTransac
 import { InventoryTransactionsTable } from "../components/InventoryTransactionsTable"
 import { TransactionPdfViewerDialog } from "../components/TransactionPdfViewerDialog"
 import { ExportRecordsDialog } from "@/features/inventory-management/components/ExportRecordsDialog"
+import { InventoryCrossExportDialog } from "@/features/shared/inventory-cross-export/InventoryCrossExportDialog"
+import { useInventoryExportRecords } from "@/features/shared/inventory-cross-export/useInventoryExportRecords"
+import { INVENTORY_CROSS_EXPORT_USER_TOAST } from "@/features/shared/inventory-cross-export/inventory-cross-export-ui-labels"
 import {
   SHARED_INVENTORY_TRANSACTIONS,
   SHARED_OWNERS,
@@ -27,7 +30,6 @@ import {
   warehouseKeyOf,
 } from "@/features/shared/lib/inventory-cascade"
 import type { InventoryTransactionFilters } from "../domain/types"
-import type { ExportRecordItem } from "@/features/inventory-management/domain/types"
 
 const DEFAULT_FILTERS: InventoryTransactionFilters = {
   orderNo: "",
@@ -82,7 +84,8 @@ export const InventoryTransactionsListPage: React.FC = () => {
   const [pdfModalRecord, setPdfModalRecord] = useState<InventoryTransactionRecord | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [exportModalOpen, setExportModalOpen] = useState(false)
-  const [exportRecords, setExportRecords] = useState<ExportRecordItem[]>([])
+  const [crossExportOpen, setCrossExportOpen] = useState(false)
+  const { records: exportRecords } = useInventoryExportRecords()
 
   const [draftFilters, setDraftFilters] = useState<InventoryTransactionFilters>(DEFAULT_FILTERS)
   const [appliedFilters, setAppliedFilters] = useState<InventoryTransactionFilters>(DEFAULT_FILTERS)
@@ -229,31 +232,6 @@ export const InventoryTransactionsListPage: React.FC = () => {
     setPage(1)
   }
 
-  const handleBatchExport = () => {
-    const now = new Date()
-    const pad = (value: number) => String(value).padStart(2, "0")
-    const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
-    const time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`
-    const compact = `${date.replace(/-/g, "")}${time.replace(/:/g, "")}`
-
-    const record: ExportRecordItem = {
-      id: `EXP-${compact}`,
-      fileName: `库存流水-${compact}.xlsx`,
-      viewDimension: "库存流水",
-      filterSummary: `筛选后共 ${filteredData.length} 笔流水`,
-      recordCount: filteredData.length,
-      fileSize: "96.2 KB",
-      creator: "李晓云",
-      creatorOrg: "四川享宇科技有限公司",
-      createTime: `${date} ${time}`,
-      status: "SUCCESS",
-      downloadUrl: "#",
-    }
-    setExportRecords((current) => [record, ...current])
-    setToastMessage(`已提交异步导出任务【${record.fileName}】，请点击「导出记录」查看并下载！`)
-    setTimeout(() => setToastMessage(null), 4000)
-  }
-
   const handleExportRecord = (record: InventoryTransactionRecord) => {
     setToastMessage(`正在导出单据 ${record.businessNo} 的堆放 / 扣减明细…`)
     setTimeout(() => setToastMessage(null), 3000)
@@ -307,20 +285,22 @@ export const InventoryTransactionsListPage: React.FC = () => {
               onUnlock={handleUnlock}
               onSearch={handleSearch}
               extraActions={
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setExportModalOpen(true)}
-                  >
-                    <FileSpreadsheet className="size-4" />
-                    导出记录
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={handleBatchExport}>
-                    <Download className="size-4" />
-                    批量导出
-                  </Button>
-                </>
+                <PrototypeAnnotationTarget annotationIds={["inv-cross-export-actions"]}>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setExportModalOpen(true)}
+                    >
+                      <FileSpreadsheet className="size-4" />
+                      导出记录
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setCrossExportOpen(true)}>
+                      <Download className="size-4" />
+                      批量导出
+                    </Button>
+                  </div>
+                </PrototypeAnnotationTarget>
               }
             />
           </form>
@@ -358,7 +338,18 @@ export const InventoryTransactionsListPage: React.FC = () => {
           record={pdfModalRecord}
         />
 
-        {/* 导出记录弹窗 */}
+        <PrototypeAnnotationTarget annotationIds={["inv-cross-export-dialog"]}>
+          <InventoryCrossExportDialog
+            open={crossExportOpen}
+            onOpenChange={setCrossExportOpen}
+            sourceMenu="库存流水"
+            onSubmitted={() => {
+              setToastMessage(INVENTORY_CROSS_EXPORT_USER_TOAST)
+              setTimeout(() => setToastMessage(null), 4000)
+            }}
+          />
+        </PrototypeAnnotationTarget>
+
         <ExportRecordsDialog
           open={exportModalOpen}
           onOpenChange={setExportModalOpen}

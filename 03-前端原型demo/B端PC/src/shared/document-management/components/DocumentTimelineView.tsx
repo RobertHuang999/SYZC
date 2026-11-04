@@ -38,7 +38,7 @@ export function DocumentTimelineView({
   const [searchKeyword, setSearchKeyword] = useState("")
   const [refreshKey, setRefreshKey] = useState(0)
   const [uploadOpen, setUploadOpen] = useState(false)
-  const [uploadTargetFlowType, setUploadTargetFlowType] = useState<string>("2")
+  const [uploadTargetFlowType, setUploadTargetFlowType] = useState<string>("1")
   const [previewPdfOpen, setPreviewPdfOpen] = useState(false)
   const [previewPdfName, setPreviewPdfName] = useState("")
   const [toastMessage, setToastMessage] = useState<string | null>(null)

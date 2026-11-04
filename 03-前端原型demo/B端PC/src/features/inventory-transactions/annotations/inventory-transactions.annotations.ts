@@ -1,6 +1,7 @@
 import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotationLayer"
+import { buildInventoryCrossExportAnnotations } from "@/features/shared/inventory-cross-export/inventory-cross-export.annotations"
 
-export const inventoryTransactionsAnnotations: PrototypeAnnotation[] = [
+const inventoryTransactionsBaseAnnotations: PrototypeAnnotation[] = [
   {
     id: "tx-list-page",
     number: 1,
@@ -64,3 +65,6 @@ export const inventoryTransactionsAnnotations: PrototypeAnnotation[] = [
     details: [],
   },
 ]
+
+export const inventoryTransactionsAnnotations: PrototypeAnnotation[] =
+  inventoryTransactionsBaseAnnotations.concat(buildInventoryCrossExportAnnotations(6))

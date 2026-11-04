@@ -16,6 +16,10 @@ export type ReceiptFilters = {
   goodsCategory: string
   /** 大类下的品类多选；空数组表示不限 */
   goodsVarieties: string[]
+  /** 货品三级级联多选 key 列表（大类/品类/规格）；空数组表示不限（对齐现网源码 el-cascader multiple: true） */
+  goodsKeys?: string[]
+  /** 货品三级级联选择 [大类, 品类?, 规格?]；空数组表示不限（源码对齐） */
+  goodsCascader?: string[]
   thirdParty: ReceiptThirdPartyFilter
   /** 仓单状态多选；空数组表示不限 */
   statuses: ReceiptStatus[]
@@ -34,6 +38,8 @@ export const EMPTY_RECEIPT_FILTERS: ReceiptFilters = {
   warehouse: "全部",
   goodsCategory: "全部",
   goodsVarieties: [],
+  goodsKeys: [],
+  goodsCascader: [],
   thirdParty: "全部",
   statuses: [],
   creator: "全部",
@@ -94,7 +100,24 @@ export function matchReceiptFilters(
     return false
   }
 
-  if (filters.goodsCategory !== "全部") {
+  if (filters.goodsKeys && filters.goodsKeys.length > 0) {
+    const matched = receipt.goodsGroups.some((group) => {
+      const full = `${group.category}/${group.variety}/${group.spec}`
+      const l2 = `${group.category}/${group.variety}`
+      const l1 = group.category
+      return filters.goodsKeys!.some((k) => k === full || k === l2 || k === l1)
+    })
+    if (!matched) return false
+  } else if (filters.goodsCascader && filters.goodsCascader.length > 0) {
+    const [cat, varName, specName] = filters.goodsCascader
+    const matchedGroup = receipt.goodsGroups.some((group) => {
+      if (cat && group.category !== cat) return false
+      if (varName && group.variety !== varName) return false
+      if (specName && group.spec !== specName) return false
+      return true
+    })
+    if (!matchedGroup) return false
+  } else if (filters.goodsCategory !== "全部") {
     const groups = receipt.goodsGroups.filter(
       (group) => group.category === filters.goodsCategory,
     )

@@ -34,6 +34,10 @@ const TYPE_BADGE_CLASS = "border-[#232D39]/15 bg-[#232D39]/[0.03] text-[#232D39]
 /** 操作区一行最多放 4 个胶囊 */
 const MAX_ACTIONS_PER_ROW = 4
 
+/** 列表卡片底部操作胶囊：单行不换行，窄屏略压缩内边距 */
+const ACTION_PILL_CLASS =
+  "shrink-0 whitespace-nowrap px-2 py-1 text-[11px] leading-none"
+
 type RecordCardProps = {
   /** 业务单号，展示在头部左侧 */
   orderNo: string
@@ -90,7 +94,10 @@ export function RecordCard({
 
   const renderAction = (action: RecordCardAction) => {
     // 跳转类（查看详情）用主色胶囊，其余用中性胶囊
-    const className = action.to ? H5_PILL_PRIMARY : H5_PILL_SECONDARY
+    const className = cn(
+      action.to ? H5_PILL_PRIMARY : H5_PILL_SECONDARY,
+      ACTION_PILL_CLASS,
+    )
     return action.to ? (
       <Link key={action.key} to={action.to} className={className}>
         {action.label}
@@ -182,14 +189,14 @@ export function RecordCard({
 
       {/* 操作行：一行最多 4 个胶囊；超出时第 4 个换成「更多操作」，点击向下展开全部 */}
       <div className="mx-3.5 mt-2 space-y-2 pb-3.5">
-        <div className="flex items-center justify-end gap-1.5">
+        <div className="-mx-0.5 flex flex-nowrap items-center justify-end gap-1 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {visibleActions.map(renderAction)}
           {hasOverflow ? (
             <button
               type="button"
               aria-expanded={actionsExpanded}
               onClick={() => setActionsExpanded((open) => !open)}
-              className={cn(H5_PILL_SECONDARY, "gap-0.5")}
+              className={cn(H5_PILL_SECONDARY, ACTION_PILL_CLASS, "gap-0.5")}
             >
               {actionsExpanded ? "收起" : "更多操作"}
               <ChevronDown

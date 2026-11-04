@@ -16,6 +16,7 @@ import {
 import { useNavigate } from "react-router-dom"
 import { BottomTabBar } from "@/components/layout/BottomTabBar"
 import { MobileShell } from "@/components/layout/MobileShell"
+import { NavBar } from "@/components/layout/NavBar"
 import { openMenuModule } from "@/lib/open-menu-module"
 
 export function HomePage() {
@@ -28,7 +29,9 @@ export function HomePage() {
 
   return (
     <MobileShell>
-      {/* 顶部标题区 */}
+      <NavBar title="首页" showBack={false} />
+
+      {/* 品牌区 */}
       <div className="px-4 pt-3 pb-2">
         <div className="flex items-center gap-2">
           <div className="flex size-7 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-400 to-cyan-500 text-white shadow-xs">

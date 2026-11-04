@@ -633,18 +633,18 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
     "baselineModuleDir": "B端PC/02-仓储",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "库存查询",
       "存货管理"
     ],
     "pagePath": "库存查询 / 存货管理",
     "legacyPath": "货物管理～存货管理",
-    "actionPermissions": "查看页面、存货详情、批量导出",
-    "dataPermission": "1、可见数据为账号上赋予的仓库权限决定； 2、货品价格为登录账号归属机构设置的单价；",
-    "changeNote": "优化展示数据",
+    "actionPermissions": "查看页面、存货详情、批量导出、导出记录",
+    "dataPermission": "1、可见数据为账号上赋予的仓库权限决定；2、货品价格为登录账号归属机构设置的单价；3、组合导出全量为权限内全量，不受当前列表筛选（明细 Sheet 同「仅查看有库存的」）",
+    "changeNote": "6.3 P1：跨菜单批量导出弹窗（本菜单/其他菜单，默认仅本菜单）；与库存明细、库存流水共用导出记录队列；跨多类菜单为 zip",
     "createdAt": "2026-03-10",
-    "updatedAt": "2026-04-14"
+    "updatedAt": "2026-11-04"
   },
   {
     "id": "31",
@@ -673,18 +673,18 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
     "baselineModuleDir": "B端PC/02-仓储",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "库存查询",
       "库存明细"
     ],
     "pagePath": "库存查询 / 库存明细",
     "legacyPath": "-",
-    "actionPermissions": "查看页面、详情",
-    "dataPermission": "仓库权限",
-    "changeNote": "",
+    "actionPermissions": "查看页面、详情、批量导出、导出记录",
+    "dataPermission": "仓库权限；组合导出全量为权限内仍有库存余量的明细，不受当前列表筛选",
+    "changeNote": "6.3 P1：新增批量导出与导出记录；跨菜单组合导出与存货管理、库存流水共用任务队列",
     "createdAt": "2026-04-14",
-    "updatedAt": "2026-04-14"
+    "updatedAt": "2026-11-04"
   },
   {
     "id": "33",
@@ -693,18 +693,18 @@ export const permissionRecords: PermissionRecord[] = [
     "topBarModuleLabel": "仓储",
     "menuModuleCode": "02-仓储",
     "baselineModuleDir": "B端PC/02-仓储",
-    "recordStatus": "active",
+    "recordStatus": "6.3-delivered",
     "pagePathSegments": [
       "库存查询",
       "库存流水"
     ],
     "pagePath": "库存查询 / 库存流水",
     "legacyPath": "-",
-    "actionPermissions": "查看页面、详情",
-    "dataPermission": "仓库权限",
-    "changeNote": "",
+    "actionPermissions": "查看页面、详情、批量导出、导出记录",
+    "dataPermission": "仓库权限；组合导出全量为权限内流水全量，不受当前列表筛选（与行级【下载记录】区分）",
+    "changeNote": "6.3 P1：新增批量导出与导出记录；跨菜单组合导出与存货管理、库存明细共用任务队列",
     "createdAt": "",
-    "updatedAt": ""
+    "updatedAt": "2026-11-04"
   },
   {
     "id": "34",

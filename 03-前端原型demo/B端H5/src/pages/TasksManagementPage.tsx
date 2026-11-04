@@ -24,6 +24,7 @@ import {
 import { useNavigate } from "react-router-dom"
 import { BottomTabBar } from "@/components/layout/BottomTabBar"
 import { MobileShell } from "@/components/layout/MobileShell"
+import { NavBar } from "@/components/layout/NavBar"
 import { openMenuModule } from "@/lib/open-menu-module"
 
 export function TasksManagementPage() {
@@ -43,10 +44,7 @@ export function TasksManagementPage() {
 
   return (
       <MobileShell>
-      {/* 顶部标题栏 */}
-      <div className="px-4 pt-3 pb-1">
-        <h1 className="text-lg font-bold text-gray-900">业务办理</h1>
-      </div>
+      <NavBar title="业务办理" showBack={false} />
 
       {/* 页面主滚动区域 */}
       <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 space-y-3 overscroll-contain">

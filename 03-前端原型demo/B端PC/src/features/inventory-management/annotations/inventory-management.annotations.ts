@@ -1,6 +1,7 @@
 import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotationLayer"
+import { buildInventoryCrossExportAnnotations } from "@/features/shared/inventory-cross-export/inventory-cross-export.annotations"
 
-export const inventoryManagementAnnotations: PrototypeAnnotation[] = [
+const inventoryManagementBaseAnnotations: PrototypeAnnotation[] = [
   {
     id: "inv-mgmt-page",
     number: 1,
@@ -139,17 +140,7 @@ export const inventoryManagementAnnotations: PrototypeAnnotation[] = [
     },
     details: [],
   },
-  {
-    id: "inv-mgmt-export",
-    number: 7,
-    kind: "交互",
-    title: "异步报表导出与历史追溯",
-    content:
-      "右上角提供【批量导出】与【导出记录】。批量导出触发后台异步报表生成，导出记录弹窗可查看历史报表生成状态并提供安全下载。",
-    documentRefs: {
-      fields: { section: "五、导出记录弹窗与系统审计字段", match: "导出记录" },
-      rules: { section: "5.5 异步导出与系统权限规则", match: "异步导出任务调度" },
-    },
-    details: [],
-  },
 ]
+
+export const inventoryManagementAnnotations: PrototypeAnnotation[] =
+  inventoryManagementBaseAnnotations.concat(buildInventoryCrossExportAnnotations(7))

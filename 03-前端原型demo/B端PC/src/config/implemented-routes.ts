@@ -38,6 +38,8 @@ const implementedExactRoutes = new Set<string>([
   "/仓储/入库管理/入库记录/新增",
   "/仓储/出库管理/出库记录",
   "/仓储/出库管理/出库记录/新增",
+  "/仓储/移库管理/移库记录",
+  "/仓储/移库管理/移库记录/新增",
   "/仓储/仓单管理",
   "/仓储/提货单",
   "/融资/监管/监管业务/监管办理",
@@ -49,6 +51,7 @@ const implementedDetailPrefixes = [
   "/仓储/入库管理/入库记录/详情/",
   "/仓储/入库管理/入库申请/详情/",
   "/仓储/出库管理/出库记录/详情/",
+  "/仓储/移库管理/移库记录/详情/",
 ]
 
 const inboundStagingImplementedExact = INBOUND_STAGING_PROTOTYPE_RELEASED
