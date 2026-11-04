@@ -62,8 +62,17 @@ import {
   PARTNER_POLICY_ENTERPRISE_FOOTNOTE_USER,
   PARTNER_POLICY_INDIVIDUAL_CERT_SPEC,
   PARTNER_POLICY_INDIVIDUAL_DUP_SPEC,
+  PARTNER_POLICY_DUP_ENABLE_DIALOG_CONFIRM_USER,
+  PARTNER_POLICY_DUP_ENABLE_DIALOG_DESCRIPTION_USER,
+  PARTNER_POLICY_DUP_ENABLE_DIALOG_TITLE_USER,
+  PARTNER_POLICY_ENTERPRISE_DUP_WARNING_USER,
+  PARTNER_POLICY_INDIVIDUAL_DUP_WARNING_USER,
+  PARTNER_POLICY_DUP_RELAX_SAVE_USER,
   PARTNER_POLICY_DUP_SCAN_ORDER_SPEC,
   PARTNER_POLICY_DUP_SCAN_ORDER_USER,
+  PARTNER_POLICY_RISK_RELAX_DIALOG_DESCRIPTION_USER,
+  PARTNER_POLICY_RISK_RELAX_DIALOG_TITLE_USER,
+  PARTNER_POLICY_RISK_RELAX_REASON_PLACEHOLDER_USER,
   UNSAVED_LEAVE_DIALOG_CONFIRM_USER,
   UNSAVED_LEAVE_DIALOG_DESCRIPTION_USER,
 } from "../lib/platform-basic-config-ui-labels"
@@ -95,6 +104,7 @@ import {
   cloneAgreements,
   clonePartnerAccess,
   cloneWarehouseOps,
+  isPartnerAccessDuplicateTightened,
   isPartnerAccessRelaxed,
   type CategorySavedSnapshots,
 } from "../lib/config-snapshot"
@@ -169,6 +179,7 @@ export function PlatformBasicConfigPage() {
     Record<PartnerSubjectKey, boolean>
   >({ individual: false, enterprise: false })
   const [riskRelaxOpen, setRiskRelaxOpen] = useState(false)
+  const [dupEnableConfirmOpen, setDupEnableConfirmOpen] = useState(false)
   const [unsavedDialogOpen, setUnsavedDialogOpen] = useState(false)
   const [unsavedAction, setUnsavedAction] = useState<"exit" | "switch" | "refresh" | null>(
     null
@@ -432,15 +443,16 @@ export function PlatformBasicConfigPage() {
       showToast(error)
       return
     }
-    if (
-      category === "partner-access" &&
-      isPartnerAccessRelaxed(
-        savedByCategory["partner-access"],
-        state.partnerAccess
-      )
-    ) {
-      setRiskRelaxOpen(true)
-      return
+    if (category === "partner-access") {
+      const baseline = savedByCategory["partner-access"]
+      if (isPartnerAccessRelaxed(baseline, state.partnerAccess)) {
+        setRiskRelaxOpen(true)
+        return
+      }
+      if (isPartnerAccessDuplicateTightened(baseline, state.partnerAccess)) {
+        setDupEnableConfirmOpen(true)
+        return
+      }
     }
     if (showBulkSave) {
       commitCategorySave(category)
@@ -740,10 +752,10 @@ export function PlatformBasicConfigPage() {
             handlePartnerDuplicatePreventChange("individual", checked)
           }
           duplicateOrderHint={PARTNER_POLICY_DUP_SCAN_ORDER_USER}
+          duplicateRelaxHint={PARTNER_POLICY_DUP_RELAX_SAVE_USER}
           certHint="开启后，在货主信息新增/编辑/补全/改址保存时须填写身份证登记地址；入库、出库、仓单等作业不受影响。"
           certSpecNote={PARTNER_POLICY_INDIVIDUAL_CERT_SPEC}
-          duplicateWarning="开启后，同一证件地址在租户内仅允许绑定一个个人货主。冲突时在档案保存或作业快捷建档绑货主时直接拦截。"
-          duplicateHint="降低风控要求（由必填改为选填、或关闭防重复）时，保存须填写变更原因。"
+          duplicateWarning={PARTNER_POLICY_INDIVIDUAL_DUP_WARNING_USER}
           duplicateSpecNote={`${PARTNER_POLICY_INDIVIDUAL_DUP_SPEC} ${PARTNER_POLICY_DUP_AUDIT_SPEC} ${PARTNER_POLICY_DUP_SCAN_ORDER_SPEC}`}
         />
         <PartnerSubjectPolicyCard
@@ -755,10 +767,11 @@ export function PlatformBasicConfigPage() {
             handlePartnerDuplicatePreventChange("enterprise", checked)
           }
           duplicateOrderHint={PARTNER_POLICY_DUP_SCAN_ORDER_USER}
+          duplicateRelaxHint={PARTNER_POLICY_DUP_RELAX_SAVE_USER}
           certHint="开启后，在货主信息新增/编辑/补全/改址保存时须填写营业执照登记地址；仓储与仓单等作业引用货主不受影响。"
           certSpecNote={PARTNER_POLICY_ENTERPRISE_CERT_SPEC}
-          duplicateWarning="开启后，企业货主登记地址在租户内须唯一（与个人货主分池比对，互不混比）。"
-          duplicateSpecNote={`${PARTNER_POLICY_ENTERPRISE_DUP_SPEC} ${PARTNER_POLICY_DUP_SCAN_ORDER_SPEC}`}
+          duplicateWarning={PARTNER_POLICY_ENTERPRISE_DUP_WARNING_USER}
+          duplicateSpecNote={`${PARTNER_POLICY_ENTERPRISE_DUP_SPEC} ${PARTNER_POLICY_DUP_AUDIT_SPEC} ${PARTNER_POLICY_DUP_SCAN_ORDER_SPEC}`}
           duplicateHint="企业主体实名以统一社会信用代码为准；地址防重复与个人货主分别生效。"
           footnote={PARTNER_POLICY_ENTERPRISE_FOOTNOTE_USER}
           footnoteSpecNote={PARTNER_POLICY_ENTERPRISE_DUP_SPEC}
@@ -1265,19 +1278,31 @@ export function PlatformBasicConfigPage() {
 
         <ConfigConfirmDialog
           open={riskRelaxOpen}
-          title="降低风控要求确认"
-          description="您正在放宽证件地址必填或关闭防重复校验，可能增加冒用地址或虚假建档风险。变更原因将写入不可变审计日志，并在本页「策略变更审计」中展示最近记录。"
+          title={PARTNER_POLICY_RISK_RELAX_DIALOG_TITLE_USER}
+          description={PARTNER_POLICY_RISK_RELAX_DIALOG_DESCRIPTION_USER}
           confirmLabel="确认提交"
           destructive
           reasonRequired
           reasonLabel="变更原因说明"
-          reasonPlaceholder="因存量农产品散户身份证住址存在合规村集体地址重叠，经风控合规部审批特批放宽校验。"
+          reasonPlaceholder={PARTNER_POLICY_RISK_RELAX_REASON_PLACEHOLDER_USER}
           onOpenChange={setRiskRelaxOpen}
           onConfirm={(reason) => {
             if (!reason) return
             setRiskRelaxOpen(false)
             recordPartnerAccessRelax(reason)
             commitCategorySave("partner-access", { withAuditNote: true })
+          }}
+        />
+
+        <ConfigConfirmDialog
+          open={dupEnableConfirmOpen}
+          title={PARTNER_POLICY_DUP_ENABLE_DIALOG_TITLE_USER}
+          description={PARTNER_POLICY_DUP_ENABLE_DIALOG_DESCRIPTION_USER}
+          confirmLabel={PARTNER_POLICY_DUP_ENABLE_DIALOG_CONFIRM_USER}
+          onOpenChange={setDupEnableConfirmOpen}
+          onConfirm={() => {
+            setDupEnableConfirmOpen(false)
+            commitCategorySave("partner-access")
           }}
         />
 

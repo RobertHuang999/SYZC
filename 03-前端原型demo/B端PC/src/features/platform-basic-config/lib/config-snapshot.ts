@@ -79,3 +79,21 @@ export function isPartnerAccessRelaxed(
     isSubjectPolicyRelaxed(baseline.enterprise, current.enterprise)
   )
 }
+
+function isSubjectDuplicateTightened(
+  baseline: PartnerSubjectAccessPolicy,
+  current: PartnerSubjectAccessPolicy
+) {
+  return !baseline.addressDuplicatePrevent && current.addressDuplicatePrevent
+}
+
+/** 任一主体类型防重复由关改开（保存前弹确认，P03 存量须已通过校验） */
+export function isPartnerAccessDuplicateTightened(
+  baseline: PartnerAccessConfig,
+  current: PartnerAccessConfig
+) {
+  return (
+    isSubjectDuplicateTightened(baseline.individual, current.individual) ||
+    isSubjectDuplicateTightened(baseline.enterprise, current.enterprise)
+  )
+}

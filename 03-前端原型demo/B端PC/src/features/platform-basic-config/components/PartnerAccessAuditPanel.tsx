@@ -17,7 +17,7 @@ export function PartnerAccessAuditPanel({ records }: PartnerAccessAuditPanelProp
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          降低风控要求（放宽必填或关闭防重复）并保存后，变更原因与时间将展示于此；完整流水可在「操作审批日志」中追溯。
+          放宽风控并保存后，变更原因和时间会显示在这里。
         </CardContent>
       </Card>
     )

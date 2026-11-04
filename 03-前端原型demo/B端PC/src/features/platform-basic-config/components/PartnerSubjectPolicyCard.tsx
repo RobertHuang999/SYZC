@@ -11,7 +11,7 @@ import type { PartnerSubjectAccessPolicy, YesNo } from "../domain/types"
 type PartnerSubjectPolicyCardProps = {
   title: string
   certHint: string
-  duplicateHint: string
+  duplicateHint?: string
   duplicateWarning: string
   policy: PartnerSubjectAccessPolicy
   onChange: (patch: Partial<PartnerSubjectAccessPolicy>) => void
@@ -19,6 +19,8 @@ type PartnerSubjectPolicyCardProps = {
   /** 开启/关闭防重复前校验（P03）；未传则直接写 policy */
   onDuplicatePreventChange?: (checked: boolean) => void
   duplicateOrderHint?: string
+  /** 放宽必填或关闭防重复时的保存说明（P04 页内文案，与排查顺序说明并列） */
+  duplicateRelaxHint?: string
   footnote?: string
   certSpecNote?: string
   duplicateSpecNote?: string
@@ -35,6 +37,7 @@ export function PartnerSubjectPolicyCard({
   onScanDuplicates,
   onDuplicatePreventChange,
   duplicateOrderHint,
+  duplicateRelaxHint,
   footnote,
   certSpecNote,
   duplicateSpecNote,
@@ -93,7 +96,13 @@ export function PartnerSubjectPolicyCard({
           <ProductFieldHint className="text-amber-800 dark:text-amber-300">
             {duplicateWarning}
           </ProductFieldHint>
-          <ProductFieldHint>{duplicateOrderHint ?? duplicateHint}</ProductFieldHint>
+          {duplicateOrderHint ? (
+            <ProductFieldHint>{duplicateOrderHint}</ProductFieldHint>
+          ) : null}
+          {duplicateRelaxHint ? (
+            <ProductFieldHint>{duplicateRelaxHint}</ProductFieldHint>
+          ) : null}
+          {duplicateHint ? <ProductFieldHint>{duplicateHint}</ProductFieldHint> : null}
           {duplicateSpecNote ? <PrototypeSpecCallout>{duplicateSpecNote}</PrototypeSpecCallout> : null}
         </div>
       </CardContent>
