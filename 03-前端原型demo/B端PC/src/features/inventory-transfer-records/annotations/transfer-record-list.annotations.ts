@@ -96,7 +96,7 @@ export const transferRecordListAnnotations: PrototypeAnnotation[] = [
     id: "transfer-record-table-actions",
     targetId: "transfer-record-table-actions",
     number: 4,
-    kind: "按钮",
+    kind: "交互",
     title: "行操作：详情、下载记录与单据下载 (R06)",
     content:
       "固定操作列基于规范 TableRowActionPanel 呈现，提供【查看详情】、【下载记录】、【单据下载】三项操作。点击【单据下载】触发异步生成标准 PDF 凭证并计入下载记录；点击【下载记录】弹出历史所有生成快照支持复用下载。",

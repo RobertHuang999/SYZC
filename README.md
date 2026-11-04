@@ -26,6 +26,10 @@ SYZC 是森云科技面向资金方、仓储/监管企业、借款企业、核�
 
 其他背景文档只对基准进行解释和落地，不得与两份基准文档产生冲突；如发现冲突，先登记待确认项，不得自行扩展业务范围。
 
+## 前端原型 · 部署前构建
+
+PC / H5 原型在 `03-前端原型demo/` 下为**独立 npm 工程**；Cloudflare 等对 PC 工程执行 `npm run build`（含 `tsc -b`）。本地开发请用 **`npm run build`** 或根目录 **`npm run build:prototype`** 自检，详见 [03-前端原型demo/README.md](./03-前端原型demo/README.md)。仓库根已配置 **Husky pre-push**（需根目录 `npm install` 一次）。
+
 ## 工作规范
 
 - 输出使用简体中文；需求拆解遵循 MECE，单项任务控制在 2 个工作日以内。

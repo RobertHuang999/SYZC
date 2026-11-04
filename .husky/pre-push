@@ -1,0 +1,2 @@
+# 与 Cloudflare Pages 一致：部署前必须 tsc -b && vite build 通过
+npm run build:prototype

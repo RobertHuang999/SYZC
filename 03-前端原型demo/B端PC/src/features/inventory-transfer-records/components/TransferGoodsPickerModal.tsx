@@ -167,7 +167,7 @@ export function TransferGoodsPickerModal({
             <label className="text-xs text-muted-foreground block mb-1">仓库筛选</label>
             <Select
               value={selectedWarehouseId}
-              onValueChange={setSelectedWarehouseId}
+              onValueChange={(val) => val != null && setSelectedWarehouseId(val)}
             >
               <SelectTrigger className="h-[34px] text-xs">
                 <SelectValue placeholder="全部仓库" />
@@ -198,6 +198,7 @@ export function TransferGoodsPickerModal({
             <Select
               value={`${sortField}-${sortOrder}`}
               onValueChange={(val) => {
+                if (!val) return
                 const [f, o] = val.split("-") as [
                   "inboundTime" | "availableAmount",
                   "asc" | "desc"

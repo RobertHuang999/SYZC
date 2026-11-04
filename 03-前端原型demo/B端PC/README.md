@@ -12,6 +12,19 @@ npm run dev
 
 默认端口 **5173**（H5 原型为 5174）。
 
+## 部署前构建（Cloudflare Pages 同款）
+
+线上构建命令为 **`npm run build`**（= `tsc -b && vite build`）。本地只跑 `npm run dev` **不会**做全量类型检查，TypeScript 错误容易推到部署才暴露。
+
+**推送 / 合并前请在工程目录执行：**
+
+```bash
+cd 03-前端原型demo/B端PC   # 或已在 B端PC 内则省略
+npm run build
+```
+
+仓库根目录已配置 **Git pre-push**：`git push` 前会自动执行 PC + H5 的 `build:prototype`（需先在各自子工程 `npm install`，并在根目录执行一次 `npm install` 以启用 Husky）。跳过钩子仅在你明确接受部署风险时使用：`git push --no-verify`。
+
 ## 布局与目录
 
 - **顶栏模块**：`TopModuleNav` + 各模块内容区

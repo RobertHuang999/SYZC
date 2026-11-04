@@ -1,0 +1,14 @@
+{
+  "name": "syzc",
+  "private": true,
+  "description": "SYZC 资料库根目录：Husky 钩子与原型构建脚本（业务代码在 03-前端原型demo/）",
+  "scripts": {
+    "prepare": "husky",
+    "build:prototype:pc": "npm run build --prefix \"03-前端原型demo/B端PC\"",
+    "build:prototype:h5": "npm run build --prefix \"03-前端原型demo/B端H5\"",
+    "build:prototype": "npm run build:prototype:pc && npm run build:prototype:h5"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

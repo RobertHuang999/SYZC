@@ -355,14 +355,15 @@ export function TransferGoodsSection({ groups, onChange }: Props) {
                               <TableCell>
                                 <Select
                                   value={detail.targetRoomZone}
-                                  onValueChange={(val) =>
+                                  onValueChange={(val) => {
+                                    if (!val) return
                                     handleDetailTargetChange(
                                       group.id,
                                       detail.id,
                                       "targetRoomZone",
                                       val
                                     )
-                                  }
+                                  }}
                                 >
                                   <SelectTrigger className="h-7 text-xs">
                                     <SelectValue placeholder="请选择目标库位" />

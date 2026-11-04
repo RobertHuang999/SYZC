@@ -13,7 +13,9 @@ npm run dev
 ```
 
 - **本地访问地址**：[http://localhost:5182/](http://localhost:5182/)（或对应控制台提示端口）
-- **构建打包验证**：`npm run build`
+- **构建打包验证（部署前必跑）**：`npm run build`（= `tsc -b && vite build`，与 CI/Cloudflare 一致；仅 `npm run dev` 不会拦截类型错误）
+
+仓库根目录 **pre-push** 会连同 PC 原型一起跑 `npm run build:prototype`；单独验证 H5 时在本文目录执行 `npm run build` 即可。
 
 ---
 

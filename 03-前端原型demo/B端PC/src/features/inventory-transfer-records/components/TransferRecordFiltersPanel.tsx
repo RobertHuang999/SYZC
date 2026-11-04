@@ -74,7 +74,7 @@ export function TransferRecordFiltersPanel({
             <label className="text-xs font-normal text-muted-foreground">移库类型</label>
             <Select
               value={draftFilters.transferType}
-              onValueChange={(val) => updateField("transferType", val)}
+              onValueChange={(val) => val != null && updateField("transferType", val)}
             >
               <SelectTrigger className="h-[34px] text-sm">
                 <SelectValue placeholder="全部" />
@@ -106,7 +106,7 @@ export function TransferRecordFiltersPanel({
             <label className="text-xs font-normal text-muted-foreground">仓库名称</label>
             <Select
               value={draftFilters.warehouseId}
-              onValueChange={(val) => updateField("warehouseId", val)}
+              onValueChange={(val) => val != null && updateField("warehouseId", val)}
             >
               <SelectTrigger className="h-[34px] text-sm">
                 <SelectValue placeholder="请选择仓库" />
@@ -143,7 +143,7 @@ export function TransferRecordFiltersPanel({
               <label className="text-xs font-normal text-muted-foreground">制单人</label>
               <Select
                 value={draftFilters.createBy}
-                onValueChange={(val) => updateField("createBy", val)}
+                onValueChange={(val) => val != null && updateField("createBy", val)}
               >
                 <SelectTrigger className="h-[34px] text-sm">
                   <SelectValue placeholder="请选择制单人" />

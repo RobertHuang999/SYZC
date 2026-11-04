@@ -49,7 +49,7 @@ export const transferRecordDetailAnnotations: PrototypeAnnotation[] = [
     id: "transfer-detail-goods-tab",
     targetId: "transfer-detail-goods-tab",
     number: 3,
-    kind: "表格",
+    kind: "字段",
     title: "移库明细分流呈现 (R03/R04)",
     content:
       "移库明细标签页根据移库类型分流呈现：普通移库采用折叠树形结构（展示原位置 vs 移入位置，支持展开二级储位）；抵押/质押移库采用平铺表格呈现受押货品的位置与数量明细。",
@@ -71,7 +71,7 @@ export const transferRecordDetailAnnotations: PrototypeAnnotation[] = [
     id: "transfer-detail-audit-tab",
     targetId: "transfer-detail-audit-tab",
     number: 4,
-    kind: "表格",
+    kind: "字段",
     title: "全链路审批与对冲履历 (R05)",
     content:
       "展示移库单从发起申请到主管初审、资方终审的不可变流转履历，终审通过时原子触发库存对冲（移库出库 + 移库入库）。",

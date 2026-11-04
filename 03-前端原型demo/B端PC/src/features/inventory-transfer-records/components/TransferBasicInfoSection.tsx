@@ -93,7 +93,7 @@ export function TransferBasicInfoSection({ form, onChange }: Props) {
               }
               className="h-[34px] text-sm"
             />
-            <ProductFieldHint text="移库业务实际作业时间，不可选择未来时间" />
+            <ProductFieldHint>移库业务实际作业时间，不可选择未来时间</ProductFieldHint>
           </div>
 
           {/* 2. 货主类型 */}
@@ -120,7 +120,10 @@ export function TransferBasicInfoSection({ form, onChange }: Props) {
             <label className="text-xs font-medium text-foreground flex items-center gap-1">
               <span className="text-red-500">*</span> 货主名称
             </label>
-            <Select value={form.ownerId} onValueChange={handleOwnerSelect}>
+            <Select
+              value={form.ownerId}
+              onValueChange={(val) => val && handleOwnerSelect(val)}
+            >
               <SelectTrigger className="h-[34px] text-sm">
                 <SelectValue placeholder="请选择或输入货主名称" />
               </SelectTrigger>
@@ -193,7 +196,7 @@ export function TransferBasicInfoSection({ form, onChange }: Props) {
               </label>
               <Select
                 value={form.relatedId}
-                onValueChange={handleRelatedOrderSelect}
+                onValueChange={(val) => val && handleRelatedOrderSelect(val)}
               >
                 <SelectTrigger className="h-[34px] text-sm border-amber-500/50">
                   <SelectValue placeholder="请选择关联监管业务单号" />

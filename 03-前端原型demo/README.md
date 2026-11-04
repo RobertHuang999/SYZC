@@ -2,6 +2,16 @@
 
 本目录包含 **B 端 PC** 与 **B 端 H5** 两套独立 Vite 工程，分别存放在子文件夹中。
 
+## 部署 / 推送前（必读）
+
+| 步骤 | 命令 | 说明 |
+| :--- | :--- | :--- |
+| PC 类型检查 + 打包 | `cd B端PC && npm run build` | Cloudflare 对 PC 原型使用同一命令 |
+| H5 类型检查 + 打包 | `cd B端H5 && npm run build` | H5 独立站点时同样要求 |
+| 根目录一键（pre-push 同款） | 在仓库根 `npm run build:prototype` | 需根目录与各子工程均已 `npm install` |
+
+首次启用 Git 钩子：在仓库根执行 `npm install`（安装 Husky），之后每次 `git push` 会自动跑双端 build。
+
 ## B 端 PC（后台管理）
 
 ```bash

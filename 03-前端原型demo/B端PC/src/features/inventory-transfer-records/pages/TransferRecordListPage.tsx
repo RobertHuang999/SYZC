@@ -108,8 +108,8 @@ export function TransferRecordListPage() {
           {/* 分页组件 */}
           {filteredRows.length > 0 && (
             <WarningListPagination
-              totalItems={filteredRows.length}
-              currentPage={page}
+              total={filteredRows.length}
+              page={page}
               pageSize={pageSize}
               onPageChange={setPage}
               onPageSizeChange={(newSize) => {

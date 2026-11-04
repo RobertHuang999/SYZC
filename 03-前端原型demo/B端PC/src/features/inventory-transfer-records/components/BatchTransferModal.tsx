@@ -84,7 +84,10 @@ export function BatchTransferModal({
             <label className="text-xs font-medium text-foreground flex items-center gap-1">
               <span className="text-red-500">*</span> 批量移入库房/分区：
             </label>
-            <Select value={targetRoomZone} onValueChange={setTargetRoomZone}>
+            <Select
+              value={targetRoomZone}
+              onValueChange={(val) => val != null && setTargetRoomZone(val)}
+            >
               <SelectTrigger className="h-[36px] text-xs">
                 <SelectValue placeholder="请选择目标库房与分区" />
               </SelectTrigger>

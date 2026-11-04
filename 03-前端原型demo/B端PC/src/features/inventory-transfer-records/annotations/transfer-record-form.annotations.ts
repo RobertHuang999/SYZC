@@ -49,7 +49,7 @@ export const transferRecordFormAnnotations: PrototypeAnnotation[] = [
     id: "transfer-form-batch-modal",
     targetId: "transfer-form-batch-modal",
     number: 3,
-    kind: "操作",
+    kind: "交互",
     title: "普通移库主行批量移库一键覆盖 (R03)",
     content:
       "普通移库一级货品主行提供【批量移库】按钮。在弹窗中统一选择目标移入库房/分区及选填具体位置，点击确定即可一键覆盖当前主行下所有二级明细行的目标储位。",
