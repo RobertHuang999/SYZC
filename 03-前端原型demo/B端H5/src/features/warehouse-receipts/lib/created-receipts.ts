@@ -6,7 +6,12 @@ import type {
   ReceiptGoodsLot,
   WarehouseReceipt,
 } from "@prototype/shared/warehouse-receipts/warehouse-receipt-types"
-import { findWarehouseReceiptByIdOrCode, warehouseReceiptSeed } from "@prototype/shared/warehouse-receipts/warehouse-receipt-seed"
+import {
+  findWarehouseReceiptByIdOrCode,
+  receiptIssuanceCandidates,
+  warehouseReceiptSeed,
+} from "@prototype/shared/warehouse-receipts/warehouse-receipt-seed"
+import { buildFifoPlan } from "./receipt-fifo"
 import type { ReceiptInitiateDraft } from "./receipt-initiate-session"
 
 const CREATED_STORAGE_KEY = "syzc-h5-created-receipts"
@@ -47,18 +52,41 @@ export function findMobileReceipt(id: string | undefined): WarehouseReceipt | un
 
 export function buildReceiptFromDraft(
   draft: ReceiptInitiateDraft,
-  candidates: IssuanceCandidate[],
-  code: string,
+  candidates: IssuanceCandidate[] = receiptIssuanceCandidates,
+  code: string = `WH-REC-${new Date().getFullYear()}${String(Date.now()).slice(-6)}`,
 ): WarehouseReceipt {
-  const selected = candidates.filter((item) =>
-    draft.selectedCandidateIds.includes(item.id),
-  )
+  const selectedWithAllocations: { candidate: IssuanceCandidate; quantity: number }[] = []
+
+  if (draft.deductMode === "FIFO") {
+    const plan = buildFifoPlan(
+      candidates,
+      draft.fifoGoodsKey,
+      Number(draft.fifoTotal) || 0,
+    )
+    plan.forEach((item) => {
+      selectedWithAllocations.push({
+        candidate: item.candidate,
+        quantity: item.quantity,
+      })
+    })
+  } else {
+    const selected = candidates.filter((item) =>
+      draft.selectedCandidateIds.includes(item.id),
+    )
+    selected.forEach((candidate) => {
+      const quantity = Number(
+        draft.allocations[candidate.id] ?? candidate.remainQuantity,
+      )
+      selectedWithAllocations.push({
+        candidate,
+        quantity,
+      })
+    })
+  }
+
   const groupMap = new Map<string, ReceiptGoodsGroup>()
 
-  selected.forEach((candidate) => {
-    const quantity = Number(
-      draft.allocations[candidate.id] ?? candidate.remainQuantity,
-    )
+  selectedWithAllocations.forEach(({ candidate, quantity }) => {
     const existing = groupMap.get(candidate.goodsName)
     const lot: ReceiptGoodsLot = {
       id: `lot-${candidate.id}`,

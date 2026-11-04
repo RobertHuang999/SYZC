@@ -217,7 +217,7 @@ export function ReceiptCard({
               >
                 <span className="truncate">
                   {good.name}
-                  {good.specification ? ` (${good.specification})` : ""}
+                  {good.spec && !good.name.includes(good.spec) ? ` (${good.spec})` : ""}
                 </span>
                 <span className="shrink-0 font-medium text-[#232D39]">
                   {formatReceiptQuantity(good.quantity)} {good.unit}

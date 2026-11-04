@@ -26,6 +26,7 @@ import { ReceiptCard } from "../components/ReceiptCard"
 import { ReceiptRecordSheet } from "../components/ReceiptRecordSheet"
 import {
   WORKSPACE_ROUTE,
+  receiptH5DetailPath,
   receiptH5OpsPath,
 } from "../domain/constants"
 import { getAllMobileReceipts } from "../mock/warehouse-receipts.mock"
@@ -118,6 +119,16 @@ export function WarehouseReceiptListPage() {
   }
 
   const handleOpClick = (receipt: WarehouseReceipt, op: ReceiptRowAction) => {
+    if (op === "detail") {
+      navigate(receiptH5DetailPath(receipt.id))
+      return
+    }
+
+    if (op === "download") {
+      handleDownload(receipt)
+      return
+    }
+
     // 检查持有人不一致限制
     const isHolderDifferent =
       receipt.holder.name !== receipt.owner.name ||
@@ -190,21 +201,18 @@ export function WarehouseReceiptListPage() {
               options={WAREHOUSE_OPTIONS}
               value={warehouse}
               onChange={setWarehouse}
-              active={warehouse !== "全部"}
             />
             <DropdownFilterPill
               label={goodsCategory === "全部" ? "货物" : goodsCategory}
               options={GOODS_OPTIONS}
               value={goodsCategory}
               onChange={setGoodsCategory}
-              active={goodsCategory !== "全部"}
             />
             <DropdownFilterPill
               label={thirdParty === "全部" ? "三方登记" : `三方: ${thirdParty}`}
               options={THIRD_PARTY_OPTIONS}
               value={thirdParty}
               onChange={setThirdParty}
-              active={thirdParty !== "全部"}
             />
             <DropdownFilterPill
               label={
@@ -216,7 +224,6 @@ export function WarehouseReceiptListPage() {
               options={STATUS_OPTIONS}
               value={status}
               onChange={setStatus}
-              active={status !== "全部"}
             />
           </div>
         </div>

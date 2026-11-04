@@ -100,7 +100,8 @@ export function ReceiptInitiateConfirmPage() {
   // 认证成功后提交
   const handleSignatureSuccess = (result: FaceSignatureResult) => {
     setFaceModalOpen(false)
-    const newReceipt = buildReceiptFromDraft(draft)
+    const code = `WH-REC-${new Date().getFullYear()}${String(Date.now()).slice(-6)}`
+    const newReceipt = buildReceiptFromDraft(draft, activeCandidates, code)
     persistCreatedReceipt(newReceipt)
     clearReceiptDraft()
 
