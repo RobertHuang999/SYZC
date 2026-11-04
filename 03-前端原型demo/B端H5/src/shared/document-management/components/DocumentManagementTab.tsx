@@ -20,7 +20,7 @@ const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&auto=format&fit=crop&q=60"
 
 /**
- * 资料管理 Tab（H5）：时间轴 + 搜索 + 上传补充资料 + 预览/下载。
+ * 资料管理 Tab（H5）：时间轴 + 搜索 + 上传资料 + 预览/下载。
  * 只输出内容，外层卡片壳由详情页决定，保证与两套现有详情页风格一致。
  */
 export function DocumentManagementTab({

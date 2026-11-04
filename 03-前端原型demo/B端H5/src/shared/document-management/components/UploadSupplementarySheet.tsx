@@ -228,7 +228,7 @@ export function UploadSupplementarySheet({
       {/* 遮罩 */}
       <button
         type="button"
-        aria-label="关闭上传补充资料"
+        aria-label="关闭上传资料"
         onClick={onClose}
         className="absolute inset-0 bg-black/50 backdrop-blur-xs"
       />
@@ -239,7 +239,7 @@ export function UploadSupplementarySheet({
 
         <div className="flex shrink-0 items-center justify-between px-4 pt-2 pb-2.5">
           <div>
-            <h3 className="text-sm font-bold text-[#232D39]">上传补充资料</h3>
+            <h3 className="text-sm font-bold text-[#232D39]">上传资料</h3>
             <p className="mt-0.5 text-[10px] text-[#232D39]/45">
               单据编号：{orderNo}
             </p>
@@ -264,13 +264,8 @@ export function UploadSupplementarySheet({
               onClick={() => setStagePickerOpen(true)}
               className="flex w-full items-center justify-between rounded-lg border border-[#232D39]/15 bg-white px-3 py-2.5 text-left active:bg-gray-50"
             >
-              <span className="min-w-0">
-                <span className="block text-xs font-medium text-[#232D39]">
-                  {matchedStage.label}
-                </span>
-                <span className="mt-0.5 block truncate text-[10px] text-[#232D39]/45">
-                  {matchedStage.hint}
-                </span>
+              <span className="text-xs font-medium text-[#232D39]">
+                {matchedStage.label}
               </span>
               <ChevronRight className="size-4 shrink-0 text-[#232D39]/30" />
             </button>
@@ -458,10 +453,7 @@ export function UploadSupplementarySheet({
                   }}
                   className="flex w-full items-center justify-between py-2.5 text-left active:bg-gray-50"
                 >
-                  <div>
-                    <p className="text-xs font-medium text-[#232D39]">{st.label}</p>
-                    <p className="mt-0.5 text-[10px] text-[#232D39]/45">{st.hint}</p>
-                  </div>
+                  <p className="text-xs font-medium text-[#232D39]">{st.label}</p>
                   {selectedFlowType === st.value && (
                     <Check className="size-4 shrink-0 text-blue-600" />
                   )}

@@ -113,17 +113,17 @@ export function VersionViewMenu() {
                 }}
                 className={cn(
                   "flex w-full items-start gap-2 rounded-lg px-2 py-2 text-left transition-colors cursor-pointer",
-                  active ? "bg-[#fff7e8]" : "hover:bg-[#f7f8fa]"
+                  active ? "bg-[#e8f3ff]" : "hover:bg-[#f7f8fa]"
                 )}
               >
                 <span
                   className={cn(
                     "mt-[3px] grid size-3.5 shrink-0 place-items-center rounded-full border bg-white",
-                    active ? "border-[#ff9a2e]" : "border-[#c9cdd4]"
+                    active ? "border-[#165dff]" : "border-[#c9cdd4]"
                   )}
                   aria-hidden="true"
                 >
-                  {active ? <span className="size-1.5 rounded-full bg-[#ff9a2e]" /> : null}
+                  {active ? <span className="size-1.5 rounded-full bg-[#165dff]" /> : null}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span

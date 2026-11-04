@@ -185,13 +185,13 @@ export const InventoryManagementPage: React.FC = () => {
                 onClick={() => handleTabChange(tab.key)}
                 className={`relative cursor-pointer pb-2 transition-colors ${
                   viewMode === tab.key
-                    ? "font-semibold text-[#d99020]"
+                    ? "font-semibold text-[#165dff]"
                     : "font-normal text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {tab.label}
                 {viewMode === tab.key && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#d99020]" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#165dff]" />
                 )}
               </button>
             ))}

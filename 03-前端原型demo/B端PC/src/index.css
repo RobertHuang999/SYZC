@@ -321,14 +321,15 @@ textarea {
 }
 
 .version-view-trigger.is-highlight-on {
-  color: #ad6800;
-  background: #fff7e8;
-  border-color: #ffd591;
+  color: #165dff;
+  background: #e8f3ff;
+  border-color: #bedaff;
 }
 
 .version-view-trigger.is-highlight-on:hover {
-  background: #fff1d6;
-  border-color: #ffc069;
+  color: #165dff;
+  background: #dce9ff;
+  border-color: #85a9ff;
 }
 
 .version-view-trigger.is-on-reference {
@@ -342,7 +343,7 @@ textarea {
   height: 7px;
   flex: none;
   border-radius: 9999px;
-  background: #ff9a2e;
+  background: #165dff;
 }
 
 .version-view-trigger-dot.is-off {
@@ -407,10 +408,11 @@ textarea {
   background: #f7faff;
 }
 
+/* 壳层选中：品牌蓝（AGENTS.md 4.1.4）；迭代「变更」琥珀色见 IterationHighlight / VersionViewMenu 图例 */
 .top-module-link.is-active {
-  color: #d99020;
+  color: #165dff;
   font-weight: 500;
-  background: #fff6e8;
+  background: #e8f3ff;
   border-radius: 8px;
 }
 
@@ -562,9 +564,9 @@ textarea {
 }
 
 .page-tab.is-active {
-  color: #d99020;
-  background: #fff6e8;
-  border-color: #f7dfb8;
+  color: #165dff;
+  background: #e8f3ff;
+  border-color: #bedaff;
 }
 
 .page-tab-trigger,

@@ -154,7 +154,7 @@ export function DocumentTimelineView({
             }}
           >
             <Plus className="w-3.5 h-3.5 mr-1" />
-            上传补充资料
+            上传资料
           </Button>
         </div>
       </div>
@@ -411,7 +411,7 @@ export function DocumentTimelineView({
                             className="h-8 text-xs text-blue-600 border-blue-300 hover:bg-blue-50 cursor-pointer mb-1"
                           >
                             <UploadCloud className="w-3.5 h-3.5 mr-1" />
-                            点击上传补充资料
+                            点击上传资料
                           </Button>
                           <p className="text-xs text-slate-400">
                             支持 PDF、JPG、PNG、ZIP，单文件不超过 50MB

@@ -22,7 +22,7 @@ type DocumentTimelineMobileProps = {
   onPreview: (doc: DocumentItem) => void
   /** 点「下载」时交给页面提示 */
   onDownload: (doc: DocumentItem) => void
-  /** 点「上传补充资料」，带上预选的阶段；主入口传 "2" */
+  /** 点「上传资料」，带上预选的阶段；主入口传 "2" */
   onUpload: (defaultFlowType: string) => void
   /** 上传成功后的刷新信号，由页面递增 */
   refreshKey?: number
@@ -99,7 +99,7 @@ export function DocumentTimelineMobile({
           className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-600 active:bg-blue-100"
         >
           <Upload className="size-3" />
-          上传补充资料
+          上传资料
         </button>
       </div>
 

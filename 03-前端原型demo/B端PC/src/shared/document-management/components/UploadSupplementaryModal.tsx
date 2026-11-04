@@ -340,7 +340,7 @@ export function UploadSupplementaryModal({
       <DialogContent className="sm:max-w-lg p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="pb-1">
           <DialogTitle className="text-base font-semibold text-slate-800">
-            上传补充资料
+            上传资料
           </DialogTitle>
         </DialogHeader>
 
@@ -380,15 +380,8 @@ export function UploadSupplementaryModal({
               </SelectTrigger>
               <SelectContent>
                 {stageOptions.map((st) => (
-                  <SelectItem key={st.value} value={st.value} className="py-2">
-                    <span className="flex flex-col gap-0.5 whitespace-normal">
-                      <span className="text-xs font-medium text-slate-800">
-                        {st.stageText}
-                      </span>
-                      <span className="text-[10.5px] leading-tight text-slate-500">
-                        {st.hint}
-                      </span>
-                    </span>
+                  <SelectItem key={st.value} value={st.value}>
+                    {st.stageText}
                   </SelectItem>
                 ))}
               </SelectContent>

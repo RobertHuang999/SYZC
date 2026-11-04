@@ -279,6 +279,23 @@ PRD、ASCII、Demo 与规范文档互相引用章节时**不使用章节符**，
 
 **Agent 硬性约定**：新建或改版原型表单/配置/弹窗说明时，**默认**按本节实现 USER + SPEC 分层并写入对应 `*-ui-labels.ts`；用户无需每次重复提醒。
 
+### 4.1.4 壳层主色与迭代「变更」琥珀色（固定 · 不可混用）
+
+> **色值条文真源**：[05-PC 色彩与表格视觉规范](./03-前端原型demo/样式规范-%20PC端/05-PC端色彩与表格视觉规范.md) 第 3.1～3.1.1 节；H5 标注层同色口径见 [05-H5 色彩与视觉系统规范](./03-前端原型demo/样式规范-%20H5端/05-移动端色彩与视觉系统规范.md) 第 2.1 节。
+
+**壳层导航与顶栏工具**（一级模块、侧边栏选中、多页签选中、版本视图按钮高亮态等）统一用**系统品牌蓝**，与 `:root` 主色一致（字色 `#165dff`、浅底 `#e8f3ff`、浅描边 `#bedaff`；PC 实现见 `B端PC/src/index.css` 中 `.top-module-link.is-active`、`.page-tab.is-active`、`.sidebar-item.is-active`、`.version-view-trigger.is-highlight-on` 等）。
+
+**迭代「变更」语义**（原型评审专用，**不是**线上业务按钮/状态色）**固定琥珀色**，禁止改成品牌蓝或与其他状态色混用：
+
+| 范围 | 说明 | 标杆实现 |
+| :--- | :--- | :--- |
+| 本版改动高亮外框 / 徽标 | 虚线琥珀框、「6.x 新增/优化」角标 | `B端PC/src/shared/components/IterationHighlight.tsx` |
+| 页面打点 | 当前版本迭代点位为琥珀，历史沿用为浅灰 | `B端PC/src/shared/annotations/PrototypeAnnotationLayer.tsx`（H5 同组件路径在 `B端H5/src/shared/annotations/`） |
+| 版本视图图例 | 下拉里「6.3 变更」色块仍为琥珀，表示**页内**标注含义；壳层按钮本身用品牌蓝 | `B端PC/src/components/layout/VersionViewMenu.tsx` |
+| 规格对照框 | `PrototypeSpecCallout`、合作方改造点等琥珀规格说明 | `B端PC/src/components/form/PartnerChangeZone.tsx` 等 |
+
+**Agent 硬性约定**：调整壳层高亮时**不得**顺带把「变更」琥珀体系改成蓝；新增迭代高亮或变更图例**不得**用 `--primary` / `text-primary` 表达「本版本有改动」。
+
 ### 4.2 原型标注标杆标准（四维一体）
 
 > 需求真源见 **4.0 节 三件套 + 衍生**；原型与标注不得脱离三件套单独演进。  
