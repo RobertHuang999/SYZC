@@ -10,6 +10,8 @@ import {
 } from "@prototype/shared/partner-archives/partner-archive-routes"
 
 export const PERMISSION_REFERENCE_PATH = "/系统参考/功能与数据权限"
+export const MENU_PERMISSION_CONFIG_PATH = "/系统参考/功能与菜单权限配置"
+export const MENU_PERMISSION_CONFIG_LABEL = "功能与菜单权限配置"
 /** 旧路由保留重定向，避免书签失效 */
 export const ITERATION_RECORD_LEGACY_PATH = "/系统参考/菜单迭代记录"
 export const ITERATION_RECORD_PATH = "/系统参考/迭代记录"
@@ -169,16 +171,26 @@ const decodePath = (pathname: string) => {
 export function isSystemReferencePath(pathname: string) {
   const currentPath = decodePath(pathname)
   return (
+    currentPath === MENU_PERMISSION_CONFIG_PATH ||
+    currentPath.startsWith(`${MENU_PERMISSION_CONFIG_PATH}/`) ||
     currentPath === PERMISSION_REFERENCE_PATH ||
     currentPath.startsWith(`${PERMISSION_REFERENCE_PATH}/`) ||
     isIterationRecordPath(currentPath)
   )
 }
 
-export function getSystemReferenceTab(pathname: string): "permission" | "iteration" | null {
+export function getSystemReferenceTab(
+  pathname: string,
+): "permission" | "menu-config" | "iteration" | null {
   const currentPath = decodePath(pathname)
   if (isIterationRecordPath(currentPath)) {
     return "iteration"
+  }
+  if (
+    currentPath === MENU_PERMISSION_CONFIG_PATH ||
+    currentPath.startsWith(`${MENU_PERMISSION_CONFIG_PATH}/`)
+  ) {
+    return "menu-config"
   }
   if (
     currentPath === PERMISSION_REFERENCE_PATH ||
@@ -328,6 +340,9 @@ export function getPageTitle(pathname: string) {
   if (getSystemReferenceTab(pathname) === "permission") {
     return "功能与数据权限"
   }
+  if (getSystemReferenceTab(pathname) === "menu-config") {
+    return MENU_PERMISSION_CONFIG_LABEL
+  }
 
   const allItems = Object.values(sidebarGroupsByModule).flatMap((groups) => groups.flatMap((group) => group.items))
   const matchedItem = allItems.find((item) => currentPath === item.path || currentPath.startsWith(`${item.path}/`))
@@ -349,6 +364,9 @@ export function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
   }
   if (getSystemReferenceTab(pathname) === "permission") {
     return [{ label: "系统参考" }, { label: "功能与数据权限" }]
+  }
+  if (getSystemReferenceTab(pathname) === "menu-config") {
+    return [{ label: "系统参考" }, { label: MENU_PERMISSION_CONFIG_LABEL }]
   }
 
   const activeModule = getActiveTopModule(pathname)

@@ -250,6 +250,12 @@ export function DocumentTimelineView({
                   <div className="mt-3 pl-4 sm:pl-7 space-y-3">
                     {step.documents.length > 0 ? (
                       groupDocumentsIntoBatchesPC(step.documents).map((batch) => {
+                        const isAdditionBatch = batch.nature === "ADDITION"
+                        const batchDescription = batch.description?.trim() ?? ""
+                        const showBatchDescription =
+                          isAdditionBatch && batchDescription.length > 0
+                        const showEmptyAdditionHint =
+                          isAdditionBatch && batchDescription.length === 0
                         return (
                           <div
                             key={batch.batchKey}
@@ -377,15 +383,21 @@ export function DocumentTimelineView({
 
                             {/* 3. 底部：说明样式 + 时间跟在说明下面（补充说明不加图标） */}
                             <div className="px-4 py-3 bg-slate-50 border-t border-slate-100 text-xs text-slate-600 leading-relaxed">
-                              {batch.description ? (
+                              {showBatchDescription ? (
                                 <div className="text-slate-700">
                                   <span className="font-semibold text-slate-800">补充说明：</span>
-                                  <span>{batch.description}</span>
+                                  <span>{batchDescription}</span>
                                 </div>
-                              ) : (
+                              ) : showEmptyAdditionHint ? (
                                 <div className="text-slate-400">无补充说明</div>
-                              )}
-                              <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px] text-slate-400">
+                              ) : null}
+                              <div
+                                className={
+                                  showBatchDescription || showEmptyAdditionHint
+                                    ? "mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px] text-slate-400"
+                                    : "flex items-center justify-between text-[11px] text-slate-400"
+                                }
+                              >
                                 <span>上传时间：{batch.createTime}</span>
                               </div>
                             </div>

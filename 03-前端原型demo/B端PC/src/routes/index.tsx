@@ -40,6 +40,7 @@ import { AccessControlDeviceListPage } from "@/features/access-control-devices/p
 import { MigrationSchemePage } from "@/features/migration-schemes/pages/MigrationSchemePage"
 import { PermissionReferencePage } from "@/features/permission-reference/pages/PermissionReferencePage"
 import { IterationRecordPage } from "@/features/permission-reference/pages/IterationRecordPage"
+import { MenuPermissionConfigPage } from "@/features/menu-permission-config/pages/MenuPermissionConfigPage"
 import { PartnerArchiveListPage } from "@/features/partner-archives/pages/PartnerArchiveListPage"
 import { PartnerArchiveDetailPage } from "@/features/partner-archives/pages/PartnerArchiveDetailPage"
 import { PartnerArchiveFormPage } from "@/features/partner-archives/pages/PartnerArchiveFormPage"
@@ -284,6 +285,7 @@ export function AppRoutes() {
         />
 
         <Route path="系统参考/功能与数据权限" element={<PermissionReferencePage />} />
+        <Route path="系统参考/功能与菜单权限配置" element={<MenuPermissionConfigPage />} />
         <Route
           path="功能与数据权限"
           element={<Navigate to="/系统参考/功能与数据权限" replace />}

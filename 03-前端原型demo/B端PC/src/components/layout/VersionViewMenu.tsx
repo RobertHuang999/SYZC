@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { ChevronDown, ChevronRight, HistoryIcon, KeyRound } from "lucide-react"
+import { ChevronDown, ChevronRight, HistoryIcon, KeyRound, ShieldCheck } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
   useIterationHighlight,
@@ -13,6 +13,7 @@ import {
 import {
   isSystemReferencePath,
   ITERATION_RECORD_PATH,
+  MENU_PERMISSION_CONFIG_PATH,
   PERMISSION_REFERENCE_PATH,
 } from "@/config/navigation"
 import { cn } from "@/lib/utils"
@@ -165,6 +166,16 @@ export function VersionViewMenu() {
         >
           <KeyRound size={14} strokeWidth={1.8} className="shrink-0 text-[#86909c]" />
           <span className="flex-1">功能与数据权限</span>
+          <ChevronRight size={13} className="shrink-0 text-[#c9cdd4]" />
+        </Link>
+
+        <Link
+          to={MENU_PERMISSION_CONFIG_PATH}
+          onClick={() => setOpen(false)}
+          className="flex items-center gap-2 rounded-lg px-2 py-2 text-[12.5px] text-[#1d2129] no-underline transition-colors hover:bg-[#f7f8fa]"
+        >
+          <ShieldCheck size={14} strokeWidth={1.8} className="shrink-0 text-[#86909c]" />
+          <span className="flex-1">功能与菜单权限配置</span>
           <ChevronRight size={13} className="shrink-0 text-[#c9cdd4]" />
         </Link>
       </PopoverContent>

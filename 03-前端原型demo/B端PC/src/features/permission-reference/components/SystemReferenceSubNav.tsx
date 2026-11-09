@@ -2,14 +2,17 @@ import { NavLink } from "react-router-dom"
 import {
   ITERATION_RECORD_LABEL,
   ITERATION_RECORD_PATH,
+  MENU_PERMISSION_CONFIG_LABEL,
+  MENU_PERMISSION_CONFIG_PATH,
   PERMISSION_REFERENCE_PATH,
 } from "@/config/navigation"
 import { cn } from "@/lib/utils"
 
-type TabId = "permission" | "iteration"
+type TabId = "permission" | "menu-config" | "iteration"
 
 const tabs: { id: TabId; label: string; to: string }[] = [
   { id: "permission", label: "功能与数据权限", to: PERMISSION_REFERENCE_PATH },
+  { id: "menu-config", label: MENU_PERMISSION_CONFIG_LABEL, to: MENU_PERMISSION_CONFIG_PATH },
   { id: "iteration", label: ITERATION_RECORD_LABEL, to: ITERATION_RECORD_PATH },
 ]
 

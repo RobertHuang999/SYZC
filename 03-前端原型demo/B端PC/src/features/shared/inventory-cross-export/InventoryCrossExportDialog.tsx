@@ -14,7 +14,6 @@ import {
   createCombinedExportRecord,
   createDefaultCrossExportSelection,
   getCrossExportMenuGroups,
-  isCrossMenuExport,
   type InventoryCrossExportTargetId,
   type InventoryExportSourceMenu,
 } from "./inventoryCrossExportTypes"
@@ -22,6 +21,7 @@ import {
   INVENTORY_CROSS_EXPORT_OPTION_LABELS,
   INVENTORY_CROSS_EXPORT_OPTION_LABELS_OTHER_MENU,
   INVENTORY_CROSS_EXPORT_USER_DETAIL_SCOPE_HINT,
+  INVENTORY_CROSS_EXPORT_USER_FLOW_SCOPE_HINT,
   INVENTORY_CROSS_EXPORT_USER_ZIP_HINT,
   INVENTORY_CROSS_EXPORT_SPEC_DIALOG_NOTE,
   INVENTORY_CROSS_EXPORT_USER_CANCEL,
@@ -78,7 +78,6 @@ export const InventoryCrossExportDialog: React.FC<InventoryCrossExportDialogProp
   )
 
   const canSubmit = selectedTargets.length > 0
-  const willPackageZip = isCrossMenuExport(selectedTargets)
 
   const toggle = (id: InventoryCrossExportTargetId, enabled: boolean) => {
     if (!enabled) return
@@ -97,7 +96,8 @@ export const InventoryCrossExportDialog: React.FC<InventoryCrossExportDialogProp
     id: InventoryCrossExportTargetId,
     label: string,
     enabled: boolean,
-    disabledReason?: string
+    disabledReason?: string,
+    scopeHint?: string
   ) => (
     <label
       key={id}
@@ -114,6 +114,9 @@ export const InventoryCrossExportDialog: React.FC<InventoryCrossExportDialogProp
       />
       <span className="text-sm text-foreground">
         {label}
+        {scopeHint ? (
+          <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">{scopeHint}</span>
+        ) : null}
         {disabledReason ? (
           <span className="mt-0.5 block text-xs text-muted-foreground">{disabledReason}</span>
         ) : null}
@@ -137,7 +140,17 @@ export const InventoryCrossExportDialog: React.FC<InventoryCrossExportDialogProp
               : id === "FLOW" && !canExportFlow
                 ? "无库存流水查看权限"
                 : undefined
-          return renderRow(id, labelMap[id], enabled, disabledReason)
+          const scopeHint =
+            id === "DETAIL"
+              ? INVENTORY_CROSS_EXPORT_USER_DETAIL_SCOPE_HINT
+              : id === "FLOW"
+                ? INVENTORY_CROSS_EXPORT_USER_FLOW_SCOPE_HINT
+                : undefined
+          const rowLabel =
+            id === "DETAIL"
+              ? INVENTORY_CROSS_EXPORT_OPTION_LABELS_OTHER_MENU.DETAIL
+              : labelMap[id]
+          return renderRow(id, rowLabel, enabled, disabledReason, scopeHint)
         })}
       </div>
     </div>
@@ -153,7 +166,12 @@ export const InventoryCrossExportDialog: React.FC<InventoryCrossExportDialogProp
         </DialogHeader>
 
         <div className="space-y-3">
-          <p className="text-sm text-foreground">{INVENTORY_CROSS_EXPORT_USER_DIALOG_INTRO}</p>
+          <div className="flex items-start justify-between gap-3">
+            <p className="shrink-0 text-sm text-foreground">{INVENTORY_CROSS_EXPORT_USER_DIALOG_INTRO}</p>
+            <ProductFieldHint className="min-w-0 flex-1 text-right">
+              {INVENTORY_CROSS_EXPORT_USER_HINT_SCOPE}
+            </ProductFieldHint>
+          </div>
 
           <div className="space-y-3">
             {renderSection(
@@ -166,20 +184,10 @@ export const InventoryCrossExportDialog: React.FC<InventoryCrossExportDialogProp
               groups.other,
               INVENTORY_CROSS_EXPORT_OPTION_LABELS_OTHER_MENU
             )}
-            {selection.DETAIL ? (
-              <ProductFieldHint className="pl-0.5">
-                {INVENTORY_CROSS_EXPORT_USER_DETAIL_SCOPE_HINT}
-              </ProductFieldHint>
-            ) : null}
-            {willPackageZip ? (
-              <ProductFieldHint className="pl-0.5">{INVENTORY_CROSS_EXPORT_USER_ZIP_HINT}</ProductFieldHint>
-            ) : null}
+            <ProductFieldHint className="pl-0.5">{INVENTORY_CROSS_EXPORT_USER_ZIP_HINT}</ProductFieldHint>
           </div>
 
-          <div className="space-y-1">
-            <ProductFieldHint>{INVENTORY_CROSS_EXPORT_USER_HINT_SCOPE}</ProductFieldHint>
-            <ProductFieldHint>{INVENTORY_CROSS_EXPORT_USER_HINT_ASYNC}</ProductFieldHint>
-          </div>
+          <ProductFieldHint>{INVENTORY_CROSS_EXPORT_USER_HINT_ASYNC}</ProductFieldHint>
 
           <PrototypeSpecCallout>{INVENTORY_CROSS_EXPORT_SPEC_DIALOG_NOTE}</PrototypeSpecCallout>
 

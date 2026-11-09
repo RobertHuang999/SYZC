@@ -256,6 +256,9 @@ function DocumentBatchCardMobile({
   onDownload: (doc: DocumentItem) => void
 }) {
   const isAddition = batch.nature === "ADDITION"
+  const batchDescription = batch.description?.trim() ?? ""
+  const showBatchDescription = isAddition && batchDescription.length > 0
+  const showEmptyAdditionHint = isAddition && batchDescription.length === 0
 
   return (
     <div className="rounded-xl border border-[#232D39]/10 bg-white p-2.5 shadow-2xs">
@@ -379,15 +382,21 @@ function DocumentBatchCardMobile({
 
       {/* 3. 底部：说明样式 + 时间跟在说明下面（补充说明不加图标） */}
       <div className="mt-2 rounded-md border border-[#232D39]/5 bg-slate-50 p-2 text-[10.5px] leading-relaxed">
-        {batch.description ? (
+        {showBatchDescription ? (
           <div className="text-[#232D39]/80">
             <span className="font-semibold text-[#232D39]">补充说明：</span>
-            <span>{batch.description}</span>
+            <span>{batchDescription}</span>
           </div>
-        ) : (
+        ) : showEmptyAdditionHint ? (
           <div className="text-[#232D39]/40">无补充说明</div>
-        )}
-        <div className="mt-1.5 pt-1.5 border-t border-[#232D39]/5 flex items-center justify-between text-[9.5px] text-[#232D39]/45">
+        ) : null}
+        <div
+          className={
+            showBatchDescription || showEmptyAdditionHint
+              ? "mt-1.5 pt-1.5 border-t border-[#232D39]/5 flex items-center justify-between text-[9.5px] text-[#232D39]/45"
+              : "flex items-center justify-between text-[9.5px] text-[#232D39]/45"
+          }
+        >
           <span>上传时间：{batch.createTime}</span>
         </div>
       </div>
