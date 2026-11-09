@@ -252,7 +252,6 @@ export const InventoryManagementPage: React.FC = () => {
                 setPage(1)
               }}
               pageSizes={[10, 20, 50]}
-              totalLabel="条"
             />
           </div>
         </PrototypeAnnotationTarget>

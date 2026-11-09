@@ -326,7 +326,6 @@ export const InventoryTransactionsListPage: React.FC = () => {
                 setPageSize(newSize)
                 setPage(1)
               }}
-              totalLabel="笔流水"
             />
           </div>
         </PrototypeAnnotationTarget>

@@ -804,6 +804,25 @@ textarea {
   border-color: #f2f3f5;
 }
 
+/* 原生 <table>（异动、盘点等页面）与统一表格规范对齐 */
+.page-surface table:not([data-slot="table"]) {
+  color: #4e5969;
+  font-size: 13px;
+}
+.page-surface table:not([data-slot="table"]) thead th {
+  height: 45px;
+  padding: 0 16px;
+  color: #4e5969;
+  font-size: 13px;
+  font-weight: 600;
+  border-color: #f2f3f5;
+}
+.page-surface table:not([data-slot="table"]) tbody td {
+  color: #4e5969;
+  font-size: 13px;
+  border-color: #f2f3f5;
+}
+
 /* 行内操作按钮按 28px 紧凑高度，2×2 排列时不会把标准行高撑高 */
 .page-surface .table-row-action-panel [data-slot="button"] {
   height: 28px;

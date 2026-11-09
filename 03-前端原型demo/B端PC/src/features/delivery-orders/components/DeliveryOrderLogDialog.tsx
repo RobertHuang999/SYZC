@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Clock, CheckCircle2 } from "lucide-react"
+import { Clock } from "lucide-react"
 import type { DeliveryOrderItem } from "../domain/types"
 
 interface DeliveryOrderLogDialogProps {
@@ -25,49 +25,66 @@ export function DeliveryOrderLogDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="max-w-xl font-sans max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Clock className="size-5 text-primary" />
-            <span>提货单操作记录与全流程审计</span>
+          <DialogTitle className="flex items-center gap-2 text-foreground">
+            <Clock className="size-5 text-amber-600" />
+            <span>操作记录</span>
           </DialogTitle>
-          <DialogDescription>
-            单号：{order.orderNo} · 关联出库单：{order.outboundOrderNo}
+          <DialogDescription className="text-xs text-muted-foreground">
+            提货单号：{order.orderNo} · 关联出库单：{order.outboundOrderNo}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-2 text-xs">
-          <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-muted-foreground/20">
+        <div className="py-4 text-xs">
+          <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-muted-foreground/20">
             {order.logs.map((log, idx) => (
               <div key={log.id || idx} className="relative group">
-                {/* 时间轴圆点 */}
-                <span className="absolute -left-6 top-0.5 flex size-5 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/30">
-                  <CheckCircle2 className="size-3" />
+                {/* 双环金色节点（对齐 ASCII 2.1 风格） */}
+                <span className="absolute -left-6 top-1 flex size-5 items-center justify-center rounded-full bg-card border-2 border-amber-600 shadow-2xs">
+                  <span className="size-1.5 rounded-full bg-amber-600" />
                 </span>
 
-                <div className="rounded-lg border bg-card p-3 shadow-2xs space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-foreground text-sm">
+                <div className="rounded-lg border bg-card overflow-hidden shadow-2xs">
+                  {/* 卡片头部浅灰底栏 */}
+                  <div className="bg-muted/40 px-3 py-1.5 border-b flex items-center justify-between text-muted-foreground">
+                    <span className="text-[11px] font-medium">{log.time}</span>
+                    <span className="text-[11px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                      事件 {idx + 1}
+                    </span>
+                  </div>
+
+                  {/* 卡片内容 */}
+                  <div className="p-3 space-y-1.5">
+                    <div className="font-semibold text-foreground text-sm">
                       {log.action}
-                    </span>
-                    <span className="text-[11px] text-muted-foreground">
-                      {log.time}
-                    </span>
+                    </div>
+                    {log.operatorName && (
+                      <div className="text-muted-foreground">
+                        <span>操作人：</span>
+                        <span className="text-foreground">{log.operatorName}</span>
+                      </div>
+                    )}
+                    {log.detail && (
+                      <p className="text-foreground/90 text-xs pt-1 border-t border-dashed">
+                        {log.detail}
+                      </p>
+                    )}
+                    {log.notes && (
+                      <div className="bg-muted/30 p-2 rounded text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">说明：</span>
+                        {log.notes}
+                      </div>
+                    )}
                   </div>
-                  <div className="text-muted-foreground flex items-center gap-2">
-                    <span>经办人：{log.operatorName}</span>
-                  </div>
-                  <p className="text-foreground pt-1 border-t border-dashed">
-                    {log.detail}
-                  </p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <DialogFooter>
-          <Button size="sm" onClick={onClose}>
+        <DialogFooter className="justify-center sm:justify-center pt-2">
+          <Button size="sm" onClick={onClose} className="px-6 text-xs">
             关 闭
           </Button>
         </DialogFooter>

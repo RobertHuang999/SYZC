@@ -77,22 +77,22 @@ flowchart LR
 | :---: | :--- | :--- | :--- | :--- |
 | ✅ | ws-inbound-mgr / biz-init-inbound | 入库管理/发起 | pickings/warehousing-order | 与 PC 新增页校验/关联单/汇总栏一致 |
 | ⬜ | ws-outbound-mgr / biz-init-outbound | 出库 | outbound 相关 pickings | 与 PC 出库成对 |
-| ⬜ | ws-transfer-loc-mgr / biz-init-transfer-loc | 移库 | | |
-| ⬜ | ws-transfer-owner-mgr / biz-init-transfer-owner | 转让 | | |
+| ✅ | ws-transfer-loc-mgr / biz-init-transfer-loc | 移库 | other/moving-type + pickings/moving-goods | 工作台移库记录台账 + 业务办理两步发起 |
+| ✅ | ws-transfer-owner-mgr / biz-init-transfer-owner | 转让 | | H5 转让记录列表 + 详情；货权流向箭头 + 转让明细/审核记录 |
 | ⬜ | ws-receipt-mgr / biz-init-receipt-issue | 仓单 | | |
-| ⬜ | ws-processing-mgr / biz-init-processing-apply | 加工 | | |
+| ✅ | ws-processing-mgr / biz-init-processing-apply | 加工 | | H5 加工记录列表 + 详情；投入➔转化➔产出链路、完成/作废入口 |
 | ⬜ | ws-delivery-order | 提货单 | | |
 | ⬜ | ws-inventory-mgr | 存货管理 | | |
 | ⬜ | ws-stock-detail / ws-tally-stacking | 库存/理货 | | |
-| ⬜ | ws-cargo-movement / biz-init-movement-apply | 异动 | | |
-| ⬜ | ws-stock-taking / biz-init-stock-taking-apply | 盘点 | | |
+| ✅ | ws-cargo-movement / biz-init-movement-apply | 异动 | | H5 异动记录列表 + 详情；调账前后数量箭头链路 |
+| ✅ | ws-stock-taking / biz-init-stock-taking-apply | 盘点 | | H5 盘点列表 + 详情；账面汇总/库存明细双模式、异常解除 |
 | ⬜ | ws-cargo-rights / ws-evidence-mgr | 货权/证据 | | |
 | ⬜ | ws-device-iot / ws-device-gps | 物联/GPS | device 子包 | 设备 hub 已部分实现 |
 | ⬜ | ws-pledge-order-mgr 等融资监管 | 多条 | supervision 包 | |
 | ⬜ | biz-overview-* / biz-approve-* | 审批类 | | 部分与 PC 审批重复 |
 | ⬜ | home-report / home-todos | 首页 | | |
 
-**H5 已落地 `customRoute`**：仓库管理、新增仓库、设备/门禁、设备/押品预警、风险公示、我的申请、开锁审批、入库（13 项）。
+**H5 已落地 `customRoute`**：仓库管理、新增仓库、设备/门禁、设备/押品预警、风险公示、我的申请、开锁审批、入库、移库、转让、加工、盘点、异动（18 项）。
 
 ---
 

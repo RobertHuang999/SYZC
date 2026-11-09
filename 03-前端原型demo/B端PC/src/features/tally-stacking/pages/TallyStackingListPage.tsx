@@ -185,7 +185,6 @@ export const TallyStackingListPage: React.FC = () => {
                 setPageSize(newSize)
                 setPage(1)
               }}
-              totalLabel="条批次"
             />
           </div>
         </PrototypeAnnotationTarget>

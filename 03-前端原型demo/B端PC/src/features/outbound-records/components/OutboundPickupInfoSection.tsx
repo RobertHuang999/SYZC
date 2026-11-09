@@ -149,10 +149,10 @@ export function OutboundPickupInfoSection({
       </div>
 
       {expanded && (
-        <CardContent className="space-y-4 pt-5 pb-6 text-xs">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <CardContent className="space-y-4 pt-5 pb-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {/* 1. 提货人类型 */}
-            <FormItem label="提货人类型:" required>
+            <FormItem label="提货人类型" required>
               <Select
                 value={form.pickupPersonType}
                 onValueChange={(val) =>
@@ -166,7 +166,7 @@ export function OutboundPickupInfoSection({
                   })
                 }
               >
-                <SelectTrigger className="h-9 text-xs w-full">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="请选择提货人类型" />
                 </SelectTrigger>
                 <SelectContent>
@@ -179,7 +179,7 @@ export function OutboundPickupInfoSection({
             {/* 个人提货人字段 */}
             {isPersonal ? (
               <>
-                <FormItem label="提货经办人:" required className="sm:col-span-2 lg:col-span-2">
+                <FormItem label="提货经办人" required className="sm:col-span-2 lg:col-span-2">
                   <PrototypeAnnotationTarget annotationIds={["outbound-form-partner-pickup"]}>
                     <PartnerChangeFieldMark
                       markId="outbound-pickup-agent"
@@ -201,77 +201,77 @@ export function OutboundPickupInfoSection({
                     </PartnerChangeFieldMark>
                   </PrototypeAnnotationTarget>
                 </FormItem>
-                <FormItem label="提货人姓名:" required>
+                <FormItem label="提货人姓名" required>
                   <Input
                     value={form.pickupName}
                     onChange={(e) => onPatch({ pickupName: e.target.value })}
                     placeholder="请选择提货经办人或快捷建档"
                     disabled={pickupFieldsLocked}
-                    className="h-9 text-xs disabled:bg-muted/60"
+                    className="disabled:bg-muted/60"
                   />
                 </FormItem>
-                <FormItem label="提货人身份证号:" required>
+                <FormItem label="提货人身份证号" required>
                   <Input
                     value={form.pickupIdCardNo}
                     onChange={(e) => onPatch({ pickupIdCardNo: e.target.value })}
                     placeholder="选中后只读反显"
                     disabled={pickupFieldsLocked}
-                    className="h-9 text-xs disabled:bg-muted/60"
+                    className="disabled:bg-muted/60"
                   />
                 </FormItem>
-                <FormItem label="提货人电话:" required>
+                <FormItem label="提货人电话" required>
                   <Input
                     maxLength={11}
                     value={form.pickupPhone}
                     onChange={(e) => onPatch({ pickupPhone: e.target.value })}
                     placeholder="选中后只读反显"
                     disabled={pickupFieldsLocked}
-                    className="h-9 text-xs disabled:bg-muted/60"
+                    className="disabled:bg-muted/60"
                   />
                 </FormItem>
-                <FormItem label="车牌号:">
+                <FormItem label="车牌号">
                   <Input
                     value={form.plateNo}
                     onChange={(e) => onPatch({ plateNo: e.target.value })}
                     placeholder="请输入车牌号"
-                    className="h-9 text-xs"
+                    className=""
                   />
                 </FormItem>
               </>
             ) : (
               /* 企业提货人字段 */
               <>
-                <FormItem label="提货人名称:" required>
+                <FormItem label="提货人名称" required>
                   <Input
                     value={form.pickupName}
                     onChange={(e) => onPatch({ pickupName: e.target.value })}
                     placeholder="请输入公司名称"
-                    className="h-9 text-xs"
+                    className=""
                   />
                 </FormItem>
-                <FormItem label="统一社会信用编码:" required>
+                <FormItem label="统一社会信用编码" required>
                   <Input
                     value={form.pickupIdentity}
                     onChange={(e) => onPatch({ pickupIdentity: e.target.value })}
                     placeholder="请输入统一社会信用编码"
-                    className="h-9 text-xs"
+                    className=""
                   />
                 </FormItem>
-                <FormItem label="经办人姓名:" required>
+                <FormItem label="经办人姓名" required>
                   <Input
                     value={form.pickupOperator}
                     onChange={(e) => onPatch({ pickupOperator: e.target.value })}
                     placeholder="请输入经办人姓名"
-                    className="h-9 text-xs"
+                    className=""
                   />
                 </FormItem>
-                <FormItem label="经办人电话:" required>
+                <FormItem label="经办人电话" required>
                   <Input
                     maxLength={11}
                     value={form.pickupPhone}
                     onChange={(e) => onPatch({ pickupPhone: e.target.value })}
                     placeholder="请输入经办人电话"
-                    className="h-9 text-xs"
+                    className=""
                   />
                 </FormItem>
               </>
@@ -284,7 +284,7 @@ export function OutboundPickupInfoSection({
                     value={form.pickupIdCardNo}
                     onChange={(e) => onPatch({ pickupIdCardNo: e.target.value })}
                     placeholder="请输入经办人身份证号"
-                    className="h-9 text-xs"
+                    className=""
                   />
                 </FormItem>
                 <FormItem label="车牌号">
@@ -292,7 +292,7 @@ export function OutboundPickupInfoSection({
                     value={form.plateNo}
                     onChange={(e) => onPatch({ plateNo: e.target.value })}
                     placeholder="请输入车牌号"
-                    className="h-9 text-xs"
+                    className=""
                   />
                 </FormItem>
               </>

@@ -274,3 +274,26 @@ export const mobileOutboundRecordsMock: MobileOutboundRecord[] = [
     ],
   },
 ]
+
+/** 出库单据修改记录（详情页「修改记录」页签） */
+export const MOBILE_OUTBOUND_MODIFY_LOGS: Record<
+  string,
+  { fieldLabel: string; beforeValue: string; afterValue: string; operator: string; operatedAt: string }[]
+> = {
+  "20617289020070320130": [
+    {
+      fieldLabel: "出库日期",
+      beforeValue: "2026-06-03 09:00:00",
+      afterValue: "2026-06-03 10:18:22",
+      operator: "lxy（四川享宇科技有限公司）",
+      operatedAt: "2026-06-03 09:42:11",
+    },
+    {
+      fieldLabel: "提货人姓名",
+      beforeValue: "王强",
+      afterValue: "王强（四川建龙物资有限公司）",
+      operator: "lxy（四川享宇科技有限公司）",
+      operatedAt: "2026-06-03 09:45:30",
+    },
+  ],
+}

@@ -1,6 +1,6 @@
 import { Check } from "lucide-react"
 
-const STEPS = ["基础信息", "出库货品"] as const
+const STEPS = ["基础信息", "货品明细"] as const
 
 type Props = {
   current: 0 | 1

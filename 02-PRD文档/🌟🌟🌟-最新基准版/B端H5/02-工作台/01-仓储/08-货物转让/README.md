@@ -1,9 +1,9 @@
 # 货物转让
 
-> **文档状态**：占位 — 待迭代回写 H5 端 PRD / Demo / ASCII
+> **文档状态**：H5 列表页 + 详情页原型已落地（转让明细 / 审核记录）
 > **moduleId**：`ws-transfer-owner-mgr`
 > **菜单路径**：工作台 → 仓储 → 货物转让
-> **原型路由**：`/m/module/ws-transfer-owner-mgr`
+> **原型路由**：`/m/workspace/transfer-records`（详情 `/:id`）
 > **PC 原路径**：货物管理～转让
 > **功能清单唯一定义来源**：`03-前端原型demo/B端H5/src/data/mobileMenuData.ts`
 > **基准路径**：`B端H5/02-工作台/01-仓储/08-货物转让`

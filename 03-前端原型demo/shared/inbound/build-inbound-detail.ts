@@ -184,9 +184,9 @@ function resolveSkuForGoodsName(name: string): GoodsSkuRecord | undefined {
   })
 }
 
-function demoCollectOtherInfo(sku: GoodsSkuRecord | undefined, index: number): string {
+function demoCollectOtherInfo(sku: GoodsSkuRecord | undefined): string {
   if (!sku || sku.inboundCollect.length === 0) {
-    return index === 0 ? "无：--" : "无：--"
+    return "—"
   }
   const labels: Record<string, string> = {}
   const values: Record<string, string> = {}
@@ -244,7 +244,7 @@ function buildGoodsLines(row: InboundListRowForDetail): InboundGoodsDetailLine[]
       variety: sku?.variety ?? parsed.variety,
       spec: sku ? formatSpecSummary(sku.specValues) : parsed.spec,
       measureLabel,
-      otherInfo: demoCollectOtherInfo(sku, index),
+      otherInfo: demoCollectOtherInfo(sku),
       amount: portion,
       unit,
       totalQuantityLabel: qtyLabel,

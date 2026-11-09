@@ -56,7 +56,7 @@ export function AccessControlDeviceTable({
                 <TableCell>{(page - 1) * pageSize + index + 1}</TableCell>
                 <TableCell>{device.originalName}</TableCell>
                 <TableCell className="font-medium">{device.displayName}</TableCell>
-                <TableCell className="font-mono text-sm">{device.deviceCode}</TableCell>
+                <TableCell className="text-sm">{device.deviceCode}</TableCell>
                 <TableCell>
                   <Badge variant="outline">{device.deviceType}</Badge>
                 </TableCell>

@@ -1,0 +1,18 @@
+{
+  "login": ["pc"],
+  "tasks": [
+    {
+      "type": "eval",
+      "kind": "pc",
+      "name": "01-top-nav",
+      "js": "() => { const out = []; document.querySelectorAll('[class*=\"menu\"],[class*=\"nav\"]').forEach(el => { if (el.children.length < 14) { const t = (el.textContent||'').replace(/\\s+/g,' ').trim(); if (t) out.push({ tag: el.tagName, cls: String(el.className).slice(0,60), text: t.slice(0,50) }) } }); return out.slice(0, 120) }"
+    },
+    { "type": "nav", "kind": "pc", "clicks": ["仓储"], "name": "02-pc-cangchu" },
+    {
+      "type": "eval",
+      "kind": "pc",
+      "name": "03-side-menu",
+      "js": "() => { const out = []; document.querySelectorAll('aside *, .el-menu-item, .el-submenu__title, [class*=\"sidebar\"] *').forEach(el => { const t = (el.textContent||'').replace(/\\s+/g,' ').trim(); if (t && t.length < 24 && el.children.length < 6) out.push({ tag: el.tagName, cls: String(el.className).slice(0,50), text: t }) }); const seen = new Set(); return out.filter(x => !seen.has(x.text) && seen.add(x.text)).slice(0, 150) }"
+    }
+  ]
+}

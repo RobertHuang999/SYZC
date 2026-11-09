@@ -48,6 +48,29 @@ import {
 } from "@/features/outbound-records/annotations/outbound-record.annotations"
 import { outboundRecordH5Documents } from "@/features/outbound-records/documents/outbound-record-documents"
 import {
+  movingH5DetailAnnotations,
+  movingH5InitiateAnnotations,
+  movingH5ListAnnotations,
+} from "@/features/inventory-transfer-records/annotations/moving-record.annotations"
+import { movingRecordH5Documents } from "@/features/inventory-transfer-records/documents/moving-record-documents"
+import {
+  transferH5DetailAnnotations,
+  transferH5ListAnnotations,
+} from "@/features/inventory-transfer-records/annotations/transfer-record.annotations"
+import { transferRecordH5Documents } from "@/features/inventory-transfer-records/documents/transfer-record-documents"
+import {
+  processingH5DetailAnnotations,
+  processingH5ListAnnotations,
+} from "@/features/processing-records/annotations/processing-h5.annotations"
+import { processingRecordH5Documents } from "@/features/processing-records/documents/processing-record-documents"
+import { checkH5Annotations } from "@/features/inventory-check/annotations/check-h5.annotations"
+import { inventoryCheckH5Documents } from "@/features/inventory-check/documents/inventory-check-documents"
+import {
+  abnormalH5DetailAnnotations,
+  abnormalH5ListAnnotations,
+} from "@/features/inventory-abnormal-records/annotations/abnormal-h5.annotations"
+import { inventoryAbnormalH5Documents } from "@/features/inventory-abnormal-records/documents/inventory-abnormal-documents"
+import {
   warehouseReceiptH5DetailAnnotations,
   warehouseReceiptH5InitiateAnnotations,
   warehouseReceiptH5ListAnnotations,
@@ -225,6 +248,50 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
     pageTitle = "出库发起 · 移动端交互与 PRD 标注"
     currentAnnotations = outboundH5InitiateAnnotations
     currentDocuments = outboundRecordH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/moving-records/")) {
+    pageTitle = "移库详情 · 移动端交互与 PRD 标注"
+    currentAnnotations = movingH5DetailAnnotations
+    currentDocuments = movingRecordH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/moving-records")) {
+    pageTitle = "移库管理 · 移动端交互与 PRD 标注"
+    currentAnnotations = movingH5ListAnnotations
+    currentDocuments = movingRecordH5Documents
+  } else if (location.pathname.startsWith("/m/transfer/initiate")) {
+    pageTitle = "移库发起 · 移动端交互与 PRD 标注"
+    currentAnnotations = movingH5InitiateAnnotations
+    currentDocuments = movingRecordH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/transfer-records/")) {
+    pageTitle = "货物转让详情 · 移动端交互与 PRD 标注"
+    currentAnnotations = transferH5DetailAnnotations
+    currentDocuments = transferRecordH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/transfer-records")) {
+    pageTitle = "货物转让 · 移动端交互与 PRD 标注"
+    currentAnnotations = transferH5ListAnnotations
+    currentDocuments = transferRecordH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/processing-records/")) {
+    pageTitle = "加工单详情 · 移动端交互与 PRD 标注"
+    currentAnnotations = processingH5DetailAnnotations
+    currentDocuments = processingRecordH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/processing-records")) {
+    pageTitle = "加工管理 · 移动端交互与 PRD 标注"
+    currentAnnotations = processingH5ListAnnotations
+    currentDocuments = processingRecordH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/inventory-checks/")) {
+    pageTitle = "盘点单详情 · 移动端交互与 PRD 标注"
+    currentAnnotations = checkH5Annotations
+    currentDocuments = inventoryCheckH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/inventory-checks")) {
+    pageTitle = "货物盘点 · 移动端交互与 PRD 标注"
+    currentAnnotations = checkH5Annotations
+    currentDocuments = inventoryCheckH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/inventory-abnormal-records/")) {
+    pageTitle = "异动详情 · 移动端交互与 PRD 标注"
+    currentAnnotations = abnormalH5DetailAnnotations
+    currentDocuments = inventoryAbnormalH5Documents
+  } else if (location.pathname.startsWith("/m/workspace/inventory-abnormal-records")) {
+    pageTitle = "异动管理 · 移动端交互与 PRD 标注"
+    currentAnnotations = abnormalH5ListAnnotations
+    currentDocuments = inventoryAbnormalH5Documents
   } else if (location.pathname.startsWith("/m/partner-archives/form")) {
     pageTitle = "合作方档案 · H5 新增/编辑 · PRD 标注"
     currentAnnotations = partnerArchiveH5FormAnnotations

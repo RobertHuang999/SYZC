@@ -140,7 +140,7 @@ export function ApprovalFlowSelectDialog({
 
         <DialogFooter className="gap-2 sm:justify-end">
           <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
-            取 消
+            取消
           </Button>
           <Button type="button" onClick={handleSubmit} disabled={loading}>
             {loading && <Loader2 className="mr-1.5 size-4 animate-spin" />}

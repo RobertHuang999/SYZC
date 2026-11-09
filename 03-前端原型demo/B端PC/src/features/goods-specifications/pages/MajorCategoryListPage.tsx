@@ -323,7 +323,6 @@ export function MajorCategoryListPage() {
                   setPageSize(size)
                   setPage(1)
                 }}
-                totalLabel="个大类"
               />
             </CardContent>
           </Card>

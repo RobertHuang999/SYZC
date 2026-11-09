@@ -157,7 +157,7 @@ export function OutboundRecordListPage() {
 
         {/* 提示 Toast */}
         {toastMessage && (
-          <div className="fixed bottom-16 right-6 z-50 rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
+          <div className="fixed right-6 bottom-6 z-50 max-w-sm rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
             {toastMessage}
           </div>
         )}

@@ -41,7 +41,7 @@ export function InboundGoodsSection({
           ) : (
             <ChevronDownIcon className="size-4 text-muted-foreground" />
           )}
-          货品明细 ({form.goodsLines.length} 项)
+          货品明细（{form.goodsLines.length} 项）
         </button>
         <Button
           type="button"

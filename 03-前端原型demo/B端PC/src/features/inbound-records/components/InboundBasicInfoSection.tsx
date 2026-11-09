@@ -1,6 +1,5 @@
-import { useEffect, type ReactNode } from "react"
-import { Link } from "react-router-dom"
-import { CameraIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
+import { useEffect, useState, type ReactNode } from "react"
+import { CameraIcon, ChevronDownIcon, ChevronUpIcon, Plus as PlusIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -55,7 +54,10 @@ import {
 import {
   CONTACT_PHONE_VERIFY_BADGE_CLASS,
   CONTACT_PHONE_VERIFY_LABELS,
+  markContactPhoneVerified,
 } from "@/features/partner-archives/lib/contact-phone-verify"
+import { PartnerVerifyDialog } from "@/features/partner-archives/components/PartnerVerifyDialog"
+import { partnerArchivesMock } from "@/features/partner-archives/mock/partner-archives.mock"
 import { isFinancialInboundType } from "../lib/inbound-owner-verify"
 
 function ownerTagStaging(
@@ -101,6 +103,7 @@ export function InboundBasicInfoSection({
   variant = "formal",
 }: InboundBasicInfoSectionProps) {
   const isStaging = variant === "staging"
+  const [ownerVerifyOpen, setOwnerVerifyOpen] = useState(false)
   const isEnterprise = form.ownerType === "企业货主"
   const isPersonal = form.ownerType === "个人货主"
   const needsRelated =
@@ -120,6 +123,23 @@ export function InboundBasicInfoSection({
   })
   const isArchivedOwner = Boolean(form.partnerId && matchedArchive)
   const ownerFieldsLocked = Boolean(form.partnerId && ownerNameTrimmed)
+
+  // 货主联系手机核验：复用用户中心合作方档案的验证弹窗
+  const verifyPartner = matchedArchive?.partnerId
+    ? partnerArchivesMock.find((partner) => partner.id === matchedArchive.partnerId)
+    : undefined
+  const ownerVerificationStatus = matchedArchive?.contactPhoneVerified
+  const verifySubjectType =
+    isPersonal || verifyPartner?.subjectType === "INDIVIDUAL"
+      ? ("INDIVIDUAL" as const)
+      : ("ENTERPRISE" as const)
+  const verifyIdNumber = isPersonal
+    ? form.idCardNo || matchedArchive?.idCardNo || ""
+    : form.ownerIdentifier || matchedArchive?.ownerIdentifier || ""
+  const verifyContactPhone =
+    form.contactPhone || verifyPartner?.contactPhone || matchedArchive?.contactPhone || ""
+  const verifyFullAddress = verifyPartner?.certAddress?.fullAddress ?? ""
+  const verifyRoles = verifyPartner?.roles.map((role) => role.roleType) ?? []
   const idCardMaskedDisplay =
     resolvePersonalOwnerIdCardMasked(form, matchedArchive) ||
     matchedArchive?.idCardMasked ||
@@ -206,7 +226,7 @@ export function InboundBasicInfoSection({
               <PrototypeSpecCallout>{STAGING_P01_FORM_HINT_SPEC}</PrototypeSpecCallout>
             </div>
           ) : null}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {isStaging ? (
               <>
                 <Field label="入库日期" required>
@@ -353,14 +373,46 @@ export function InboundBasicInfoSection({
             </Field>
 
             {/* 3. 货主（合作方引用 · 6.3 改造点） */}
-            <Field label="货主" required className="sm:col-span-2 lg:col-span-2">
+            <Field
+              label="货主"
+              required
+              labelExtra={
+                isArchivedOwner && ownerVerificationStatus ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setOwnerVerifyOpen(true)}
+                      title={
+                        ownerVerificationStatus === "UNVERIFIED"
+                          ? "点击完成货主联系手机验证"
+                          : "货主联系手机已验证"
+                      }
+                      className="cursor-pointer"
+                    >
+                      <Badge
+                        variant="outline"
+                        className={CONTACT_PHONE_VERIFY_BADGE_CLASS[ownerVerificationStatus]}
+                      >
+                        {CONTACT_PHONE_VERIFY_LABELS[ownerVerificationStatus]}
+                      </Badge>
+                    </button>
+                    {ownerVerificationStatus === "UNVERIFIED" ? (
+                      <button
+                        type="button"
+                        onClick={() => setOwnerVerifyOpen(true)}
+                        className="cursor-pointer font-normal text-primary hover:underline"
+                      >
+                        去验证
+                      </button>
+                    ) : null}
+                  </>
+                ) : null
+              }
+            >
               <PrototypeAnnotationTarget annotationIds={["inbound-form-partner-63"]}>
               <PartnerChangeFieldMark
                 markId="inbound-owner"
-                userHint={INBOUND_OWNER_PARTNER_CHANGE_ZONE_USER}
-                specNote={INBOUND_OWNER_PARTNER_CHANGE_ZONE_SPEC}
               >
-              <div className="flex flex-col gap-2 p-2">
               <div className="flex gap-1.5">
                 <div className="min-w-0 flex-1">
                   <OwnerNameSearchSelect
@@ -437,11 +489,13 @@ export function InboundBasicInfoSection({
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
-                    className="shrink-0 text-xs"
+                    size="icon"
+                    className="shrink-0"
+                    title="快速添加货主"
+                    aria-label="快速添加货主"
                     onClick={onQuickAddOwner}
                   >
-                    + 快速添加货主
+                    <PlusIcon className="size-4" />
                   </Button>
                 ) : null}
                 {(!form.ownerType || isEnterprise) ? (
@@ -456,47 +510,6 @@ export function InboundBasicInfoSection({
                   >
                     <CameraIcon className="size-4" />
                   </Button>
-                ) : null}
-              </div>
-                {isArchivedOwner && matchedArchive ? (
-                  <div className="col-span-full flex flex-wrap items-center gap-2 text-[11px]">
-                    <span className="text-muted-foreground">档案货主</span>
-                    {matchedArchive.contactPhoneVerified ? (
-                      <Badge
-                        variant="outline"
-                        className={
-                          CONTACT_PHONE_VERIFY_BADGE_CLASS[
-                            matchedArchive.contactPhoneVerified
-                          ]
-                        }
-                      >
-                        {
-                          CONTACT_PHONE_VERIFY_LABELS[
-                            matchedArchive.contactPhoneVerified
-                          ]
-                        }
-                      </Badge>
-                    ) : null}
-                    {matchedArchive.partnerId ? (
-                      <Link
-                        to={`/用户中心/合作方档案/货主信息/详情/${matchedArchive.partnerId}`}
-                        className="text-primary hover:underline"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        查看货主
-                      </Link>
-                    ) : null}
-                    {matchedArchive.contactPhoneVerified === "UNVERIFIED" &&
-                    isFinancialInboundType(form.inboundType) ? (
-                      <div className="space-y-1">
-                        <ProductFieldHint className="text-amber-900 dark:text-amber-100">
-                          {INBOUND_FINANCIAL_OWNER_SMS_USER}
-                        </ProductFieldHint>
-                        <PrototypeSpecCallout>{INBOUND_FINANCIAL_OWNER_SMS_SPEC}</PrototypeSpecCallout>
-                      </div>
-                    ) : null}
-                  </div>
                 ) : null}
               </div>
               </PartnerChangeFieldMark>
@@ -650,6 +663,28 @@ export function InboundBasicInfoSection({
             )}
           </div>
 
+          {/* 金融类入库的货主短信核验提示：通栏放在栅格外，避免把「货主」输入格撑高 */}
+          {!isStaging &&
+          isArchivedOwner &&
+          matchedArchive?.contactPhoneVerified === "UNVERIFIED" &&
+          isFinancialInboundType(form.inboundType) ? (
+            <div className="space-y-1">
+              <ProductFieldHint className="text-amber-900 dark:text-amber-100">
+                {INBOUND_FINANCIAL_OWNER_SMS_USER}
+              </ProductFieldHint>
+              <PrototypeSpecCallout>{INBOUND_FINANCIAL_OWNER_SMS_SPEC}</PrototypeSpecCallout>
+            </div>
+          ) : null}
+
+          {!isStaging ? (
+            <PrototypeSpecCallout>
+              <p className="mb-1.5 text-[11px] leading-relaxed text-foreground/90">
+                {INBOUND_OWNER_PARTNER_CHANGE_ZONE_USER}
+              </p>
+              <p>{INBOUND_OWNER_PARTNER_CHANGE_ZONE_SPEC}</p>
+            </PrototypeSpecCallout>
+          ) : null}
+
           {/* 10. 备注信息 */}
           <Field label="备注" className="pb-0">
             <div className="relative">
@@ -668,6 +703,34 @@ export function InboundBasicInfoSection({
           </Field>
         </CardContent>
       ) : null}
+
+      {/* 货主联系手机验证：复用用户中心合作方档案的短信核验弹窗 */}
+      {ownerVerifyOpen ? (
+        <PartnerVerifyDialog
+          open={ownerVerifyOpen}
+          subjectType={verifySubjectType}
+          name={form.ownerName}
+          idNumber={verifyIdNumber}
+          contactPhone={verifyContactPhone}
+          fullAddress={verifyFullAddress}
+          roles={verifyRoles}
+          mode="CREATE"
+          verifyContext="INBOUND_CREATE"
+          cancelLabel="暂不验证"
+          onOpenChange={setOwnerVerifyOpen}
+          onConfirm={() => {
+            if (verifyPartner) {
+              markContactPhoneVerified(verifyPartner)
+            }
+            setOwnerVerifyOpen(false)
+            onFormHint?.(
+              verifyPartner
+                ? `货主「${form.ownerName}」联系手机已验证`
+                : "货主联系手机已完成验证"
+            )
+          }}
+        />
+      ) : null}
     </Card>
   )
 }
@@ -675,11 +738,13 @@ export function InboundBasicInfoSection({
 function Field({
   label,
   required,
+  labelExtra,
   children,
   className,
 }: {
   label: string
   required?: boolean
+  labelExtra?: ReactNode
   children: ReactNode
   className?: string
 }) {
@@ -688,6 +753,7 @@ function Field({
       <Label className="text-xs font-medium text-foreground">
         {required ? <span className="text-destructive">* </span> : null}
         {label}
+        {labelExtra ? <span className="ml-1 inline-flex items-center gap-2">{labelExtra}</span> : null}
       </Label>
       {children}
     </div>

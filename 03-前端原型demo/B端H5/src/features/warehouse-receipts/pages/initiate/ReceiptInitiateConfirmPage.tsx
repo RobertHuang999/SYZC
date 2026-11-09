@@ -126,7 +126,7 @@ export function ReceiptInitiateConfirmPage() {
 
           <div className="space-y-3">
             {/* 货主主体信息卡片 */}
-            <section className="rounded-2xl border border-[#232D39]/8 bg-white p-4 shadow-xs">
+            <section className="rounded-lg border border-[#232D39]/8 bg-white p-4 shadow-xs">
               <h3 className="flex items-center gap-2 text-sm font-bold text-[#232D39] border-b border-gray-100 pb-2.5">
                 <Building2 className="size-4 text-blue-600" />
                 货主主体信息
@@ -177,7 +177,7 @@ export function ReceiptInitiateConfirmPage() {
             </section>
 
             {/* 拟开立货品明细卡片 */}
-            <section className="rounded-2xl border border-[#232D39]/8 bg-white p-4 shadow-xs">
+            <section className="rounded-lg border border-[#232D39]/8 bg-white p-4 shadow-xs">
               <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
                 <h3 className="flex items-center gap-2 text-sm font-bold text-[#232D39]">
                   <Package className="size-4 text-blue-600" />
@@ -239,7 +239,7 @@ export function ReceiptInitiateConfirmPage() {
             </section>
 
             {/* 法律防伪与二元强认证声明 */}
-            <section className="rounded-2xl border border-blue-200 bg-blue-50/60 p-4 shadow-xs">
+            <section className="rounded-lg border border-blue-200 bg-blue-50/60 p-4 shadow-xs">
               <div className="flex items-start gap-2.5">
                 <ShieldCheck className="size-5 shrink-0 text-blue-600 mt-0.5" />
                 <div className="text-xs space-y-1">
@@ -281,7 +281,7 @@ export function ReceiptInitiateConfirmPage() {
         />
 
         {toast ? (
-          <div className="fixed bottom-24 left-1/2 z-50 max-w-[90%] -translate-x-1/2 rounded-full bg-black/85 px-4 py-2 text-center text-xs text-white shadow-lg">
+          <div className="fixed bottom-24 left-1/2 z-50 max-w-[90%] -translate-x-1/2 rounded-full bg-black/80 px-4 py-1.5 text-center text-xs text-white shadow-lg">
             {toast}
           </div>
         ) : null}

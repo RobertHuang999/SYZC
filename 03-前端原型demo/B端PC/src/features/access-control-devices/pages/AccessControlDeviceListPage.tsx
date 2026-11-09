@@ -156,7 +156,6 @@ export function AccessControlDeviceListPage() {
               setPageSize(size)
               setPage(1)
             }}
-            totalLabel="条设备"
           />
         </PrototypeAnnotationTarget>
 

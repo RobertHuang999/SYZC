@@ -73,7 +73,7 @@ export function OutboundInitiateGoodsPage() {
   if (!form) {
     return (
       <MobileShell>
-        <NavBar title="出库货物明细" onBack={() => navigate(OUTBOUND_INITIATE_ROUTE)} />
+        <NavBar title="出库单填写" onBack={() => navigate(OUTBOUND_INITIATE_ROUTE)} />
         <div className="flex flex-1 items-center justify-center text-sm text-[#232D39]/60">
           加载中…
         </div>
@@ -157,19 +157,17 @@ export function OutboundInitiateGoodsPage() {
       <div className="flex min-h-0 flex-1 flex-col bg-[#F2F3F7]">
         <PrototypeAnnotationTarget annotationIds={["outbound-h5-initiate"]}>
           <NavBar
-            title="出库货物明细"
+            title="出库单填写"
             onBack={() => navigate(OUTBOUND_INITIATE_ROUTE)}
           />
         </PrototypeAnnotationTarget>
 
         {/* 步骤条 */}
-        <div className="bg-white px-4 border-b border-[#232D39]/5">
-          <NativeOutboundStepBar current={1} />
-        </div>
+        <NativeOutboundStepBar current={1} />
 
         {/* 吐司提示 */}
         {toast && (
-          <div className="fixed top-14 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#232D39]/90 px-4 py-2 text-xs font-medium text-white shadow-lg backdrop-blur-sm animate-fade-in">
+          <div className="fixed bottom-32 left-1/2 z-50 max-w-[90%] -translate-x-1/2 rounded-lg bg-gray-900 px-4 py-2 text-xs text-white">
             {toast}
           </div>
         )}
@@ -345,40 +343,39 @@ export function OutboundInitiateGoodsPage() {
           )}
         </div>
 
-        {/* 底部悬浮固定汇总与提交栏（对齐 InboundFormSummaryBarMobile） */}
-        <div className="fixed inset-x-0 bottom-0 z-30 bg-white border-t border-[#232D39]/10 px-4 py-3 shadow-lg">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <div className="text-[11px] text-[#232D39]/60">
-                已勾选 <span className="font-semibold text-[#232D39]">{totals.selectedCount}</span> 项
-              </div>
-              <div className="flex items-baseline gap-0.5">
-                <span className="text-xs text-[#232D39]/80 font-medium">合计:</span>
-                <span className="text-base font-bold text-blue-600">
-                  {totals.weight.toLocaleString()}
-                </span>
-                <span className="text-xs font-medium text-blue-600">吨</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => navigate(OUTBOUND_INITIATE_ROUTE)}
-                className="h-10 px-4 rounded-xl border border-[#232D39]/20 text-xs font-medium text-[#232D39]/70 active:bg-gray-50"
-              >
-                上一步
-              </button>
-              <button
-                type="button"
-                disabled={totals.selectedCount === 0}
-                onClick={handleSubmit}
-                className="h-10 px-6 rounded-xl bg-blue-600 text-xs font-medium text-white shadow-md shadow-blue-500/20 active:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center"
-              >
-                提交出库申请
-              </button>
-            </div>
+        {/* 底部汇总条（对齐入库 Step 2） */}
+        <div className="fixed inset-x-0 bottom-16 z-20 border-t border-[#232D39]/10 bg-white/95 px-4 py-2.5 text-xs backdrop-blur-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-[#232D39]/70">
+              已勾选 <span className="font-semibold text-[#232D39]">{totals.selectedCount}</span> 项
+            </span>
+            <span className="flex items-baseline gap-1 text-[#232D39]/80">
+              合计
+              <span className="text-base font-bold text-blue-600">
+                {totals.weight.toLocaleString()}
+              </span>
+              吨
+            </span>
           </div>
+        </div>
+
+        {/* 底部操作栏（对齐入库 Step 2：上一步 / 提交审核） */}
+        <div className="fixed inset-x-0 bottom-0 z-30 flex gap-3 border-t border-[#232D39]/10 bg-white p-3 pb-safe">
+          <button
+            type="button"
+            onClick={() => navigate(OUTBOUND_INITIATE_ROUTE)}
+            className="flex h-[44px] flex-1 items-center justify-center rounded-lg border border-[#232D39]/20 text-sm text-[#232D39] active:bg-gray-50"
+          >
+            上一步
+          </button>
+          <button
+            type="button"
+            disabled={totals.selectedCount === 0}
+            onClick={handleSubmit}
+            className="flex h-[44px] flex-[1.2] items-center justify-center rounded-lg bg-blue-600 text-sm font-medium text-white active:bg-blue-700 disabled:pointer-events-none disabled:opacity-50"
+          >
+            提交审核
+          </button>
         </div>
 
         {/* 选择货物弹窗 */}

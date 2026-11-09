@@ -440,7 +440,6 @@ export function SubcategoryListPage() {
                   setPageSize(size)
                   setPage(1)
                 }}
-                totalLabel="个品类"
               />
             </CardContent>
           </Card>

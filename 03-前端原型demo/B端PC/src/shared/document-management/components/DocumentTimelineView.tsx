@@ -22,7 +22,7 @@ import { PdfViewerDialog } from "@/features/inbound-records/components/PdfViewer
 interface DocumentTimelineViewProps {
   orderNo: string
   approvalId?: string
-  orderType?: "inbound" | "outbound"
+  orderType?: DocumentItem["orderType"]
   /** 是否允许事后补充资料；质押/抵押/仓单等金融类单据传 false（R33 / O18） */
   allowSupplement?: boolean
   className?: string
@@ -58,8 +58,8 @@ export function DocumentTimelineView({
   })
 
   const allDocuments = useMemo(() => {
-    return getDocumentsByOrderNo(orderNo)
-  }, [orderNo, refreshKey])
+    return getDocumentsByOrderNo(orderNo, orderType)
+  }, [orderNo, orderType, refreshKey])
 
   const showToast = (msg: string) => {
     setToastMessage(msg)

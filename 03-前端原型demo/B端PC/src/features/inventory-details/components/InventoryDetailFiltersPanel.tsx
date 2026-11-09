@@ -3,7 +3,6 @@ import { Lock, Unlock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -293,7 +292,7 @@ function FilterField({
   return (
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center justify-between">
-        <Label>{label}</Label>
+        <span className="text-xs font-normal text-muted-foreground">{label}</span>
         {locked && (
           <span className="inline-flex items-center gap-0.5 text-muted-foreground">
             <Lock className="size-3" />

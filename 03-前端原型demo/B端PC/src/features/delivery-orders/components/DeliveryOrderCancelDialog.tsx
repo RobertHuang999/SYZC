@@ -9,9 +9,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { AlertTriangle } from "lucide-react"
+import { AlertCircle } from "lucide-react"
 import type { DeliveryOrderItem } from "../domain/types"
 
 interface DeliveryOrderCancelDialogProps {
@@ -35,68 +34,66 @@ export function DeliveryOrderCancelDialog({
 
   const handleCancelAndGoReturn = () => {
     if (!reason.trim()) {
-      setErrorMsg("请输入取消提货说明（50字以内）")
+      setErrorMsg("请填写取消提货说明（必填，50字以内）")
       return
     }
     setErrorMsg(null)
     onConfirmCancel(reason)
     onClose()
-    // 携参跳转退货入库（对齐 PRD 场景 5）
-    navigate("/仓储/入库管理/入库申请/新增?type=RETURN&fromOrder=" + order.orderNo)
+
+    // 携参跳转退货入库承接页（对齐 PRD 5.5 / R06 / ASCII 1.2）
+    navigate(
+      `/仓储/入库管理/入库记录/新增?type=RETURN&fromOrder=${order.outboundOrderNo}&owner=${encodeURIComponent(
+        order.ownerName
+      )}`
+    )
   }
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md font-sans">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-destructive">
-            <AlertTriangle className="size-5" />
-            <span>取消提货与退货入库联动</span>
+          <DialogTitle className="flex items-center gap-2 text-foreground">
+            <AlertCircle className="size-5 text-amber-600" />
+            <span>提示</span>
           </DialogTitle>
-          <DialogDescription>
-            单据取消后将变更为【已取消】终态且不可撤销，出库扣减的库存资产将联动触发【退货入库】流程以重新分配合规库位并恢复库存。
+          <DialogDescription className="pt-2 text-xs leading-relaxed text-foreground">
+            您正在操作取消货主 <strong className="text-primary">{order.ownerName}</strong>{" "}
+            的提货申请操作，取消后提货申请将无法操作提货且无法恢复，请慎重操作！
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3 py-2 text-xs">
-          <div className="rounded-md bg-muted/40 p-3 space-y-1 text-muted-foreground">
-            <p>• 提货单号：<strong className="text-foreground">{order.orderNo}</strong></p>
-            <p>• 货主：{order.ownerName}</p>
-            <p>• 提货人：{order.pickupName}</p>
+        <div className="space-y-2 py-2 text-xs">
+          <div className="flex justify-between items-center">
+            <span className="font-medium text-foreground">
+              <span className="text-destructive mr-0.5">*</span>说明：
+            </span>
+            <span className="text-[11px] text-muted-foreground">{reason.length}/50</span>
           </div>
-
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-foreground flex items-center">
-              <span className="text-destructive mr-1">*</span>取消提货说明（必填，最多50字）：
-            </Label>
-            <Textarea
-              placeholder="例如：提货司机车辆严重超载，货主现场拒提申请退回（必填）"
-              maxLength={50}
-              value={reason}
-              onChange={(e) => {
-                setReason(e.target.value)
-                setErrorMsg(null)
-              }}
-              rows={3}
-              className="text-xs"
-            />
-            <div className="flex justify-between text-[11px] text-muted-foreground">
-              <span>{errorMsg && <span className="text-destructive">{errorMsg}</span>}</span>
-              <span>{reason.length}/50</span>
-            </div>
-          </div>
+          <Textarea
+            placeholder="请填写取消提货说明（必填，50字以内）"
+            maxLength={50}
+            value={reason}
+            onChange={(e) => {
+              setReason(e.target.value)
+              setErrorMsg(null)
+            }}
+            rows={3}
+            className="text-xs"
+          />
+          {errorMsg && <p className="text-xs text-destructive">{errorMsg}</p>}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" size="sm" onClick={onClose}>
-            取 消
+        <DialogFooter className="mt-2 gap-2">
+          <Button variant="outline" size="sm" onClick={onClose} className="text-xs">
+            取消
           </Button>
           <Button
             size="sm"
-            variant="destructive"
+            className="text-xs px-4"
             onClick={handleCancelAndGoReturn}
           >
-            确认取消并前往退货入库
+            前往退货入库
           </Button>
         </DialogFooter>
       </DialogContent>

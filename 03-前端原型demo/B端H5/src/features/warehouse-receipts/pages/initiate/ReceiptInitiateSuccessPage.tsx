@@ -49,7 +49,7 @@ export function ReceiptInitiateSuccessPage() {
           <ReceiptStepBar current={3} steps={INITIATE_STEPS} theme="blue" />
 
           {/* 成功状态卡片 */}
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-[#232D39]/8 bg-white p-6 text-center shadow-xs">
+          <div className="flex flex-col items-center justify-center rounded-lg border border-[#232D39]/8 bg-white p-6 text-center shadow-xs">
             <div className="flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 shadow-inner mb-3">
               <CheckCircle2 className="size-10 stroke-[2.5]" />
             </div>
@@ -62,7 +62,7 @@ export function ReceiptInitiateSuccessPage() {
             </p>
 
             {/* 仓单凭单展示盒：对齐全站蓝灰科技色 */}
-            <div className="mt-5 w-full rounded-2xl border border-blue-200/80 bg-gradient-to-r from-blue-50/50 to-slate-50/70 p-4 text-left">
+            <div className="mt-5 w-full rounded-lg border border-blue-200/80 bg-gradient-to-r from-blue-50/50 to-slate-50/70 p-4 text-left">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-blue-900/70 font-medium">
                   数字仓单凭单编码
@@ -116,7 +116,7 @@ export function ReceiptInitiateSuccessPage() {
           <button
             type="button"
             onClick={() => navigate("/m/tasks")}
-            className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 active:bg-gray-50"
+            className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white text-sm font-semibold text-gray-700 active:bg-gray-50"
           >
             <Home className="size-4" />
             返回业务办理
@@ -131,7 +131,7 @@ export function ReceiptInitiateSuccessPage() {
                   : "/m/workspace/warehouse-receipts",
               )
             }
-            className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-600 text-sm font-semibold text-white shadow-md active:bg-blue-700"
+            className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 text-sm font-semibold text-white shadow-md active:bg-blue-700"
           >
             <FileText className="size-4" />
             查看仓单详情
@@ -140,7 +140,7 @@ export function ReceiptInitiateSuccessPage() {
         </div>
 
         {toast ? (
-          <div className="fixed bottom-24 left-1/2 z-50 max-w-[90%] -translate-x-1/2 rounded-full bg-black/85 px-4 py-2 text-center text-xs text-white shadow-lg">
+          <div className="fixed bottom-24 left-1/2 z-50 max-w-[90%] -translate-x-1/2 rounded-full bg-black/80 px-4 py-1.5 text-center text-xs text-white shadow-lg">
             {toast}
           </div>
         ) : null}

@@ -28,6 +28,7 @@ import { generateMockInboundOrderNo } from "@prototype/shared/inbound/mock-inbou
 import { INBOUND_APPLY_LIST_PATH } from "../domain/constants"
 import type { InboundFormState } from "../domain/form-types"
 import { inboundRecordDocuments } from "../documents/inbound-record-documents"
+import { FormPageHeader } from "@/shared/components/FormPageHeader"
 import { inboundRecordFormAnnotations } from "../annotations/inbound-record-form.annotations"
 import {
   calcFormTotals,
@@ -445,34 +446,25 @@ export function InboundRecordFormPage() {
       annotations={inboundRecordFormAnnotations}
     >
       <div className="flex min-h-full flex-col bg-muted/10">
-        <div className="flex-1 space-y-4 p-6 pb-4">
+        <div className="flex-1 space-y-4 p-6 pb-24">
           <PrototypeAnnotationTarget annotationIds={["inbound-form-page"]}>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h1 className="text-2xl font-semibold tracking-tight text-foreground">新增入库</h1>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  支持普通/质押/抵押/仓单/监管服务入库；货品三级联动与多库位理货堆放分配
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                {INBOUND_FORMAL_STAGING_CHANNEL_ENABLED ? (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setStagingSwitchOpen(true)}
-                  >
-                    入库暂存登记
-                  </Button>
-                ) : null}
-                <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
-                  取 消
+          <FormPageHeader
+            title="新增入库"
+            description="支持普通/质押/抵押/仓单/监管服务入库；货品三级联动与多库位理货堆放分配"
+            onBack={handleCancel}
+            actions={
+              INBOUND_FORMAL_STAGING_CHANNEL_ENABLED ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setStagingSwitchOpen(true)}
+                >
+                  入库暂存登记
                 </Button>
-                <Button type="button" size="sm" onClick={handleStartSubmit}>
-                  提交审核
-                </Button>
-              </div>
-            </div>
+              ) : null
+            }
+          />
           </PrototypeAnnotationTarget>
 
           {INBOUND_FORMAL_STAGING_CHANNEL_ENABLED && sourceRegId ? (
@@ -675,6 +667,28 @@ export function InboundRecordFormPage() {
             {toast}
           </div>
         ) : null}
+
+        <div className="fixed bottom-0 left-0 right-0 z-30 border-t bg-card px-6 py-3">
+          <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4">
+            <div className="text-xs text-muted-foreground">
+              提交后进入审批中心，审批通过才会写入入库记录台账
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-9 px-4 text-xs"
+                onClick={handleCancel}
+              >
+                取消
+              </Button>
+              <Button type="button" size="sm" className="h-9 px-5 text-xs" onClick={handleStartSubmit}>
+                提交审核
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </PrototypeAnnotationProvider>
   )

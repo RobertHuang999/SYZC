@@ -9,7 +9,6 @@ import { useMemo, useState, type ReactNode } from "react"
 import { WarningFilterHeader } from "@/components/business/WarningListPrimitives"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -42,6 +41,7 @@ type Props = {
   onChange: (value: ReceiptFilters) => void
   onSearch: () => void
   onReset: () => void
+  onAdd: () => void
 }
 
 export function ReceiptFiltersPanel({
@@ -51,6 +51,7 @@ export function ReceiptFiltersPanel({
   onChange,
   onSearch,
   onReset,
+  onAdd,
 }: Props) {
   return (
     <Card>
@@ -60,6 +61,8 @@ export function ReceiptFiltersPanel({
           onToggle={onToggleExpanded}
           onReset={onReset}
           onSearch={onSearch}
+          onAdd={onAdd}
+          addLabel="仓单开立"
         />
 
         {/* 默认常驻第 1 行：4 项 */}
@@ -119,7 +122,7 @@ export function ReceiptFiltersPanel({
 
         {/* 展开区：对齐源码 9 项排序与 PC 4 列栅格规范，排满两行 8 列 */}
         {expanded ? (
-          <div className="grid gap-4 border-t border-border pt-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {/* 5. 开立时间（col-span-2） */}
             <FilterField label="开立时间" className="lg:col-span-2">
               <div className="flex items-center gap-2">
@@ -239,7 +242,7 @@ function FilterField({
 }) {
   return (
     <div className={cn("space-y-2", className)}>
-      <Label>{label}</Label>
+      <label className="block text-xs font-normal text-muted-foreground">{label}</label>
       {children}
     </div>
   )

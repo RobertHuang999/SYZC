@@ -74,7 +74,7 @@ export const InventoryDetailsTable: React.FC<InventoryDetailsTableProps> = ({
     <Table className="min-w-[1800px]">
       <TableHeader>
         <TableRow className="hover:bg-transparent">
-          <TableHead className="w-16 min-w-16 text-center">序号</TableHead>
+          <TableHead className="sticky left-0 z-10 w-16 min-w-16 bg-slate-50 text-center">序号</TableHead>
           <TableHead className="w-[170px] min-w-[170px]">货主</TableHead>
           <TableHead className="w-[170px] min-w-[170px]">货物名称</TableHead>
           <TableHead className="w-[160px] min-w-[160px]">入库时间</TableHead>
@@ -98,7 +98,7 @@ export const InventoryDetailsTable: React.FC<InventoryDetailsTableProps> = ({
         {data.length === 0 ? (
           <TableRow className="hover:bg-transparent">
             <TableCell colSpan={15} className="h-32 text-center text-muted-foreground">
-              暂无匹配货位明细数据
+              暂无符合条件的库存明细，可调整筛选条件后重试
             </TableCell>
           </TableRow>
         ) : (
@@ -114,7 +114,7 @@ export const InventoryDetailsTable: React.FC<InventoryDetailsTableProps> = ({
 
             return (
               <TableRow key={row.id} className="group h-[72px]">
-                <TableCell className="text-center text-muted-foreground">
+                <TableCell className="sticky left-0 z-10 bg-white text-center text-muted-foreground group-hover:bg-slate-50">
                   {(page - 1) * pageSize + index + 1}
                 </TableCell>
 

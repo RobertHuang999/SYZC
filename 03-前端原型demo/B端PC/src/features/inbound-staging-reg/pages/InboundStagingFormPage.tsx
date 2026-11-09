@@ -131,7 +131,7 @@ export function InboundStagingFormPage() {
             <PrototypeAnnotationTarget annotationIds={["inbound-staging-form-save"]}>
               <div className="flex items-center gap-2">
                 <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
-                  取 消
+                  取消
                 </Button>
                 <Button type="button" size="sm" onClick={handleSave}>
                   保存登记 / 暂存

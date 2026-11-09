@@ -170,7 +170,6 @@ export function WarehouseListPage() {
                 setPageSize(size)
                 setPage(1)
               }}
-              totalLabel="个仓库"
             />
           </div>
         </div>

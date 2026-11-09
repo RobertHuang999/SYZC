@@ -21,11 +21,13 @@ export const DOC_CATEGORY_LABELS: Record<DocCategory, string> = {
 
 export type DocFileType = "pdf" | "jpg" | "png" | "zip" | "rar" | "doc" | "docx"
 
+export type DocumentOrderType = "inbound" | "outbound" | "transfer"
+
 export interface DocumentItem {
   id: string
   orderNo: string
   approvalId: string
-  orderType: "inbound" | "outbound"
+  orderType: DocumentOrderType
   /** "1" 入/出库发起 · "9527" 补充资料（与上传关联流程、时间轴节点一致） */
   flowType: string
   flowNodeTitle: string

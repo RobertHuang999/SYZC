@@ -23,6 +23,7 @@ import {
   OUTBOUND_APPROVAL_FLOWS,
 } from "@/features/inbound-records/components/ApprovalFlowSelectDialog"
 import { outboundRecordDocuments } from "../documents/outbound-record-documents"
+import { FormPageHeader } from "@/shared/components/FormPageHeader"
 import { outboundRecordFormAnnotations } from "../annotations/outbound-record-form.annotations"
 import { OutboundBasicInfoSection } from "../components/OutboundBasicInfoSection"
 import { OutboundGoodsPickerModal } from "../components/OutboundGoodsPickerModal"
@@ -293,31 +294,13 @@ export function OutboundRecordFormPage() {
       annotations={outboundRecordFormAnnotations}
     >
       <div className="flex min-h-full flex-col bg-muted/10">
-        <div className="flex-1 space-y-4 p-6 pb-4">
+        <div className="flex-1 space-y-4 p-6 pb-24">
           <PrototypeAnnotationTarget annotationIds={["outbound-form-header"]}>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                  新增出库
-                </h1>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  支持普通/仓单/质押/抵押出库；普通出库从可用库存选货，关联出库由业务单号带出明细并生成提货单
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
-                  取 消
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={handleSubmit}
-                  disabled={submitLoading}
-                >
-                  {submitLoading ? "提交中..." : "提交审核"}
-                </Button>
-              </div>
-            </div>
+            <FormPageHeader
+              title="新增出库"
+              description="支持普通/仓单/质押/抵押出库；普通出库从可用库存选货，关联出库由业务单号带出明细并生成提货单"
+              onBack={handleCancel}
+            />
           </PrototypeAnnotationTarget>
 
           {partnerReviewActive && partnerMapId ? (
@@ -443,10 +426,38 @@ export function OutboundRecordFormPage() {
         </Dialog>
 
         {toastMessage ? (
-          <div className="fixed right-6 bottom-16 z-50 rounded-lg border bg-foreground px-4 py-3 text-xs text-background shadow-lg">
+          <div className="fixed right-6 bottom-6 z-50 max-w-sm rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
             {toastMessage}
           </div>
         ) : null}
+
+        <div className="fixed bottom-0 left-0 right-0 z-30 border-t bg-card px-6 py-3">
+          <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4">
+            <div className="text-xs text-muted-foreground">
+              提交后进入审批中心，审批通过才会扣减库存并生成提货单
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-9 px-4 text-xs"
+                onClick={handleCancel}
+              >
+                取消
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                className="h-9 px-5 text-xs"
+                onClick={handleSubmit}
+                disabled={submitLoading}
+              >
+                {submitLoading ? "提交中..." : "提交审核"}
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </PrototypeAnnotationProvider>
   )

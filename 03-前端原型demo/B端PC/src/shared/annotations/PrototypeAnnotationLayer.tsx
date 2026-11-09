@@ -66,7 +66,7 @@ export type PrototypeAnnotation = {
   /** 打点归属版本：6.3 为本轮改动，未填视为历史沿用（6.2 及更早） */
   version?: "6.3" | "6.2"
   documentRefs?: Partial<Record<DocumentTabKey, DocumentLocator>>
-  details: Array<{
+  details?: Array<{
     title: string
     items: Array<{
       label: string
@@ -1126,7 +1126,7 @@ function InPlaceAnnotationCard({
           {annotation.content}
         </div>
 
-        {annotation.details.map((group, groupIdx) => (
+        {(annotation.details ?? []).map((group, groupIdx) => (
           <div key={groupIdx} className="space-y-1.5">
             <h4 className="font-semibold text-xs text-foreground flex items-center gap-1.5 border-b pb-1">
               <span className="size-1.5 rounded-full bg-blue-500 inline-block" />
@@ -1578,7 +1578,7 @@ function AnnotationSidebarDrawer() {
                         </p>
 
                         {/* Group Details */}
-                        {annotation.details.length > 0 && (
+                        {annotation.details && annotation.details.length > 0 && (
                           <div className="grid gap-1.5 border-t pt-2">
                             {annotation.details.map((group, gIdx) => (
                               <div key={gIdx} className="space-y-1">

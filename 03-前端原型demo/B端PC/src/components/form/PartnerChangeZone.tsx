@@ -31,7 +31,7 @@ export function PartnerChangeFieldMark({
     >
       <div
         className={cn(
-          "rounded-lg p-2",
+          "rounded-lg",
           highlightEnabled && "ring-1 ring-inset ring-amber-500/40"
         )}
       >

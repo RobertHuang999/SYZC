@@ -9,7 +9,7 @@ import { isImageDocument, type DocumentItem } from "../types"
 type DocumentManagementTabProps = {
   orderNo: string
   approvalId?: string
-  orderType?: "inbound" | "outbound"
+  orderType?: DocumentItem["orderType"]
   ownerName?: string
   warehouseName?: string
   /** 交给页面统一提示，避免出现两个浮层 */
@@ -116,7 +116,11 @@ export function DocumentManagementTab({
           open
           title="资料文件预览"
           subtitle={
-            orderType === "outbound" ? "出库业务归档资料" : "入库业务归档资料"
+            orderType === "outbound"
+              ? "出库业务归档资料"
+              : orderType === "transfer"
+                ? "移库业务归档资料"
+                : "入库业务归档资料"
           }
           fileName={pdfDoc.name}
           fileSize={pdfDoc.fileSize}

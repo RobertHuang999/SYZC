@@ -11,6 +11,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { DetailSection, DetailField } from "@/shared/components/DetailSection"
+import { DetailPageHeader } from "@/shared/components/DetailPageHeader"
+import { DetailTabShell } from "@/shared/components/DetailTabShell"
 import {
   SnapshotImageModal,
   type SnapshotPreviewData,
@@ -25,6 +27,14 @@ import { InventoryBarcodeQrDialog } from "../components/InventoryBarcodeQrDialog
 import { SHARED_INVENTORY_DETAILS } from "@/features/shared/mock/inventory-shared-seed"
 
 const CREATOR_ORG = "四川享宇科技有限公司"
+
+/** 现场照片示例图（与其它菜单保持同一套实拍图口径） */
+const INVENTORY_PHOTO_SAMPLES = [
+  "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1553413077-190dd305871c?w=600&auto=format&fit=crop&q=60",
+  "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=60",
+]
+
 const STICKY_ACTION_CLASS =
   "sticky right-0 z-10 border-l border-border/60 bg-card px-2 py-2 text-center"
 
@@ -70,23 +80,34 @@ function AttachmentBlock({
 function PhotoCard({
   name,
   caption,
+  src,
   onClick,
 }: {
   name: string
   caption?: string
+  src?: string
   onClick: () => void
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[104px] w-[150px] cursor-pointer flex-col items-center justify-center gap-1.5 overflow-hidden rounded-md border border-border bg-muted/40 px-2 transition-colors hover:border-primary/40 hover:bg-muted"
+      className="group relative flex h-[104px] w-[150px] cursor-pointer flex-col overflow-hidden rounded-md border border-border bg-muted/40 transition-colors hover:border-primary/40"
       title={name}
     >
-      <ImageIcon className="size-6 text-muted-foreground" />
-      <span className="w-full truncate text-center text-[13px] text-muted-foreground">{name}</span>
+      {src ? (
+        <img src={src} alt={name} className="h-full w-full object-cover" />
+      ) : (
+        <span className="flex h-full w-full flex-col items-center justify-center gap-1.5 px-2">
+          <ImageIcon className="size-6 text-muted-foreground" />
+          <span className="w-full truncate text-center text-[13px] text-muted-foreground">{name}</span>
+        </span>
+      )}
+      <span className="absolute inset-x-0 bottom-0 truncate bg-black/55 px-2 py-1 text-[12px] text-white">
+        {name}
+      </span>
       {caption && (
-        <span className="w-full truncate text-center text-[12px] text-muted-foreground/80">
+        <span className="absolute inset-x-0 top-0 truncate bg-black/45 px-2 py-0.5 text-[11px] text-white/90">
           {caption}
         </span>
       )}
@@ -97,6 +118,7 @@ function PhotoCard({
 export const InventoryDetailsDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState("attachments")
   const [qrOpen, setQrOpen] = useState(false)
   const [preview, setPreview] = useState<SnapshotPreviewData | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -125,20 +147,12 @@ export const InventoryDetailsDetailPage: React.FC = () => {
 
         {/* 顶部标题与返回 */}
         <PrototypeAnnotationTarget annotationIds={["inv-details-detail-page"]}>
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                {record.specification} — {record.totalQuantity}
-                {record.unit}
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                入库批次 {record.inboundOrderNo} · {locationText}
-              </p>
-            </div>
-            <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
-              返回
-            </Button>
-          </div>
+          <DetailPageHeader
+            title="库存明细详情"
+            number={record.inboundOrderNo}
+            numberLabel="入库单号"
+            onBack={() => navigate(-1)}
+          />
         </PrototypeAnnotationTarget>
 
         {/* 基础信息 */}
@@ -170,7 +184,7 @@ export const InventoryDetailsDetailPage: React.FC = () => {
               </span>
             </PrototypeAnnotationTarget>
           </DetailField>
-          <DetailField label="备注信息">{record.remark || "——"}</DetailField>
+          <DetailField label="备注信息">{record.remark || "—"}</DetailField>
           <DetailField label="仓库">{record.warehouseName}</DetailField>
           <DetailField label="库房">
             {record.houseName}
@@ -179,11 +193,18 @@ export const InventoryDetailsDetailPage: React.FC = () => {
             </span>
           </DetailField>
           <DetailField label="分区">{record.partitionName}</DetailField>
-          <DetailField label="其他信息">{record.collectInfo || "——"}</DetailField>
+          <DetailField label="其他信息">{record.collectInfo || "—"}</DetailField>
         </DetailSection>
 
-        {/* 附件信息 */}
-        <DetailSection title="附件信息">
+        <DetailTabShell
+          tabs={[
+            { key: "attachments", label: "附件信息" },
+            { key: "inventory", label: "存货信息" },
+          ]}
+          active={activeTab}
+          onChange={setActiveTab}
+        >
+          {activeTab === "attachments" && (
           <div className="space-y-5">
             <AttachmentBlock
               label="现场照片"
@@ -191,10 +212,11 @@ export const InventoryDetailsDetailPage: React.FC = () => {
             >
               {record.scenePhotos?.length ? (
                 <div className="flex flex-wrap gap-3">
-                  {record.scenePhotos.map((name) => (
+                  {record.scenePhotos.map((name, index) => (
                     <PhotoCard
                       key={name}
                       name={name}
+                      src={INVENTORY_PHOTO_SAMPLES[index % INVENTORY_PHOTO_SAMPLES.length]}
                       onClick={() =>
                         setPreview({
                           title: `现场照片 — ${name}`,
@@ -249,10 +271,9 @@ export const InventoryDetailsDetailPage: React.FC = () => {
               ) : undefined}
             </AttachmentBlock>
           </div>
-        </DetailSection>
+          )}
 
-        {/* 存货信息 */}
-        <DetailSection title="存货信息">
+          {activeTab === "inventory" && (
           <div className="w-full">
             <Table className="min-w-[1020px]">
               <TableHeader>
@@ -277,7 +298,7 @@ export const InventoryDetailsDetailPage: React.FC = () => {
                   <TableCell className="text-foreground">{record.houseName}</TableCell>
                   <TableCell className="text-foreground">{record.partitionName}</TableCell>
                   <TableCell className="text-foreground">
-                    {record.isVirtual ? "——" : record.locationCode}
+                    {record.isVirtual ? "—" : record.locationCode}
                   </TableCell>
                   <TableCell className="text-right tabular-nums text-foreground">
                     {record.initialQuantity.toFixed(3)} {record.unit}
@@ -304,13 +325,14 @@ export const InventoryDetailsDetailPage: React.FC = () => {
                     <StatusBadge status={record.status} label={record.goodsStatus} />
                   </TableCell>
                   <TableCell className={STICKY_ACTION_CLASS} style={{ width: 72, minWidth: 72 }}>
-                    <span className="text-muted-foreground">——</span>
+                    <span className="text-muted-foreground">—</span>
                   </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
           </div>
-        </DetailSection>
+          )}
+        </DetailTabShell>
 
         {/* 图片预览 */}
         <SnapshotImageModal data={preview} onClose={() => setPreview(null)} />

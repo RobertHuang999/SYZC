@@ -47,7 +47,7 @@ export interface OutboundStockLocationItem {
   locationPath: string // 例如：海霸王仓库-1号库房-A区
   specificLocation?: string // 例如：垛位-01
   inboundTime: string
-  extraInfo?: string // 例如：无：--，或 保质期至 2027-05
+  extraInfo?: string // 例如：—，或 保质期至 2027-05
   barcode: string // 存货条码，例如 SYZC-BC-20260510-001
   status: string // 例如：存货中
   availableAmount: number
@@ -122,6 +122,14 @@ export interface OutboundAuditRecord {
 }
 
 /** 出库记录单据主表 */
+export interface OutboundModifyLog {
+  fieldLabel: string
+  beforeValue: string
+  afterValue: string
+  operator: string
+  operatedAt: string
+}
+
 export interface OutboundRecord {
   id: string // 19位单号
   orderNo: string // 单号别名
@@ -151,6 +159,7 @@ export interface OutboundRecord {
   pickCompleted: boolean // 是否已完成提货
   pickupRecord?: OutboundPickupRecord
   auditRecord?: OutboundAuditRecord
+  modifyLogs?: OutboundModifyLog[]
 }
 
 /** 列表筛选条件 */

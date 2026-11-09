@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, X } from "lucide-react"
+import { Filter, RotateCcw, Search, X } from "lucide-react"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import {
   DropdownFilterPill,
   type DropdownOption,
 } from "@/components/ui/DropdownFilterPill"
+import { DrawerField, FilterDrawer } from "@/components/ui/FilterDrawer"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import {
   EMPTY_RECEIPT_FILTERS,
@@ -30,7 +31,7 @@ import {
   receiptH5OpsPath,
 } from "../domain/constants"
 import { getAllMobileReceipts } from "../mock/warehouse-receipts.mock"
-import { H5_FILTER_BAR, H5_LIST_SCROLL } from "@/shared/h5-ui-theme"
+import { H5_FILTER_BAR, H5_LIST_SCROLL, H5_SEARCH_INPUT } from "@/shared/h5-ui-theme"
 
 const WAREHOUSE_OPTIONS: DropdownOption[] = [
   { label: "全部仓库", value: "全部" },
@@ -74,6 +75,11 @@ export function WarehouseReceiptListPage() {
   const [goodsCategory, setGoodsCategory] = useState("全部")
   const [thirdParty, setThirdParty] = useState("全部")
   const [status, setStatus] = useState("全部")
+  const [establishedStart, setEstablishedStart] = useState("")
+  const [establishedEnd, setEstablishedEnd] = useState("")
+  const [createdStart, setCreatedStart] = useState("")
+  const [createdEnd, setCreatedEnd] = useState("")
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   // 变更记录抽屉目标
   const [recordReceipt, setRecordReceipt] = useState<WarehouseReceipt | null>(null)
@@ -96,8 +102,12 @@ export function WarehouseReceiptListPage() {
       goodsCategory,
       thirdParty: thirdParty as ReceiptFilters["thirdParty"],
       statuses: status === "全部" ? [] : [status as ReceiptStatus],
+      establishedStart,
+      establishedEnd,
+      createdStart,
+      createdEnd,
     }),
-    [keyword, warehouse, goodsCategory, thirdParty, status],
+    [keyword, warehouse, goodsCategory, thirdParty, status, establishedStart, establishedEnd, createdStart, createdEnd],
   )
 
   const filtered = useMemo(() => {
@@ -166,7 +176,7 @@ export function WarehouseReceiptListPage() {
 
   return (
     <MobileShell>
-      <div className="flex min-h-0 flex-1 flex-col bg-[#F2F3F7]">
+      <div className="flex min-h-0 flex-1 flex-col bg-[#edf2f8]">
         {/* 小程序顶栏：标题居中，右侧保留胶囊，无开立/新增按钮 */}
         <PrototypeAnnotationTarget annotationIds={["receipt-list-page"]}>
           <NavBar title="仓单管理" backTo={WORKSPACE_ROUTE} />
@@ -174,53 +184,64 @@ export function WarehouseReceiptListPage() {
 
         {/* 顶部搜索栏与 4 个胶囊筛选栏（对齐确认项 5：移除多余抽屉筛选按钮） */}
         <div className={`shrink-0 ${H5_FILTER_BAR} space-y-2.5`}>
-          {/* 搜索框 */}
-          <div className="flex items-center gap-2 rounded-xl bg-gray-100 px-3 py-2 text-xs text-[#232D39]">
-            <Search className="size-4 shrink-0 text-[#232D39]/40" />
-            <input
-              value={keyword}
-              onChange={(event) => setKeyword(event.target.value)}
-              placeholder="请输入持有人名称 / 货品信息"
-              className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#232D39]/35"
-            />
-            {keyword ? (
-              <button
-                type="button"
-                onClick={() => setKeyword("")}
-                className="shrink-0 text-[#232D39]/40 hover:text-[#232D39]"
-              >
-                <X className="size-4" />
-              </button>
-            ) : null}
+          {/* 搜索框 + 更多筛选 */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              className="relative flex size-7 shrink-0 items-center justify-center rounded-md text-[#232D39]/50 active:bg-[#232D39]/5"
+              aria-label="更多筛选"
+            >
+              <Filter className="size-4" />
+              {establishedStart || establishedEnd || createdStart || createdEnd ? (
+                <span className="absolute -right-0.5 -top-0.5 flex size-3.5 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white">
+                  1
+                </span>
+              ) : null}
+            </button>
+            <div className="relative min-w-0 flex-1">
+              <input
+                value={keyword}
+                onChange={(event) => setKeyword(event.target.value)}
+                placeholder="请输入持有人名称 / 货品信息"
+                className={H5_SEARCH_INPUT}
+              />
+              {keyword ? (
+                <button
+                  type="button"
+                  onClick={() => setKeyword("")}
+                  className="absolute right-2.5 top-1/2 flex size-3.5 -translate-y-1/2 items-center justify-center rounded-full bg-gray-300 text-gray-600"
+                >
+                  <X className="size-2" />
+                </button>
+              ) : (
+                <Search className="pointer-events-none absolute right-2.5 top-1/2 size-3.5 -translate-y-1/2 text-[#232D39]/40" />
+              )}
+            </div>
           </div>
 
           {/* 横向 4 个快捷筛选胶囊 */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
             <DropdownFilterPill
-              label={warehouse === "全部" ? "仓库" : warehouse}
+              label="所属仓库"
               options={WAREHOUSE_OPTIONS}
               value={warehouse}
               onChange={setWarehouse}
             />
             <DropdownFilterPill
-              label={goodsCategory === "全部" ? "货物" : goodsCategory}
+              label="货物类别"
               options={GOODS_OPTIONS}
               value={goodsCategory}
               onChange={setGoodsCategory}
             />
             <DropdownFilterPill
-              label={thirdParty === "全部" ? "三方登记" : `三方: ${thirdParty}`}
+              label="三方登记"
               options={THIRD_PARTY_OPTIONS}
               value={thirdParty}
               onChange={setThirdParty}
             />
             <DropdownFilterPill
-              label={
-                status === "全部"
-                  ? "状态"
-                  : STATUS_OPTIONS.find((option) => option.value === status)?.label ||
-                    status
-              }
+              label="仓单状态"
               options={STATUS_OPTIONS}
               value={status}
               onChange={setStatus}
@@ -233,15 +254,30 @@ export function WarehouseReceiptListPage() {
           <PrototypeAnnotationTarget annotationIds={["receipt-list-items"]}>
             {filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="size-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-3">
-                  <Search className="size-8" />
+                <div className="mb-3 flex size-14 items-center justify-center rounded-full bg-white text-[#232D39]/20 shadow-xs">
+                  <Search className="size-7" />
                 </div>
-                <p className="text-sm font-medium text-[#232D39]/70">
-                  没有找到符合条件的仓单
+                <p className="text-xs font-medium text-[#232D39]/60">
+                  未找到符合条件的仓单，可调整筛选条件后重试
                 </p>
-                <p className="mt-1 text-xs text-[#232D39]/40">
-                  可尝试调整搜索关键字或筛选条件
-                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setKeyword("")
+                    setWarehouse("全部")
+                    setGoodsCategory("全部")
+                    setThirdParty("全部")
+                    setStatus("全部")
+                    setEstablishedStart("")
+                    setEstablishedEnd("")
+                    setCreatedStart("")
+                    setCreatedEnd("")
+                  }}
+                  className="mt-3 inline-flex items-center gap-1 rounded-md border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-600 shadow-xs"
+                >
+                  <RotateCcw className="size-3" />
+                  重置筛选条件
+                </button>
               </div>
             ) : (
               filtered.map((receipt) => (
@@ -257,6 +293,58 @@ export function WarehouseReceiptListPage() {
             )}
           </PrototypeAnnotationTarget>
         </div>
+
+        {/* 更多筛选：开立时间与制单时间 */}
+        <FilterDrawer
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          onReset={() => {
+            setEstablishedStart("")
+            setEstablishedEnd("")
+            setCreatedStart("")
+            setCreatedEnd("")
+          }}
+          onConfirm={() => setDrawerOpen(false)}
+        >
+          <DrawerField label="开立时间">
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={establishedStart}
+                onChange={(event) => setEstablishedStart(event.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="开立开始日期"
+              />
+              <span className="shrink-0 text-xs text-[#232D39]/50">至</span>
+              <input
+                type="date"
+                value={establishedEnd}
+                onChange={(event) => setEstablishedEnd(event.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="开立结束日期"
+              />
+            </div>
+          </DrawerField>
+          <DrawerField label="制单时间">
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={createdStart}
+                onChange={(event) => setCreatedStart(event.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="制单开始日期"
+              />
+              <span className="shrink-0 text-xs text-[#232D39]/50">至</span>
+              <input
+                type="date"
+                value={createdEnd}
+                onChange={(event) => setCreatedEnd(event.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="制单结束日期"
+              />
+            </div>
+          </DrawerField>
+        </FilterDrawer>
 
         {/* 变更记录抽屉弹窗 */}
         <ReceiptRecordSheet
@@ -289,7 +377,7 @@ export function WarehouseReceiptListPage() {
 
         {/* 轻提示 Toast */}
         {toast ? (
-          <div className="fixed bottom-16 left-1/2 z-50 -translate-x-1/2 rounded-full bg-black/85 px-4 py-2 text-xs font-medium text-white shadow-lg animate-fade-in">
+          <div className="fixed bottom-16 left-1/2 z-50 -translate-x-1/2 rounded-full bg-black/80 px-4 py-1.5 text-xs text-white shadow-lg">
             {toast}
           </div>
         ) : null}

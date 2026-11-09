@@ -49,7 +49,7 @@ const COL = {
   actions: ACTION_COL_CLASS,
 } as const
 
-const cellBase = "align-middle px-3.5 py-2.5 text-sm"
+const cellBase = "align-middle px-3.5 py-2.5 text-[13px]"
 const actionCell = cn(
   COL.actions,
   STICKY_ACTION_CLASS,
@@ -187,38 +187,38 @@ export function InboundRecordTable({
             <TableHead
               className={cn(
                 COL.index,
-                "sticky left-0 z-10 text-center text-xs font-medium text-muted-foreground bg-slate-100 dark:bg-slate-800"
+                "sticky left-0 z-10 text-center text-[13px] font-semibold text-[#4e5969] bg-slate-100 dark:bg-slate-800"
               )}
             >
               序号
             </TableHead>
-            <TableHead className={cn(COL.orderNo, "text-xs font-medium text-muted-foreground px-3.5")}>
+            <TableHead className={cn(COL.orderNo, "text-[13px] font-semibold text-[#4e5969] px-3.5")}>
               入库单号
             </TableHead>
-            <TableHead className={cn(COL.owner, "text-xs font-medium text-muted-foreground px-3.5")}>
+            <TableHead className={cn(COL.owner, "text-[13px] font-semibold text-[#4e5969] px-3.5")}>
               货主名称/标识
             </TableHead>
-            <TableHead className={cn(COL.type, "text-xs font-medium text-muted-foreground px-3.5")}>
+            <TableHead className={cn(COL.type, "text-[13px] font-semibold text-[#4e5969] px-3.5")}>
               入库类型
             </TableHead>
-            <TableHead className={cn(COL.inboundDate, "text-xs font-medium text-muted-foreground px-3.5")}>
+            <TableHead className={cn(COL.inboundDate, "text-[13px] font-semibold text-[#4e5969] px-3.5")}>
               入库日期
             </TableHead>
-            <TableHead className={cn(COL.warehouse, "text-xs font-medium text-muted-foreground px-3.5")}>
+            <TableHead className={cn(COL.warehouse, "text-[13px] font-semibold text-[#4e5969] px-3.5")}>
               仓库名称
             </TableHead>
-            <TableHead className={cn(COL.related, "text-xs font-medium text-muted-foreground px-3.5")}>
+            <TableHead className={cn(COL.related, "text-[13px] font-semibold text-[#4e5969] px-3.5")}>
               关联单号
             </TableHead>
-            <TableHead className={cn(COL.goods, "text-xs font-medium text-muted-foreground px-3.5")}>
+            <TableHead className={cn(COL.goods, "text-[13px] font-semibold text-[#4e5969] px-3.5")}>
               货物名称
             </TableHead>
             <TableHead
-              className={cn(COL.quantity, "text-right text-xs font-medium text-muted-foreground px-3.5")}
+              className={cn(COL.quantity, "text-right text-[13px] font-semibold text-[#4e5969] px-3.5")}
             >
               入库数量
             </TableHead>
-            <TableHead className={cn(COL.creator, "text-xs font-medium text-muted-foreground px-3.5")}>
+            <TableHead className={cn(COL.creator, "text-[13px] font-semibold text-[#4e5969] px-3.5")}>
               制单人
             </TableHead>
             <TableHead
@@ -239,7 +239,7 @@ export function InboundRecordTable({
                 colSpan={11}
                 className="h-32 text-center text-sm text-muted-foreground"
               >
-                暂无匹配的入库记录
+                暂无符合条件的入库记录，可调整筛选条件后重试
               </TableCell>
             </TableRow>
           ) : (

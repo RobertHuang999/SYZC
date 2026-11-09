@@ -54,6 +54,20 @@ import {
   OutboundInitiatePage,
   OutboundInitiateGoodsPage,
 } from "@/features/outbound-records"
+import {
+  TransferRecordListPage,
+  TransferRecordDetailPage,
+  MovingRecordListPage,
+  MovingRecordDetailPage,
+  MovingInitiatePage,
+  MovingInitiateGoodsPage,
+} from "@/features/inventory-transfer-records"
+import { ProcessingRecordListPage } from "@/features/processing-records/pages/ProcessingRecordListPage"
+import { ProcessingRecordDetailPage } from "@/features/processing-records/pages/ProcessingRecordDetailPage"
+import { InventoryCheckListPage } from "@/features/inventory-check/pages/InventoryCheckListPage"
+import { InventoryCheckDetailPage } from "@/features/inventory-check/pages/InventoryCheckDetailPage"
+import { InventoryAbnormalListPage } from "@/features/inventory-abnormal-records/pages/InventoryAbnormalListPage"
+import { InventoryAbnormalDetailPage } from "@/features/inventory-abnormal-records/pages/InventoryAbnormalDetailPage"
 import { PartnerArchiveListPage } from "@/features/partner-archives/pages/PartnerArchiveListPage"
 import { PartnerArchiveDetailPage } from "@/features/partner-archives/pages/PartnerArchiveDetailPage"
 import { PartnerArchiveFormPage } from "@/features/partner-archives/pages/PartnerArchiveFormPage"
@@ -198,6 +212,61 @@ export function AppRoutes() {
       />
       <Route path="/m/outbound/initiate" element={<OutboundInitiatePage />} />
       <Route path="/m/outbound/initiate/goods" element={<OutboundInitiateGoodsPage />} />
+
+      {/* 移库管理（移库记录台账 + 业务办理发起） */}
+      <Route path="/m/workspace/moving-records" element={<MovingRecordListPage />} />
+      <Route
+        path="/m/workspace/moving-records/:id"
+        element={<MovingRecordDetailPage />}
+      />
+      <Route path="/m/transfer/initiate" element={<MovingInitiatePage />} />
+      <Route
+        path="/m/transfer/initiate/goods"
+        element={<MovingInitiateGoodsPage />}
+      />
+
+      {/* 货物转让（转让记录） */}
+      <Route path="/m/workspace/transfer-records" element={<TransferRecordListPage />} />
+      <Route
+        path="/m/workspace/transfer-records/:id"
+        element={<TransferRecordDetailPage />}
+      />
+      {/* 旧路由兼容：/inventory-transfers 统一回到移库台账 */}
+      <Route
+        path="/m/workspace/inventory-transfers"
+        element={<Navigate to="/m/workspace/moving-records" replace />}
+      />
+      <Route
+        path="/m/workspace/inventory-transfers/:id"
+        element={<Navigate to="/m/workspace/moving-records" replace />}
+      />
+
+      {/* 加工管理（加工记录） */}
+      <Route
+        path="/m/workspace/processing-records"
+        element={<ProcessingRecordListPage />}
+      />
+      <Route
+        path="/m/workspace/processing-records/:id"
+        element={<ProcessingRecordDetailPage />}
+      />
+
+      {/* 货物盘点 */}
+      <Route path="/m/workspace/inventory-checks" element={<InventoryCheckListPage />} />
+      <Route
+        path="/m/workspace/inventory-checks/:id"
+        element={<InventoryCheckDetailPage />}
+      />
+
+      {/* 异动管理（异动记录） */}
+      <Route
+        path="/m/workspace/inventory-abnormal-records"
+        element={<InventoryAbnormalListPage />}
+      />
+      <Route
+        path="/m/workspace/inventory-abnormal-records/:id"
+        element={<InventoryAbnormalDetailPage />}
+      />
 
       {PARTNER_ARCHIVE_MENU_LABELS.flatMap((menu) => {
         const slug = H5_PARTNER_ARCHIVE_LIST_SLUG[menu as PartnerArchiveMenuLabel]

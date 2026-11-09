@@ -1,0 +1,5 @@
+{
+  "tasks": [
+    { "type": "nav", "kind": "pc", "clicks": ["出库管理", "出库记录"], "name": "10-outbound-list-pc" }
+  ]
+}

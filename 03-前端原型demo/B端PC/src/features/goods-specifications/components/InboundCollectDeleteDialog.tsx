@@ -132,7 +132,7 @@ export function InboundCollectDeleteDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                取 消
+                取消
               </Button>
               <Button
                 type="button"

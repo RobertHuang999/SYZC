@@ -335,7 +335,7 @@ export function InboundCollectFormPage() {
                 取消
               </Button>
               <Button type="button" disabled={submitting} onClick={handleSubmit}>
-                {submitting ? "保存中..." : isEdit ? "保 存" : "保存并启用"}
+                {submitting ? "保存中..." : isEdit ? "保存" : "保存并启用"}
               </Button>
             </div>
           </div>

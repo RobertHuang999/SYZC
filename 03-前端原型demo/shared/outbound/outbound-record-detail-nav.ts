@@ -6,6 +6,7 @@ const VALID_TABS: OutboundRecordDetailTabKey[] = [
   "goods",
   "pickup",
   "audit",
+  "modify",
   "documents",
 ]
 

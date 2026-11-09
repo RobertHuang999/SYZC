@@ -1,0 +1,9 @@
+{
+  "login": ["pc", "h5"],
+  "tasks": [
+    { "type": "menu", "kind": "pc" },
+    { "type": "menu", "kind": "h5" },
+    { "type": "page", "kind": "pc", "url": "https://senyun-wrl-test4.sylinker.cn/wrlaa/index", "name": "pc-index" },
+    { "type": "page", "kind": "h5", "url": "https://senyun-wrl-test4.sylinker.cn/wrlan/#/", "name": "h5-index" }
+  ]
+}

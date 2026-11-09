@@ -130,7 +130,7 @@ export function ReceiptInitiateOwnerPage() {
           <ReceiptStepBar current={0} steps={INITIATE_STEPS} theme="blue" />
 
           <PrototypeAnnotationTarget annotationIds={["receipt-initiate-owner"]}>
-            <section className="rounded-2xl border border-[#232D39]/8 bg-white p-4 shadow-xs">
+            <section className="rounded-lg border border-[#232D39]/8 bg-white p-4 shadow-xs">
               <h3 className="flex items-center gap-2 text-base font-semibold text-[#232D39]">
                 <UserRound className="size-5 text-blue-600" />
                 货主主体信息
@@ -200,7 +200,7 @@ export function ReceiptInitiateOwnerPage() {
             </section>
 
             {draft.ownerType === "ENTERPRISE" ? (
-              <section className="mt-3 rounded-2xl border border-[#232D39]/8 bg-white p-4 shadow-xs">
+              <section className="mt-3 rounded-lg border border-[#232D39]/8 bg-white p-4 shadow-xs">
                 <h3 className="flex items-center gap-2 text-base font-semibold text-[#232D39]">
                   <Users className="size-5 text-blue-600" />
                   经办人信息（企业办理人）
@@ -250,7 +250,7 @@ export function ReceiptInitiateOwnerPage() {
           <button
             type="button"
             onClick={goNext}
-            className="flex h-12 w-full items-center justify-center rounded-xl bg-blue-600 text-base font-semibold text-white shadow-md active:bg-blue-700"
+            className="flex h-11 w-full items-center justify-center rounded-lg bg-blue-600 text-base font-semibold text-white shadow-md active:bg-blue-700"
           >
             下一步：圈选货品
           </button>
@@ -274,7 +274,7 @@ export function ReceiptInitiateOwnerPage() {
 
         {/* 轻提示 Toast */}
         {toast ? (
-          <div className="fixed bottom-24 left-1/2 z-50 max-w-[90%] -translate-x-1/2 rounded-full bg-black/85 px-4 py-2 text-center text-xs text-white shadow-lg">
+          <div className="fixed bottom-24 left-1/2 z-50 max-w-[90%] -translate-x-1/2 rounded-full bg-black/80 px-4 py-1.5 text-center text-xs text-white shadow-lg">
             {toast}
           </div>
         ) : null}

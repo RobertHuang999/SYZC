@@ -1,6 +1,11 @@
 /** 出库记录详情 · Tab 文案真源（PC / H5 对齐） */
 
-export type OutboundRecordDetailTabKey = "goods" | "pickup" | "audit" | "documents"
+export type OutboundRecordDetailTabKey =
+  | "goods"
+  | "pickup"
+  | "audit"
+  | "modify"
+  | "documents"
 
 export function outboundRecordDetailGoodsTabLabel(goodsCount: number): string {
   return `货物明细 (${goodsCount})`
@@ -9,6 +14,7 @@ export function outboundRecordDetailGoodsTabLabel(goodsCount: number): string {
 export const OUTBOUND_RECORD_DETAIL_TAB_LABELS = {
   pickup: "提货信息",
   audit: "审核记录",
+  modify: "修改记录",
   documents: "资料管理",
 } as const
 
@@ -21,6 +27,7 @@ export function buildOutboundRecordDetailTabEntries(goodsCount: number) {
     ["goods", outboundRecordDetailGoodsTabLabel(goodsCount)],
     ["pickup", OUTBOUND_RECORD_DETAIL_TAB_LABELS.pickup],
     ["audit", OUTBOUND_RECORD_DETAIL_TAB_LABELS.audit],
+    ["modify", OUTBOUND_RECORD_DETAIL_TAB_LABELS.modify],
     ["documents", OUTBOUND_RECORD_DETAIL_TAB_LABELS.documents],
   ] as const
 }

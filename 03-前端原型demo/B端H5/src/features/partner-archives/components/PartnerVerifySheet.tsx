@@ -84,7 +84,9 @@ export function PartnerVerifySheet({
         ? verifyContext === "DETAIL_VERIFY"
           ? "确认验证"
           : "确认验证并建档"
-        : "确认建档并生效"
+        : verifyContext === "INBOUND_CREATE"
+          ? "确认并下一步"
+          : "确认建档并生效"
 
   const handleSubmit = () => {
     if (!code.trim()) {

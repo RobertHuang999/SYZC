@@ -230,7 +230,6 @@ export function GoodsListPage() {
                   setPageSize(size)
                   setPage(1)
                 }}
-                totalLabel="条货品"
               />
             </PrototypeAnnotationTarget>
           </div>

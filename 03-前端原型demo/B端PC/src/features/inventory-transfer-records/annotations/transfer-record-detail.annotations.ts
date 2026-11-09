@@ -2,91 +2,81 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 
 export const transferRecordDetailAnnotations: PrototypeAnnotation[] = [
   {
-    id: "transfer-detail-header",
-    targetId: "transfer-detail-header",
+    id: "transfer-detail-basic-card",
+    targetId: "transfer-detail-basic-card",
     number: 1,
-    kind: "页面",
-    title: "移库单详情与归档终态印章 (R07)",
+    kind: "字段",
+    title: "纯净 6 项基础信息与无影像规范 (R06)",
     content:
-      "移库详情页展示全局唯一 19 位移库单号，提供一键复制按钮。右上角呈现绿色【已通过】印章，严格遵循【台账终态归档与禁止反冲正】(R07) 规范，不提供线上撤销或反冲正操作。",
+      "转让单详情页纯净展示 6 项基础信息：制单人、制单时间、接收人、转让人、转让时间、转让原因（0/500字完整交易背景，R04），右上角盖绿色大印章【已通过】。因货物物理不移动，严格不设现场照片与设备抓拍图（R06）。",
     documentRefs: {
       prd: {
-        section: "6.1 列表页功能规格（P-CKG-011）",
-        match: "移库详情",
+        section: "4. 业务规则索引速查",
+        match: "【详情页纯净无影像展示】(R06)",
+        element: "text",
+      },
+      fields: {
+        section: "六、展示、筛选与引用规则汇总",
+        match: "敏感信息脱敏与占位符规范",
         element: "text",
       },
       rules: {
         section: "三、核心业务规则与逻辑规格",
-        match: "【台账终态归档与禁止反冲正】(R07)",
+        match: "R06",
         element: "text",
       },
     },
-    details: [],
   },
   {
-    id: "transfer-detail-photos",
-    targetId: "transfer-detail-photos",
+    id: "transfer-detail-goods-table",
+    targetId: "transfer-detail-goods-table",
     number: 2,
     kind: "字段",
-    title: "现场作业照片与 IoT 设备智能抓拍 (R08)",
+    title: "转让货品明细树形折叠 (R01)",
     content:
-      "现场照片为提交时必传作业图片（最多 10 张）；设备抓拍图为系统提交落库瞬间自动调度移出/移入库区绑定的球机或枪机抓拍凭据，支持点击预览放大。",
+      "一级主行展示货品规格与转让总数量，二级展开展示具体存放储位、具体位置、入库时间、扩展信息、二维码条码、状态与转让数量。明细为纯只读，条码支持点击大图预览，物权流转后条码指针指向新货主。",
     documentRefs: {
       prd: {
-        section: "3.1 货权档案、货权公示与证据管理跨模块数据互通",
-        match: "证据管理",
+        section: "2. 功能范围",
+        match: "树形货品明细",
+        element: "text",
+      },
+      fields: {
+        section: "二、转让货品明细字段",
+        match: "转让货品明细采用树形结构",
         element: "text",
       },
       rules: {
         section: "三、核心业务规则与逻辑规格",
-        match: "【现场照片必传与设备抓拍】(R08)",
+        match: "R01",
         element: "text",
       },
     },
-    details: [],
   },
   {
-    id: "transfer-detail-goods-tab",
-    targetId: "transfer-detail-goods-tab",
+    id: "transfer-detail-audit-timeline",
+    targetId: "transfer-detail-audit-timeline",
     number: 3,
-    kind: "字段",
-    title: "移库明细分流呈现 (R03/R04)",
+    kind: "交互",
+    title: "审核流转记录与跨模块入库闭环 (R05)",
     content:
-      "移库明细标签页根据移库类型分流呈现：普通移库采用折叠树形结构（展示原位置 vs 移入位置，支持展开二级储位）；抵押/质押移库采用平铺表格呈现受押货品的位置与数量明细。",
+      "展示全生命周期审批流转履历（提交审核、主管审核、终审通过）。终审通过后原子触发原货主转让出库单生成，并在受让新货主名下自动生成转让入库单（R05）。",
     documentRefs: {
       prd: {
-        section: "6.2 普通移库新增表单规格",
-        match: "货品明细",
+        section: "4. 业务规则索引速查",
+        match: "【跨模块转让入库联动与货权对冲】(R05)",
         element: "text",
+      },
+      fields: {
+        section: "五、统计汇总、系统与审批审计字段",
+        match: "审核记录",
+        element: "row",
       },
       rules: {
         section: "三、核心业务规则与逻辑规格",
-        match: "【抵押质押移库关联单号与货权继承】(R04)",
+        match: "R05",
         element: "text",
       },
     },
-    details: [],
-  },
-  {
-    id: "transfer-detail-audit-tab",
-    targetId: "transfer-detail-audit-tab",
-    number: 4,
-    kind: "字段",
-    title: "全链路审批与对冲履历 (R05)",
-    content:
-      "展示移库单从发起申请到主管初审、资方终审的不可变流转履历，终审通过时原子触发库存对冲（移库出库 + 移库入库）。",
-    documentRefs: {
-      prd: {
-        section: "3. 模块定位与系统链路",
-        match: "原子对冲",
-        element: "text",
-      },
-      rules: {
-        section: "三、核心业务规则与逻辑规格",
-        match: "【审批终审原子账实对冲】(R05)",
-        element: "text",
-      },
-    },
-    details: [],
   },
 ]

@@ -45,7 +45,7 @@ export function formatCollectValuesAsOtherInfo(
   labels?: Record<string, string>
 ): string {
   const entries = Object.entries(values).filter(([, v]) => v.trim().length > 0)
-  if (entries.length === 0) return "无：--"
+  if (entries.length === 0) return "—"
   return entries
     .map(([key, value]) => {
       const label = labels?.[key] ?? key

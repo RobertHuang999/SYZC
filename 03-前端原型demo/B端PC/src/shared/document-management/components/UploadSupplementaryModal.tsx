@@ -39,7 +39,7 @@ interface UploadSupplementaryModalProps {
   open: boolean
   orderNo: string
   approvalId?: string
-  orderType: "inbound" | "outbound"
+  orderType: DocumentItem["orderType"]
   defaultFlowType?: string
   onClose: () => void
   onSuccess: (newDocs: DocumentItem[]) => void

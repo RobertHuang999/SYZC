@@ -1,0 +1,53 @@
+import { Check } from "lucide-react"
+
+const STEPS = ["基础信息", "货品明细"] as const
+
+type Props = {
+  currentStep: 0 | 1
+}
+
+/** 移库两步步骤条：与入库/出库共用同一套小程序步骤条视觉（见《04-移动端表单与新增编辑规范》4.1 节） */
+export function MovingStepBar({ currentStep }: Props) {
+  return (
+    <div className="flex shrink-0 items-start justify-between px-1 py-4">
+      {STEPS.map((title, index) => {
+        const done = index < currentStep
+        const active = index === currentStep
+        const isLast = index === STEPS.length - 1
+        return (
+          <div key={title} className="flex min-w-0 flex-1 items-start">
+            <div className="flex min-w-[72px] flex-1 flex-col items-center gap-2">
+              {done ? (
+                <div className="flex size-6 items-center justify-center rounded-full bg-blue-100">
+                  <Check className="size-3.5 stroke-[3] text-blue-600" />
+                </div>
+              ) : active ? (
+                <div className="flex size-6 items-center justify-center rounded-full bg-blue-100">
+                  <div className="size-3.5 rounded-full bg-blue-600" />
+                </div>
+              ) : (
+                <div className="flex size-6 items-center justify-center rounded-full bg-[#232D39]/20 text-xs font-medium text-white">
+                  {index + 1}
+                </div>
+              )}
+              <span
+                className={`w-full text-center text-xs leading-tight ${
+                  active || done ? "font-medium text-[#232D39]" : "text-[#232D39]/60"
+                }`}
+              >
+                {title}
+              </span>
+            </div>
+            {!isLast ? (
+              <div
+                className={`mt-3 h-0.5 min-w-[24px] flex-1 ${
+                  done ? "bg-blue-600" : "bg-blue-100"
+                }`}
+              />
+            ) : null}
+          </div>
+        )
+      })}
+    </div>
+  )
+}

@@ -732,6 +732,36 @@ export const PROTOTYPE_NAV_GROUPS: PrototypeNavGroup[] = [
         icon: "📤",
         matchPrefixes: ["/m/workspace/outbound-records", "/m/outbound/initiate"],
       },
+      {
+        title: "移库管理",
+        path: "/m/workspace/moving-records",
+        icon: "🔀",
+        matchPrefixes: ["/m/workspace/moving-records", "/m/transfer/initiate"],
+      },
+      {
+        title: "货物转让",
+        path: "/m/workspace/transfer-records",
+        icon: "🔄",
+        matchPrefixes: ["/m/workspace/transfer-records"],
+      },
+      {
+        title: "加工管理",
+        path: "/m/workspace/processing-records",
+        icon: "⚙️",
+        matchPrefixes: ["/m/workspace/processing-records"],
+      },
+      {
+        title: "货物盘点",
+        path: "/m/workspace/inventory-checks",
+        icon: "📋",
+        matchPrefixes: ["/m/workspace/inventory-checks"],
+      },
+      {
+        title: "异动管理",
+        path: "/m/workspace/inventory-abnormal-records",
+        icon: "📝",
+        matchPrefixes: ["/m/workspace/inventory-abnormal-records"],
+      },
     ],
   },
   {
@@ -813,7 +843,7 @@ function WorkbenchLayout({ children }: { children: ReactNode }) {
   const [autoScale, setAutoScale] = useState(1)
   const [manualScale, setManualScale] = useState(1)
   // 无机壳纯屏模式（Frameless）：隐藏外壳黑边框、iOS 状态栏与灵动岛、底部小黑条，纯净展示页面
-  const [isFrameless, setIsFrameless] = useState(false)
+  const [isFrameless, setIsFrameless] = useState(true)
   // 分类大类的展开/收起状态（默认全部展开，key 为 group.label）
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
 

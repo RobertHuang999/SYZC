@@ -1,7 +1,6 @@
 import React, { useState, type ReactNode } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -160,7 +159,7 @@ function FilterField({
 }) {
   return (
     <div className={cn("space-y-2", className)}>
-      <Label>{label}</Label>
+      <span className="text-xs font-normal text-muted-foreground">{label}</span>
       {children}
     </div>
   )

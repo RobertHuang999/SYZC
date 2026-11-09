@@ -13,7 +13,7 @@ import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { OUTBOUND_MGR_ROUTE } from "../domain/constants"
-import { mobileOutboundRecordsMock } from "../mock/outbound-records.mock"
+import { mobileOutboundRecordsMock, MOBILE_OUTBOUND_MODIFY_LOGS } from "../mock/outbound-records.mock"
 import { MobileImageModal } from "@/features/inbound-records/components/MobileImageModal"
 import { MobilePdfModal } from "@/features/inbound-records/components/MobilePdfModal"
 import { DocumentManagementTab } from "@/shared/document-management"
@@ -21,6 +21,7 @@ import { parseOutboundRecordDetailTabParam } from "@prototype/shared/outbound/ou
 import {
   buildOutboundRecordDetailTabEntries,
   OUTBOUND_RECORD_DETAIL_AUDIT_SECTION_TITLE,
+  OUTBOUND_RECORD_DETAIL_TAB_LABELS,
 } from "@prototype/shared/outbound/outbound-record-detail-ui-labels"
 
 export function OutboundRecordDetailPage() {
@@ -37,7 +38,7 @@ export function OutboundRecordDetailPage() {
 
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState<
-    "goods" | "pickup" | "audit" | "documents"
+    "goods" | "pickup" | "audit" | "modify" | "documents"
   >(() => parseOutboundRecordDetailTabParam(searchParams.get("tab")) ?? "goods")
 
   useEffect(() => {
@@ -407,6 +408,33 @@ export function OutboundRecordDetailPage() {
               ))}
             </div>
           </div>
+        )}
+        {activeTab === "modify" && (
+          <section className="space-y-3 rounded-xl border border-[#232D39]/10 bg-white p-3.5 text-xs shadow-xs">
+            <h3 className="flex items-center gap-1.5 border-b border-[#232D39]/5 pb-2 font-bold text-[#232D39]">
+              <Clock className="size-4 text-blue-600" />
+              {OUTBOUND_RECORD_DETAIL_TAB_LABELS.modify}
+            </h3>
+            {(MOBILE_OUTBOUND_MODIFY_LOGS[record.id] ?? []).length > 0 ? (
+              <ul className="space-y-2">
+                {(MOBILE_OUTBOUND_MODIFY_LOGS[record.id] ?? []).map((log, index) => (
+                  <li key={index} className="space-y-1 border-b border-[#232D39]/5 pb-2 last:border-0">
+                    <p className="font-medium text-[#232D39]">{log.fieldLabel}</p>
+                    <p className="text-[#232D39]/70">
+                      <span className="line-through">{log.beforeValue}</span>
+                      <span className="mx-1 text-[#232D39]/40">→</span>
+                      <span className="font-medium text-blue-600">{log.afterValue}</span>
+                    </p>
+                    <p className="text-[11px] text-[#232D39]/50">
+                      {log.operator} · {log.operatedAt}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="py-6 text-center text-[#232D39]/40">暂无单据修改记录</p>
+            )}
+          </section>
         )}
         {activeTab === "documents" && (
           <section className="rounded-xl border border-[#232D39]/10 bg-white p-3.5 shadow-xs">

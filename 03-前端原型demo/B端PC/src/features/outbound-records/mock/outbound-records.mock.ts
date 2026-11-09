@@ -1,9 +1,9 @@
-import type { OutboundRecord } from "../domain/types"
+import type { OutboundRecord, OutboundModifyLog } from "../domain/types"
 
 export const CURRENT_USER_NAME = "lxy"
 export const CURRENT_USER_ORG = "四川享宇科技有限公司"
 
-export const outboundRecordsMock: OutboundRecord[] = [
+const allOutboundRecords: OutboundRecord[] = [
   {
     id: "20617289020070320130",
     orderNo: "20617289020070320130",
@@ -1367,3 +1367,40 @@ export const outboundRecordsMock: OutboundRecord[] = [
     },
   },
 ]
+
+/**
+ * 出库台账只保留「每种出库类型一条」，覆盖质押 / 普通 / 仓单 / 抵押 / 移库 / 转让六种场景，
+ * 不再铺重复行；详情页仍可点开对应单号查看完整单据。
+ */
+const OUTBOUND_SCENARIO_IDS = new Set([
+  "20617289020070320130", // 质押出库
+  "2061717554803183362", // 普通出库
+  "2061264633286291458", // 仓单出库
+  "2060986738672332805", // 抵押出库
+  "2060855214789012345", // 移库出库
+  "2060723891023456789", // 转让出库
+])
+
+export const outboundRecordsMock: OutboundRecord[] = allOutboundRecords.filter((row) =>
+  OUTBOUND_SCENARIO_IDS.has(row.id)
+)
+
+/** 出库单据修改记录（详情页「修改记录」页签） */
+export const OUTBOUND_MODIFY_LOGS: Record<string, OutboundModifyLog[]> = {
+  "20617289020070320130": [
+    {
+      fieldLabel: "出库日期",
+      beforeValue: "2026-06-03 09:00:00",
+      afterValue: "2026-06-03 10:18:22",
+      operator: "lxy（四川享宇科技有限公司）",
+      operatedAt: "2026-06-03 09:42:11",
+    },
+    {
+      fieldLabel: "提货人姓名",
+      beforeValue: "王强",
+      afterValue: "王强（四川建龙物资有限公司）",
+      operator: "lxy（四川享宇科技有限公司）",
+      operatedAt: "2026-06-03 09:45:30",
+    },
+  ],
+}

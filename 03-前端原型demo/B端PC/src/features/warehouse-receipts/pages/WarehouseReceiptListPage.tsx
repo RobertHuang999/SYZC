@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { PlusIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { WarningListPagination } from "@/components/business/WarningListPrimitives"
 import {
   PrototypeAnnotationProvider,
@@ -163,14 +161,6 @@ export function WarehouseReceiptListPage() {
     setGuideTarget({ receipt: item, action })
   }
 
-  const copyCode = async (code: string) => {
-    try {
-      await navigator.clipboard.writeText(code)
-      showToast("仓单编号已复制到剪贴板！")
-    } catch {
-      showToast(`复制失败，请手动选中复制：${code}`)
-    }
-  }
 
   const guide = guideTarget ? buildGuide(guideTarget.action) : null
 
@@ -182,21 +172,13 @@ export function WarehouseReceiptListPage() {
     >
       <div className="space-y-4 p-6">
         <PrototypeAnnotationTarget annotationIds={["receipt-list-page"]}>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                仓单管理
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                数字资产确权与全生命周期监控台账；按当前账号管辖仓库隔离，最新开立的仓单排在最前。
-              </p>
-            </div>
-            <PrototypeAnnotationTarget annotationIds={["receipt-list-issue-guide"]}>
-              <Button type="button" onClick={() => setIssueOpen(true)}>
-                <PlusIcon className="size-4" />
-                仓单开立
-              </Button>
-            </PrototypeAnnotationTarget>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              仓单管理
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              数字资产确权与全生命周期监控台账；按当前账号管辖仓库隔离，最新开立的仓单排在最前。
+            </p>
           </div>
         </PrototypeAnnotationTarget>
 
@@ -214,6 +196,7 @@ export function WarehouseReceiptListPage() {
               onChange={setDraftFilters}
               onSearch={handleSearch}
               onReset={handleReset}
+              onAdd={() => setIssueOpen(true)}
             />
           </PrototypeAnnotationTarget>
         </form>
@@ -227,7 +210,6 @@ export function WarehouseReceiptListPage() {
               page={currentPage}
               pageSize={pageSize}
               onAction={handleRowAction}
-              onCopyCode={copyCode}
             />
           </PrototypeAnnotationTarget>
 
@@ -240,7 +222,6 @@ export function WarehouseReceiptListPage() {
               setPageSize(size)
               setPage(1)
             }}
-            totalLabel="条仓单"
           />
         </div>
       </div>
@@ -284,7 +265,7 @@ export function WarehouseReceiptListPage() {
       />
 
       {toastMessage ? (
-        <div className="fixed bottom-6 left-1/2 z-[120] max-w-md -translate-x-1/2 rounded-md bg-foreground px-4 py-2 text-center text-sm text-background shadow-lg">
+        <div className="fixed right-6 bottom-6 z-50 max-w-sm rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
           {toastMessage}
         </div>
       ) : null}

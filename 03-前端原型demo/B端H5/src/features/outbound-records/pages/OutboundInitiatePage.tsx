@@ -228,32 +228,30 @@ export function OutboundInitiatePage() {
 
   return (
     <MobileShell>
-      <div className="flex min-h-0 flex-1 flex-col bg-[#F2F3F7]">
+      <div className="flex min-h-0 flex-1 flex-col bg-gradient-to-b from-blue-50/80 to-[#F2F3F7]">
         <PrototypeAnnotationTarget annotationIds={["outbound-h5-initiate"]}>
           <NavBar
-            title="出库申请发起"
+            title="出库单填写"
             onBack={() => navigate(TASKS_ROUTE)}
           />
         </PrototypeAnnotationTarget>
 
         {/* 步骤条 */}
-        <div className="bg-white px-4 border-b border-[#232D39]/5">
-          <NativeOutboundStepBar current={0} />
-        </div>
+        <NativeOutboundStepBar current={0} />
 
         {/* 吐司提示 */}
         {toast && (
-          <div className="fixed top-14 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#232D39]/90 px-4 py-2 text-xs font-medium text-white shadow-lg backdrop-blur-sm animate-fade-in">
+          <div className="fixed bottom-24 left-1/2 z-50 max-w-[90%] -translate-x-1/2 rounded-lg bg-gray-900 px-4 py-2 text-xs text-white">
             {toast}
           </div>
         )}
 
         {/* 主表单区域 */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3 space-y-3 pb-28">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-8">
           {/* 1. 货主与基本信息 */}
           <NativeInfoCard
             title="货主与出库信息"
-            icon={<Building2 className="size-4 text-blue-600" />}
+            icon={<Building2 className="size-5" />}
           >
             <NativeFormRow label="货主类型" required>
               <div className="flex gap-4">
@@ -263,17 +261,17 @@ export function OutboundInitiatePage() {
                     <button
                       key={t}
                       type="button"
-                      className={`flex h-7 px-4 items-center justify-center rounded-lg text-xs font-medium transition-colors ${
+                      className={`flex h-[26px] w-14 items-center justify-center rounded-md text-sm ${
                         active
-                          ? "bg-blue-50 text-blue-600 border border-blue-200"
-                          : "bg-[#232D39]/5 text-[#232D39]/60 border border-transparent"
+                          ? "bg-blue-50 text-blue-600"
+                          : "bg-[#232D39]/5 text-[#232D39]/60"
                       }`}
                       onClick={() => {
                         const found = OWNER_CANDIDATES.find((c) => c.type === t)
                         if (found) setSelectedOwner(found)
                       }}
                     >
-                      {t}货主
+                      {t}
                     </button>
                   )
                 })}
@@ -283,7 +281,7 @@ export function OutboundInitiatePage() {
             <NativeFormRow label="货主名称" required>
               <button
                 type="button"
-                className="flex items-center justify-end text-xs text-[#232D39] font-medium active:opacity-70"
+                className="flex items-center justify-end text-sm text-[#232D39] font-medium active:opacity-70"
                 onClick={() => setOwnerModalOpen(true)}
               >
                 <span>{selectedOwner.name}</span>
@@ -291,8 +289,8 @@ export function OutboundInitiatePage() {
               </button>
             </NativeFormRow>
 
-            <NativeFormRow label="货主识别码">
-              <span className="text-xs text-[#232D39]/70">
+            <NativeFormRow label="货主标识">
+              <span className="text-sm text-[#232D39]/80">
                 {selectedOwner.identifier}
               </span>
             </NativeFormRow>
@@ -300,7 +298,7 @@ export function OutboundInitiatePage() {
             <NativeFormRow label="出库类型" required>
               <button
                 type="button"
-                className="flex items-center justify-end text-xs text-blue-600 font-medium active:opacity-70"
+                className="flex items-center justify-end text-sm text-blue-600 font-medium active:opacity-70"
                 onClick={() => setTypeModalOpen(true)}
               >
                 <span>{outboundType}</span>
@@ -311,7 +309,7 @@ export function OutboundInitiatePage() {
             <NativeFormRow label="所属仓库" required>
               <button
                 type="button"
-                className="flex items-center justify-end text-xs text-[#232D39] font-medium active:opacity-70"
+                className="flex items-center justify-end text-sm text-[#232D39] font-medium active:opacity-70"
                 onClick={() => setWarehouseModalOpen(true)}
               >
                 <span>{selectedWarehouse}</span>
@@ -323,7 +321,7 @@ export function OutboundInitiatePage() {
               <NativeFormRow label="关联合同/单据" required>
                 <button
                   type="button"
-                  className="flex items-center justify-end text-xs text-blue-600 font-medium active:opacity-70 text-right truncate max-w-[200px]"
+                  className="flex items-center justify-end text-sm text-blue-600 font-medium active:opacity-70 text-right truncate max-w-[200px]"
                   onClick={() => setRelatedOrderModalOpen(true)}
                 >
                   <span className="truncate">
@@ -363,7 +361,7 @@ export function OutboundInitiatePage() {
           {/* 2. 提货信息 */}
           <NativeInfoCard
             title="提货人信息"
-            icon={<User className="size-4 text-blue-600" />}
+            icon={<User className="size-5" />}
           >
             <NativeFormRow label="提货主体" required>
               <div className="flex gap-4">
@@ -373,7 +371,7 @@ export function OutboundInitiatePage() {
                     <button
                       key={t}
                       type="button"
-                      className={`flex h-7 px-4 items-center justify-center rounded-lg text-xs font-medium transition-colors ${
+                      className={`flex h-[26px] px-3 items-center justify-center rounded-md text-sm transition-colors ${
                         active
                           ? "bg-blue-50 text-blue-600 border border-blue-200"
                           : "bg-[#232D39]/5 text-[#232D39]/60 border border-transparent"
@@ -393,7 +391,7 @@ export function OutboundInitiatePage() {
                 value={pickupName}
                 onChange={(e) => setPickupName(e.target.value)}
                 placeholder="请填写提货人姓名"
-                className="w-44 text-right text-xs text-[#232D39] outline-none placeholder:text-[#232D39]/30"
+                className="w-44 text-right text-sm text-[#232D39] outline-none placeholder:text-[#232D39]/30"
               />
             </NativeFormRow>
 
@@ -404,7 +402,7 @@ export function OutboundInitiatePage() {
                 value={pickupPhone}
                 onChange={(e) => setPickupPhone(e.target.value)}
                 placeholder="11位手机号码"
-                className="w-44 text-right text-xs text-[#232D39] outline-none placeholder:text-[#232D39]/30"
+                className="w-44 text-right text-sm text-[#232D39] outline-none placeholder:text-[#232D39]/30"
               />
             </NativeFormRow>
 
@@ -415,7 +413,7 @@ export function OutboundInitiatePage() {
                 value={pickupIdCard}
                 onChange={(e) => setPickupIdCard(e.target.value)}
                 placeholder="提货人二代身份证"
-                className="w-44 text-right text-xs text-[#232D39] outline-none placeholder:text-[#232D39]/30"
+                className="w-44 text-right text-sm text-[#232D39] outline-none placeholder:text-[#232D39]/30"
               />
             </NativeFormRow>
 
@@ -426,7 +424,7 @@ export function OutboundInitiatePage() {
                   value={pickupOperator}
                   onChange={(e) => setPickupOperator(e.target.value)}
                   placeholder="授权委托经办人"
-                  className="w-44 text-right text-xs text-[#232D39] outline-none placeholder:text-[#232D39]/30"
+                  className="w-44 text-right text-sm text-[#232D39] outline-none placeholder:text-[#232D39]/30"
                 />
               </NativeFormRow>
             )}
@@ -437,7 +435,7 @@ export function OutboundInitiatePage() {
                 value={pickupPlateNo}
                 onChange={(e) => setPickupPlateNo(e.target.value)}
                 placeholder="例如：川A·88888"
-                className="w-44 text-right text-xs text-[#232D39] outline-none placeholder:text-[#232D39]/30"
+                className="w-44 text-right text-sm text-[#232D39] outline-none placeholder:text-[#232D39]/30"
               />
             </NativeFormRow>
           </NativeInfoCard>
@@ -445,7 +443,7 @@ export function OutboundInitiatePage() {
           {/* 3. 现场核实照片 */}
           <NativeInfoCard
             title="现场照片与凭证"
-            icon={<Camera className="size-4 text-blue-600" />}
+            icon={<Camera className="size-5" />}
           >
             <div className="py-2">
               <div className="flex items-center justify-between mb-2">
@@ -494,7 +492,7 @@ export function OutboundInitiatePage() {
           {/* 4. 备注说明 */}
           <NativeInfoCard
             title="出库申请备注"
-            icon={<FileText className="size-4 text-blue-600" />}
+            icon={<FileText className="size-5" />}
           >
             <div className="py-2">
               <textarea
@@ -502,31 +500,18 @@ export function OutboundInitiatePage() {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="请填写出库相关背景、资方解质审批文号等备注说明..."
-                className="w-full rounded-lg bg-[#232D39]/5 p-2.5 text-xs text-[#232D39] outline-none placeholder:text-[#232D39]/30"
+                className="w-full rounded-lg bg-[#232D39]/5 p-2.5 text-sm text-[#232D39] outline-none placeholder:text-[#232D39]/30"
               />
             </div>
           </NativeInfoCard>
-        </div>
 
-        {/* 底部吸底主按钮 */}
-        <div className="fixed inset-x-0 bottom-0 z-30 bg-white border-t border-[#232D39]/10 p-3 shadow-lg">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => navigate(TASKS_ROUTE)}
-              className="h-11 px-5 rounded-xl border border-[#232D39]/20 text-xs font-medium text-[#232D39]/70 active:bg-gray-50"
-            >
-              取消
-            </button>
-            <button
-              type="button"
-              onClick={handleGoNext}
-              className="flex-1 h-11 rounded-xl bg-blue-600 text-sm font-medium text-white shadow-md shadow-blue-500/20 active:bg-blue-700 flex items-center justify-center gap-1"
-            >
-              下一步：选择出库货物
-              <span className="text-base leading-none">›</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            className="mt-4 flex h-[52px] w-full items-center justify-center rounded-lg bg-blue-600 text-base font-medium text-white active:bg-blue-700"
+            onClick={handleGoNext}
+          >
+            下一步
+          </button>
         </div>
 
         {/* 货主选择弹窗 */}

@@ -225,7 +225,6 @@ export function DeviceWarningEventListPage() {
               setPageSize(size)
               setPage(1)
             }}
-            totalLabel="条设备预警"
           />
         </PrototypeAnnotationTarget>
       </div>

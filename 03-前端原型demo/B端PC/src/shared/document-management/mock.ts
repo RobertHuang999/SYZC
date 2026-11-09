@@ -367,15 +367,83 @@ export const initialDocumentsMock: DocumentItem[] = [
     description: "出库后财务对账完毕开具的增值税专用发票电子件后置归档。",
     statusText: "有效补充",
   },
+  // 移库单模板资料（未单独配置资料的单据按 orderType=transfer 兜底匹配）
+  {
+    id: "doc-tr-01",
+    orderNo: "YK-TEMPLATE",
+    approvalId: "SP202605280001",
+    orderType: "transfer",
+    flowType: "1",
+    flowNodeTitle: "移库发起",
+    nature: "BASE",
+    category: "ONSITE",
+    name: "移库作业现场照片_移出库位.jpg",
+    version: "V1.0",
+    fileType: "jpg",
+    fileSize: "2.14 MB",
+    createTime: "2026-07-29 11:40:16",
+    uploader: "王铁柱",
+    uploaderOrg: "中储无锡运营中心",
+    hash: "9a0364b9e99bb480dd25e1f0284c8555",
+    description: "移出库位货物码放实况与库位标识同框照片。",
+    statusText: "已通过",
+  },
+  {
+    id: "doc-tr-02",
+    orderNo: "YK-TEMPLATE",
+    approvalId: "SP202605280001",
+    orderType: "transfer",
+    flowType: "1",
+    flowNodeTitle: "移库发起",
+    nature: "BASE",
+    category: "ONSITE",
+    name: "移库作业现场照片_移入库位.jpg",
+    version: "V1.0",
+    fileType: "jpg",
+    fileSize: "1.96 MB",
+    createTime: "2026-07-29 11:41:03",
+    uploader: "王铁柱",
+    uploaderOrg: "中储无锡运营中心",
+    hash: "c4ca4238a0b923820dcc509a6f75849b",
+    description: "移入目标库位货物落位与外观完整度照片。",
+    statusText: "已通过",
+  },
+  {
+    id: "doc-tr-03",
+    orderNo: "YK-TEMPLATE",
+    approvalId: "SP202605280001",
+    orderType: "transfer",
+    flowType: "9527",
+    flowNodeTitle: "补充资料",
+    nature: "ADDITION",
+    category: "OWNERSHIP",
+    name: "移库审批单_仓储主管签批.pdf",
+    version: "V1.0",
+    fileType: "pdf",
+    fileSize: "620 KB",
+    createTime: "2026-07-29 14:05:00",
+    uploader: "周敏",
+    uploaderOrg: "中储无锡运营中心-仓储部",
+    hash: "d3d9446802a44259755d38e6d163e820",
+    description: "库区调整审批单扫描件，含主管签批意见。",
+    statusText: "有效补充",
+  },
 ]
 
 // 内存单例存储（支持增改查）
 let documentsState: DocumentItem[] = [...initialDocumentsMock]
 
-export function getDocumentsByOrderNo(orderNo: string): DocumentItem[] {
+export function getDocumentsByOrderNo(
+  orderNo: string,
+  orderType?: DocumentItem["orderType"]
+): DocumentItem[] {
   const filtered = documentsState.filter((d) => d.orderNo === orderNo)
   if (filtered.length > 0) return filtered
-  // 兜底根据前缀返回对应模板
+  // 兜底：优先按调用方声明的单据类型返回模板
+  if (orderType) {
+    return documentsState.filter((d) => d.orderType === orderType)
+  }
+  // 未声明类型时按单号前缀推断（出库 CK 开头，其余按入库）
   return documentsState.filter((d) =>
     orderNo.startsWith("CK") ? d.orderType === "outbound" : d.orderType === "inbound"
   )
@@ -414,9 +482,38 @@ export function addDocumentItems(
 export function buildTimelineSteps(
   orderNo: string,
   _approvalId: string,
-  orderType: "inbound" | "outbound"
+  orderType: DocumentItem["orderType"]
 ): TimelineStep[] {
-  const docs = getDocumentsByOrderNo(orderNo)
+  const docs = getDocumentsByOrderNo(orderNo, orderType)
+
+  if (orderType === "transfer") {
+    return [
+      {
+        stepIndex: 1,
+        title: "移库发起",
+        flowType: "1",
+        statusText: "已通过",
+        statusType: "success",
+        time: "2026-07-29 11:36:20~2026-07-29 11:48:37",
+        operator: "王铁柱 / 库管复核",
+        org: "中储无锡运营中心 · 1号重载库房",
+        documents: docs.filter((d) => d.flowType === "1"),
+        expanded: true,
+      },
+      {
+        stepIndex: 2,
+        title: "补充资料",
+        flowType: "9527",
+        statusText: "",
+        statusType: "info",
+        time: "2026-07-29 14:05:00",
+        operator: "业务后置补录",
+        org: "仓储主管 · 审批归档",
+        documents: docs.filter((d) => d.flowType === "9527"),
+        expanded: true,
+      },
+    ]
+  }
 
   if (orderType === "inbound") {
     return [

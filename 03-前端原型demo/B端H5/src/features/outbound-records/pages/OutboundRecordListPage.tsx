@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { Search, CheckCircle2, Filter, X, RotateCcw } from "lucide-react"
+import { Search, Filter, X, RotateCcw } from "lucide-react"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
 import {
@@ -36,7 +36,7 @@ const STATUS_OPTIONS: DropdownOption[] = [
 ]
 
 const PICKUP_OPTIONS: DropdownOption[] = [
-  { label: "全部提货", value: "ALL" },
+  { label: "全部提货", value: "全部" },
   { label: "已提货", value: "PICKED" },
   { label: "未提货", value: "UNPICKED" },
 ]
@@ -47,7 +47,11 @@ export function OutboundRecordListPage() {
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>("全部")
   const [selectedType, setSelectedType] = useState<string>("全部")
   const [selectedStatus, setSelectedStatus] = useState<string>("全部")
-  const [selectedPickup, setSelectedPickup] = useState<string>("ALL")
+  const [selectedPickup, setSelectedPickup] = useState<string>("全部")
+  const [outboundStartDate, setOutboundStartDate] = useState("")
+  const [outboundEndDate, setOutboundEndDate] = useState("")
+  const [createStartDate, setCreateStartDate] = useState("")
+  const [createEndDate, setCreateEndDate] = useState("")
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
@@ -64,12 +68,21 @@ export function OutboundRecordListPage() {
       if (selectedType !== "全部" && row.type !== selectedType) {
         return false
       }
+      if (selectedStatus !== "全部" && row.statusCode !== selectedStatus) {
+        return false
+      }
       if (selectedPickup === "PICKED" && !row.pickCompleted) {
         return false
       }
       if (selectedPickup === "UNPICKED" && row.pickCompleted) {
         return false
       }
+      const outboundDay = row.outboundTime.slice(0, 10)
+      if (outboundStartDate && outboundDay < outboundStartDate) return false
+      if (outboundEndDate && outboundDay > outboundEndDate) return false
+      const createDay = row.createTime.slice(0, 10)
+      if (createStartDate && createDay < createStartDate) return false
+      if (createEndDate && createDay > createEndDate) return false
       const q = keyword.trim().toLowerCase()
       if (!q) return true
       return (
@@ -80,7 +93,7 @@ export function OutboundRecordListPage() {
         (row.relatedNo && row.relatedNo.toLowerCase().includes(q))
       )
     })
-  }, [records, keyword, selectedWarehouse, selectedType, selectedPickup])
+  }, [records, keyword, selectedWarehouse, selectedType, selectedStatus, selectedPickup, outboundStartDate, outboundEndDate, createStartDate, createEndDate])
 
   const handleDownload = (kind: "excel" | "pdf", item: MobileOutboundRecord) => {
     if (kind === "excel") {
@@ -95,17 +108,23 @@ export function OutboundRecordListPage() {
     setSelectedWarehouse("全部")
     setSelectedType("全部")
     setSelectedStatus("全部")
-    setSelectedPickup("ALL")
+    setSelectedPickup("全部")
+    setOutboundStartDate("")
+    setOutboundEndDate("")
+    setCreateStartDate("")
+    setCreateEndDate("")
   }
 
   const activeFilterCount =
     (selectedWarehouse !== "全部" ? 1 : 0) +
     (selectedType !== "全部" ? 1 : 0) +
-    (selectedPickup !== "ALL" ? 1 : 0)
+    (selectedStatus !== "全部" ? 1 : 0) +
+    (selectedPickup !== "全部" ? 1 : 0) +
+    (outboundStartDate || outboundEndDate || createStartDate || createEndDate ? 1 : 0)
 
   return (
     <MobileShell>
-      <div className="flex min-h-0 flex-1 flex-col bg-[#F2F3F7]">
+      <div className="flex min-h-0 flex-1 flex-col bg-[#edf2f8]">
         <PrototypeAnnotationTarget annotationIds={["outbound-h5-list"]}>
           <NavBar title="出库管理" backTo={WORKSPACE_ROUTE} />
         </PrototypeAnnotationTarget>
@@ -183,14 +202,14 @@ export function OutboundRecordListPage() {
         <div className={`${H5_LIST_SCROLL} pb-8`}>
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="size-16 rounded-full bg-white flex items-center justify-center shadow-xs text-[#232D39]/20 mb-3">
-                <Search className="size-8" />
+              <div className="mb-3 flex size-14 items-center justify-center rounded-full bg-white text-[#232D39]/20 shadow-xs">
+                <Search className="size-7" />
               </div>
               <p className="text-xs font-medium text-[#232D39]/60">未找到符合条件的出库记录</p>
               <button
                 type="button"
                 onClick={resetAllFilters}
-                className="mt-3 inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-blue-600 shadow-xs border border-blue-200"
+                className="mt-3 inline-flex items-center gap-1 rounded-md border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-600 shadow-xs"
               >
                 <RotateCcw className="size-3" />
                 重置筛选条件
@@ -207,84 +226,62 @@ export function OutboundRecordListPage() {
           )}
         </div>
 
-        {/* 高级筛选抽屉 FilterDrawer */}
+        {/* 更多筛选：出库日期与制单日期（常用维度已在胶囊上） */}
         <FilterDrawer
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
-          onReset={resetAllFilters}
+          onReset={() => {
+            setOutboundStartDate("")
+            setOutboundEndDate("")
+            setCreateStartDate("")
+            setCreateEndDate("")
+          }}
           onConfirm={() => setDrawerOpen(false)}
         >
-          <DrawerField label="所属监管仓库">
-            <div className="grid grid-cols-2 gap-2">
-              {WAREHOUSE_OPTIONS.map((opt) => {
-                const active = selectedWarehouse === opt.value
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setSelectedWarehouse(opt.value)}
-                    className={`rounded-lg py-2 px-2.5 text-xs text-left truncate transition-colors ${
-                      active
-                        ? "bg-blue-50 font-bold text-blue-600 border border-blue-200"
-                        : "bg-gray-50 text-[#232D39]/80 border border-transparent"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                )
-              })}
+          <DrawerField label="出库日期">
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={outboundStartDate}
+                onChange={(event) => setOutboundStartDate(event.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="出库开始日期"
+              />
+              <span className="shrink-0 text-xs text-[#232D39]/50">至</span>
+              <input
+                type="date"
+                value={outboundEndDate}
+                onChange={(event) => setOutboundEndDate(event.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="出库结束日期"
+              />
             </div>
           </DrawerField>
 
-          <DrawerField label="出库业务类型">
-            <div className="grid grid-cols-2 gap-2">
-              {TYPE_OPTIONS.map((opt) => {
-                const active = selectedType === opt.value
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setSelectedType(opt.value)}
-                    className={`rounded-lg py-2 px-2.5 text-xs text-left truncate transition-colors ${
-                      active
-                        ? "bg-blue-50 font-bold text-blue-600 border border-blue-200"
-                        : "bg-gray-50 text-[#232D39]/80 border border-transparent"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                )
-              })}
-            </div>
-          </DrawerField>
-
-          <DrawerField label="提货完成状态">
-            <div className="grid grid-cols-3 gap-2">
-              {PICKUP_OPTIONS.map((opt) => {
-                const active = selectedPickup === opt.value
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setSelectedPickup(opt.value)}
-                    className={`rounded-lg py-2 px-2 text-center text-xs transition-colors ${
-                      active
-                        ? "bg-blue-50 font-bold text-blue-600 border border-blue-200"
-                        : "bg-gray-50 text-[#232D39]/80 border border-transparent"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                )
-              })}
+          <DrawerField label="制单日期">
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={createStartDate}
+                onChange={(event) => setCreateStartDate(event.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="制单开始日期"
+              />
+              <span className="shrink-0 text-xs text-[#232D39]/50">至</span>
+              <input
+                type="date"
+                value={createEndDate}
+                onChange={(event) => setCreateEndDate(event.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="制单结束日期"
+              />
             </div>
           </DrawerField>
         </FilterDrawer>
 
         {/* Toast 提示浮层 */}
         {toast && (
-          <div className="fixed bottom-16 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#232D39]/90 px-4 py-2 text-xs font-medium text-white shadow-lg backdrop-blur-xs transition-opacity animate-fade-in flex items-center gap-1.5">
-            <CheckCircle2 className="size-3.5 text-emerald-400" />
+          <div className="fixed bottom-16 left-1/2 z-50 -translate-x-1/2 rounded-full bg-black/80 px-4 py-1.5 text-xs text-white shadow-lg">
             {toast}
           </div>
         )}

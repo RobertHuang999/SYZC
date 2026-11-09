@@ -58,7 +58,7 @@ export function OutboundGoodsSection({
           ) : (
             <ChevronDownIcon className="size-4 text-muted-foreground" />
           )}
-          货品明细 ({goodsList.length} 项)
+          货品明细（{goodsList.length} 项）
         </button>
 
         {isNormal ? (

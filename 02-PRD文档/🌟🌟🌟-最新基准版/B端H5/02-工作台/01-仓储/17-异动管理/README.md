@@ -1,9 +1,9 @@
 # 异动管理
 
-> **文档状态**：占位 — 待迭代回写 H5 端 PRD / Demo / ASCII
+> **文档状态**：H5 列表页 + 详情页原型已落地（调账货品明细 / 审核记录）
 > **moduleId**：`ws-cargo-movement`
 > **菜单路径**：工作台 → 仓储 → 异动管理
-> **原型路由**：`/m/module/ws-cargo-movement`
+> **原型路由**：`/m/workspace/inventory-abnormal-records`（详情 `/:id`）
 > **PC 原路径**：货物数量变更
 > **功能清单唯一定义来源**：`03-前端原型demo/B端H5/src/data/mobileMenuData.ts`
 > **基准路径**：`B端H5/02-工作台/01-仓储/17-异动管理`

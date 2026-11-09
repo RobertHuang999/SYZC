@@ -9,9 +9,8 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ImagePlus, Trash2 } from "lucide-react"
+import { ImagePlus, Trash2, Clock, CheckCircle2, ShieldCheck, Eye } from "lucide-react"
 import type { DeliveryOrderItem } from "../domain/types"
 
 interface DeliveryOrderConfirmDialogProps {
@@ -33,12 +32,13 @@ export function DeliveryOrderConfirmDialog({
   onSuccess,
 }: DeliveryOrderConfirmDialogProps) {
   const [isSelfPickup, setIsSelfPickup] = useState<boolean>(true)
-  const [plateNo, setPlateNo] = useState(order?.pickupPlate || "川A88888")
+  const [plateNo, setPlateNo] = useState(order?.pickupPlate || "川A99881")
   const [notes, setNotes] = useState("")
   const [photos, setPhotos] = useState<string[]>([
     "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&auto=format&fit=crop&q=60",
   ])
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [previewPhoto, setPreviewPhoto] = useState<string | null>(null)
 
   if (!open || !order) return null
 
@@ -47,13 +47,18 @@ export function DeliveryOrderConfirmDialog({
     const mockList = [
       "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=60",
       "https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=600&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&auto=format&fit=crop&q=60",
     ]
     setPhotos((prev) => [...prev, mockList[prev.length % mockList.length]])
   }
 
+  const handleRemovePhoto = (idx: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== idx))
+  }
+
   const handleConfirm = () => {
     if (photos.length === 0) {
-      setErrorMsg("请上传现场提货照片（至少1张）")
+      setErrorMsg("请上传提货交接现场照片（必填，最多10张）")
       return
     }
     setErrorMsg(null)
@@ -69,184 +74,231 @@ export function DeliveryOrderConfirmDialog({
   const currentTime = new Date().toLocaleString("zh-CN", { hour12: false }).replace(/\//g, "-")
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center justify-between pr-4">
-            <span>确认提货（免码现场直接提货）</span>
-            <span className="text-xs font-normal text-muted-foreground">
-              提货单号：{order.orderNo}
-            </span>
-          </DialogTitle>
-          <DialogDescription>
-            适用于仓库网络受限或现场直接交接场景。核对出库实物外观，拍摄装车照片并确认放行。
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+        <DialogContent className="max-w-2xl max-h-[92vh] overflow-y-auto font-sans">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between pr-4 text-foreground">
+              <span className="flex items-center gap-2">
+                <ShieldCheck className="size-5 text-amber-600" />
+                <span>确认提货（免码现场直接确认）</span>
+              </span>
+              <span className="text-xs font-normal text-muted-foreground">
+                提货单号：{order.orderNo}
+              </span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              适用于仓库弱网或当面交接场景。系统锁定提货人原始档案防篡改，现场比对出库照片并完成交接拍照。
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-4 py-2 text-xs">
-          {/* 两列排版展示基础与提货人锁定信息 */}
-          <div className="grid grid-cols-2 gap-3 rounded-md bg-muted/40 p-3">
-            <div>
-              <span className="text-muted-foreground">提货时间：</span>
-              <span className="font-medium text-foreground ml-1">{currentTime}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">提货人类型：</span>
-              <span className="font-medium text-foreground ml-1">{order.pickupPersonType}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">提货人姓名：</span>
-              <span className="font-medium text-foreground ml-1">{order.pickupName}</span>
-              <span className="text-[11px] text-muted-foreground ml-1">（档案只读锁定）</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">提货人电话：</span>
-              <span className="font-medium text-foreground ml-1">{order.pickupPhone}</span>
-            </div>
-            {order.pickupIdCard && (
-              <div className="col-span-2">
-                <span className="text-muted-foreground">提货人身份证号：</span>
-                <span className="font-medium text-foreground ml-1">{order.pickupIdCard}</span>
+          <div className="space-y-4 py-2 text-xs">
+            {/* 提货时间（带出只读） */}
+            <div className="flex items-center gap-3">
+              <span className="font-medium text-foreground whitespace-nowrap">提货时间：</span>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded border text-muted-foreground">
+                <Clock className="size-3.5" />
+                <span>{currentTime}</span>
+                <span className="text-[10px] text-muted-foreground/70 ml-1">（系统当前时间·只读）</span>
               </div>
-            )}
-            {order.pickupIdentity && (
-              <div className="col-span-2">
-                <span className="text-muted-foreground">企业信用代码：</span>
-                <span className="font-medium text-foreground ml-1">{order.pickupIdentity}</span>
-              </div>
-            )}
-          </div>
+            </div>
 
-          {/* 原出库照片与外观比对 */}
-          {order.outboundPhotos && order.outboundPhotos.length > 0 && (
-            <div className="space-y-1.5 rounded-md border p-3 bg-muted/10">
-              <Label className="text-xs font-medium text-muted-foreground">
-                原出库申报照片对照（核对实物外观与包装完好）：
-              </Label>
-              <div className="flex gap-2 pt-1 overflow-x-auto">
-                {order.outboundPhotos.map((url, i) => (
-                  <img
-                    key={i}
-                    src={url}
-                    alt="原出库申报图"
-                    className="size-16 rounded border object-cover shrink-0"
+            {/* 是否本人提货 */}
+            <div className="flex items-center gap-4">
+              <span className="font-medium text-foreground whitespace-nowrap">
+                <span className="text-destructive mr-0.5">*</span>是否本人提货：
+              </span>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="confirmSelfPickup"
+                    checked={isSelfPickup === true}
+                    onChange={() => setIsSelfPickup(true)}
+                    className="text-amber-600 focus:ring-amber-500"
                   />
+                  <span>是</span>
+                </label>
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="confirmSelfPickup"
+                    checked={isSelfPickup === false}
+                    onChange={() => setIsSelfPickup(false)}
+                    className="text-amber-600 focus:ring-amber-500"
+                  />
+                  <span>否</span>
+                </label>
+              </div>
+              <span className="text-[11px] text-muted-foreground">
+                （选“否”下方提货人信息仍灰底锁定只读，严格防篡改）
+              </span>
+            </div>
+
+            {/* 提货人信息回显（灰底只读带出，防篡改） */}
+            <div className="rounded-lg border bg-muted/40 p-3 space-y-2">
+              <div className="flex items-center justify-between text-muted-foreground border-b pb-1.5">
+                <span className="font-medium text-foreground">预留提货人档案（只读带出）</span>
+                <span className="text-[11px]">出库登记原件·不可修改</span>
+              </div>
+              <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                <div>
+                  <span className="text-muted-foreground">提货人类型：</span>
+                  <span className="font-medium text-foreground ml-1">{order.pickupPersonType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">
+                    {order.pickupPersonType === "企业" ? "经办人姓名：" : "提货人姓名："}
+                  </span>
+                  <span className="font-medium text-foreground ml-1">
+                    {order.pickupOperator || order.pickupName}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">联系电话：</span>
+                  <span className="font-medium text-foreground ml-1">{order.pickupPhone}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">身份证号码：</span>
+                  <span className="font-medium text-foreground ml-1">
+                    {order.pickupIdCard ? `${order.pickupIdCard.slice(0, 6)}****${order.pickupIdCard.slice(-4)}` : "—"}
+                  </span>
+                </div>
+                {order.pickupPersonType === "企业" && (
+                  <>
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">企业名称：</span>
+                      <span className="font-medium text-foreground ml-1">{order.pickupName}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">统一社会信用代码：</span>
+                      <span className="font-medium text-foreground ml-1">{order.pickupIdentity || "—"}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* 车牌号 */}
+            <div className="space-y-1">
+              <span className="font-medium text-foreground">车牌号：</span>
+              <Input
+                placeholder="请输入车牌号（选填）"
+                value={plateNo}
+                onChange={(e) => setPlateNo(e.target.value)}
+                className="h-8 text-xs max-w-xs"
+              />
+            </div>
+
+            {/* 原出库现场照片（只读比对） */}
+            <div className="space-y-1.5">
+              <span className="font-medium text-foreground">原出库现场照片（只读比对）：</span>
+              <div className="flex flex-wrap gap-2">
+                {order.outboundPhotos && order.outboundPhotos.length > 0 ? (
+                  order.outboundPhotos.map((url, i) => (
+                    <div
+                      key={i}
+                      className="relative size-16 rounded border overflow-hidden cursor-pointer group bg-muted/20"
+                      onClick={() => setPreviewPhoto(url)}
+                    >
+                      <img src={url} alt="原出库照片" className="size-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
+                        <Eye className="size-3.5" />
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <span className="text-muted-foreground text-[11px]">无原出库现场照片</span>
+                )}
+              </div>
+            </div>
+
+            {/* 提货照片（必填，最多10张） */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-foreground">
+                  <span className="text-destructive mr-0.5">*</span>提货照片：
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  最多 10 张，单张不超过 5M（已传 {photos.length}/10）
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2.5">
+                {photos.map((url, idx) => (
+                  <div
+                    key={idx}
+                    className="relative size-20 rounded-md border border-border overflow-hidden group bg-muted/20"
+                  >
+                    <img src={url} alt="现场提货照片" className="size-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePhoto(idx)}
+                      className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {/* 是否本人提货 */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-foreground flex items-center">
-              <span className="text-destructive mr-1">*</span>是否本人提货：
-            </Label>
-            <div className="flex items-center gap-6 pt-1">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="confirmSelf"
-                  checked={isSelfPickup}
-                  onChange={() => setIsSelfPickup(true)}
-                  className="size-4 text-primary"
-                />
-                <span>是（本人提货）</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="confirmSelf"
-                  checked={!isSelfPickup}
-                  onChange={() => setIsSelfPickup(false)}
-                  className="size-4 text-primary"
-                />
-                <span>否（委托代领 / 司机代提）</span>
-              </label>
-            </div>
-          </div>
-
-          {/* 提货车牌号 */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-foreground">提货车牌号：</Label>
-            <Input
-              value={plateNo}
-              onChange={(e) => setPlateNo(e.target.value)}
-              placeholder="请输入现场提货货车车牌号（如：川A88888）"
-              className="text-xs h-8"
-            />
-          </div>
-
-          {/* 现场提货装车照片 */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-foreground flex items-center">
-              <span className="text-destructive mr-1">*</span>现场提货照片（装车复核/出库凭证，至少1张，最多10张）：
-            </Label>
-            <div className="flex flex-wrap gap-2 pt-1">
-              {photos.map((url, idx) => (
-                <div
-                  key={idx}
-                  className="relative group size-16 rounded border overflow-hidden bg-muted"
-                >
-                  <img
-                    src={url}
-                    alt="现场提货照片"
-                    className="size-full object-cover"
-                  />
+                {photos.length < 10 && (
                   <button
                     type="button"
-                    onClick={() => setPhotos((p) => p.filter((_, i) => i !== idx))}
-                    className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={handleUploadPhoto}
+                    className="flex size-20 flex-col items-center justify-center rounded-md border border-dashed border-muted-foreground/40 hover:border-amber-600 hover:text-amber-600 transition-colors bg-muted/10 text-muted-foreground"
                   >
-                    <Trash2 className="size-4" />
+                    <ImagePlus className="size-5 mb-1" />
+                    <span className="text-[10px]">请上传图片</span>
                   </button>
-                </div>
-              ))}
-              {photos.length < 10 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleUploadPhoto}
-                  className="size-16 flex flex-col items-center justify-center border-dashed text-muted-foreground hover:text-primary gap-1 p-0"
-                >
-                  <ImagePlus className="size-4" />
-                  <span className="text-[10px]">上传照片</span>
-                </Button>
-              )}
+                )}
+              </div>
             </div>
+
+            {/* 其他说明 */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-foreground">其他说明：</span>
+                <span className="text-[11px] text-muted-foreground">{notes.length}/50</span>
+              </div>
+              <Textarea
+                placeholder="请输入其他说明（选填，50字以内）"
+                maxLength={50}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={2}
+                className="text-xs"
+              />
+            </div>
+
+            {errorMsg && (
+              <div className="text-xs text-destructive bg-destructive/10 p-2 rounded">
+                {errorMsg}
+              </div>
+            )}
           </div>
 
-          {/* 说明 */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-foreground">其他说明：</Label>
-            <Textarea
-              placeholder="请输入提货交接说明（选填，50字以内）"
-              maxLength={50}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={2}
-              className="text-xs"
-            />
-          </div>
+          <DialogFooter className="pt-2">
+            <Button variant="outline" size="sm" onClick={onClose} className="text-xs">
+              取消
+            </Button>
+            <Button
+              size="sm"
+              className="text-xs px-6 shadow-xs"
+              onClick={handleConfirm}
+            >
+              <CheckCircle2 className="size-3.5 mr-1" />
+              确认提货
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-          {errorMsg && (
-            <p className="text-xs text-destructive font-medium">{errorMsg}</p>
-          )}
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" size="sm" onClick={onClose}>
-            取 消
-          </Button>
-          <Button
-            size="sm"
-            className="bg-amber-600 hover:bg-amber-700 text-white"
-            onClick={handleConfirm}
-          >
-            确认提货完成
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      {/* 照片放大预览 */}
+      {previewPhoto && (
+        <Dialog open={true} onOpenChange={() => setPreviewPhoto(null)}>
+          <DialogContent className="max-w-3xl p-2">
+            <img src={previewPhoto} alt="大图预览" className="w-full max-h-[80vh] object-contain rounded" />
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   )
 }

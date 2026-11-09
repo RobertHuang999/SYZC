@@ -74,7 +74,7 @@ export const InventoryBarcodeQrDialog: React.FC<InventoryBarcodeQrDialogProps> =
               <rect x="56" y="78" width="8" height="6" />
               <rect x="80" y="74" width="8" height="12" />
             </svg>
-            <div className="text-center font-mono text-xs font-bold text-slate-800 mt-2">
+            <div className="text-center text-xs font-bold text-slate-800 mt-2">
               {item.barcode}
             </div>
           </div>

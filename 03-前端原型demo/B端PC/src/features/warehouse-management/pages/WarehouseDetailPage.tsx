@@ -429,13 +429,13 @@ export function WarehouseDetailPage() {
                       <div className="text-muted-foreground">
                         统一社会信用代码/身份证号
                       </div>
-                      <div className="mt-0.5 break-all font-mono text-[13px] leading-snug text-foreground">
+                      <div className="mt-0.5 break-all text-[13px] leading-snug text-foreground">
                         {warehouse.managerIdNumber}
                       </div>
                     </div>
                     <div>
                       <div className="text-muted-foreground">管理方联系电话</div>
-                      <div className="mt-0.5 font-mono text-[13px] text-foreground">
+                      <div className="mt-0.5 text-[13px] text-foreground">
                         {warehouse.managerPhone}
                       </div>
                     </div>
@@ -467,7 +467,7 @@ export function WarehouseDetailPage() {
                       <div className="space-y-3.5">
                         <div>
                           <div className="text-muted-foreground">中仓登仓库ID号</div>
-                          <div className="mt-0.5 break-all font-mono text-[13px] font-medium text-foreground">
+                          <div className="mt-0.5 break-all text-[13px] font-medium text-foreground">
                             {warehouse.zhongdengId || "5202"}
                           </div>
                         </div>
@@ -584,9 +584,9 @@ export function WarehouseDetailPage() {
                             side="top"
                             className="max-w-[18rem] space-y-2 text-xs leading-relaxed"
                           >
-                            <p className="font-medium">出入库审核（R03 · F13）</p>
+                            <p className="font-medium">出入库审核</p>
                             <p className="text-muted-foreground">
-                              列表展示「出入库审核标记：是/否」；在【编辑库房】中修改，与基础配置自动同步（R03）。
+                              列表展示「出入库审核标记：是/否」；在【编辑库房】中修改，与基础配置自动同步。
                             </p>
                             {ops.inOutRequiresAudit === "否" ? (
                               <p className="text-amber-700 dark:text-amber-400">
@@ -896,7 +896,7 @@ export function WarehouseDetailPage() {
                                 <TableCell className="px-2 align-middle text-xs leading-snug whitespace-normal">
                                   {fac.quantity} {fac.unit}
                                 </TableCell>
-                                <TableCell className="px-2 align-middle font-mono text-xs leading-snug whitespace-normal">
+                                <TableCell className="px-2 align-middle text-xs leading-snug whitespace-normal">
                                   {fac.validUntil}
                                 </TableCell>
                                 <TableCell className="px-2 align-middle whitespace-normal">

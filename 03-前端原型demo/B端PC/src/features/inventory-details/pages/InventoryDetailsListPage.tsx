@@ -305,7 +305,6 @@ export const InventoryDetailsListPage: React.FC = () => {
                 setPageSize(newSize)
                 setPage(1)
               }}
-              totalLabel="条货位明细"
             />
           </div>
         </PrototypeAnnotationTarget>

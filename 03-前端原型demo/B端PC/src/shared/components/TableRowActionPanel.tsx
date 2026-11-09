@@ -164,18 +164,25 @@ function MoreActionsTrigger() {
 type TableRowActionPanelProps = {
   actions: TableRowActionItem[]
   fixedCols?: number
+  /** 直出上限（含「更多」占位）；默认 9，行数较多时可收紧以保住 72px 行高 */
+  maxInline?: number
 }
 
-export function TableRowActionPanel({ actions, fixedCols }: TableRowActionPanelProps) {
+export function TableRowActionPanel({
+  actions,
+  fixedCols,
+  maxInline = TABLE_ROW_ACTION_MAX_INLINE,
+}: TableRowActionPanelProps) {
   if (actions.length === 0) {
-    return <span className="text-sm text-muted-foreground">——</span>
+    return <span className="text-sm text-muted-foreground">—</span>
   }
 
-  const needsOverflow = actions.length > TABLE_ROW_ACTION_MAX_INLINE
+  const safeMaxInline = Math.max(2, Math.min(TABLE_ROW_ACTION_MAX_INLINE, maxInline))
+  const needsOverflow = actions.length > safeMaxInline
   const inlineActions = needsOverflow
-    ? actions.slice(0, OVERFLOW_KEEP_INLINE)
-    : actions.slice(0, TABLE_ROW_ACTION_MAX_INLINE)
-  const overflowActions = needsOverflow ? actions.slice(OVERFLOW_KEEP_INLINE) : []
+    ? actions.slice(0, safeMaxInline - 1)
+    : actions.slice(0, safeMaxInline)
+  const overflowActions = needsOverflow ? actions.slice(safeMaxInline - 1) : []
 
   const dangerOverflow = overflowActions.some((item) => item.tone === "danger")
   const firstDangerIndex = overflowActions.findIndex((item) => item.tone === "danger")

@@ -17,7 +17,7 @@ import { isImageDocument, type DocumentItem } from "../types"
 
 type DocumentTimelineMobileProps = {
   orderNo: string
-  orderType?: "inbound" | "outbound"
+  orderType?: DocumentItem["orderType"]
   /** 点「预览」时交给页面弹出 PDF / 图片预览 */
   onPreview: (doc: DocumentItem) => void
   /** 点「下载」时交给页面提示 */

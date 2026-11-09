@@ -64,7 +64,7 @@ export const InventoryTransactionsTable: React.FC<InventoryTransactionsTableProp
     <Table className="min-w-[1780px]">
       <TableHeader>
         <TableRow className="hover:bg-transparent">
-          <TableHead className="w-16 min-w-16 text-center">序号</TableHead>
+          <TableHead className="sticky left-0 z-10 w-16 min-w-16 bg-slate-50 text-center">序号</TableHead>
           <TableHead className="w-[190px] min-w-[190px]">业务单号</TableHead>
           <TableHead className="w-[160px] min-w-[160px]">业务时间</TableHead>
           <TableHead className="w-[120px] min-w-[120px]">业务类型</TableHead>
@@ -85,7 +85,7 @@ export const InventoryTransactionsTable: React.FC<InventoryTransactionsTableProp
         {data.length === 0 ? (
           <TableRow className="hover:bg-transparent">
             <TableCell colSpan={12} className="h-32 text-center text-muted-foreground">
-              暂无匹配出入库流水数据
+              暂无符合条件的库存流水，可调整筛选条件后重试
             </TableCell>
           </TableRow>
         ) : (
@@ -114,7 +114,7 @@ export const InventoryTransactionsTable: React.FC<InventoryTransactionsTableProp
 
             return (
               <TableRow key={row.id} className="group h-[72px]">
-                <TableCell className="text-center text-muted-foreground">
+                <TableCell className="sticky left-0 z-10 bg-white text-center text-muted-foreground group-hover:bg-slate-50">
                   {(page - 1) * pageSize + index + 1}
                 </TableCell>
 
@@ -137,13 +137,13 @@ export const InventoryTransactionsTable: React.FC<InventoryTransactionsTableProp
                 <TableCell className="text-foreground">{row.businessType}</TableCell>
 
                 <TableCell className="whitespace-normal break-all text-muted-foreground">
-                  {row.relatedId || "——"}
+                  {row.relatedId || "—"}
                 </TableCell>
 
                 <TableCell>
                   <div className="text-foreground">{row.ownerName}</div>
                   <div className="mt-0.5 text-[13px] text-muted-foreground">
-                    {owner?.identifierMasked ?? "——"}
+                    {owner?.identifierMasked ?? "—"}
                   </div>
                 </TableCell>
 

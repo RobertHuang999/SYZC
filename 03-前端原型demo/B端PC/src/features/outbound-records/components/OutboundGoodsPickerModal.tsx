@@ -400,7 +400,7 @@ export function OutboundGoodsPickerModal({
                                 <td className="p-2 font-medium text-gray-900">{loc.locationPath}</td>
                                 <td className="p-2 text-gray-600">{loc.specificLocation || "--"}</td>
                                 <td className="p-2 text-gray-600">{loc.inboundTime}</td>
-                                <td className="p-2 text-gray-500">{loc.extraInfo || "无：--"}</td>
+                                <td className="p-2 text-gray-500">{loc.extraInfo || "—"}</td>
                                 <td className="p-2 text-gray-700">{loc.barcode}</td>
                                 <td className="p-2">
                                   <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700 border border-emerald-200">

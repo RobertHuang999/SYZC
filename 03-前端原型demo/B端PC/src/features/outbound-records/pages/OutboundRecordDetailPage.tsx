@@ -12,9 +12,6 @@ import {
   ChevronRight,
   QrCode,
   KeyRound,
-  Paperclip,
-  FileText,
-  Plus,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -39,7 +36,7 @@ import {
 import { outboundRecordDetailAnnotations } from "../annotations/outbound-record-detail.annotations"
 import { ImageViewerModal } from "../components/ImageViewerModal"
 import { OUTBOUND_RECORD_LIST_PATH } from "../domain/constants"
-import { outboundRecordsMock } from "../mock/outbound-records.mock"
+import { outboundRecordsMock, OUTBOUND_MODIFY_LOGS } from "../mock/outbound-records.mock"
 import { DeliveryOrderWriteOffDialog } from "@/features/delivery-orders/components/DeliveryOrderWriteOffDialog"
 import { DeliveryOrderConfirmDialog } from "@/features/delivery-orders/components/DeliveryOrderConfirmDialog"
 import {
@@ -49,13 +46,13 @@ import {
 import type { DeliveryOrderItem } from "@/features/delivery-orders/domain/types"
 import {
   DocumentManagementTabContent,
-  UploadSupplementaryModal,
-  getDocumentsByOrderNo,
 } from "@/shared/document-management"
 import { useIterationHighlight } from "@/shared/components/IterationHighlight"
 import { DetailField, DetailSection } from "@/shared/components/DetailSection"
+import { DetailPageHeader } from "@/shared/components/DetailPageHeader"
+import { DetailTabShell } from "@/shared/components/DetailTabShell"
 
-type DetailTab = "goods" | "pickup" | "audit" | "documents"
+type DetailTab = "goods" | "pickup" | "audit" | "modify" | "documents"
 
 export function OutboundRecordDetailPage() {
   const { highlightEnabled } = useIterationHighlight()
@@ -85,13 +82,6 @@ export function OutboundRecordDetailPage() {
   // 现场提货核销弹窗
   const [writeOffOpen, setWriteOffOpen] = useState(false)
   const [directConfirmOpen, setDirectConfirmOpen] = useState(false)
-  const [auditUploadFlowType, setAuditUploadFlowType] = useState<string | null>(null)
-  const [docsRefreshKey, setDocsRefreshKey] = useState(0)
-
-  const allOrderDocs = useMemo(() => {
-    if (!record) return []
-    return getDocumentsByOrderNo(record.orderNo)
-  }, [record, docsRefreshKey])
 
   const isTransferOrAssign =
     record.type === "移库出库" || record.type === "转让出库"
@@ -186,74 +176,49 @@ export function OutboundRecordDetailPage() {
       <div className="space-y-4 p-6 bg-muted/10 min-h-full">
         {/* 顶部标题与操作卡片（对齐 store-apply-info-detail.vue 结构） */}
         <PrototypeAnnotationTarget annotationIds={["outbound-detail-header"]}>
-          <div className="rounded-lg border bg-card p-5 shadow-xs">
-            {/* 顶栏：单号、状态徽标与操作按钮 */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-foreground">
-                  出库单号：
-                  <span className="text-base font-bold ml-1">
-                    {record.orderNo}
-                  </span>
-                </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-7 text-muted-foreground hover:text-primary"
-                  title="复制单号"
-                  onClick={() => {
-                    void navigator.clipboard.writeText(record.orderNo)
-                    showToast("已复制出库单号至剪贴板")
-                  }}
-                >
-                  <Copy className="size-3.5" />
-                </Button>
-                <div className="ml-2">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-0.5 text-xs font-semibold text-emerald-700 shadow-2xs">
-                    <CheckCircle2 className="size-3.5" />
-                    已通过
-                  </span>
-                </div>
-              </div>
+          <DetailPageHeader
+            title="出库单详情"
+            number={record.orderNo}
+            numberLabel="出库单号"
+            status={
+              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 shadow-2xs">
+                <CheckCircle2 className="size-3.5" />
+                已通过
+              </span>
+            }
+            onBack={() => navigate(OUTBOUND_RECORD_LIST_PATH)}
+            onCopy={() => {
+              void navigator.clipboard.writeText(record.orderNo)
+              showToast("已复制出库单号至剪贴板")
+            }}
+            actions={
+              !record.pickCompleted && !isTransferOrAssign ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-primary/40 text-primary hover:bg-primary/5 text-xs h-8 gap-1 font-medium"
+                    onClick={() => setWriteOffOpen(true)}
+                  >
+                    <KeyRound className="size-3.5" />
+                    提货码核销
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="bg-primary hover:bg-primary/90 text-xs h-8 gap-1 font-medium"
+                    onClick={() => setDirectConfirmOpen(true)}
+                  >
+                    <Truck className="size-3.5" />
+                    免码直接提货
+                  </Button>
+                </>
+              ) : undefined
+            }
+          />
 
-              <div className="flex items-center gap-2">
-                {!record.pickCompleted && !isTransferOrAssign && (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-primary/40 text-primary hover:bg-primary/5 text-xs h-8 gap-1 font-medium"
-                      onClick={() => setWriteOffOpen(true)}
-                    >
-                      <KeyRound className="size-3.5" />
-                      提货码核销
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="bg-primary hover:bg-primary/90 text-xs h-8 gap-1 font-medium"
-                      onClick={() => setDirectConfirmOpen(true)}
-                    >
-                      <Truck className="size-3.5" />
-                      免码直接提货
-                    </Button>
-                  </>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate(OUTBOUND_RECORD_LIST_PATH)}
-                  className="h-8 text-xs"
-                >
-                  <ArrowLeft className="mr-1 size-4" />
-                  返 回
-                </Button>
-              </div>
-            </div>
-
-            {/* 基础信息（上标签下取值，4 列栅格） */}
+          {/* 基础信息（上标签下取值，4 列栅格） */}
             <PrototypeAnnotationTarget annotationIds={["outbound-detail-basic"]}>
-              <DetailSection title="单据信息">
+              <DetailSection title="基础信息">
                 <DetailField label="制单人">
                   {record.createdByName}
                   {record.createdByOrg ? (
@@ -283,82 +248,22 @@ export function OutboundRecordDetailPage() {
                 </div>
               </DetailSection>
             </PrototypeAnnotationTarget>
-          </div>
         </PrototypeAnnotationTarget>
 
-        {/* 标签栏与主体区域 */}
-        <div className="rounded-lg border bg-card p-4 shadow-xs space-y-4">
-          <div className="flex border-b border-border">
-            <button
-              type="button"
-              className={cn(
-                "px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer",
-                tab === "goods"
-                  ? "border-primary text-primary font-semibold"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              )}
-              onClick={() => setTab("goods")}
-            >
-              {outboundRecordDetailGoodsTabLabel(record.goodsList.length)}
-            </button>
-            <button
-              type="button"
-              className={cn(
-                "px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-1.5",
-                tab === "pickup"
-                  ? "border-primary text-primary font-semibold"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              )}
-              onClick={() => setTab("pickup")}
-            >
-              {OUTBOUND_RECORD_DETAIL_TAB_LABELS.pickup}
-              {record.pickCompleted ? (
-                <span className="rounded bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0.2 font-normal">
-                  已完成
-                </span>
-              ) : isTransferOrAssign ? (
-                <span className="rounded bg-muted text-muted-foreground text-[10px] px-1.5 py-0.2 font-normal">
-                  免提货
-                </span>
-              ) : (
-                <span className="rounded bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0.2 font-normal">
-                  待提货
-                </span>
-              )}
-            </button>
-            <button
-              type="button"
-              className={cn(
-                "px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer",
-                tab === "audit"
-                  ? "border-primary text-primary font-semibold"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              )}
-              onClick={() => setTab("audit")}
-            >
-              {OUTBOUND_RECORD_DETAIL_TAB_LABELS.audit}
-            </button>
-            <button
-              type="button"
-              className={cn(
-                "px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer",
-                tab === "documents"
-                  ? "border-primary text-primary font-semibold"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              )}
-              onClick={() => setTab("documents")}
-            >
-              {OUTBOUND_RECORD_DETAIL_TAB_LABELS.documents}
-              {highlightEnabled ? (
-                <span className="ml-1.5 rounded bg-amber-500 px-1 py-0.5 text-[9px] font-bold leading-none text-white">
-                  6.3
-                </span>
-              ) : null}
-            </button>
-          </div>
-
-          {/* Tab 1: 货物明细 */}
+        {/* 明细、提货、审核、修改与资料统一按页签展示 */}
+        <DetailTabShell
+          tabs={[
+            { key: "goods", label: "货物明细" },
+            { key: "pickup", label: "提货信息" },
+            { key: "audit", label: "审核记录" },
+            { key: "modify", label: "修改记录" },
+            { key: "documents", label: "资料管理" },
+          ]}
+          active={tab}
+          onChange={(key) => setTab(key as DetailTab)}
+        >
           {tab === "goods" && (
+            <>
             <div className="space-y-4">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
@@ -381,28 +286,27 @@ export function OutboundRecordDetailPage() {
               </div>
 
               {record.type === "普通出库" ? (
-                /* 普通出库：一级货品主行 + 二级库存位置展开表（对齐 PRD 2.1~2.2 节） */
+                /* 普通出库：一级货品主行（序号/货物名称/出库数量）+ 二级库存位置明细 */
                 <div className="overflow-x-auto rounded-md border">
-                  <Table className="min-w-[1000px] text-xs">
+                  <Table className="min-w-[760px] text-xs">
                     <TableHeader>
                       <TableRow className="bg-muted/40">
                         <TableHead className="w-12 text-center">展开</TableHead>
                         <TableHead className="w-12 text-center">序号</TableHead>
-                        <TableHead className="w-[200px]">货物名称</TableHead>
-                        <TableHead className="w-[120px]">规格型号</TableHead>
-                        <TableHead className="w-[160px]">其他信息</TableHead>
-                        <TableHead className="w-[120px] text-right font-semibold">
+                        <TableHead>货物名称</TableHead>
+                        <TableHead className="w-[140px] text-right font-semibold">
                           出库数量
                         </TableHead>
-                        <TableHead className="w-[80px] text-center">单位</TableHead>
-                        <TableHead className="w-[140px]">库存位置汇总</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {record.goodsList.map((goods, idx) => {
-                        const isExpanded = expandedGoods[goods.id || String(idx)] ?? true
+                        const key = goods.id || String(idx)
+                        const isExpanded = expandedGoods[key] ?? true
+                        const locations = goods.locations ?? []
+
                         return (
-                          <Fragment key={goods.id || idx}>
+                          <Fragment key={key}>
                             <TableRow className="hover:bg-muted/30">
                               <TableCell className="text-center">
                                 <button
@@ -410,10 +314,10 @@ export function OutboundRecordDetailPage() {
                                   onClick={() =>
                                     setExpandedGoods((prev) => ({
                                       ...prev,
-                                      [goods.id || String(idx)]: !isExpanded,
+                                      [key]: !isExpanded,
                                     }))
                                   }
-                                  className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground"
+                                  className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
                                   title={isExpanded ? "收起位置明细" : "展开位置明细"}
                                 >
                                   {isExpanded ? (
@@ -429,66 +333,108 @@ export function OutboundRecordDetailPage() {
                               <TableCell className="font-semibold text-foreground">
                                 {goods.goodsName}
                               </TableCell>
-                              <TableCell className="text-muted-foreground">
-                                {goods.specName || "—"}
-                              </TableCell>
-                              <TableCell className="text-muted-foreground">
-                                {goods.extraInfo || "无"}
-                              </TableCell>
                               <TableCell className="text-right font-bold text-foreground">
                                 {goods.totalOutboundAmount}
-                              </TableCell>
-                              <TableCell className="text-center text-muted-foreground">
-                                {goods.unit}
-                              </TableCell>
-                              <TableCell className="text-muted-foreground text-[11px]">
-                                {goods.locationPath || record.warehouseName}
+                                <span className="ml-1 text-xs font-normal text-muted-foreground">
+                                  {goods.unit}
+                                </span>
                               </TableCell>
                             </TableRow>
 
-                            {/* 二级展开位置明细表格 */}
                             {isExpanded && (
-                              <TableRow className="bg-slate-50/70 dark:bg-slate-900/40 hover:bg-slate-50/70 dark:hover:bg-slate-900/40">
-                                <TableCell colSpan={8} className="p-3 pl-12">
-                                  <div className="rounded border bg-card p-3 space-y-2">
-                                    <div className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
-                                      <span>各库存位置实际扣减明细：</span>
+                              <TableRow className="bg-slate-50/70 hover:bg-slate-50/70 dark:bg-slate-900/40 dark:hover:bg-slate-900/40">
+                                <TableCell colSpan={4} className="p-3 pl-12">
+                                  <div className="space-y-2 rounded border bg-card p-3">
+                                    <div className="text-[11px] font-semibold text-muted-foreground">
+                                      各库存位置实际扣减明细：
                                     </div>
                                     <Table className="text-xs">
                                       <TableHeader>
                                         <TableRow className="bg-muted/20">
-                                          <TableHead className="w-10 text-center text-[11px]">#</TableHead>
-                                          <TableHead className="text-[11px]">实体仓库</TableHead>
-                                          <TableHead className="text-[11px]">监管库房</TableHead>
-                                          <TableHead className="text-[11px]">物理分区</TableHead>
-                                          <TableHead className="text-[11px] text-right">出库前库存</TableHead>
-                                          <TableHead className="text-[11px] text-right font-semibold">扣减出库量</TableHead>
-                                          <TableHead className="text-[11px] text-right">出库后剩余</TableHead>
-                                          <TableHead className="text-[11px] text-center">存货条码/二维码</TableHead>
+                                          <TableHead className="w-[150px] text-[11px]">
+                                            入库时间
+                                          </TableHead>
+                                          <TableHead className="w-10 text-center text-[11px]">
+                                            序号
+                                          </TableHead>
+                                          <TableHead className="text-[11px]">位置</TableHead>
+                                          <TableHead className="w-[110px] text-[11px]">
+                                            具体位置
+                                          </TableHead>
+                                          <TableHead className="w-[150px] text-[11px]">
+                                            其他信息
+                                          </TableHead>
+                                          <TableHead className="w-[150px] text-center text-[11px]">
+                                            存货条码
+                                          </TableHead>
+                                          <TableHead className="w-[110px] text-right text-[11px] font-semibold">
+                                            出库数量
+                                          </TableHead>
                                         </TableRow>
                                       </TableHeader>
                                       <TableBody>
-                                        <TableRow>
-                                          <TableCell className="text-center text-muted-foreground text-[11px]">1</TableCell>
-                                          <TableCell>{goods.warehouseName || record.warehouseName}</TableCell>
-                                          <TableCell>{goods.storeroomName || "1号冷冻库"}</TableCell>
-                                          <TableCell>{goods.partitionName || "A区垛位01"}</TableCell>
-                                          <TableCell className="text-right text-muted-foreground">
-                                            {goods.beforeAmount !== undefined ? `${goods.beforeAmount} ${goods.unit}` : "—"}
-                                          </TableCell>
-                                          <TableCell className="text-right font-bold text-primary">
-                                            {goods.totalOutboundAmount} {goods.unit}
-                                          </TableCell>
-                                          <TableCell className="text-right text-muted-foreground">
-                                            {goods.afterAmount !== undefined ? `${goods.afterAmount} ${goods.unit}` : "—"}
-                                          </TableCell>
-                                          <TableCell className="text-center">
-                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-muted/60 text-[11px]">
-                                              <QrCode className="size-3 text-primary" />
-                                              {goods.barcode || "SYZC-BC-2026-001"}
-                                            </span>
-                                          </TableCell>
-                                        </TableRow>
+                                        {(locations.length > 0
+                                          ? locations
+                                          : [
+                                              {
+                                                id: `${key}-fallback`,
+                                                warehouseName: goods.warehouseName ?? record.warehouseName,
+                                                storeroomName: goods.storeroomName ?? "",
+                                                partitionName: goods.partitionName ?? "",
+                                                locationPath: goods.locationPath ?? "",
+                                                specificLocation: "",
+                                                inboundTime: "",
+                                                extraInfo: goods.extraInfo,
+                                                barcode: goods.barcode ?? "",
+                                                status: "",
+                                                availableAmount: goods.availableAmount ?? 0,
+                                                outboundAmount: goods.totalOutboundAmount,
+                                                unit: goods.unit,
+                                              },
+                                            ]
+                                        ).map((location, locationIdx) => {
+                                          const position =
+                                            location.locationPath ||
+                                            [
+                                              location.warehouseName,
+                                              location.storeroomName,
+                                              location.partitionName,
+                                            ]
+                                              .filter(Boolean)
+                                              .join("-")
+
+                                          return (
+                                            <TableRow key={location.id}>
+                                              <TableCell className="text-[11px] text-muted-foreground">
+                                                {location.inboundTime || "—"}
+                                              </TableCell>
+                                              <TableCell className="text-center text-[11px] text-muted-foreground">
+                                                {locationIdx + 1}
+                                              </TableCell>
+                                              <TableCell className="text-[11px] text-foreground">
+                                                {position || "—"}
+                                              </TableCell>
+                                              <TableCell className="text-[11px] text-muted-foreground">
+                                                {location.specificLocation || "—"}
+                                              </TableCell>
+                                              <TableCell className="text-[11px] text-muted-foreground">
+                                                {location.extraInfo || "无"}
+                                              </TableCell>
+                                              <TableCell className="text-center">
+                                                <span className="inline-flex items-center gap-1 rounded bg-muted/60 px-2 py-0.5 text-[11px]">
+                                                  <QrCode className="size-3 text-primary" />
+                                                  {location.barcode || "—"}
+                                                </span>
+                                              </TableCell>
+                                              <TableCell className="text-right text-[11px] font-bold text-primary">
+                                                {location.outboundAmount}
+                                                <span className="ml-1 font-normal text-muted-foreground">
+                                                  {location.unit}
+                                                </span>
+                                              </TableCell>
+                                            </TableRow>
+                                          )
+                                        })}
                                       </TableBody>
                                     </Table>
                                   </div>
@@ -540,7 +486,7 @@ export function OutboundRecordDetailPage() {
                           <TableCell className="font-semibold text-foreground">
                             {goods.goodsName}
                           </TableCell>
-                          <TableCell className="text-muted-foreground text-[11px]">
+                          <TableCell className="text-[11px] text-muted-foreground">
                             {goods.extraInfo || "无"}
                           </TableCell>
                           <TableCell className="text-right text-muted-foreground">
@@ -560,7 +506,7 @@ export function OutboundRecordDetailPage() {
                             {goods.unit}
                           </TableCell>
                           <TableCell className="text-center">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-muted/60 text-[11px]">
+                            <span className="inline-flex items-center gap-1 rounded bg-muted/60 px-2 py-0.5 text-[11px]">
                               <QrCode className="size-3 text-primary" />
                               {goods.barcode || "—"}
                             </span>
@@ -572,10 +518,10 @@ export function OutboundRecordDetailPage() {
                 </div>
               )}
             </div>
+            </>
           )}
-
-          {/* Tab 2: 提货信息 (回显提货人与现场提货记录) */}
           {tab === "pickup" && (
+            <>
             <div className="space-y-4">
               {isTransferOrAssign ? (
                 <div className="rounded-lg border border-dashed p-8 text-center text-xs text-muted-foreground">
@@ -771,16 +717,14 @@ export function OutboundRecordDetailPage() {
                 </div>
               )}
             </div>
+            </>
           )}
-
-          {/* Tab 3: 审核记录 */}
           {tab === "audit" && (
+            <>
             <div className="space-y-4">
               <div className="rounded-lg border p-4">
                 <div className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
                   {(record.auditRecord?.nodes || []).map((step, idx) => {
-                    const stepFlowType = idx === 0 ? "1" : idx === 1 ? "2" : "3"
-                    const stepDocs = allOrderDocs.filter((d) => d.flowType === stepFlowType)
 
                     return (
                       <div key={idx} className="relative text-xs">
@@ -793,16 +737,6 @@ export function OutboundRecordDetailPage() {
                             <span className="text-muted-foreground text-[11px]">
                               {step.actionTime}
                             </span>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="h-6 px-2 text-[11px] text-blue-600 border-blue-200 hover:bg-blue-50 cursor-pointer"
-                              onClick={() => setAuditUploadFlowType(stepFlowType)}
-                            >
-                              <Plus className="size-3 mr-0.5" />
-                              补充本阶段资料
-                            </Button>
                           </div>
                         </div>
                         <p className="text-muted-foreground mt-0.5">
@@ -817,60 +751,73 @@ export function OutboundRecordDetailPage() {
                           </p>
                         )}
 
-                        {/* 节点关联资料穿透展示 */}
-                        <div className="mt-2 pt-2 border-t border-border/60">
-                          <div className="text-[11px] font-medium text-muted-foreground mb-1.5 flex items-center gap-1.5">
-                            <Paperclip className="size-3 text-muted-foreground" />
-                            <span>本节点关联资料 ({stepDocs.length})：</span>
-                          </div>
-                          {stepDocs.length > 0 ? (
-                            <div className="space-y-1.5">
-                              {stepDocs.map((doc) => (
-                                <div
-                                  key={doc.id}
-                                  className="flex items-center justify-between p-2 rounded bg-muted/20 border border-border/40 text-xs hover:border-blue-200 transition-colors"
-                                >
-                                  <div className="flex items-center gap-2 truncate">
-                                    <FileText className="size-3.5 text-blue-500 shrink-0" />
-                                    <span className="font-medium text-foreground truncate">{doc.name}</span>
-                                    <span className="text-[10.5px] text-muted-foreground shrink-0">({doc.fileSize})</span>
-                                    {doc.nature === "ADDITION" && (
-                                      <span className="px-1.5 py-0.5 rounded text-[10px] bg-amber-50 text-amber-700 border border-amber-200/60 font-medium shrink-0">
-                                        事后补录
-                                      </span>
-                                    )}
-                                    {doc.description && (
-                                      <span className="text-[11px] text-muted-foreground truncate hidden md:inline">
-                                        - {doc.description}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <span className="text-[11px] text-muted-foreground shrink-0 ml-2">{doc.createTime}</span>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-[11px] text-muted-foreground">暂无资料附件</span>
-                          )}
-                        </div>
                       </div>
                     )
                   })}
                 </div>
               </div>
             </div>
+            </>
           )}
-
-          {/* Tab 4: 资料管理 */}
+          {tab === "modify" && (
+            <>
+            <div className="space-y-3">
+              <div className="overflow-x-auto rounded-md border">
+                <Table className="text-xs">
+                  <TableHeader>
+                    <TableRow className="bg-muted/40">
+                      <TableHead className="w-12 text-center">序号</TableHead>
+                      <TableHead>修改字段</TableHead>
+                      <TableHead>修改前内容</TableHead>
+                      <TableHead>修改后内容</TableHead>
+                      <TableHead>操作人</TableHead>
+                      <TableHead className="w-40">操作时间</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(OUTBOUND_MODIFY_LOGS[record.id] ?? []).length > 0 ? (
+                      (OUTBOUND_MODIFY_LOGS[record.id] ?? []).map((log, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="text-center text-muted-foreground">
+                            {index + 1}
+                          </TableCell>
+                          <TableCell className="font-medium">{log.fieldLabel}</TableCell>
+                          <TableCell className="text-muted-foreground line-through">
+                            {log.beforeValue}
+                          </TableCell>
+                          <TableCell className="font-medium text-primary">
+                            {log.afterValue}
+                          </TableCell>
+                          <TableCell>{log.operator}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {log.operatedAt}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                          暂无单据修改记录
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+            </>
+          )}
           {tab === "documents" && (
+            <>
             <DocumentManagementTabContent
               orderNo={record.orderNo}
               approvalId="SP202605290001"
               orderType="outbound"
               allowSupplement={true}
             />
+            </>
           )}
-        </div>
+        </DetailTabShell>
 
         {/* 图片预览弹窗 */}
         <ImageViewerModal
@@ -894,29 +841,9 @@ export function OutboundRecordDetailPage() {
           onSuccess={handleDirectConfirmSuccess}
         />
 
-        {/* 审核记录中的补充资料弹窗 */}
-        {auditUploadFlowType && (
-          <UploadSupplementaryModal
-            open={auditUploadFlowType !== null}
-            orderNo={record.orderNo}
-            approvalId="SP202605290001"
-            orderType="outbound"
-            defaultFlowType={auditUploadFlowType}
-            onClose={() => setAuditUploadFlowType(null)}
-            onSuccess={(newDocs) => {
-              setDocsRefreshKey((k) => k + 1)
-              showToast(
-                newDocs.length > 1
-                  ? `已成功批量补充 ${newDocs.length} 份资料至本流程节点`
-                  : `资料已成功补充挂载至本流程节点：${newDocs[0]?.name}`
-              )
-            }}
-          />
-        )}
-
         {/* 提示 Toast */}
         {toastMessage && (
-          <div className="fixed bottom-16 right-6 z-50 rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
+          <div className="fixed right-6 bottom-6 z-50 max-w-sm rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
             {toastMessage}
           </div>
         )}

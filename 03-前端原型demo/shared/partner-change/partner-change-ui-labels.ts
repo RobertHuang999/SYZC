@@ -9,7 +9,7 @@ export const OUTBOUND_OWNER_PARTNER_CHANGE_USER =
   "货主须从合作方档案「货主信息」选择已有档案；本页不提供快捷新建货主。"
 
 export const OUTBOUND_OWNER_PARTNER_CHANGE_SPEC =
-  "【货主信息库内匹配与准入规则】(WH-R01)：货主取自合作方档案「货主信息」；出库制单只能选已有货主，不提供快捷建档。真源：05 协同 3.3 节 · 11 出库三件套 · 【货主类型与字段隔离】(O05)。"
+  "【货主信息库内匹配与准入规则】：货主取自合作方档案「货主信息」；出库制单只能选已有货主，不提供快捷建档。真源：05 协同 3.3 节 · 11 出库三件套 · 【货主类型与字段隔离】(O05)。"
 
 export const OUTBOUND_PICKUP_AGENT_PARTNER_CHANGE_USER =
   "个人提货须选择「提货人信息」档案或快捷建档绑定提货经办人；选中后姓名/证号/电话只读反显。"

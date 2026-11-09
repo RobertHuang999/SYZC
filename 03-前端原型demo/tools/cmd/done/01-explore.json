@@ -1,0 +1,12 @@
+{
+  "tasks": [
+    { "type": "menu", "kind": "pc" },
+    { "type": "nav", "kind": "pc", "clicks": ["仓储"], "name": "02-pc-cangchu" },
+    {
+      "type": "eval",
+      "kind": "pc",
+      "name": "03-side-menu",
+      "js": "() => { const out = []; const seen = new Set(); document.querySelectorAll('.el-menu-item, .el-submenu__title, aside *, [class*=\"side\"] *, [class*=\"menu\"] *').forEach(el => { const t = (el.textContent||'').replace(/\\s+/g,' ').trim(); if (t && t.length > 1 && t.length < 20 && el.children.length < 5 && !seen.has(t)) { seen.add(t); out.push({ tag: el.tagName, cls: String(el.className).slice(0,50), text: t }) } }); return out.slice(0, 200) }"
+    }
+  ]
+}

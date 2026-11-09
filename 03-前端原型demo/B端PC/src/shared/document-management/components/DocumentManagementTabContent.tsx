@@ -1,9 +1,10 @@
 import { DocumentTimelineView } from "./DocumentTimelineView"
+import type { DocumentItem } from "../types"
 
 interface DocumentManagementTabContentProps {
   orderNo: string
   approvalId?: string
-  orderType?: "inbound" | "outbound"
+  orderType?: DocumentItem["orderType"]
   allowSupplement?: boolean
 }
 

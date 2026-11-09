@@ -1,39 +1,22 @@
 import type { TransferFormState } from "../domain/form-types"
 
+/** 汇总转让货品的品类数与总数量（按一级货品分组统计） */
 export function calcFormTotals(form: TransferFormState) {
-  if (form.transferType === "NORMAL") {
-    let categoryCount = 0
-    let totalQuantity = 0
-    let unit = "吨"
-
-    for (const group of form.normalGroups) {
-      const activeDetails = group.details.filter((d) => d.transferAmount > 0)
-      if (activeDetails.length > 0) {
-        categoryCount += 1
-        for (const d of activeDetails) {
-          totalQuantity += Number(d.transferAmount) || 0
-          if (d.unit) unit = d.unit
-        }
-      }
-    }
-    return {
-      categoryCount,
-      totalQuantity: Math.round(totalQuantity * 10000) / 10000,
-      unit,
-    }
-  }
-
-  // PLEDGE / MORTGAGE
-  const selectedItems = form.pledgeItems.filter(
-    (item) => item.selected && Number(item.transferAmount) > 0
-  )
-  const categoryCount = new Set(selectedItems.map((i) => i.goodsName)).size
+  let categoryCount = 0
   let totalQuantity = 0
   let unit = "吨"
-  for (const item of selectedItems) {
-    totalQuantity += Number(item.transferAmount) || 0
-    if (item.unit) unit = item.unit
+
+  for (const group of form.goodsGroups) {
+    const activeDetails = group.details.filter((d) => d.transferAmount > 0)
+    if (activeDetails.length > 0) {
+      categoryCount += 1
+      for (const d of activeDetails) {
+        totalQuantity += Number(d.transferAmount) || 0
+        if (d.unit) unit = d.unit
+      }
+    }
   }
+
   return {
     categoryCount,
     totalQuantity: Math.round(totalQuantity * 10000) / 10000,
@@ -47,60 +30,47 @@ export function validateTransferForm(form: TransferFormState): {
 } {
   const errors: string[] = []
 
-  if (!form.transferTime) {
-    errors.push("请选择移库日期时间")
+  if (!form.assignTime) {
+    errors.push("请选择转让日期时间")
   }
-  if (!form.ownerName) {
-    errors.push("请选择或输入货主名称")
+  if (!form.sourceOwnerName) {
+    errors.push("请选择转让方名称")
+  }
+  if (!form.sourceOwnerIdentity) {
+    errors.push("请填写货主标识")
+  }
+  if (!form.assignReason.trim()) {
+    errors.push("请填写转让原因说明")
   }
 
-  if (form.transferType === "PLEDGE" || form.transferType === "MORTGAGE") {
-    if (!form.relatedId.trim()) {
-      errors.push("抵押/质押移库必须选择或输入关联单号")
-    }
-    const selected = form.pledgeItems.filter((i) => i.selected)
-    if (selected.length === 0) {
-      errors.push("请至少勾选一行要移库的货物")
-    }
-    for (const item of selected) {
-      if (!item.transferAmount || item.transferAmount <= 0) {
-        errors.push(`货物【${item.goodsName}】的移库数量必须大于 0`)
-      }
-      if (item.transferAmount > item.availableAmount) {
-        errors.push(`货物【${item.goodsName}】的移库数量不能超过可用数量 (${item.availableAmount})`)
-      }
-      if (!item.targetRoomZone) {
-        errors.push(`请为已勾选的货物【${item.goodsName}】选择移入库房/分区`)
-      }
-    }
-  } else if (form.transferType === "NORMAL") {
-    if (form.normalGroups.length === 0) {
-      errors.push("请添加至少一种要移库的货品")
-    }
-    // 同仓强校验 (R01)
-    const warehouseIds = new Set(form.normalGroups.map((g) => g.warehouseId))
-    if (warehouseIds.size > 1) {
-      errors.push("【同仓移库物理边界强约束】(R01)：移库仅限同一仓库内部，禁止跨仓库移库")
-    }
+  if (form.goodsGroups.length === 0) {
+    errors.push("请添加至少一种要转让的货品")
+  }
 
-    for (const group of form.normalGroups) {
-      for (const d of group.details) {
-        if (d.transferAmount <= 0) {
-          errors.push(`货物【${d.goodsName}】在储位【${d.sourceRoomZone}】的移库数量必须大于 0`)
-        }
-        if (d.transferAmount > d.availableAmount) {
-          errors.push(`货物【${d.goodsName}】的移库数量不能超过该储位可用数量 (${d.availableAmount})`)
-        }
-        if (!d.targetRoomZone) {
-          errors.push(`请为货物【${d.goodsName}】选择目标移入库房/分区`)
-        }
+  // 同仓强约束：转让货物必须位于同一仓库内部
+  const warehouseIds = new Set(form.goodsGroups.map((g) => g.warehouseId))
+  if (warehouseIds.size > 1) {
+    errors.push("转让货物必须位于同一仓库内部，禁止跨仓库转让")
+  }
+
+  for (const group of form.goodsGroups) {
+    for (const d of group.details) {
+      if (d.transferAmount <= 0) {
+        errors.push(`货物【${group.goodsName}】的转让数量必须大于 0`)
+      }
+      if (d.transferAmount > d.availableAmount) {
+        errors.push(
+          `货物【${group.goodsName}】的转让数量不能超过该储位可用数量 (${d.availableAmount})`
+        )
       }
     }
   }
 
-  // 现场照片必传 (R08)
-  if (!form.scenePhotos || form.scenePhotos.length === 0) {
-    errors.push("【现场照片必传与设备抓拍】(R08)：必须上传现场移库作业照片")
+  if (!form.targetOwner.ownerName.trim()) {
+    errors.push("请填写接收方姓名/全称")
+  }
+  if (!form.targetOwner.ownerIdentity.trim()) {
+    errors.push("请填写接收方手机/信用代码")
   }
 
   return {
@@ -108,4 +78,3 @@ export function validateTransferForm(form: TransferFormState): {
     errors,
   }
 }
-

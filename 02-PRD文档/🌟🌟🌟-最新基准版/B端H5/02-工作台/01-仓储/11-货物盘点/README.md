@@ -1,9 +1,9 @@
 # 货物盘点
 
-> **文档状态**：占位 — 待迭代回写 H5 端 PRD / Demo / ASCII
+> **文档状态**：H5 列表页 + 详情页原型已落地（账面汇总 / 库存明细两种模式）
 > **moduleId**：`ws-stock-taking`
 > **菜单路径**：工作台 → 仓储 → 货物盘点
-> **原型路由**：`/m/module/ws-stock-taking`
+> **原型路由**：`/m/workspace/inventory-checks`（详情 `/:id`）
 > **PC 原路径**：货物管理～货物盘点
 > **原型标签**：优化
 > **功能清单唯一定义来源**：`03-前端原型demo/B端H5/src/data/mobileMenuData.ts`

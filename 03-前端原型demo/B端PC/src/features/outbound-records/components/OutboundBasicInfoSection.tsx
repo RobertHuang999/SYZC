@@ -26,6 +26,7 @@ import type { OutboundFormState } from "../domain/form-types"
 import type { OwnerType, OutboundTypeName } from "../domain/types"
 import { RELATED_ORDER_CANDIDATES, type RelatedOrderItem } from "../mock/outbound-form.mock"
 import { PartnerChangeFieldMark } from "@/components/form/PartnerChangeZone"
+import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { PartnerArchiveEmbeddedPicker } from "@/features/partner-archives/components/PartnerArchiveEmbeddedPicker"
 import {
   OUTBOUND_OWNER_PARTNER_CHANGE_SPEC,
@@ -202,8 +203,8 @@ export function OutboundBasicInfoSection({
       </div>
 
       {expanded && (
-        <CardContent className="space-y-4 pt-5 pb-6 text-xs">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <CardContent className="space-y-4 pt-5 pb-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {/* 1. 出库日期 */}
             <FormItem label="出库日期" required>
               <div className="relative">
@@ -213,18 +214,18 @@ export function OutboundBasicInfoSection({
                   value={form.outboundDate}
                   onChange={(e) => onPatch({ outboundDate: e.target.value })}
                   placeholder="请选择出库日期"
-                  className="pl-8 h-9 text-xs"
+                  className="pl-8"
                 />
               </div>
             </FormItem>
 
             {/* 2. 货主类型 */}
-            <FormItem label="货主类型:" required>
+            <FormItem label="货主类型" required>
               <Select
                 value={form.ownerType}
                 onValueChange={(val) => handleOwnerTypeChange((val || "个人") as OwnerType)}
               >
-                <SelectTrigger className="h-9 text-xs w-full">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="请选择货主类型" />
                 </SelectTrigger>
                 <SelectContent>
@@ -234,63 +235,60 @@ export function OutboundBasicInfoSection({
               </Select>
             </FormItem>
 
-            <div className="sm:col-span-2 lg:col-span-4">
+            <FormItem label="货主" required>
               <PrototypeAnnotationTarget annotationIds={["outbound-form-partner-owner"]}>
-                <PartnerChangeFieldMark
-                  markId="outbound-owner"
-                  userHint={OUTBOUND_OWNER_PARTNER_CHANGE_USER}
-                  specNote={OUTBOUND_OWNER_PARTNER_CHANGE_SPEC}
-                >
+                <PartnerChangeFieldMark markId="outbound-owner">
                   <PartnerArchiveEmbeddedPicker
                     archiveMenu="货主信息"
                     fieldLabel="货主"
                     required
                     enableQuickCreate={false}
                     hideEmbeddedHints
+                    showFieldLabel={false}
                     value={form.ownerPartnerId || undefined}
                     selection={ownerSelection}
                     onChange={applyOwnerPartner}
                   />
                 </PartnerChangeFieldMark>
               </PrototypeAnnotationTarget>
-            </div>
+            </FormItem>
 
             {/* 4 & 5. 个人 vs 企业动态列 */}
             {form.ownerType === "个人" ? (
               <>
-                <FormItem label="货主标识:" required>
+                <FormItem label="货主标识" required>
                   <Input
                     disabled
                     value={form.ownerIdentifier}
                     placeholder="请输入手机号码"
-                    className="h-9 text-xs border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
+                    className="border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
                   />
                 </FormItem>
-                <FormItem label="身份证号:" required>
+                <FormItem label="身份证号" required>
                   <Input
                     disabled
                     value={form.ownerIdCard}
                     placeholder="请输入货主身份证号"
-                    className="h-9 text-xs border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
+                    className="border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
                   />
                 </FormItem>
               </>
             ) : (
               <>
-                <FormItem label="货主标识:" required>
+                <FormItem label="货主标识" required>
                   <Input
                     disabled
                     value={form.ownerIdentifier}
                     placeholder="请输入公司统一社会信用编码"
-                    className="h-9 text-xs border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
+                    className="border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
                   />
                 </FormItem>
-                <FormItem label="联系电话:" required>
+                <FormItem label="联系电话" required>
                   <Input
                     disabled
                     value={form.contactPhone}
                     placeholder="请输入联系电话"
-                    className="h-9 text-xs border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
+                    className="border-gray-200 bg-gray-50/70 text-gray-600 cursor-not-allowed"
                   />
                 </FormItem>
               </>
@@ -301,7 +299,7 @@ export function OutboundBasicInfoSection({
                 value={form.type}
                 onValueChange={(val) => handleTypeChange((val || "普通出库") as OutboundTypeName)}
               >
-                <SelectTrigger className="h-9 text-xs w-full">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="请选择出库类型" />
                 </SelectTrigger>
                 <SelectContent>
@@ -321,11 +319,19 @@ export function OutboundBasicInfoSection({
                   value={form.relatedNo || ""}
                   placeholder="点击选择关联单号"
                   onClick={() => setShowRelatedDialog(true)}
-                  className="h-9 text-xs cursor-pointer bg-background hover:border-primary/50"
+                  className="cursor-pointer bg-background hover:border-primary/50"
                 />
               </FormItem>
             ) : null}
           </div>
+
+          {/* 货主合作方改造说明：通栏放在栅格外，避免把「货主」输入格撑高 */}
+          <PrototypeSpecCallout>
+            <p className="mb-1.5 text-[11px] leading-relaxed text-foreground/90">
+              {OUTBOUND_OWNER_PARTNER_CHANGE_USER}
+            </p>
+            <p>{OUTBOUND_OWNER_PARTNER_CHANGE_SPEC}</p>
+          </PrototypeSpecCallout>
 
           <FormItem label="备注" className="pb-0">
             <div className="relative">
@@ -335,7 +341,7 @@ export function OutboundBasicInfoSection({
                 rows={3}
                 onChange={(e) => onPatch({ notes: e.target.value })}
                 placeholder="请输入备注"
-                className="text-xs resize-none pb-7 pr-16"
+                className="resize-none pb-7 pr-16"
               />
               <span className="pointer-events-none absolute bottom-2 right-2.5 select-none text-[11px] text-muted-foreground">
                 {form.notes?.length || 0}/140

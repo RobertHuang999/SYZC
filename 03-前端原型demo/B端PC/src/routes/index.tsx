@@ -61,7 +61,21 @@ import { OutboundRecordDetailPage } from "@/features/outbound-records/pages/Outb
 import { TransferRecordListPage } from "@/features/inventory-transfer-records/pages/TransferRecordListPage"
 import { TransferRecordFormPage } from "@/features/inventory-transfer-records/pages/TransferRecordFormPage"
 import { TransferRecordDetailPage } from "@/features/inventory-transfer-records/pages/TransferRecordDetailPage"
+import { RelocationRecordListPage } from "@/features/inventory-relocation-records/pages/RelocationRecordListPage"
+import { RelocationRecordFormPage } from "@/features/inventory-relocation-records/pages/RelocationRecordFormPage"
+import { RelocationRecordDetailPage } from "@/features/inventory-relocation-records/pages/RelocationRecordDetailPage"
+import { InventoryAbnormalListPage } from "@/features/inventory-abnormal-records/pages/InventoryAbnormalListPage"
+import { InventoryAbnormalFormPage } from "@/features/inventory-abnormal-records/pages/InventoryAbnormalFormPage"
+import { InventoryAbnormalDetailPage } from "@/features/inventory-abnormal-records/pages/InventoryAbnormalDetailPage"
+import { ProcessingRecordListPage } from "@/features/processing-records/pages/ProcessingRecordListPage"
+import { ProcessingRecordFormPage } from "@/features/processing-records/pages/ProcessingRecordFormPage"
+import { ProcessingRecordDetailPage } from "@/features/processing-records/pages/ProcessingRecordDetailPage"
+import { InventoryCheckListPage } from "@/features/inventory-check/pages/InventoryCheckListPage"
+import { InventoryCheckFormPage } from "@/features/inventory-check/pages/InventoryCheckFormPage"
+import { InventoryCheckInputPage } from "@/features/inventory-check/pages/InventoryCheckInputPage"
+import { InventoryCheckDetailPage } from "@/features/inventory-check/pages/InventoryCheckDetailPage"
 import { DeliveryOrderListPage } from "@/features/delivery-orders/pages/DeliveryOrderListPage"
+import { DeliveryOrderDetailPage } from "@/features/delivery-orders/pages/DeliveryOrderDetailPage"
 import { WarehouseReceiptListPage } from "@/features/warehouse-receipts/pages/WarehouseReceiptListPage"
 import { WarehouseReceiptDetailPage } from "@/features/warehouse-receipts/pages/WarehouseReceiptDetailPage"
 import { InventoryManagementPage } from "@/features/inventory-management/pages/InventoryManagementPage"
@@ -481,18 +495,78 @@ export function AppRoutes() {
           element={<OutboundRecordDetailPage />}
         />
 
-        {/* 仓储 - 移库管理（移库记录） */}
+        {/* 仓储 - 货物转让（转让记录，最新基准版） */}
         <Route
-          path="仓储/移库管理/移库记录"
+          path="仓储/货物转让/转让记录"
           element={<TransferRecordListPage />}
         />
         <Route
-          path="仓储/移库管理/移库记录/新增"
+          path="仓储/货物转让/转让记录/新增"
           element={<TransferRecordFormPage />}
         />
         <Route
-          path="仓储/移库管理/移库记录/详情/:id"
+          path="仓储/货物转让/转让记录/详情/:id"
           element={<TransferRecordDetailPage />}
+        />
+
+        {/* 仓储 - 货物异动（异动记录，最新基准版） */}
+        <Route
+          path="仓储/货物异动/异动记录"
+          element={<InventoryAbnormalListPage />}
+        />
+        <Route
+          path="仓储/货物异动/异动记录/新增"
+          element={<InventoryAbnormalFormPage />}
+        />
+        <Route
+          path="仓储/货物异动/异动记录/详情/:id"
+          element={<InventoryAbnormalDetailPage />}
+        />
+
+        {/* 仓储 - 加工管理（加工记录，最新基准版） */}
+        <Route
+          path="仓储/加工管理/加工记录"
+          element={<ProcessingRecordListPage />}
+        />
+        <Route
+          path="仓储/加工管理/加工记录/新增"
+          element={<ProcessingRecordFormPage />}
+        />
+        <Route
+          path="仓储/加工管理/加工记录/详情/:id"
+          element={<ProcessingRecordDetailPage />}
+        />
+
+        {/* 仓储 - 货物盘点（最新基准版 V1.2） */}
+        <Route
+          path="仓储/货物盘点"
+          element={<InventoryCheckListPage />}
+        />
+        <Route
+          path="仓储/货物盘点/新增"
+          element={<InventoryCheckFormPage />}
+        />
+        <Route
+          path="仓储/货物盘点/待盘点/:id"
+          element={<InventoryCheckInputPage />}
+        />
+        <Route
+          path="仓储/货物盘点/详情/:id"
+          element={<InventoryCheckDetailPage />}
+        />
+
+        {/* 仓储 - 移库管理（移库记录） */}
+        <Route
+          path="仓储/移库管理/移库记录"
+          element={<RelocationRecordListPage />}
+        />
+        <Route
+          path="仓储/移库管理/移库记录/新增"
+          element={<RelocationRecordFormPage />}
+        />
+        <Route
+          path="仓储/移库管理/移库记录/详情/:id"
+          element={<RelocationRecordDetailPage />}
         />
 
         {/* 仓储 - 仓单管理 */}
@@ -509,6 +583,10 @@ export function AppRoutes() {
         <Route
           path="仓储/提货单"
           element={<DeliveryOrderListPage />}
+        />
+        <Route
+          path="仓储/提货单/详情/:id"
+          element={<DeliveryOrderDetailPage />}
         />
 
         {/* 6.2 菜单更名：旧路径书签兼容 */}

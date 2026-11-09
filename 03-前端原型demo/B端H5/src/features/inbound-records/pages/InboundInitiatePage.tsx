@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Building2, Camera, CalendarDays, Package } from "lucide-react"
+import { Building2, Camera, CalendarDays, Check, Package, User } from "lucide-react"
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
@@ -25,6 +25,8 @@ import {
   FORM_WAREHOUSES,
   FORM_STOREROOMS,
   filterOwnerSearchRecords,
+  findOwnerSearchRecord,
+  findOwnerSearchRecordByPartnerId,
   getRelatedOrdersByType,
 } from "../mock/inbound-form.mock"
 import {
@@ -57,6 +59,13 @@ import {
 import type { PartnerSubject } from "@prototype/B端PC/src/features/partner-archives/domain/types"
 import { PartnerQuickCreateSheetMobile } from "@/features/partner-archives/components/PartnerQuickCreateSheetMobile"
 import {
+  CONTACT_PHONE_VERIFY_BADGE_CLASS,
+  CONTACT_PHONE_VERIFY_LABELS,
+  markContactPhoneVerified,
+} from "@prototype/B端PC/src/features/partner-archives/lib/contact-phone-verify"
+import { PartnerVerifySheet } from "@/features/partner-archives/components/PartnerVerifySheet"
+import { partnerArchivesMock } from "@prototype/B端PC/src/features/partner-archives/mock/partner-archives.mock"
+import {
   INBOUND_STAGING_FORM_ROUTE,
   INBOUND_STAGING_FORM_RESUME,
 } from "@/features/inbound-staging-reg/domain/constants"
@@ -66,8 +75,14 @@ import {
   saveStagingEditId,
 } from "@/features/inbound-staging-reg/lib/inbound-staging-session"
 
-export function InboundInitiatePage() {
-  const navigate = useNavigate()
+function maskIdCardNo(idCard?: string): string {
+  if (!idCard) return ""
+  return idCard.length >= 10
+    ? `${idCard.slice(0, 6)}****${idCard.slice(-4)}`
+    : idCard
+}
+
+export function InboundInitiatePage() {  const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const sourceRegId = searchParams.get("sourceRegId")
@@ -78,6 +93,7 @@ export function InboundInitiatePage() {
   const [warehouseOpen, setWarehouseOpen] = useState(false)
   const [storeroomOpen, setStoreroomOpen] = useState(false)
   const [leaveOpen, setLeaveOpen] = useState(false)
+  const [ownerVerifyOpen, setOwnerVerifyOpen] = useState(false)
   const [ownerDropdown, setOwnerDropdown] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [stagingSwitchOpen, setStagingSwitchOpen] = useState(false)
@@ -129,6 +145,27 @@ export function InboundInitiatePage() {
     typeCode === "SUPERVISION_SERVICE"
 
   const ownerCandidates = filterOwnerSearchRecords(form.ownerType, form.ownerName)
+  const selectedOwnerRecord = form.partnerId
+    ? findOwnerSearchRecordByPartnerId(form.partnerId)
+    : findOwnerSearchRecord(form.ownerType, form.ownerName)
+  const ownerVerifyStatus = selectedOwnerRecord?.contactPhoneVerified
+
+  // 货主联系手机核验：复用用户中心合作方档案的验证流程
+  const verifyPartner = selectedOwnerRecord?.partnerId
+    ? partnerArchivesMock.find((partner) => partner.id === selectedOwnerRecord.partnerId)
+    : undefined
+  const verifySubjectType =
+    form.ownerType === "个人货主" || verifyPartner?.subjectType === "INDIVIDUAL"
+      ? ("INDIVIDUAL" as const)
+      : ("ENTERPRISE" as const)
+  const verifyIdNumber =
+    form.ownerType === "个人货主"
+      ? form.idCardNo || selectedOwnerRecord?.idCardNo || ""
+      : form.ownerIdentifier || selectedOwnerRecord?.ownerIdentifier || ""
+  const verifyContactPhone =
+    form.contactPhone || verifyPartner?.contactPhone || selectedOwnerRecord?.contactPhone || ""
+  const verifyFullAddress = verifyPartner?.certAddress?.fullAddress ?? ""
+  const verifyRoles = verifyPartner?.roles.map((role) => role.roleType) ?? []
   const warehouseName = FORM_WAREHOUSES.find((w) => w.id === form.warehouseId)?.name
   const storeroomLabel =
     form.storeroomIds.length === 0
@@ -270,9 +307,38 @@ export function InboundInitiatePage() {
 
             <div className="relative border-b border-[#232D39]/10 py-3.5">
               <div className="flex items-center justify-between gap-3">
-                <div className="flex shrink-0 text-sm text-[#232D39]">
+                <div className="flex shrink-0 items-center gap-1.5 text-sm text-[#232D39]">
                   <span className="mr-0.5 text-[#EF3E3E]">*</span>
                   货主名称
+                  {ownerVerifyStatus ? (
+                    <button
+                      type="button"
+                      onClick={() => setOwnerVerifyOpen(true)}
+                      className="cursor-pointer"
+                      title={
+                        ownerVerifyStatus === "UNVERIFIED"
+                          ? "点击完成货主联系手机验证"
+                          : "货主联系手机已验证"
+                      }
+                    >
+                      <span
+                        className={`rounded border px-1 py-0.5 text-[10px] font-normal ${
+                          CONTACT_PHONE_VERIFY_BADGE_CLASS[ownerVerifyStatus]
+                        }`}
+                      >
+                        {CONTACT_PHONE_VERIFY_LABELS[ownerVerifyStatus]}
+                      </span>
+                    </button>
+                  ) : null}
+                  {ownerVerifyStatus === "UNVERIFIED" ? (
+                    <button
+                      type="button"
+                      onClick={() => setOwnerVerifyOpen(true)}
+                      className="text-[11px] font-normal text-blue-600"
+                    >
+                      去验证
+                    </button>
+                  ) : null}
                 </div>
                 <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
                   <input
@@ -297,28 +363,79 @@ export function InboundInitiatePage() {
                 </div>
               </div>
               {ownerDropdown && ownerCandidates.length > 0 && form.ownerName ? (
-                <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-40 overflow-y-auto rounded-lg bg-white shadow-lg">
-                  {ownerCandidates.slice(0, 6).map((o) => (
-                    <button
-                      key={o.id}
-                      type="button"
-                      className="block w-full border-b border-[#232D39]/10 px-4 py-3 text-left text-sm last:border-0"
-                      onClick={() => {
-                        patch({
-                          ownerName: o.name,
-                          ownerIdentifier: o.ownerIdentifier,
-                          contactPhone: o.contactPhone ?? "",
-                          idCardNo: o.idCardNo ?? "",
-                          partnerId: o.partnerId ?? "",
-                          isNewOwner: false,
-                        })
-                        setOwnerDropdown(false)
-                      }}
-                    >
-                      {o.name}{" "}
-                      <span className="text-[#232D39]/50">{o.identifierMasked}</span>
-                    </button>
-                  ))}
+                <div className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-lg bg-white shadow-lg">
+                  <div className="flex items-center justify-between border-b border-[#232D39]/10 bg-[#232D39]/[0.03] px-3 py-2 text-[11px] text-[#232D39]/60">
+                    <span>
+                      {form.ownerType ? `系统${form.ownerType}档案库候选` : "系统货主档案库候选"}
+                    </span>
+                    <span className="text-[10px]">{ownerCandidates.length} 个匹配</span>
+                  </div>
+                  <div className="max-h-40 overflow-y-auto">
+                    {ownerCandidates.slice(0, 6).map((o) => {
+                      const selected = form.ownerName === o.name
+                      return (
+                        <button
+                          key={o.id}
+                          type="button"
+                          className={`flex w-full items-center justify-between gap-2 border-b border-[#232D39]/10 px-4 py-2.5 text-left last:border-0 ${
+                            selected ? "bg-blue-50/60" : ""
+                          }`}
+                          onClick={() => {
+                            patch({
+                              ownerName: o.name,
+                              ownerIdentifier: o.ownerIdentifier,
+                              contactPhone: o.contactPhone ?? "",
+                              idCardNo: o.idCardNo ?? "",
+                              partnerId: o.partnerId ?? "",
+                              isNewOwner: false,
+                            })
+                            setOwnerDropdown(false)
+                          }}
+                        >
+                          <div className="flex min-w-0 items-center gap-2">
+                            {o.ownerType === "企业货主" ? (
+                              <Building2 className="size-3.5 shrink-0 text-blue-600" />
+                            ) : (
+                              <User className="size-3.5 shrink-0 text-amber-600" />
+                            )}
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <span className="truncate text-sm font-medium text-[#232D39]">
+                                  {o.name}
+                                </span>
+                                <span
+                                  className={`shrink-0 rounded border px-1 py-0.2 text-[10px] font-normal ${
+                                    o.ownerType === "企业货主"
+                                      ? "border-blue-200 bg-blue-50 text-blue-700"
+                                      : "border-amber-200 bg-amber-50 text-amber-700"
+                                  }`}
+                                >
+                                  {o.ownerType === "企业货主" ? "企业" : "个人"}
+                                </span>
+                                {o.contactPhoneVerified ? (
+                                  <span
+                                    className={`shrink-0 rounded border px-1 py-0.5 text-[10px] font-normal ${
+                                      CONTACT_PHONE_VERIFY_BADGE_CLASS[o.contactPhoneVerified]
+                                    }`}
+                                  >
+                                    {CONTACT_PHONE_VERIFY_LABELS[o.contactPhoneVerified]}
+                                  </span>
+                                ) : null}
+                              </div>
+                              <p className="truncate text-[11px] text-[#232D39]/50">
+                                {o.ownerType === "个人货主"
+                                  ? `手机:${o.identifierMasked} · 身份证:${maskIdCardNo(o.idCardNo) || "无"}`
+                                  : `税号:${o.identifierMasked}`}
+                              </p>
+                            </div>
+                          </div>
+                          {selected ? (
+                            <Check className="size-4 shrink-0 text-blue-600" />
+                          ) : null}
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
               ) : null}
               {ownerDropdown &&
@@ -625,6 +742,29 @@ export function InboundInitiatePage() {
             </div>
           </div>
         </div>
+      ) : null}
+
+      {/* 货主联系手机验证：与 PC 端同一套短信核验流程（H5 用底部面板） */}
+      {ownerVerifyOpen ? (
+        <PartnerVerifySheet
+          open={ownerVerifyOpen}
+          subjectType={verifySubjectType}
+          name={form.ownerName}
+          idNumber={verifyIdNumber}
+          contactPhone={verifyContactPhone}
+          fullAddress={verifyFullAddress}
+          roles={verifyRoles}
+          mode="CREATE"
+          verifyContext="INBOUND_CREATE"
+          onClose={() => setOwnerVerifyOpen(false)}
+          onConfirm={() => {
+            if (verifyPartner) {
+              markContactPhoneVerified(verifyPartner)
+            }
+            setOwnerVerifyOpen(false)
+            showToast("货主联系手机已验证")
+          }}
+        />
       ) : null}
 
       {toast ? (

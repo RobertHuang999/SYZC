@@ -4,7 +4,6 @@ import {
   ArrowLeftIcon,
   ChevronDownIcon,
   ChevronRightIcon,
-  CopyIcon,
   QrCodeIcon,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -30,6 +29,8 @@ import {
   PrototypeAnnotationTarget,
 } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { DetailField, DetailSection } from "@/shared/components/DetailSection"
+import { DetailPageHeader } from "@/shared/components/DetailPageHeader"
+import { DetailTabShell } from "@/shared/components/DetailTabShell"
 import { TableDateTimeCell } from "@/shared/components/TableCells"
 import type {
   ReceiptGoodsGroup,
@@ -38,16 +39,13 @@ import type {
 import {
   RECEIPT_STATUS_SEAL_COLOR,
   formatReceiptQuantity,
-  receiptLotCount,
 } from "@prototype/shared/warehouse-receipts/warehouse-receipt-types"
 import { warehouseReceiptDetailAnnotations } from "../annotations/warehouse-receipt-detail.annotations"
 import { QrPlaceholder } from "../components/ReceiptDialogs"
-import { ReceiptStatusBadge } from "../components/ReceiptStatusBadge"
 import { warehouseReceiptDocuments } from "../documents/warehouse-receipt-documents"
 import { RECEIPT_LIST_PATH } from "../domain/constants"
 import { getWarehouseReceiptById } from "../mock/warehouse-receipts.mock"
 
-type TabKey = "goods" | "changes"
 
 type BarcodeTarget = {
   lot: ReceiptGoodsLot
@@ -59,7 +57,7 @@ export function WarehouseReceiptDetailPage() {
   const navigate = useNavigate()
   const receipt = useMemo(() => getWarehouseReceiptById(id), [id])
 
-  const [tab, setTab] = useState<TabKey>("goods")
+  const [activeTab, setActiveTab] = useState("goods")
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [barcodeTarget, setBarcodeTarget] = useState<BarcodeTarget | null>(null)
   const [relatedOrderTarget, setRelatedOrderTarget] = useState<string | null>(null)
@@ -96,7 +94,6 @@ export function WarehouseReceiptDetailPage() {
   }
 
   const seal = RECEIPT_STATUS_SEAL_COLOR[receipt.status]
-  const lotCount = receiptLotCount(receipt)
 
   return (
     <PrototypeAnnotationProvider
@@ -104,158 +101,97 @@ export function WarehouseReceiptDetailPage() {
       documents={warehouseReceiptDocuments}
       annotations={warehouseReceiptDetailAnnotations}
     >
-      <div className="space-y-4 p-6">
+      <div className="space-y-4 p-6 min-h-full">
         <PrototypeAnnotationTarget annotationIds={["receipt-detail-page"]}>
-          <div className="rounded-xl border bg-card p-4">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="min-w-0 space-y-2">
-                <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                  <span>仓单编号</span>
-                  <span className="whitespace-nowrap text-lg font-semibold text-foreground">
-                    {receipt.code}
-                  </span>
-                  <button
-                    type="button"
-                    className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                    title="复制仓单编号"
-                    onClick={() =>
-                      copyText(receipt.code, "仓单编号已复制到剪贴板！")
-                    }
-                  >
-                    <CopyIcon className="size-4" />
-                  </button>
-                  <ReceiptStatusBadge status={receipt.status} />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  共 {receipt.goodsGroups.length} 种货品 · {lotCount} 个批次 ·
-                  制单人 {receipt.creatorDisplay}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <PrototypeAnnotationTarget annotationIds={["receipt-detail-seal"]}>
-                  <div
-                    className="flex size-24 shrink-0 flex-col items-center justify-center rounded-full text-white shadow-md ring-4 ring-white"
-                    style={{ backgroundColor: seal.background }}
-                  >
-                    <span className="text-xs opacity-80">仓单状态</span>
-                    <span className="mt-1 text-lg font-semibold tracking-[0.2em]">
-                      {seal.label}
-                    </span>
-                  </div>
-                </PrototypeAnnotationTarget>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate(RECEIPT_LIST_PATH)}
+          <DetailPageHeader
+            title="仓单详情"
+            number={receipt.code}
+            numberLabel="仓单编号"
+            onBack={() => navigate(RECEIPT_LIST_PATH)}
+            actions={
+              <PrototypeAnnotationTarget annotationIds={["receipt-detail-seal"]}>
+                <div
+                  className="mr-1 flex size-14 shrink-0 flex-col items-center justify-center rounded-full text-white shadow-sm ring-2 ring-white"
+                  style={{ backgroundColor: seal.background }}
                 >
-                  <ArrowLeftIcon />
-                  返回
-                </Button>
-              </div>
-            </div>
-          </div>
+                  <span className="text-[10px] opacity-80">仓单状态</span>
+                  <span className="mt-0.5 text-sm font-semibold tracking-[0.15em]">
+                    {seal.label}
+                  </span>
+                </div>
+              </PrototypeAnnotationTarget>
+            }
+          />
         </PrototypeAnnotationTarget>
 
         <PrototypeAnnotationTarget annotationIds={["receipt-detail-basic"]}>
           <DetailSection title="基础信息">
-            <div className="space-y-4">
-              {/* 第 1 行：制单人、制单时间 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <DetailField label="制单人">{receipt.creatorDisplay}</DetailField>
-                <DetailField label="制单时间">
-                  <TableDateTimeCell value={receipt.createdAt} plain />
-                </DetailField>
-              </div>
-
-              {/* 第 2 行：存货人(货主)、存货人标识、开立时间 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-3 border-t border-border/40">
-                <DetailField label="存货人(货主)">{receipt.owner.name}</DetailField>
-                <DetailField label="存货人(货主)标识">{receipt.owner.identifier}</DetailField>
-                <DetailField label="开立时间">
-                  <TableDateTimeCell value={receipt.establishedAt} plain />
-                </DetailField>
-              </div>
-
-              {/* 第 3 行：持有人、持有人标识、关联单号（穿透提示） */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-3 border-t border-border/40">
-                <DetailField label="持有人">{receipt.holder.name}</DetailField>
-                <DetailField label="持有人标识">{receipt.holder.identifier}</DetailField>
-                <DetailField label="关联单号">
-                  {receipt.relatedId ? (
-                    <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
-                      <span>{receipt.relatedId}</span>
-                      <button
-                        type="button"
-                        className="text-xs text-primary hover:underline font-normal ml-0.5 cursor-pointer"
-                        onClick={() => setRelatedOrderTarget(receipt.relatedId ?? null)}
-                      >
-                        【查看】
-                      </button>
-                    </span>
-                  ) : (
-                    <span className="text-muted-foreground">--</span>
-                  )}
-                </DetailField>
-              </div>
-
-              {/* 第 4 行：仓库名称(含准入徽章)、注销时间、在途流程 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-3 border-t border-border/40">
-                <DetailField label="仓库名称">
-                  <span className="inline-flex items-center gap-2">
-                    <span>{receipt.warehouseName}</span>
-                    {receipt.thirdPartyRegistered ? (
-                      <Badge
-                        variant="outline"
-                        className="border-emerald-200 bg-emerald-50 text-emerald-700 text-xs font-normal"
-                      >
-                        准入
-                      </Badge>
-                    ) : null}
-                  </span>
-                </DetailField>
-                <DetailField label="注销时间">
-                  {receipt.cancelledAt ? (
-                    <TableDateTimeCell value={receipt.cancelledAt} plain />
-                  ) : (
-                    <span className="text-muted-foreground">--</span>
-                  )}
-                </DetailField>
-                {receipt.currentFlow ? (
-                  <DetailField label="在途审批流程">
-                    <span className="text-amber-700 font-medium">
-                      {receipt.currentFlow}（审批中）
-                    </span>
-                  </DetailField>
+            <DetailField label="制单人">{receipt.creatorDisplay}</DetailField>
+            <DetailField label="制单时间">
+              <TableDateTimeCell value={receipt.createdAt} plain />
+            </DetailField>
+            <DetailField label="存货人(货主)">{receipt.owner.name}</DetailField>
+            <DetailField label="存货人(货主)标识">{receipt.owner.identifier}</DetailField>
+            <DetailField label="开立时间">
+              <TableDateTimeCell value={receipt.establishedAt} plain />
+            </DetailField>
+            <DetailField label="持有人">{receipt.holder.name}</DetailField>
+            <DetailField label="持有人标识">{receipt.holder.identifier}</DetailField>
+            <DetailField label="关联单号">
+              {receipt.relatedId ? (
+                <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
+                  <span>{receipt.relatedId}</span>
+                  <button
+                    type="button"
+                    className="ml-0.5 cursor-pointer text-xs font-normal text-primary hover:underline"
+                    onClick={() => setRelatedOrderTarget(receipt.relatedId ?? null)}
+                  >
+                    【查看】
+                  </button>
+                </span>
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )}
+            </DetailField>
+            <DetailField label="仓库名称">
+              <span className="inline-flex items-center gap-2">
+                <span>{receipt.warehouseName}</span>
+                {receipt.thirdPartyRegistered ? (
+                  <Badge
+                    variant="outline"
+                    className="border-emerald-200 bg-emerald-50 text-xs font-normal text-emerald-700"
+                  >
+                    准入
+                  </Badge>
                 ) : null}
-              </div>
-            </div>
+              </span>
+            </DetailField>
+            <DetailField label="注销时间">
+              {receipt.cancelledAt ? (
+                <TableDateTimeCell value={receipt.cancelledAt} plain />
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )}
+            </DetailField>
+            {receipt.currentFlow ? (
+              <DetailField label="在途审批流程">
+                <span className="font-medium text-amber-700">
+                  {receipt.currentFlow}（审批中）
+                </span>
+              </DetailField>
+            ) : null}
           </DetailSection>
         </PrototypeAnnotationTarget>
 
-        <div className="flex items-center gap-1 border-b">
-          {(
-            [
-              ["goods", "货物明细"],
-              ["changes", "变更记录"],
-            ] as const
-          ).map(([key, label]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setTab(key)}
-              className={
-                tab === key
-                  ? "-mb-px border-b-2 border-primary px-4 py-2 text-sm font-medium text-primary"
-                  : "-mb-px px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
-              }
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {tab === "goods" ? (
+        <DetailTabShell
+          tabs={[
+            { key: "goods", label: "货物明细" },
+            { key: "changes", label: "变更记录" },
+          ]}
+          active={activeTab}
+          onChange={setActiveTab}
+        >
+          {activeTab === "goods" && (
           <PrototypeAnnotationTarget
             annotationIds={["receipt-detail-goods", "receipt-detail-barcode"]}
           >
@@ -309,7 +245,9 @@ export function WarehouseReceiptDetailPage() {
               </Table>
             </div>
           </PrototypeAnnotationTarget>
-        ) : (
+          )}
+
+          {activeTab === "changes" && (
           <PrototypeAnnotationTarget annotationIds={["receipt-detail-changes"]}>
             <div className="overflow-x-auto rounded-md border bg-card">
               <Table className="w-full min-w-[1080px]">
@@ -380,7 +318,7 @@ export function WarehouseReceiptDetailPage() {
                               {record.relatedNo}
                             </button>
                           ) : (
-                            <span className="text-muted-foreground">--</span>
+                            <span className="text-muted-foreground">—</span>
                           )}
                         </TableCell>
                         <TableCell>
@@ -404,7 +342,8 @@ export function WarehouseReceiptDetailPage() {
               </Table>
             </div>
           </PrototypeAnnotationTarget>
-        )}
+          )}
+        </DetailTabShell>
       </div>
 
       {barcodeTarget ? (
@@ -527,25 +466,28 @@ function GroupRows({
                           {lot.zoneName}
                         </TableCell>
                         <TableCell className="text-sm text-foreground">
-                          {lot.position || "--"}
+                          {lot.position || "—"}
                         </TableCell>
                         <TableCell className="whitespace-nowrap">
                           <TableDateTimeCell value={lot.inboundAt} plain />
                         </TableCell>
                         <TableCell className="text-xs leading-relaxed text-muted-foreground">
-                          {lot.otherInfo.length > 0
-                            ? lot.otherInfo.join(" / ")
-                            : "无: --"}
+                          {lot.otherInfo.length > 0 ? lot.otherInfo.join(" / ") : "—"}
                         </TableCell>
-                        <TableCell className="text-center">
-                          <button
-                            type="button"
-                            className="inline-flex size-8 items-center justify-center rounded border bg-white text-primary hover:bg-primary/5"
-                            title="查看存货条码"
-                            onClick={() => onOpenBarcode(lot)}
-                          >
-                            <QrCodeIcon className="size-4" />
-                          </button>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5 whitespace-nowrap">
+                            <span className="text-xs tabular-nums text-foreground">
+                              {lot.barcode || "—"}
+                            </span>
+                            <button
+                              type="button"
+                              className="inline-flex size-7 items-center justify-center rounded border bg-white text-primary hover:bg-primary/5"
+                              title="查看存货条码"
+                              onClick={() => onOpenBarcode(lot)}
+                            >
+                              <QrCodeIcon className="size-4" />
+                            </button>
+                          </div>
                         </TableCell>
                         <TableCell className="text-sm text-foreground">
                           <Badge
@@ -617,7 +559,7 @@ function BarcodeDialog({
           <p>
             <span className="text-muted-foreground">存放位置：</span>
             {lot.warehouseName}-{lot.houseName}({lot.houseAudit})-{lot.zoneName}-
-            {lot.position || "--"}
+            {lot.position || "—"}
           </p>
           <p>
             <span className="text-muted-foreground">入库时间：</span>
@@ -665,7 +607,7 @@ function RelatedOrderDialog({
           </div>
           <div className="flex justify-between items-center py-1 border-b border-border/60">
             <span className="text-muted-foreground">关联单号</span>
-            <span className="font-mono font-medium text-primary select-all">{orderId}</span>
+            <span className="font-medium text-primary select-all">{orderId}</span>
           </div>
           <div className="flex justify-between items-center py-1 border-b border-border/60">
             <span className="text-muted-foreground">风控锁定状态</span>

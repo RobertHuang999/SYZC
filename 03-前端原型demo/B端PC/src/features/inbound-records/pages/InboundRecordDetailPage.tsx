@@ -11,8 +11,6 @@ import {
   Clock,
   AlertCircle,
   RotateCcw,
-  Plus,
-  FileText,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -48,11 +46,11 @@ import {
 import { CURRENT_USER_NAME } from "../mock/inbound-records.mock"
 import {
   DocumentManagementTabContent,
-  UploadSupplementaryModal,
-  getDocumentsByOrderNo,
 } from "@/shared/document-management"
 import { useIterationHighlight } from "@/shared/components/IterationHighlight"
 import { DetailField, DetailSection } from "@/shared/components/DetailSection"
+import { DetailPageHeader } from "@/shared/components/DetailPageHeader"
+import { DetailTabShell } from "@/shared/components/DetailTabShell"
 
 type DetailTab = "goods" | "audit" | "modify" | "documents"
 
@@ -63,14 +61,14 @@ export function InboundRecordDetailPage() {
   const [searchParams] = useSearchParams()
   const initialDetail = useMemo(() => getInboundRecordDetailById(id), [id])
   const [detail, setDetail] = useState<InboundRecordDetail | undefined>(initialDetail)
-  const [tab, setTab] = useState<DetailTab>(() =>
+  const [activeTab, setActiveTab] = useState<DetailTab>(() =>
     parseInboundRecordDetailTabParam(searchParams.get("tab")) ?? "goods"
   )
   // 从一条单据切到另一条时，详情数据要跟着路由 id 重置，避免沿用上一条的单据
   useEffect(() => {
     setDetail(initialDetail)
     setExpandedGoods({})
-    setTab(parseInboundRecordDetailTabParam(searchParams.get("tab")) ?? "goods")
+    setActiveTab(parseInboundRecordDetailTabParam(searchParams.get("tab")) ?? "goods")
   }, [initialDetail, searchParams, id])
   const [expandedGoods, setExpandedGoods] = useState<Record<string, boolean>>({})
   const [toast, setToast] = useState<string | null>(null)
@@ -91,13 +89,6 @@ export function InboundRecordDetailPage() {
   // 选项 A：统一查看附件弹窗
   const [attachmentData, setAttachmentData] = useState<AttachmentDialogData | null>(null)
   const [relatedOrderModalOpen, setRelatedOrderModalOpen] = useState(false)
-  const [auditUploadFlowType, setAuditUploadFlowType] = useState<string | null>(null)
-  const [docsRefreshKey, setDocsRefreshKey] = useState(0)
-
-  const allOrderDocs = useMemo(() => {
-    if (!detail) return []
-    return getDocumentsByOrderNo(detail.orderNo)
-  }, [detail, docsRefreshKey])
 
   const showToast = (message: string) => {
     setToast(message)
@@ -161,28 +152,28 @@ export function InboundRecordDetailPage() {
     switch (detail.checkStatus) {
       case 0:
         return (
-          <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3.5 py-1 text-xs font-semibold text-blue-700 shadow-2xs">
+          <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 shadow-2xs">
             <Clock className="size-3.5" />
             待审核
           </span>
         )
       case 1:
         return (
-          <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1 text-xs font-semibold text-amber-700 shadow-2xs">
+          <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 shadow-2xs">
             <Clock className="size-3.5" />
             审核中
           </span>
         )
       case 2:
         return (
-          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1 text-xs font-semibold text-emerald-700 shadow-2xs">
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 shadow-2xs">
             <CheckCircle2 className="size-3.5" />
             已通过
           </span>
         )
       case 3:
         return (
-          <span className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-3.5 py-1 text-xs font-semibold text-rose-700 shadow-2xs">
+          <span className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 shadow-2xs">
             <AlertCircle className="size-3.5" />
             未通过
           </span>
@@ -205,51 +196,35 @@ export function InboundRecordDetailPage() {
       documents={inboundRecordDocuments}
       annotations={inboundRecordDetailAnnotations}
     >
-      <div className="space-y-4 p-6 bg-muted/10 min-h-full">
+      <div className="space-y-4 p-6 min-h-full">
         {/* 顶部标题与操作卡片（对齐 store-apply-info-detail.vue 结构） */}
         <PrototypeAnnotationTarget annotationIds={["inbound-detail-header"]}>
-          <div className="rounded-lg border bg-card p-5 shadow-xs">
-            {/* 顶栏：单号、状态徽标与操作按钮 */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-foreground">
-                  入库单号：<span className="text-base font-bold">{detail.orderNo}</span>
-                </span>
+          <DetailPageHeader
+            title="入库单详情"
+            number={detail.orderNo}
+            numberLabel="入库单号"
+            status={renderStatusStamp()}
+            onBack={() => navigate(-1)}
+            onCopy={() => {
+              void navigator.clipboard.writeText(detail.orderNo)
+              showToast("已复制入库单号至剪贴板")
+            }}
+            actions={
+              canRevoke ? (
                 <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-7 text-muted-foreground hover:text-primary"
-                  title="复制单号"
-                  onClick={() => {
-                    void navigator.clipboard.writeText(detail.orderNo)
-                    showToast("已复制入库单号至剪贴板")
-                  }}
+                  variant="outline"
+                  size="sm"
+                  className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                  onClick={() => setRevokeOpen(true)}
                 >
-                  <Copy className="size-3.5" />
+                  撤 销
                 </Button>
-                <div className="ml-2">{renderStatusStamp()}</div>
-              </div>
+              ) : undefined
+            }
+          />
 
-              <div className="flex items-center gap-2">
-                {canRevoke && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-destructive/40 text-destructive hover:bg-destructive/10"
-                    onClick={() => setRevokeOpen(true)}
-                  >
-                    撤 销
-                  </Button>
-                )}
-                <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
-                  返 回
-                </Button>
-              </div>
-            </div>
-
-            {/* 基础信息（上标签下取值，4 列栅格） */}
-            <DetailSection title="单据信息">
+          {/* 基础信息（上标签下取值，4 列栅格） */}
+            <DetailSection title="基础信息">
               <DetailField label="制单人">{detail.creatorDisplay}</DetailField>
               <DetailField label="制单时间">{detail.createdAt}</DetailField>
               <DetailField label="货主名称">{detail.ownerName}</DetailField>
@@ -275,45 +250,31 @@ export function InboundRecordDetailPage() {
                     </span>
                   </div>
                 ) : (
-                  <span className="text-muted-foreground">——</span>
+                  <span className="text-muted-foreground">—</span>
                 )}
               </DetailField>
               <div>
                 <DetailField label="备注信息">
-                  {detail.remark || "——"}
+                  {detail.remark || "—"}
                 </DetailField>
               </div>
             </DetailSection>
-          </div>
         </PrototypeAnnotationTarget>
 
-        {/* 标签页导航与内容区 */}
+        {/* 明细、审核、修改与资料统一按页签展示 */}
         <PrototypeAnnotationTarget annotationIds={["inbound-detail-tabs"]}>
-          <div className="rounded-lg border bg-card p-5 shadow-xs space-y-4">
-            <div className="flex border-b">
-              {buildInboundRecordDetailTabEntries(detail.goodsLines.length).map(([key, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={`border-b-2 px-5 py-2.5 text-xs font-medium transition-colors ${
-                    tab === key
-                      ? "border-primary text-primary font-semibold"
-                      : "border-transparent text-muted-foreground hover:text-foreground"
-                  }`}
-                  onClick={() => setTab(key)}
-                >
-                  {label}
-                  {key === "documents" && highlightEnabled ? (
-                    <span className="ml-1.5 rounded bg-amber-500 px-1 py-0.5 text-[9px] font-bold leading-none text-white">
-                      6.3
-                    </span>
-                  ) : null}
-                </button>
-              ))}
-            </div>
-
-            {/* Tab 1: 货物明细（对齐源码带有两级展开表格、二维码图标与【查看附件】弹窗） */}
-            {tab === "goods" && (
+          <DetailTabShell
+            tabs={[
+              { key: "goods", label: "货物明细" },
+              { key: "audit", label: "审核记录" },
+              { key: "modify", label: "修改记录" },
+              { key: "documents", label: "资料管理" },
+            ]}
+            active={activeTab}
+            onChange={(key) => setActiveTab(key as DetailTab)}
+          >
+            {activeTab === "goods" && (
+            <>
               <div className="space-y-4">
                 <div className="overflow-hidden rounded-md border bg-card">
                   <Table className="table-fixed w-full">
@@ -359,7 +320,7 @@ export function InboundRecordDetailPage() {
                               </TableCell>
                               <TableCell className="whitespace-normal align-middle py-2.5 text-muted-foreground">
                                 <span className="line-clamp-2 leading-snug break-words">
-                                  {line.otherInfo || "--"}
+                                  {line.otherInfo || "—"}
                                 </span>
                               </TableCell>
                               <TableCell className="whitespace-normal align-middle py-2.5 text-right font-semibold text-primary">
@@ -369,7 +330,7 @@ export function InboundRecordDetailPage() {
                               </TableCell>
                               <TableCell className="whitespace-normal align-middle py-2.5 text-muted-foreground">
                                 <span className="line-clamp-2 leading-snug break-words">
-                                  {line.remark || "--"}
+                                  {line.remark || "—"}
                                 </span>
                               </TableCell>
 
@@ -523,15 +484,12 @@ export function InboundRecordDetailPage() {
                   </Table>
                 </div>
               </div>
-            )}
-
-            {/* Tab 2: 审核记录 */}
-            {tab === "audit" && (
+            </>)}
+            {activeTab === "audit" && (
+            <>
               <div className="space-y-4 py-2">
                 <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
                   {detail.auditTrail.map((step, idx) => {
-                    const stepFlowType = idx === 0 ? "1" : idx === 1 ? "2" : "3"
-                    const stepDocs = allOrderDocs.filter((d) => d.flowType === stepFlowType)
 
                     return (
                       <div key={idx} className="relative flex items-start gap-3 text-xs">
@@ -545,16 +503,6 @@ export function InboundRecordDetailPage() {
                             </span>
                             <div className="flex items-center gap-2">
                               <span className="text-muted-foreground">{step.time}</span>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="h-6 px-2 text-[11px] text-blue-600 border-blue-200 hover:bg-blue-50 cursor-pointer"
-                                onClick={() => setAuditUploadFlowType(stepFlowType)}
-                              >
-                                <Plus className="size-3 mr-0.5" />
-                                补充本阶段资料
-                              </Button>
                             </div>
                           </div>
                           <div className="flex items-center gap-3 text-muted-foreground">
@@ -567,52 +515,15 @@ export function InboundRecordDetailPage() {
                             </p>
                           )}
 
-                          {/* 节点挂载资料穿透展示 */}
-                          <div className="pt-2 border-t border-border/60">
-                            <div className="text-[11px] font-medium text-muted-foreground mb-1.5 flex items-center gap-1.5">
-                              <Paperclip className="size-3 text-muted-foreground" />
-                              <span>本节点关联资料 ({stepDocs.length})：</span>
-                            </div>
-                            {stepDocs.length > 0 ? (
-                              <div className="space-y-1.5">
-                                {stepDocs.map((doc) => (
-                                  <div
-                                    key={doc.id}
-                                    className="flex items-center justify-between p-2 rounded bg-card border border-border/40 text-xs hover:border-blue-200 transition-colors"
-                                  >
-                                    <div className="flex items-center gap-2 truncate">
-                                      <FileText className="size-3.5 text-blue-500 shrink-0" />
-                                      <span className="font-medium text-foreground truncate">{doc.name}</span>
-                                      <span className="text-[10.5px] text-muted-foreground shrink-0">({doc.fileSize})</span>
-                                      {doc.nature === "ADDITION" && (
-                                        <span className="px-1.5 py-0.5 rounded text-[10px] bg-amber-50 text-amber-700 border border-amber-200/60 font-medium shrink-0">
-                                          事后补录
-                                        </span>
-                                      )}
-                                      {doc.description && (
-                                        <span className="text-[11px] text-muted-foreground truncate hidden md:inline">
-                                          - {doc.description}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <span className="text-[11px] text-muted-foreground shrink-0 ml-2">{doc.createTime}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <span className="text-[11px] text-muted-foreground">暂无资料附件</span>
-                            )}
-                          </div>
                         </div>
                       </div>
                     )
                   })}
                 </div>
               </div>
-            )}
-
-            {/* Tab 3: 修改记录 */}
-            {tab === "modify" && (
+            </>)}
+            {activeTab === "modify" && (
+            <>
               <div className="space-y-3">
                 <div className="overflow-x-auto rounded-md border">
                   <Table className="text-xs">
@@ -657,18 +568,17 @@ export function InboundRecordDetailPage() {
                   </Table>
                 </div>
               </div>
-            )}
-
-            {/* Tab 4: 资料管理 */}
-            {tab === "documents" && (
+            </>)}
+            {activeTab === "documents" && (
+            <>
               <DocumentManagementTabContent
                 orderNo={detail.orderNo}
                 approvalId="SP202605280001"
                 orderType="inbound"
                 allowSupplement={true}
               />
-            )}
-          </div>
+            </>)}
+          </DetailTabShell>
         </PrototypeAnnotationTarget>
 
         {/* 撤销确认弹窗 */}
@@ -723,7 +633,7 @@ export function InboundRecordDetailPage() {
             <div className="space-y-3 rounded-lg border bg-muted/20 p-4 text-xs">
               <div className="flex items-center justify-between border-b pb-2">
                 <span className="text-muted-foreground">关联业务单号：</span>
-                <span className="font-semibold text-primary">{detail.relatedOrderNo || "--"}</span>
+                <span className="font-semibold text-primary">{detail.relatedOrderNo || "—"}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">单据业务类型：</span>
@@ -760,28 +670,8 @@ export function InboundRecordDetailPage() {
           </DialogContent>
         </Dialog>
 
-        {/* 审核记录中的补充资料弹窗 */}
-        {auditUploadFlowType && (
-          <UploadSupplementaryModal
-            open={auditUploadFlowType !== null}
-            orderNo={detail.orderNo}
-            approvalId="SP202605280001"
-            orderType="inbound"
-            defaultFlowType={auditUploadFlowType}
-            onClose={() => setAuditUploadFlowType(null)}
-            onSuccess={(newDocs) => {
-              setDocsRefreshKey((k) => k + 1)
-              showToast(
-                newDocs.length > 1
-                  ? `已成功批量补充 ${newDocs.length} 份资料至本流程节点`
-                  : `资料已成功补充挂载至本流程节点：${newDocs[0]?.name}`
-              )
-            }}
-          />
-        )}
-
         {toast ? (
-          <div className="fixed right-6 bottom-6 z-50 rounded-lg border bg-foreground px-4 py-3 text-xs text-background shadow-lg">
+          <div className="fixed right-6 bottom-6 z-50 max-w-sm rounded-lg border bg-background px-4 py-3 text-sm shadow-lg">
             {toast}
           </div>
         ) : null}

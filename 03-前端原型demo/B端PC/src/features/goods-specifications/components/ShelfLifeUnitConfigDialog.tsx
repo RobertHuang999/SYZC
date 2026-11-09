@@ -256,10 +256,10 @@ export function ShelfLifeUnitConfigDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
           >
-            取 消
+            取消
           </Button>
           <Button type="button" onClick={handleSave}>
-            保 存
+            保存
           </Button>
         </DialogFooter>
       </DialogContent>

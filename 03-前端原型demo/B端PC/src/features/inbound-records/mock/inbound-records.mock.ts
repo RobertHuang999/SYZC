@@ -680,9 +680,26 @@ const inboundRecordsMockTail: InboundRecord[] = [
   },
 ]
 
+/**
+ * 台账只保留「每种场景一条」：
+ * 仓单入库、无关联单号的普通入库、退货入库、移库入库、转让入库、加工入库（示例）。
+ * 其余重复类型不再铺量，避免列表里一堆长得一样的行。
+ */
+const TAIL_SCENARIO_IDS = new Set([
+  "inbound-7", // 仓单入库
+  "inbound-8", // 普通入库，无关联单号
+  "inbound-10", // 退货入库（关联出库单）
+  "inbound-11", // 移库入库
+  "inbound-12", // 转让入库
+  "inbound-13", // 加工入库
+])
+
 export const inboundRecordsMock: InboundRecord[] = [
   ...inboundRecordsFromSeeds,
   ...inboundRecordsMockTail.filter(
-    (row) => !SEED_PC_IDS.has(row.id) && !SEED_ORDER_NOS.has(row.orderNo)
+    (row) =>
+      TAIL_SCENARIO_IDS.has(row.id) &&
+      !SEED_PC_IDS.has(row.id) &&
+      !SEED_ORDER_NOS.has(row.orderNo)
   ),
 ]

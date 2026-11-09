@@ -168,6 +168,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     description: "管理库区内的货位变更作业。通过事前授权与轨迹监控防范“调包/偷换”风险，移位完成后实时更新空间坐标及质押绑定状态。",
     buttons: ["查看页面", "移库", "查看详情", "单据下载", "下载记录", "操作记录", "移库撤销"],
     dataPermission: "可见数据根据当前登录账号的角色的仓库权限决定",
+    customRoute: "/m/workspace/moving-records",
     iconType: "ArrowLeftRight",
   },
   {
@@ -179,6 +180,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     description: "提供支持业务运转的操作入口，处理货主之间无实物位移的货权转让过户流程。",
     buttons: ["查看页面", "转让", "转让申请详情", "撤销", "转让记录详情"],
     dataPermission: "可见数据根据当前登录账号的角色的仓库权限决定",
+    customRoute: "/m/workspace/transfer-records",
     iconType: "RefreshCcw",
   },
   {
@@ -202,6 +204,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     description: "监管原材料到产成品的转化加工全流程，实时冲减原物料并建立产成品数字监管档案。",
     buttons: ["查看页面", "详情", "新增加工", "撤销加工", "完成加工", "作废", "操作记录"],
     dataPermission: "可见数据根据当前登录账号的角色的仓库权限决定",
+    customRoute: "/m/workspace/processing-records",
     iconType: "Cpu",
   },
   {
@@ -215,6 +218,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "可见数据根据当前登录账号的角色的仓库权限决定；盘点人只能盘点有权限的货物",
     remark: "优化页面",
     badge: "优化",
+    customRoute: "/m/workspace/inventory-checks",
     iconType: "ClipboardCheck",
   },
   {
@@ -276,6 +280,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     description: "管理库区内因损耗、溢短装或取样导致的货物数量变更作业，完整记录审批留痕。",
     buttons: ["查看页面", "异动订单详情", "异动申请详情", "操作记录", "移库撤销"],
     dataPermission: "可见数据根据当前登录账号的角色的仓库权限决定",
+    customRoute: "/m/workspace/inventory-abnormal-records",
     iconType: "SlidersHorizontal",
   },
   {
@@ -761,6 +766,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "账号赋予的仓库权限",
     remark: "优化页面",
     badge: "优化",
+    customRoute: "/m/transfer/initiate",
     iconType: "ArrowLeftRight",
   },
   {
@@ -774,6 +780,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "账号赋予的仓库权限",
     remark: "优化页面",
     badge: "优化",
+    customRoute: "/m/workspace/transfer-records",
     iconType: "RefreshCcw",
   },
   {

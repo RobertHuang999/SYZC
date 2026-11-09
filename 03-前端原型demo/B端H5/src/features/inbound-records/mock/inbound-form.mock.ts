@@ -1,6 +1,9 @@
 import type { OwnerType, RelatedOrderOption } from "../domain/form-types"
 import { partnerArchivesMock } from "@prototype/B端PC/src/features/partner-archives/mock/partner-archives.mock"
 
+import { resolveContactPhoneVerified } from "@prototype/B端PC/src/features/partner-archives/lib/contact-phone-verify"
+import type { ContactPhoneVerifyStatus } from "@prototype/B端PC/src/features/partner-archives/domain/types"
+
 export type OwnerSearchRecord = {
   id: string
   ownerType: OwnerType
@@ -10,6 +13,7 @@ export type OwnerSearchRecord = {
   contactPhone?: string
   idCardNo?: string
   partnerId?: string
+  contactPhoneVerified?: ContactPhoneVerifyStatus
 }
 
 function buildPartnerOwnerRecords(): OwnerSearchRecord[] {
@@ -30,6 +34,7 @@ function buildPartnerOwnerRecords(): OwnerSearchRecord[] {
         identifierMasked: partner.idNumberMasked,
         contactPhone: partner.contactPhone,
         idCardNo: isEnterprise ? undefined : partner.idNumber,
+        contactPhoneVerified: resolveContactPhoneVerified(partner),
       }
     })
 }
@@ -90,6 +95,27 @@ export const OWNER_SEARCH_RECORDS: OwnerSearchRecord[] = [
     contactPhone: "02166666666",
   },
 ]
+
+export function findOwnerSearchRecord(
+  ownerType: OwnerType | "",
+  ownerName: string
+): OwnerSearchRecord | undefined {
+  const name = ownerName.trim()
+  if (!name) return undefined
+  const sameName = getOwnerSearchCatalog().filter((record) => record.name === name)
+  if (sameName.length === 0) return undefined
+  if (ownerType) {
+    return sameName.find((record) => record.ownerType === ownerType) ?? sameName[0]
+  }
+  return sameName[0]
+}
+
+export function findOwnerSearchRecordByPartnerId(
+  partnerId: string
+): OwnerSearchRecord | undefined {
+  if (!partnerId) return undefined
+  return getOwnerSearchCatalog().find((record) => record.partnerId === partnerId)
+}
 
 export function filterOwnerSearchRecords(
   ownerType: OwnerType | "",

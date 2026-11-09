@@ -133,7 +133,7 @@ export const TallyQrCodeDialog: React.FC<TallyQrCodeDialogProps> = ({
               <rect x="72" y="78" width="6" height="8" />
               <rect x="84" y="76" width="8" height="12" />
             </svg>
-            <div className="text-center font-mono text-xs font-bold text-slate-800 mt-2">
+            <div className="text-center text-xs font-bold text-slate-800 mt-2">
               {activeBarcode}
             </div>
           </div>
@@ -156,7 +156,7 @@ export const TallyQrCodeDialog: React.FC<TallyQrCodeDialogProps> = ({
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">源头单号：</span>
-              <span className="font-mono text-slate-800 text-right">{item.inboundOrderNo}</span>
+              <span className="text-slate-800 text-right">{item.inboundOrderNo}</span>
             </div>
           </div>
         </div>

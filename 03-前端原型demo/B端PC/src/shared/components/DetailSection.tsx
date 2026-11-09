@@ -20,14 +20,18 @@ export function DetailSection({
 export function DetailField({
   label,
   children,
+  value,
 }: {
   label: ReactNode
-  children: ReactNode
+  children?: ReactNode
+  /** 兼容以 value 传值的写法；与 children 二选一 */
+  value?: ReactNode
 }) {
+  const content = value !== undefined ? value : children
   return (
     <div className="detail-field">
       <div className="detail-field-label">{label}</div>
-      <div className="detail-field-value">{children}</div>
+      <div className="detail-field-value">{content}</div>
     </div>
   )
 }

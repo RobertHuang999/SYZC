@@ -1,10 +1,11 @@
 import { X } from "lucide-react"
 import { DocumentManagementTab } from "./DocumentManagementTab"
+import type { DocumentItem } from "../types"
 
 type DocumentManagementSheetProps = {
   open: boolean
   orderNo: string
-  orderType?: "inbound" | "outbound"
+  orderType?: DocumentItem["orderType"]
   ownerName?: string
   warehouseName?: string
   onClose: () => void

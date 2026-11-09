@@ -5,6 +5,8 @@ export type UploadFlowStageOption = {
   stageText: string
 }
 
+export type DocumentOrderType = "inbound" | "outbound" | "transfer"
+
 /** 入库记录 · 上传补充资料：仅「入库发起」与「补充资料」 */
 export const INBOUND_UPLOAD_FLOW_OPTIONS: UploadFlowStageOption[] = [
   {
@@ -33,12 +35,26 @@ export const OUTBOUND_UPLOAD_FLOW_OPTIONS: UploadFlowStageOption[] = [
   },
 ]
 
+/** 移库记录 · 上传补充资料：仅「移库发起」与「补充资料」 */
+export const TRANSFER_UPLOAD_FLOW_OPTIONS: UploadFlowStageOption[] = [
+  {
+    value: "1",
+    label: "移库发起",
+    stageText: "移库发起",
+  },
+  {
+    value: "9527",
+    label: "补充资料",
+    stageText: "补充资料",
+  },
+]
+
 export function getUploadFlowOptions(
-  orderType: "inbound" | "outbound",
+  orderType: DocumentOrderType,
 ): UploadFlowStageOption[] {
-  return orderType === "outbound"
-    ? OUTBOUND_UPLOAD_FLOW_OPTIONS
-    : INBOUND_UPLOAD_FLOW_OPTIONS
+  if (orderType === "outbound") return OUTBOUND_UPLOAD_FLOW_OPTIONS
+  if (orderType === "transfer") return TRANSFER_UPLOAD_FLOW_OPTIONS
+  return INBOUND_UPLOAD_FLOW_OPTIONS
 }
 
 /** 时间轴节点或历史 flowType 映射为上传表单可选值（仅 1 / 9527） */

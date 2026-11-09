@@ -19,7 +19,7 @@ type UploadSupplementarySheetProps = {
   open: boolean
   orderNo: string
   approvalId?: string
-  orderType?: "inbound" | "outbound"
+  orderType?: DocumentItem["orderType"]
   /** 从某个节点「+ 本阶段资料」进来时预选该阶段 */
   defaultFlowType?: string
   onClose: () => void

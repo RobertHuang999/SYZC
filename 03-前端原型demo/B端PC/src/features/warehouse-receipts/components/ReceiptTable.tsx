@@ -1,11 +1,8 @@
-import { useEffect, useRef, useState } from "react"
-import { CopyIcon } from "lucide-react"
-import { Link } from "react-router-dom"
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import {
   Table,
   TableBody,
@@ -15,7 +12,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { TableDateTimeCell } from "@/shared/components/TableCells"
+import { TableDateTimeCell, TablePersonOrgTimeCell } from "@/shared/components/TableCells"
+import { DocNoCell } from "@/shared/components/DocNoCell"
 import type {
   ReceiptRowAction,
   WarehouseReceipt,
@@ -35,16 +33,16 @@ import { ReceiptStatusBadge } from "./ReceiptStatusBadge"
 
 /** 列宽锁定：总宽度 1886px，对齐 AGENTS.md 规范与标杆页面 */
 const WIDTHS = {
-  index: 56,
-  code: 220,
-  owner: 220,
-  holder: 220,
+  index: 64,
+  code: 150,
+  owner: 210,
+  holder: 210,
   warehouse: 160,
-  goods: 240,
+  goods: 200,
   established: 160,
   status: 100,
   thirdParty: 90,
-  creator: 200,
+  creator: 180,
   actions: TABLE_ROW_ACTION_COL_TOTAL_PX, // 218px
 } as const
 
@@ -61,7 +59,7 @@ const TABLE_MIN_WIDTH =
   WIDTHS.creator +
   WIDTHS.actions // 1884px
 
-const cellBase = "align-middle px-3.5 py-2.5 text-sm"
+const cellBase = "align-middle px-3.5 py-2.5 text-[13px]"
 
 const STICKY_ACTION_CLASS =
   "sticky right-0 z-20 border-l border-border/80 shadow-[-8px_0_16px_-4px_rgba(0,0,0,0.08)]"
@@ -77,7 +75,6 @@ type Props = {
   page: number
   pageSize: number
   onAction: (action: ReceiptRowAction, item: WarehouseReceipt) => void
-  onCopyCode: (code: string) => void
 }
 
 function buildReceiptRowActions(
@@ -120,12 +117,11 @@ export function ReceiptTable({
   page,
   pageSize,
   onAction,
-  onCopyCode,
 }: Props) {
   return (
     <div className="overflow-x-auto rounded-md border bg-card">
       <Table
-        className="w-full table-fixed text-sm"
+        className="w-full table-fixed text-[13px]"
         style={{ minWidth: `${TABLE_MIN_WIDTH}px` }}
       >
         <colgroup>
@@ -145,61 +141,61 @@ export function ReceiptTable({
           <TableRow className="bg-slate-50 dark:bg-slate-900/50 h-11">
             <TableHead
               style={{ width: WIDTHS.index }}
-              className="text-center text-xs font-medium text-muted-foreground px-2"
+              className="sticky left-0 z-10 bg-slate-100 text-center text-[13px] font-semibold text-[#4e5969] px-2 dark:bg-slate-800"
             >
               序号
             </TableHead>
             <TableHead
               style={{ width: WIDTHS.code }}
-              className="text-left text-xs font-medium text-muted-foreground px-3.5"
+              className="text-left text-[13px] font-semibold text-[#4e5969] px-3.5"
             >
               仓单编码
             </TableHead>
             <TableHead
               style={{ width: WIDTHS.owner }}
-              className="text-left text-xs font-medium text-muted-foreground px-3.5"
+              className="text-left text-[13px] font-semibold text-[#4e5969] px-3.5"
             >
               存货人
             </TableHead>
             <TableHead
               style={{ width: WIDTHS.holder }}
-              className="text-left text-xs font-medium text-muted-foreground px-3.5"
+              className="text-left text-[13px] font-semibold text-[#4e5969] px-3.5"
             >
               持有人
             </TableHead>
             <TableHead
               style={{ width: WIDTHS.warehouse }}
-              className="text-left text-xs font-medium text-muted-foreground px-3.5"
+              className="text-left text-[13px] font-semibold text-[#4e5969] px-3.5"
             >
               仓库名称
             </TableHead>
             <TableHead
               style={{ width: WIDTHS.goods }}
-              className="text-left text-xs font-medium text-muted-foreground px-3.5"
+              className="text-left text-[13px] font-semibold text-[#4e5969] px-3.5"
             >
               货物名称
             </TableHead>
             <TableHead
               style={{ width: WIDTHS.established }}
-              className="text-left text-xs font-medium text-muted-foreground px-3.5"
+              className="text-left text-[13px] font-semibold text-[#4e5969] px-3.5"
             >
               开立时间
             </TableHead>
             <TableHead
               style={{ width: WIDTHS.status }}
-              className="text-left text-xs font-medium text-muted-foreground px-3.5"
+              className="text-center text-[13px] font-semibold text-[#4e5969] px-3.5"
             >
               仓单状态
             </TableHead>
             <TableHead
               style={{ width: WIDTHS.thirdParty }}
-              className="text-left text-xs font-medium text-muted-foreground px-3.5"
+              className="text-left text-[13px] font-semibold text-[#4e5969] px-3.5"
             >
               三方登记
             </TableHead>
             <TableHead
               style={{ width: WIDTHS.creator }}
-              className="text-left text-xs font-medium text-muted-foreground px-3.5"
+              className="text-left text-[13px] font-semibold text-[#4e5969] px-3.5"
             >
               制单人
             </TableHead>
@@ -221,13 +217,11 @@ export function ReceiptTable({
                 colSpan={11}
                 className="h-32 text-center text-sm text-muted-foreground"
               >
-                未找到符合筛选条件的仓单
+                暂无符合条件的仓单，可调整筛选条件后重试
               </TableCell>
             </TableRow>
           ) : (
             data.map((row, index) => {
-              const time = row.createdAt.split(" ")[1] ?? ""
-
               return (
                 <TableRow
                   key={row.id}
@@ -238,7 +232,7 @@ export function ReceiptTable({
                     style={{ width: WIDTHS.index }}
                     className={cn(
                       cellBase,
-                      "text-center text-xs text-muted-foreground px-2",
+                      "sticky left-0 z-10 bg-white text-center text-xs text-muted-foreground px-2 group-hover:bg-slate-50 dark:bg-slate-900 dark:group-hover:bg-slate-800",
                     )}
                   >
                     {(page - 1) * pageSize + index + 1}
@@ -246,23 +240,7 @@ export function ReceiptTable({
 
                   {/* 2. 仓单编码 */}
                   <TableCell style={{ width: WIDTHS.code }} className={cellBase}>
-                    <div className="flex items-center gap-1.5">
-                      <Link
-                        to={receiptDetailPath(row.id)}
-                        className="whitespace-nowrap font-medium text-primary hover:underline"
-                        title={row.code}
-                      >
-                        {row.code}
-                      </Link>
-                      <button
-                        type="button"
-                        className="shrink-0 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100"
-                        title="复制仓单编号"
-                        onClick={() => onCopyCode(row.code)}
-                      >
-                        <CopyIcon className="size-3.5" />
-                      </button>
-                    </div>
+                    <DocNoCell docNo={row.code} linkTo={receiptDetailPath(row.id)} wrap />
                   </TableCell>
 
                   {/* 3. 存货人 */}
@@ -300,13 +278,13 @@ export function ReceiptTable({
                     style={{ width: WIDTHS.established }}
                     className={cn(cellBase, "whitespace-nowrap")}
                   >
-                    <TableDateTimeCell value={row.establishedAt} plain />
+                    <TableDateTimeCell value={row.establishedAt} stackedPlain />
                   </TableCell>
 
                   {/* 8. 仓单状态 */}
                   <TableCell
                     style={{ width: WIDTHS.status }}
-                    className={cellBase}
+                    className={cn(cellBase, "text-center")}
                   >
                     <ReceiptStatusBadge status={row.status} />
                   </TableCell>
@@ -326,17 +304,11 @@ export function ReceiptTable({
                     style={{ width: WIDTHS.creator }}
                     className={cellBase}
                   >
-                    <div className="flex flex-col gap-0.5 leading-snug">
-                      <span
-                        className="block truncate text-sm text-foreground"
-                        title={row.creatorDisplay}
-                      >
-                        {row.creatorDisplay}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {time}
-                      </span>
-                    </div>
+                    <TablePersonOrgTimeCell
+                      person={row.creatorName}
+                      org={row.creatorOrg}
+                      time={row.createdAt}
+                    />
                   </TableCell>
 
                   {/* 11. 操作（实色背景、防穿透悬浮固定列） */}
@@ -347,6 +319,7 @@ export function ReceiptTable({
                     <TableRowActionPanel
                       actions={buildReceiptRowActions(row, onAction)}
                       fixedCols={3}
+                      maxInline={6}
                     />
                   </TableCell>
                 </TableRow>
@@ -392,128 +365,36 @@ function GoodsCell({
   receipt: WarehouseReceipt
   width: number
 }) {
-  const [open, setOpen] = useState(false)
-  const openTimer = useRef<number | null>(null)
-  const closeTimer = useRef<number | null>(null)
   const groups = receipt.goodsGroups
-
-  const clearTimers = () => {
-    if (openTimer.current) window.clearTimeout(openTimer.current)
-    if (closeTimer.current) window.clearTimeout(closeTimer.current)
-    openTimer.current = null
-    closeTimer.current = null
-  }
-
-  useEffect(() => {
-    return () => {
-      if (openTimer.current) window.clearTimeout(openTimer.current)
-      if (closeTimer.current) window.clearTimeout(closeTimer.current)
-    }
-  }, [])
-
-  const openWithDelay = () => {
-    clearTimers()
-    openTimer.current = window.setTimeout(() => setOpen(true), 300)
-  }
-
-  const closeWithDelay = () => {
-    if (openTimer.current) window.clearTimeout(openTimer.current)
-    openTimer.current = null
-    closeTimer.current = window.setTimeout(() => setOpen(false), 180)
-  }
-
-  const keepOpen = () => {
-    if (closeTimer.current) window.clearTimeout(closeTimer.current)
-    closeTimer.current = null
-  }
-
-  if (groups.length <= 2) {
+  if (groups.length === 0) {
     return (
       <TableCell style={{ width }} className={cellBase}>
-        <div className="space-y-1 overflow-hidden">
-          {groups.map((group) => {
-            const line = formatReceiptGoodsLine(group)
-            return (
-              <div
-                key={group.id}
-                className="text-sm leading-snug text-foreground truncate"
-                title={line}
-              >
-                {line}
-              </div>
-            )
-          })}
-        </div>
+        <span className="text-sm text-muted-foreground">—</span>
       </TableCell>
     )
   }
 
+  const first = formatReceiptGoodsLine(groups[0])
   return (
     <TableCell style={{ width }} className={cellBase}>
-      <div className="space-y-1 overflow-hidden">
-        {groups.slice(0, 2).map((group) => {
-          const line = formatReceiptGoodsLine(group)
-          return (
-            <div
-              key={group.id}
-              className="text-sm leading-snug text-foreground truncate"
-              title={line}
-            >
-              {line}
-            </div>
-          )
-        })}
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger
-            render={
-              <button
-                type="button"
-                className="text-xs font-medium text-primary hover:underline"
-                onMouseEnter={openWithDelay}
-                onMouseLeave={closeWithDelay}
-              />
-            }
-          >
-            更多...
-          </PopoverTrigger>
-          <PopoverContent
-            className="w-80 p-0"
-            align="start"
-            side="top"
-            onMouseEnter={keepOpen}
-            onMouseLeave={closeWithDelay}
-          >
-            <div className="border-b bg-muted/40 px-3 py-2 text-xs font-medium text-foreground">
-              仓单货品清单汇总（{receipt.code}）
-            </div>
-            <div className="max-h-64 overflow-y-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b text-muted-foreground">
-                    <th className="w-10 px-3 py-1.5 text-left font-medium">序号</th>
-                    <th className="px-3 py-1.5 text-left font-medium">货品规格全称</th>
-                    <th className="w-24 px-3 py-1.5 text-right font-medium">开立数量</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {groups.map((group, index) => (
-                    <tr key={group.id} className="border-b last:border-0">
-                      <td className="px-3 py-1.5 text-muted-foreground">{index + 1}</td>
-                      <td className="px-3 py-1.5 text-foreground">{group.name}</td>
-                      <td className="px-3 py-1.5 text-right text-foreground">
-                        {Number(group.quantity.toFixed(4))} {group.unit}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="border-t px-3 py-1.5 text-xs text-muted-foreground">
-              合计品类：{groups.length} 种规格
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
+      <Tooltip>
+        <TooltipTrigger
+          render={<span />}
+          className="line-clamp-1 cursor-help text-left text-sm font-normal leading-snug break-words text-foreground transition-colors hover:text-primary"
+          aria-label={`仓单货品：${groups.map((group) => formatReceiptGoodsLine(group)).join("、")}`}
+        >
+          {groups.length > 1 ? `${first} 等 ${groups.length} 种` : first}
+        </TooltipTrigger>
+        <TooltipContent className="max-w-sm">
+          <ul className="space-y-1 text-xs">
+            {groups.map((group) => (
+              <li key={group.id} className="leading-snug">
+                {formatReceiptGoodsLine(group)}
+              </li>
+            ))}
+          </ul>
+        </TooltipContent>
+      </Tooltip>
     </TableCell>
   )
 }

@@ -5,12 +5,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { DocumentTimelineView } from "./DocumentTimelineView"
+import type { DocumentItem } from "../types"
 
 interface DocumentTimelineModalProps {
   open: boolean
   orderNo: string
   approvalId?: string
-  orderType?: "inbound" | "outbound"
+  orderType?: DocumentItem["orderType"]
   onClose: () => void
 }
 

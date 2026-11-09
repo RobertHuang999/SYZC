@@ -243,7 +243,7 @@ export function ReceiptInitiateGoodsPage() {
           <ReceiptStepBar current={1} steps={INITIATE_STEPS} theme="blue" />
 
           <PrototypeAnnotationTarget annotationIds={["receipt-initiate-goods"]}>
-            <section className="rounded-2xl border border-[#232D39]/8 bg-white p-4 shadow-xs">
+            <section className="rounded-lg border border-[#232D39]/8 bg-white p-4 shadow-xs">
               <div className="flex items-center justify-between border-b border-[#232D39]/6 pb-3">
                 <span className="text-sm font-semibold text-[#232D39]">
                   {draft.ownerName || "未指定货主"}
@@ -409,7 +409,7 @@ export function ReceiptInitiateGoodsPage() {
             disabled={candidateCount === 0}
             onClick={goNextToConfirm}
             className={cn(
-              "flex h-12 w-full items-center justify-center rounded-xl text-base font-semibold text-white shadow-md transition-all",
+              "flex h-11 w-full items-center justify-center rounded-lg text-base font-semibold text-white shadow-md transition-all",
               candidateCount > 0
                 ? "bg-blue-600 active:bg-blue-700"
                 : "bg-gray-300 cursor-not-allowed",
@@ -685,7 +685,7 @@ export function ReceiptInitiateGoodsPage() {
 
         {/* Toast */}
         {toast ? (
-          <div className="fixed bottom-24 left-1/2 z-50 max-w-[90%] -translate-x-1/2 rounded-full bg-black/85 px-4 py-2 text-center text-xs text-white shadow-lg">
+          <div className="fixed bottom-24 left-1/2 z-50 max-w-[90%] -translate-x-1/2 rounded-full bg-black/80 px-4 py-1.5 text-center text-xs text-white shadow-lg">
             {toast}
           </div>
         ) : null}

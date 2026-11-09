@@ -16,7 +16,7 @@ export function ReceiptStatusBadge({
   return (
     <Badge
       variant="outline"
-      className={cn("px-2 py-0.5 text-xs font-normal", RECEIPT_STATUS_TONE[status].badge, className)}
+      className={cn("px-2.5 py-0.5 text-xs font-normal", RECEIPT_STATUS_TONE[status].badge, className)}
     >
       {RECEIPT_STATUS_LABEL[status]}
     </Badge>
