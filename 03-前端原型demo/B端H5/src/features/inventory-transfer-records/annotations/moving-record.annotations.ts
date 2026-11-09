@@ -12,7 +12,7 @@ export const movingH5ListAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "工作台 · 移库管理",
     content:
-      "已通过移库归档台账：按货主名称/标识搜索，仓库与移库类型用筛选胶囊，制单人与移库日期收进【更多筛选】抽屉；列表只做查询与单据操作，不在列表页放发起入口。",
+      "已通过移库归档台账：按移库单号/货主名称或标识/货物名称搜索，移库类型、仓库、货品用筛选胶囊，制单人、移库日期、制单日期收进【更多筛选】抽屉；列表字段与 PC 一致（移库单号、货主、移库时间、移库类型、关联单号、仓库、货物、移库数量、制单人、制单时间），只做查询与详情，不在列表页放发起入口。",
     documentRefs: {
       prd: { section: "6.1 列表页功能规格", match: "移库", element: "text" },
       fields: { section: "一、单据级业务字段", match: "移库单号", element: "row" },
@@ -75,7 +75,7 @@ export const movingH5DetailAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "移库管理 · 详情",
     content:
-      "摘要卡展示单号、状态、货主、移库日期、类型、仓库与移库总量；页签为货物明细、审核记录、修改记录、资料管理；现场照片与设备抓拍并入货物明细，点击可全屏预览。",
+      "摘要卡展示移库单号（可复制）、已通过状态、移库时间、移库类型、关联单号、仓库名称、货主名称/标识、制单人、制单时间与备注信息；页签固定为移库货品明细、现场凭证、审核记录，明细展示移出/移入位置、入库时间、其他信息、存货条码、可用数量与移库数量。",
     documentRefs: {
       prd: { section: "6.1 列表页功能规格", match: "详情", element: "text" },
       fields: { section: "五、系统、影像与下载审计字段", match: "影像", element: "row" },

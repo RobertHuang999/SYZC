@@ -189,20 +189,17 @@ export function calculateBookSummaryStats(items: BookSummaryItem[]) {
   }
 }
 
-/** 列表筛选：维度与 PC 一致，只改承载方式 */
+/** 列表筛选：维度与 PC 完全一致，只改承载方式 */
 export function filterCheckRecords(
   records: InventoryCheckRecord[],
   filters: CheckListFilters
 ): InventoryCheckRecord[] {
-  const keyword = filters.keyword.trim().toLowerCase()
+  const checkNo = filters.checkNo.trim().toLowerCase()
   const taskName = filters.taskName.trim().toLowerCase()
 
   return records.filter((record) => {
-    if (keyword) {
-      const hit =
-        record.checkNo.toLowerCase().includes(keyword) ||
-        record.taskName.toLowerCase().includes(keyword)
-      if (!hit) return false
+    if (checkNo && !record.checkNo.toLowerCase().includes(checkNo)) {
+      return false
     }
     if (taskName && !record.taskName.toLowerCase().includes(taskName)) {
       return false
@@ -238,6 +235,15 @@ export function filterCheckRecords(
       return false
     }
     if (filters.endDate && record.startDate > filters.endDate) {
+      return false
+    }
+    if (
+      filters.createdStartTime &&
+      record.createdTime < filters.createdStartTime
+    ) {
+      return false
+    }
+    if (filters.createdEndTime && record.createdTime > filters.createdEndTime) {
       return false
     }
     return true

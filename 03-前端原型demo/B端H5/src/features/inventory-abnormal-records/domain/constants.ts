@@ -40,10 +40,16 @@ export const ABNORMAL_TYPE_BADGE_CLASS: Record<AbnormalTypeLabel, string> = {
   其他: "border-slate-200 bg-slate-100 text-slate-600",
 }
 
-/** 仓库筛选项（取自 Mock 数据中的实体仓库） */
+/** 仓库筛选与库房级联（与 PC 异动记录筛选口径一致） */
 export const WAREHOUSE_OPTIONS = [
-  "海霸王仓库",
-  "生鲜仓库",
-  "张家港沙钢中心1号仓",
-  "无锡不锈钢智慧监管仓",
+  {
+    value: "海霸王仓库",
+    label: "海霸王仓库",
+    children: ["冻库1审核", "库房（不审核）"],
+  },
+  {
+    value: "生鲜仓库",
+    label: "生鲜仓库",
+    children: ["水果库房2", "水果库房不审核"],
+  },
 ] as const

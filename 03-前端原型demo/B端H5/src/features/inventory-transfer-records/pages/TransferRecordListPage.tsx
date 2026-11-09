@@ -12,21 +12,29 @@ import { H5_FILTER_BAR, H5_LIST_SCROLL, H5_SEARCH_INPUT } from "@/shared/h5-ui-t
 import { TransferRecordCard } from "../components/TransferRecordCard"
 import {
   H5_CREATOR_OPTIONS,
-  H5_TRANSFER_RECORD_LIST_PATH,
+  H5_GOODS_OPTIONS,
   H5_WAREHOUSE_OPTIONS,
 } from "../domain/constants"
-import type { MobileTransferRecord } from "../domain/types"
 import { mobileTransferRecordsMock } from "../mock/transfer-records.mock"
 
 const WAREHOUSE_OPTIONS: DropdownOption[] = H5_WAREHOUSE_OPTIONS
+const GOODS_OPTIONS: DropdownOption[] = H5_GOODS_OPTIONS
 const CREATOR_OPTIONS: DropdownOption[] = H5_CREATOR_OPTIONS
 
+/**
+ * 货物转让列表：筛选维度对齐 PC 转让记录 7 项检索条件
+ * （转让单号 / 转让日期 / 货主名称标识 / 仓库 / 货品名称 / 制单人 / 制单时间）。
+ * 移动端把单号与货主收进搜索框，仓库/货品/制单人用胶囊，日期范围进底部抽屉。
+ */
 export function TransferRecordListPage() {
   const [keyword, setKeyword] = useState("")
   const [selectedWarehouse, setSelectedWarehouse] = useState("ALL")
+  const [selectedGoods, setSelectedGoods] = useState("ALL")
   const [selectedCreator, setSelectedCreator] = useState("ALL")
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
+  const [assignStartDate, setAssignStartDate] = useState("")
+  const [assignEndDate, setAssignEndDate] = useState("")
+  const [createStartDate, setCreateStartDate] = useState("")
+  const [createEndDate, setCreateEndDate] = useState("")
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const filteredList = useMemo(() => {
@@ -34,37 +42,56 @@ export function TransferRecordListPage() {
       if (selectedWarehouse !== "ALL" && item.warehouseName !== selectedWarehouse) {
         return false
       }
+      if (selectedCreator !== "ALL" && item.createByName !== selectedCreator) {
+        return false
+      }
       if (
-        selectedCreator !== "ALL" &&
-        !item.createByName.includes(selectedCreator)
+        selectedGoods !== "ALL" &&
+        !item.goodsList.some((goods) => goods.goodsName === selectedGoods)
       ) {
         return false
       }
-      const transferDay = (item.transferTime || item.createTime).slice(0, 10)
-      if (startDate && transferDay < startDate) return false
-      if (endDate && transferDay > endDate) return false
 
-      const kw = keyword.trim().toLowerCase()
-      if (!kw) return true
+      const assignDay = item.assignTime.slice(0, 10)
+      if (assignStartDate && assignDay < assignStartDate) return false
+      if (assignEndDate && assignDay > assignEndDate) return false
+
+      const createDay = item.createTime.slice(0, 10)
+      if (createStartDate && createDay < createStartDate) return false
+      if (createEndDate && createDay > createEndDate) return false
+
+      const q = keyword.trim().toLowerCase()
+      if (!q) return true
       return (
-        item.id.toLowerCase().includes(kw) ||
-        item.sourceOwner.ownerName.toLowerCase().includes(kw) ||
-        item.sourceOwner.ownerIdentity.toLowerCase().includes(kw) ||
-        item.targetOwner.ownerName.toLowerCase().includes(kw) ||
-        item.targetOwner.ownerIdentity.toLowerCase().includes(kw) ||
-        item.goodsList.some((goods) => goods.goodsName.toLowerCase().includes(kw))
+        item.id.toLowerCase().includes(q) ||
+        item.sourceOwner.ownerName.toLowerCase().includes(q) ||
+        item.sourceOwner.ownerIdentity.toLowerCase().includes(q)
       )
     })
-  }, [keyword, selectedWarehouse, selectedCreator, startDate, endDate])
+  }, [
+    keyword,
+    selectedWarehouse,
+    selectedGoods,
+    selectedCreator,
+    assignStartDate,
+    assignEndDate,
+    createStartDate,
+    createEndDate,
+  ])
 
-  const advancedFilterCount = (startDate || endDate ? 1 : 0)
+  const advancedFilterCount =
+    (assignStartDate || assignEndDate ? 1 : 0) +
+    (createStartDate || createEndDate ? 1 : 0)
 
   const resetAllFilters = () => {
     setKeyword("")
     setSelectedWarehouse("ALL")
+    setSelectedGoods("ALL")
     setSelectedCreator("ALL")
-    setStartDate("")
-    setEndDate("")
+    setAssignStartDate("")
+    setAssignEndDate("")
+    setCreateStartDate("")
+    setCreateEndDate("")
   }
 
   return (
@@ -94,7 +121,7 @@ export function TransferRecordListPage() {
             <div className="relative flex-1">
               <input
                 type="text"
-                placeholder="请输入单号/货主名称/标识"
+                placeholder="请输入转让单号/货主名称/标识"
                 className={H5_SEARCH_INPUT}
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
@@ -119,6 +146,12 @@ export function TransferRecordListPage() {
               value={selectedWarehouse}
               options={WAREHOUSE_OPTIONS}
               onChange={setSelectedWarehouse}
+            />
+            <DropdownFilterPill
+              label="货品名称"
+              value={selectedGoods}
+              options={GOODS_OPTIONS}
+              onChange={setSelectedGoods}
             />
             <DropdownFilterPill
               label="制单人"
@@ -155,13 +188,15 @@ export function TransferRecordListPage() {
           )}
         </div>
 
-        {/* 更多筛选：转让日期 */}
+        {/* 更多筛选：转让日期 + 制单日期（PC 7 项检索中的日期维度） */}
         <FilterDrawer
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
           onReset={() => {
-            setStartDate("")
-            setEndDate("")
+            setAssignStartDate("")
+            setAssignEndDate("")
+            setCreateStartDate("")
+            setCreateEndDate("")
           }}
           onConfirm={() => setDrawerOpen(false)}
         >
@@ -169,18 +204,38 @@ export function TransferRecordListPage() {
             <div className="flex items-center gap-2">
               <input
                 type="date"
-                value={startDate}
-                onChange={(event) => setStartDate(event.target.value)}
+                value={assignStartDate}
+                onChange={(event) => setAssignStartDate(event.target.value)}
                 className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
                 aria-label="转让开始日期"
               />
               <span className="shrink-0 text-xs text-[#232D39]/50">至</span>
               <input
                 type="date"
-                value={endDate}
-                onChange={(event) => setEndDate(event.target.value)}
+                value={assignEndDate}
+                onChange={(event) => setAssignEndDate(event.target.value)}
                 className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
                 aria-label="转让结束日期"
+              />
+            </div>
+          </DrawerField>
+
+          <DrawerField label="制单日期">
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={createStartDate}
+                onChange={(event) => setCreateStartDate(event.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="制单开始日期"
+              />
+              <span className="shrink-0 text-xs text-[#232D39]/50">至</span>
+              <input
+                type="date"
+                value={createEndDate}
+                onChange={(event) => setCreateEndDate(event.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="制单结束日期"
               />
             </div>
           </DrawerField>

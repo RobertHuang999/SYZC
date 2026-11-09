@@ -32,6 +32,13 @@ export function InventoryAbnormalCard({ item }: InventoryAbnormalCardProps) {
     item.goodsLines.length > 1
       ? `${firstLine.goodsName} 等 ${item.goodsLines.length} 项`
       : firstLine.goodsName
+  const abnormalTypeSummary = Array.from(
+    new Set(item.goodsLines.map((line) => line.abnormalType)),
+  ).join(" | ")
+  const locationSummary =
+    item.goodsLines.length > 1
+      ? `${firstLine.location} 等 ${item.goodsLines.length} 处`
+      : firstLine.location
 
   const handleCopy = () => {
     navigator.clipboard.writeText(item.id)
@@ -49,7 +56,9 @@ export function InventoryAbnormalCard({ item }: InventoryAbnormalCardProps) {
       ownerName={item.owner.ownerName}
       ownerIdentifier={item.owner.ownerIdentity}
       person={item.applicantName}
+      personLabel="申请人"
       time={item.applyTime}
+      timeLabel="申请时间"
       metrics={
         <>
           <RecordCardMetricRow label="关联单据" value={item.relateId} />
@@ -58,8 +67,9 @@ export function InventoryAbnormalCard({ item }: InventoryAbnormalCardProps) {
             value={goodsSummary}
             onClick={() => setGoodsOpen(true)}
           />
+          <RecordCardMetricRow label="异动类型" value={abnormalTypeSummary} />
           <RecordCardMetricRow
-            label="异动前后"
+            label="异动后数量"
             value={
               <span className="inline-flex items-center gap-1">
                 <span>
@@ -85,7 +95,7 @@ export function InventoryAbnormalCard({ item }: InventoryAbnormalCardProps) {
               </span>
             }
           />
-          <RecordCardMetricRow label="仓库位置" value={firstLine.location} />
+          <RecordCardMetricRow label="存放位置" value={locationSummary} />
         </>
       }
       actions={[

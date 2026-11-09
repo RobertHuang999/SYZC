@@ -54,10 +54,14 @@ type RecordCardProps = {
   metrics: ReactNode
   /** 制单人姓名 */
   person: string
+  /** 制单人字段的展示名；默认「制单人」，异动台账口径为「申请人」 */
+  personLabel?: string
   /** 制单人所属组织（可选，跟在姓名后） */
   personOrg?: string
   /** 操作时间 */
   time: string
+  /** 时间字段的展示名；默认「操作时间」，PC 台账口径多为「制单时间」 */
+  timeLabel?: string
   /** 操作列表：最多 3 个直出，第 4 个起进「更多」 */
   actions: RecordCardAction[]
   /** 头部右侧的提醒图标等 */
@@ -76,8 +80,10 @@ export function RecordCard({
   ownerIdentifier,
   metrics,
   person,
+  personLabel = "制单人",
   personOrg,
   time,
+  timeLabel = "操作时间",
   actions,
   alert,
   children,
@@ -172,7 +178,7 @@ export function RecordCard({
         <div className="flex items-center justify-between gap-3">
           <span className="flex shrink-0 items-center gap-1 text-[#232D39]/60">
             <User className="size-3 text-[#232D39]/40" />
-            制单人
+            {personLabel}
           </span>
           <span className="min-w-0 truncate text-right font-medium text-[#232D39]/80">
             {personOrg ? `${person}（${personOrg}）` : person}
@@ -181,7 +187,7 @@ export function RecordCard({
         <div className="flex items-center justify-between gap-3">
           <span className="flex shrink-0 items-center gap-1 text-[#232D39]/60">
             <Clock className="size-3 text-[#232D39]/40" />
-            操作时间
+            {timeLabel}
           </span>
           <span className="truncate text-right text-[#232D39]/70">{time}</span>
         </div>

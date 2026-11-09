@@ -1,5 +1,6 @@
 import { RecordCard, RecordCardMetricRow } from "@/shared/components/RecordCard"
 import {
+  ANOMALY_HANDLING_MAP,
   CHECK_STATUS_MAP,
   CHECK_TYPE_LABEL,
   checkDetailRoute,
@@ -22,6 +23,7 @@ export function InventoryCheckCard({
   onRevoke,
 }: InventoryCheckCardProps) {
   const statusConfig = CHECK_STATUS_MAP[item.status]
+  const anomalyConfig = ANOMALY_HANDLING_MAP[item.anomalyHandling]
 
   return (
     <RecordCard
@@ -31,17 +33,14 @@ export function InventoryCheckCard({
       statusLabel={statusConfig.label}
       statusTone={statusConfig.tone}
       ownerName={item.taskName}
-      ownerIdentifier={item.warehouseName}
       metrics={
         <>
-          <RecordCardMetricRow label="盘点模式" value={
-            item.checkMode === "SINGLE_PERSON" ? "单人独立盘点" : "多人协作盘点"
-          } />
           <RecordCardMetricRow
             label="盘点时间"
             value={`${item.startDate} 至 ${item.endDate}`}
           />
-          <RecordCardMetricRow label="实际盘点人" value={item.actualUsers || "——"} />
+          <RecordCardMetricRow label="盘点仓库" value={item.warehouseName} />
+          <RecordCardMetricRow label="实际盘点人员" value={item.actualUsers || "——"} />
           <RecordCardMetricRow
             label="盘点结果"
             value={
@@ -62,11 +61,28 @@ export function InventoryCheckCard({
               </span>
             }
           />
+          <RecordCardMetricRow
+            label="异常处理"
+            value={
+              <span
+                className={
+                  item.anomalyHandling === "UNRESOLVED"
+                    ? "font-medium text-amber-600"
+                    : item.anomalyHandling === "RESOLVED"
+                      ? "font-medium text-emerald-600"
+                      : "text-[#232D39]/40"
+                }
+              >
+                {anomalyConfig.label}
+              </span>
+            }
+          />
         </>
       }
       person={item.creatorName.split(" / ")[0]}
       personOrg={item.creatorName.split(" / ")[1]}
       time={item.createdTime}
+      timeLabel="制单时间"
       actions={[
         { key: "detail", label: "查看详情", to: checkDetailRoute(item.id) },
         ...(canCheck

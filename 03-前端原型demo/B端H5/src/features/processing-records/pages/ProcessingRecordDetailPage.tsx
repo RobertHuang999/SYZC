@@ -25,14 +25,14 @@ import {
 } from "../domain/constants"
 import type { ProcessingRecord } from "../domain/types"
 
-type TabKey = "input" | "output" | "audit" | "modify" | "photos"
+type TabKey = "photos" | "input" | "output" | "audit" | "modify"
 
 const TABS: Array<{ key: TabKey; label: string }> = [
-  { key: "input", label: "投入" },
-  { key: "output", label: "产出" },
-  { key: "audit", label: "审核" },
-  { key: "modify", label: "修改" },
-  { key: "photos", label: "附件" },
+  { key: "photos", label: "凭证与附件" },
+  { key: "input", label: "投入货物" },
+  { key: "output", label: "产出货物" },
+  { key: "audit", label: "审核记录" },
+  { key: "modify", label: "修改记录" },
 ]
 
 function FieldRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -73,7 +73,7 @@ export function ProcessingRecordDetailPage() {
     () => MOCK_PROCESSING_RECORDS.find((item) => item.id === id) ?? MOCK_PROCESSING_RECORDS[0],
     [id]
   )
-  const [tab, setTab] = useState<TabKey>("input")
+  const [tab, setTab] = useState<TabKey>("photos")
   const [copied, setCopied] = useState(false)
   const [preview, setPreview] = useState<{ images: string[]; index: number } | null>(null)
 
@@ -146,6 +146,14 @@ export function ProcessingRecordDetailPage() {
                 ) : (
                   "—"
                 )
+              }
+            />
+            <FieldRow
+              label="单据业务状态"
+              value={
+                <span className={`inline-flex rounded border px-1.5 py-0.5 text-[11px] font-medium ${status.badgeClass}`}>
+                  {status.label}
+                </span>
               }
             />
             <FieldRow label="加工原因" value={record.remark || "—"} />
@@ -227,7 +235,7 @@ export function ProcessingRecordDetailPage() {
         {/* 投入货物 */}
         {tab === "input" && (
           <div className="space-y-2.5">
-            {record.inputGroups.map((group) => (
+            {record.inputGroups.map((group, groupIndex) => (
               <section
                 key={group.id}
                 className="space-y-2 rounded-xl border border-[#232D39]/10 bg-white p-3.5 text-xs shadow-xs"
@@ -244,40 +252,50 @@ export function ProcessingRecordDetailPage() {
                   </span>
                 </div>
 
-                {group.lines.map((line) => (
+                {group.lines.map((line, lineIndex) => (
                   <div
                     key={line.id}
                     className="space-y-1.5 rounded-lg bg-[#232D39]/[0.03] p-2.5 text-[11px]"
                   >
                     <FieldRow
+                      label="序号"
+                      value={`${groupIndex + 1}.${lineIndex + 1}`}
+                    />
+                    <FieldRow
                       label="货物位置"
-                      value={`${line.roomZone}${line.specificLocation ? ` · ${line.specificLocation}` : ""}`}
+                      value={line.roomZone}
+                    />
+                    <FieldRow
+                      label="具体位置"
+                      value={line.specificLocation || "—"}
                     />
                     <FieldRow label="入库时间" value={line.inboundTime} />
                     <FieldRow label="存货条码" value={line.barcode} />
-                    {line.otherInfo && <FieldRow label="扩展信息" value={line.otherInfo} />}
+                    <FieldRow label="扩展信息" value={line.otherInfo || "—"} />
                     <div className="flex items-baseline justify-between gap-3 border-t border-dashed border-[#232D39]/10 pt-1.5">
                       <span className="text-[#232D39]/60">计划投入</span>
                       <span className="font-bold text-[#232D39]">
                         {formatQty(line.planAmount)} {line.unit}
                       </span>
                     </div>
-                    {isCompleted && (
-                      <div className="grid grid-cols-2 gap-2 border-t border-dashed border-[#232D39]/10 pt-1.5">
-                        <div>
-                          <span className="block text-[#232D39]/45">实际消耗</span>
-                          <span className="font-semibold text-[#232D39]">
-                            {formatQty(line.actualAmount)} {line.unit}
-                          </span>
-                        </div>
-                        <div className="text-right">
-                          <span className="block text-[#232D39]/45">自动释放</span>
-                          <span className="font-semibold text-emerald-600">
-                            {formatQty(line.releasedAmount)} {line.unit}
-                          </span>
-                        </div>
+                    <div className="grid grid-cols-2 gap-2 border-t border-dashed border-[#232D39]/10 pt-1.5">
+                      <div>
+                        <span className="block text-[#232D39]/45">实际消耗</span>
+                        <span className="font-semibold text-[#232D39]">
+                          {isCompleted
+                            ? `${formatQty(line.actualAmount)} ${line.unit}`
+                            : "—"}
+                        </span>
                       </div>
-                    )}
+                      <div className="text-right">
+                        <span className="block text-[#232D39]/45">释放数量</span>
+                        <span className="font-semibold text-emerald-600">
+                          {isCompleted
+                            ? `${formatQty(line.releasedAmount)} ${line.unit}`
+                            : "—"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </section>
@@ -288,7 +306,7 @@ export function ProcessingRecordDetailPage() {
         {/* 产出货物 */}
         {tab === "output" && (
           <div className="space-y-2.5">
-            {record.outputItems.map((output) => (
+            {record.outputItems.map((output, outputIndex) => (
               <section
                 key={output.id}
                 className="space-y-2 rounded-xl border border-[#232D39]/10 bg-white p-3.5 text-xs shadow-xs"
@@ -301,11 +319,15 @@ export function ProcessingRecordDetailPage() {
                     </p>
                   </div>
                   <span className="shrink-0 rounded border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-700">
-                    产出成品
+                    产出货物
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 rounded-lg bg-[#232D39]/[0.03] p-2.5 text-[11px]">
+                  <div className="col-span-2">
+                    <span className="block text-[#232D39]/45">序号</span>
+                    <span className="font-semibold text-[#232D39]">{outputIndex + 1}</span>
+                  </div>
                   <div>
                     <span className="block text-[#232D39]/45">预计数量</span>
                     <span className="font-semibold text-[#232D39]">
@@ -317,7 +339,7 @@ export function ProcessingRecordDetailPage() {
                     <span className="font-semibold text-[#232D39]">
                       {isCompleted
                         ? `${formatQty(output.actualQty)} ${output.unit}`
-                        : "待完成登记"}
+                        : "—"}
                     </span>
                   </div>
                   <div>
@@ -335,7 +357,7 @@ export function ProcessingRecordDetailPage() {
 
                 {output.collectAttrs && output.collectAttrs.length > 0 && (
                   <div className="space-y-1 text-[11px]">
-                    <span className="text-[#232D39]/45">扩展采集属性</span>
+                    <span className="text-[#232D39]/45">扩展属性 (动态采集)</span>
                     {output.collectAttrs.map((attr) => (
                       <FieldRow
                         key={attr.label}
@@ -352,7 +374,7 @@ export function ProcessingRecordDetailPage() {
                     新存货条码
                   </span>
                   <span className="flex items-center gap-1 font-medium text-[#232D39]">
-                    {isCompleted && output.barcode ? output.barcode : "待完成加工后生成"}
+                    {isCompleted && output.barcode ? output.barcode : "—"}
                   </span>
                 </div>
               </section>
@@ -368,7 +390,12 @@ export function ProcessingRecordDetailPage() {
               审批流转记录
             </h3>
             <div className="relative space-y-4 pl-5 before:absolute before:bottom-2 before:left-2 before:top-2 before:w-0.5 before:bg-[#232D39]/10">
-              {record.auditNodes.map((node) => (
+              {(record.auditNodes ?? []).length === 0 && (
+                <p className="py-4 text-center text-[11px] text-[#232D39]/40">
+                  暂无审核历史记录
+                </p>
+              )}
+              {(record.auditNodes ?? []).map((node) => (
                 <div key={node.id} className="relative">
                   <div
                     className={`absolute -left-5 top-1 size-3 rounded-full border-2 border-white shadow-xs ${
@@ -392,6 +419,11 @@ export function ProcessingRecordDetailPage() {
                   {node.comment && (
                     <p className="mt-1 rounded-lg bg-[#232D39]/[0.03] p-2 text-[11px] text-[#232D39]/70">
                       意见：{node.comment}
+                    </p>
+                  )}
+                  {node.taskId && (
+                    <p className="mt-1 text-[11px] font-medium text-blue-600">
+                      查看通用审批中心任务详情 ›
                     </p>
                   )}
                 </div>
@@ -458,7 +490,7 @@ export function ProcessingRecordDetailPage() {
           <section className="space-y-2.5 rounded-xl border border-[#232D39]/10 bg-white p-3.5 text-xs shadow-xs">
             <h3 className="flex items-center gap-1.5 font-bold text-[#232D39]">
               <Camera className="size-4 text-blue-600" />
-              现场设备抓拍
+              现场设备抓拍图
             </h3>
             {record.devicePhotos && record.devicePhotos.length > 0 ? (
               <div className="flex flex-wrap gap-2">

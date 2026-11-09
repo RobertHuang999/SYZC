@@ -6,13 +6,12 @@ interface TransferRecordCardProps {
   item: MobileTransferRecord
 }
 
-/** 转让记录卡：与入库/出库共用 RecordCard 五段式结构（见《02-移动端列表页设计与交互规范》4.2 节） */
+/**
+ * 转让记录卡：与入库/出库共用 RecordCard 五段式结构。
+ * 字段按 PC 列表 10 列口径：转让人为主主体，接收人、转让时间、数量、仓库、货物放指标块；
+ * 操作仅【查看详情】（PC R07 明确不设下载入口）。
+ */
 export function TransferRecordCard({ item }: TransferRecordCardProps) {
-  const goodsSummary =
-    item.goodsList.length > 1
-      ? `${item.goodsList[0].goodsName} 等 ${item.goodsList.length} 种`
-      : item.goodsList[0].goodsName
-
   return (
     <RecordCard
       orderNo={item.id}
@@ -20,23 +19,25 @@ export function TransferRecordCard({ item }: TransferRecordCardProps) {
       typeLabel="货权转让"
       statusLabel="已通过"
       statusTone="emerald"
-      ownerName={item.targetOwner.ownerName}
-      ownerIdentifier={`受让方 · ${item.targetOwner.ownerIdentity}`}
+      ownerName={item.sourceOwner.ownerName}
+      ownerIdentifier={item.sourceOwner.ownerIdentity}
       person={item.createByName}
       personOrg={item.createOrgName}
-      time={item.transferTime || item.createTime}
+      time={item.createTime}
+      timeLabel="制单时间"
       metrics={
         <>
-          <RecordCardMetricRow
-            label="出让方"
-            value={item.sourceOwner.ownerName}
-          />
-          <RecordCardMetricRow label="转让货物" value={goodsSummary} />
+          <RecordCardMetricRow label="转让时间" value={item.assignTime} />
           <RecordCardMetricRow
             label="转让数量"
-            value={`${item.totalAmount.toLocaleString()} ${item.unit}`}
+            value={`${item.amount.toLocaleString("zh-CN", { maximumFractionDigits: 3 })} ${item.unit}`}
           />
-          <RecordCardMetricRow label="监管仓库" value={item.warehouseName} />
+          <RecordCardMetricRow
+            label="接收人"
+            value={`${item.targetOwner.ownerName}（${item.targetOwner.ownerIdentity}）`}
+          />
+          <RecordCardMetricRow label="仓库名称" value={item.warehouseName} />
+          <RecordCardMetricRow label="货物名称" value={item.goodsSummaryText} />
         </>
       }
       actions={[

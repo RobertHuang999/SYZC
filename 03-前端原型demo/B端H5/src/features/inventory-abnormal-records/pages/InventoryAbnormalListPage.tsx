@@ -15,59 +15,100 @@ import {
   ORDER_TYPE_OPTIONS,
   WAREHOUSE_OPTIONS,
 } from "../domain/constants"
+import type { AbnormalOrderTypeLabel, AbnormalTypeLabel } from "../domain/types"
 import { abnormalRecordsMock } from "../mock/inventory-abnormal.mock"
-
-const ORDER_TYPE_FILTER_OPTIONS: DropdownOption[] = [
-  { label: "全部单据", value: "全部" },
-  ...ORDER_TYPE_OPTIONS.map((type) => ({ label: type, value: type })),
-]
-
-const ABNORMAL_TYPE_FILTER_OPTIONS: DropdownOption[] = [
-  { label: "全部异动", value: "全部" },
-  ...ABNORMAL_TYPE_OPTIONS.map((type) => ({ label: type, value: type })),
-]
 
 const WAREHOUSE_FILTER_OPTIONS: DropdownOption[] = [
   { label: "全部仓库", value: "全部" },
-  ...WAREHOUSE_OPTIONS.map((name) => ({ label: name, value: name })),
+  ...WAREHOUSE_OPTIONS.map((warehouse) => ({
+    label: warehouse.label,
+    value: warehouse.value,
+  })),
 ]
 
-/** 申请人选项取自 Mock，展示为「姓名（机构）」的姓名部分 */
-const APPLICANT_OPTIONS: DropdownOption[] = [
-  { label: "全部申请人", value: "全部" },
-  ...Array.from(new Set(abnormalRecordsMock.map((item) => item.applicantName))).map(
-    (name) => ({
-      label: name.split("（")[0] ?? name,
-      value: name,
-    }),
-  ),
-]
+/** 记录是否发生在指定仓库 */
+function inWarehouse(location: string, warehouse: string): boolean {
+  return location.startsWith(`${warehouse}-`)
+}
+
+/** 记录是否发生在指定库房 */
+function inHouse(location: string, house: string): boolean {
+  return location.split("-")[1] === house
+}
 
 export function InventoryAbnormalListPage() {
   const [keyword, setKeyword] = useState("")
-  const [selectedOrderType, setSelectedOrderType] = useState("全部")
-  const [selectedAbnormalType, setSelectedAbnormalType] = useState("全部")
+  const [abnormalNo, setAbnormalNo] = useState("")
+  const [relateNo, setRelateNo] = useState("")
+  const [ownerKeyword, setOwnerKeyword] = useState("")
+  const [goodsKeyword, setGoodsKeyword] = useState("")
+  const [orderTypes, setOrderTypes] = useState<AbnormalOrderTypeLabel[]>([])
+  const [abnormalTypes, setAbnormalTypes] = useState<AbnormalTypeLabel[]>([])
   const [selectedWarehouse, setSelectedWarehouse] = useState("全部")
-  const [selectedApplicant, setSelectedApplicant] = useState("全部")
+  const [selectedHouse, setSelectedHouse] = useState("全部")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
   const [drawerOpen, setDrawerOpen] = useState(false)
 
+  const houseOptions = useMemo(() => {
+    const warehouse = WAREHOUSE_OPTIONS.find(
+      (item) => item.value === selectedWarehouse,
+    )
+    return warehouse ? [...warehouse.children] : []
+  }, [selectedWarehouse])
+
+  const toggleOrderType = (type: AbnormalOrderTypeLabel) => {
+    setOrderTypes((prev) =>
+      prev.includes(type) ? prev.filter((item) => item !== type) : [...prev, type],
+    )
+  }
+
+  const toggleAbnormalType = (type: AbnormalTypeLabel) => {
+    setAbnormalTypes((prev) =>
+      prev.includes(type) ? prev.filter((item) => item !== type) : [...prev, type],
+    )
+  }
+
   const filteredList = useMemo(() => {
     return abnormalRecordsMock.filter((item) => {
-      if (selectedOrderType !== "全部" && item.relateOrderType !== selectedOrderType) {
+      if (abnormalNo.trim() && !item.id.includes(abnormalNo.trim())) return false
+      if (relateNo.trim() && !item.relateId.includes(relateNo.trim())) return false
+
+      if (ownerKeyword.trim()) {
+        const owner = ownerKeyword.trim().toLowerCase()
+        const ownerHit =
+          item.owner.ownerName.toLowerCase().includes(owner) ||
+          item.owner.ownerIdentity.toLowerCase().includes(owner)
+        if (!ownerHit) return false
+      }
+
+      if (goodsKeyword.trim()) {
+        const goods = goodsKeyword.trim().toLowerCase()
+        if (!item.goodsLines.some((line) => line.goodsName.toLowerCase().includes(goods))) {
+          return false
+        }
+      }
+
+      if (orderTypes.length > 0 && !orderTypes.includes(item.relateOrderType)) {
         return false
       }
       if (
-        selectedAbnormalType !== "全部" &&
-        !item.goodsLines.some((line) => line.abnormalType === selectedAbnormalType)
+        abnormalTypes.length > 0 &&
+        !item.goodsLines.some((line) => abnormalTypes.includes(line.abnormalType))
       ) {
         return false
       }
-      if (selectedWarehouse !== "全部" && item.warehouseName !== selectedWarehouse) {
+
+      if (
+        selectedWarehouse !== "全部" &&
+        !item.goodsLines.some((line) => inWarehouse(line.location, selectedWarehouse))
+      ) {
         return false
       }
-      if (selectedApplicant !== "全部" && item.applicantName !== selectedApplicant) {
+      if (
+        selectedHouse !== "全部" &&
+        !item.goodsLines.some((line) => inHouse(line.location, selectedHouse))
+      ) {
         return false
       }
 
@@ -87,27 +128,39 @@ export function InventoryAbnormalListPage() {
     })
   }, [
     keyword,
-    selectedOrderType,
-    selectedAbnormalType,
+    abnormalNo,
+    relateNo,
+    ownerKeyword,
+    goodsKeyword,
+    orderTypes,
+    abnormalTypes,
     selectedWarehouse,
-    selectedApplicant,
+    selectedHouse,
     startDate,
     endDate,
   ])
 
-  const activeFilterCount =
-    (selectedOrderType !== "全部" ? 1 : 0) +
-    (selectedAbnormalType !== "全部" ? 1 : 0) +
+  const advancedFilterCount =
+    (abnormalNo ? 1 : 0) +
+    (relateNo ? 1 : 0) +
+    (ownerKeyword ? 1 : 0) +
+    (goodsKeyword ? 1 : 0) +
+    (orderTypes.length > 0 ? 1 : 0) +
+    (abnormalTypes.length > 0 ? 1 : 0) +
     (selectedWarehouse !== "全部" ? 1 : 0) +
-    (selectedApplicant !== "全部" ? 1 : 0) +
+    (selectedHouse !== "全部" ? 1 : 0) +
     (startDate || endDate ? 1 : 0)
 
   const resetAllFilters = () => {
     setKeyword("")
-    setSelectedOrderType("全部")
-    setSelectedAbnormalType("全部")
+    setAbnormalNo("")
+    setRelateNo("")
+    setOwnerKeyword("")
+    setGoodsKeyword("")
+    setOrderTypes([])
+    setAbnormalTypes([])
     setSelectedWarehouse("全部")
-    setSelectedApplicant("全部")
+    setSelectedHouse("全部")
     setStartDate("")
     setEndDate("")
   }
@@ -128,9 +181,9 @@ export function InventoryAbnormalListPage() {
               aria-label="更多筛选"
             >
               <Filter className="size-4.5" />
-              {activeFilterCount > 0 && (
+              {advancedFilterCount > 0 && (
                 <span className="absolute -right-0.5 -top-0.5 flex size-3.5 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white">
-                  {activeFilterCount}
+                  {advancedFilterCount}
                 </span>
               )}
             </button>
@@ -159,23 +212,36 @@ export function InventoryAbnormalListPage() {
 
           <div className="no-scrollbar flex items-center gap-2 overflow-x-auto py-0.5">
             <DropdownFilterPill
-              label="单据类型"
-              value={selectedOrderType}
-              options={ORDER_TYPE_FILTER_OPTIONS}
-              onChange={setSelectedOrderType}
-            />
-            <DropdownFilterPill
-              label="异动类型"
-              value={selectedAbnormalType}
-              options={ABNORMAL_TYPE_FILTER_OPTIONS}
-              onChange={setSelectedAbnormalType}
-            />
-            <DropdownFilterPill
               label="仓库"
               value={selectedWarehouse}
               options={WAREHOUSE_FILTER_OPTIONS}
-              onChange={setSelectedWarehouse}
+              onChange={(value) => {
+                setSelectedWarehouse(value)
+                setSelectedHouse("全部")
+              }}
             />
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              className={`shrink-0 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-medium ${
+                orderTypes.length > 0
+                  ? "border border-blue-200 bg-blue-50 font-bold text-blue-600"
+                  : "bg-[#232D39]/5 text-[#232D39]/70"
+              }`}
+            >
+              单据类型{orderTypes.length > 0 ? ` · ${orderTypes.length}` : ""}
+            </button>
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              className={`shrink-0 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-medium ${
+                abnormalTypes.length > 0
+                  ? "border border-blue-200 bg-blue-50 font-bold text-blue-600"
+                  : "bg-[#232D39]/5 text-[#232D39]/70"
+              }`}
+            >
+              异动类型{abnormalTypes.length > 0 ? ` · ${abnormalTypes.length}` : ""}
+            </button>
           </div>
         </div>
 
@@ -211,28 +277,135 @@ export function InventoryAbnormalListPage() {
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
           onReset={() => {
-            setSelectedApplicant("全部")
+            setAbnormalNo("")
+            setRelateNo("")
+            setOwnerKeyword("")
+            setGoodsKeyword("")
+            setOrderTypes([])
+            setAbnormalTypes([])
+            setSelectedHouse("全部")
             setStartDate("")
             setEndDate("")
           }}
           onConfirm={() => setDrawerOpen(false)}
         >
-          <DrawerField label="申请人">
-            <select
-              value={selectedApplicant}
-              onChange={(event) => setSelectedApplicant(event.target.value)}
+          <DrawerField label="异动单号">
+            <input
+              type="text"
+              value={abnormalNo}
+              onChange={(event) => setAbnormalNo(event.target.value)}
+              placeholder="请输入异动单号"
               className="w-full rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
-              aria-label="申请人"
-            >
-              {APPLICANT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            />
           </DrawerField>
 
-          <DrawerField label="申请日期">
+          <DrawerField label="关联单据">
+            <input
+              type="text"
+              value={relateNo}
+              onChange={(event) => setRelateNo(event.target.value)}
+              placeholder="监管业务单号或入库单号"
+              className="w-full rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+            />
+          </DrawerField>
+
+          <DrawerField label="货主名称/标识">
+            <input
+              type="text"
+              value={ownerKeyword}
+              onChange={(event) => setOwnerKeyword(event.target.value)}
+              placeholder="请输入货主名称或识别码"
+              className="w-full rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+            />
+          </DrawerField>
+
+          <DrawerField label="货物名称">
+            <input
+              type="text"
+              value={goodsKeyword}
+              onChange={(event) => setGoodsKeyword(event.target.value)}
+              placeholder="请输入货物名称/规格"
+              className="w-full rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+            />
+          </DrawerField>
+
+          <DrawerField label="单据类型">
+            <div className="flex flex-wrap gap-1.5">
+              {ORDER_TYPE_OPTIONS.map((type) => {
+                const active = orderTypes.includes(type)
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => toggleOrderType(type)}
+                    className={`rounded-full px-2.5 py-1 text-xs ${
+                      active
+                        ? "border border-blue-200 bg-blue-50 font-semibold text-blue-600"
+                        : "bg-gray-50 text-[#232D39]/70"
+                    }`}
+                  >
+                    {type}
+                  </button>
+                )
+              })}
+            </div>
+          </DrawerField>
+
+          <DrawerField label="异动类型">
+            <div className="flex flex-wrap gap-1.5">
+              {ABNORMAL_TYPE_OPTIONS.map((type) => {
+                const active = abnormalTypes.includes(type)
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => toggleAbnormalType(type)}
+                    className={`rounded-full px-2.5 py-1 text-xs ${
+                      active
+                        ? "border border-blue-200 bg-blue-50 font-semibold text-blue-600"
+                        : "bg-gray-50 text-[#232D39]/70"
+                    }`}
+                  >
+                    {type}
+                  </button>
+                )
+              })}
+            </div>
+          </DrawerField>
+
+          <DrawerField label="仓库/库房">
+            <div className="flex items-center gap-2">
+              <select
+                value={selectedWarehouse}
+                onChange={(event) => {
+                  setSelectedWarehouse(event.target.value)
+                  setSelectedHouse("全部")
+                }}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+              >
+                {WAREHOUSE_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={selectedHouse}
+                onChange={(event) => setSelectedHouse(event.target.value)}
+                disabled={selectedWarehouse === "全部"}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39] disabled:bg-gray-50 disabled:text-[#232D39]/35"
+              >
+                <option value="全部">全部库房</option>
+                {houseOptions.map((house) => (
+                  <option key={house} value={house}>
+                    {house}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </DrawerField>
+
+          <DrawerField label="申请时间范围">
             <div className="flex items-center gap-2">
               <input
                 type="date"

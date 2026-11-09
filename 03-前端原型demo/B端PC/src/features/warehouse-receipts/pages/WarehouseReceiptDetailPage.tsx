@@ -426,11 +426,11 @@ function GroupRows({
                 <Table className="w-full min-w-[1080px] table-fixed">
                   <colgroup>
                     <col className="w-14" />
-                    <col className="w-[240px]" />
-                    <col className="w-[120px]" />
+                    <col className="w-[260px]" />
+                    <col className="w-[140px]" />
                     <col className="w-[150px]" />
                     <col className="w-[200px]" />
-                    <col className="w-[90px]" />
+                    <col className="w-[70px]" />
                     <col className="w-[90px]" />
                     <col className="w-[130px]" />
                   </colgroup>
@@ -461,28 +461,26 @@ function GroupRows({
                         <TableCell className="text-center text-xs text-muted-foreground">
                           {lotIndex + 1}
                         </TableCell>
-                        <TableCell className="text-sm text-foreground">
+                        <TableCell className="whitespace-normal break-words text-sm leading-relaxed text-foreground">
                           {lot.warehouseName}-{lot.houseName}({lot.houseAudit})-
                           {lot.zoneName}
                         </TableCell>
-                        <TableCell className="text-sm text-foreground">
+                        <TableCell className="whitespace-normal break-words text-sm leading-relaxed text-foreground">
                           {lot.position || "—"}
                         </TableCell>
                         <TableCell className="whitespace-nowrap">
                           <TableDateTimeCell value={lot.inboundAt} plain />
                         </TableCell>
-                        <TableCell className="text-xs leading-relaxed text-muted-foreground">
+                        <TableCell className="whitespace-normal break-words text-xs leading-relaxed text-muted-foreground">
                           {lot.otherInfo.length > 0 ? lot.otherInfo.join(" / ") : "—"}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1.5 whitespace-nowrap">
-                            <span className="text-xs tabular-nums text-foreground">
-                              {lot.barcode || "—"}
-                            </span>
+                          <div className="flex items-center justify-center">
                             <button
                               type="button"
                               className="inline-flex size-7 items-center justify-center rounded border bg-white text-primary hover:bg-primary/5"
-                              title="查看存货条码"
+                              title={lot.barcode ? `查看存货条码：${lot.barcode}` : "暂无存货条码"}
+                              aria-label="查看存货条码"
                               onClick={() => onOpenBarcode(lot)}
                             >
                               <QrCodeIcon className="size-4" />

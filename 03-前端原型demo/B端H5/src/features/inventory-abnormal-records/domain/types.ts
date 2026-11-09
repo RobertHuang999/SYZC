@@ -27,6 +27,8 @@ export interface AbnormalGoodsLine {
   afterQty: number
   /** 差额 = 变动后 - 变动前 */
   diffQty: number
+  /** 带符号差额展示，如 "+49.0007斤"、"-2公斤"（与 PC 一致） */
+  diffQtyDisplay?: string
   abnormalType: AbnormalTypeLabel
   reason?: string
   barcode?: string
@@ -43,6 +45,7 @@ export interface AbnormalApprovalNode {
   roleDesc?: string
   hasTaskDetail?: boolean
   taskId?: string
+  status?: "COMPLETED" | "CURRENT" | "WAITING"
 }
 
 /** 异动台账记录（台账只展示已生效归档单据） */

@@ -1,4 +1,3 @@
-import { ArrowRight, Package } from "lucide-react"
 import { RecordCard, RecordCardMetricRow } from "@/shared/components/RecordCard"
 import {
   PROCESSING_STATUS_MAP,
@@ -14,32 +13,37 @@ interface ProcessingRecordCardProps {
   onVoid: (item: ProcessingRecord) => void
 }
 
-/** 投入 / 产出摘要：列表只给一行，详情页再展开到货位与条码 */
-function buildFlowSummary(item: ProcessingRecord): string {
-  const inputNames = item.inputGroups.map((group) => group.goodsName.replace(/^.*-/, ""))
-  const outputNames = item.outputItems.map((output) => output.goodsName.replace(/^.*-/, ""))
-  return `${inputNames.join("、") || "—"} ➔ ${outputNames.join("、") || "—"}`
+/** 按 PC 列表的「计划 / 实际投入货物」口径汇总：首项名称 + 数量，多项补「等 N 种」 */
+function summarizeInput(item: ProcessingRecord, mode: "plan" | "actual"): string {
+  const entries = item.inputGroups
+    .map((group) => {
+      const qty = group.lines.reduce(
+        (sum, line) => sum + (mode === "plan" ? line.planAmount : line.actualAmount ?? 0),
+        0
+      )
+      return { name: group.goodsName, qty, unit: group.unit }
+    })
+    .filter((entry) => entry.qty > 0)
+  if (entries.length === 0) return "—"
+  const first = `${entries[0].name}：${formatQty(entries[0].qty)}${entries[0].unit}`
+  return entries.length > 1 ? `${first} 等 ${entries.length} 种` : first
 }
 
-function buildQuantitySummary(item: ProcessingRecord): string {
-  const unit = item.inputGroups[0]?.unit ?? item.outputItems[0]?.unit ?? ""
-  if (item.status === "COMPLETED") {
-    const actualInput = item.inputGroups.reduce(
-      (sum, group) =>
-        sum + group.lines.reduce((lineSum, line) => lineSum + (line.actualAmount ?? 0), 0),
-      0
+/** 按 PC 列表的「计划 / 实际产出货物」口径汇总 */
+function summarizeOutput(item: ProcessingRecord, mode: "expected" | "actual"): string {
+  const entries = item.outputItems
+    .map((output) => ({
+      name: output.goodsName,
+      qty: mode === "expected" ? output.expectedQty : output.actualQty,
+      unit: output.unit,
+    }))
+    .filter(
+      (entry): entry is { name: string; qty: number; unit: string } =>
+        typeof entry.qty === "number" && entry.qty > 0
     )
-    const actualOutput = item.outputItems.reduce(
-      (sum, output) => sum + (output.actualQty ?? 0),
-      0
-    )
-    return `投入 ${formatQty(actualInput)} ${unit} / 产出 ${formatQty(actualOutput)} ${unit}`
-  }
-  const planInput = item.inputGroups.reduce(
-    (sum, group) => sum + group.lines.reduce((lineSum, line) => lineSum + line.planAmount, 0),
-    0
-  )
-  return `计划投入 ${formatQty(planInput)} ${unit}`
+  if (entries.length === 0) return "—"
+  const first = `${entries[0].name}：${formatQty(entries[0].qty)}${entries[0].unit}`
+  return entries.length > 1 ? `${first} 等 ${entries.length} 项` : first
 }
 
 export function ProcessingRecordCard({
@@ -49,6 +53,7 @@ export function ProcessingRecordCard({
 }: ProcessingRecordCardProps) {
   const status = PROCESSING_STATUS_MAP[item.status]
   const isPending = item.status === "PENDING_COMPLETION"
+  const isCompleted = item.status === "COMPLETED"
 
   return (
     <RecordCard
@@ -61,30 +66,34 @@ export function ProcessingRecordCard({
       ownerIdentifier={item.ownerIdentity}
       metrics={
         <>
+          <RecordCardMetricRow label="加工日期" value={item.processingTime} />
+          <RecordCardMetricRow label="仓库名称" value={item.warehouseName} />
           <RecordCardMetricRow
-            label="加工流转"
-            value={
-              <span className="inline-flex min-w-0 items-center gap-1">
-                <Package className="size-3 shrink-0 text-[#232D39]/40" />
-                <span className="truncate">{buildFlowSummary(item)}</span>
-                <ArrowRight className="size-3 shrink-0 text-blue-600" />
-              </span>
-            }
+            label="关联单号"
+            value={item.associatedOrderId || "—"}
           />
-          <RecordCardMetricRow label="加工数量" value={buildQuantitySummary(item)} />
           <RecordCardMetricRow
-            label="仓库名称"
-            value={
-              item.associatedOrderId
-                ? `${item.warehouseName} · ${item.associatedOrderId}`
-                : item.warehouseName
-            }
+            label="计划投入"
+            value={summarizeInput(item, "plan")}
+          />
+          <RecordCardMetricRow
+            label="实际投入"
+            value={isCompleted ? summarizeInput(item, "actual") : "—"}
+          />
+          <RecordCardMetricRow
+            label="计划产出"
+            value={summarizeOutput(item, "expected")}
+          />
+          <RecordCardMetricRow
+            label="实际产出"
+            value={isCompleted ? summarizeOutput(item, "actual") : "—"}
           />
         </>
       }
       person={item.createByName}
       personOrg={item.createOrgName}
       time={item.createTime}
+      timeLabel="制单时间"
       actions={[
         { key: "detail", label: "查看详情", to: processingDetailRoute(item.id) },
         ...(isPending

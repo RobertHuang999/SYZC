@@ -1,13 +1,14 @@
-import type { MovingFlowTypeValue, MovingRecordItem } from "./types"
+import type { MovingFlowTypeValue, MovingRecordType } from "./types"
 
 /* ---------------- 移库记录（工作台 · 移库管理） ---------------- */
 
 export const H5_MOVING_RECORD_LIST_PATH = "/m/workspace/moving-records"
+export const WORKSPACE_ROUTE = "/m/workspace"
 
 export const h5MovingRecordDetailPath = (id: string) =>
   `/m/workspace/moving-records/${encodeURIComponent(id)}`
 
-/** 移库类型下拉（列表筛选与发起页共用；仓单移库须回仓单管理操作，不在此发起） */
+/** 移库发起页可选的类型（仓单移库须回仓单管理操作，不作为发起选项） */
 export const MOVING_FLOW_TYPES: Array<{
   id: MovingFlowTypeValue
   name: string
@@ -18,27 +19,17 @@ export const MOVING_FLOW_TYPES: Array<{
   { id: "CD", name: "仓单移库" },
 ]
 
-/** 在押货细分类型（按业务口径归并「抵押 / 质押 / 仓单 / 普通存货」） */
-export function getMovingTypeText(record: MovingRecordItem): { text: string; value: string } {
-  if (record.refType === 1) {
-    if (record.pledgeType === 2) return { text: "仓单移库", value: "CD" }
-    return record.applyType === 1
-      ? { text: "抵押移库", value: "MORTGAGE" }
-      : { text: "质押移库", value: "PLEDGE" }
-  }
-  return { text: "普通移库", value: "NORMAL" }
-}
-
-/** 审核状态（列表卡片胶囊 + 详情摘要标签） */
-export const MOVING_CHECK_STATUS_MAP: Record<
-  number,
-  { text: string; tone: "amber" | "emerald" | "rose" | "slate" }
-> = {
-  1: { text: "审核中", tone: "amber" },
-  2: { text: "已通过", tone: "emerald" },
-  3: { text: "已驳回", tone: "rose" },
-  4: { text: "已撤销", tone: "slate" },
-}
+/** 台账筛选的移库类型（含「仓单移库」，与 PC 字段清单一一致） */
+export const MOVING_RECORD_TYPE_FILTER_OPTIONS: Array<{
+  label: string
+  value: MovingRecordType | "全部"
+}> = [
+  { label: "全部类型", value: "全部" },
+  { label: "普通移库", value: "普通移库" },
+  { label: "质押移库", value: "质押移库" },
+  { label: "抵押移库", value: "抵押移库" },
+  { label: "仓单移库", value: "仓单移库" },
+]
 
 /* ---------------- 货物转让（工作台 · 货物转让） ---------------- */
 
@@ -49,15 +40,27 @@ export const h5TransferRecordDetailPath = (id: string) =>
 
 export const H5_WAREHOUSE_OPTIONS = [
   { label: "全部仓库", value: "ALL" },
-  { label: "海霸王一号冷库", value: "海霸王一号冷库" },
-  { label: "海霸王二号综合库", value: "海霸王二号综合库" },
-  { label: "西南大宗商品保税库", value: "西南大宗商品保税库" },
-  { label: "生鲜冷链储备库", value: "生鲜冷链储备库" },
+  { label: "海霸王仓库", value: "海霸王仓库" },
+  { label: "干粮仓库", value: "干粮仓库" },
+  { label: "生鲜仓库", value: "生鲜仓库" },
+  { label: "钢铁物流园仓库", value: "钢铁物流园仓库" },
+  { label: "有色金属监管仓", value: "有色金属监管仓" },
+]
+
+export const H5_GOODS_OPTIONS = [
+  { label: "全部货品", value: "ALL" },
+  { label: "水果-苹果-新疆-特级", value: "水果-苹果-新疆-特级" },
+  { label: "水果-香蕉-海南-1斤", value: "水果-香蕉-海南-1斤" },
+  { label: "水果-西瓜-二级-云南", value: "水果-西瓜-二级-云南" },
+  { label: "冻货-牛肉-36个月", value: "冻货-牛肉-36个月" },
+  { label: "热轧卷板-Q235B", value: "热轧卷板-Q235B" },
+  { label: "高纯阴极铜-A级", value: "高纯阴极铜-A级" },
 ]
 
 export const H5_CREATOR_OPTIONS = [
   { label: "全部制单人", value: "ALL" },
-  { label: "张明", value: "张明" },
-  { label: "李华", value: "李华" },
-  { label: "王建军", value: "王建军" },
+  { label: "lxyl（四川享宇科技有限公司）", value: "lxyl" },
+  { label: "admin（系统管理部）", value: "admin" },
+  { label: "operator1（海霸王监管组）", value: "operator1" },
+  { label: "陈主管（物流监管中心）", value: "陈主管" },
 ]

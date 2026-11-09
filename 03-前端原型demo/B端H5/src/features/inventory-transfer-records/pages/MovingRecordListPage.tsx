@@ -11,34 +11,37 @@ import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotat
 import { H5_FILTER_BAR, H5_LIST_SCROLL, H5_SEARCH_INPUT } from "@/shared/h5-ui-theme"
 import { MovingRecordCard } from "../components/MovingRecordCard"
 import { MOCK_MOVING_RECORDS } from "../mock/moving-records.mock"
-import { MOVING_CREATOR_OPTIONS } from "../mock/moving-form.mock"
-import { MOVING_FLOW_TYPES } from "../domain/constants"
-import type { MovingRecordItem } from "../domain/types"
+import {
+  MOVING_RECORD_TYPE_FILTER_OPTIONS,
+  WORKSPACE_ROUTE,
+} from "../domain/constants"
+import type { MovingRecordItem, MovingRecordType } from "../domain/types"
 
-/** 仓库筛选选项取自真实 Mock 数据，避免选项与记录对不上导致空列表 */
-const REPO_OPTIONS: DropdownOption[] = [
+const TYPE_OPTIONS: DropdownOption[] = MOVING_RECORD_TYPE_FILTER_OPTIONS.map(
+  (option) => ({ label: option.label, value: option.value })
+)
+
+const WAREHOUSE_OPTIONS: DropdownOption[] = [
   { label: "全部仓库", value: "全部" },
+  ...Array.from(new Set(MOCK_MOVING_RECORDS.map((item) => item.warehouseName))).map(
+    (name) => ({ label: name, value: name })
+  ),
+]
+
+const GOODS_OPTIONS: DropdownOption[] = [
+  { label: "全部货品", value: "全部" },
   ...Array.from(
     new Set(
-      MOCK_MOVING_RECORDS.flatMap((item) => [
-        item.repoNames,
-        ...item.respOutStockInfoVoList.map((goods) => goods.sourceRepoName),
-      ]).filter(Boolean)
+      MOCK_MOVING_RECORDS.flatMap((item) => item.goods.map((line) => line.goodsName))
     )
   ).map((name) => ({ label: name, value: name })),
 ]
 
-const TYPE_OPTIONS: DropdownOption[] = [
-  { label: "全部类型", value: "全部" },
-  ...MOVING_FLOW_TYPES.map((type) => ({ label: type.name, value: type.id })),
-]
-
 const CREATOR_OPTIONS: DropdownOption[] = [
   { label: "全部制单人", value: "全部" },
-  ...MOVING_CREATOR_OPTIONS.map((creator) => ({
-    label: `${creator.userName}（${creator.belongOrgName}）`,
-    value: creator.id,
-  })),
+  ...Array.from(
+    new Set(MOCK_MOVING_RECORDS.map((item) => item.creatorName))
+  ).map((name) => ({ label: name, value: name })),
 ]
 
 function dayOf(dateTime: string): string {
@@ -46,84 +49,85 @@ function dayOf(dateTime: string): string {
 }
 
 export function MovingRecordListPage() {
-  const [searchKeyword, setSearchKeyword] = useState("")
-  const [selectedRepoId, setSelectedRepoId] = useState("全部")
-  const [selectedFlowType, setSelectedFlowType] = useState("全部")
-  const [selectedCreatorId, setSelectedCreatorId] = useState("全部")
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
+  const [keyword, setKeyword] = useState("")
+  const [selectedType, setSelectedType] = useState<MovingRecordType | "全部">("全部")
+  const [selectedWarehouse, setSelectedWarehouse] = useState("全部")
+  const [selectedGoods, setSelectedGoods] = useState("全部")
+  const [selectedCreator, setSelectedCreator] = useState("全部")
+  const [moveStartDate, setMoveStartDate] = useState("")
+  const [moveEndDate, setMoveEndDate] = useState("")
+  const [createStartDate, setCreateStartDate] = useState("")
+  const [createEndDate, setCreateEndDate] = useState("")
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [toast, setToast] = useState<string | null>(null)
-
-  const showToast = (message: string) => {
-    setToast(message)
-    window.setTimeout(() => setToast(null), 2500)
-  }
 
   const filteredList = useMemo(() => {
-    return MOCK_MOVING_RECORDS.filter((item) => {
-      const keyword = searchKeyword.trim().toLowerCase()
-      if (keyword) {
-        const hitKeyword =
-          item.ownerName.toLowerCase().includes(keyword) ||
-          item.ownerIdentity.toLowerCase().includes(keyword) ||
-          item.id.toLowerCase().includes(keyword) ||
-          item.goodsInfo.toLowerCase().includes(keyword)
-        if (!hitKeyword) return false
+    return MOCK_MOVING_RECORDS.filter((item: MovingRecordItem) => {
+      if (selectedType !== "全部" && item.moveType !== selectedType) return false
+      if (selectedWarehouse !== "全部" && item.warehouseName !== selectedWarehouse) {
+        return false
       }
-
-      if (selectedRepoId !== "全部") {
-        const hitRepo =
-          item.repoNames.includes(selectedRepoId) ||
-          item.respOutStockInfoVoList.some(
-            (goods) =>
-              goods.sourceRepoName === selectedRepoId ||
-              goods.targetRepoName === selectedRepoId
-          )
-        if (!hitRepo) return false
+      if (
+        selectedGoods !== "全部" &&
+        !item.goods.some((line) => line.goodsName === selectedGoods)
+      ) {
+        return false
       }
-
-      if (selectedFlowType !== "全部" && item.flowType !== selectedFlowType) {
+      if (selectedCreator !== "全部" && item.creatorName !== selectedCreator) {
         return false
       }
 
-      if (selectedCreatorId !== "全部" && item.createByName !== selectedCreatorIdName(selectedCreatorId)) {
-        return false
-      }
+      const moveDay = dayOf(item.moveTime)
+      if (moveStartDate && moveDay < moveStartDate) return false
+      if (moveEndDate && moveDay > moveEndDate) return false
 
-      const day = dayOf(item.transferTime || item.createTime)
-      if (startDate && day < startDate) return false
-      if (endDate && day > endDate) return false
+      const createDay = dayOf(item.createTime)
+      if (createStartDate && createDay < createStartDate) return false
+      if (createEndDate && createDay > createEndDate) return false
 
-      return true
+      const query = keyword.trim().toLowerCase()
+      if (!query) return true
+      return (
+        item.id.toLowerCase().includes(query) ||
+        item.ownerName.toLowerCase().includes(query) ||
+        item.ownerIdentifier.toLowerCase().includes(query) ||
+        item.goodsNameSummary.toLowerCase().includes(query) ||
+        item.goods.some((line) => line.goodsName.toLowerCase().includes(query))
+      )
     })
-  }, [searchKeyword, selectedRepoId, selectedFlowType, selectedCreatorId, startDate, endDate])
+  }, [
+    keyword,
+    selectedType,
+    selectedWarehouse,
+    selectedGoods,
+    selectedCreator,
+    moveStartDate,
+    moveEndDate,
+    createStartDate,
+    createEndDate,
+  ])
 
   const advancedFilterCount =
-    (selectedCreatorId !== "全部" ? 1 : 0) + (startDate || endDate ? 1 : 0)
+    (selectedCreator !== "全部" ? 1 : 0) +
+    (moveStartDate || moveEndDate ? 1 : 0) +
+    (createStartDate || createEndDate ? 1 : 0)
 
-  const resetFilters = () => {
-    setSearchKeyword("")
-    setSelectedRepoId("全部")
-    setSelectedFlowType("全部")
-    setSelectedCreatorId("全部")
-    setStartDate("")
-    setEndDate("")
-  }
-
-  const handleDownload = (kind: "bill" | "history", item: MovingRecordItem) => {
-    showToast(
-      kind === "bill"
-        ? `正在生成移库凭证 PDF（${item.id}）...`
-        : `正在导出移库下载记录（${item.id}）...`
-    )
+  const resetAllFilters = () => {
+    setKeyword("")
+    setSelectedType("全部")
+    setSelectedWarehouse("全部")
+    setSelectedGoods("全部")
+    setSelectedCreator("全部")
+    setMoveStartDate("")
+    setMoveEndDate("")
+    setCreateStartDate("")
+    setCreateEndDate("")
   }
 
   return (
     <MobileShell>
       <div className="relative flex min-h-0 flex-1 flex-col bg-[#edf2f8]">
         <PrototypeAnnotationTarget annotationIds={["moving-h5-list"]}>
-          <NavBar title="移库管理" backTo="/m/workspace" />
+          <NavBar title="移库管理" backTo={WORKSPACE_ROUTE} />
         </PrototypeAnnotationTarget>
 
         {/* 筛选条：搜索 + 常用胶囊 + 更多筛选 */}
@@ -132,12 +136,12 @@ export function MovingRecordListPage() {
             <button
               type="button"
               onClick={() => setDrawerOpen(true)}
-              className="relative flex size-7 shrink-0 items-center justify-center rounded-md text-[#232D39]/50 active:bg-[#232D39]/5"
+              className="relative flex size-8 shrink-0 items-center justify-center rounded-lg text-[#232D39]/60 active:bg-gray-100"
               aria-label="更多筛选"
             >
-              <Filter className="size-4" />
+              <Filter className="size-4.5" />
               {advancedFilterCount > 0 ? (
-                <span className="absolute -right-0.5 -top-0.5 flex size-3.5 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white">
+                <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white">
                   {advancedFilterCount}
                 </span>
               ) : null}
@@ -146,37 +150,43 @@ export function MovingRecordListPage() {
             <div className="relative min-w-0 flex-1">
               <input
                 type="text"
-                placeholder="请输入货主名称/标识"
+                placeholder="请输入移库单号/货主/货物"
                 className={H5_SEARCH_INPUT}
-                value={searchKeyword}
-                onChange={(event) => setSearchKeyword(event.target.value)}
+                value={keyword}
+                onChange={(event) => setKeyword(event.target.value)}
               />
-              {searchKeyword ? (
+              {keyword ? (
                 <button
                   type="button"
-                  onClick={() => setSearchKeyword("")}
-                  className="absolute right-2.5 top-1/2 flex size-3.5 -translate-y-1/2 items-center justify-center rounded-full bg-gray-300 text-gray-600"
+                  onClick={() => setKeyword("")}
+                  className="absolute right-2.5 top-1/2 flex size-4 -translate-y-1/2 items-center justify-center rounded-full bg-gray-300 text-gray-600"
                 >
-                  <X className="size-2" />
+                  <X className="size-2.5" />
                 </button>
               ) : (
-                <Search className="pointer-events-none absolute right-2.5 top-1/2 size-3.5 -translate-y-1/2 text-[#232D39]/40" />
+                <Search className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[#232D39]/40" />
               )}
             </div>
           </div>
 
-          <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto py-0.5">
-            <DropdownFilterPill
-              label="所属仓库"
-              value={selectedRepoId}
-              options={REPO_OPTIONS}
-              onChange={setSelectedRepoId}
-            />
+          <div className="no-scrollbar flex items-center gap-2 overflow-x-auto py-0.5">
             <DropdownFilterPill
               label="移库类型"
-              value={selectedFlowType}
+              value={selectedType}
               options={TYPE_OPTIONS}
-              onChange={setSelectedFlowType}
+              onChange={(value) => setSelectedType(value as MovingRecordType | "全部")}
+            />
+            <DropdownFilterPill
+              label="所属仓库"
+              value={selectedWarehouse}
+              options={WAREHOUSE_OPTIONS}
+              onChange={setSelectedWarehouse}
+            />
+            <DropdownFilterPill
+              label="货品名称"
+              value={selectedGoods}
+              options={GOODS_OPTIONS}
+              onChange={setSelectedGoods}
             />
           </div>
         </div>
@@ -193,7 +203,7 @@ export function MovingRecordListPage() {
               </p>
               <button
                 type="button"
-                onClick={resetFilters}
+                onClick={resetAllFilters}
                 className="mt-3 inline-flex items-center gap-1 rounded-md border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-600 shadow-xs"
               >
                 <RotateCcw className="size-3" />
@@ -202,81 +212,79 @@ export function MovingRecordListPage() {
             </div>
           ) : (
             filteredList.map((item) => (
-              <MovingRecordCard
-                key={item.id}
-                item={item}
-                onDownloadBill={(row) => handleDownload("bill", row)}
-                onDownloadHistory={(row) => handleDownload("history", row)}
-              />
+              <MovingRecordCard key={item.id} item={item} />
             ))
           )}
         </div>
 
-        {/* 更多筛选：制单人 + 移库日期 */}
+        {/* 更多筛选：移库日期、制单人、制单日期 */}
         <FilterDrawer
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
           onReset={() => {
-            setSelectedCreatorId("全部")
-            setStartDate("")
-            setEndDate("")
+            setSelectedCreator("全部")
+            setMoveStartDate("")
+            setMoveEndDate("")
+            setCreateStartDate("")
+            setCreateEndDate("")
           }}
           onConfirm={() => setDrawerOpen(false)}
         >
-          <DrawerField label="制单人">
-            <div className="grid grid-cols-2 gap-2">
-              {CREATOR_OPTIONS.map((option) => {
-                const active = selectedCreatorId === option.value
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setSelectedCreatorId(option.value)}
-                    className={`truncate rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${
-                      active
-                        ? "border border-blue-200 bg-blue-50 font-bold text-blue-600"
-                        : "border border-transparent bg-gray-50 text-[#232D39]/80"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                )
-              })}
-            </div>
-          </DrawerField>
-
           <DrawerField label="移库日期">
             <div className="flex items-center gap-2">
               <input
                 type="date"
-                value={startDate}
-                onChange={(event) => setStartDate(event.target.value)}
+                value={moveStartDate}
+                onChange={(event) => setMoveStartDate(event.target.value)}
                 className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
-                aria-label="开始日期"
+                aria-label="移库开始日期"
               />
               <span className="shrink-0 text-xs text-[#232D39]/50">至</span>
               <input
                 type="date"
-                value={endDate}
-                onChange={(event) => setEndDate(event.target.value)}
+                value={moveEndDate}
+                onChange={(event) => setMoveEndDate(event.target.value)}
                 className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
-                aria-label="结束日期"
+                aria-label="移库结束日期"
+              />
+            </div>
+          </DrawerField>
+
+          <DrawerField label="制单人">
+            <select
+              value={selectedCreator}
+              onChange={(event) => setSelectedCreator(event.target.value)}
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs text-[#232D39]"
+            >
+              {CREATOR_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </DrawerField>
+
+          <DrawerField label="制单日期">
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={createStartDate}
+                onChange={(event) => setCreateStartDate(event.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="制单开始日期"
+              />
+              <span className="shrink-0 text-xs text-[#232D39]/50">至</span>
+              <input
+                type="date"
+                value={createEndDate}
+                onChange={(event) => setCreateEndDate(event.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="制单结束日期"
               />
             </div>
           </DrawerField>
         </FilterDrawer>
-
-        {toast ? (
-          <div className="fixed bottom-16 left-1/2 z-50 -translate-x-1/2 rounded-full bg-black/80 px-4 py-1.5 text-xs text-white shadow-lg">
-            {toast}
-          </div>
-        ) : null}
       </div>
     </MobileShell>
   )
-}
-
-/** 制单人筛选值（ID）→ 人员姓名 */
-function selectedCreatorIdName(creatorId: string): string {
-  return MOVING_CREATOR_OPTIONS.find((creator) => creator.id === creatorId)?.userName ?? ""
 }

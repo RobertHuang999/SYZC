@@ -22,14 +22,21 @@ export type ProcessingStatus =
 /** 投入货物 · 二级货位明细行 */
 export interface ProcessingInputLine {
   id: string
+  candidateId?: string
+  goodsId?: string
   goodsName: string
   specModel: string
+  warehouseId?: string
+  warehouseName?: string
   roomZone: string // 仓库-库房-分区
   specificLocation?: string // 具体位置/垛位
   inboundTime: string
   barcode: string
+  qrCodeUrl?: string
   otherInfo?: string
+  availableAmount?: number // 实时可用量
   planAmount: number // 计划投入数量
+  lockedAmount?: number // 锁定数量
   actualAmount?: number // 实际消耗数量（已完成才填）
   releasedAmount?: number // 计划余量自动释放数量
   unit: string
@@ -38,25 +45,40 @@ export interface ProcessingInputLine {
 /** 投入货物 · 一级货品汇总行 */
 export interface ProcessingInputGroup {
   id: string
+  goodsId?: string
   goodsName: string // 大类-品类-货品（含规格说明）
   specModel: string
   unit: string
+  expanded?: boolean
   lines: ProcessingInputLine[]
 }
 
 /** 产出货物明细行 */
 export interface ProcessingOutputItem {
   id: string
+  goodsId?: string
   goodsName: string
   specModel: string
   unit: string
   expectedQty: number
   actualQty?: number
   price?: number | null // 行业参考单价（元），空表示未定价
+  expectedAmount?: number | null
+  actualAmount?: number | null
   warehouseLocation: string // 仓库-库房-分区
   specificLocation?: string
+  otherInfo?: string
   barcode?: string // 加工入库后生成的新存货条码
-  collectAttrs?: Array<{ label: string; value?: string; unit?: string }>
+  barcodeUrl?: string
+  collectAttrs?: Array<{
+    key?: string
+    label: string
+    type?: "text" | "number" | "select" | "date"
+    required?: boolean
+    options?: string[]
+    value?: string
+    unit?: string
+  }>
 }
 
 /** 审批流轨迹节点 */
@@ -68,6 +90,7 @@ export interface ProcessingAuditNode {
   handleTime: string
   status: "SUBMITTED" | "APPROVED" | "REJECTED" | "PENDING"
   comment?: string
+  taskId?: string
 }
 
 /** 现场修改 / 作废审计记录 */
@@ -96,7 +119,9 @@ export interface ProcessingRecord {
   ownerType: OwnerType
   ownerName: string
   ownerIdentity: string
+  ownerIdCard?: string
   processingType: ProcessingType
+  warehouseId?: string
   warehouseName: string
   associatedOrderId?: string
   status: ProcessingStatus
@@ -106,9 +131,10 @@ export interface ProcessingRecord {
   createByName: string
   createOrgName?: string
   createTime: string
+  version?: number
   inputGroups: ProcessingInputGroup[]
   outputItems: ProcessingOutputItem[]
-  auditNodes: ProcessingAuditNode[]
+  auditNodes?: ProcessingAuditNode[]
   modifyRecord?: ProcessingModifyRecord
   devicePhotos?: ProcessingDevicePhoto[]
 }

@@ -60,17 +60,21 @@ function FieldRow({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 function AnomalyBadge({ status }: { status: "待处理" | "已处理" | "——" }) {
-  if (status === "——") return null
   return (
-    <span
-      className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
-        status === "待处理"
-          ? "border-rose-200 bg-rose-50 text-rose-600"
-          : "border-emerald-200 bg-emerald-50 text-emerald-700"
-      }`}
-    >
-      {status}
-    </span>
+    <div className="flex shrink-0 items-center gap-1">
+      <span className="text-[10px] text-[#232D39]/40">异常状态</span>
+      <span
+        className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+          status === "待处理"
+            ? "border-rose-200 bg-rose-50 text-rose-600"
+            : status === "已处理"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+              : "border-transparent bg-transparent text-[#232D39]/35"
+        }`}
+      >
+        {status}
+      </span>
+    </div>
   )
 }
 
@@ -365,12 +369,7 @@ export function InventoryCheckDetailPage() {
                 </span>
               }
             />
-            {record.remarks && (
-              <div className="rounded-lg bg-[#232D39]/[0.03] p-2.5 text-[11px] leading-relaxed text-[#232D39]/70">
-                <span className="text-[#232D39]/45">备注：</span>
-                {record.remarks}
-              </div>
-            )}
+            <FieldRow label="备注说明" value={record.remarks || "——"} />
           </div>
         </section>
 
@@ -461,8 +460,8 @@ export function InventoryCheckDetailPage() {
                     </div>
 
                     <div className="flex items-center justify-between border-t border-dashed border-[#232D39]/10 pt-2 text-[11px] text-[#232D39]/50">
-                      <span>{item.actualUser || "——"}</span>
-                      <span>{item.checkTime || "——"}</span>
+                      <span>盘点人员：{item.actualUser || "——"}</span>
+                      <span>盘点时间：{item.checkTime || "——"}</span>
                     </div>
 
                     <div className="flex items-center justify-end gap-1.5">
@@ -626,7 +625,7 @@ export function InventoryCheckDetailPage() {
                     </p>
                   </div>
 
-                  {filteredDetailItems.map((item) => {
+                  {filteredDetailItems.map((item, index) => {
                     const anomaly = judgeRowAnomaly(
                       item.isExist,
                       item.isIntact,
@@ -642,7 +641,7 @@ export function InventoryCheckDetailPage() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
                             <h3 className="font-bold leading-snug text-[#232D39]">
-                              {item.goodsName}
+                              {index + 1}. {item.goodsName}
                             </h3>
                             <p className="mt-0.5 text-[10px] text-[#232D39]/45">
                               货物编号：{item.inventoryNo}
@@ -673,15 +672,15 @@ export function InventoryCheckDetailPage() {
                         </div>
 
                         <div className="flex justify-between gap-3 text-[11px] text-[#232D39]/60">
-                          <span>{item.warehouseName}</span>
+                          <span>仓库：{item.warehouseName}</span>
                           <span>
-                            {item.roomName} · {item.partitionName}
+                            库房/分区：{item.roomName} · {item.partitionName}
                           </span>
                         </div>
 
                         <div className="grid grid-cols-2 gap-2 text-[11px]">
                           <div className="rounded-lg bg-[#232D39]/[0.03] p-2">
-                            <span className="block text-[#232D39]/45">账面数量</span>
+                            <span className="block text-[#232D39]/45">本次数量</span>
                             <span className="font-semibold text-[#232D39]">
                               {item.snapshotQty} {item.unit}
                             </span>
@@ -709,8 +708,8 @@ export function InventoryCheckDetailPage() {
                         </div>
 
                         <div className="flex items-center justify-between border-t border-dashed border-[#232D39]/10 pt-2 text-[11px] text-[#232D39]/50">
-                          <span>{item.actualUser || "——"}</span>
-                          <span>{item.checkTime || "——"}</span>
+                          <span>实际盘点人员：{item.actualUser || "——"}</span>
+                          <span>盘点时间：{item.checkTime || "——"}</span>
                         </div>
 
                         <div className="flex items-center justify-end gap-1.5">

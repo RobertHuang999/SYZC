@@ -39,6 +39,7 @@ export interface CheckHistoryNode {
   snapshotQty: number
   unit: string
   remarks?: string
+  attachments?: string[]
   resolveList: AnomalyResolveRecord[]
 }
 
@@ -55,6 +56,7 @@ export interface BookSummaryItem {
   actualUser: string
   checkTime: string
   anomalyStatus: AnomalyItemStatus
+  attachments: string[]
   historyList: CheckHistoryNode[]
 }
 
@@ -72,6 +74,7 @@ export interface InventoryDetailItem {
   partitionName: string
   goodsStatus: string
   barcode: string
+  qrCodeUrl?: string
   countedQty: number | "无需盘点" | null
   isExist: "是" | "否" | null
   isIntact: "是" | "否" | null
@@ -79,6 +82,7 @@ export interface InventoryDetailItem {
   actualUser: string
   checkTime: string
   anomalyStatus: AnomalyItemStatus
+  attachments: string[]
   historyList: CheckHistoryNode[]
 }
 
@@ -91,6 +95,7 @@ export interface InventoryCheckRecord {
   endDate: string
   checkMode: CheckMode
   checkType: CheckType
+  plannedUserIds: string[]
   plannedUsers: string
   actualUsers: string
   warehouseId: string
@@ -101,6 +106,7 @@ export interface InventoryCheckRecord {
   creatorId: string
   creatorName: string
   createdTime: string
+  attachments: string[]
   remarks: string
   bookSummaryItems?: BookSummaryItem[]
   inventoryDetailItems?: InventoryDetailItem[]
@@ -120,9 +126,9 @@ export interface InventoryCheckStats {
   }
 }
 
-/** 列表筛选条件 */
+/** 列表筛选条件（与 PC 字段清单 10 项一致） */
 export interface CheckListFilters {
-  keyword: string
+  checkNo: string
   taskName: string
   checkType: string
   warehouseName: string
@@ -132,4 +138,6 @@ export interface CheckListFilters {
   creator: string
   startDate: string
   endDate: string
+  createdStartTime: string
+  createdEndTime: string
 }

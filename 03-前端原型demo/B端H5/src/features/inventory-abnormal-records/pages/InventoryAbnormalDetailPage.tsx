@@ -6,7 +6,6 @@ import {
   Check,
   Copy,
   ExternalLink,
-  Package,
   ShieldCheck,
 } from "lucide-react"
 import { MobileShell } from "@/components/layout/MobileShell"
@@ -99,10 +98,6 @@ export function InventoryAbnormalDetailPage() {
     )
   }
 
-  const warehouseNames = Array.from(
-    new Set(record.goodsLines.map((line) => line.location.split("-")[0])),
-  )
-
   return (
     <MobileShell>
       <PrototypeAnnotationTarget annotationIds={["abnormal-h5-detail"]}>
@@ -137,7 +132,7 @@ export function InventoryAbnormalDetailPage() {
               </button>
             </div>
             <p className="pt-0.5 text-[11px] text-[#232D39]/50">
-              申请人：{record.applicantName} · {record.applyTime}
+              申请时间：{record.applyTime}
             </p>
           </div>
 
@@ -153,11 +148,11 @@ export function InventoryAbnormalDetailPage() {
                 </span>
               }
             />
-            <FieldRow label="货主名称" value={record.owner.ownerName} />
+            <FieldRow label="货主" value={record.owner.ownerName} />
             <FieldRow label="货主标识" value={record.owner.ownerIdentity} />
+            <FieldRow label="申请人" value={record.applicantName} />
             <FieldRow label="申请时间" value={record.applyTime} />
             <FieldRow label="审批流程" value={record.processTitle} />
-            <FieldRow label="仓库位置" value={warehouseNames.join("、")} />
           </div>
         </section>
 
@@ -200,8 +195,8 @@ export function InventoryAbnormalDetailPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 items-start gap-2">
-                    <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded bg-blue-600 text-white">
-                      <Package className="size-3" />
+                    <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded bg-blue-600 text-[10px] font-bold text-white">
+                      {index + 1}
                     </span>
                     <div className="min-w-0">
                       <h3 className="font-bold leading-snug text-[#232D39]">
@@ -225,7 +220,7 @@ export function InventoryAbnormalDetailPage() {
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0 text-left">
                         <span className="block text-[10px] text-[#232D39]/45">
-                          变动前数量
+                          变动前
                         </span>
                         <span className="mt-0.5 block font-semibold text-[#232D39]/80">
                           {formatQty(line.beforeQty)} {line.unit}
@@ -234,14 +229,15 @@ export function InventoryAbnormalDetailPage() {
                       <ArrowRight className="size-4 shrink-0 text-blue-600" />
                       <div className="min-w-0 text-right">
                         <span className="block text-[10px] text-[#232D39]/45">
-                          变动后数量
+                          变动后
                         </span>
                         <span className="mt-0.5 block text-base font-bold text-[#232D39]">
                           {formatQty(line.afterQty)} {line.unit}
                         </span>
                       </div>
                     </div>
-                    <div className="mt-2 flex justify-center border-t border-dashed border-[#232D39]/10 pt-2">
+                    <div className="mt-2 flex items-center justify-center gap-2 border-t border-dashed border-[#232D39]/10 pt-2">
+                      <span className="text-[10px] text-[#232D39]/45">变动数量</span>
                       <DiffBadge line={line} />
                     </div>
                   </div>

@@ -72,7 +72,8 @@ export function InventoryCheckListPage() {
     (filters.taskName ? 1 : 0) +
     (filters.actualUsers.length > 0 ? 1 : 0) +
     (filters.creator !== "ALL" ? 1 : 0) +
-    (filters.startDate || filters.endDate ? 1 : 0)
+    (filters.startDate || filters.endDate ? 1 : 0) +
+    (filters.createdStartTime || filters.createdEndTime ? 1 : 0)
 
   const activeFilterCount =
     (filters.checkType !== "ALL" ? 1 : 0) +
@@ -93,6 +94,8 @@ export function InventoryCheckListPage() {
       creator: "ALL",
       startDate: "",
       endDate: "",
+      createdStartTime: "",
+      createdEndTime: "",
     })
   }
 
@@ -150,15 +153,15 @@ export function InventoryCheckListPage() {
             <div className="relative flex-1">
               <input
                 type="text"
-                placeholder="请输入盘点单号/任务名称"
+                placeholder="请输入盘点单号"
                 className={H5_SEARCH_INPUT}
-                value={filters.keyword}
-                onChange={(event) => patchFilters({ keyword: event.target.value })}
+                value={filters.checkNo}
+                onChange={(event) => patchFilters({ checkNo: event.target.value })}
               />
-              {filters.keyword ? (
+              {filters.checkNo ? (
                 <button
                   type="button"
-                  onClick={() => patchFilters({ keyword: "" })}
+                  onClick={() => patchFilters({ checkNo: "" })}
                   className="absolute right-2.5 top-1/2 flex size-4 -translate-y-1/2 items-center justify-center rounded-full bg-gray-300 text-gray-600"
                   aria-label="清空搜索"
                 >
@@ -269,8 +272,31 @@ export function InventoryCheckListPage() {
             </div>
           </DrawerField>
 
-          <DrawerField label="实际盘点人员">
-            <div className="flex flex-wrap gap-2">
+          <DrawerField label="制单时间">
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={filters.createdStartTime}
+                onChange={(event) =>
+                  patchFilters({ createdStartTime: event.target.value })
+                }
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="制单开始日期"
+              />
+              <span className="shrink-0 text-xs text-[#232D39]/50">至</span>
+              <input
+                type="date"
+                value={filters.createdEndTime}
+                onChange={(event) =>
+                  patchFilters({ createdEndTime: event.target.value })
+                }
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="制单结束日期"
+              />
+            </div>
+          </DrawerField>
+
+          <DrawerField label="实际盘点人员">            <div className="flex flex-wrap gap-2">
               {CHECK_ACTUAL_USER_OPTIONS.map((user) => {
                 const active = filters.actualUsers.includes(user)
                 return (

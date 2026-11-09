@@ -4,82 +4,61 @@ export type OwnerType = "ENTERPRISE" | "PERSONAL"
  * 移库记录（来源：PC 11-移库管理-移库记录 三件套）
  * ------------------------------------------------------------------ */
 
+/** 移库发起页使用的流程类型（保留给业务办理·移库发起） */
 export type MovingFlowTypeValue = "NORMAL" | "PLEDGE" | "MORTGAGE" | "CD"
 
-/** 移库货物明细行（按货品汇总，一处原货位 ➔ 一处目标货位） */
-export interface MovingGoodsDetailVo {
+/** 移库类型（台账取值，与 PC 字段清单一致） */
+export type MovingRecordType = "普通移库" | "质押移库" | "抵押移库" | "仓单移库"
+
+export type MovingOwnerType = "企业" | "个人"
+
+/** 移库货品与储位调拨明细（一条库存位置一行） */
+export interface MovingGoodsLine {
   id: string
-  goodsId?: string
   goodsName: string
-  cateName: string
-  typeName: string
-  specification: string
-  concatAttrValue: string
-  batchNo?: string
-  amount: number
+  outLocation: string
+  outSpecific: string
+  inboundTime: string
+  otherInfo?: string
+  barcode: string
+  quantity: number
   unit: string
-  weight?: number
-  weightUnit?: string
-  sourceRepoId?: string
-  sourceRepoName: string
-  sourceHouseName: string
-  sourceZoneName: string
-  targetRepoId?: string
-  targetRepoName: string
-  targetHouseName: string
-  targetZoneName: string
-  pledgeStatus?: string
+  availableQty: number
+  inRoomZone: string
+  inSpecific: string
 }
 
-/** 设备抓拍图 */
-export interface MovingCaptureImage {
-  time: string
-  cameraName: string
-  deviceCode: string
-  url: string
+/** 移库审批节点 */
+export interface MovingAuditNode {
+  id: string
+  title: string
+  handlerName: string
+  handleTime: string
+  result: string
+  comment?: string
 }
 
-/** 移库台账记录（列表卡片与详情页共用） */
+/** 移库台账记录（列表卡片与详情页共用，与 PC RelocationRecord 同构） */
 export interface MovingRecordItem {
   id: string
-  /** 1=在押货（质押/抵押/仓单）移库；2=普通存货移库 */
-  refType: 1 | 2
-  /** 在押货细分：1=质押移库，2=仓单移库 */
-  pledgeType?: 1 | 2
-  /** 在押货细分：1=抵押移库，2=质押移库 */
-  applyType?: 1 | 2
-  flowType: MovingFlowTypeValue
-  ownerId: string
+  moveTime: string
+  ownerType: MovingOwnerType
   ownerName: string
-  /** 1=个人，2=企业 */
-  ownerType: 1 | 2
-  ownerIdentity: string
-  goodsInfo: string
-  amount: number
+  ownerIdentifier: string
+  moveType: MovingRecordType
+  relatedNo?: string
+  warehouseName: string
+  goodsNameSummary: string
+  totalQty: number
   unit: string
-  totalWeight: number
-  weightUnit: string
-  repoNames: string
-  createByName: string
-  createOrgName: string
+  creatorName: string
+  creatorOrg: string
   createTime: string
-  transferTime?: string
-  /** 1=审核中，2=已通过，3=已驳回，4=已撤销 */
-  checkStatus?: 1 | 2 | 3 | 4
-  applyFlowId?: string
+  status: "已通过"
   remark?: string
-  pictureScene?: string[]
-  pictureCapture?: MovingCaptureImage[]
-  respOutStockInfoVoList: MovingGoodsDetailVo[]
-}
-
-/** 单据修改记录 */
-export interface MovingModifyLog {
-  fieldLabel: string
-  beforeValue: string
-  afterValue: string
-  operator: string
-  operatedAt: string
+  goods: MovingGoodsLine[]
+  photos: string[]
+  auditNodes: MovingAuditNode[]
 }
 
 export interface MobileOwnerEntity {
@@ -89,54 +68,64 @@ export interface MobileOwnerEntity {
   idCardNo?: string
 }
 
+/** 二级库存储位明细（对齐 PC 转让记录字段清单 2.2） */
 export interface MobileTransferLocationDetail {
   id: string
   locationName: string // 仓库-库房-分区
-  specificLocation: string // 具体位置/垛位
+  specificLocation: string // 具体位置/货架/垛位，无值展示“——”
   inboundTime: string
-  barcode: string
-  status: string
+  otherInfo?: string // 原库存扩展属性，无值展示“—”
+  barcode: string // 存货条码
+  barcodeQrUrl?: string
+  status: string // 在库状态，固定“存货中”
   amount: number
   unit: string
-  otherInfo?: string
 }
 
+/** 一级货品主行（对齐 PC 转让记录字段清单 2.1） */
 export interface MobileTransferGoodsItem {
   id: string
-  goodsName: string
-  cateName: string
-  typeName: string
-  specName: string
+  goodsName: string // 大类-品类-规格
+  cateName?: string
+  typeName?: string
+  specName?: string
+  warehouseName: string
+  warehouseId?: string
   amount: number
   unit: string
   locations: MobileTransferLocationDetail[]
 }
 
-export interface MobileTransferTimelineItem {
+/** 审批流转节点（对齐 PC TransferAuditLog） */
+export interface MobileTransferAuditLog {
   id: string
+  flowName?: string
   nodeName: string
-  operator: string
+  operatorName: string
   operatorOrg: string
-  action: string
+  action: "SUBMIT" | "APPROVE" | "REJECT" | "REVOKE"
+  actionName: string
   time: string
   comment?: string
 }
 
+/** 转让记录主实体（对齐 PC TransferRecord / 三件套字段清单） */
 export interface MobileTransferRecord {
   id: string // 19位转让单号
-  sourceOwner: MobileOwnerEntity
-  targetOwner: MobileOwnerEntity
-  transferTime: string
+  assignTime: string // 转让时间
+  sourceOwner: MobileOwnerEntity // 转让人（出让原货主）
+  targetOwner: MobileOwnerEntity // 接收人（受让新货主）
   warehouseName: string
-  warehouseId: string
-  totalAmount: number
+  warehouseId?: string
+  amount: number // 转让总数量
   unit: string
+  goodsSummaryText: string
+  goodsDisplayList: Array<{ name: string; amount: number; unit: string }>
+  goodsList: MobileTransferGoodsItem[]
   assignReason: string
-  createBy: string
   createByName: string
   createOrgName: string
   createTime: string
   status: "APPROVED"
-  goodsList: MobileTransferGoodsItem[]
-  timeline: MobileTransferTimelineItem[]
+  auditLogs: MobileTransferAuditLog[]
 }

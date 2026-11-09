@@ -43,8 +43,11 @@ export function ProcessingRecordListPage() {
   const [selectedStatus, setSelectedStatus] = useState("全部")
   const [selectedWarehouse, setSelectedWarehouse] = useState("全部")
   const [selectedCreator, setSelectedCreator] = useState("全部")
+  const [goodsKeyword, setGoodsKeyword] = useState("")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
+  const [createStartDate, setCreateStartDate] = useState("")
+  const [createEndDate, setCreateEndDate] = useState("")
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null)
@@ -65,14 +68,22 @@ export function ProcessingRecordListPage() {
       if (startDate && day < startDate) return false
       if (endDate && day > endDate) return false
 
-      const query = keyword.trim().toLowerCase()
-      if (!query) return true
+      const createDay = item.createTime.slice(0, 10)
+      if (createStartDate && createDay < createStartDate) return false
+      if (createEndDate && createDay > createEndDate) return false
+
       const goodsText = [
         ...item.inputGroups.map((group) => group.goodsName),
         ...item.outputItems.map((output) => output.goodsName),
       ]
         .join(" ")
         .toLowerCase()
+      if (goodsKeyword.trim() && !goodsText.includes(goodsKeyword.trim().toLowerCase())) {
+        return false
+      }
+
+      const query = keyword.trim().toLowerCase()
+      if (!query) return true
       return (
         item.id.toLowerCase().includes(query) ||
         item.ownerName.toLowerCase().includes(query) ||
@@ -86,12 +97,18 @@ export function ProcessingRecordListPage() {
     selectedStatus,
     selectedWarehouse,
     selectedCreator,
+    goodsKeyword,
     startDate,
     endDate,
+    createStartDate,
+    createEndDate,
   ])
 
   const activeFilterCount =
-    (selectedCreator !== "全部" ? 1 : 0) + (startDate || endDate ? 1 : 0)
+    (selectedCreator !== "全部" ? 1 : 0) +
+    (goodsKeyword.trim() ? 1 : 0) +
+    (startDate || endDate ? 1 : 0) +
+    (createStartDate || createEndDate ? 1 : 0)
 
   const resetAllFilters = () => {
     setKeyword("")
@@ -99,8 +116,11 @@ export function ProcessingRecordListPage() {
     setSelectedStatus("全部")
     setSelectedWarehouse("全部")
     setSelectedCreator("全部")
+    setGoodsKeyword("")
     setStartDate("")
     setEndDate("")
+    setCreateStartDate("")
+    setCreateEndDate("")
   }
 
   const confirmPendingAction = () => {
@@ -221,8 +241,11 @@ export function ProcessingRecordListPage() {
           onClose={() => setDrawerOpen(false)}
           onReset={() => {
             setSelectedCreator("全部")
+            setGoodsKeyword("")
             setStartDate("")
             setEndDate("")
+            setCreateStartDate("")
+            setCreateEndDate("")
           }}
           onConfirm={() => setDrawerOpen(false)}
         >
@@ -238,6 +261,16 @@ export function ProcessingRecordListPage() {
                 </option>
               ))}
             </select>
+          </DrawerField>
+
+          <DrawerField label="货品名称">
+            <input
+              type="text"
+              value={goodsKeyword}
+              onChange={(event) => setGoodsKeyword(event.target.value)}
+              placeholder="请输入投入或产出货品名称"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs text-[#232D39]"
+            />
           </DrawerField>
 
           <DrawerField label="加工日期">
@@ -260,8 +293,28 @@ export function ProcessingRecordListPage() {
             </div>
           </DrawerField>
 
+          <DrawerField label="制单时间">
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={createStartDate}
+                onChange={(event) => setCreateStartDate(event.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="制单开始日期"
+              />
+              <span className="shrink-0 text-xs text-[#232D39]/50">至</span>
+              <input
+                type="date"
+                value={createEndDate}
+                onChange={(event) => setCreateEndDate(event.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-[#232D39]"
+                aria-label="制单结束日期"
+              />
+            </div>
+          </DrawerField>
+
           <p className="text-[11px] leading-relaxed text-[#232D39]/45">
-            加工类型、单据状态、所属仓库已在首屏胶囊中切换；日期与制单人在此补充，点「确定」后生效。
+            加工类型、单据状态、所属仓库已在首屏胶囊中切换；货品名称、日期与制单人在此补充，点「确定」后生效。
           </p>
         </FilterDrawer>
 

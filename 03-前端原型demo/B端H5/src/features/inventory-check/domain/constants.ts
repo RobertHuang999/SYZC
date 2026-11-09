@@ -128,13 +128,21 @@ export const CHECK_RESULT_OPTIONS = [
 ]
 
 /** 后端字典里的实际盘点人员（用于 More 抽屉多选） */
-export const CHECK_ACTUAL_USER_OPTIONS = ["lxy", "卡皮巴拉", "张监管", "李库管"]
+export const CHECK_ACTUAL_USER_OPTIONS = [
+  "lxy",
+  "卡皮巴拉",
+  "张监管",
+  "李库管",
+  "王巡查",
+]
 
 export const CHECK_CREATOR_OPTIONS = [
   { label: "全部制单人", value: "ALL" },
   { label: "lxy", value: "lxy" },
   { label: "卡皮巴拉", value: "卡皮巴拉" },
   { label: "张监管", value: "张监管" },
+  { label: "李库管", value: "李库管" },
+  { label: "王巡查", value: "王巡查" },
 ]
 
 export const CHECK_WAREHOUSE_OPTIONS = [
@@ -145,7 +153,7 @@ export const CHECK_WAREHOUSE_OPTIONS = [
 ]
 
 export const DEFAULT_CHECK_FILTERS: CheckListFilters = {
-  keyword: "",
+  checkNo: "",
   taskName: "",
   checkType: "ALL",
   warehouseName: "ALL",
@@ -155,4 +163,6 @@ export const DEFAULT_CHECK_FILTERS: CheckListFilters = {
   creator: "ALL",
   startDate: "",
   endDate: "",
+  createdStartTime: "",
+  createdEndTime: "",
 }
