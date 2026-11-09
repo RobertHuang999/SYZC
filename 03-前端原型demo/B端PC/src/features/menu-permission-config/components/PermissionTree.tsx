@@ -10,6 +10,8 @@ import {
 
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
 
+const TREE_LINE = "bg-slate-400/50"
+
 type CollapseApi = {
   collapsed: Set<string>
   toggle: (id: string) => void
@@ -154,71 +156,6 @@ export function PermissionChip({
   )
 }
 
-function InlineNode({
-  node,
-  granted,
-  onToggle,
-}: {
-  node: MenuNode
-  granted: Set<string>
-  onToggle: (node: MenuNode, next: boolean) => void
-}) {
-  const state = getCheckState(node, granted)
-  const isCollapsed = useContext(CollapseContext).collapsed.has(node.id)
-
-  if (node.children.length === 0) {
-    return <PermissionChip node={node} state={state} onToggle={onToggle} />
-  }
-
-  return (
-    <span
-      className={cn(
-        "flex w-full flex-col gap-1 rounded-md border px-1.5 py-1",
-        state === "disabled"
-          ? "border-dashed border-slate-200 bg-slate-50/60"
-          : "border-primary/30 bg-primary/[0.035]",
-      )}
-    >
-      <span className="flex flex-wrap items-center gap-1.5">
-        <CollapseToggle node={node} />
-        <ToggleCheckbox node={node} state={state} onToggle={onToggle}>
-          <span
-            className={cn(
-              "text-[11px] font-semibold",
-              state === "disabled" ? "text-slate-400" : "text-foreground",
-            )}
-          >
-            {node.name}
-          </span>
-        </ToggleCheckbox>
-        <DisabledBadge show={!node.enabled} />
-        <span
-          className={cn(
-            "rounded-full px-1.5 py-px text-[9.5px]",
-            state === "disabled"
-              ? "bg-slate-100 text-slate-400"
-              : "bg-primary/10 text-primary",
-          )}
-        >
-          含 {node.children.length} 项子操作
-        </span>
-      </span>
-      {!isCollapsed && (
-        <span className="ml-2 flex flex-wrap items-center gap-1 border-l-2 border-primary/25 pl-2">
-          {node.children.map((child) => (
-            <InlineNode
-              key={child.id}
-              node={child}
-              granted={granted}
-              onToggle={onToggle}
-            />
-          ))}
-        </span>
-      )}
-    </span>
-  )
-}
-
 function GroupActions({
   node,
   onToggle,
@@ -252,248 +189,84 @@ function GroupActions({
   )
 }
 
-function ActionGroupCard({
+/** 一层树线：竖线 + 拐角，最后一个子项竖线在拐角处收住 */
+function TreeBranch({ isLast, children }: { isLast: boolean; children: React.ReactNode }) {
+  return (
+    <div className="relative pl-5">
+      <span
+        aria-hidden
+        className={cn("absolute left-2 top-0 w-px", TREE_LINE, isLast ? "h-[15px]" : "h-full")}
+      />
+      <span aria-hidden className={cn("absolute left-2 top-[15px] h-px w-[10px]", TREE_LINE)} />
+      {children}
+    </div>
+  )
+}
+
+function NodeRow({
   node,
   granted,
   onToggle,
+  isRoot = false,
 }: {
   node: MenuNode
   granted: Set<string>
   onToggle: (node: MenuNode, next: boolean) => void
+  isRoot?: boolean
 }) {
   const state = getCheckState(node, granted)
   const { selected, total } = countSubtree(node.children, granted)
-  const isCollapsed = useContext(CollapseContext).collapsed.has(node.id)
+  const hasChildren = node.children.length > 0
 
   return (
     <div
       className={cn(
-        "rounded-md border",
-        state === "disabled" ? "border-dashed border-slate-200 bg-slate-50/40" : "border-border/70 bg-muted/[0.12]",
+        "flex flex-wrap items-center gap-2 rounded-md px-2 transition-colors hover:bg-muted/40",
+        isRoot ? "py-1.5" : "py-1",
       )}
     >
-      <div className="flex flex-wrap items-center gap-2 border-b border-border/50 px-2 py-1">
-        <CollapseToggle node={node} />
-        <ToggleCheckbox node={node} state={state} onToggle={onToggle}>
-          <span
-            className={cn(
-              "text-[11.5px] font-medium",
-              state === "disabled" ? "text-slate-400" : "text-foreground",
-            )}
-          >
-            {node.name}
-          </span>
-        </ToggleCheckbox>
-        <DisabledBadge show={!node.enabled} />
-        <span className="text-[10px] text-muted-foreground">
-          {selected}/{total}
-        </span>
-        {node.enabled && <GroupActions node={node} onToggle={onToggle} />}
-      </div>
-      {!isCollapsed && (
-        <div className="flex flex-wrap gap-x-2 gap-y-1.5 px-2 py-1.5">
-          {node.children.map((child) => (
-            <InlineNode
-              key={child.id}
-              node={child}
-              granted={granted}
-              onToggle={onToggle}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function MenuCard({
-  node,
-  granted,
-  onToggle,
-}: {
-  node: MenuNode
-  granted: Set<string>
-  onToggle: (node: MenuNode, next: boolean) => void
-}) {
-  const state = getCheckState(node, granted)
-  const { selected, total } = countSubtree(node.children, granted)
-  const isCollapsed = useContext(CollapseContext).collapsed.has(node.id)
-  const hasChildren = node.children.length > 0
-  const leafChildren = node.children.filter((child) => child.children.length === 0)
-  const groupChildren = node.children.filter((child) => child.children.length > 0)
-
-  return (
-    <div className="rounded-md border border-border/80 bg-card">
-      <div
-        className={cn(
-          "flex flex-wrap items-center gap-2 px-2.5 py-1.5",
-          hasChildren && "border-b border-border/60",
-          "bg-slate-50/70",
-        )}
-      >
-        {hasChildren ? <CollapseToggle node={node} /> : <span className="size-5 shrink-0" />}
-        <ToggleCheckbox node={node} state={state} onToggle={onToggle}>
-          <span
-            className={cn(
-              "text-[12px] font-semibold",
-              state === "disabled" ? "text-slate-400" : "text-foreground",
-            )}
-          >
-            {node.name}
-          </span>
-        </ToggleCheckbox>
-        <DisabledBadge show={!node.enabled} />
-        {hasChildren ? (
-          <>
-            <span className="text-[10px] text-muted-foreground">
-              {selected}/{total}
-            </span>
-            {node.enabled && <GroupActions node={node} onToggle={onToggle} />}
-          </>
-        ) : (
-          <span className="text-[10px] text-muted-foreground">无下级操作</span>
-        )}
-      </div>
-      {hasChildren && !isCollapsed && (
-        <div className="space-y-1.5 px-2.5 py-2">
-          {leafChildren.length > 0 && (
-            <div className="flex flex-wrap gap-x-2 gap-y-1.5">
-              {leafChildren.map((child) => (
-                <PermissionChip
-                  key={child.id}
-                  node={child}
-                  state={getCheckState(child, granted)}
-                  onToggle={onToggle}
-                />
-              ))}
-            </div>
-          )}
-          {groupChildren.map((child) =>
-            child.level === "菜单" ? (
-              <MenuCard
-                key={child.id}
-                node={child}
-                granted={granted}
-                onToggle={onToggle}
-              />
-            ) : (
-              <ActionGroupCard
-                key={child.id}
-                node={child}
-                granted={granted}
-                onToggle={onToggle}
-              />
-            ),
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function SectionShell({
-  node,
-  granted,
-  onToggle,
-  depth,
-  children,
-}: {
-  node: MenuNode
-  granted: Set<string>
-  onToggle: (node: MenuNode, next: boolean) => void
-  depth: number
-  children: React.ReactNode
-}) {
-  const state = getCheckState(node, granted)
-  const { selected, total } = countSubtree(node.children, granted)
-  const isCollapsed = useContext(CollapseContext).collapsed.has(node.id)
-
-  return (
-    <section
-      className={cn(
-        "rounded-lg border",
-        depth === 0 ? "border-border/80" : "border-border/60",
-        state === "disabled" ? "border-dashed border-slate-200 bg-slate-50/30" : "bg-card",
-      )}
-    >
-      <header
-        className={cn(
-          "flex flex-wrap items-center gap-2 rounded-t-lg border-b px-3 py-1.5",
-          depth === 0 ? "border-border/70 bg-muted/30" : "border-border/50 bg-muted/15",
-        )}
-      >
-        <CollapseToggle node={node} />
-        <ToggleCheckbox node={node} state={state} onToggle={onToggle}>
-          <span
-            className={cn(
-              depth === 0 ? "text-[12.5px] font-semibold" : "text-[12px] font-medium",
-              state === "disabled" ? "text-slate-400" : "text-foreground",
-            )}
-          >
-            {node.name}
-          </span>
-        </ToggleCheckbox>
-        <DisabledBadge show={!node.enabled} />
-        <span className="text-[10px] text-muted-foreground">
-          {selected}/{total}
-        </span>
-        {node.enabled && <GroupActions node={node} onToggle={onToggle} />}
-      </header>
-      {!isCollapsed && <div className="space-y-2 px-2.5 py-2">{children}</div>}
-    </section>
-  )
-}
-
-function NodeChildren({
-  node,
-  granted,
-  onToggle,
-  depth,
-}: {
-  node: MenuNode
-  granted: Set<string>
-  onToggle: (node: MenuNode, next: boolean) => void
-  depth: number
-}) {
-  const blocks: React.ReactNode[] = []
-  let leafBuffer: MenuNode[] = []
-
-  const flushLeaves = () => {
-    if (leafBuffer.length === 0) return
-
-    // 模块层的叶子节点（如「外链平台」「数据走势」）与「审批中心」「数据一览」同级，
-    // 用整行小卡片呈现，避免被误读成上一张卡片的下级。
-    if (node.level === "模块") {
-      for (const leaf of leafBuffer) {
-        blocks.push(
-          <div
-            key={leaf.id}
-            className="flex items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-1.5"
-          >
-            <ToggleCheckbox
-              node={leaf}
-              state={getCheckState(leaf, granted)}
-              onToggle={onToggle}
-            >
-              <span className="text-[12px] font-medium text-foreground">{leaf.name}</span>
-            </ToggleCheckbox>
-            <span className="text-[10px] text-muted-foreground">无下级操作</span>
-          </div>,
-        )
-      }
-      leafBuffer = []
-      return
-    }
-
-    blocks.push(
-      <div key={`leaves-${leafBuffer[0].id}`} className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+      {hasChildren ? <CollapseToggle node={node} /> : <span className="size-5 shrink-0" />}
+      <ToggleCheckbox node={node} state={state} onToggle={onToggle}>
         <span
-          className="shrink-0 rounded bg-muted/60 px-1.5 py-0.5 text-[10px] text-muted-foreground"
-          title="直接挂在本层、没有再往下分组的操作权限"
+          className={cn(
+            isRoot ? "text-[13px] font-semibold" : "text-[12px] font-medium",
+            state === "disabled" ? "text-slate-400" : "text-foreground",
+          )}
         >
-          本层直属操作 · {leafBuffer.length} 项
+          {node.name}
         </span>
-        {leafBuffer.map((child) => (
+      </ToggleCheckbox>
+      <DisabledBadge show={!node.enabled} />
+      {hasChildren ? (
+        <>
+          <span className="text-[10px] text-muted-foreground">
+            {selected}/{total}
+          </span>
+          {node.enabled && <GroupActions node={node} onToggle={onToggle} />}
+        </>
+      ) : (
+        <span className="text-[10px] text-muted-foreground">无下级操作</span>
+      )}
+    </div>
+  )
+}
+
+function DirectOperations({
+  nodes,
+  granted,
+  onToggle,
+}: {
+  nodes: MenuNode[]
+  granted: Set<string>
+  onToggle: (node: MenuNode, next: boolean) => void
+}) {
+  return (
+    <div className="rounded-md bg-muted/20 px-2 py-1.5">
+      <div className="mb-1 text-[10px] text-muted-foreground">
+        直属操作 · {nodes.length} 项
+      </div>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+        {nodes.map((child) => (
           <PermissionChip
             key={child.id}
             node={child}
@@ -501,50 +274,97 @@ function NodeChildren({
             onToggle={onToggle}
           />
         ))}
-      </div>,
-    )
-    leafBuffer = []
+      </div>
+    </div>
+  )
+}
+
+type BranchItem =
+  | { kind: "node"; node: MenuNode }
+  | { kind: "chips"; nodes: MenuNode[] }
+
+function buildBranchItems(node: MenuNode): BranchItem[] {
+  const isDirectLeaf = (child: MenuNode) =>
+    child.level !== "菜单" && child.children.length === 0
+  const directLeaves = node.children.filter(isDirectLeaf)
+  const others = node.children.filter((child) => !isDirectLeaf(child))
+  const items: BranchItem[] = []
+
+  if (directLeaves.length > 0) {
+    // 模块层的叶子（如外链平台、数据走势）本身就是导航项，单独成行；
+    // 其他层级的直属操作合并成一组胶囊，避免每条都占一行。
+    if (node.level === "模块") {
+      for (const leaf of directLeaves) items.push({ kind: "node", node: leaf })
+    } else {
+      items.push({ kind: "chips", nodes: directLeaves })
+    }
   }
 
-  for (const child of node.children) {
-    if (child.level === "菜单") {
-      flushLeaves()
-      blocks.push(<MenuCard key={child.id} node={child} granted={granted} onToggle={onToggle} />)
-      continue
-    }
-    if (child.children.length > 0) {
-      flushLeaves()
-      blocks.push(
-        <SectionShell
-          key={child.id}
-          node={child}
-          granted={granted}
-          onToggle={onToggle}
-          depth={depth + 1}
-        >
-          <NodeChildren
-            node={child}
-            granted={granted}
-            onToggle={onToggle}
-            depth={depth + 1}
-          />
-        </SectionShell>,
-      )
-      continue
-    }
-    leafBuffer.push(child)
-  }
-  flushLeaves()
+  for (const child of others) items.push({ kind: "node", node: child })
+  return items
+}
 
-  if (blocks.length === 0) {
+function NodeBody({
+  node,
+  granted,
+  onToggle,
+}: {
+  node: MenuNode
+  granted: Set<string>
+  onToggle: (node: MenuNode, next: boolean) => void
+}) {
+  const items = buildBranchItems(node)
+
+  if (items.length === 0) {
     return (
-      <div className="px-2 py-2 text-[11px] text-muted-foreground">
+      <div className="px-2 py-1.5 text-[11px] text-muted-foreground">
         下级权限均已停用，打开顶部「显示已停用」可查看。
       </div>
     )
   }
 
-  return <>{blocks}</>
+  return (
+    <div>
+      {items.map((item, index) => {
+        const isLast = index === items.length - 1
+        return (
+          <TreeBranch
+            key={item.kind === "node" ? item.node.id : `chips-${item.nodes[0].id}`}
+            isLast={isLast}
+          >
+            {item.kind === "chips" ? (
+              <DirectOperations nodes={item.nodes} granted={granted} onToggle={onToggle} />
+            ) : (
+              <TreeNode node={item.node} granted={granted} onToggle={onToggle} />
+            )}
+          </TreeBranch>
+        )
+      })}
+    </div>
+  )
+}
+
+function TreeNode({
+  node,
+  granted,
+  onToggle,
+  isRoot = false,
+}: {
+  node: MenuNode
+  granted: Set<string>
+  onToggle: (node: MenuNode, next: boolean) => void
+  isRoot?: boolean
+}) {
+  const { collapsed } = useContext(CollapseContext)
+  const hasChildren = node.children.length > 0
+  const expanded = hasChildren && !collapsed.has(node.id)
+
+  return (
+    <div>
+      <NodeRow node={node} granted={granted} onToggle={onToggle} isRoot={isRoot} />
+      {expanded && <NodeBody node={node} granted={granted} onToggle={onToggle} />}
+    </div>
+  )
 }
 
 export function ModulePanel({
@@ -562,19 +382,18 @@ export function ModulePanel({
 }) {
   return (
     <CollapseContext.Provider value={{ collapsed, toggle: onToggleCollapse }}>
-      {module.level === "菜单" ? (
-        <MenuCard node={module} granted={granted} onToggle={onToggle} />
-      ) : (
-        <SectionShell node={module} granted={granted} onToggle={onToggle} depth={0}>
-          {module.children.length === 0 ? (
-            <div className="px-3 py-6 text-center text-[11px] text-muted-foreground">
+      <div className="rounded-lg border border-border/70 bg-card px-2 py-1.5">
+        {module.children.length === 0 ? (
+          <>
+            <NodeRow node={module} granted={granted} onToggle={onToggle} isRoot />
+            <div className="px-2 py-3 text-center text-[11px] text-muted-foreground">
               该模块在现网权限库里没有下级权限。
             </div>
-          ) : (
-            <NodeChildren node={module} granted={granted} onToggle={onToggle} depth={0} />
-          )}
-        </SectionShell>
-      )}
+          </>
+        ) : (
+          <TreeNode node={module} granted={granted} onToggle={onToggle} isRoot />
+        )}
+      </div>
     </CollapseContext.Provider>
   )
 }
