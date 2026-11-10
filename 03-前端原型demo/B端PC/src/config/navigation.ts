@@ -68,6 +68,7 @@ export const topModules: TopModule[] = [
   { id: "statistics", label: "统计/看板", path: "/统计/看板/总机构报表看板/业务管理看板" },
   { id: "settlement", label: "结算", path: "/结算/监管结算/项目结算管理" },
   { id: "config", label: "配置管理", path: "/配置管理/门户管理/门户端配置" },
+  { id: "contract", label: "合同签署", path: "/合同签署/合同签署中心/模版管理" },
 ]
 
 const migrationSidebarGroup: SidebarGroup = {
@@ -138,6 +139,7 @@ const sidebarGroupsByModule: Record<string, SidebarGroup[]> = {
       label: "合作方档案",
       items: partnerArchiveSidebarItems,
     },
+    ...(generatedSidebarGroupsByModule["user-center"] ?? []),
     {
       id: "synergy-spec",
       label: "业务协同与说明",

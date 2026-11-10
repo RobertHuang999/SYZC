@@ -24,6 +24,8 @@ const moduleMap = {
   "7.统计/看板": "statistics",
   "8.结算": "settlement",
   "9.配置管理": "config",
+  "10.用户中心": "user-center",
+  "11.合同签署": "contract",
   // 合流前 CSV 别名
   "6.统计/看板": "statistics",
   "7.结算": "settlement",

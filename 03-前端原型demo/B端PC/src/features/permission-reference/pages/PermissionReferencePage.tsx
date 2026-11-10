@@ -30,6 +30,7 @@ type ChangeFilter = "全部" | "最近变更"
 
 const permissionModuleOrder = [
   "1.工作中心",
+  "10.用户中心",
   "2.仓储",
   "3.融资/监管",
   "4.交易",
@@ -38,6 +39,7 @@ const permissionModuleOrder = [
   "7.统计/看板",
   "8.结算",
   "9.配置管理",
+  "11.合同签署",
 ]
 
 const permissionModuleOrderMap = new Map(permissionModuleOrder.map((moduleName, index) => [moduleName, index]))
