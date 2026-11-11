@@ -1297,7 +1297,7 @@ export function PartnerArchiveFormPage() {
                             title: "【提货人档案】业务要求与必填核验",
                             items,
                             missingCount: missing,
-                            businessTip: "提货人在仓储出库提货核销时必须核验经办人身份证与人脸比对（PP-R01）。",
+                            businessTip: "提货人在仓储出库提货核销时必须核验经办人身份证与人脸比对（R01）。",
                           }
                         }
 

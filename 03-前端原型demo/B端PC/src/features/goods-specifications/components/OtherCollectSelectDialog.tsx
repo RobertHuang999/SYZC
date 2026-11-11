@@ -162,7 +162,7 @@ export function OtherCollectSelectDialog({
             : undefined),
       })
     })
-    // 【收集项引用联动规则】(SKU-F12)：存量货品已绑定的「底座已停用」收集项不在可选池中，确认弹窗时必须原样保留，仅允许在外部卡片上主动移除
+    // 【收集项引用联动规则】(K12)：存量货品已绑定的「底座已停用」收集项不在可选池中，确认弹窗时必须原样保留，仅允许在外部卡片上主动移除
     selectedItems.forEach((prevItem) => {
       if (!selectableIds.has(prevItem.fieldId)) {
         result.push({ ...prevItem })

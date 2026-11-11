@@ -28,7 +28,7 @@ export function formatContactPhoneVerifiedAt(value?: string) {
 }
 
 /** 详情展示：显式核验时间；C端注册默认可用建档时间 */
-/** 【合作方档案操作权限矩阵】(PA-P02)：详情/列表「验证联系手机」显隐（冻结主体不提供） */
+/** 【合作方档案操作权限矩阵】(GP02)：详情/列表「验证联系手机」显隐（冻结主体不提供） */
 export function canShowVerifyContactPhoneAction(partner: PartnerSubject): boolean {
   if (partner.status === "FROZEN") {
     return false
@@ -60,7 +60,7 @@ export function markContactPhoneVerified(
 }
 
 /**
- * 编辑保存前是否须短信核验（【编辑修改联系手机二元核验规则】(PA-R04a)）。
+ * 编辑保存前是否须短信核验（【编辑修改联系手机二元核验规则】(G04a)）。
  * 联系手机仍为「未验证」时改号直接落库，不弹窗。
  */
 export function requiresPartnerEditPhoneSmsVerify(input: {

@@ -61,7 +61,7 @@ export const PARTNER_FORM_ADDRESS_USER_HINT_OTHER =
   "选填。可按证照填写登记地址。"
 
 export const PARTNER_FORM_ADDRESS_SPEC_NOTE_OTHER =
-  "【货主准入与地址唯一联动规则】(PA-R04) 的 P01/P02 **仅货主信息域**；提货人/资金方/服务方保存不强制 P01。"
+  "【货主准入与地址唯一联动规则】(G04) 的 P01/P02 **仅货主信息域**；提货人/资金方/服务方保存不强制 P01。"
 
 export const PARTNER_FORM_INITIAL_ROLES_USER_HINT =
   "勾选多项时将与本页档案一次保存；全部通过才会落库，否则会说明哪一项未通过。未选则仅在本菜单建档。"
@@ -71,13 +71,13 @@ export const PARTNER_APPEND_ROLE_INDIVIDUAL_USER_HINT =
   "当前为个人身份，仅可追加至货主信息或提货人信息；资金方与服务方仅支持企业主体。"
 
 export const PARTNER_FORM_INITIAL_ROLES_SPEC_NOTE =
-  "【追加多身份一次保存原子规则】(PA-R03a)：预检 → 一次确认 → 单事务；勾选货主域时走【货主准入与地址唯一联动规则】(PA-R04) 与 P01/P02。"
+  "【追加多身份一次保存原子规则】(G03a)：预检 → 一次确认 → 单事务；勾选货主域时走【货主准入与地址唯一联动规则】(G04) 与 P01/P02。"
 
 export const PARTNER_COMPOSITE_SAVE_CONFIRM_USER =
   "以下身份将在同一笔保存中一并处理；任一项无法完成时，整单都不会写入数据库（含本页档案）。"
 
 export const PARTNER_COMPOSITE_SAVE_CONFIRM_SPEC =
-  "【追加多身份一次保存原子规则】(PA-R03a) · 【主体识别与库内匹配总则】(PA-R03)"
+  "【追加多身份一次保存原子规则】(G03a) · 【主体识别与库内匹配总则】(G03)"
 
 export const PARTNER_COMPOSITE_SAVE_FAILURE_INTRO =
   "未写入任何合作方档案，请根据下列说明修改后重新保存。"
@@ -133,7 +133,7 @@ export const PARTNER_PICKUP_ENTERPRISE_AGENT_ID_USER_HINT =
   "请填写现场提货经办人的18位居民身份证号，须与经办人姓名、联系电话一致，用于出库核验。"
 
 export const PARTNER_PICKUP_ENTERPRISE_AGENT_ID_SPEC_NOTE =
-  "提货人信息 · 企业必填；参与【提货人信息库内匹配规则】(PP-R01)；列表与筛选不提供本字段。"
+  "提货人信息 · 企业必填；参与【提货人信息库内匹配规则】(R01)；列表与筛选不提供本字段。"
 
 /** 货主 / 资金方 / 服务方 · 企业 · 经办人身份证号（选填） */
 export const PARTNER_OPTIONAL_ENTERPRISE_AGENT_ID_USER_HINT =
@@ -266,13 +266,13 @@ export const PARTNER_VERIFY_COPY = {
     "检测到合作方业务联系手机号发生变更。系统已向新手机号发送验证码，请完成确认后再保存。",
   verifyDetailUser:
     "请向当前预留的业务联系手机完成短信确认。通过后更新为「已验证」，姓名与身份标识将锁定不可随意修改。",
-  verifyDetailSpec: "【联系手机核验后核心身份锁定规则】(PA-R04c)。",
+  verifyDetailSpec: "【联系手机核验后核心身份锁定规则】(G04c)。",
   verifyCreateUser:
     "请向当前预留的业务联系手机完成短信确认。通过后建档为「已验证」，姓名与身份标识将锁定。",
-  verifyCreateSpec: "【联系手机核验后核心身份锁定规则】(PA-R04c)。",
+  verifyCreateSpec: "【联系手机核验后核心身份锁定规则】(G04c)。",
   inboundSubmitUser:
     "该货主联系手机尚未验证。完成短信确认后将更新为「已验证」，并继续提交本入库单审核。",
-  inboundSubmitSpec: "【联系手机核验状态与金融场景强制核验规则】(PA-R04b)。",
+  inboundSubmitSpec: "【联系手机核验状态与金融场景强制核验规则】(G04b)。",
   inboundCreateUser:
     "请核对货主实名信息与联系方式，并向预留手机完成短信确认。",
   inboundCreateSpec: "【新货主二元身份核验与建档沉淀规则】(R03)。",
@@ -285,7 +285,7 @@ export const PARTNER_QUICK_CREATE_INBOUND_USER =
   "证件地址选填；保存后联系手机为「未验证」。普通入库可直接引用该货主；质押/仓单等金融类入库提交前须先完成手机验证。"
 
 export const PARTNER_QUICK_CREATE_INBOUND_SPEC =
-  "不走档案 P01；有地址时 P02 分池；金融节点 PA-R04b。"
+  "不走档案 P01；有地址时 P02 分池；金融节点 G04b。"
 
 export const PARTNER_QUICK_CREATE_OUTBOUND_USER =
   "仅通过本入口建档；输入框失焦不会自动创建档案。角色为提货经办人，不参与货主地址唯一校验。"
@@ -297,13 +297,13 @@ export const PARTNER_QUICK_CREATE_SUPERVISION_FUNDER_USER =
   "仅创建企业资金方档案，挂接至「资金方信息」菜单；用于抵押/质押单抵押权人、质押权人选择。"
 
 export const PARTNER_QUICK_CREATE_SUPERVISION_FUNDER_SPEC =
-  "【抵质押权人合作方引用规则】(R-PLG-14) · 【资金方信息库内匹配规则】(FN-R01)；不走货主 P01/P02。"
+  "【抵质押权人合作方引用规则】(R14) · 【资金方信息库内匹配规则】(R01)；不走货主 P01/P02。"
 
 export const PARTNER_QUICK_CREATE_SUPERVISION_SERVICE_USER =
   "仅创建企业服务方档案，挂接至「服务方信息」菜单；用于监管服务单质权人，界面不写「资金方」。"
 
 export const PARTNER_QUICK_CREATE_SUPERVISION_SERVICE_SPEC =
-  "【监管服务质权人合作方引用规则】(R-PLG-15) · 【服务方信息库内匹配规则】(SP-R01)。"
+  "【监管服务质权人合作方引用规则】(R15) · 【服务方信息库内匹配规则】(R01)。"
 
 /** 出库制单：货主须在库有货，不提供作业页快捷新增 */
 export const OUTBOUND_OWNER_PICKER_USER_HINT =
@@ -325,13 +325,13 @@ export function partnerEmbeddedPickerUserHint(menu: PartnerArchiveMenuLabel): st
 export function partnerEmbeddedPickerSpecNote(menu: PartnerArchiveMenuLabel): string {
   switch (menu) {
     case "货主信息":
-      return "【货主合作方引用规则】(R-PLG-16) · 【货主信息库内匹配与准入规则】(WH-R01) · 【合作方子菜单分视图与隐式角色规则】(PA-R12)。"
+      return "【货主合作方引用规则】(R16) · 【货主信息库内匹配与准入规则】(R01) · 【合作方子菜单分视图与隐式角色规则】(G12)。"
     case "资金方信息":
-      return "【抵质押权人合作方引用规则】(R-PLG-14) · FN-R01 · PA-R12 域间硬隔离。"
+      return "【抵质押权人合作方引用规则】(R14) · R01 · G12 域间硬隔离。"
     case "服务方信息":
-      return "【监管服务质权人合作方引用规则】(R-PLG-15) · SP-R01 · 禁止与资金方域混选。"
+      return "【监管服务质权人合作方引用规则】(R15) · R01 · 禁止与资金方域混选。"
     default:
-      return "PA-R12 按 archiveMenu 过滤可选主档。"
+      return "G12 按 archiveMenu 过滤可选主档。"
   }
 }
 

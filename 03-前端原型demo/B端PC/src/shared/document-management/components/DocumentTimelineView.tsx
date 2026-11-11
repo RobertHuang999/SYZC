@@ -39,6 +39,7 @@ export function DocumentTimelineView({
   const [refreshKey, setRefreshKey] = useState(0)
   const [uploadOpen, setUploadOpen] = useState(false)
   const [uploadTargetFlowType, setUploadTargetFlowType] = useState<string>("1")
+  const [uploadTargetStageLabel, setUploadTargetStageLabel] = useState<string>("")
   const [previewPdfOpen, setPreviewPdfOpen] = useState(false)
   const [previewPdfName, setPreviewPdfName] = useState("")
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -144,18 +145,6 @@ export function DocumentTimelineView({
               className="h-8 pl-8 text-xs rounded-md border-slate-200 focus-visible:ring-blue-500 placeholder:text-slate-400"
             />
           </div>
-
-          <Button
-            size="sm"
-            className="h-8 px-4 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-2xs cursor-pointer"
-            onClick={() => {
-              setUploadTargetFlowType("2")
-              setUploadOpen(true)
-            }}
-          >
-            <Plus className="w-3.5 h-3.5 mr-1" />
-            上传资料
-          </Button>
         </div>
       </div>
 
@@ -225,6 +214,9 @@ export function DocumentTimelineView({
                       onClick={(e) => {
                         e.stopPropagation()
                         setUploadTargetFlowType(step.flowType)
+                        setUploadTargetStageLabel(
+                          step.title.replace(/\s*\(flowType:.*\)/, "")
+                        )
                         setUploadOpen(true)
                       }}
                     >
@@ -414,7 +406,11 @@ export function DocumentTimelineView({
                     {isSupplementNode && allowSupplement && (
                       <div className="pt-1">
                         <div
-                          onClick={() => setUploadOpen(true)}
+                          onClick={() => {
+                            setUploadTargetFlowType("9527")
+                            setUploadTargetStageLabel("补充资料")
+                            setUploadOpen(true)
+                          }}
                           className="border-2 border-dashed border-slate-200 hover:border-blue-400 rounded-lg p-4 text-center cursor-pointer transition-colors bg-slate-50/40 hover:bg-slate-50"
                         >
                           <Button
@@ -453,6 +449,7 @@ export function DocumentTimelineView({
         approvalId={approvalId}
         orderType={orderType}
         defaultFlowType={uploadTargetFlowType}
+        stageLabel={uploadTargetStageLabel}
         onClose={() => setUploadOpen(false)}
         onSuccess={handleUploadSuccess}
       />

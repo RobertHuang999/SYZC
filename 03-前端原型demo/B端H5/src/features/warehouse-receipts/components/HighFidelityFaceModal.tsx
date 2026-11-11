@@ -365,7 +365,7 @@ export function HighFidelityFaceModal({
               </p>
               <p className="font-semibold">第三条 监管与动碰规则</p>
               <p>
-                仓单在押存续期间，仓单项下货品受到实时物联监库保护，出库、补货、移库等资产动碰操作需遵循单流程互斥原则（R-DWR-04）。
+                仓单在押存续期间，仓单项下货品受到实时物联监库保护，出库、补货、移库等资产动碰操作需遵循单流程互斥原则（R04）。
               </p>
             </div>
             <button

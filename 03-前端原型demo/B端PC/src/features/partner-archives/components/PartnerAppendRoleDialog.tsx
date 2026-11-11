@@ -129,7 +129,7 @@ export function PartnerAppendRoleDialog({
                 ) : null}
                 <ProductFieldHint>{PARTNER_APPEND_ROLE_MULTI_USER_HINT}</ProductFieldHint>
                 <PrototypeSpecCallout>
-                  【追加多身份一次保存原子规则】(PA-R03a) · 【主体识别与库内匹配总则】(PA-R03) · 【合作方子菜单分视图与隐式角色规则】(PA-R12)
+                  【追加多身份一次保存原子规则】(G03a) · 【主体识别与库内匹配总则】(G03) · 【合作方子菜单分视图与隐式角色规则】(G12)
                 </PrototypeSpecCallout>
               </div>
             )}

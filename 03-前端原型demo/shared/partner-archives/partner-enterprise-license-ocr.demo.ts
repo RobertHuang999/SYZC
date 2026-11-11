@@ -1,6 +1,6 @@
 import type { PartnerArchiveMenuLabel } from "./partner-archive-routes"
 
-/** 原型 Demo：企业营业执照 OCR 识别回填（【企业营业执照 OCR 识别规则】(PA-R13)） */
+/** 原型 Demo：企业营业执照 OCR 识别回填（【企业营业执照 OCR 识别规则】(G13)） */
 export type PartnerEnterpriseLicenseOcrDemoResult = {
   enterpriseName: string
   unifiedSocialCreditCode: string

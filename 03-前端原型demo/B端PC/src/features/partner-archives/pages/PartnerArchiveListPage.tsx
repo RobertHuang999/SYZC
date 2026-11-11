@@ -330,7 +330,7 @@ export function PartnerArchiveListPage() {
           onConfirm={confirmPendingDialog}
         />
 
-        <PrototypeAnnotationTarget annotationIds={["partner-archive-row-append-pa-r03a"]}>
+        <PrototypeAnnotationTarget annotationIds={["partner-archive-row-append-g03a"]}>
           <PartnerAppendRoleDialog
             partner={activePartner}
             open={appendRoleOpen}

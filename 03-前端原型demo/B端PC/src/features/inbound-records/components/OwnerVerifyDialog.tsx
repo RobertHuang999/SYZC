@@ -20,7 +20,7 @@ import type { OwnerType } from "../domain/form-types"
 type OwnerVerifyDialogProps = {
   open: boolean
   isNewOwner?: boolean
-  /** 金融入库等对「已建档但未验证手机」货主强制短信（PA-R04b） */
+  /** 金融入库等对「已建档但未验证手机」货主强制短信（G04b） */
   requireSmsVerification?: boolean
   ownerType: OwnerType | string
   ownerName: string
@@ -44,7 +44,7 @@ function maskIdCard(id?: string) {
   return id
 }
 
-/** 入库货主确认：需短信时复用合作方档案 PartnerVerifyDialog（PA-R04a / R03 共用） */
+/** 入库货主确认：需短信时复用合作方档案 PartnerVerifyDialog（G04a / R03 共用） */
 export function OwnerVerifyDialog({
   open,
   isNewOwner = false,

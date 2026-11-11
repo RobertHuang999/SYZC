@@ -7,6 +7,22 @@
 
 ---
 
+## 6.3 页面功能说明（已落地）
+
+| 区域 | 规格 |
+| :--- | :--- |
+| 顶区 | 品牌蓝渐变 `from-[#e8f3ff]` → 页面底 `#edf2f8`；头像 54px 圆角 |
+| 登录人 | Mock：张明远 / 森云科技（供应链数字监管中心）/ 监管服务方运营 · 全量数据权限 / 手机 `159****6655` |
+| 头像 | `/avatars/profile-default.jpg`，上线换真实用户接口 |
+| 菜单行 | 授权管理 · 手机号（行尾脱敏）· 隐私协议 · 退出登录（二次确认 + Toast） |
+| 版本 | 系统版本号 **V3.0** |
+| 子路由 | `/m/profile/authorization` · `/m/profile/phone` · `/m/profile/privacy`，当前为占位页 |
+| 壳层 | 无顶 NavBar；底栏四 Tab 选中为品牌蓝 |
+
+> 手机号脱敏工具：`src/lib/mask-phone.ts`；登录人 Mock：`src/features/profile/mock/current-user.mock.ts`。
+
+---
+
 ## 一、模块定位与页面结构
 
 1. **登录人信息卡片**：

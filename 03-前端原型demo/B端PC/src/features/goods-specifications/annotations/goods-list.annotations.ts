@@ -11,7 +11,7 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
       "货品是存货监管的最小核算单元，承接品类定义的规格维度，并从【07 入库收集项配置】字段池勾选入库采集项、锁定保质期专属固定单位及维护系统参考单价。",
     documentRefs: {
       prd: { section: "3. 模块定位与系统链路", match: "入库收集项配置" },
-      rules: { section: "二、状态定义与有效启用计算模型", match: "SKU-F11" },
+      rules: { section: "二、状态定义与有效启用计算模型", match: "K11" },
     },
     details: [
       {
@@ -23,7 +23,7 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
 | :--- | :--- | :--- |
 | **入库收集项来源** | 货品内写死 16 项静态预置项 | 实时引用 **07 入库收集项配置** 字段池（名称、控件、单位、选项动态同步） |
 | **保质期单位控制** | 入库现场仓管员每次手动下拉选单位（易出现 2年 vs 24个月 口径撕裂） | 货品建档时指定**专属固定单位**（天/月/年）+ **建议默认数值**，入库单只读锁定单位 |
-| **底座停用降级** | 无字段池启停联动 | 07 停用后新建不可选，存量已绑定货品保留并标注「含底座停用项」（SKU-F12） |`,
+| **底座停用降级** | 无字段池启停联动 | 07 停用后新建不可选，存量已绑定货品保留并标注「含底座停用项」（K12） |`,
           },
         ],
       },
@@ -33,7 +33,7 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
           {
             label: "计算公式",
             content:
-              "【有效启用状态多级综合计算规则】(SKU-F11)：自身启用、品类启用、大类启用三者同时成立，才是有效启用。",
+              "【有效启用状态多级综合计算规则】(K11)：自身启用、品类启用、大类启用三者同时成立，才是有效启用。",
           },
           {
             label: "下游影响",
@@ -104,7 +104,7 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
       "列表按所选品类定义的规格维度动态拆列；「其他收集信息」列直接展示该货品已配置的收集项名称列表（名称实时同步自 07 字段池），鼠标悬停可查看完整项名与必填状态。",
     documentRefs: {
       fields: { section: "一、业务字段", match: "入库收集信息配置" },
-      rules: { section: "三、核心业务规则", match: "SKU-F01" },
+      rules: { section: "三、核心业务规则", match: "K01" },
     },
     details: [
       {
@@ -117,7 +117,7 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
 | 序号 | 纯文本 | 当前页从 1 开始递增 | 不入库 |
 | 品类 | 纯文本 | 展示当前品类名称 | 继承品类管理 |
 | 动态规格参数 | 多列 | 按品类规格维度逐列展示规格值 | 如材质、规格、产地 |
-| 计量参数(单位) | 组合文本 | 例如 重量(吨) | 计量参数与单位分离维护（SKU-F02） |
+| 计量参数(单位) | 组合文本 | 例如 重量(吨) | 计量参数与单位分离维护（K02） |
 | 其他收集信息 | 纯文本摘要 | 展示已配收集项名称（如 保质期、生产日期、产地） | 完整配置清单在详情页 |
 | 单价 | 金额 | 支持元 / 万元切换；未设价显示 -- | 点击可查看价格趋势 |
 | 状态 | 状态徽章 | 启用绿色、停用灰色；上级停用时提示原因 | 有效状态在详情页展示 |
@@ -131,7 +131,7 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
           {
             label: "SKU 组合唯一",
             content:
-              "【货品SKU唯一性校验规则】(SKU-F01)：同一品类下，动态规格组合 + 计量参数 + 单位必须唯一。",
+              "【货品SKU唯一性校验规则】(K01)：同一品类下，动态规格组合 + 计量参数 + 单位必须唯一。",
           },
         ],
       },
@@ -146,7 +146,7 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
     content:
       "单价按元录入并保存 2 位小数，列表支持元（6 位小数）与万元（10 位小数）两种口径切换；点击单价可查看近 7 / 15 / 30 天趋势。",
     documentRefs: {
-      rules: { section: "三、核心业务规则", match: "SKU-F05" },
+      rules: { section: "三、核心业务规则", match: "K05" },
     },
     details: [
       {
@@ -155,7 +155,7 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
           {
             label: "元展示",
             content:
-              "【系统参考单价维护与双精度展示规则】(SKU-F05)：保留 6 位小数并带千分位，例如 68,000.000000 元/吨。",
+              "【系统参考单价维护与双精度展示规则】(K05)：保留 6 位小数并带千分位，例如 68,000.000000 元/吨。",
           },
           {
             label: "万元展示",
@@ -164,7 +164,7 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
           {
             label: "未设价",
             content:
-              "【未设置单价下游统一提示规则】(SKU-F06)：列表展示 --；下游业务单据统一提示系统未设置的单价。",
+              "【未设置单价下游统一提示规则】(K06)：列表展示 --；下游业务单据统一提示系统未设置的单价。",
           },
         ],
       },
@@ -194,7 +194,7 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
     content:
       "货品已产生入库单后禁止编辑和删除；删除必须先停用，再扫描入库单并二次确认。",
     documentRefs: {
-      rules: { section: "三、核心业务规则", match: "SKU-F09" },
+      rules: { section: "三、核心业务规则", match: "K09" },
     },
     details: [
       {
@@ -203,12 +203,12 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
           {
             label: "编辑拦截",
             content:
-              "【编辑操作入库单强拦截规则】(SKU-F08)：已产生入库单的货品，点击编辑被阻断并提示「该货品已有业务数据产生，不可编辑！」。",
+              "【编辑操作入库单强拦截规则】(K08)：已产生入库单的货品，点击编辑被阻断并提示「该货品已有业务数据产生，不可编辑！」。",
           },
           {
             label: "删除阶段一",
             content:
-              "【两阶段安全删除控制规则】(SKU-F09)：启用状态下的货品不可删除，提示「启用状态下的【大类/品类/货品】不可删除，请先停用。」。",
+              "【两阶段安全删除控制规则】(K09)：启用状态下的货品不可删除，提示「启用状态下的【大类/品类/货品】不可删除，请先停用。」。",
           },
           {
             label: "删除阶段二",

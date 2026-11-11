@@ -844,7 +844,7 @@ export const MOCK_INBOUND_COLLECT_FIELDS: InboundCollectFieldConfig[] = [
     isCore: false,
     status: "DISABLED",
     placeholder: "请输入出厂检验员姓名",
-    remark: "6.3 演示样本：该收集项已在 07 底座停用，但仍被 06 存量货品（螺纹钢 HRB400E Φ25mm 永钢）引用，用于验证【收集项引用联动规则】(SKU-F12) 与【两阶段安全删除控制规则】(R04)。",
+    remark: "6.3 演示样本：该收集项已在 07 底座停用，但仍被 06 存量货品（螺纹钢 HRB400E Φ25mm 永钢）引用，用于验证【收集项引用联动规则】(K12) 与【两阶段安全删除控制规则】(R04)。",
     createdBy: "李质检员",
     createdAt: "2026-08-05 10:30:00",
     updatedBy: "王管理员",

@@ -59,7 +59,7 @@ export const partnerStockChangeMapRows: PartnerStockChangeMapRow[] = [
     archiveMenus: ["货主信息", "提货人信息", "资金方信息", "服务方信息"],
     summaryBullets: [
       "方案 B：分菜单独立主档，选择器按 archiveMenu 硬过滤",
-      "管理端保存可未验证；改址走 PA-R06a，不回写历史快照",
+      "管理端保存可未验证；改址走 G06a，不回写历史快照",
     ],
     prototypeRoute: buildPartnerChangePrototypeRoute(
       "/用户中心/合作方档案/货主信息",
@@ -95,7 +95,7 @@ export const partnerStockChangeMapRows: PartnerStockChangeMapRow[] = [
     archiveMenus: ["货主信息"],
     summaryBullets: [
       "货主 owner_partner_id；作业嵌入快捷建档（QCP），不在提交时原子建档",
-      "普通入库未验证货主零短信；金融类 PA-R04b 补验",
+      "普通入库未验证货主零短信；金融类 G04b 补验",
       "审批通过写库存前固化货主快照",
     ],
     doNot: ["主表平铺证件地址", "提交时再新建货主"],
@@ -267,16 +267,16 @@ export const partnerStockChangeMapRows: PartnerStockChangeMapRow[] = [
     specHint: "05 §2.1 只读下游",
   },
   {
-    id: "financing-pa-r04b",
+    id: "financing-g04b",
     sector: "风控 / 融资",
     menuLabel: "贷中风控 / 独立融资制单",
     menuPath: "各模块以 PRD 为准",
     priority: "—",
     changeLevel: "out-of-scope",
     archiveMenus: ["货主信息"],
-    summaryBullets: ["6.3 不改菜单交互", "若引用货主且未验证，挂载 PA-R04b"],
+    summaryBullets: ["6.3 不改菜单交互", "若引用货主且未验证，挂载 G04b"],
     prototypeStatus: "doc-only",
-    specHint: "04 公共规则 PA-R04b",
+    specHint: "04 公共规则 G04b",
   },
   {
     id: "migration",

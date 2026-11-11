@@ -37,13 +37,13 @@ export const warehouseReceiptListAnnotationsShared: SharedPrototypeAnnotation[] 
     targetId: "receipt-list-filter",
     number: 2,
     kind: "字段",
-    title: "组合筛选与仓库权限隔离（R-DWR-01）",
+    title: "组合筛选与仓库权限隔离（R01）",
     content:
       "默认露出仓单编号、开立时间、存货人/持有人/货品综合搜索、仓库四项，其余收进「展开筛选」；仓库下拉仅列出账号权限范围内的实体仓库。",
     documentRefs: {
       prd: { section: "6.1 仓单管理 — 列表页", match: "两排筛选区" },
       fields: { section: "二、PC 列表筛选区专属字段", match: "仓库" },
-      rules: { section: "2. 规则详细规格", match: "R-DWR-01" },
+      rules: { section: "2. 规则详细规格", match: "R01" },
     },
     details: [
       {
@@ -68,13 +68,13 @@ export const warehouseReceiptListAnnotationsShared: SharedPrototypeAnnotation[] 
     targetId: "receipt-list-table",
     number: 3,
     kind: "字段",
-    title: "11 列全息台账与货物折叠悬停（R-DWR-12）",
+    title: "11 列全息台账与货物折叠悬停（R12）",
     content:
       "固定列序：序号、仓单编码、存货人、持有人、仓库名称、货物名称、开立时间、仓单状态、三方登记、制单人、操作；货物默认展示前 2 条，超出时悬停【更多...】弹出完整清单。",
     documentRefs: {
       prd: { section: "6.1 仓单管理 — 列表页", match: "核心表格（11 列）" },
       fields: { section: "一、仓单单据与列表台账字段", match: "货物名称" },
-      rules: { section: "2. 规则详细规格", match: "R-DWR-12" },
+      rules: { section: "2. 规则详细规格", match: "R12" },
     },
     details: [
       {
@@ -104,12 +104,12 @@ export const warehouseReceiptListAnnotationsShared: SharedPrototypeAnnotation[] 
     targetId: "receipt-list-row-actions",
     number: 4,
     kind: "规则",
-    title: "四态操作能力矩阵与移动端人脸绑定（R-DWR-05 / R-DWR-03）",
+    title: "四态操作能力矩阵与移动端人脸绑定（R05 / R03）",
     content:
       "正常态根据存货人/持有人一致性控制权限（不一致时补货/移库置灰禁用）；审批中仅保留详情；冻结与注销保留详情与下载。动碰类操作在 PC 端点击后弹出移动端办理引导。",
     documentRefs: {
       prd: { section: "5.2 操作按钮能力矩阵", match: "正常" },
-      rules: { section: "2. 规则详细规格", match: "R-DWR-05" },
+      rules: { section: "2. 规则详细规格", match: "R05" },
       fields: { section: "五、操作字段子清单索引", match: "07 仓单注销字段清单" },
     },
     details: [
@@ -150,13 +150,13 @@ export const warehouseReceiptListAnnotationsShared: SharedPrototypeAnnotation[] 
     targetId: "receipt-list-issue-guide",
     number: 5,
     kind: "交互",
-    title: "仓单开立扫码引导（R-DWR-06）",
+    title: "仓单开立扫码引导（R06）",
     content:
       "PC 端右上角【仓单开立】弹出二维码与办理路径，扫码直达移动端「业务办理 → 业务发起 → 仓单开立」，由现场人员核验货位并完成人脸 + 短信双因子认证。",
     documentRefs: {
       prd: { section: "6.1 仓单管理 — 列表页", match: "仓单开立" },
       fields: { section: "五、操作字段子清单索引", match: "01 仓单开立字段清单" },
-      rules: { section: "2. 规则详细规格", match: "R-DWR-06" },
+      rules: { section: "2. 规则详细规格", match: "R06" },
     },
     details: [],
   },

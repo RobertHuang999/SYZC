@@ -70,12 +70,12 @@ export const warehouseReceiptDetailAnnotationsShared: SharedPrototypeAnnotation[
     targetId: "receipt-detail-seal",
     number: 3,
     kind: "规则",
-    title: "四态实心大圆章（R-DWR-05）",
+    title: "四态实心大圆章（R05）",
     content:
       "详情头部右侧悬挂状态实心圆章：审批中金黄、正常生态绿、冻结深灰蓝、注销中灰；颜色只承载状态语义，不随主题色变化。",
     documentRefs: {
       prd: { section: "5.1 仓单四态生命周期定义", match: "审批中" },
-      rules: { section: "2. 规则详细规格", match: "R-DWR-05" },
+      rules: { section: "2. 规则详细规格", match: "R05" },
       fields: { section: "一、仓单单据与列表台账字段", match: "仓单状态" },
     },
     details: [],

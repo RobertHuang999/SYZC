@@ -1,7 +1,6 @@
 import type { PrototypeDocument } from "@/shared/annotations/annotation.types"
-import mockDataMarkdown from "@prototype/MOCK_DATA-开锁审批-V1.3.md?raw"
-import h5ShellPrd from "@docs/🌟🌟🌟-最新基准版/B端H5/03-业务办理/01-内部审批/04-我的申请记录/我的申请记录主PRD.md?raw"
-import h5ShellDemo from "@docs/🌟🌟🌟-最新基准版/B端H5/03-业务办理/01-内部审批/04-我的申请记录/我的申请记录_Demo_移动端.md?raw"
+import h5ShellPrd from "@docs/🌟🌟🌟-最新基准版/B端H5/03-业务办理/01-内部审批/05-我的申请记录/我的申请记录主PRD.md?raw"
+import h5ShellDemo from "@docs/🌟🌟🌟-最新基准版/B端H5/03-业务办理/01-内部审批/05-我的申请记录/我的申请记录_Demo_移动端.md?raw"
 import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/01-工作中心/01-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请主PRD.md?raw"
 import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/01-工作中心/01-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请字段清单.md?raw"
 import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/01-工作中心/01-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请业务规则规格.md?raw"
@@ -73,12 +72,5 @@ export const myApplyDocuments: PrototypeDocument[] = [
     content: demoSubmitMarkdown,
     category: "PRD需求规格",
     badge: "Demo · 提交",
-  },
-  {
-    id: "mock-data",
-    title: "Mock 数据示例 V1.7",
-    content: mockDataMarkdown,
-    category: "PRD需求规格",
-    badge: "Mock",
   },
 ]

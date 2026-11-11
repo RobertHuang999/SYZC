@@ -17,12 +17,12 @@ export const SUPERVISION_DOC_KIND_OPTIONS: {
   },
 ]
 
-/** 权人/质权人合作方档案归属菜单（R-PLG-14 / R-PLG-15） */
+/** 权人/质权人合作方档案归属菜单（R14 / R15） */
 export function holderArchiveMenuForDocKind(
   kind: SupervisionDocKind,
 ): PartnerArchiveMenuLabel {
   return kind === "SUPERVISION_SERVICE" ? "服务方信息" : "资金方信息"
 }
 
-/** 货主固定货主信息域（R-PLG-16） */
+/** 货主固定货主信息域（R16） */
 export const SUPERVISION_OWNER_ARCHIVE_MENU: PartnerArchiveMenuLabel = "货主信息"

@@ -1,4 +1,4 @@
-import { generatedSidebarGroupsByModule } from "./menu-catalog.generated"
+import { generatedMenuPaths, generatedSidebarGroupsByModule } from "./menu-catalog.generated"
 import {
   INBOUND_STAGING_PROTOTYPE_RELEASED,
   INBOUND_STAGING_PC_MENU_PATH,
@@ -108,7 +108,8 @@ const configSidebarGroupsWith63: SidebarGroup[] = (
   return group
 })
 
-/** 权限 CSV 多行字段导致「监管管理」未进生成菜单；侧栏与占位路由须与权限表、6.2 路径一致 */
+/** 监管办理=开立入口；监管管理=存续期台账（页内 Tab：抵押/质押/监管服务订单）。办理未进权限 CSV，侧栏在此补齐 */
+const SUPERVISION_HANDLING_PC_PATH = "/融资/监管/监管业务/监管办理"
 const SUPERVISION_MANAGEMENT_PC_PATH = "/融资/监管/监管业务/监管管理"
 
 const financeSidebarGroupsWithSupervisionMgmt: SidebarGroup[] = (
@@ -117,17 +118,22 @@ const financeSidebarGroupsWithSupervisionMgmt: SidebarGroup[] = (
   if (group.id !== "监管业务" && group.label !== "监管业务") {
     return group
   }
-  const items = [...group.items]
-  if (items.some((item) => item.path === SUPERVISION_MANAGEMENT_PC_PATH)) {
-    return group
-  }
-  const handlingIndex = items.findIndex((item) => item.label === "监管办理")
-  items.splice(
-    handlingIndex >= 0 ? handlingIndex + 1 : items.length,
-    0,
-    { label: "监管管理", path: SUPERVISION_MANAGEMENT_PC_PATH },
+  const withoutMgmtTabs = group.items.filter(
+    (item) =>
+      item.path === SUPERVISION_MANAGEMENT_PC_PATH ||
+      !item.path.startsWith(`${SUPERVISION_MANAGEMENT_PC_PATH}/`),
   )
-  return { ...group, items }
+  const corePaths = new Set([SUPERVISION_HANDLING_PC_PATH, SUPERVISION_MANAGEMENT_PC_PATH])
+  const otherItems = withoutMgmtTabs.filter((item) => !corePaths.has(item.path))
+
+  return {
+    ...group,
+    items: [
+      { label: "监管办理", path: SUPERVISION_HANDLING_PC_PATH },
+      { label: "监管管理", path: SUPERVISION_MANAGEMENT_PC_PATH },
+      ...otherItems,
+    ],
+  }
 })
 
 const sidebarGroupsByModule: Record<string, SidebarGroup[]> = {
@@ -295,10 +301,10 @@ export function shouldShowSidebar(pathname: string) {
 }
 
 export function getAllMenuPaths(): string[] {
-  const paths = Object.values(sidebarGroupsByModule).flatMap((groups) =>
+  const sidebarPaths = Object.values(sidebarGroupsByModule).flatMap((groups) =>
     groups.flatMap((group) => group.items.map((item) => item.path)),
   )
-  return [...new Set(paths)]
+  return [...new Set([...generatedMenuPaths, ...sidebarPaths])]
 }
 
 function filterInboundStagingSidebarGroups(groups: SidebarGroup[]): SidebarGroup[] {

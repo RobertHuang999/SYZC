@@ -26,3 +26,6 @@
 | 17 | 异动管理 | `ws-cargo-movement` | `/m/module/ws-cargo-movement` | [17-异动管理/](./17-异动管理/README.md) |
 | 18 | 理货堆放 | `ws-tally-stacking` | `/m/module/ws-tally-stacking` | [18-理货堆放/](./18-理货堆放/README.md) |
 | 19 | 库存明细 | `ws-stock-detail` | `/m/module/ws-stock-detail` | [19-库存明细/](./19-库存明细/README.md) |
+| 20 | 库存流水（6.3 新增） | `ws-stock-flow` | `/m/module/ws-stock-flow` | [20-库存流水/](./20-库存流水/README.md) |
+
+> **入库暂存登记**：需求暂缓，未纳入基准；原型保留隐藏开关。

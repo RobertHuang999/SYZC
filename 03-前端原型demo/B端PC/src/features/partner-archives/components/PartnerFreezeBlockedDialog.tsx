@@ -16,7 +16,7 @@ type PartnerFreezeBlockedDialogProps = {
   blockInfo: FreezeBlockReason | null
 }
 
-/** PA-R02 冻结阻断：仅标题 + 主体识别 + 单行阻断说明（对齐 ASCII 列表 1.0） */
+/** G02 冻结阻断：仅标题 + 主体识别 + 单行阻断说明（对齐 ASCII 列表 1.0） */
 export function PartnerFreezeBlockedDialog({
   open,
   onOpenChange,

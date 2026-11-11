@@ -2,7 +2,7 @@ import {
   partnerCertAddressFieldsDiff,
   partnerHadSavedCertAddress,
   type CertAddressLike,
-} from "./partner-change-address-pa-r06a"
+} from "./partner-change-address-g06a"
 import type { PartnerArchiveMenuLabel } from "./partner-archive-routes"
 
 type SubjectType = "INDIVIDUAL" | "ENTERPRISE"

@@ -1,7 +1,7 @@
 import type { PrototypeDocument } from "@/shared/annotations/PrototypeAnnotationLayer"
-import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/02-仓储/02-库存查询-理货堆放/理货堆放主PRD.md?raw"
-import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/02-仓储/02-库存查询-理货堆放/理货堆放字段清单.md?raw"
-import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/02-仓储/02-库存查询-理货堆放/理货堆放业务规则规格.md?raw"
+import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/03-仓储/02-库存查询-理货堆放/理货堆放主PRD.md?raw"
+import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/03-仓储/02-库存查询-理货堆放/理货堆放字段清单.md?raw"
+import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/03-仓储/02-库存查询-理货堆放/理货堆放业务规则规格.md?raw"
 
 export const tallyStackingDocuments: PrototypeDocument[] = [
   {

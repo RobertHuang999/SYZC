@@ -146,7 +146,7 @@ export function WarehouseReceiptListPage() {
       return
     }
 
-    // R-DWR-04：补货/出库/移库/注销四类流程在途互斥
+    // R04：补货/出库/移库/注销四类流程在途互斥
     if (
       item.currentFlow &&
       ["replenish", "outbound", "relocate", "cancel"].includes(action)

@@ -1,12 +1,11 @@
 import type { PrototypeDocument } from "@/shared/annotations/PrototypeAnnotationLayer"
-import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/01-物联网IOT管理/02门禁设备/门禁设备主PRD.md?raw"
-import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/01-物联网IOT管理/02门禁设备/门禁设备字段清单.md?raw"
-import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/01-物联网IOT管理/02门禁设备/门禁设备业务规则规格.md?raw"
-import demoListMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/01-物联网IOT管理/02门禁设备/门禁设备_Demo_列表页_PC.md?raw"
-import demoLockPasswordMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/01-物联网IOT管理/02门禁设备/门禁设备_Demo_获取门锁密码.md?raw"
-import demoAccessPasswordMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/06-物联网IOT与预警/01-物联网IOT管理/02门禁设备/门禁设备_Demo_获取门禁密码.md?raw"
+import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/07-物联网IOT与预警/01-物联网IOT管理/02门禁设备/门禁设备主PRD.md?raw"
+import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/07-物联网IOT与预警/01-物联网IOT管理/02门禁设备/门禁设备字段清单.md?raw"
+import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/07-物联网IOT与预警/01-物联网IOT管理/02门禁设备/门禁设备业务规则规格.md?raw"
+import demoListMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/07-物联网IOT与预警/01-物联网IOT管理/02门禁设备/门禁设备_Demo_列表页_PC.md?raw"
+import demoLockPasswordMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/07-物联网IOT与预警/01-物联网IOT管理/02门禁设备/门禁设备_Demo_获取门锁密码.md?raw"
+import demoAccessPasswordMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/07-物联网IOT与预警/01-物联网IOT管理/02门禁设备/门禁设备_Demo_获取门禁密码.md?raw"
 import demoSubmitMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/01-工作中心/01-审批中心/03-业务审批/04-我的申请管理/04-开锁审批/开锁申请_Demo_发起申请页.md?raw"
-import mockDataMarkdown from "@prototype/MOCK_DATA-开锁审批-V1.3.md?raw"
 
 export const accessControlDeviceDocuments: PrototypeDocument[] = [
   {
@@ -50,11 +49,5 @@ export const accessControlDeviceDocuments: PrototypeDocument[] = [
     title: "Demo · 发起开锁申请（需审批）",
     content: demoSubmitMarkdown,
     category: "原型交互规范",
-  },
-  {
-    id: "mock-data",
-    title: "Mock 数据示例 V1.7",
-    content: mockDataMarkdown,
-    category: "原型数据",
   },
 ]

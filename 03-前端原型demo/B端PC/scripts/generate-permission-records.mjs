@@ -277,7 +277,7 @@ const fileContent = `// 自动生成，请勿手工编辑。运行 npm run gener
 
 export type PermissionRecord = {
   id: string
-  platform: "PC" | "移动"
+  platform: "PC" | "移动" | "C端PC" | "C端H5" | "SAAS"
   module: string
   topBarModuleLabel: string
   menuModuleCode: string

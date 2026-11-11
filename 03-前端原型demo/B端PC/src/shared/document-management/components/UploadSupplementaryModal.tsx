@@ -8,13 +8,6 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import {
   UploadCloud,
@@ -29,9 +22,6 @@ import {
 import type { DocumentItem, DocFileType } from "../types"
 import { addDocumentItems } from "../mock"
 import {
-  getUploadFlowOptions,
-  INBOUND_UPLOAD_FLOW_OPTIONS,
-  OUTBOUND_UPLOAD_FLOW_OPTIONS,
   resolveUploadFlowType,
 } from "@prototype/shared/document-management/upload-flow-options"
 
@@ -41,6 +31,8 @@ interface UploadSupplementaryModalProps {
   approvalId?: string
   orderType: DocumentItem["orderType"]
   defaultFlowType?: string
+  /** 本次资料归档的阶段名称，由发起上传的时间轴节点带过来 */
+  stageLabel?: string
   onClose: () => void
   onSuccess: (newDocs: DocumentItem[]) => void
 }
@@ -53,12 +45,6 @@ export const MAX_DOC_COUNT = 10
 
 /** 单个文件最大体积 (50MB) */
 export const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024
-
-/** @deprecated 请使用 shared `INBOUND_UPLOAD_FLOW_OPTIONS` */
-export const INBOUND_STAGE_OPTIONS = INBOUND_UPLOAD_FLOW_OPTIONS
-
-/** @deprecated 请使用 shared `OUTBOUND_UPLOAD_FLOW_OPTIONS` */
-export const OUTBOUND_STAGE_OPTIONS = OUTBOUND_UPLOAD_FLOW_OPTIONS
 
 export interface SelectedFileItem {
   id: string
@@ -120,14 +106,14 @@ export function UploadSupplementaryModal({
   approvalId = "SP202605280001",
   orderType,
   defaultFlowType = "1",
+  stageLabel,
   onClose,
   onSuccess,
 }: UploadSupplementaryModalProps) {
-  const stageOptions = getUploadFlowOptions(orderType)
+  const selectedFlowType = resolveUploadFlowType(defaultFlowType)
+  const resolvedStageLabel =
+    stageLabel?.trim() || (selectedFlowType === "9527" ? "补充资料" : "流程发起阶段")
 
-  const [selectedFlowType, setSelectedFlowType] = useState<string>(() =>
-    resolveUploadFlowType(defaultFlowType),
-  )
   const [description, setDescription] = useState("")
   const [selectedFiles, setSelectedFiles] = useState<SelectedFileItem[]>([])
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -135,10 +121,9 @@ export function UploadSupplementaryModal({
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  // 当弹窗打开或传入阶段发生变化时同步默认阶段并重置状态
+  // 弹窗打开时重置表单状态
   useEffect(() => {
     if (open) {
-      setSelectedFlowType(resolveUploadFlowType(defaultFlowType))
       setDescription("")
       setSelectedFiles([])
       setErrorMessage(null)
@@ -309,14 +294,12 @@ export function UploadSupplementaryModal({
       return
     }
 
-    const matchedStage = stageOptions.find((s) => s.value === selectedFlowType) || stageOptions[0]
-
     const newDocsToInsert = selectedFiles.map((f) => ({
       orderNo,
       approvalId,
       orderType,
       flowType: selectedFlowType,
-      flowNodeTitle: matchedStage.label,
+      flowNodeTitle: resolvedStageLabel,
       nature: "ADDITION" as const,
       category: "OTHER" as const,
       name: f.name,
@@ -357,35 +340,10 @@ export function UploadSupplementaryModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-1">
-          {/* 关联流程 */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-slate-700">
-              <span className="text-destructive mr-1">*</span>关联流程：
-            </Label>
-
-            <Select
-              value={selectedFlowType}
-              onValueChange={(value) => {
-                setSelectedFlowType(String(value))
-                setErrorMessage(null)
-              }}
-            >
-              <SelectTrigger className="w-full text-xs">
-                <SelectValue>
-                  {(value) => {
-                    const matched = stageOptions.find((s) => s.value === value)
-                    return matched ? matched.stageText : "请选择关联流程"
-                  }}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {stageOptions.map((st) => (
-                  <SelectItem key={st.value} value={st.value}>
-                    {st.stageText}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* 归档阶段：由发起上传的时间轴节点决定，不再手工选择 */}
+          <div className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50 px-3 py-2 text-xs">
+            <span className="text-slate-500">归档阶段</span>
+            <span className="font-medium text-slate-800">{resolvedStageLabel}</span>
           </div>
 
           {/* 附件上传区域 */}
@@ -460,7 +418,7 @@ export function UploadSupplementaryModal({
                 className="h-7 text-xs text-blue-600 hover:bg-blue-50 px-2"
                 onClick={handleSimulateSampleFiles}
               >
-                载入样例盖章件包 (3份)
+                载入样例盖章件包 (2份)
               </Button>
 
               {selectedFiles.length > 0 && selectedFiles.length < MAX_DOC_COUNT && (

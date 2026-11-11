@@ -96,7 +96,7 @@ export interface AuditLogItem {
 
 export interface PartnerSubject {
   id: string
-  /** 档案归属菜单（PA-R12）；Mock 可由 enrich 推断 */
+  /** 档案归属菜单（G12）；Mock 可由 enrich 推断 */
   archiveMenu: PartnerArchiveMenuLabel
   partnerNo: string
   name: string

@@ -156,7 +156,7 @@ export function WarehouseReceiptListPage() {
       return
     }
 
-    // 检查是否审批中或流程冲突 (R-DWR-04)
+    // 检查是否审批中或流程冲突 (R04)
     if (receipt.currentFlow) {
       setNotice({
         title: "流程在途拦截",

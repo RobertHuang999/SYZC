@@ -134,6 +134,18 @@ function OverflowMenuItem({ item }: { item: TableRowActionItem }) {
     </>
   )
 
+  if (item.disabled) {
+    return (
+      <span
+        className="flex w-full cursor-not-allowed items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-muted-foreground/40"
+        title={item.title ?? item.label}
+        aria-disabled="true"
+      >
+        {content}
+      </span>
+    )
+  }
+
   if (item.to) {
     return (
       <Link to={item.to} className={rowClass}>
@@ -166,12 +178,15 @@ type TableRowActionPanelProps = {
   fixedCols?: number
   /** 直出上限（含「更多」占位）；默认 9，行数较多时可收紧以保住 72px 行高 */
   maxInline?: number
+  /** 「更多」浮层列数：默认 1 列；操作项很多时可传 2 列避免浮层过高 */
+  overflowColumns?: number
 }
 
 export function TableRowActionPanel({
   actions,
   fixedCols,
   maxInline = TABLE_ROW_ACTION_MAX_INLINE,
+  overflowColumns = 1,
 }: TableRowActionPanelProps) {
   if (actions.length === 0) {
     return <span className="text-sm text-muted-foreground">—</span>
@@ -195,11 +210,23 @@ export function TableRowActionPanel({
     cells.push(
       <Popover key="more-actions">
         <MoreActionsTrigger />
-        <PopoverContent align="end" side="bottom" className="w-44 p-1.5">
-          <div className="flex flex-col gap-0.5">
+        <PopoverContent
+          align="end"
+          side="bottom"
+          className={cn("p-1.5", overflowColumns > 1 ? "w-[21rem]" : "w-44")}
+        >
+          <div
+            className={cn(
+              "gap-0.5",
+              overflowColumns > 1 ? "grid grid-cols-2" : "flex flex-col",
+            )}
+          >
             {overflowActions.map((item, index) => (
               <div key={item.key}>
-                {dangerOverflow && index === firstDangerIndex && index > 0 ? (
+                {overflowColumns === 1 &&
+                dangerOverflow &&
+                index === firstDangerIndex &&
+                index > 0 ? (
                   <Separator className="my-1" />
                 ) : null}
                 <OverflowMenuItem item={item} />

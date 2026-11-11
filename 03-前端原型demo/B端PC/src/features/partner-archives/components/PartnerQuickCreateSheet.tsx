@@ -449,7 +449,7 @@ export function PartnerQuickCreateSheet({
                 {showCertAddressSection ? <p>{certAddressSpecNote}</p> : null}
                 <p>
                   落库创建来源固定为「人工建档」；本弹窗为{copy.entryName}入口（入口差异见
-                  【操作审批日志生成与防篡改规则】(PA-R07)，非上线用户文案）。
+                  【操作审批日志生成与防篡改规则】(G07)，非上线用户文案）。
                 </p>
               </div>
             </PrototypeSpecCallout>

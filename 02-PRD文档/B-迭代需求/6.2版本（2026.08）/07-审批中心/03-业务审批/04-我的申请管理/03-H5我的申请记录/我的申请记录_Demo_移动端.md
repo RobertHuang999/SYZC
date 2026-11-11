@@ -80,7 +80,7 @@
 ## 6. Mock 数据
 
 - 流程/政策 标签页：占位文案，无 Mock 列表
-- 开锁 标签页：与 [MOCK_DATA-开锁审批-V1.3.md](../../../../../../03-前端原型demo/MOCK_DATA-开锁审批-V1.3.md) 第3节 对齐（文档内 V1.5，18 条）
+- 开锁 标签页：与 原型 `unlock-applies.mock.ts` 第3节 对齐（文档内 V1.5，18 条）
 - 原型实现：`03-前端原型demo/B端H5/src/features/my-applies/mock/`
 
 ---

@@ -40,6 +40,63 @@ const WORKSPACE_GROUP_ORDER = [
   "配置管理",
 ]
 
+/** 工作台宫格展示顺序（与线上一致；未列出的 id 排在组末） */
+const WORKSPACE_ITEM_ORDER: Record<string, readonly string[]> = {
+  仓储: [
+    "ws-inventory-mgr",
+    "ws-receipt-mgr",
+    "ws-cargo-rights",
+    "ws-evidence-mgr",
+    "ws-inbound-mgr",
+    "ws-outbound-mgr",
+    "ws-transfer-loc-mgr",
+    "ws-transfer-owner-mgr",
+    "ws-delivery-order",
+    "ws-stock-taking",
+    "ws-device-monitoring",
+    "ws-cargo-movement",
+    "ws-tally-stacking",
+    "ws-stock-detail",
+    "ws-stock-flow",
+    "ws-processing-mgr",
+    "ws-inbound-reg",
+  ],
+  "融资/监管": [
+    "ws-pledge-order-mgr",
+    "ws-credit-process",
+    "ws-due-diligence-process",
+    "ws-online-pledge-process",
+    "ws-reject-pool",
+  ],
+  交易: ["ws-trade-procure", "ws-trade-sales", "ws-policy-news"],
+  风控: ["ws-risk-device-warning", "ws-risk-order-warning", "ws-risk-disclosure", "ws-risk-in-loan"],
+  结算: ["ws-settle-mgr", "ws-settle-income-new", "ws-settle-expense-new"],
+  用户中心: [
+    "ws-user-partner-owner",
+    "ws-user-partner-pickup",
+    "ws-user-partner-funder",
+    "ws-user-partner-service",
+    "ws-supervision-archive",
+  ],
+  配置管理: [
+    "ws-conf-warehouse",
+    "ws-conf-warehouse-new",
+    "ws-conf-industrial-site-new",
+    "ws-conf-industrial-site-mgr",
+  ],
+}
+
+function sortWorkstationItems(groupName: string, items: MenuItemData[]): MenuItemData[] {
+  const order = WORKSPACE_ITEM_ORDER[groupName]
+  if (!order) return items
+  const rank = new Map(order.map((id, index) => [id, index]))
+  return [...items].sort((a, b) => {
+    const ra = rank.get(a.id) ?? 999
+    const rb = rank.get(b.id) ?? 999
+    return ra - rb
+  })
+}
+
 // 设备管理是工作台的聚合 hub，其他 4 个设备 Tab 从 hub 内进入。
 const DEVICE_HUB_TAB_IDS = new Set([
   "ws-device-iot",
@@ -71,12 +128,15 @@ const WORKSPACE_GROUPS: WorkstationGroup[] = WORKSPACE_GROUP_ORDER.map((groupNam
       item.secondaryCategory === groupName &&
       item.enabled !== false &&
       !DEVICE_HUB_TAB_IDS.has(item.id),
-  ).map((item, index) => ({
-    ...item,
-    bgColor: GROUP_ACCENT_COLORS[groupName][index % GROUP_ACCENT_COLORS[groupName].length],
-    badgeCount: WORKSPACE_BADGE_COUNTS[item.id],
-  })),
-}))
+  ),
+})).map((group) => ({
+    ...group,
+    items: sortWorkstationItems(group.groupName, group.items).map((item, index) => ({
+      ...item,
+      bgColor: GROUP_ACCENT_COLORS[group.groupName][index % GROUP_ACCENT_COLORS[group.groupName].length],
+      badgeCount: WORKSPACE_BADGE_COUNTS[item.id],
+    })),
+  }))
 
 export function WorkspacePage() {
   const navigate = useNavigate()

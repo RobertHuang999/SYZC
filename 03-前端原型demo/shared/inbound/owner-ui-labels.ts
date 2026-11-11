@@ -5,7 +5,7 @@ export const INBOUND_OWNER_VERIFY_DIALOG = {
   description: "请认真核对货主档案信息与联系方式，确认无误后进入下一步。",
   descriptionSmsRequiredUser: "须完成手机短信验证后，方可继续下一步。",
   descriptionSmsRequiredSpec:
-    "【新货主二元身份核验与建档沉淀规则】(R03) 或金融入库【联系手机核验状态与金融场景强制核验规则】(PA-R04b)。",
+    "【新货主二元身份核验与建档沉淀规则】(R03) 或金融入库【联系手机核验状态与金融场景强制核验规则】(G04b)。",
   /** @deprecated 使用 descriptionSmsRequiredUser */
   descriptionSmsRequired: "须完成手机短信验证后，方可继续下一步。",
   existingOwnerHint:
@@ -24,7 +24,7 @@ export const INBOUND_OWNER_VERIFY_DIALOG = {
 export const INBOUND_FINANCIAL_OWNER_SMS_USER =
   "提交审核前须完成货主手机短信确认。"
 
-export const INBOUND_FINANCIAL_OWNER_SMS_SPEC = "【联系手机核验状态与金融场景强制核验规则】(PA-R04b)。"
+export const INBOUND_FINANCIAL_OWNER_SMS_SPEC = "【联系手机核验状态与金融场景强制核验规则】(G04b)。"
 
 export function inboundOwnerTypeDisplay(ownerType: string): string {
   return ownerType === "个人货主" || ownerType === "个人" ? "个人" : "企业"

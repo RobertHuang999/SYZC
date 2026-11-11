@@ -37,7 +37,7 @@ export type PartnerSelectorValue = {
 }
 
 type PartnerArchiveSelectorProps = {
-  /** 6.3 档案域硬过滤（PA-R12）；与 roleType 二选一或组合，域优先推导隐式角色 */
+  /** 6.3 档案域硬过滤（G12）；与 roleType 二选一或组合，域优先推导隐式角色 */
   archiveMenu?: PartnerArchiveMenuLabel
   roleType?: RoleType
   value?: string

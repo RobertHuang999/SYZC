@@ -41,7 +41,7 @@ export function isPickupEnterpriseAgentIdRequired(
 
 /**
  * 编辑页：主体名称是否允许改。
- * 【已验证主体核心字段锁定规则】(PA-R04c)：联系手机已验证时置灰只读；未验证可改（冻结态除外）。
+ * 【已验证主体核心字段锁定规则】(G04c)：联系手机已验证时置灰只读；未验证可改（冻结态除外）。
  */
 export function canEditPartnerSubjectNameOnForm(input: {
   isEdit: boolean

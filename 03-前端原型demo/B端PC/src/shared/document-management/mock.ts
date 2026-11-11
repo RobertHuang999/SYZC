@@ -428,6 +428,147 @@ export const initialDocumentsMock: DocumentItem[] = [
     description: "库区调整审批单扫描件，含主管签批意见。",
     statusText: "有效补充",
   },
+  // 监管管理模板资料（未单独配置资料的在押订单按 orderType=supervision 兜底匹配）
+  {
+    id: "doc-sv-01",
+    orderNo: "JG-TEMPLATE",
+    approvalId: "SP202610260001",
+    orderType: "supervision",
+    flowType: "1",
+    flowNodeTitle: "监管办理发起",
+    nature: "BASE",
+    category: "COMPLIANCE",
+    name: "监管办理申请与终审审批单_盖章件.pdf",
+    version: "V1.0",
+    fileType: "pdf",
+    fileSize: "1.26 MB",
+    createTime: "2026-10-26 10:33:12",
+    uploader: "业务经办人-李行",
+    uploaderOrg: "四川享宇科技有限公司",
+    hash: "7c1e9a2b3d4f5061728394a5b6c7d8e9",
+    description: "监管办理发起申请、资方风控审批意见与终审签章页。",
+    statusText: "已通过",
+  },
+  {
+    id: "doc-sv-02",
+    orderNo: "JG-TEMPLATE",
+    approvalId: "SP202610260001",
+    orderType: "supervision",
+    flowType: "1",
+    flowNodeTitle: "监管办理发起",
+    nature: "BASE",
+    category: "OWNERSHIP",
+    name: "货权与权属证明_货主盖章扫描件.pdf",
+    version: "V1.0",
+    fileType: "pdf",
+    fileSize: "2.08 MB",
+    createTime: "2026-10-26 10:35:40",
+    uploader: "货主-四川果香农业",
+    uploaderOrg: "四川果香农业有限公司",
+    hash: "8d2f0b3c4e5a6172839405b6c7d8e9f0",
+    description: "货主主体资格、货权归属与授权委托材料。",
+    statusText: "已通过",
+  },
+  {
+    id: "doc-sv-03",
+    orderNo: "JG-TEMPLATE",
+    approvalId: "SP202610260001",
+    orderType: "supervision",
+    flowType: "1",
+    flowNodeTitle: "监管办理发起",
+    nature: "BASE",
+    category: "COMPLIANCE",
+    name: "中仓登登记证明回执.pdf",
+    version: "V1.0",
+    fileType: "pdf",
+    fileSize: "980 KB",
+    createTime: "2026-10-26 10:41:18",
+    uploader: "系统自动归档",
+    uploaderOrg: "统一登记系统",
+    hash: "9e3a1c4d5f60718293a4b5c6d7e8f901",
+    description: "中仓登 1.3.2 接口登记成功返回的质权登记证明编号与回执。",
+    statusText: "已归档",
+  },
+  {
+    id: "doc-sv-04",
+    orderNo: "JG-TEMPLATE",
+    approvalId: "SP202610260001",
+    orderType: "supervision",
+    flowType: "1",
+    flowNodeTitle: "监管办理发起",
+    nature: "BASE",
+    category: "INSPECTION",
+    name: "货物评估报告与行情源报价快照.pdf",
+    version: "V1.0",
+    fileType: "pdf",
+    fileSize: "3.42 MB",
+    createTime: "2026-10-26 10:46:05",
+    uploader: "卡皮评估",
+    uploaderOrg: "卡皮评估有限公司",
+    hash: "a14b2d3e4f5061728394a5b6c7d8e9f0",
+    description: "开单时点的货物评估价值、计价口径与权威行情源报价快照。",
+    statusText: "已通过",
+  },
+  {
+    id: "doc-sv-05",
+    orderNo: "JG-TEMPLATE",
+    approvalId: "SP202610260001",
+    orderType: "supervision",
+    flowType: "1",
+    flowNodeTitle: "监管办理发起",
+    nature: "BASE",
+    category: "ONSITE",
+    name: "现场入库磅单与货位实况照片.jpg",
+    version: "V1.0",
+    fileType: "jpg",
+    fileSize: "2.36 MB",
+    createTime: "2026-10-26 11:02:33",
+    uploader: "现场监管员-黄主管",
+    uploaderOrg: "海霸王仓库-冷藏部",
+    hash: "b25c3e4f5061728394a5b6c7d8e9f0a1",
+    description: "货物入库过磅单据、货位标识与实物码放同框照片。",
+    statusText: "已通过",
+  },
+  {
+    id: "doc-sv-06",
+    orderNo: "JG-TEMPLATE",
+    approvalId: "SP202610260001",
+    orderType: "supervision",
+    flowType: "9527",
+    flowNodeTitle: "补充资料",
+    nature: "ADDITION",
+    category: "SETTLEMENT",
+    name: "银行贷款放款借据与放款回单.pdf",
+    version: "V1.1",
+    fileType: "pdf",
+    fileSize: "1.12 MB",
+    createTime: "2026-11-02 09:18:26",
+    uploader: "财务结算专员-王会计",
+    uploaderOrg: "卡皮银行营业部",
+    hash: "c36d4f5061728394a5b6c7d8e9f0a1b2",
+    description: "放款结果录入后补充实际出账借据与银行放款回单，用于激活抵押率计算。",
+    statusText: "有效补充",
+  },
+  {
+    id: "doc-sv-07",
+    orderNo: "JG-TEMPLATE",
+    approvalId: "SP202610260001",
+    orderType: "supervision",
+    flowType: "9527",
+    flowNodeTitle: "补充资料",
+    nature: "ADDITION",
+    category: "ONSITE",
+    name: "日常监管巡检双签底稿_20261105.pdf",
+    version: "V1.0",
+    fileType: "pdf",
+    fileSize: "760 KB",
+    createTime: "2026-11-05 16:42:10",
+    uploader: "现场监管员-黄主管",
+    uploaderOrg: "海霸王仓库-冷藏部",
+    hash: "d47e5061728394a5b6c7d8e9f0a1b2c3",
+    description: "现场巡检时间、位置、货物状态与监管方、货主双签确认底稿。",
+    statusText: "有效补充",
+  },
 ]
 
 // 内存单例存储（支持增改查）
@@ -438,7 +579,18 @@ export function getDocumentsByOrderNo(
   orderType?: DocumentItem["orderType"]
 ): DocumentItem[] {
   const filtered = documentsState.filter((d) => d.orderNo === orderNo)
-  if (filtered.length > 0) return filtered
+  if (filtered.length > 0) {
+    // 监管管理：单据自身资料 + 模板资料一起展示，避免后续补录把原始归档顶掉
+    if (orderType === "supervision") {
+      return [
+        ...filtered,
+        ...documentsState.filter(
+          (d) => d.orderType === "supervision" && d.orderNo === "JG-TEMPLATE"
+        ),
+      ]
+    }
+    return filtered
+  }
   // 兜底：优先按调用方声明的单据类型返回模板
   if (orderType) {
     return documentsState.filter((d) => d.orderType === orderType)
@@ -485,6 +637,35 @@ export function buildTimelineSteps(
   orderType: DocumentItem["orderType"]
 ): TimelineStep[] {
   const docs = getDocumentsByOrderNo(orderNo, orderType)
+
+  if (orderType === "supervision") {
+    return [
+      {
+        stepIndex: 1,
+        title: "监管办理发起",
+        flowType: "1",
+        statusText: "已通过",
+        statusType: "success",
+        time: "2026-10-26 10:33:12~2026-10-26 11:02:33",
+        operator: "业务经办人-李行 / 资方风控",
+        org: "四川享宇科技 · 卡皮银行 · 海霸王仓库",
+        documents: docs.filter((d) => d.flowType === "1"),
+        expanded: true,
+      },
+      {
+        stepIndex: 2,
+        title: "补充资料",
+        flowType: "9527",
+        statusText: "",
+        statusType: "info",
+        time: "2026-11-02 09:18:26~2026-11-05 16:42:10",
+        operator: "业务后置补录",
+        org: "财务结算 · 现场监管协同归档",
+        documents: docs.filter((d) => d.flowType === "9527"),
+        expanded: true,
+      },
+    ]
+  }
 
   if (orderType === "transfer") {
     return [

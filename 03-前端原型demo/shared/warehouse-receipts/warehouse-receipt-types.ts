@@ -67,7 +67,7 @@ export type ReceiptChangeRecord = {
   relatedNo?: string
 }
 
-/** 动碰流程类型：补货/出库/移库/注销四类之间互斥（R-DWR-04） */
+/** 动碰流程类型：补货/出库/移库/注销四类之间互斥（R04） */
 export type ReceiptFlowType = "仓单补货" | "仓单出库" | "仓单移库" | "仓单注销"
 
 export type WarehouseReceipt = {
@@ -89,7 +89,7 @@ export type WarehouseReceipt = {
   cancelledAt?: string
   /** 关联单号（如抵质押申请单号，存在时可在详情页穿透查看） */
   relatedId?: string
-  /** 当前在途未办结流程（用于演示 R-DWR-04 互斥拦截） */
+  /** 当前在途未办结流程（用于演示 R04 互斥拦截） */
   currentFlow?: ReceiptFlowType
   goodsGroups: ReceiptGoodsGroup[]
   changes: ReceiptChangeRecord[]
@@ -152,7 +152,7 @@ export function receiptStatusLabel(status: ReceiptStatus): string {
   return RECEIPT_STATUS_LABEL[status]
 }
 
-/** 正常态 8 项操作；其余三态仅详情 + 下载（R-DWR-05） */
+/** 正常态 8 项操作；其余三态仅详情 + 下载（R05） */
 export type ReceiptRowAction =
   | "detail"
   | "replenish"
@@ -189,7 +189,7 @@ export const RECEIPT_ACTION_LABEL: Record<ReceiptRowAction, string> = {
   download: "下载",
 }
 
-/** 需在移动端完成人脸核验的动碰类操作（R-DWR-03） */
+/** 需在移动端完成人脸核验的动碰类操作（R03） */
 export const RECEIPT_MOBILE_FACE_ACTIONS: ReceiptRowAction[] = [
   "replenish",
   "outbound",
@@ -239,7 +239,7 @@ export function partySubline(party: ReceiptParty): string {
   return party.type === "ENTERPRISE" ? `(${party.identifier})` : `(${party.identifier})`
 }
 
-/** 动碰流程在途提示文案（R-DWR-04） */
+/** 动碰流程在途提示文案（R04） */
 export function receiptFlowConflictMessage(flow: ReceiptFlowType): string {
   return `您还有【${flow}】正在审批中，暂无法发起新的流程！`
 }

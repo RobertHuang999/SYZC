@@ -1,4 +1,4 @@
-export type DocumentOrderType = "inbound" | "outbound" | "transfer"
+export type DocumentOrderType = "inbound" | "outbound" | "transfer" | "supervision"
 
 export type DocNature = "ADDITION" | "BASE"
 

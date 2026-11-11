@@ -10,7 +10,7 @@ type PartnerFreezeBlockedSheetProps = {
   blockInfo: FreezeBlockReason | null
 }
 
-/** PA-R02 冻结阻断 · H5：与 PC 弹窗同构（标题 + 主体 + 单行说明） */
+/** G02 冻结阻断 · H5：与 PC 弹窗同构（标题 + 主体 + 单行说明） */
 export function PartnerFreezeBlockedSheet({
   open,
   onClose,

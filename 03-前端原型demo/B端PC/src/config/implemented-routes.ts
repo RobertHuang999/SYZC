@@ -52,6 +52,7 @@ const implementedExactRoutes = new Set<string>([
   "/仓储/仓单管理",
   "/仓储/提货单",
   "/融资/监管/监管业务/监管办理",
+  "/融资/监管/监管业务/监管管理",
 ])
 
 const implementedDetailPrefixes = [

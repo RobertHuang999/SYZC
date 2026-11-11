@@ -9,13 +9,15 @@ type Props = {
   className?: string
   /** 超长单号（17 位以上）允许折成两行，保持完整展示、不出现省略号 */
   wrap?: boolean
+  /** 无详情路由时，用点击回调代替链接（如原型轻提示） */
+  onClick?: () => void
 }
 
 /**
  * 业务单号单元格（列表通用）：完整展示 + 悬停轻量复制。
  * 超长单号可折两行，见《06-PC端表格行与操作列规范》3.2 节。
  */
-export function DocNoCell({ docNo, linkTo, className, wrap = false }: Props) {
+export function DocNoCell({ docNo, linkTo, className, wrap = false, onClick }: Props) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = (e: React.MouseEvent) => {
@@ -43,6 +45,19 @@ export function DocNoCell({ docNo, linkTo, className, wrap = false }: Props) {
         <Link to={linkTo} className={cn(textClass, "text-primary hover:underline")} title={docNo}>
           {docNo}
         </Link>
+      ) : onClick ? (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            onClick()
+          }}
+          className={cn(textClass, "text-left text-foreground transition-colors hover:text-primary hover:underline")}
+          title={docNo}
+        >
+          {docNo}
+        </button>
       ) : (
         <span className={cn(textClass, "text-foreground")} title={docNo}>
           {docNo}

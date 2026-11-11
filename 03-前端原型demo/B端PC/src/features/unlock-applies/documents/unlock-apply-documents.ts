@@ -1,5 +1,4 @@
 import type { PrototypeDocument } from "@/shared/annotations/PrototypeAnnotationLayer"
-import mockDataMarkdown from "@prototype/MOCK_DATA-开锁审批-V1.3.md?raw"
 import myApplyShellPrd from "@docs/🌟🌟🌟-最新基准版/B端PC/01-工作中心/01-审批中心/03-业务审批/04-我的申请管理/我的申请管理主PRD.md?raw"
 // 壳层 Demo：原型内副本（与基准 `…/04-我的申请管理/我的申请管理_Demo_PC.md` 同步；避免基准衍生未入库时 dev 无法启动）
 import myApplyShellDemo from "@prototype/shared/unlock-applies/我的申请管理_Demo_PC.md?raw"
@@ -65,11 +64,5 @@ export const unlockApplyDocuments: PrototypeDocument[] = [
     title: "Demo · 发起申请页",
     content: demoSubmitMarkdown,
     category: "原型交互规范",
-  },
-  {
-    id: "mock-data",
-    title: "Mock 数据示例 V1.7",
-    content: mockDataMarkdown,
-    category: "原型数据",
   },
 ]

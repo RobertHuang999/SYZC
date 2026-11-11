@@ -453,7 +453,7 @@ export function PartnerArchiveListPage() {
           blockInfo={blockedDialog?.blockInfo ?? null}
         />
 
-        <PrototypeAnnotationTarget annotationIds={["partner-archive-row-append-pa-r03a"]}>
+        <PrototypeAnnotationTarget annotationIds={["partner-archive-row-append-g03a"]}>
           <PartnerAppendRoleSheet
             partner={activePartner}
             open={appendRoleOpen}

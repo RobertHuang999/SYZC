@@ -1,31 +1,202 @@
 import { useState } from "react"
-import {
-  ArrowDownToLine,
-  ArrowLeftRight,
-  ArrowUpFromLine,
-  CheckCircle2,
-  ChevronRight,
-  ClipboardList,
-  FileCheck,
-  FileSignature,
-  FileSpreadsheet,
-  FileText,
-  Lock,
-  RefreshCcw,
-  RefreshCw,
-  SearchCheck,
-  Send,
-  ShieldCheck,
-  ShoppingBag,
-  SlidersHorizontal,
-  Store,
-  Workflow,
-} from "lucide-react"
+import { ChevronRight, RefreshCw } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { IconRenderer } from "@/components/common/IconRenderer"
 import { BottomTabBar } from "@/components/layout/BottomTabBar"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
+import { MOBILE_MENU_ITEMS, type MenuItemData } from "@/data/mobileMenuData"
 import { openMenuModule } from "@/lib/open-menu-module"
+
+interface TaskHubItem extends MenuItemData {
+  bgColor: string
+  badgeCount?: number
+}
+
+const PENDING_CONFIRM_TOTAL = 60
+const TODAY_NEW_TOTAL = 0
+
+const TASK_SECTION_ORDER = ["内部审批", "业务发起", "客户需求审批", "其他审批"] as const
+
+const TASK_ITEM_ORDER: Record<string, readonly string[]> = {
+  内部审批: [
+    "biz-overview-pending",
+    "biz-overview-cc",
+    "biz-overview-processed",
+    "biz-overview-supervision-entrust",
+    "biz-overview-my-apply",
+    "biz-overview-biz-apply",
+  ],
+  业务发起: [
+    "biz-init-inbound",
+    "biz-init-outbound",
+    "biz-init-transfer-loc",
+    "biz-init-transfer-owner",
+    "biz-init-receipt-issue",
+    "biz-init-pledge-biz",
+    "biz-init-movement-apply",
+    "biz-init-processing-apply",
+  ],
+  客户需求审批: [
+    "biz-approve-customer-inbound-appoint",
+    "biz-approve-customer-outbound-appoint",
+    "biz-approve-customer-finance-leads",
+    "biz-approve-customer-sales-req",
+    "biz-approve-customer-procure-req",
+    "biz-approve-due-diligence-sso",
+  ],
+  其他审批: ["biz-approve-policy-news", "biz-approve-unlock-apply", "biz-approve-in-loan-risk-sso"],
+}
+
+const INTERNAL_APPROVAL_ICON_COLORS: Record<string, string> = {
+  "biz-overview-pending": "bg-[#f57c00]",
+  "biz-overview-cc": "bg-[#1875f0]",
+  "biz-overview-processed": "bg-[#43a047]",
+  "biz-overview-supervision-entrust": "bg-[#1875f0]",
+  "biz-overview-my-apply": "bg-[#43a047]",
+  "biz-overview-biz-apply": "bg-[#e53935]",
+}
+
+const TASK_GRID_ACCENT: Record<string, readonly string[]> = {
+  业务发起: [
+    "bg-[#1875f0]",
+    "bg-[#fb8c00]",
+    "bg-[#43a047]",
+    "bg-[#e53935]",
+    "bg-[#f57c00]",
+    "bg-[#1875f0]",
+    "bg-[#e53935]",
+    "bg-[#1976d2]",
+  ],
+  客户需求审批: [
+    "bg-[#1875f0]",
+    "bg-[#fb8c00]",
+    "bg-[#43a047]",
+    "bg-[#1e88e5]",
+    "bg-[#e53935]",
+    "bg-[#1976d2]",
+  ],
+  其他审批: ["bg-[#43a047]", "bg-[#f57c00]", "bg-[#1875f0]"],
+}
+
+/** 与参考截图一致的演示角标（原型 Mock，非真实待办统计） */
+const TASK_BADGE_COUNTS: Record<string, number> = {
+  "biz-overview-pending": 3,
+  "biz-overview-supervision-entrust": 53,
+  "biz-approve-customer-finance-leads": 1,
+  "biz-approve-customer-sales-req": 1,
+  "biz-approve-customer-procure-req": 1,
+  "biz-approve-policy-news": 2,
+}
+
+function formatBadgeCount(count: number) {
+  return count > 99 ? "99+" : String(count)
+}
+
+function sortTaskItems(sectionName: string, items: MenuItemData[]): MenuItemData[] {
+  const order = TASK_ITEM_ORDER[sectionName]
+  if (!order) return items
+  const rank = new Map(order.map((id, index) => [id, index]))
+  const allowed = new Set(order)
+  return items
+    .filter((item) => allowed.has(item.id))
+    .sort((a, b) => {
+      const ra = rank.get(a.id) ?? 999
+      const rb = rank.get(b.id) ?? 999
+      return ra - rb
+    })
+}
+
+function buildTaskSections(): { sectionName: string; items: TaskHubItem[] }[] {
+  return TASK_SECTION_ORDER.map((sectionName) => {
+    const raw = MOBILE_MENU_ITEMS.filter(
+      (item) =>
+        item.primaryModule === "业务办理" &&
+        item.secondaryCategory === sectionName &&
+        item.enabled !== false,
+    )
+    const sorted = sortTaskItems(sectionName, raw)
+    const accents = TASK_GRID_ACCENT[sectionName]
+
+    return {
+      sectionName,
+      items: sorted.map((item, index) => ({
+        ...item,
+        bgColor:
+          sectionName === "内部审批"
+            ? (INTERNAL_APPROVAL_ICON_COLORS[item.id] ?? "bg-[#1875f0]")
+            : (accents?.[index % (accents?.length ?? 1)] ?? "bg-[#1875f0]"),
+        badgeCount: TASK_BADGE_COUNTS[item.id],
+      })),
+    }
+  })
+}
+
+const TASK_SECTIONS = buildTaskSections()
+
+function InternalApprovalCard({
+  item,
+  onOpen,
+}: {
+  item: TaskHubItem
+  onOpen: (id: string) => void
+}) {
+  return (
+    <div
+      onClick={() => onOpen(item.id)}
+      className="relative flex min-h-[92px] flex-col justify-between rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100 transition-colors"
+    >
+      <div className="flex items-start justify-between gap-1">
+        <div
+          className={`flex size-7 shrink-0 items-center justify-center rounded-lg text-white ${item.bgColor}`}
+        >
+          <IconRenderer icon={item.iconType} className="size-4 stroke-[2.2]" />
+        </div>
+        {item.badgeCount != null && item.badgeCount > 0 && (
+          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-none text-white">
+            {formatBadgeCount(item.badgeCount)}
+          </span>
+        )}
+      </div>
+      <div className="mt-2 text-xs font-bold text-gray-900 leading-snug">{item.name}</div>
+      <div className="mt-1 flex items-center text-[10px] font-medium text-gray-400">
+        <span>查看</span>
+        <ChevronRight className="size-2.5" />
+      </div>
+    </div>
+  )
+}
+
+function GridIconItem({
+  item,
+  onOpen,
+}: {
+  item: TaskHubItem
+  onOpen: (id: string) => void
+}) {
+  return (
+    <div
+      onClick={() => onOpen(item.id)}
+      className="group flex flex-col items-center cursor-pointer active:scale-95 transition-transform text-center"
+    >
+      <div className="relative">
+        <div
+          className={`flex size-10 items-center justify-center rounded-[12px] text-white shadow-xs ${item.bgColor}`}
+        >
+          <IconRenderer icon={item.iconType} className="size-5 stroke-[2.2]" />
+        </div>
+        {item.badgeCount != null && item.badgeCount > 0 && (
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold leading-none text-white ring-1 ring-white">
+            {formatBadgeCount(item.badgeCount)}
+          </span>
+        )}
+      </div>
+      <span className="mt-1.5 line-clamp-2 text-[10px] leading-tight text-gray-700 font-medium tracking-tighter">
+        {item.name}
+      </span>
+    </div>
+  )
+}
 
 export function TasksManagementPage() {
   const navigate = useNavigate()
@@ -36,25 +207,19 @@ export function TasksManagementPage() {
     setTimeout(() => setIsRefreshing(false), 800)
   }
 
-  const openFeature = (nameOrId: string) => openMenuModule(navigate, nameOrId)
-
-  const openOtherApproval = (moduleId: string) => {
-    openMenuModule(navigate, moduleId)
-  }
+  const openFeature = (id: string) => openMenuModule(navigate, id)
 
   return (
-      <MobileShell>
+    <MobileShell>
       <NavBar title="业务办理" showBack={false} />
 
-      {/* 页面主滚动区域 */}
       <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 space-y-3 overscroll-contain">
-        {/* 顶部统计条 */}
         <section className="flex items-center justify-between rounded-xl bg-white px-3.5 py-2.5 shadow-xs">
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500 font-medium">待确认合计</span>
-            <span className="text-base font-bold text-gray-900">53</span>
-            <span className="rounded bg-amber-50 px-1.5 py-0.2 text-[10px] font-semibold text-amber-700">
-              今日新增 3
+            <span className="text-base font-bold text-gray-900">{PENDING_CONFIRM_TOTAL}</span>
+            <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
+              今日新增 {TODAY_NEW_TOTAL}
             </span>
           </div>
           <button
@@ -68,376 +233,27 @@ export function TasksManagementPage() {
           </button>
         </section>
 
-        {/* 1. 内部审批 (核心卡片网格) */}
-        <section className="rounded-2xl bg-white p-3.5 shadow-xs space-y-3">
-          <h2 className="text-xs font-bold text-gray-800 tracking-tight">内部审批</h2>
+        {TASK_SECTIONS.map((section) => (
+          <section key={section.sectionName} className="rounded-2xl bg-white p-3.5 shadow-xs space-y-3">
+            <h2 className="text-xs font-bold text-gray-800 tracking-tight">{section.sectionName}</h2>
 
-          {/* 上面三项：待处理、抄送我的、已处理 */}
-          <div className="grid grid-cols-3 gap-2">
-            {/* 待处理 */}
-            <div
-              onClick={() => openFeature("biz-overview-pending")}
-              className="relative flex flex-col justify-between rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100 transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex size-7 items-center justify-center rounded-lg bg-[#f57c00] text-white">
-                  <ClipboardList className="size-4" />
-                </div>
-                <span className="flex size-4.5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white">
-                  12
-                </span>
+            {section.sectionName === "内部审批" ? (
+              <div className="grid grid-cols-3 gap-2">
+                {section.items.map((item) => (
+                  <InternalApprovalCard key={item.id} item={item} onOpen={openFeature} />
+                ))}
               </div>
-              <div className="mt-2 text-xs font-bold text-gray-900">待处理</div>
-              <div className="mt-1 flex items-center text-[10px] text-amber-600 font-medium bg-amber-50 rounded px-1 py-0.2 w-fit">
-                <span>今日新增 3</span>
-                <ChevronRight className="size-2.5" />
+            ) : (
+              <div className="grid grid-cols-5 gap-y-3.5 gap-x-1 text-center">
+                {section.items.map((item) => (
+                  <GridIconItem key={item.id} item={item} onOpen={openFeature} />
+                ))}
               </div>
-            </div>
-
-            {/* 抄送我的 */}
-            <div
-              onClick={() => openFeature("biz-overview-cc")}
-              className="relative flex flex-col justify-between rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100 transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex size-7 items-center justify-center rounded-lg bg-[#1875f0] text-white">
-                  <Send className="size-4" />
-                </div>
-                <span className="flex size-4.5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white">
-                  5
-                </span>
-              </div>
-              <div className="mt-2 text-xs font-bold text-gray-900">抄送我的</div>
-              <div className="mt-1 flex items-center text-[10px] text-amber-600 font-medium bg-amber-50 rounded px-1 py-0.2 w-fit">
-                <span>今日新增 3</span>
-                <ChevronRight className="size-2.5" />
-              </div>
-            </div>
-
-            {/* 已处理 */}
-            <div
-              onClick={() => openFeature("biz-overview-processed")}
-              className="relative flex flex-col justify-between rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100 transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex size-7 items-center justify-center rounded-lg bg-[#43a047] text-white">
-                  <CheckCircle2 className="size-4" />
-                </div>
-              </div>
-              <div className="mt-2 text-xs font-bold text-gray-900">已处理</div>
-              <div className="mt-1 flex items-center text-[10px] text-blue-600 font-medium bg-blue-50 rounded px-1 py-0.2 w-fit">
-                <span>今日已处理 3</span>
-                <ChevronRight className="size-2.5" />
-              </div>
-            </div>
-          </div>
-
-          {/* 下面两项：我的申请记录、业务申请记录 */}
-          <div className="grid grid-cols-2 gap-2">
-            <div
-              onClick={() => openFeature("biz-overview-my-apply")}
-              className="flex items-center justify-between rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100 transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <div className="flex size-7 items-center justify-center rounded-lg bg-[#43a047] text-white">
-                  <FileText className="size-4" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-gray-900">我的申请记录</div>
-                  <div className="mt-0.5 flex items-center text-[10px] text-amber-600 font-medium">
-                    <span>今日新增 3</span>
-                    <ChevronRight className="size-2.5" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div
-              onClick={() => openFeature("biz-overview-biz-apply")}
-              className="flex items-center justify-between rounded-xl bg-[#f8fafc] p-2.5 cursor-pointer active:bg-gray-100 transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <div className="flex size-7 items-center justify-center rounded-lg bg-[#e53935] text-white">
-                  <FileSpreadsheet className="size-4" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-gray-900">业务申请记录</div>
-                  <div className="mt-0.5 flex items-center text-[10px] text-amber-600 font-medium">
-                    <span>今日新增 3</span>
-                    <ChevronRight className="size-2.5" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 2. 业务发起 (5列网格) */}
-        <section className="rounded-2xl bg-white p-3.5 shadow-xs space-y-3">
-          <h2 className="text-xs font-bold text-gray-800 tracking-tight">业务发起</h2>
-
-          <div className="grid grid-cols-5 gap-y-3.5 gap-x-1 text-center">
-            {/* 入库发起 */}
-            <div
-              onClick={() => openFeature("biz-init-inbound")}
-              className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#1875f0] text-white shadow-xs">
-                <ArrowDownToLine className="size-5 stroke-[2.2]" />
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700">入库发起</span>
-            </div>
-
-            {/* 出库发起 */}
-            <div
-              onClick={() => openFeature("biz-init-outbound")}
-              className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#fb8c00] text-white shadow-xs">
-                <ArrowUpFromLine className="size-5 stroke-[2.2]" />
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700">出库发起</span>
-            </div>
-
-            {/* 移库发起 */}
-            <div
-              onClick={() => openFeature("biz-init-transfer-loc")}
-              className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#43a047] text-white shadow-xs">
-                <ArrowLeftRight className="size-5 stroke-[2.2]" />
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700">移库发起</span>
-            </div>
-
-            {/* 货物转让 */}
-            <div
-              onClick={() => openFeature("biz-init-transfer-owner")}
-              className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#e53935] text-white shadow-xs">
-                <RefreshCcw className="size-5 stroke-[2.2]" />
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700">货物转让</span>
-            </div>
-
-            {/* 仓单开立 */}
-            <div
-              onClick={() => openFeature("biz-init-receipt-issue")}
-              className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#f57c00] text-white shadow-xs">
-                <FileCheck className="size-5 stroke-[2.2]" />
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700">仓单开立</span>
-            </div>
-
-            {/* 监管办理 */}
-            <div
-              onClick={() => openFeature("biz-init-pledge-biz")}
-              className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#1875f0] text-white shadow-xs">
-                <Lock className="size-5 stroke-[2.2]" />
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight">
-                监管办理
-              </span>
-            </div>
-
-            {/* 异动申请 */}
-            <div
-              onClick={() => openFeature("biz-init-movement-apply")}
-              className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#e53935] text-white shadow-xs">
-                <SlidersHorizontal className="size-5 stroke-[2.2]" />
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700">异动申请</span>
-            </div>
-
-            {/* 盘点发起 */}
-            <div
-              onClick={() => openFeature("biz-init-stock-taking-apply")}
-              className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#0288d1] text-white shadow-xs">
-                <ClipboardList className="size-5 stroke-[2.2]" />
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700">盘点发起</span>
-            </div>
-
-            {/* 加工发起 */}
-            <div
-              onClick={() => openFeature("biz-init-processing-apply")}
-              className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#1976d2] text-white shadow-xs">
-                <Workflow className="size-5 stroke-[2.2]" />
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700">加工发起</span>
-            </div>
-          </div>
-        </section>
-
-        {/* 3. 客户需求审批 (5列网格，带红点角标) */}
-        <section className="rounded-2xl bg-white p-3.5 shadow-xs space-y-3">
-          <h2 className="text-xs font-bold text-gray-800 tracking-tight">客户需求审批</h2>
-
-          <div className="grid grid-cols-5 gap-y-3.5 gap-x-1 text-center">
-            {/* 客户入库预约 (红点5) */}
-            <div
-              onClick={() => openFeature("biz-approve-customer-inbound-appoint")}
-              className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="relative">
-                <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#1875f0] text-white shadow-xs">
-                  <ArrowDownToLine className="size-5 stroke-[2.2]" />
-                </div>
-                <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-1 ring-white">
-                  5
-                </span>
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight">
-                客户入库预约
-              </span>
-            </div>
-
-            {/* 客户出库预约 (红点1) */}
-            <div
-              onClick={() => openFeature("biz-approve-customer-outbound-appoint")}
-              className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="relative">
-                <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#fb8c00] text-white shadow-xs">
-                  <ArrowUpFromLine className="size-5 stroke-[2.2]" />
-                </div>
-                <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-1 ring-white">
-                  1
-                </span>
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight">
-                客户出库预约
-              </span>
-            </div>
-
-            {/* 客户融资需求线索 (红点9) */}
-            <div
-              onClick={() => openFeature("biz-approve-customer-finance-leads")}
-              className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="relative">
-                <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#43a047] text-white shadow-xs">
-                  <FileSignature className="size-5 stroke-[2.2]" />
-                </div>
-                <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-1 ring-white">
-                  9
-                </span>
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight">
-                客户融资需求线索
-              </span>
-            </div>
-
-            {/* 客户销售需求 (红点12) */}
-            <div
-              onClick={() => openFeature("biz-approve-customer-sales-req")}
-              className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="relative">
-                <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#1e88e5] text-white shadow-xs">
-                  <Store className="size-5 stroke-[2.2]" />
-                </div>
-                <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-1 ring-white">
-                  12
-                </span>
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight">
-                客户销售需求
-              </span>
-            </div>
-
-            {/* 客户采购需求 */}
-            <div
-              onClick={() => openFeature("biz-approve-customer-procure-req")}
-              className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="relative">
-                <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#e53935] text-white shadow-xs">
-                  <ShoppingBag className="size-5 stroke-[2.2]" />
-                </div>
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight">
-                客户采购需求
-              </span>
-            </div>
-
-            {/* 尽调办理 */}
-            <div
-              onClick={() => openFeature("biz-approve-due-diligence-sso")}
-              className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#1976d2] text-white shadow-xs">
-                <SearchCheck className="size-5 stroke-[2.2]" />
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700">尽调办理</span>
-            </div>
-          </div>
-        </section>
-
-        {/* 4. 其他审批 (5列网格) */}
-        <section className="rounded-2xl bg-white p-3.5 shadow-xs space-y-3">
-          <h2 className="text-xs font-bold text-gray-800 tracking-tight">其他审批</h2>
-
-          <div className="grid grid-cols-5 gap-y-3.5 gap-x-1 text-center">
-            {/* 政策资讯审核 (红点1) */}
-            <div
-              onClick={() => openOtherApproval("biz-approve-policy-news")}
-              className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="relative">
-                <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#43a047] text-white shadow-xs">
-                  <FileCheck className="size-5 stroke-[2.2]" />
-                </div>
-                <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-1 ring-white">
-                  1
-                </span>
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight">
-                政策资讯审核
-              </span>
-            </div>
-
-            {/* 开锁审批 */}
-            <div
-              onClick={() => openOtherApproval("biz-approve-unlock-apply")}
-              className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#f57c00] text-white shadow-xs">
-                <Lock className="size-5 stroke-[2.2]" />
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight">
-                开锁审批
-              </span>
-            </div>
-
-            {/* 贷中风控处理 */}
-            <div
-              onClick={() => openOtherApproval("biz-approve-in-loan-risk-sso")}
-              className="relative flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#1875f0] text-white shadow-xs">
-                <ShieldCheck className="size-5 stroke-[2.2]" />
-              </div>
-              <span className="mt-1.5 text-[10px] font-medium text-gray-700 line-clamp-2 leading-tight">
-                贷中风控处理
-              </span>
-            </div>
-          </div>
-        </section>
+            )}
+          </section>
+        ))}
       </div>
 
-      {/* 底部导航栏 */}
       <BottomTabBar />
     </MobileShell>
   )

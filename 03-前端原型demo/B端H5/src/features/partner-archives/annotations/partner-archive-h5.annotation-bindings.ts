@@ -31,8 +31,8 @@ export const partnerArchiveH5ListAnnotationBindings: Record<
     contentSuffix:
       "【H5 端差异】以底部抽屉（Sheet）形式弹出阻断提示（非 PC 居中对话框）。",
   },
-  "partner-archive-row-append-pa-r03a": {
-    targetId: "partner-archive-row-append-pa-r03a",
+  "partner-archive-row-append-g03a": {
+    targetId: "partner-archive-row-append-g03a",
     contentSuffix:
       "【H5 端差异】追加步骤 1 为 `PartnerAppendRoleSheet` Pill 多选 +【继续】；步骤 2~4 为 `PartnerCompositeSaveSheet`（flowKind=rowAppend）确认/失败/成功分项，与 PC 弹窗口径一致；详情无页头追加，仅列表卡片【追加】。",
   },
@@ -55,12 +55,12 @@ export const partnerArchiveH5DetailAnnotationBindings: Record<
   "partner-archive-detail-actions": {
     targetId: "partner-archive-detail-actions",
     contentSuffix:
-      "【H5 端差异】详情只读查阅，不提供冻结/解冻/追加；上述操作仅在列表卡片 Footer（与 PC 列表行操作矩阵一致）。详情 Tab 内可【验证联系手机】的显隐仍同 PA-P02（若页头未做验证入口则走列表卡片【验证】）。",
+      "【H5 端差异】详情只读查阅，不提供冻结/解冻/追加；上述操作仅在列表卡片 Footer（与 PC 列表行操作矩阵一致）。详情 Tab 内可【验证联系手机】的显隐仍同 GP02（若页头未做验证入口则走列表卡片【验证】）。",
   },
-  "partner-archive-row-append-pa-r03a": {
+  "partner-archive-row-append-g03a": {
     targetId: "partner-archive-detail-actions",
     contentSuffix:
-      "【H5 端差异】本页无追加弹窗挂载点；**PA-R03a 行追加**见列表页 **7 号点**（卡片 Footer【追加】+ Composite Sheet）。",
+      "【H5 端差异】本页无追加弹窗挂载点；**G03a 行追加**见列表页 **7 号点**（卡片 Footer【追加】+ Composite Sheet）。",
   },
   "partner-archive-detail-tabs": {
     targetId: "partner-archive-detail-tabs",
@@ -97,17 +97,17 @@ export const partnerArchiveH5FormAnnotationBindings: Record<
   "partner-archive-form-base": {
     targetId: "partner-archive-form-base",
     contentSuffix:
-      "【H5 端差异】已验证企业主体在「经办人姓名」上方提供文字链【调整经办人信息】（非 PC 行内 Link）；展开后可编辑经办人姓名与联系电话（经办人手机），保存前短信核验口径同 PC（【合作方短信二元身份核验规则】(PA-R04a)）。",
+      "【H5 端差异】已验证企业主体在「经办人姓名」上方提供文字链【调整经办人信息】（非 PC 行内 Link）；展开后可编辑经办人姓名与联系电话（经办人手机），保存前短信核验口径同 PC（【合作方短信二元身份核验规则】(G04a)）。",
   },
   "partner-archive-form-address": {
     targetId: "partner-archive-form-address",
     contentSuffix:
-      "【H5 端差异】省/市/区/详细地址为四行控件 + 多行详细地址（字段清单 8.8.3）；个人货主改址与 PC 一致，保存前准入、无单独改址 Sheet（PA-R06a）。",
+      "【H5 端差异】省/市/区/详细地址为四行控件 + 多行详细地址（字段清单 8.8.3）；个人货主改址与 PC 一致，保存前准入、无单独改址 Sheet（G06a）。",
   },
   "partner-archive-form-roles": {
     targetId: "partner-archive-form-roles",
     contentSuffix:
-      "【H5 端差异】追加目标为子菜单 Pill 多选（非业务角色枚举）；多选保存走 PA-R03a 底部 Sheet（确认/失败/成功），与 PC 弹窗口径一致。",
+      "【H5 端差异】追加目标为子菜单 Pill 多选（非业务角色枚举）；多选保存走 G03a 底部 Sheet（确认/失败/成功），与 PC 弹窗口径一致。",
   },
   "partner-archive-form-actions": {
     targetId: "partner-archive-form-actions",

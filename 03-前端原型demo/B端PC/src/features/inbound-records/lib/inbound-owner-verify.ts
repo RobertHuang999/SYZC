@@ -11,7 +11,7 @@ export function isFinancialInboundType(
   )
 }
 
-/** 【合作方货主引用与快捷建档规则】(R03) + PA-R04b：金融类且联系手机未验证时提交前补验 */
+/** 【合作方货主引用与快捷建档规则】(R03) + G04b：金融类且联系手机未验证时提交前补验 */
 export function needsOwnerSmsAtSubmit(
   form: Pick<
     InboundFormState,

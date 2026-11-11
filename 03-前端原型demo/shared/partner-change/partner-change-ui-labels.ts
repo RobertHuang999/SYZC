@@ -30,10 +30,10 @@ export const SUPERVISION_OWNER_PARTNER_CHANGE_USER =
   "货主须从「货主信息」域选择；保存后生单快照，主档后续变更不回写本单。"
 
 export const SUPERVISION_OWNER_PARTNER_CHANGE_SPEC =
-  "【合作方子菜单分视图与隐式角色规则】(PA-R12)：货主 → 货主信息。真源：05 第八节 · 12 融资监管引用域。"
+  "【合作方子菜单分视图与隐式角色规则】(G12)：货主 → 货主信息。真源：05 第八节 · 12 融资监管引用域。"
 
 export const SUPERVISION_HOLDER_PARTNER_CHANGE_USER =
   "权人/质权人按单据类型分域选择，列表不得跨域混选；界面称谓须与域一致（监管服务单不用「资金方」指质权人）。"
 
 export const SUPERVISION_HOLDER_PARTNER_CHANGE_SPEC =
-  "抵押/质押 → 资金方信息（抵押权人/质押权人）；监管服务 → 服务方信息（质权人）。【抵质押权人合作方引用规则】(R-PLG-14) / 【监管服务质权人合作方引用规则】(R-PLG-15)。"
+  "抵押/质押 → 资金方信息（抵押权人/质押权人）；监管服务 → 服务方信息（质权人）。【抵质押权人合作方引用规则】(R14) / 【监管服务质权人合作方引用规则】(R15)。"

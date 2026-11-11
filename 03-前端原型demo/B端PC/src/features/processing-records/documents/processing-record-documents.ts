@@ -1,7 +1,7 @@
 import type { PrototypeDocument } from "@/shared/annotations/PrototypeAnnotationLayer"
-import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/02-仓储/14-加工管理-加工记录/加工管理主PRD.md?raw"
-import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/02-仓储/14-加工管理-加工记录/加工管理字段清单.md?raw"
-import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/02-仓储/14-加工管理-加工记录/加工管理业务规则规格.md?raw"
+import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/03-仓储/14-加工管理-加工记录/加工管理主PRD.md?raw"
+import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/03-仓储/14-加工管理-加工记录/加工管理字段清单.md?raw"
+import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/03-仓储/14-加工管理-加工记录/加工管理业务规则规格.md?raw"
 
 export const processingRecordDocuments: PrototypeDocument[] = [
   {

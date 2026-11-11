@@ -8,7 +8,7 @@ export const supervisionHandlingPartnerRefAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "监管办理 · 合作方引用域（6.3）",
     content:
-      "抵押/质押单权人仅查资金方信息域；监管服务单质权人仅查服务方信息域；货主统一货主信息域。选择器按 archiveMenu 硬隔离（PA-R12）。",
+      "抵押/质押单权人仅查资金方信息域；监管服务单质权人仅查服务方信息域；货主统一货主信息域。选择器按 archiveMenu 硬隔离（G12）。",
     details: [
       {
         title: "单据类型与档案域对照",
@@ -16,9 +16,9 @@ export const supervisionHandlingPartnerRefAnnotations: PrototypeAnnotation[] = [
           {
             label: "域对照表",
             content: `| 单据类型 | 权人界面称谓 | 合作方档案域 |
-| 抵押单 / 质押单 | 抵押权人 / 质押权人 | 资金方信息 · R-PLG-14 · FN-R01 |
-| 监管服务单 | 质权人（服务方） | 服务方信息 · R-PLG-15 · SP-R01 |
-| 共用 | 货主 | 货主信息 · R-PLG-16 · WH-R01 |`,
+| 抵押单 / 质押单 | 抵押权人 / 质押权人 | 资金方信息 · R14 · R01 |
+| 监管服务单 | 质权人（服务方） | 服务方信息 · R15 · R01 |
+| 共用 | 货主 | 货主信息 · R16 · R01 |`,
           },
           {
             label: "选择流转示意",
@@ -50,11 +50,11 @@ export const supervisionHandlingPartnerRefAnnotations: PrototypeAnnotation[] = [
           {
             label: "权人合作方引用",
             content:
-              "抵押/质押 → archiveMenu=资金方信息；【抵质押权人合作方引用规则】(R-PLG-14)。监管服务 → archiveMenu=服务方信息；【监管服务质权人合作方引用规则】(R-PLG-15)。",
+              "抵押/质押 → archiveMenu=资金方信息；【抵质押权人合作方引用规则】(R14)。监管服务 → archiveMenu=服务方信息；【监管服务质权人合作方引用规则】(R15)。",
           },
           {
             label: "域间隔离",
-            content: "【合作方子菜单分视图与隐式角色规则】(PA-R12)：Mock 列表不得跨菜单域混选。",
+            content: "【合作方子菜单分视图与隐式角色规则】(G12)：Mock 列表不得跨菜单域混选。",
           },
         ],
       },

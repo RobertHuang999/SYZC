@@ -11,7 +11,7 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
       "详情页全量只读展示货品主数据、规格、入库收集配置、系统参考单价与操作留痕。",
     documentRefs: {
       prd: { section: "5. 状态机与动作能力矩阵", match: "有效启用" },
-      rules: { section: "二、状态定义与有效启用计算模型", match: "SKU-F11" },
+      rules: { section: "二、状态定义与有效启用计算模型", match: "K11" },
     },
     details: [
       {
@@ -25,7 +25,7 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "有效状态",
             content:
-              "【有效启用状态多级综合计算规则】(SKU-F11)：自身、品类、大类三者全部启用才是有效启用；上级停用时，详情页会明确提示无效原因。",
+              "【有效启用状态多级综合计算规则】(K11)：自身、品类、大类三者全部启用才是有效启用；上级停用时，详情页会明确提示无效原因。",
           },
         ],
       },
@@ -51,7 +51,7 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
       "展示所属大类与品类、计量参数与单位、动态规格取值、系统参考单价（元保留 2~6 位小数，万元保留 10 位小数）及价格趋势入口。",
     documentRefs: {
       fields: { section: "一、业务字段", match: "系统参考单价" },
-      rules: { section: "三、核心业务规则", match: "SKU-F05" },
+      rules: { section: "三、核心业务规则", match: "K05" },
     },
     details: [
       {
@@ -70,7 +70,7 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "系统参考单价",
             content:
-              "【系统参考单价维护与双精度展示规则】(SKU-F05)：支持元与万元（10 位小数）同屏对照，点击「价格趋势」可查看近期价格曲线。",
+              "【系统参考单价维护与双精度展示规则】(K05)：支持元与万元（10 位小数）同屏对照，点击「价格趋势」可查看近期价格曲线。",
           },
         ],
       },
@@ -82,13 +82,13 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "goods-detail-inbound",
     number: 3,
     kind: "字段",
-    title: "6.3 变更 · 入库收集信息配置 (SKU-F03 / SKU-F04 / SKU-F12)",
+    title: "6.3 变更 · 入库收集信息配置 (K03 / K04 / K12)",
     content:
       "按配置顺序展示已勾选的 07 收集项、控件类型、是否必填、保质期固定单位与建议默认值，以及下拉选择器勾选的适用候选项。",
     documentRefs: {
       prd: { section: "4. 业务场景", match: "SKU-S02" },
       fields: { section: "1.1 入库收集信息配置", match: "保质期固定单位" },
-      rules: { section: "三、核心业务规则", match: "SKU-F12" },
+      rules: { section: "三、核心业务规则", match: "K12" },
     },
     details: [
       {
@@ -100,7 +100,7 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
 | :--- | :--- | :--- |
 | **保质期说明列** | 仅显示“周期组合项” | 明确展示 **固定单位（天/个月/年）+ 建议默认数值 + 入库单单位只读锁定说明** |
 | **下拉选择器说明列** | 仅显示“下拉选择器” | 明确展示当前货品从 07 枚举池中勾选的 **可选候选项** |
-| **底座停用标识** | 无 | 当 07 收集项被停用时，详情行显示 **「底座已停用」** 徽章及降级提示（SKU-F12） |`,
+| **底座停用标识** | 无 | 当 07 收集项被停用时，详情行显示 **「底座已停用」** 徽章及降级提示（K12） |`,
           },
         ],
       },
@@ -115,12 +115,12 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "底座停用",
             content:
-              "【收集项引用联动规则】(SKU-F12)：07 停用后该行显示「底座已停用」，存量货品与历史入库单不受影响。",
+              "【收集项引用联动规则】(K12)：07 停用后该行显示「底座已停用」，存量货品与历史入库单不受影响。",
           },
           {
             label: "下游渲染",
             content:
-              "【入库单动态联动与单位只读锁定规则】(SKU-F04)：入库单按此清单动态生成字段，保质期单位只读锁定，下拉选择器按适用候选项渲染，并强校验温度/湿度区间、水分/杂质百分比与生产/过期日期逻辑。",
+              "【入库单动态联动与单位只读锁定规则】(K04)：入库单按此清单动态生成字段，保质期单位只读锁定，下拉选择器按适用候选项渲染，并强校验温度/湿度区间、水分/杂质百分比与生产/过期日期逻辑。",
           },
         ],
       },
@@ -135,7 +135,7 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
     content:
       "按时间倒序展示历次设置价格的审计记录，同时呈现元与万元（保留 10 位小数）双口径。",
     documentRefs: {
-      rules: { section: "三、核心业务规则", match: "SKU-F05" },
+      rules: { section: "三、核心业务规则", match: "K05" },
     },
     details: [
       {
@@ -144,7 +144,7 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "双精度展示",
             content:
-              "【系统参考单价维护与双精度展示规则】(SKU-F05)：元展示保留 2~6 位小数并带千分位；万元展示严格保留 10 位小数。",
+              "【系统参考单价维护与双精度展示规则】(K05)：元展示保留 2~6 位小数并带千分位；万元展示严格保留 10 位小数。",
           },
           {
             label: "设置价格",
@@ -165,7 +165,7 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
       "详情页底部展示数据版本号（第 N 版）、创建人、创建时间、最近更新人与更新时间，明确主档变更与历史单据不可变快照边界。",
     documentRefs: {
       fields: { section: "二、状态与系统字段", match: "数据版本号" },
-      rules: { section: "三、核心业务规则", match: "SKU-F10" },
+      rules: { section: "三、核心业务规则", match: "K10" },
     },
     details: [
       {
@@ -174,12 +174,12 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "并发与版本控制",
             content:
-              "【多人同时编辑防冲突与防重复提交规则】(SKU-F10)：新建、编辑、启停、设价均记录操作人、时间并递增数据版本号。",
+              "【多人同时编辑防冲突与防重复提交规则】(K10)：新建、编辑、启停、设价均记录操作人、时间并递增数据版本号。",
           },
           {
             label: "价格变更与历史快照",
             content:
-              "【价格变更与存量业务计算规则】(SKU-F07)：历次单价调整记录在修改记录中永久保留；历史入库单保留生成时刻的货品名称、规格、单位快照，不随主档修改而回写。",
+              "【价格变更与存量业务计算规则】(K07)：历次单价调整记录在修改记录中永久保留；历史入库单保留生成时刻的货品名称、规格、单位快照，不随主档修改而回写。",
           },
         ],
       },

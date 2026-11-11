@@ -200,7 +200,7 @@ export function InboundGoodsLineCard({
         </Button>
       </div>
 
-      {/* 大类 / 品类 / 货品(SKU) / 计量 — 继承货品管理有效启用主档 (R11 / SKU-F04) */}
+      {/* 大类 / 品类 / 货品(SKU) / 计量 — 继承货品管理有效启用主档 (R11 / K04) */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Field label="货品大类" required>
           <Select

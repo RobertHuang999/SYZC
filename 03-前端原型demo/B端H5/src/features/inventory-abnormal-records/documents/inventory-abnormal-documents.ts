@@ -1,7 +1,7 @@
 import type { PrototypeDocument } from "@/shared/annotations/PrototypeAnnotationLayer"
-import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/02-仓储/13-货物异动-异动记录/货物异动_异动记录主PRD.md?raw"
-import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/02-仓储/13-货物异动-异动记录/货物异动_异动记录字段清单.md?raw"
-import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/02-仓储/13-货物异动-异动记录/货物异动_异动记录业务规则规格.md?raw"
+import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/03-仓储/13-货物异动-异动记录/货物异动_异动记录主PRD.md?raw"
+import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/03-仓储/13-货物异动-异动记录/货物异动_异动记录字段清单.md?raw"
+import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/03-仓储/13-货物异动-异动记录/货物异动_异动记录业务规则规格.md?raw"
 
 export const inventoryAbnormalH5Documents: PrototypeDocument[] = [
   {

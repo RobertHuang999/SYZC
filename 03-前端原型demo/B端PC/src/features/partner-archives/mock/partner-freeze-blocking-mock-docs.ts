@@ -1,6 +1,6 @@
 import type { AssociatedDocItem } from "../domain/types"
 
-/** PA-R02 原型演示：货主名下在库/在押 — 列表/详情点【冻结】应弹出阻断弹窗（赵磊 PA-202609001） */
+/** G02 原型演示：货主名下在库/在押 — 列表/详情点【冻结】应弹出阻断弹窗（赵磊 PA-202609001） */
 export const MOCK_OWNER_FREEZE_BLOCKING_DOCS: AssociatedDocItem[] = [
   {
     id: "doc-rk-p01-1",
@@ -26,7 +26,7 @@ export const MOCK_OWNER_FREEZE_BLOCKING_DOCS: AssociatedDocItem[] = [
   },
 ]
 
-/** PA-R02 演示：提货人待提货出库单（李华 PA-202609005） */
+/** G02 演示：提货人待提货出库单（李华 PA-202609005） */
 export const MOCK_PICKUP_FREEZE_BLOCKING_DOCS: AssociatedDocItem[] = [
   {
     id: "doc-ck-p05-1",
@@ -41,7 +41,7 @@ export const MOCK_PICKUP_FREEZE_BLOCKING_DOCS: AssociatedDocItem[] = [
   },
 ]
 
-/** PA-R02 演示：服务方进行中监管单（中储发展 PA-202609010 · p-10） */
+/** G02 演示：服务方进行中监管单（中储发展 PA-202609010 · p-10） */
 export const MOCK_SERVICE_FREEZE_BLOCKING_DOCS: AssociatedDocItem[] = [
   {
     id: "doc-jg-p10-1",
@@ -56,7 +56,7 @@ export const MOCK_SERVICE_FREEZE_BLOCKING_DOCS: AssociatedDocItem[] = [
   },
 ]
 
-/** PA-R02 演示：资金方进行中抵质押（建行无锡分行 PA-202609008） */
+/** G02 演示：资金方进行中抵质押（建行无锡分行 PA-202609008） */
 export const MOCK_FUNDER_FREEZE_BLOCKING_DOCS: AssociatedDocItem[] = [
   {
     id: "doc-dy-p08-1",

@@ -13,7 +13,7 @@ export const warehouseReceiptInitiateAnnotationsShared: SharedPrototypeAnnotatio
     documentRefs: {
       prd: { section: "6. 页面交互规格索引", match: "移动端" },
       fields: { section: "五、操作字段子清单索引", match: "01 仓单开立字段清单" },
-      rules: { section: "2. 规则详细规格", match: "R-DWR-06" },
+      rules: { section: "2. 规则详细规格", match: "R06" },
     },
     details: [
       {
@@ -43,7 +43,7 @@ export const warehouseReceiptInitiateAnnotationsShared: SharedPrototypeAnnotatio
       "选择企业或个人货主，货主标识与身份证号由档案自动带出并脱敏展示；企业货主需在同一页补录经办人姓名、手机号与身份证号。",
     documentRefs: {
       fields: { section: "五、操作字段子清单索引", match: "货主类型" },
-      rules: { section: "2. 规则详细规格", match: "R-DWR-01" },
+      rules: { section: "2. 规则详细规格", match: "R01" },
     },
     details: [
       {
@@ -76,7 +76,7 @@ export const warehouseReceiptInitiateAnnotationsShared: SharedPrototypeAnnotatio
       "点击「添加货物」后在面板内选择仓库，展示该货主在该仓库内【存货中】且可用数量大于 0 的未占用库存；支持先入先出（FIFO）快捷开立与自定义圈选，单次开立最多 50 组货物。",
     documentRefs: {
       fields: { section: "五、操作字段子清单索引", match: "批次开立数量" },
-      rules: { section: "2. 规则详细规格", match: "R-DWR-02" },
+      rules: { section: "2. 规则详细规格", match: "R02" },
     },
     details: [
       {
@@ -141,11 +141,11 @@ export const warehouseReceiptInitiateAnnotationsShared: SharedPrototypeAnnotatio
     targetId: "receipt-initiate-sign",
     number: 5,
     kind: "规则",
-    title: "电子签章：人脸活体 + 短信验证码（R-DWR-06）",
+    title: "电子签章：人脸活体 + 短信验证码（R06）",
     content:
       "先完成活体人脸识别，通过后才激活短信验证码；验证码 6 位、有效期 5 分钟，发送后 60 秒倒计时防刷，错误超过 5 次锁定本次开单 30 分钟。",
     documentRefs: {
-      rules: { section: "2. 规则详细规格", match: "R-DWR-06" },
+      rules: { section: "2. 规则详细规格", match: "R06" },
       prd: { section: "场景 1【现场实名开具电子仓单】(S01)", match: "活体人脸识别" },
     },
     details: [

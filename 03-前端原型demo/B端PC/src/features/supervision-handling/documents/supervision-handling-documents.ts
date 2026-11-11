@@ -1,7 +1,7 @@
 import type { PrototypeDocument } from "@/shared/annotations/PrototypeAnnotationLayer"
-import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/03-融资监管/06-抵质押业务-抵质押业务办理/抵质押业务办理主PRD.md?raw"
-import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/03-融资监管/06-抵质押业务-抵质押业务办理/抵质押业务办理字段清单.md?raw"
-import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/03-融资监管/06-抵质押业务-抵质押业务办理/抵质押业务办理业务规则规格.md?raw"
+import prdMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/04-融资监管/06-监管业务-监管办理/监管办理主PRD.md?raw"
+import fieldsMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/04-融资监管/06-监管业务-监管办理/监管办理字段清单.md?raw"
+import rulesMarkdown from "@docs/🌟🌟🌟-最新基准版/B端PC/04-融资监管/06-监管业务-监管办理/监管办理业务规则规格.md?raw"
 
 export const supervisionHandlingDocuments: PrototypeDocument[] = [
   {

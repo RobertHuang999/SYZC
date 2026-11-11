@@ -6,7 +6,7 @@ export type PartnerImplicitRoleCode =
   | "FUNDER"
   | "SERVICE_PROVIDER"
 
-/** 子菜单 → 本菜单隐式业务角色（PA-R12） */
+/** 子菜单 → 本菜单隐式业务角色（G12） */
 export const IMPLICIT_ROLE_BY_ARCHIVE_MENU: Record<
   PartnerArchiveMenuLabel,
   PartnerImplicitRoleCode

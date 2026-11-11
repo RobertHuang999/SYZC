@@ -16,6 +16,17 @@ const outputPath = path.resolve(__dirname, "../src/config/menu-catalog.generated
 
 const moduleMap = {
   "1.工作中心": "home",
+  "2.用户中心": "user-center",
+  "3.仓储": "storage",
+  "4.融资/监管": "finance",
+  "5.交易": "trade",
+  "6.风控": "risk",
+  "7.物联网IOT与预警": "device-warning",
+  "8.统计/看板": "statistics",
+  "9.结算": "settlement",
+  "10.配置管理": "config",
+  "11.合同签署": "contract",
+  // 合流前 CSV 别名（旧编号）
   "2.仓储": "storage",
   "3.融资/监管": "finance",
   "4.交易": "trade",
@@ -25,8 +36,6 @@ const moduleMap = {
   "8.结算": "settlement",
   "9.配置管理": "config",
   "10.用户中心": "user-center",
-  "11.合同签署": "contract",
-  // 合流前 CSV 别名
   "6.统计/看板": "statistics",
   "7.结算": "settlement",
   "8.配置管理": "config",
@@ -70,7 +79,47 @@ function shouldIncludeInPrototypeMenu(resolved, moduleId) {
   return false
 }
 
-function buildMenuEntry(resolved) {
+/** 一级菜单下 Tab 为页内切换，侧栏只保留单入口（对齐线上「项目监管～监管档案」） */
+const SIDEBAR_HUB_ONLY_LEVEL1 = new Set(["监管档案"])
+/** 二级菜单下 Tab 为页内切换，侧栏只保留单入口（抵押/质押/监管服务订单） */
+const SIDEBAR_HUB_ONLY_LEVEL2 = new Set(["监管管理"])
+/** Tab 仅登记权限/路由，不出现在侧栏（已并入父级看板页） */
+const SIDEBAR_EXCLUDED_TABS = new Set(["链接分享记录"])
+
+function shouldOmitSidebarCatalogEntry(resolved) {
+  const tab = resolved.tab
+  return tab && tab !== "-" && SIDEBAR_EXCLUDED_TABS.has(tab)
+}
+
+function isHubOnlyLevel1Sidebar(resolved) {
+  const level1 = stripModulePrefix(resolved.level1)
+  const level2 = resolved.level2
+  return SIDEBAR_HUB_ONLY_LEVEL1.has(level1) && (!level2 || level2 === "-")
+}
+
+function isHubOnlyLevel2Sidebar(resolved) {
+  const level2 = resolved.level2
+  const tab = resolved.tab
+  return level2 && level2 !== "-" && SIDEBAR_HUB_ONLY_LEVEL2.has(level2) && tab && tab !== "-"
+}
+
+function isHubOnlySidebarEntry(resolved) {
+  return isHubOnlyLevel1Sidebar(resolved) || isHubOnlyLevel2Sidebar(resolved)
+}
+
+function hubRoutePathForSidebar(resolved) {
+  const level1 = stripModulePrefix(resolved.level1)
+  const level2 = resolved.level2
+  if (isHubOnlyLevel1Sidebar(resolved)) {
+    return buildPath([stripModulePrefix(resolved.module), level1].filter(Boolean))
+  }
+  if (isHubOnlyLevel2Sidebar(resolved)) {
+    return buildPath([stripModulePrefix(resolved.module), level1, level2].filter(Boolean))
+  }
+  return buildRoutePath(resolved)
+}
+
+function buildRoutePath(resolved) {
   const level1 = stripModulePrefix(resolved.level1)
   const level2 = resolved.level2
   const tab = resolved.tab
@@ -80,7 +129,35 @@ function buildMenuEntry(resolved) {
   if (level2 && level2 !== "-") pathParts.push(level2)
   if (tab && tab !== "-") pathParts.push(tab)
 
-  const routePath = buildPath(pathParts.filter(Boolean))
+  return buildPath(pathParts.filter(Boolean))
+}
+
+function buildSidebarEntry(resolved) {
+  const level1 = stripModulePrefix(resolved.level1)
+  const level2 = resolved.level2
+  const tab = resolved.tab
+
+  if (isHubOnlyLevel1Sidebar(resolved)) {
+    const routePath = buildPath([stripModulePrefix(resolved.module), level1].filter(Boolean))
+    return {
+      routePath,
+      label: level1,
+      groupLabel: level1,
+      groupId: slugify(level1) || moduleMap[resolved.module] || "menu",
+    }
+  }
+
+  if (isHubOnlyLevel2Sidebar(resolved)) {
+    const routePath = buildPath([stripModulePrefix(resolved.module), level1, level2].filter(Boolean))
+    return {
+      routePath,
+      label: level2,
+      groupLabel: level1,
+      groupId: slugify(level1) || moduleMap[resolved.module] || "menu",
+    }
+  }
+
+  const routePath = buildRoutePath(resolved)
   const label =
     tab && tab !== "-"
       ? tab
@@ -100,6 +177,7 @@ const headerIndex = buildHeaderIndex(rows[0])
 /** @type {Record<string, { groupOrder: string[], groups: Map<string, { id: string, label: string, itemOrder: string[], items: Map<string, string> }> }>} */
 const catalog = {}
 const inheritanceState = {}
+const allRoutePaths = new Set()
 
 for (const row of rows.slice(1)) {
   const resolved = resolveInheritedRow(row, headerIndex, inheritanceState)
@@ -108,7 +186,16 @@ for (const row of rows.slice(1)) {
   const moduleId = moduleMap[resolved.module]
   if (!moduleId || !shouldIncludeInPrototypeMenu(resolved, moduleId)) continue
 
-  const { routePath, label, groupLabel, groupId } = buildMenuEntry(resolved)
+  allRoutePaths.add(buildRoutePath(resolved))
+  if (isHubOnlySidebarEntry(resolved)) {
+    allRoutePaths.add(hubRoutePathForSidebar(resolved))
+  }
+
+  if (shouldOmitSidebarCatalogEntry(resolved)) {
+    continue
+  }
+
+  const { routePath, label, groupLabel, groupId } = buildSidebarEntry(resolved)
 
   catalog[moduleId] ??= { groupOrder: [], groups: new Map() }
   const moduleCatalog = catalog[moduleId]
@@ -147,9 +234,7 @@ for (const [moduleId, moduleCatalog] of Object.entries(catalog)) {
   })
 }
 
-const allPaths = Object.values(serialized).flatMap((groups) =>
-  groups.flatMap((group) => group.items.map((item) => item.path)),
-)
+const allPaths = [...allRoutePaths].sort()
 
 const output = `// AUTO-GENERATED by scripts/generate-menu-catalog.mjs — do not edit manually.
 import type { SidebarGroup } from "./navigation"

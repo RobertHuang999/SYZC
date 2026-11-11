@@ -85,6 +85,7 @@ import { InventoryDetailsListPage } from "@/features/inventory-details/pages/Inv
 import { InventoryDetailsDetailPage } from "@/features/inventory-details/pages/InventoryDetailsDetailPage"
 import { InventoryTransactionsListPage } from "@/features/inventory-transactions/pages/InventoryTransactionsListPage"
 import { SupervisionHandlingPartnerRefPage } from "@/features/supervision-handling/pages/SupervisionHandlingPartnerRefPage"
+import { SupervisionManagementListPage } from "@/features/supervision-management/pages/SupervisionManagementListPage"
 import { InboundStagingPrototypeGate } from "@/features/inbound-staging-reg/components/InboundStagingPrototypeGate"
 import { InboundStagingListPage } from "@/features/inbound-staging-reg/pages/InboundStagingListPage"
 import { InboundStagingFormPage } from "@/features/inbound-staging-reg/pages/InboundStagingFormPage"
@@ -605,6 +606,12 @@ export function AppRoutes() {
         <Route
           path="融资/监管/监管业务/监管办理"
           element={<SupervisionHandlingPartnerRefPage />}
+        />
+
+        {/* 融资监管 · 监管管理（存续期台账：抵押/质押/监管服务三 Tab） */}
+        <Route
+          path="融资/监管/监管业务/监管管理"
+          element={<SupervisionManagementListPage />}
         />
 
         {placeholderPaths.map((menuPath) => (

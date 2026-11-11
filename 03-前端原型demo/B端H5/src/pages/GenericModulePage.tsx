@@ -15,10 +15,12 @@ export function GenericModulePage() {
   const menuItem = MOBILE_MENU_ITEMS.find((item) => item.id === moduleId)
 
   useEffect(() => {
-    if (menuItem?.customRoute) {
-      navigate(menuItem.customRoute, { replace: true })
+    const target = menuItem?.customRoute
+    const selfModulePath = moduleId ? `/m/module/${moduleId}` : ""
+    if (target && target !== selfModulePath) {
+      navigate(target, { replace: true })
     }
-  }, [menuItem, navigate])
+  }, [menuItem, moduleId, navigate])
 
   if (!menuItem) {
     const fallbackTitle = decodeURIComponent(moduleId ?? "未知功能").replace(/-/g, " ")
@@ -31,7 +33,8 @@ export function GenericModulePage() {
     )
   }
 
-  if (menuItem.customRoute) {
+  const selfModulePath = moduleId ? `/m/module/${moduleId}` : ""
+  if (menuItem.customRoute && menuItem.customRoute !== selfModulePath) {
     return null
   }
 

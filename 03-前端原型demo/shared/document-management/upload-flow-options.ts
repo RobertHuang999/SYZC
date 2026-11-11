@@ -5,7 +5,7 @@ export type UploadFlowStageOption = {
   stageText: string
 }
 
-export type DocumentOrderType = "inbound" | "outbound" | "transfer"
+export type DocumentOrderType = "inbound" | "outbound" | "transfer" | "supervision"
 
 /** 入库记录 · 上传补充资料：仅「入库发起」与「补充资料」 */
 export const INBOUND_UPLOAD_FLOW_OPTIONS: UploadFlowStageOption[] = [
@@ -49,11 +49,26 @@ export const TRANSFER_UPLOAD_FLOW_OPTIONS: UploadFlowStageOption[] = [
   },
 ]
 
+/** 监管管理 · 上传补充资料：仅「监管办理发起」与「补充资料」 */
+export const SUPERVISION_UPLOAD_FLOW_OPTIONS: UploadFlowStageOption[] = [
+  {
+    value: "1",
+    label: "监管办理发起",
+    stageText: "监管办理发起",
+  },
+  {
+    value: "9527",
+    label: "补充资料",
+    stageText: "补充资料",
+  },
+]
+
 export function getUploadFlowOptions(
   orderType: DocumentOrderType,
 ): UploadFlowStageOption[] {
   if (orderType === "outbound") return OUTBOUND_UPLOAD_FLOW_OPTIONS
   if (orderType === "transfer") return TRANSFER_UPLOAD_FLOW_OPTIONS
+  if (orderType === "supervision") return SUPERVISION_UPLOAD_FLOW_OPTIONS
   return INBOUND_UPLOAD_FLOW_OPTIONS
 }
 

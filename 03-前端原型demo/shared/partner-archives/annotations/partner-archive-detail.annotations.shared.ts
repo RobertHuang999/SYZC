@@ -2,7 +2,7 @@ import type { SharedPrototypeAnnotation } from "../../annotations/prototype-anno
 
 /**
  * 合作方档案 详情页 · 原型批注真源（PC/H5 共用）
- * 依据：合作方档案主PRD · 字段清单 · 业务规则规格 PA-R01~PA-R11、PA-P01~PA-P02
+ * 依据：合作方档案主PRD · 字段清单 · 业务规则规格 G01~G11、GP01~GP02
  */
 export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] = [
   {
@@ -28,7 +28,7 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
         T1["Tab 1: 基础档案<br/>(核验/联系手机/证件地址/建档审计)"]
         T2["Tab 2: 其他合作档案<br/>(跨菜单关联主档只读+跳转)"]
         T3["Tab 3: 关联客户账号<br/>(C端 1:1 绑定)"]
-        T4["Tab 4: 操作审计日志<br/>(PA-R07 不可变时间轴)"]
+        T4["Tab 4: 操作审计日志<br/>(G07 不可变时间轴)"]
     end
 
     H1 --> T1
@@ -49,8 +49,8 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
     targetId: "partner-archive-detail-actions",
     number: 2,
     kind: "交互",
-    title: "页头操作栏 · 状态化控制与权限隔离矩阵 (PA-P02)",
-    content: "【合作方档案操作权限矩阵】(PA-P02)：PC 详情页头与列表行操作共用 `getPartnerArchiveRowActions`（去掉【详情】+ 加【返回】）；H5 仅在列表卡片 Footer 提供冻结/解冻/追加，详情只读无重复按钮；禁止删档。页头【追加合作方档案】与列表行【追加】同 **【追加多身份一次保存原子规则】(PA-R03a)**（见 **9 号点**）。",
+    title: "页头操作栏 · 状态化控制与权限隔离矩阵 (GP02)",
+    content: "【合作方档案操作权限矩阵】(GP02)：PC 详情页头与列表行操作共用 `getPartnerArchiveRowActions`（去掉【详情】+ 加【返回】）；H5 仅在列表卡片 Footer 提供冻结/解冻/追加，详情只读无重复按钮；禁止删档。页头【追加合作方档案】与列表行【追加】同 **【追加多身份一次保存原子规则】(G03a)**（见 **9 号点**）。",
     details: [
       {
         title: "1. 主体操作控制矩阵",
@@ -59,9 +59,9 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
             label: "状态与动作对照表",
             content: `| 主体当前状态 | 可用操作按钮 | 交互行为与校验约束 | 审计与业务影响 |
 | :--- | :--- | :--- | :--- |
-| **正常 · 未验证 · 必填已齐** | 【返回】、【验证联系手机】（条件）、【编辑】、【追加合作方档案】、【冻结】 | 与列表行操作一致；点击【冻结】先 PA-R02 前置校验 | 补验成功写审计 |
-| **正常 · 派生待补全** | 【返回】、【验证】（条件）、【补全资料】、【追加】、【冻结】 | 【补全资料】与【编辑】同路由；冻结同 PA-R02 | 保存后待补全徽章消失 |
-| **正常 · 已验证** | 【返回】、【编辑】、【追加】、【冻结】 | PA-R04c 已锁定核心字段；冻结须录入原因 | 写入审计 |
+| **正常 · 未验证 · 必填已齐** | 【返回】、【验证联系手机】（条件）、【编辑】、【追加合作方档案】、【冻结】 | 与列表行操作一致；点击【冻结】先 G02 前置校验 | 补验成功写审计 |
+| **正常 · 派生待补全** | 【返回】、【验证】（条件）、【补全资料】、【追加】、【冻结】 | 【补全资料】与【编辑】同路由；冻结同 G02 | 保存后待补全徽章消失 |
+| **正常 · 已验证** | 【返回】、【编辑】、【追加】、【冻结】 | G04c 已锁定核心字段；冻结须录入原因 | 写入审计 |
 | **冻结** | 【返回】、【解冻】 | **不提供** 编辑/补全/验证/追加；直达编辑 URL 拦截；解冻录入原因后即时生效 | 恢复业务准入 |`,
           },
           {
@@ -75,8 +75,8 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
         title: "2. 业务约束与自审禁止",
         items: [
           {
-            label: "分菜单主体冻结与在库在途前置校验 (PA-R01 / PA-R02)",
-            content: "【分菜单主体冻结与在途在库前置校验规则】(PA-R02)：冻结前查在库/在途；命中则精简阻断弹窗。【冻结主体】仅冻结当前菜单主档；6.3 **不提供** 列表/子表 **删除、解除关联、按角色移除**；主列表行操作为方案 A（含条件【验证】，每行最多 3 钮）。",
+            label: "分菜单主体冻结与在库在途前置校验 (G01 / G02)",
+            content: "【分菜单主体冻结与在途在库前置校验规则】(G02)：冻结前查在库/在途；命中则精简阻断弹窗。【冻结主体】仅冻结当前菜单主档；6.3 **不提供** 列表/子表 **删除、解除关联、按角色移除**；主列表行操作为方案 A（含条件【验证】，每行最多 3 钮）。",
           },
           {
             label: "自审禁止规则与不可变证据链",
@@ -133,10 +133,10 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
 | **经办人姓名** | 文本 | 不脱敏 | 仅企业；缺值 inline 待补全 |
 | **经办人身份证号** | 18 位身份证 | 隐藏中间 8 位 | **企业**展示；提货人必填、货主/资方/服务方选填；维护入口为新增/编辑/补全表单；列表与筛选不提供 |
 | **联系电话** | 11 位手机号 | 隐藏中间 4 位 | 业务联系电话；脱敏格式如 138****5678；第 1 行 |
-| **证件地址** | 省市区 + 详细地址 | 完整展示 | 仅展示地址正文；与联系电话同置第 1 行；修改须受【个人货主证件地址变更规则】(PA-R06a) 约束 |
+| **证件地址** | 省市区 + 详细地址 | 完整展示 | 仅展示地址正文；与联系电话同置第 1 行；修改须受【个人货主证件地址变更规则】(G06a) 约束 |
 | **创建来源** | 货主：C端注册 / 人工建档；提货人/资金方/服务方：仅人工建档 | 文本展示 | 列表不提供筛选；记录首次写入平台的渠道归类；同置第 2 行 |
 | **创建人** | 文本 | 不脱敏 | 首次建档经办人真实姓名；C端注册记录为「系统」；同置第 2 行 |
-| **创建时间** | YYYY-MM-DD HH:mm:ss | 不脱敏 | 首次建档时间戳；遵循【默认排序与状态优先级规则】(PA-R11)；同置第 2 行 |
+| **创建时间** | YYYY-MM-DD HH:mm:ss | 不脱敏 | 首次建档时间戳；遵循【默认排序与状态优先级规则】(G11)；同置第 2 行 |
 | **更新人** | 文本（附带所属机构） | 不脱敏 | 展示格式为「姓名（所属机构）」，例如：张工（江苏森云仓储监管有限公司）；同置第 3 行 |
 | **更新时间** | YYYY-MM-DD HH:mm:ss | 不脱敏 | 最近一次修改生效时间；无变更显示 ——；同置第 3 行 |`,
           },
@@ -150,7 +150,7 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
     number: 5,
     kind: "字段",
     title: "其他合作档案 · 跨菜单关联只读",
-    content: "展示经【追加合作方档案角色】建立的其他子菜单关联；子表行操作仅【查看详情】。**6.3 不提供解除关联/删除**（【跨菜单关联只读与不解除规则】(PA-R05)）。**无**业务角色子表冻结/移除。",
+    content: "展示经【追加合作方档案角色】建立的其他子菜单关联；子表行操作仅【查看详情】。**6.3 不提供解除关联/删除**（【跨菜单关联只读与不解除规则】(G05)）。**无**业务角色子表冻结/移除。",
     details: [
       {
         title: "1. 关联合作档案字段字典",
@@ -165,7 +165,7 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
 | **主体名称** | 文本 | 不脱敏 | 对方主档名称 |
 | **主体状态** | 正常 / 冻结 | 徽章 | 对方 **本菜单域** 主体状态 |
 | **待补全派生** | 布尔派生 | 辅助徽章 | **货主/提货人** 04-x 必填未齐时展示；详情横幅走 \`partnerPendingCompletionUserBanner\`；缺口字段行内 amber 提示（\`partnerFieldPendingInlineHint\`） |
-| **行操作** | 链接 | 仅 **查看详情** | **不提供** 解除关联/删除（PA-R05）；**不提供** 冻结对方单条角色 |`,
+| **行操作** | 链接 | 仅 **查看详情** | **不提供** 解除关联/删除（G05）；**不提供** 冻结对方单条角色 |`,
           },
         ],
       },
@@ -173,12 +173,12 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
         title: "2. 追加关联（只读、不可解除）",
         items: [
           {
-            label: "行追加多选原子 (PA-R03a)",
+            label: "行追加多选原子 (G03a)",
             content:
-              "页头【追加合作方档案】（PC）与列表行【追加】：多选 **≥1** 目标 → 预检计划 → **一次**「确认一并追加」→ 单事务提交 → 成功/失败分项弹窗；**禁止**逐步确认与部分落库。单菜单新建/关联判定仍 **【主体识别与库内匹配总则】(PA-R03)**。",
+              "页头【追加合作方档案】（PC）与列表行【追加】：多选 **≥1** 目标 → 预检计划 → **一次**「确认一并追加」→ 单事务提交 → 成功/失败分项弹窗；**禁止**逐步确认与部分落库。单菜单新建/关联判定仍 **【主体识别与库内匹配总则】(G03)**。",
           },
           {
-            label: "不解除 (PA-R05)",
+            label: "不解除 (G05)",
             content: "6.3 **不提供**【解除关联】按钮与接口；子表仅 Deep link 查看对方主档。",
           },
         ],
@@ -218,13 +218,13 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
     details: [],
   },
   {
-    id: "partner-archive-row-append-pa-r03a",
-    targetId: "partner-archive-row-append-pa-r03a",
+    id: "partner-archive-row-append-g03a",
+    targetId: "partner-archive-row-append-g03a",
     number: 9,
     kind: "规则",
-    title: "页头追加 · 多选原子提交 (PA-R03a)",
+    title: "页头追加 · 多选原子提交 (G03a)",
     content:
-      "PC 详情页头【追加合作方档案】与列表行【追加】共用 PA-R03a 链路；成功刷新 Tab2「其他合作档案」与列表「其他合作档案」条件列。H5 仅在列表卡片 Footer【追加】走同一规则（底部 Sheet）。",
+      "PC 详情页头【追加合作方档案】与列表行【追加】共用 G03a 链路；成功刷新 Tab2「其他合作档案」与列表「其他合作档案」条件列。H5 仅在列表卡片 Footer【追加】走同一规则（底部 Sheet）。",
     details: [
       {
         title: "交互与线框",
@@ -236,7 +236,7 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
           },
           {
             label: "冻结态",
-            content: "主体冻结时页头与列表 **均不展示**【追加】；与 PA-P02 矩阵一致。",
+            content: "主体冻结时页头与列表 **均不展示**【追加】；与 GP02 矩阵一致。",
           },
         ],
       },
@@ -247,16 +247,16 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
     targetId: "partner-archive-detail-logs",
     number: 8,
     kind: "字段",
-    title: "操作审计日志 · 不可变审计时间轴 (PA-R07)",
+    title: "操作审计日志 · 不可变审计时间轴 (G07)",
     content:
       "本 Tab 只记录主档 **增、改、冻、解**（6.3 无删档）。**不含** 单据审批、快照固化。徽章仅四词：**创建/修改/冻结/解冻** 合作方档案（或冻结/解冻主体）。拼法：先定动作 → 再选 §2 组合句。",
     details: [
       {
-        title: "1. 记什么 (PA-R07 · 本 Tab 范围)",
+        title: "1. 记什么 (G07 · 本 Tab 范围)",
         items: [
           {
             label: "记 / 不记",
-            content: `- **记**：创建主档；修改且有字段变更；冻结/解冻成功\n- **不记**：无变更保存、校验失败、取消\n- **不在本 Tab 展示**：仅单据快照、主档未改（PA-R07 · Tab 展示范围，归业务单据侧）`,
+            content: `- **记**：创建主档；修改且有字段变更；冻结/解冻成功\n- **不记**：无变更保存、校验失败、取消\n- **不在本 Tab 展示**：仅单据快照、主档未改（G07 · Tab 展示范围，归业务单据侧）`,
           },
         ],
       },
@@ -286,7 +286,7 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
 | M01 | 变更字段为【新】（原：旧） |
 | M02 | 联系手机短信核验通过 |
 | M03 | 待补全首次补地址 |
-| M04 | 变更证件登记地址（新/旧），含个人货主 PA-R06a 改址 |`,
+| M04 | 变更证件登记地址（新/旧），含个人货主 G06a 改址 |`,
           },
           {
             label: "冻解 S",

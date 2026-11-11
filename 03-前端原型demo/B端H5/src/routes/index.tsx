@@ -118,6 +118,36 @@ export function AppRoutes() {
 
       {/* 4. 机构与权限 */}
       <Route path="/m/profile" element={<ProfilePage />} />
+      <Route
+        path="/m/profile/authorization"
+        element={
+          <PrototypeEmptyPage
+            title="授权管理"
+            backTo="/m/profile"
+            description="查看本账号的功能权限、数据权限与管辖仓库授权范围。"
+          />
+        }
+      />
+      <Route
+        path="/m/profile/phone"
+        element={
+          <PrototypeEmptyPage
+            title="手机号"
+            backTo="/m/profile"
+            description="绑定手机号用于登录验证与安全通知；变更须通过原手机号或机构管理员核验。"
+          />
+        }
+      />
+      <Route
+        path="/m/profile/privacy"
+        element={
+          <PrototypeEmptyPage
+            title="隐私协议"
+            backTo="/m/profile"
+            description="平台个人信息与业务数据处理的合规告知与用户授权条款。"
+          />
+        }
+      />
 
       {/* 5. 通用二级模块/Tab 原型落地承接 */}
       <Route path="/m/my-applies" element={<MyApplyRecordsPage />} />

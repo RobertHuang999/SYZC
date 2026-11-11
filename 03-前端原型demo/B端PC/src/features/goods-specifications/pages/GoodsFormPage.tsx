@@ -305,7 +305,7 @@ export function GoodsFormPage() {
       }
     }
 
-    // 【货品SKU唯一性校验规则】(SKU-F01)：同一品类下规格组合+计量不可重复
+    // 【货品SKU唯一性校验规则】(K01)：同一品类下规格组合+计量不可重复
     const taken = isSkuCombinationTaken(
       selectedSubcategoryId,
       specValues,
@@ -506,7 +506,7 @@ export function GoodsFormPage() {
                     </Select>
                   </div>
 
-                  {/* 计量参数 · 与单位同为手动录入（SKU-F02 分离维护） */}
+                  {/* 计量参数 · 与单位同为手动录入（K02 分离维护） */}
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-foreground">
                       <span className="text-destructive mr-1">*</span>计量参数:

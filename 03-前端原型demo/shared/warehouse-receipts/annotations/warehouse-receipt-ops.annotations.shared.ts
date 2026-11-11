@@ -7,12 +7,12 @@ export const warehouseReceiptOpsAnnotationsShared: SharedPrototypeAnnotation[] =
     targetId: "receipt-ops-outbound",
     number: 1,
     kind: "规则",
-    title: "仓单出库提货保底拦截（R-DWR-07）",
+    title: "仓单出库提货保底拦截（R07）",
     content:
       "出库只允许部分提取，必须至少保留一组货物；勾选全部货物时强阻断并提示「仓单提货仅支持部分提取，若您需要提取仓单内所有货物，请发起仓单注销流程！」。",
     documentRefs: {
       fields: { section: "五、操作字段子清单索引", match: "02 仓单出库字段清单" },
-      rules: { section: "2. 规则详细规格", match: "R-DWR-07" },
+      rules: { section: "2. 规则详细规格", match: "R07" },
       prd: { section: "场景 2【部分提货与全部提货强拦截】(S02)", match: "全选" },
     },
     details: [
@@ -42,12 +42,12 @@ export const warehouseReceiptOpsAnnotationsShared: SharedPrototypeAnnotation[] =
     targetId: "receipt-ops-relocate",
     number: 2,
     kind: "规则",
-    title: "仓单移库同仓物理转移（R-DWR-08）",
+    title: "仓单移库同仓物理转移（R08）",
     content:
       "移库仅在当前仓单所属实体仓库内调整库位，严禁跨仓库；目标位置按「库房 → 分区 → 具体垛位」级联选择。",
     documentRefs: {
       fields: { section: "五、操作字段子清单索引", match: "03 仓单移库字段清单" },
-      rules: { section: "2. 规则详细规格", match: "R-DWR-08" },
+      rules: { section: "2. 规则详细规格", match: "R08" },
     },
     details: [
       {
@@ -74,12 +74,12 @@ export const warehouseReceiptOpsAnnotationsShared: SharedPrototypeAnnotation[] =
     targetId: "receipt-ops-replenish",
     number: 3,
     kind: "规则",
-    title: "仓单补货：追加同仓同货主可用库存（R-DWR-09）",
+    title: "仓单补货：追加同仓同货主可用库存（R09）",
     content:
       "只能选择「货主 = 当前存货人、仓库 = 当前仓单仓库、状态 = 存货中、可用数量 > 0」的普通库存，录入本次补货数量后并入仓单。",
     documentRefs: {
       fields: { section: "五、操作字段子清单索引", match: "04 仓单补货字段清单" },
-      rules: { section: "2. 规则详细规格", match: "R-DWR-09" },
+      rules: { section: "2. 规则详细规格", match: "R09" },
     },
     details: [
       {
@@ -103,12 +103,12 @@ export const warehouseReceiptOpsAnnotationsShared: SharedPrototypeAnnotation[] =
     targetId: "receipt-ops-remove",
     number: 4,
     kind: "规则",
-    title: "仓单移除：解绑还原为普通库存（R-DWR-09）",
+    title: "仓单移除：解绑还原为普通库存（R09）",
     content:
       "将仓单内选定的货物批次解绑剔除，支持整批移除或部分数量移除；解绑后货物恢复为【存货中】可用库存，不发生实体出库。",
     documentRefs: {
       fields: { section: "五、操作字段子清单索引", match: "05 仓单移除字段清单" },
-      rules: { section: "2. 规则详细规格", match: "R-DWR-09" },
+      rules: { section: "2. 规则详细规格", match: "R09" },
     },
     details: [
       {
@@ -131,12 +131,12 @@ export const warehouseReceiptOpsAnnotationsShared: SharedPrototypeAnnotation[] =
     targetId: "receipt-ops-cancel",
     number: 5,
     kind: "规则",
-    title: "仓单注销多重确认与效力终止（R-DWR-11）",
+    title: "仓单注销多重确认与效力终止（R11）",
     content:
       "注销按「重要提醒（倒计时阅读）→ 二次确认弹窗 → 电子签章人脸 → 审批流」执行；审批通过后仓单彻底作废，所有业务均不可再选中。",
     documentRefs: {
       fields: { section: "五、操作字段子清单索引", match: "07 仓单注销字段清单" },
-      rules: { section: "2. 规则详细规格", match: "R-DWR-11" },
+      rules: { section: "2. 规则详细规格", match: "R11" },
       prd: { section: "场景 5【仓单注销签署与不可逆作废】(S05)", match: "重要提醒" },
     },
     details: [
@@ -166,12 +166,12 @@ export const warehouseReceiptOpsAnnotationsShared: SharedPrototypeAnnotation[] =
     targetId: "receipt-ops-inbound",
     number: 6,
     kind: "规则",
-    title: "仓单入库关联单号自动锁定（R-DWR-10）",
+    title: "仓单入库关联单号自动锁定（R10）",
     content:
       "从仓单条目发起入库时，入库类型自动锁定为「仓单入库」、关联单号锁定为当前 CD 编号，两项均置灰不可修改；入库审批通过后新批次自动并入该仓单。",
     documentRefs: {
       fields: { section: "五、操作字段子清单索引", match: "06 仓单入库字段清单" },
-      rules: { section: "2. 规则详细规格", match: "R-DWR-10" },
+      rules: { section: "2. 规则详细规格", match: "R10" },
     },
     details: [
       {

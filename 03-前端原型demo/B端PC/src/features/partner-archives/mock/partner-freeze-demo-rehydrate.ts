@@ -6,7 +6,7 @@ import {
   MOCK_SERVICE_FREEZE_BLOCKING_DOCS,
 } from "./partner-freeze-blocking-mock-docs"
 
-/** 【分菜单主体冻结与在途在库前置校验规则】(PA-R02) · 原型可复现阻断的主体 ID */
+/** 【分菜单主体冻结与在途在库前置校验规则】(G02) · 原型可复现阻断的主体 ID */
 export const PARTNER_FREEZE_BLOCKING_DEMO_IDS = [
   "p-01",
   "p-05",
@@ -24,7 +24,7 @@ const BLOCKING_DOCS_BY_PARTNER_ID: Record<string, PartnerSubject["associatedDocs
   "p-10": MOCK_SERVICE_FREEZE_BLOCKING_DOCS,
 }
 
-/** 运行时若 associatedDocs 被清空，读档时补回 PA-R02 演示单据 */
+/** 运行时若 associatedDocs 被清空，读档时补回 G02 演示单据 */
 export function withPartnerFreezeDemoData(partner: PartnerSubject): PartnerSubject {
   if (partner.status !== "NORMAL") {
     return partner

@@ -95,7 +95,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     buttons: ["查看页面", "详情", "开立申请", "仓单拆分", "仓单注销"],
     dataPermission: "1、开立申请可选仓库为账号权限内仓库；2、可见数据为账号赋予的仓库权限决定",
     remark: "支持物权全链条追溯",
-    iconType: "FileText",
+    iconType: "FileBadge",
     customRoute: "/m/workspace/warehouse-receipts",
   },
   {
@@ -119,7 +119,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     description: "连接实物与金融的桥梁。固化区块链上链哈希、存证报告与货物原始核验凭证。",
     buttons: ["查看页面", "存证报告", "原文件", "货物详情", "导出"],
     dataPermission: "可见数据根据当前登录账号的角色的仓库权限决定",
-    iconType: "ShieldCheck",
+    iconType: "FileCheck2",
   },
   {
     id: "ws-inbound-mgr",
@@ -305,6 +305,17 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "仓库权限决定",
     iconType: "ListOrdered",
   },
+  {
+    id: "ws-stock-flow",
+    primaryModule: "工作台",
+    secondaryCategory: "仓储",
+    name: "库存流水",
+    originPath: "货物管理～库存流水",
+    description: "记录入出库、移库、转让等引起的库存数量变动流水，支持按时间、仓库、货品追溯。",
+    buttons: ["查看页面", "详情", "按单号检索", "导出流水"],
+    dataPermission: "仓库权限决定",
+    iconType: "History",
+  },
 
   // =================== 2. 工作台 - 融资/监管 ===================
   {
@@ -338,7 +349,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
       "部分解抵质押",
     ],
     dataPermission: "任务发起人及处理人可见；其他人员需对应机构数据权限；盘点限有权限货物",
-    iconType: "BadgePercent",
+    iconType: "ShieldAlert",
     customRoute: "/m/finance/supervision-management",
   },
   {
@@ -412,25 +423,6 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "登录账号数据权限内的数据",
     badge: "优化",
     iconType: "RotateCcw",
-  },
-  {
-    id: "ws-supervision-archive",
-    primaryModule: "工作台",
-    secondaryCategory: "融资/监管",
-    name: "监管档案",
-    originPath: "项目监管～监管档案",
-    description: "一户一档全量档案库，聚合入库/出库/移库单据、仓单、抵押单、质押单、风险公示及资料存证。",
-    buttons: [
-      "查看页面",
-      "新增入出移库",
-      "仓单/抵押/质押单开立与维护",
-      "设备预警",
-      "订单预警",
-      "资料管理",
-      "风险公示/批量公示",
-    ],
-    dataPermission: "登录账号机构与仓库权限决定",
-    iconType: "Archive",
   },
 
   // =================== 2. 工作台 - 交易 ===================
@@ -606,6 +598,25 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     customRoute: "/m/workspace/user-center/partner-archives/service-provider",
     badge: "新",
   },
+  {
+    id: "ws-supervision-archive",
+    primaryModule: "工作台",
+    secondaryCategory: "用户中心",
+    name: "监管档案",
+    originPath: "用户中心～监管档案",
+    description: "一户一档全量档案库，聚合入库/出库/移库单据、仓单、抵押单、质押单、风险公示及资料存证。",
+    buttons: [
+      "查看页面",
+      "新增入出移库",
+      "仓单/抵押/质押单开立与维护",
+      "设备预警",
+      "订单预警",
+      "资料管理",
+      "风险公示/批量公示",
+    ],
+    dataPermission: "登录账号机构与仓库权限决定",
+    iconType: "Archive",
+  },
 
   // =================== 2. 工作台 - 配置管理 ===================
   {
@@ -665,7 +676,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     buttons: ["查看页面", "快速审批通过", "驳回", "转交", "报告设置（监管报告类型）"],
     dataPermission: "当前登录账号为当前节点经办人/审批人",
     badge: "核心",
-    iconType: "Clock",
+    iconType: "ClipboardList",
   },
   {
     id: "biz-overview-processed",
@@ -690,6 +701,18 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     iconType: "Send",
   },
   {
+    id: "biz-overview-supervision-entrust",
+    primaryModule: "业务办理",
+    secondaryCategory: "内部审批",
+    name: "监管委托受理",
+    originPath: "审批～监管委托受理",
+    description:
+      "监管服务方受理客户发起的抵押/质押/监管服务开立信息确认任务，与 PC 工作中心「业务管理审批 → 监管委托受理」对齐。",
+    buttons: ["查看详情", "去处理", "审核记录"],
+    dataPermission: "监管委托受理（开立抵质押单审核）主要归属监管服务方处理角色",
+    iconType: "FileSignature",
+  },
+  {
     id: "biz-overview-my-apply",
     primaryModule: "业务办理",
     secondaryCategory: "内部审批",
@@ -699,7 +722,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     buttons: ["查看页面", "查看进度", "催办", "撤销申请"],
     dataPermission: "申请人为当前登录账号",
     customRoute: "/m/my-applies?tab=process",
-    iconType: "FileUser",
+    iconType: "FileText",
   },
   {
     id: "biz-overview-biz-apply",
@@ -710,7 +733,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     description: "本机构及管辖仓库范围内所有业务申请的全局流水总览。",
     buttons: ["查看页面", "全局筛选", "导出数据台账"],
     dataPermission: "登录账号所属机构及管辖数据权限",
-    iconType: "TableProperties",
+    iconType: "FileSpreadsheet",
   },
 
   // =================== 3. 业务办理 - 业务发起 ===================
@@ -808,7 +831,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "机构业务权限",
     remark: "优化页面",
     badge: "优化",
-    iconType: "BadgePercent",
+    iconType: "Lock",
   },
   {
     id: "biz-init-movement-apply",
@@ -821,7 +844,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "账号赋予的仓库权限",
     remark: "优化页面",
     badge: "优化",
-    iconType: "SlidersHorizontal",
+    iconType: "Activity",
   },
   {
     id: "biz-init-stock-taking-apply",
@@ -845,7 +868,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "账号赋予的仓库权限",
     remark: "优化页面",
     badge: "优化",
-    iconType: "Workflow",
+    iconType: "Cpu",
   },
 
   // =================== 3. 业务办理 - 客户需求审批 ===================
@@ -859,7 +882,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     buttons: ["查看页面", "查看详情", "去处理（审核通过/驳回）", "预约车牌与司机核对"],
     dataPermission: "可见数据根据当前登录账号的角色的仓库权限决定",
     badge: "已升级",
-    iconType: "CalendarArrowDown",
+    iconType: "ArrowDownToLine",
   },
   {
     id: "biz-approve-customer-outbound-appoint",
@@ -871,13 +894,13 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     buttons: ["查看页面", "查看详情", "去处理（审批核验/驳回）", "校验解押凭证"],
     dataPermission: "可见数据根据当前登录账号的角色的仓库权限决定",
     badge: "已升级",
-    iconType: "CalendarArrowUp",
+    iconType: "ArrowUpFromLine",
   },
   {
     id: "biz-approve-customer-finance-leads",
     primaryModule: "业务办理",
     secondaryCategory: "客户需求审批",
-    name: "客户融资需求线索",
+    name: "客户融资需求",
     originPath: "项目监管-审批-客户融资需求",
     description: "审核客户提交的融资线索与尽调申请，核对底层资产合规性与资信状况，流转至授信放款环节。",
     buttons: [
@@ -888,19 +911,19 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
       "审核记录",
     ],
     dataPermission: "有融资申请审核权限账号可见所有；根据具体任务操作权限决定",
-    iconType: "UserPlus",
+    iconType: "HandCoins",
   },
   {
     id: "biz-approve-due-diligence-sso",
     primaryModule: "业务办理",
     secondaryCategory: "客户需求审批",
-    name: "尽调办理",
+    name: "融资尽调",
     originPath: "联登智风控",
     description: "审核客户提交的融资线索与尽调申请，快捷单点登录跳转至智风控平台任务列表页面完成深层风控评级。",
     buttons: ["快捷跳转至智风控", "查看联登状态", "同步尽调结论"],
     dataPermission: "仅作为联登智风控入口，联登成功后跳转到智风控平台",
     badge: "联登智风控",
-    iconType: "ExternalLink",
+    iconType: "SearchCheck",
   },
   {
     id: "biz-approve-customer-sales-req",
@@ -935,7 +958,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     description: "多级会签审核运营人员发布的行业政策、行情预报及合规通报内容。",
     buttons: ["查看页面", "预览", "去处理（发布/驳回）", "审核记录"],
     dataPermission: "有菜单权限账号可见所有；操作权限依据审核状态决定",
-    iconType: "FileCheck2",
+    iconType: "Newspaper",
   },
   {
     id: "biz-approve-unlock-apply",
@@ -948,7 +971,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "须为 eligible 审批人且具备门禁仓库数据权限；列表按租户与仓库过滤",
     customRoute: "/m/approval/unlock-applies",
     badge: "已实现",
-    iconType: "Lock",
+    iconType: "KeyRound",
   },
   {
     id: "biz-approve-in-loan-risk-sso",
