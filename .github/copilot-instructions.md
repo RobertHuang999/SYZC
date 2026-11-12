@@ -4,8 +4,9 @@ All project guidelines, business architecture rules, prototype annotation standa
 
 ## Key Rules for AI:
 1. **Source of Truth**: Always refer to `AGENTS.md` for business logic, RBAC security, and prototype annotation standards.
-2. **Page Layout (before coding)**:
-   - Read `03-前端原型demo/原型页面布局速查.md` and `AGENTS.md` **4.1.1**; normative specs in `样式规范- PC端/` and `样式规范- H5端/`.
+2. **Page Layout (before / after coding)**:
+   - Before: `03-前端原型demo/原型页面布局速查.md` 第 5 节 + `AGENTS.md` **4.1.1**; normative specs in `样式规范- PC端/` and `样式规范- H5端/`.
+   - Before delivery: self-check 速查第 6 节 + `AGENTS.md` **4.1.5** (fix violations before reporting done).
 3. **Annotation Benchmark (PC & H5)**:
    - Follow `AGENTS.md` **4.2** for `PrototypeDocument` 三件套 (`prd`, `fields`, `rules`) and Mermaid page-level annotations.
    - Page-level annotation MUST include Mermaid diagrams (`flowchart` or `stateDiagram-v2`).

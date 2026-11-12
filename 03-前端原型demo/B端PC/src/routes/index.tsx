@@ -86,6 +86,12 @@ import { InventoryDetailsDetailPage } from "@/features/inventory-details/pages/I
 import { InventoryTransactionsListPage } from "@/features/inventory-transactions/pages/InventoryTransactionsListPage"
 import { SupervisionHandlingPartnerRefPage } from "@/features/supervision-handling/pages/SupervisionHandlingPartnerRefPage"
 import { SupervisionManagementListPage } from "@/features/supervision-management/pages/SupervisionManagementListPage"
+import { CustomerFinancingLeadsListPage } from "@/features/customer-financing-leads/pages/CustomerFinancingLeadsListPage"
+import { CustomerFinancingLeadDetailPage } from "@/features/customer-financing-leads/pages/CustomerFinancingLeadDetailPage"
+import { CustomerFinancingDueDiligenceListPage } from "@/features/customer-financing-due-diligence/pages/CustomerFinancingDueDiligenceListPage"
+import { CustomerFinancingDueDiligenceDetailPage } from "@/features/customer-financing-due-diligence/pages/CustomerFinancingDueDiligenceDetailPage"
+import { CustomerFinancingCreditListPage } from "@/features/customer-financing-credit/pages/CustomerFinancingCreditListPage"
+import { CustomerFinancingCreditDetailPage } from "@/features/customer-financing-credit/pages/CustomerFinancingCreditDetailPage"
 import { InboundStagingPrototypeGate } from "@/features/inbound-staging-reg/components/InboundStagingPrototypeGate"
 import { InboundStagingListPage } from "@/features/inbound-staging-reg/pages/InboundStagingListPage"
 import { InboundStagingFormPage } from "@/features/inbound-staging-reg/pages/InboundStagingFormPage"
@@ -600,6 +606,36 @@ export function AppRoutes() {
         <Route
           path="融资/监管/监管业务/抵质押业务管理"
           element={<Navigate to="/融资/监管/监管业务/监管管理" replace />}
+        />
+
+        {/* 融资监管 · 客户融资需求线索 */}
+        <Route
+          path="融资/监管/融资管理/客户融资需求线索"
+          element={<CustomerFinancingLeadsListPage />}
+        />
+        <Route
+          path="融资/监管/融资管理/客户融资需求线索/详情/:id"
+          element={<CustomerFinancingLeadDetailPage />}
+        />
+
+        {/* 融资监管 · 客户融资尽调办理 */}
+        <Route
+          path="融资/监管/融资管理/客户融资尽调办理"
+          element={<CustomerFinancingDueDiligenceListPage />}
+        />
+        <Route
+          path="融资/监管/融资管理/客户融资尽调办理/详情/:id"
+          element={<CustomerFinancingDueDiligenceDetailPage />}
+        />
+
+        {/* 融资监管 · 客户融资授信办理 */}
+        <Route
+          path="融资/监管/融资管理/客户融资授信办理"
+          element={<CustomerFinancingCreditListPage />}
+        />
+        <Route
+          path="融资/监管/融资管理/客户融资授信办理/详情/:id"
+          element={<CustomerFinancingCreditDetailPage />}
         />
 
         {/* 融资监管 · 监管办理（6.3 合作方权人/质权人引用切片） */}
