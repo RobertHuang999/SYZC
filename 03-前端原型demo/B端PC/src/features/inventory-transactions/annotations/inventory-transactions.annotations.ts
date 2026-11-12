@@ -56,9 +56,9 @@ const inventoryTransactionsBaseAnnotations: PrototypeAnnotation[] = [
     id: "tx-pdf-preview",
     number: 5,
     kind: "交互",
-    title: "单据凭证 PDF 预览与交付",
+    title: "行操作【单据下载】与【下载记录】复用出入库凭证",
     content:
-      "行操作点击【凭证下载/PDF】调出高清晰电子凭证模态框，支持直接在线验真预览与安全打印下载。",
+      "行操作【单据下载】【下载记录】与入库记录、出库记录完全同一套：入库流向打开入库多介质凭证预览（A4 / A5 / 针式连续纸），出库流向打开出库多介质凭证预览（单价货值留空）；【下载记录】打开存货管理同款导出记录弹窗（文件名/操作人/时间/状态/下载，异步生成后行内下载）。",
     documentRefs: {
       rules: { section: "4.4 行操作三重凭证与穿透追溯规则", match: "单据PDF下载" },
     },

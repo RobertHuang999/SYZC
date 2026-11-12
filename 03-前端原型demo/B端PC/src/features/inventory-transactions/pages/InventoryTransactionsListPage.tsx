@@ -12,11 +12,24 @@ import { inventoryTransactionsAnnotations } from "../annotations/inventory-trans
 import { InventoryTransactionStatsBar } from "../components/InventoryTransactionStatsBar"
 import { InventoryTransactionFiltersPanel } from "../components/InventoryTransactionFiltersPanel"
 import { InventoryTransactionsTable } from "../components/InventoryTransactionsTable"
-import { TransactionPdfViewerDialog } from "../components/TransactionPdfViewerDialog"
+import { InboundReceiptPdfDialog } from "@/features/inbound-records/components/InboundReceiptPdfDialog"
+import { OutboundPdfDialog } from "@/features/outbound-records/components/OutboundPdfDialog"
 import { ExportRecordsDialog } from "@/features/inventory-management/components/ExportRecordsDialog"
 import { InventoryCrossExportDialog } from "@/features/shared/inventory-cross-export/InventoryCrossExportDialog"
 import { useInventoryExportRecords } from "@/features/shared/inventory-cross-export/useInventoryExportRecords"
 import { INVENTORY_CROSS_EXPORT_USER_TOAST } from "@/features/shared/inventory-cross-export/inventory-cross-export-ui-labels"
+import type { ExportRecordItem } from "@/features/inventory-management/domain/types"
+import {
+  createDocumentExportRecord,
+  DEFAULT_INBOUND_EXPORT_RECORDS,
+  DEFAULT_OUTBOUND_EXPORT_RECORDS,
+} from "@/features/shared/document-export-records"
+import type { InboundRecord } from "@/features/inbound-records/domain/types"
+import type { OutboundRecord } from "@/features/outbound-records/domain/types"
+import {
+  resolveInboundRecordFromTransaction,
+  resolveOutboundRecordFromTransaction,
+} from "../lib/resolve-source-record"
 import {
   SHARED_INVENTORY_TRANSACTIONS,
   SHARED_OWNERS,
@@ -81,9 +94,15 @@ function inDateRange(value: string | undefined, start: string, end: string) {
 
 export const InventoryTransactionsListPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [pdfModalRecord, setPdfModalRecord] = useState<InventoryTransactionRecord | null>(null)
+  const [inboundPdfTarget, setInboundPdfTarget] = useState<InboundRecord | null>(null)
+  const [outboundPdfTarget, setOutboundPdfTarget] = useState<OutboundRecord | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [exportModalOpen, setExportModalOpen] = useState(false)
+  const [documentExportOpen, setDocumentExportOpen] = useState(false)
+  const [documentExportRecords, setDocumentExportRecords] = useState<ExportRecordItem[]>(() => [
+    ...DEFAULT_INBOUND_EXPORT_RECORDS,
+    ...DEFAULT_OUTBOUND_EXPORT_RECORDS,
+  ])
   const [crossExportOpen, setCrossExportOpen] = useState(false)
   const { records: exportRecords } = useInventoryExportRecords()
 
@@ -232,9 +251,45 @@ export const InventoryTransactionsListPage: React.FC = () => {
     setPage(1)
   }
 
+  const showToast = (message: string) => {
+    setToastMessage(message)
+    window.setTimeout(() => setToastMessage(null), 2800)
+  }
+
+  const handleViewPdf = (record: InventoryTransactionRecord) => {
+    if (record.direction === "IN") {
+      setOutboundPdfTarget(null)
+      setInboundPdfTarget(resolveInboundRecordFromTransaction(record))
+      return
+    }
+    setInboundPdfTarget(null)
+    setOutboundPdfTarget(resolveOutboundRecordFromTransaction(record))
+  }
+
   const handleExportRecord = (record: InventoryTransactionRecord) => {
-    setToastMessage(`正在导出单据 ${record.businessNo} 的堆放 / 扣减明细…`)
-    setTimeout(() => setToastMessage(null), 3000)
+    const inbound = record.direction === "IN"
+    const inboundSource = inbound ? resolveInboundRecordFromTransaction(record) : null
+    const outboundSource = inbound ? null : resolveOutboundRecordFromTransaction(record)
+    const task = createDocumentExportRecord({
+      kind: inbound ? "入库堆放明细" : "出库扣减明细",
+      orderNo: inboundSource?.orderNo ?? outboundSource?.orderNo ?? record.orderNo,
+      recordCount: inboundSource
+        ? inboundSource.goodsNames.length || 1
+        : outboundSource?.goodsList.length || outboundSource?.categoryCount || 1,
+      creator: inboundSource?.createByName ?? outboundSource?.createdByName,
+      creatorOrg: inboundSource?.createOrgName ?? outboundSource?.createdByOrg,
+      status: "GENERATING",
+    })
+    setDocumentExportRecords((current) => [task, ...current])
+    setDocumentExportOpen(true)
+    showToast(INVENTORY_CROSS_EXPORT_USER_TOAST)
+    window.setTimeout(() => {
+      setDocumentExportRecords((current) =>
+        current.map((row) =>
+          row.id === task.id ? { ...row, status: "SUCCESS", fileSize: "86.4 KB" } : row
+        )
+      )
+    }, 2200)
   }
 
   return (
@@ -313,7 +368,7 @@ export const InventoryTransactionsListPage: React.FC = () => {
               data={currentSlice}
               page={page}
               pageSize={pageSize}
-              onViewPdf={(rec) => setPdfModalRecord(rec)}
+              onViewPdf={handleViewPdf}
               onExportRecord={handleExportRecord}
             />
 
@@ -330,11 +385,22 @@ export const InventoryTransactionsListPage: React.FC = () => {
           </div>
         </PrototypeAnnotationTarget>
 
-        {/* 单据 PDF 预览弹窗 */}
-        <TransactionPdfViewerDialog
-          open={!!pdfModalRecord}
-          onOpenChange={(open) => !open && setPdfModalRecord(null)}
-          record={pdfModalRecord}
+        <InboundReceiptPdfDialog
+          open={inboundPdfTarget !== null}
+          record={inboundPdfTarget}
+          onClose={() => setInboundPdfTarget(null)}
+          onSuccess={showToast}
+        />
+        <OutboundPdfDialog
+          open={outboundPdfTarget !== null}
+          record={outboundPdfTarget}
+          onClose={() => setOutboundPdfTarget(null)}
+          onSuccess={showToast}
+        />
+        <ExportRecordsDialog
+          open={documentExportOpen}
+          onOpenChange={setDocumentExportOpen}
+          records={documentExportRecords}
         />
 
         <PrototypeAnnotationTarget annotationIds={["inv-cross-export-dialog"]}>

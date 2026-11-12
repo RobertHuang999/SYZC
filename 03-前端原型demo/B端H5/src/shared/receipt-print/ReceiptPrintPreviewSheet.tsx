@@ -9,11 +9,11 @@ import {
   RECEIPT_PAPER_OPTIONS,
   RECEIPT_PRINT_USER_HINTS,
   type ReceiptPaperSize,
-} from "@prototype/B端PC/src/shared/receipt-print/receipt-print-ui-labels"
+} from "./receipt-print-ui-labels"
 import {
   RECEIPT_PAPER_PREVIEW_WIDTH,
   ReceiptPaperSheet,
-} from "@prototype/B端PC/src/shared/receipt-print/receipt-print-sheets"
+} from "./receipt-print-sheets"
 import type { H5ReceiptPrintData } from "./build-mobile-receipt-print"
 
 type Props = {

@@ -101,13 +101,17 @@ export const InventoryTransactionsTable: React.FC<InventoryTransactionsTableProp
               {
                 key: "doc",
                 label: "单据下载",
-                title: "下载带章标准 PDF 单据凭证",
+                title:
+                  row.direction === "IN" ? "预览并下载入库凭证" : "预览并下载出库凭证",
                 onClick: () => onViewPdf(row),
               },
               {
                 key: "record",
                 label: "下载记录",
-                title: "导出该单据的底层堆放 / 扣减明细",
+                title:
+                  row.direction === "IN"
+                    ? "查看导出记录并下载堆放明细"
+                    : "查看导出记录并下载出库明细",
                 onClick: () => onExportRecord(row),
               },
             ]

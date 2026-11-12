@@ -3,13 +3,13 @@ import {
   aggregateQuantitiesByUnit,
   formatQuantitiesByUnit,
 } from "@prototype/shared/inbound/inbound-goods-display"
-import { getCurrentTenantPrintIdentity } from "@prototype/B端PC/src/shared/receipt-print/receipt-print-tenant"
+import { getCurrentTenantPrintIdentity } from "./receipt-print-tenant"
 import type {
   InboundReceiptGoodsRow,
   InboundReceiptPrintData,
   OutboundReceiptGoodsRow,
   OutboundReceiptPrintData,
-} from "@prototype/B端PC/src/shared/receipt-print/receipt-print-types"
+} from "./receipt-print-types"
 import type { MobileInboundRecord } from "@/features/inbound-records/domain/types"
 import type { MobileOutboundRecord } from "@/features/outbound-records/domain/types"
 
