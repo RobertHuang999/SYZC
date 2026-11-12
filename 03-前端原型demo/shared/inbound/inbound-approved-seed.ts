@@ -3,6 +3,7 @@
  */
 
 import { formatInboundGoodsSummary } from "./inbound-list-format"
+import { aggregateQuantitiesByUnit, formatQuantitiesByUnit } from "./inbound-goods-display"
 
 export type SeedGoodsLineItem = {
   name: string
@@ -33,8 +34,36 @@ export type InboundApprovedSeed = {
   photoUrls?: string[]
 }
 
-/** 与 PC/H5 原型首屏演示顺序一致：多货品在前，单货品在后 */
+/** 与 PC/H5 原型首屏演示顺序一致：6.4 单据导出与打印标杆样例置顶，多货品在前，单货品在后 */
 export const INBOUND_APPROVED_SEEDS: InboundApprovedSeed[] = [
+  {
+    pcId: "inbound-64-benchmark",
+    mobileId: "m-inbound-64-benchmark",
+    orderNo: "RK202611120005541",
+    ownerName: "无锡江南金属材料制造有限公司",
+    ownerType: "2",
+    ownerIdentifierMasked: "91320200MA2ABC8888",
+    inboundType: "普通入库",
+    inboundDate: "2026-11-12 09:15:00",
+    warehouseName: "江苏无锡锡山保税监管仓",
+    houseName: "1号有色金属标准库, 2号板卷堆场",
+    relatedOrderNo: null,
+    goodsNames: [
+      "有色金属-电解铜-Cu-CATH-1 99.99%",
+      "有色金属-铝锭-Al99.70 AOO",
+      "黑色金属-热轧卷-Q235B 9.5*1500*C",
+    ],
+    goodsLineItems: [
+      { name: "有色金属-电解铜-Cu-CATH-1 99.99%", amount: 65.432, unit: "吨" },
+      { name: "有色金属-铝锭-Al99.70 AOO", amount: 110.0, unit: "吨" },
+      { name: "黑色金属-热轧卷-Q235B 9.5*1500*C", amount: 45.12, unit: "吨" },
+    ],
+    inboundQuantity: 220.552,
+    unit: "吨",
+    creatorDisplay: "王五(江苏无锡锡山保税监管仓)",
+    createdAt: "2026-11-12 09:15:00",
+    remark: "6.4 版本入库单据多介质导出与打印（A4 / A5 / 针式连续纸）标杆验收单据。",
+  },
   {
     pcId: "inbound-2",
     mobileId: "m-inbound-multi",
@@ -80,15 +109,15 @@ export const INBOUND_APPROVED_SEEDS: InboundApprovedSeed[] = [
       "有色金属-电解铜-1号标准",
     ],
     goodsLineItems: [
-      { name: "冻货-牛肉-36个月", amount: 36.5, unit: "吨" },
-      { name: "水果-苹果-新疆红富士-特级", amount: 18, unit: "吨" },
+      { name: "冻货-牛肉-36个月", amount: 182.33, unit: "公斤" },
+      { name: "水果-苹果-新疆红富士-特级", amount: 8500, unit: "公斤" },
       { name: "有色金属-电解铜-1号标准", amount: 31.08, unit: "吨" },
     ],
-    inboundQuantity: 85.58,
+    inboundQuantity: 31.08,
     unit: "吨",
     creatorDisplay: "王监管(华东仓储运营中心)",
     createdAt: "2026-06-01 11:22:18",
-    remark: "同一入库单跨冻货、水果、有色金属三类监管货品。",
+    remark: "同一入库单跨冻货、水果、有色金属三类监管货品；计量单位按货品各行取值，公斤与吨不得混加。",
   },
   {
     pcId: "inbound-19",
@@ -268,6 +297,12 @@ export type MobileInboundSeedView = {
 }
 
 export function approvedSeedToMobileView(seed: InboundApprovedSeed): MobileInboundSeedView {
+  const lineItems =
+    seed.goodsLineItems && seed.goodsLineItems.length > 0
+      ? seed.goodsLineItems
+      : [{ amount: seed.inboundQuantity, unit: seed.unit }]
+  const unitGroups = aggregateQuantitiesByUnit(lineItems)
+  const mixedUnits = unitGroups.length > 1
   return {
     id: seed.mobileId,
     orderNo: seed.orderNo,
@@ -279,8 +314,8 @@ export function approvedSeedToMobileView(seed: InboundApprovedSeed): MobileInbou
     goodsSummary: formatInboundGoodsSummary(seed.goodsNames),
     goodsNames: [...seed.goodsNames],
     goodsKindCount: seed.goodsNames.length > 1 ? seed.goodsNames.length : undefined,
-    quantityLabel: String(seed.inboundQuantity),
-    unit: seed.unit,
+    quantityLabel: mixedUnits ? formatQuantitiesByUnit(lineItems) : String(seed.inboundQuantity),
+    unit: mixedUnits ? "" : seed.unit,
     flowStatus: "APPROVED",
     creatorDisplay: seed.creatorDisplay,
     createdAt: seed.createdAt,

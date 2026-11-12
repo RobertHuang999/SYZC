@@ -16,6 +16,8 @@ export const CREATORS = [
   "黄k(卡皮银行)",
   "张三(森云监管服务有限公司)",
   "王监管(华东仓储运营中心)",
+  "王五(江苏无锡锡山保税监管仓)",
+  "仓库主管-赵六(青白江监管仓)",
 ] as const
 
 export const inboundWarehouseFilterOptions: readonly string[] = ["全部", ...WAREHOUSES]

@@ -13,6 +13,18 @@ import { MOBILE_OUTBOUND_TYPE_OPTIONS, WORKSPACE_ROUTE } from "../domain/constan
 import type { MobileOutboundRecord } from "../domain/types"
 import { mobileOutboundRecordsMock } from "../mock/outbound-records.mock"
 import { H5_FILTER_BAR, H5_LIST_SCROLL, H5_SEARCH_INPUT } from "@/shared/h5-ui-theme"
+import { ReceiptPrintPreviewSheet } from "@/shared/receipt-print/ReceiptPrintPreviewSheet"
+import {
+  buildH5OutboundReceiptPrintData,
+  type H5ReceiptPrintData,
+} from "@/shared/receipt-print/build-mobile-receipt-print"
+import { MobileExportRecordsSheet } from "@/shared/document-export/MobileExportRecordsSheet"
+import {
+  createMobileExportRecord,
+  DEFAULT_OUTBOUND_EXPORT_RECORDS,
+  MOBILE_EXPORT_TOAST,
+  type MobileExportRecordItem,
+} from "@/shared/document-export-records"
 
 const TYPE_OPTIONS: DropdownOption[] = MOBILE_OUTBOUND_TYPE_OPTIONS.map((val) => ({
   label: val === "全部" ? "全部类型" : val,
@@ -54,6 +66,12 @@ export function OutboundRecordListPage() {
   const [createEndDate, setCreateEndDate] = useState("")
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [printOpen, setPrintOpen] = useState(false)
+  const [printData, setPrintData] = useState<H5ReceiptPrintData | null>(null)
+  const [exportOpen, setExportOpen] = useState(false)
+  const [exportRecords, setExportRecords] = useState<MobileExportRecordItem[]>(() => [
+    ...DEFAULT_OUTBOUND_EXPORT_RECORDS,
+  ])
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -96,11 +114,29 @@ export function OutboundRecordListPage() {
   }, [records, keyword, selectedWarehouse, selectedType, selectedStatus, selectedPickup, outboundStartDate, outboundEndDate, createStartDate, createEndDate])
 
   const handleDownload = (kind: "excel" | "pdf", item: MobileOutboundRecord) => {
-    if (kind === "excel") {
-      showToast(`正在导出出库记录台账 Excel（${item.orderNo}）...`)
-    } else {
-      showToast(`正在生成监管仓库出库凭证 PDF（${item.orderNo}）...`)
+    if (kind === "pdf") {
+      setPrintData(buildH5OutboundReceiptPrintData(item))
+      setPrintOpen(true)
+      return
     }
+    const task = createMobileExportRecord({
+      kind: "出库扣减明细",
+      orderNo: item.orderNo,
+      recordCount: item.goodsList.length || item.categoryCount || 1,
+      creator: item.createdByName,
+      creatorOrg: item.createdByOrg,
+      status: "GENERATING",
+    })
+    setExportRecords((current) => [task, ...current])
+    setExportOpen(true)
+    showToast(MOBILE_EXPORT_TOAST)
+    window.setTimeout(() => {
+      setExportRecords((current) =>
+        current.map((row) =>
+          row.id === task.id ? { ...row, status: "SUCCESS", fileSize: "86.4 KB" } : row
+        )
+      )
+    }, 2200)
   }
 
   const resetAllFilters = () => {
@@ -124,7 +160,7 @@ export function OutboundRecordListPage() {
 
   return (
     <MobileShell>
-      <div className="flex min-h-0 flex-1 flex-col bg-[#edf2f8]">
+      <div className="relative flex min-h-0 flex-1 flex-col bg-[#edf2f8]">
         <PrototypeAnnotationTarget annotationIds={["outbound-h5-list"]}>
           <NavBar title="出库管理" backTo={WORKSPACE_ROUTE} />
         </PrototypeAnnotationTarget>
@@ -285,6 +321,18 @@ export function OutboundRecordListPage() {
             {toast}
           </div>
         )}
+
+        <ReceiptPrintPreviewSheet
+          open={printOpen}
+          data={printData}
+          onClose={() => setPrintOpen(false)}
+          onSuccess={showToast}
+        />
+        <MobileExportRecordsSheet
+          open={exportOpen}
+          records={exportRecords}
+          onClose={() => setExportOpen(false)}
+        />
       </div>
     </MobileShell>
   )

@@ -8,7 +8,7 @@ export const inboundH5ListAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "工作台 · 入库管理",
     content:
-      "已通过入库归档台账（对齐现网 store-record）：货主搜索、四筛、未打印二维码开关；卡片含下载记录/单据/详情。流程中单据不在此列表。",
+      "已通过入库归档台账（对齐现网 store-record）：货主搜索、四筛、未打印二维码开关；卡片【单据下载】打开 A4/A5/针式连续纸预览（抬头取当前租户），【下载记录】打开与存货管理一致的导出记录列表。流程中单据不在此列表。",
     documentRefs: {
       prd: { section: "3.1 入库管理列表", match: "仅已通过", element: "text" },
       rules: { section: "【入库管理已通过台账】(P01)", match: "P01", element: "text" },

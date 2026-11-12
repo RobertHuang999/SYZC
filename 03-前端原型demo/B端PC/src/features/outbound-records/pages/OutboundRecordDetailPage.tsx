@@ -12,6 +12,7 @@ import {
   ChevronRight,
   QrCode,
   KeyRound,
+  Download,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -35,6 +36,7 @@ import {
 } from "@prototype/shared/outbound/outbound-record-detail-ui-labels"
 import { outboundRecordDetailAnnotations } from "../annotations/outbound-record-detail.annotations"
 import { ImageViewerModal } from "../components/ImageViewerModal"
+import { OutboundPdfDialog } from "../components/OutboundPdfDialog"
 import { OUTBOUND_RECORD_LIST_PATH } from "../domain/constants"
 import { outboundRecordsMock, OUTBOUND_MODIFY_LOGS } from "../mock/outbound-records.mock"
 import { DeliveryOrderWriteOffDialog } from "@/features/delivery-orders/components/DeliveryOrderWriteOffDialog"
@@ -47,10 +49,11 @@ import type { DeliveryOrderItem } from "@/features/delivery-orders/domain/types"
 import {
   DocumentManagementTabContent,
 } from "@/shared/document-management"
-import { useIterationHighlight } from "@/shared/components/IterationHighlight"
+import { IterationPageTag, useIterationHighlight } from "@/shared/components/IterationHighlight"
 import { DetailField, DetailSection } from "@/shared/components/DetailSection"
 import { DetailPageHeader } from "@/shared/components/DetailPageHeader"
 import { DetailTabShell } from "@/shared/components/DetailTabShell"
+import { formatOutboundRecordQuantity } from "../lib/list-utils"
 
 type DetailTab = "goods" | "pickup" | "audit" | "modify" | "documents"
 
@@ -79,9 +82,10 @@ export function OutboundRecordDetailPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
 
-  // 现场提货核销弹窗
+  // 现场提货核销弹窗与单据下载弹窗
   const [writeOffOpen, setWriteOffOpen] = useState(false)
   const [directConfirmOpen, setDirectConfirmOpen] = useState(false)
+  const [pdfOpen, setPdfOpen] = useState(false)
 
   const isTransferOrAssign =
     record.type === "移库出库" || record.type === "转让出库"
@@ -174,6 +178,13 @@ export function OutboundRecordDetailPage() {
       annotations={outboundRecordDetailAnnotations}
     >
       <div className="space-y-4 p-6 bg-muted/10 min-h-full">
+        <IterationPageTag
+          version="6.4"
+          changeType="新增"
+          title="详情顶部新增【单据下载】按钮，支持 A4 / A5 / 针式连续纸二等分三种排版预览与质押单价货值脱敏"
+          description="提货人明细与货主证号电话明文展示，单价与货物价值保留列头、数值留空脱敏。"
+        />
+
         {/* 顶部标题与操作卡片（对齐 store-apply-info-detail.vue 结构） */}
         <PrototypeAnnotationTarget annotationIds={["outbound-detail-header"]}>
           <DetailPageHeader
@@ -192,27 +203,40 @@ export function OutboundRecordDetailPage() {
               showToast("已复制出库单号至剪贴板")
             }}
             actions={
-              !record.pickCompleted && !isTransferOrAssign ? (
-                <>
+              <div className="flex items-center gap-2">
+                <PrototypeAnnotationTarget annotationIds={["outbound-detail-pdf-export"]}>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-primary/40 text-primary hover:bg-primary/5 text-xs h-8 gap-1 font-medium"
-                    onClick={() => setWriteOffOpen(true)}
+                    className="border-primary/40 text-primary hover:bg-primary/5 text-xs h-8 gap-1.5 font-medium"
+                    onClick={() => setPdfOpen(true)}
                   >
-                    <KeyRound className="size-3.5" />
-                    提货码核销
+                    <Download className="size-3.5" />
+                    单据下载
                   </Button>
-                  <Button
-                    size="sm"
-                    className="bg-primary hover:bg-primary/90 text-xs h-8 gap-1 font-medium"
-                    onClick={() => setDirectConfirmOpen(true)}
-                  >
-                    <Truck className="size-3.5" />
-                    免码直接提货
-                  </Button>
-                </>
-              ) : undefined
+                </PrototypeAnnotationTarget>
+                {!record.pickCompleted && !isTransferOrAssign && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-primary/40 text-primary hover:bg-primary/5 text-xs h-8 gap-1 font-medium"
+                      onClick={() => setWriteOffOpen(true)}
+                    >
+                      <KeyRound className="size-3.5" />
+                      提货码核销
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-primary hover:bg-primary/90 text-xs h-8 gap-1 font-medium"
+                      onClick={() => setDirectConfirmOpen(true)}
+                    >
+                      <Truck className="size-3.5" />
+                      免码直接提货
+                    </Button>
+                  </>
+                )}
+              </div>
             }
           />
 
@@ -238,12 +262,12 @@ export function OutboundRecordDetailPage() {
                   {record.relatedNo && record.relatedNo !== "—" ? (
                     <span className="font-semibold text-primary">{record.relatedNo}</span>
                   ) : (
-                    <span className="text-muted-foreground">——</span>
+                    <span className="text-muted-foreground">—</span>
                   )}
                 </DetailField>
                 <div>
                   <DetailField label="备注信息">
-                    {record.notes || "——"}
+                    {record.notes || "—"}
                   </DetailField>
                 </div>
               </DetailSection>
@@ -280,7 +304,7 @@ export function OutboundRecordDetailPage() {
                 <span>
                   本次出库总量：
                   <strong className="text-foreground text-sm ml-1">
-                    {record.totalAmount.toLocaleString()} {record.amountUnit}
+                    {formatOutboundRecordQuantity(record)}
                   </strong>
                 </span>
               </div>
@@ -839,6 +863,14 @@ export function OutboundRecordDetailPage() {
           order={targetDeliveryOrder}
           onClose={() => setDirectConfirmOpen(false)}
           onSuccess={handleDirectConfirmSuccess}
+        />
+
+        {/* 单据 PDF 预览与下载弹窗（6.4 多介质排版） */}
+        <OutboundPdfDialog
+          open={pdfOpen}
+          record={record}
+          onClose={() => setPdfOpen(false)}
+          onSuccess={showToast}
         />
 
         {/* 提示 Toast */}

@@ -26,21 +26,26 @@ interface OutboundRecordFiltersPanelProps {
 
 const WAREHOUSE_OPTIONS = [
   "全部",
+  "上海宝山一号钢材监管仓",
   "海霸王仓库",
   "生鲜冷链仓库",
   "农产品监管仓库",
+  "干粮仓库",
+  "生鲜仓库",
   "青白江国际陆港监管仓",
 ]
 
 const GOODS_OPTIONS = [
   "全部",
+  "黑色金属-热轧卷-Q235B 5.75*1500*C",
+  "黑色金属-冷轧板-SPCC 1.0*1250*2500",
   "有色金属-电解铜-国标",
   "黑色金属-热轧卷板-Q235",
   "有色金属-铝锭-A00",
   "农产品-白砂糖-一级白砂糖",
 ]
 
-const CREATOR_OPTIONS = ["全部", "lxy", "赵强", "张三", "李四", "王仓管"]
+const CREATOR_OPTIONS = ["全部", "张三", "赵强", "王监管", "系统调度员", "货权结算员"]
 
 export function OutboundRecordFiltersPanel({
   value,

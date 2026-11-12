@@ -26,14 +26,19 @@ type ViewOption = {
 
 const VIEW_OPTIONS: ViewOption[] = [
   {
+    value: "focus64",
+    label: "只看 6.4 变更",
+    desc: "只留 6.4 新增/调整的琥珀框与点位，其余点位收起",
+  },
+  {
     value: "focus63",
     label: "只看 6.3 变更",
-    desc: "只留 6.3 新增/调整的琥珀框与点位，历史沿用收起",
+    desc: "只留 6.3 新增/调整的琥珀框与点位，其余点位收起",
   },
   {
     value: "all",
     label: "全部原型",
-    desc: "琥珀框 + 全部点位，新旧变更一眼对比",
+    desc: "琥珀框 + 全部点位，6.4 / 6.3 与历史点位一眼对比",
   },
   {
     value: "off",
@@ -44,20 +49,20 @@ const VIEW_OPTIONS: ViewOption[] = [
 
 /**
  * 顶栏「版本视图」合并入口：
- * 一个按钮管住三档标注视图，下拉里再带「迭代记录」「功能与数据权限」两个资料页。
+ * 一个按钮管住四档标注视图，下拉里再带「迭代记录」「功能与数据权限」资料页。
  */
 export function VersionViewMenu() {
   const { viewMode, setViewMode } = useIterationHighlight()
   const { pathname } = useLocation()
   const [open, setOpen] = useState(false)
 
-  const current = VIEW_OPTIONS.find((option) => option.value === viewMode) ?? VIEW_OPTIONS[1]
+  const current = VIEW_OPTIONS.find((option) => option.value === viewMode) ?? VIEW_OPTIONS[2]
   const highlightOn = viewMode !== "off"
 
   const onReferencePage = isSystemReferencePath(pathname)
 
   const currentVersionCount = useMemo(() => {
-    const version = iterationVersions[0]?.version ?? "6.3"
+    const version = iterationVersions[0]?.version ?? "6.4"
     return {
       version,
       count: iterationRecords.filter((record) => record.version === version).length,
@@ -90,7 +95,7 @@ export function VersionViewMenu() {
           <span className="flex items-center gap-2 text-[10px] text-[#a9aeb8]">
             <span className="inline-flex items-center gap-1">
               <i className="size-2 rounded-[2px] border border-[#ff9a2e] bg-[#fff3e0]" />
-              6.3 变更
+              6.4 / 6.3 变更
             </span>
             <span className="inline-flex items-center gap-1">
               <i className="size-2 rounded-[2px] border border-[#c9cdd4] bg-white" />

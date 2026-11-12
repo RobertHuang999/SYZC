@@ -15,8 +15,16 @@ import { PrototypeAnnotationTarget } from "@/shared/annotations/PrototypeAnnotat
 import { OUTBOUND_MGR_ROUTE } from "../domain/constants"
 import { mobileOutboundRecordsMock, MOBILE_OUTBOUND_MODIFY_LOGS } from "../mock/outbound-records.mock"
 import { MobileImageModal } from "@/features/inbound-records/components/MobileImageModal"
-import { MobilePdfModal } from "@/features/inbound-records/components/MobilePdfModal"
 import { DocumentManagementTab } from "@/shared/document-management"
+import { ReceiptPrintPreviewSheet } from "@/shared/receipt-print/ReceiptPrintPreviewSheet"
+import { buildH5OutboundReceiptPrintData } from "@/shared/receipt-print/build-mobile-receipt-print"
+import { MobileExportRecordsSheet } from "@/shared/document-export/MobileExportRecordsSheet"
+import {
+  createMobileExportRecord,
+  DEFAULT_OUTBOUND_EXPORT_RECORDS,
+  MOBILE_EXPORT_TOAST,
+  type MobileExportRecordItem,
+} from "@/shared/document-export-records"
 import { parseOutboundRecordDetailTabParam } from "@prototype/shared/outbound/outbound-record-detail-nav"
 import {
   buildOutboundRecordDetailTabEntries,
@@ -55,6 +63,10 @@ export function OutboundRecordDetailPage() {
     initialIndex: 0,
   })
   const [pdfModalOpen, setPdfModalOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
+  const [exportRecords, setExportRecords] = useState<MobileExportRecordItem[]>(() => [
+    ...DEFAULT_OUTBOUND_EXPORT_RECORDS,
+  ])
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text)
@@ -456,22 +468,47 @@ export function OutboundRecordDetailPage() {
       )}
 
       {/* 底部操作固定栏 */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-2.5 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between gap-2 border-t border-gray-200 bg-white px-4 py-2.5 shadow-lg">
         <button
           type="button"
           onClick={() => navigate(OUTBOUND_MGR_ROUTE)}
-          className="rounded-xl border border-gray-200 px-4 py-2 text-xs font-medium text-gray-700 active:bg-gray-50"
+          className="rounded-xl border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 active:bg-gray-50"
         >
           返回台账
         </button>
-
+        <button
+          type="button"
+          onClick={() => {
+            const task = createMobileExportRecord({
+              kind: "出库扣减明细",
+              orderNo: record.orderNo,
+              recordCount: record.goodsList.length || 1,
+              creator: record.createdByName,
+              creatorOrg: record.createdByOrg,
+              status: "GENERATING",
+            })
+            setExportRecords((current) => [task, ...current])
+            setExportOpen(true)
+            showToast(MOBILE_EXPORT_TOAST)
+            window.setTimeout(() => {
+              setExportRecords((current) =>
+                current.map((item) =>
+                  item.id === task.id ? { ...item, status: "SUCCESS", fileSize: "86.4 KB" } : item
+                )
+              )
+            }, 2200)
+          }}
+          className="rounded-xl border border-blue-200 px-3 py-2 text-xs font-medium text-blue-600"
+        >
+          下载记录
+        </button>
         <button
           type="button"
           onClick={() => setPdfModalOpen(true)}
-          className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold text-white shadow-md active:bg-blue-700"
+          className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-md active:bg-blue-700"
         >
           <FileText className="size-3.5" />
-          出库单据凭证
+          单据下载
         </button>
       </div>
 
@@ -485,15 +522,16 @@ export function OutboundRecordDetailPage() {
         }
       />
 
-      {/* 弹窗：PDF 预览 */}
-      <MobilePdfModal
+      <ReceiptPrintPreviewSheet
         open={pdfModalOpen}
-        title="监管仓库出库凭证"
-        fileName={`出库单_${record.orderNo}.pdf`}
-        orderNo={record.orderNo}
-        ownerName={record.ownerName}
-        warehouseName={record.warehouseName}
+        data={buildH5OutboundReceiptPrintData(record)}
         onClose={() => setPdfModalOpen(false)}
+        onSuccess={showToast}
+      />
+      <MobileExportRecordsSheet
+        open={exportOpen}
+        records={exportRecords}
+        onClose={() => setExportOpen(false)}
       />
     </MobileShell>
   )

@@ -3,7 +3,7 @@ import { Sparkles, Info, Eye, EyeOff } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface IterationHighlightContextType {
-  /** 版本视图三档：只看 6.3 变更 / 全部原型 / 还原线上 */
+  /** 版本视图四档：只看 6.4 变更 / 只看 6.3 变更 / 全部原型 / 还原线上 */
   viewMode: IterationViewMode
   setViewMode: (mode: IterationViewMode) => void
   /** 便捷布尔值：viewMode 不为 off 时为 true */
@@ -13,7 +13,7 @@ interface IterationHighlightContextType {
   activeVersion: string
 }
 
-export type IterationViewMode = "focus63" | "all" | "off"
+export type IterationViewMode = "focus64" | "focus63" | "all" | "off"
 
 const IterationHighlightContext = createContext<IterationHighlightContextType>({
   viewMode: "all",
@@ -21,7 +21,7 @@ const IterationHighlightContext = createContext<IterationHighlightContextType>({
   highlightEnabled: true,
   setHighlightEnabled: () => {},
   toggleHighlight: () => {},
-  activeVersion: "6.3",
+  activeVersion: "6.4",
 })
 
 const STORAGE_KEY = "syzc_iteration_view_mode"
@@ -30,7 +30,7 @@ const LEGACY_STORAGE_KEY = "syzc_iteration_highlight_enabled"
 function readInitialViewMode(): IterationViewMode {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved === "focus63" || saved === "all" || saved === "off") {
+    if (saved === "focus64" || saved === "focus63" || saved === "all" || saved === "off") {
       return saved
     }
     const legacy = localStorage.getItem(LEGACY_STORAGE_KEY)
@@ -45,7 +45,7 @@ function readInitialViewMode(): IterationViewMode {
 
 export function IterationHighlightProvider({
   children,
-  defaultVersion = "6.3",
+  defaultVersion = "6.4",
 }: {
   children: ReactNode
   defaultVersion?: string
@@ -89,6 +89,11 @@ const VIEW_MODE_OPTIONS: Array<{
   title: string
 }> = [
   {
+    value: "focus64",
+    label: "只看 6.4 变更",
+    title: "只显示 6.4 新增或调整的琥珀框与改动点位，其余点位收起",
+  },
+  {
     value: "focus63",
     label: "只看 6.3 变更",
     title: "只显示 6.3 新增或调整的琥珀框与改动点位，历史沿用点位收起",
@@ -96,7 +101,7 @@ const VIEW_MODE_OPTIONS: Array<{
   {
     value: "all",
     label: "全部原型",
-    title: "琥珀框与全部点位都显示；6.3 点位为琥珀色，历史沿用点位为浅灰",
+    title: "琥珀框与全部点位都显示；6.4 / 6.3 点位为琥珀色，历史沿用点位为浅灰",
   },
   {
     value: "off",
@@ -199,9 +204,15 @@ export function IterationPageTag({
   description?: string
   className?: string
 }) {
-  const { highlightEnabled } = useIterationHighlight()
+  const { viewMode, highlightEnabled } = useIterationHighlight()
 
-  if (!highlightEnabled) {
+  const isVisible =
+    highlightEnabled &&
+    (viewMode === "all" ||
+      (viewMode === "focus64" && version === "6.4") ||
+      (viewMode === "focus63" && version === "6.3"))
+
+  if (!isVisible) {
     return null
   }
 
@@ -250,9 +261,15 @@ export function IterationHighlight({
   className,
   badgePosition = "top-left",
 }: IterationHighlightProps) {
-  const { highlightEnabled } = useIterationHighlight()
+  const { viewMode, highlightEnabled } = useIterationHighlight()
 
-  if (!highlightEnabled) {
+  const isVisible =
+    highlightEnabled &&
+    (viewMode === "all" ||
+      (viewMode === "focus64" && version === "6.4") ||
+      (viewMode === "focus63" && version === "6.3"))
+
+  if (!isVisible) {
     return <>{children}</>
   }
 

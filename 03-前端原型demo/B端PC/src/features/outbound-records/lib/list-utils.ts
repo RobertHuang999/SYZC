@@ -1,3 +1,4 @@
+import { formatQuantitiesByUnit } from "@prototype/shared/inbound/inbound-goods-display"
 import type { OutboundRecord, OutboundRecordFilters } from "../domain/types"
 
 export function filterOutboundRecords(
@@ -30,7 +31,7 @@ export function filterOutboundRecords(
       return false
     }
 
-    if (filters.goodsName.trim()) {
+    if (filters.goodsName.trim() && filters.goodsName !== "全部") {
       const q = filters.goodsName.trim()
       const matchGoods =
         item.goodsSummary.includes(q) ||
@@ -81,6 +82,18 @@ export function paginateOutboundRecords(
 
 export function formatOutboundQuantity(amount: number, unit = "吨"): string {
   return `${amount.toLocaleString("zh-CN", { maximumFractionDigits: 3 })} ${unit}`
+}
+
+export function formatOutboundRecordQuantity(record: OutboundRecord): string {
+  if (record.goodsList && record.goodsList.length > 0) {
+    return formatQuantitiesByUnit(
+      record.goodsList.map((item) => ({
+        amount: item.totalOutboundAmount,
+        unit: item.unit || record.amountUnit,
+      }))
+    )
+  }
+  return formatOutboundQuantity(record.totalAmount, record.amountUnit)
 }
 
 export function formatGoodsNamesForList(names: string[]): string {

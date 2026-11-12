@@ -14,8 +14,11 @@ const GOODS_SPEC_LINES = [
   "水果-苹果-新疆红富士-特级",
   "水果-香蕉-海南",
   "有色金属-电解铜-1号标准",
+  "有色金属-电解铜-Cu-CATH-1 99.99%",
+  "有色金属-铝锭-Al99.70 AOO",
   "钢材-热轧卷板-Q235B-3.0mm",
   "钢材-冷轧卷板-SPCC-1.0mm",
+  "黑色金属-热轧卷-Q235B 9.5*1500*C",
   "有色金属-铝锭-ADC12",
   "橡胶-天然橡胶-20号标胶",
   "化工-聚乙烯-LLDPE-7042",
@@ -83,6 +86,21 @@ export const INBOUND_WAREHOUSE_STOREROOM_TREE: WarehouseStoreroomNode[] = [
     id: "wh-gl",
     name: "干粮仓库",
     storerooms: [{ id: "sr-gl-1", name: "干粮主库", fullKey: "干粮仓库|干粮主库" }],
+  },
+  {
+    id: "wh-wx-xs",
+    name: "江苏无锡锡山保税监管仓",
+    storerooms: [
+      { id: "sr-wx-xs-1", name: "1号有色金属标准库", fullKey: "江苏无锡锡山保税监管仓|1号有色金属标准库" },
+      { id: "sr-wx-xs-2", name: "2号板卷堆场", fullKey: "江苏无锡锡山保税监管仓|2号板卷堆场" },
+    ],
+  },
+  {
+    id: "wh-qbj",
+    name: "青白江大宗商品监管1号仓",
+    storerooms: [
+      { id: "sr-qbj-1", name: "默认库房", fullKey: "青白江大宗商品监管1号仓|默认库房" },
+    ],
   },
 ]
 

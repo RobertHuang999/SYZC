@@ -41,7 +41,7 @@ export const DEFAULT_OUTBOUND_RECORD_FILTERS: OutboundRecordFilters = {
   ownerKeyword: "",
   type: "全部",
   warehouseName: "全部",
-  goodsName: "",
+  goodsName: "全部",
   createdBy: "全部",
   createStartDate: "",
   createEndDate: "",

@@ -63,8 +63,8 @@ export type PrototypeAnnotation = {
   kind: AnnotationKind
   title: string
   content: string
-  /** 打点归属版本：6.3 为本轮改动，未填视为历史沿用（6.2 及更早） */
-  version?: "6.3" | "6.2"
+  /** 打点归属版本：6.4 / 6.3 为对应版本改动，未填视为历史沿用（6.2 及更早） */
+  version?: "6.4" | "6.3" | "6.2"
   documentRefs?: Partial<Record<DocumentTabKey, DocumentLocator>>
   details?: Array<{
     title: string
@@ -544,9 +544,15 @@ function RightEdgeFoldTab() {
     return null
   }
 
-  const historyCount = context.annotations.filter((item) => item.version !== "6.3").length
-  const focusCount = context.annotations.length - historyCount
-  const badgeCount = viewMode === "focus63" ? focusCount : context.annotations.length
+  const count64 = context.annotations.filter((item) => item.version === "6.4").length
+  const count63 = context.annotations.filter((item) => item.version === "6.3").length
+  const badgeCount =
+    viewMode === "focus64"
+      ? count64
+      : viewMode === "focus63"
+        ? count63
+        : context.annotations.length
+  const hiddenCount = context.annotations.length - badgeCount
 
   return (
     <div
@@ -603,9 +609,11 @@ function RightEdgeFoldTab() {
               : "bg-slate-400 dark:bg-slate-700 text-slate-100"
           )}
           title={
-            viewMode === "focus63" && historyCount > 0
-              ? `当前只看 6.3 变更点位（${focusCount} 处）；另有 ${historyCount} 处历史沿用点位已收起，切到「全部原型」可查看`
-              : undefined
+            viewMode === "focus64" && hiddenCount > 0
+              ? `当前只看 6.4 变更点位（${count64} 处）；另有 ${hiddenCount} 处其他版本点位已收起，切到「全部原型」可查看`
+              : viewMode === "focus63" && hiddenCount > 0
+                ? `当前只看 6.3 变更点位（${count63} 处）；另有 ${hiddenCount} 处其他版本点位已收起，切到「全部原型」可查看`
+                : undefined
           }
         >
           {badgeCount}
@@ -687,9 +695,11 @@ export function PrototypeAnnotationTarget({
     .map((id) => context.annotations.find((annotation) => annotation.id === id))
     .filter((annotation): annotation is PrototypeAnnotation => Boolean(annotation))
   const visibleAnnotations =
-    viewMode === "focus63"
-      ? annotations.filter((annotation) => annotation.version === "6.3")
-      : annotations
+    viewMode === "focus64"
+      ? annotations.filter((annotation) => annotation.version === "6.4")
+      : viewMode === "focus63"
+        ? annotations.filter((annotation) => annotation.version === "6.3")
+        : annotations
   const targetId = annotations[0]?.targetId ?? annotations[0]?.id
   const activeAnnotation = annotations.find(
     (annotation) => annotation.id === context.activePopupAnnotationId
@@ -719,23 +729,29 @@ export function PrototypeAnnotationTarget({
         >
           {visibleAnnotations.map((annotation) => {
             const isPopupOpen = annotation.id === context.activePopupAnnotationId
-            const is63 = annotation.version === "6.3"
+            const isIterChange = annotation.version === "6.4" || annotation.version === "6.3"
+            const versionLabel =
+              annotation.version === "6.4"
+                ? "6.4 改动点"
+                : annotation.version === "6.3"
+                  ? "6.3 改动点"
+                  : "历史沿用点位"
             return (
               <button
                 key={annotation.id}
                 type="button"
                 className={cn(
                   "flex size-6 cursor-pointer items-center justify-center rounded-full border-2 border-white text-xs font-bold text-white shadow-lg transition-all hover:scale-125 focus-visible:outline-none focus-visible:ring-2 active:scale-95",
-                  is63 ? "focus-visible:ring-amber-400" : "focus-visible:ring-slate-300",
+                  isIterChange ? "focus-visible:ring-amber-400" : "focus-visible:ring-slate-300",
                   isPopupOpen
-                    ? is63
+                    ? isIterChange
                       ? "bg-amber-600 ring-4 ring-amber-400/40 scale-110"
                       : "bg-slate-600 ring-4 ring-slate-400/40 scale-110"
-                    : is63
+                    : isIterChange
                       ? "bg-amber-500 hover:bg-amber-600"
                       : "bg-slate-400 hover:bg-slate-500"
                 )}
-                title={`${is63 ? "6.3 改动点" : "历史沿用点位"} #${annotation.number}：${annotation.title}（点击就近弹出查看）`}
+                title={`${versionLabel} #${annotation.number}：${annotation.title}（点击就近弹出查看）`}
                 onClick={(e) => {
                   e.stopPropagation()
                   context.openInPlacePopup(annotation.id)
@@ -1080,7 +1096,11 @@ function InPlaceAnnotationCard({
             {annotation.kind}
           </span>
           <span className="rounded border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300">
-            v6.2.0
+            {annotation.version === "6.4"
+              ? "v6.4.0 · 6.4 变更"
+              : annotation.version === "6.3"
+                ? "v6.3.0 · 6.3 变更"
+                : "v6.2.0 · 历史沿用"}
           </span>
           {targetId && (
             <span className="rounded bg-muted px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
@@ -1229,6 +1249,7 @@ function InPlaceAnnotationCard({
  */
 function AnnotationSidebarDrawer() {
   const context = useAnnotationContext()
+  const { viewMode } = useIterationHighlight()
   const [searchKeyword, setSearchKeyword] = useState("")
 
   // 根据当前上下文解析匹配各个专项文档
@@ -1261,15 +1282,21 @@ function AnnotationSidebarDrawer() {
 
   const filteredAnnotations = useMemo(() => {
     return context.annotations.filter((item) => {
+      const matchVersion =
+        viewMode === "focus64"
+          ? item.version === "6.4"
+          : viewMode === "focus63"
+            ? item.version === "6.3"
+            : true
       const matchKind =
         context.filterKind === "全部" || item.kind === context.filterKind
       const matchKeyword =
         !searchKeyword.trim() ||
         item.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
         item.content.toLowerCase().includes(searchKeyword.toLowerCase())
-      return matchKind && matchKeyword
+      return matchVersion && matchKind && matchKeyword
     })
-  }, [context.annotations, context.filterKind, searchKeyword])
+  }, [context.annotations, context.filterKind, searchKeyword, viewMode])
 
   const [collapsedMap, setCollapsedMap] = useState<Record<string, boolean>>({})
 
@@ -1533,12 +1560,24 @@ function AnnotationSidebarDrawer() {
                     {/* 卡片头部：左侧序号+标题+类型，右侧折叠按钮 */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
-                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-rose-500 text-xs font-bold text-white shadow-sm">
+                        <span
+                          className={cn(
+                            "flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm",
+                            annotation.version === "6.4" || annotation.version === "6.3"
+                              ? "bg-amber-500"
+                              : "bg-slate-500"
+                          )}
+                        >
                           {annotation.number}
                         </span>
                         <h3 className="font-semibold text-xs text-foreground leading-snug">
                           {annotation.title}
                         </h3>
+                        {(annotation.version === "6.4" || annotation.version === "6.3") && (
+                          <span className="rounded border border-amber-300 bg-amber-50 px-1.5 py-0.2 text-[10px] font-semibold text-amber-800 leading-none">
+                            {annotation.version} 变更
+                          </span>
+                        )}
                         <span
                           className={cn(
                             "rounded border px-1.5 py-0.2 text-[10px] leading-none",

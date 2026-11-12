@@ -5,7 +5,7 @@ import { IterationHighlightProvider } from "@/shared/components/IterationHighlig
 function App() {
   return (
     <HashRouter>
-      <IterationHighlightProvider defaultVersion="6.3">
+      <IterationHighlightProvider defaultVersion="6.4">
         <AppRoutes />
       </IterationHighlightProvider>
     </HashRouter>

@@ -115,10 +115,39 @@ export const outboundRecordListAnnotations: PrototypeAnnotation[] = [
     targetId: "outbound-record-row-actions",
     number: 4,
     kind: "交互",
-    title: "2×2 行操作与凭证导出审计（6.3 新增【资料管理】）",
+    version: "6.3",
+    title: "行操作三列排布与资料管理深链",
     content:
-      "四按钮按 2×2 排布：【详情】跳详情页并定位「货物明细」Tab（?tab=goods）；【单据下载】生成正式 PDF 出库凭证；【下载记录】导出 Excel 明细清单（含条码与库存位置）；【资料管理】跳详情页并定位「资料管理」Tab（?tab=documents）。所有下载与查阅行为均受并发令牌控制并写入安全审计日志（O15）。",
+      "操作列一行最多 3 个、最多两行（超过 6 个才收入【更多】）。当前直出【详情】【单据下载】【下载记录】【资料管理】：【详情】跳详情页并定位「货物明细」页签；【单据下载】打开凭证预览弹窗；【下载记录】与库存查询-存货管理【导出记录】同一套弹窗（文件名/操作人/时间/状态/下载，异步生成后行内下载）；【资料管理】跳详情页并定位「资料管理」页签。",
     documentRefs: {
+      prd: {
+        section: "出库记录主列表页",
+        match: "操作列",
+        element: "text",
+      },
+      rules: {
+        section: "【并发控制幂等与操作审计】(O15)",
+        match: "下载记录和下载凭证",
+        element: "text",
+      },
+    },
+    details: [],
+  },
+  {
+    id: "outbound-record-pdf-export",
+    targetId: "outbound-record-row-actions",
+    number: 5,
+    kind: "交互",
+    version: "6.4",
+    title: "多介质【单据下载】与质押单价货值脱敏（REQ-6.4-002 / REQ-6.4-003）",
+    content:
+      "点击行操作【单据下载】呼出多介质打印预览弹窗，支持 A4 纵向完整版（210×297mm）、A5 横向便携版（210×148mm）、针式连续纸二等分版（241×139.5mm）实时切换，单价与货物价值保留列头数值留空脱敏，货主与提货人证件号及电话明文展示。",
+    documentRefs: {
+      prd: {
+        section: "四、 【出库单】三种纸张排版样式规格",
+        match: "出库单 - A4 纵向完整版",
+        element: "heading",
+      },
       rules: {
         section: "【并发控制幂等与操作审计】(O15)",
         match: "下载记录和下载凭证",
@@ -127,11 +156,17 @@ export const outboundRecordListAnnotations: PrototypeAnnotation[] = [
     },
     details: [
       {
-        title: "凭证规范",
+        title: "6.4 出库单据多介质打印与脱敏规则（REQ-6.4-002 / REQ-6.4-003）",
         items: [
           {
-            label: "PDF凭证",
-            content: "包含监管仓库、货主、出库货物明细、提货人信息、双方签字盖章区与电子印章。",
+            label: "出库金额脱敏",
+            content:
+              "质押/抵押等出库涉及敏感货值，打印表格保留【单价】与【货物价值】列头但单元格数值留空，对现场承运司机及门卫脱敏，防止商业价格泄露。",
+          },
+          {
+            label: "明文核验与防断针排版",
+            content:
+              "货主与提货人证件号、联系电话、车牌号明文展示；采用全空白连续纸纯黑实线（1px solid #000），不印条形码/二维码及免责声明，预留仓管、司机、复核/门卫、货权方四方签章框。单据抬头取当前租户系统名称；同一单内货品单位不同时，合计按单位分组展示，禁止混加。",
           },
         ],
       },

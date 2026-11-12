@@ -20,6 +20,7 @@ export const inboundRecordDetailAnnotations: PrototypeAnnotation[] = [
     targetId: "inbound-detail-tabs",
     number: 2,
     kind: "交互",
+    version: "6.3",
     title: "四标签页：货物明细 / 审核记录 / 修改记录 / 资料管理（6.3 新增）",
     content:
       "货物明细支持货品行展开二级库位堆放（Tab 展示货品行数）；审核记录为时间轴；修改记录展示特权纠偏留痕（无数据时空态）；资料管理按流程阶段归档凭证，只有普通入库可后补资料。",
@@ -40,6 +41,24 @@ export const inboundRecordDetailAnnotations: PrototypeAnnotation[] = [
       prd: { section: "6.2", match: "查看附件", element: "text" },
       fields: { section: "设备抓拍图", match: "R18", element: "row" },
       rules: { section: "【物联网摄像头自动抓拍与容错】(R18)", match: "R18", element: "text" },
+    },
+    details: [],
+  },
+  {
+    id: "inbound-detail-pdf-export",
+    targetId: "inbound-detail-pdf-export",
+    number: 4,
+    kind: "交互",
+    version: "6.4",
+    title: "详情顶部【单据下载】与三端介质打印预览（6.4 新增 · REQ-6.4-001）",
+    content:
+      "仅针对状态为【已通过】的正式生效入库单，在详情页右上角操作栏提供【单据下载】按钮。点击弹出居中预览弹窗，支持 A4 纵向完整版、A5 横向便携版、针式连续纸二等分版（241×139.5mm）三种模式即时切换与矢量文件导出。",
+    documentRefs: {
+      prd: {
+        section: "三、 【入库单】三种纸张排版样式规格",
+        match: "入库单 - A4 纵向完整版",
+        element: "heading",
+      },
     },
     details: [],
   },

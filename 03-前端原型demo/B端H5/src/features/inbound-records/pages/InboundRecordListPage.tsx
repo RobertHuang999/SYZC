@@ -20,6 +20,16 @@ import { INBOUND_GOODS_CASCADE_TREE } from "../mock/inbound-goods-cascade.mock"
 import type { MobileInboundRecord } from "../domain/types"
 import { mobileInboundRecordsMock } from "../mock/inbound-records.mock"
 import { H5_FILTER_BAR, H5_LIST_SCROLL } from "@/shared/h5-ui-theme"
+import { ReceiptPrintPreviewSheet } from "@/shared/receipt-print/ReceiptPrintPreviewSheet"
+import { buildH5InboundReceiptPrintData } from "@/shared/receipt-print/build-mobile-receipt-print"
+import type { H5ReceiptPrintData } from "@/shared/receipt-print/build-mobile-receipt-print"
+import { MobileExportRecordsSheet } from "@/shared/document-export/MobileExportRecordsSheet"
+import {
+  createMobileExportRecord,
+  DEFAULT_INBOUND_EXPORT_RECORDS,
+  MOBILE_EXPORT_TOAST,
+  type MobileExportRecordItem,
+} from "@/shared/document-export-records"
 
 const EMPTY_DATE_RANGE: DateRangeDraft = {
   inboundStart: "",
@@ -71,6 +81,12 @@ export function InboundRecordListPage() {
   const [creator, setCreator] = useState("全部")
   const [onlyUnprinted, setOnlyUnprinted] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [printOpen, setPrintOpen] = useState(false)
+  const [printData, setPrintData] = useState<H5ReceiptPrintData | null>(null)
+  const [exportOpen, setExportOpen] = useState(false)
+  const [exportRecords, setExportRecords] = useState<MobileExportRecordItem[]>(() => [
+    ...DEFAULT_INBOUND_EXPORT_RECORDS,
+  ])
 
   const [dateFilterOpen, setDateFilterOpen] = useState(false)
   const [dateDraft, setDateDraft] = useState<DateRangeDraft>({ ...EMPTY_DATE_RANGE })
@@ -142,6 +158,33 @@ export function InboundRecordListPage() {
   const showToast = (msg: string) => {
     setToast(msg)
     window.setTimeout(() => setToast(null), 2400)
+  }
+
+  const handleDownload = (kind: "excel" | "pdf", row: MobileInboundRecord) => {
+    if (kind === "pdf") {
+      setPrintData(buildH5InboundReceiptPrintData(row))
+      setPrintOpen(true)
+      return
+    }
+    const creatorMatch = row.creatorDisplay.match(/^(.+?)\((.+)\)$/)
+    const task = createMobileExportRecord({
+      kind: "入库堆放明细",
+      orderNo: row.orderNo,
+      recordCount: row.goodsNames.length || 1,
+      creator: creatorMatch?.[1] ?? row.creatorDisplay,
+      creatorOrg: creatorMatch?.[2] ?? "四川享宇科技有限公司",
+      status: "GENERATING",
+    })
+    setExportRecords((current) => [task, ...current])
+    setExportOpen(true)
+    showToast(MOBILE_EXPORT_TOAST)
+    window.setTimeout(() => {
+      setExportRecords((current) =>
+        current.map((item) =>
+          item.id === task.id ? { ...item, status: "SUCCESS", fileSize: "86.4 KB" } : item
+        )
+      )
+    }, 2200)
   }
 
   const resetFilters = () => {
@@ -282,13 +325,7 @@ export function InboundRecordListPage() {
               <InboundRecordCard
                 key={item.id}
                 item={item}
-                onDownload={(kind, row) => {
-                  showToast(
-                    kind === "excel"
-                      ? `下载记录导出中: ${row.orderNo}`
-                      : `单据凭证生成中: ${row.orderNo}`
-                  )
-                }}
+                onDownload={handleDownload}
               />
             ))
           )}
@@ -299,6 +336,18 @@ export function InboundRecordListPage() {
             {toast}
           </div>
         )}
+
+        <ReceiptPrintPreviewSheet
+          open={printOpen}
+          data={printData}
+          onClose={() => setPrintOpen(false)}
+          onSuccess={showToast}
+        />
+        <MobileExportRecordsSheet
+          open={exportOpen}
+          records={exportRecords}
+          onClose={() => setExportOpen(false)}
+        />
       </div>
     </MobileShell>
   )

@@ -10,6 +10,9 @@ import { MobileQrModal } from "../components/MobileQrModal"
 import { MobileImageModal } from "../components/MobileImageModal"
 import { MobilePdfModal } from "../components/MobilePdfModal"
 import { DocumentManagementTab } from "@/shared/document-management"
+import { ReceiptPrintPreviewSheet } from "@/shared/receipt-print/ReceiptPrintPreviewSheet"
+import { buildH5InboundReceiptPrintData } from "@/shared/receipt-print/build-mobile-receipt-print"
+import { getMobileInboundById, mobileInboundRecordsMock } from "../mock/inbound-records.mock"
 import { parseInboundRecordDetailTabParam } from "@prototype/shared/inbound/inbound-record-detail-nav"
 import { buildInboundRecordDetailTabEntries } from "@prototype/shared/inbound/inbound-record-detail-ui-labels"
 
@@ -66,6 +69,7 @@ export function InboundRecordDetailPage() {
     open: false,
     fileName: "",
   })
+  const [receiptOpen, setReceiptOpen] = useState(false)
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -89,7 +93,19 @@ export function InboundRecordDetailPage() {
   return (
     <MobileShell>
       <PrototypeAnnotationTarget annotationIds={["inbound-h5-detail"]}>
-        <NavBar title="入库详情" onBack={handleBack} />
+        <NavBar
+          title="入库详情"
+          onBack={handleBack}
+          right={
+            <button
+              type="button"
+              className="text-[13px] text-blue-600"
+              onClick={() => setReceiptOpen(true)}
+            >
+              凭证
+            </button>
+          }
+        />
       </PrototypeAnnotationTarget>
 
       <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto bg-[#edf2f8] p-3 pb-24">
@@ -280,6 +296,19 @@ export function InboundRecordDetailPage() {
           ownerName={detail.ownerName}
           warehouseName={detail.warehouseName}
           onClose={() => setPdfModalData((prev) => ({ ...prev, open: false }))}
+        />
+      )}
+
+      {receiptOpen && (
+        <ReceiptPrintPreviewSheet
+          open={receiptOpen}
+          data={buildH5InboundReceiptPrintData(
+            getMobileInboundById(id) ??
+              mobileInboundRecordsMock.find((row) => row.orderNo === detail.orderNo) ??
+              mobileInboundRecordsMock[0]
+          )}
+          onClose={() => setReceiptOpen(false)}
+          onSuccess={showToast}
         />
       )}
 

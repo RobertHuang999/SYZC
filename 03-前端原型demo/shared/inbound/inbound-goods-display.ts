@@ -40,6 +40,25 @@ export function formatInboundQuantityLabel(amount: number, unit: string): string
   return unit ? `${formatted} ${unit}` : formatted
 }
 
+export type QuantityWithUnit = { amount: number; unit?: string }
+
+/** 按计量单位分组加总；吨与公斤等不同单位不得混加 */
+export function aggregateQuantitiesByUnit(items: QuantityWithUnit[]): { amount: number; unit: string }[] {
+  const map = new Map<string, number>()
+  for (const item of items) {
+    const unit = (item.unit ?? "").trim() || "吨"
+    map.set(unit, (map.get(unit) ?? 0) + (Number(item.amount) || 0))
+  }
+  return [...map.entries()].map(([unit, amount]) => ({ unit, amount }))
+}
+
+/** 列表/合计展示：同单位只出一笔；混单位用「 / 」拼接，例如 `31.08 吨 / 8,682.33 公斤` */
+export function formatQuantitiesByUnit(items: QuantityWithUnit[]): string {
+  const groups = aggregateQuantitiesByUnit(items)
+  if (groups.length === 0) return "—"
+  return groups.map((group) => formatInboundQuantityLabel(group.amount, group.unit)).join(" / ")
+}
+
 export function formatCollectValuesAsOtherInfo(
   values: Record<string, string>,
   labels?: Record<string, string>

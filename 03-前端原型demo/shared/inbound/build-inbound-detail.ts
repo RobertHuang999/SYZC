@@ -224,7 +224,7 @@ function buildGoodsLines(row: InboundListRowForDetail): InboundGoodsDetailLine[]
     const parsed = parseInboundGoodsName(name)
     const sku = resolveSkuForGoodsName(name)
     const portion = item.amount
-    const unit = sku?.measureUnit ?? item.unit ?? row.unit ?? "吨"
+    const unit = item.unit ?? sku?.measureUnit ?? row.unit ?? "吨"
     const measureLabel = sku
       ? measureLabelFromParam(sku.measureParam)
       : unit === "吨" || unit === "公斤"

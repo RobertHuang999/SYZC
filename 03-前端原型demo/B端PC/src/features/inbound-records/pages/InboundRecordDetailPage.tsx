@@ -11,6 +11,7 @@ import {
   Clock,
   AlertCircle,
   RotateCcw,
+  Download,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -39,6 +40,7 @@ import { inboundRecordDocuments } from "../documents/inbound-record-documents"
 import { getInboundRecordDetailById, type InboundRecordDetail } from "../lib/detail-utils"
 import { RevokeConfirmDialog } from "../components/RevokeConfirmDialog"
 import { QrCodeDialog } from "../components/QrCodeDialog"
+import { InboundReceiptPdfDialog } from "../components/InboundReceiptPdfDialog"
 import {
   InboundAttachmentDialog,
   type AttachmentDialogData,
@@ -47,7 +49,7 @@ import { CURRENT_USER_NAME } from "../mock/inbound-records.mock"
 import {
   DocumentManagementTabContent,
 } from "@/shared/document-management"
-import { useIterationHighlight } from "@/shared/components/IterationHighlight"
+import { IterationPageTag, useIterationHighlight } from "@/shared/components/IterationHighlight"
 import { DetailField, DetailSection } from "@/shared/components/DetailSection"
 import { DetailPageHeader } from "@/shared/components/DetailPageHeader"
 import { DetailTabShell } from "@/shared/components/DetailTabShell"
@@ -75,6 +77,7 @@ export function InboundRecordDetailPage() {
 
   // 弹窗状态
   const [revokeOpen, setRevokeOpen] = useState(false)
+  const [pdfOpen, setPdfOpen] = useState(false)
   const [qrCodeData, setQrCodeData] = useState<{
     open: boolean
     type: "main" | "sub"
@@ -197,6 +200,13 @@ export function InboundRecordDetailPage() {
       annotations={inboundRecordDetailAnnotations}
     >
       <div className="space-y-4 p-6 min-h-full">
+        <IterationPageTag
+          version="6.4"
+          changeType="新增"
+          title="详情顶部新增【单据下载】按钮，支持 A4 / A5 / 针式连续纸二等分三种排版预览与 PDF 导出"
+          description="仅对【已通过】状态单据展示，按一级货品汇总平铺，货主证号与电话明文打印。"
+        />
+
         {/* 顶部标题与操作卡片（对齐 store-apply-info-detail.vue 结构） */}
         <PrototypeAnnotationTarget annotationIds={["inbound-detail-header"]}>
           <DetailPageHeader
@@ -210,16 +220,31 @@ export function InboundRecordDetailPage() {
               showToast("已复制入库单号至剪贴板")
             }}
             actions={
-              canRevoke ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-destructive/40 text-destructive hover:bg-destructive/10"
-                  onClick={() => setRevokeOpen(true)}
-                >
-                  撤 销
-                </Button>
-              ) : undefined
+              <div className="flex items-center gap-2">
+                {detail.checkStatus === 2 && (
+                  <PrototypeAnnotationTarget annotationIds={["inbound-detail-pdf-export"]}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-primary/40 text-primary hover:bg-primary/5 text-xs h-8 gap-1.5 font-medium"
+                      onClick={() => setPdfOpen(true)}
+                    >
+                      <Download className="size-3.5" />
+                      单据下载
+                    </Button>
+                  </PrototypeAnnotationTarget>
+                )}
+                {canRevoke && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                    onClick={() => setRevokeOpen(true)}
+                  >
+                    撤 销
+                  </Button>
+                )}
+              </div>
             }
           />
 
@@ -588,6 +613,14 @@ export function InboundRecordDetailPage() {
           ownerName={detail.ownerName}
           onClose={() => setRevokeOpen(false)}
           onConfirm={handleRevokeConfirm}
+        />
+
+        {/* 单据 PDF 预览与下载弹窗（6.4 多介质排版） */}
+        <InboundReceiptPdfDialog
+          open={pdfOpen}
+          record={detail}
+          onClose={() => setPdfOpen(false)}
+          onSuccess={showToast}
         />
 
         {/* 存货条码弹窗（支持主条码与子条码） */}

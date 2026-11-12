@@ -9,8 +9,14 @@ import { outboundRecordDocuments } from "../documents/outbound-record-documents"
 import { outboundRecordListAnnotations } from "../annotations/outbound-record-list.annotations"
 import { OutboundRecordFiltersPanel } from "../components/OutboundRecordFiltersPanel"
 import { OutboundRecordTable } from "../components/OutboundRecordTable"
-import { OutboundExportRecordsDialog } from "../components/OutboundExportRecordsDialog"
 import { OutboundPdfDialog } from "../components/OutboundPdfDialog"
+import { ExportRecordsDialog } from "@/features/inventory-management/components/ExportRecordsDialog"
+import type { ExportRecordItem } from "@/features/inventory-management/domain/types"
+import {
+  createDocumentExportRecord,
+  DEFAULT_OUTBOUND_EXPORT_RECORDS,
+} from "@/features/shared/document-export-records"
+import { INVENTORY_CROSS_EXPORT_USER_TOAST } from "@/features/shared/inventory-cross-export/inventory-cross-export-ui-labels"
 import {
   DEFAULT_OUTBOUND_RECORD_FILTERS,
   OUTBOUND_RECORD_ADD_PATH,
@@ -43,8 +49,10 @@ export function OutboundRecordListPage() {
   const [pageSize, setPageSize] = useState(PAGE_SIZE)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
-  // 导出与单据预览弹窗状态
-  const [exportTarget, setExportTarget] = useState<OutboundRecord | null>(null)
+  const [exportModalOpen, setExportModalOpen] = useState(false)
+  const [exportRecords, setExportRecords] = useState<ExportRecordItem[]>(() => [
+    ...DEFAULT_OUTBOUND_EXPORT_RECORDS,
+  ])
   const [pdfTarget, setPdfTarget] = useState<OutboundRecord | null>(null)
   const filtered = useMemo(() => {
     const matched = filterOutboundRecords(rows, appliedFilters)
@@ -76,7 +84,26 @@ export function OutboundRecordListPage() {
 
   const handleRowAction = (action: OutboundRecordRowAction, item: OutboundRecord) => {
     if (action === "downloadExcel") {
-      setExportTarget(item)
+      const task = createDocumentExportRecord({
+        kind: "出库扣减明细",
+        orderNo: item.orderNo,
+        recordCount: item.goodsList?.length || item.categoryCount || 1,
+        creator: item.createdByName,
+        creatorOrg: item.createdByOrg,
+        status: "GENERATING",
+      })
+      setExportRecords((current) => [task, ...current])
+      setExportModalOpen(true)
+      showToast(INVENTORY_CROSS_EXPORT_USER_TOAST)
+      window.setTimeout(() => {
+        setExportRecords((current) =>
+          current.map((row) =>
+            row.id === task.id
+              ? { ...row, status: "SUCCESS", fileSize: "86.4 KB" }
+              : row
+          )
+        )
+      }, 2200)
       return
     }
     if (action === "downloadPdf") {
@@ -106,8 +133,16 @@ export function OutboundRecordListPage() {
         </PrototypeAnnotationTarget>
 
         <IterationPageTag
+          version="6.4"
+          changeType="新增"
+          title="支持多介质【单据下载】（A4 纵向 / A5 横向 / 针式连续纸二等分 PDF）与质押单价货值脱敏"
+          description="点击行操作【单据下载】呼出多介质打印预览弹窗，提货人明细与货主证号电话明文展示，单价与货物价值保留列头、数值留空脱敏。"
+        />
+
+        <IterationPageTag
+          version="6.3"
           changeType="优化"
-          title="行操作改为 2×2 并新增【资料管理】"
+          title="行操作一行最多 3 个、最多两行，并新增【资料管理】"
           description="制单页货主只从「货主信息」档案选择、不提供快捷建档；个人提货人改为引用提货人档案。"
         />
 
@@ -132,13 +167,18 @@ export function OutboundRecordListPage() {
         {/* 表格与操作打点 */}
         <div className="space-y-4">
           <PrototypeAnnotationTarget
-            annotationIds={["outbound-record-table", "outbound-record-row-actions"]}
+            annotationIds={[
+              "outbound-record-table",
+              "outbound-record-row-actions",
+              "outbound-record-pdf-export",
+            ]}
           >
             <OutboundRecordTable
               data={pageData}
               page={currentPage}
               pageSize={pageSize}
               onAction={handleRowAction}
+              onResetFilters={handleReset}
             />
           </PrototypeAnnotationTarget>
 
@@ -162,12 +202,10 @@ export function OutboundRecordListPage() {
           </div>
         )}
 
-        {/* 下载记录 Excel 弹窗 */}
-        <OutboundExportRecordsDialog
-          open={!!exportTarget}
-          record={exportTarget}
-          onClose={() => setExportTarget(null)}
-          onSuccess={showToast}
+        <ExportRecordsDialog
+          open={exportModalOpen}
+          onOpenChange={setExportModalOpen}
+          records={exportRecords}
         />
 
         {/* 单据凭证 PDF 弹窗 */}

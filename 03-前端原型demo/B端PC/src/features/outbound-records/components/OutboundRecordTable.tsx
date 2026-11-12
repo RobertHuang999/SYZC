@@ -12,16 +12,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { TableDateTimeCell, TablePersonTimeCell } from "@/shared/components/TableCells"
+import { TableDateTimeCell, TablePersonOrgTimeCell } from "@/shared/components/TableCells"
 import {
   TableRowActionPanel,
+  TABLE_ROW_ACTION_COL_TOTAL_PX,
   type TableRowActionItem,
 } from "@/shared/components/TableRowActionPanel"
 import { DocNoCell } from "@/shared/components/DocNoCell"
 import { outboundRecordDetailPath } from "../domain/constants"
 import type { OutboundRecord, OutboundRecordRowAction } from "../domain/types"
-import { formatGoodsNamesForList } from "../lib/list-utils"
+import { formatGoodsNamesForList, formatOutboundRecordQuantity } from "../lib/list-utils"
 
 /**
  * 列宽按现网实测（1440 视口）：80/180/180/80/180/80/80/150/80/180/220，合计 1410。
@@ -36,9 +38,9 @@ const COL = {
   warehouse: "w-[150px] min-w-[150px]",
   related: "w-[130px] min-w-[130px]",
   goods: "w-[180px] min-w-[180px]",
-  quantity: "w-[110px] min-w-[110px]",
-  creator: "w-[160px] min-w-[160px]",
-  actions: "w-[142px] min-w-[142px]",
+  quantity: "w-[160px] min-w-[160px]",
+  creator: "w-[180px] min-w-[180px]",
+  actions: "w-[var(--outbound-action-col-w)] min-w-[var(--outbound-action-col-w)] max-w-[var(--outbound-action-col-w)]",
 } as const
 
 /** 表头：13px / 700 / #999 / #F2F6FC 底 / 36px 高 */
@@ -47,16 +49,52 @@ const headCell =
 /** 单元格：14px / #606266 / 上下 13px 留白 / 分割线 #EFEFEF */
 const cellBase = "px-3.5 py-0 align-middle text-[13px] text-[#4e5969]"
 
-/** 现网：序号列左固定、操作列右固定，横向滚动时两端不动 */
-const stickyLeft = "sticky left-0 z-10 bg-card group-hover:bg-[#F5F7FA]"
+/** 现网：序号列左固定、操作列右固定；底色必须不透明，避免横向滚动文字穿透 */
+const stickyLeft =
+  "sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800"
 const stickyRight =
-  "sticky right-0 z-10 bg-card group-hover:bg-[#F5F7FA] shadow-[-6px_0_10px_-6px_rgba(0,0,0,0.12)]"
+  "sticky right-0 z-20 border-l border-border/80 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800 shadow-[-8px_0_16px_-4px_rgba(0,0,0,0.08)]"
 
 interface OutboundRecordTableProps {
   data: OutboundRecord[]
   page: number
   pageSize: number
   onAction: (action: OutboundRecordRowAction, item: OutboundRecord) => void
+  onResetFilters?: () => void
+}
+
+function getOutboundTypeBadge(type: string) {
+  let badgeClass =
+    "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-300"
+
+  if (type.includes("质押")) {
+    badgeClass =
+      "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/40 dark:bg-blue-950/40 dark:text-blue-300"
+  } else if (type.includes("抵押")) {
+    badgeClass =
+      "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-900/40 dark:bg-indigo-950/40 dark:text-indigo-300"
+  } else if (type.includes("仓单")) {
+    badgeClass =
+      "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-900/40 dark:bg-purple-950/40 dark:text-purple-300"
+  } else if (type.includes("普通")) {
+    badgeClass =
+      "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-300"
+  } else if (type.includes("移库")) {
+    badgeClass =
+      "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-300"
+  } else if (type.includes("转让")) {
+    badgeClass =
+      "border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-900/40 dark:bg-cyan-950/40 dark:text-cyan-300"
+  }
+
+  return (
+    <Badge
+      variant="outline"
+      className={cn("whitespace-nowrap text-[11px] px-2 py-0.5 font-normal shrink-0", badgeClass)}
+    >
+      {type}
+    </Badge>
+  )
 }
 
 function OutboundGoodsCell({ row }: { row: OutboundRecord }) {
@@ -106,7 +144,7 @@ function OutboundGoodsCell({ row }: { row: OutboundRecord }) {
   )
 }
 
-/** 行操作顺序对齐现网：查看详情 / 资料管理 / 下载记录 / 单据下载；按 2×2 排布，避免挤成一行 */
+/** 行操作：一行 3 个、最多两行；超过 6 个才收入「更多」 */
 function buildOutboundRowActions(
   row: OutboundRecord,
   onAction: (action: OutboundRecordRowAction, item: OutboundRecord) => void
@@ -119,22 +157,22 @@ function buildOutboundRowActions(
       to: outboundRecordDetailPath(row.id, "goods"),
     },
     {
-      key: "docs",
-      label: "资料管理",
-      title: "查看与补充出库单据资料",
-      onClick: () => onAction("manageDocs", row),
+      key: "pdf",
+      label: "单据下载",
+      title: "预览并下载出库凭证",
+      onClick: () => onAction("downloadPdf", row),
     },
     {
       key: "excel",
       label: "下载记录",
-      title: "下载货品出库记录清单Excel",
+      title: "查看导出记录并下载出库明细",
       onClick: () => onAction("downloadExcel", row),
     },
     {
-      key: "pdf",
-      label: "单据下载",
-      title: "下载标准出库凭证PDF",
-      onClick: () => onAction("downloadPdf", row),
+      key: "docs",
+      label: "资料管理",
+      title: "查看与补充出库单据资料",
+      onClick: () => onAction("manageDocs", row),
     },
   ]
 }
@@ -144,12 +182,18 @@ export function OutboundRecordTable({
   page,
   pageSize,
   onAction,
+  onResetFilters,
 }: OutboundRecordTableProps) {
   return (
     <div className="overflow-x-auto rounded-lg border border-border bg-card">
       <Table
-        className="w-full min-w-[1506px] table-fixed text-sm"
-        style={{ "--row-hover": "#F5F7FA" } as CSSProperties}
+        className="w-full min-w-[1562px] table-fixed text-sm"
+        style={
+          {
+            "--row-hover": "#F5F7FA",
+            "--outbound-action-col-w": `${TABLE_ROW_ACTION_COL_TOTAL_PX}px`,
+          } as CSSProperties
+        }
       >
         <colgroup>
           <col style={{ width: 64 }} />
@@ -161,8 +205,8 @@ export function OutboundRecordTable({
           <col style={{ width: 130 }} />
           <col style={{ width: 180 }} />
           <col style={{ width: 110 }} />
-          <col style={{ width: 160 }} />
-          <col style={{ width: 142 }} />
+          <col style={{ width: 180 }} />
+          <col style={{ width: TABLE_ROW_ACTION_COL_TOTAL_PX }} />
         </colgroup>
         <TableHeader>
           <TableRow className="bg-[#F2F6FC] hover:bg-[#F2F6FC]">
@@ -176,7 +220,7 @@ export function OutboundRecordTable({
             <TableHead className={cn(COL.goods, headCell)}>货物名称</TableHead>
             <TableHead className={cn(COL.quantity, headCell, "text-right")}>出库数量</TableHead>
             <TableHead className={cn(COL.creator, headCell)}>制单人</TableHead>
-            <TableHead className={cn(COL.actions, headCell, "sticky right-0 z-20 bg-[#F2F6FC]")}>操作</TableHead>
+            <TableHead className={cn(COL.actions, headCell, "sticky right-0 z-20 bg-[#F2F6FC] shadow-[-8px_0_16px_-4px_rgba(0,0,0,0.08)]")}>操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -186,7 +230,18 @@ export function OutboundRecordTable({
                 colSpan={11}
                 className="h-32 text-center text-[14px] text-[#909399]"
               >
-                暂无符合条件的出库记录，可调整筛选条件后重试
+                <div className="flex flex-col items-center gap-2">
+                  <span>暂无符合条件的出库记录，可调整筛选条件后重试</span>
+                  {onResetFilters ? (
+                    <button
+                      type="button"
+                      className="text-primary hover:underline"
+                      onClick={onResetFilters}
+                    >
+                      重置筛选条件
+                    </button>
+                  ) : null}
+                </div>
               </TableCell>
             </TableRow>
           ) : (
@@ -210,13 +265,16 @@ export function OutboundRecordTable({
                     <span className="line-clamp-1" title={row.ownerName}>
                       {row.ownerName}
                     </span>
-                    <span className="line-clamp-1 tabular-nums text-[#606266]">
+                    <span
+                      className="line-clamp-1 tabular-nums text-[#606266]"
+                      title={row.ownerIdentifier}
+                    >
                       {row.ownerIdentifier}
                     </span>
                   </div>
                 </TableCell>
                 <TableCell className={cn(cellBase, COL.type)}>
-                  <span className="whitespace-nowrap">{row.type}</span>
+                  {getOutboundTypeBadge(row.type)}
                 </TableCell>
                 <TableCell className={cn(cellBase, COL.outboundDate)}>
                   <TableDateTimeCell value={row.outboundTime} stackedPlain />
@@ -237,21 +295,22 @@ export function OutboundRecordTable({
                   <OutboundGoodsCell row={row} />
                 </TableCell>
                 <TableCell className={cn(cellBase, COL.quantity, "text-right")}>
-                  <span className="tabular-nums font-medium text-foreground">
-                    {row.totalAmount.toLocaleString("zh-CN", { maximumFractionDigits: 3 })}
+                  <span className="tabular-nums font-medium text-foreground" title={formatOutboundRecordQuantity(row)}>
+                    {formatOutboundRecordQuantity(row)}
                   </span>
-                  <span className="ml-1 text-xs text-muted-foreground">{row.amountUnit}</span>
                 </TableCell>
                 <TableCell className={cn(cellBase, COL.creator)}>
-                  <TablePersonTimeCell
+                  <TablePersonOrgTimeCell
                     person={row.createdByName}
+                    org={row.createdByOrg}
                     time={row.createTime}
                   />
                 </TableCell>
                 <TableCell className={cn(cellBase, COL.actions, stickyRight)}>
                   <TableRowActionPanel
                     actions={buildOutboundRowActions(row, onAction)}
-                    fixedCols={2}
+                    fixedCols={3}
+                    maxInline={6}
                   />
                 </TableCell>
               </TableRow>

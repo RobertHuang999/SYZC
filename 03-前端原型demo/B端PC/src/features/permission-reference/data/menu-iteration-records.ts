@@ -45,6 +45,21 @@ export const ITERATION_RECORD_LABEL = "迭代记录"
 
 export const iterationVersions: IterationVersionMeta[] = [
   {
+    "version": "6.4",
+    "name": "6.4版本（2026.11）",
+    "period": "2026.11",
+    "summary": "仓储实务作业闭环与多介质单据凭据输出能力升级（入库单/出库单 A4 · A5 · 针式连续纸二等分打印与 PDF 导出）",
+    "docPath": "B-迭代需求/6.4版本（2026.11）/README.md",
+    "recordPath": "B-迭代需求/6.4版本（2026.11）/00-菜单迭代记录.md",
+    "scopeAnnotations": [
+      {
+        "tag": "必交付",
+        "meaning": "6.4 仓储出入库单据多介质打印与 PDF 导出主线必须上线",
+        "menus": "仓储 / 入库管理 / 入库记录、仓储 / 出库管理 / 出库记录（列表与详情【单据下载】、A4/A5/针式连续纸二等分排版、出库单价货值脱敏与防断针打印样式）"
+      }
+    ]
+  },
+  {
     "version": "6.3",
     "name": "6.3版本（2026.09）",
     "period": "2026.09",
@@ -95,6 +110,34 @@ export const iterationVersions: IterationVersionMeta[] = [
 ]
 
 export const iterationRecords: IterationRecordEntry[] = [
+  {
+    "id": "64-1",
+    "version": "6.4",
+    "platform": "PC",
+    "type": "新增能力",
+    "title": "入库记录 · 多介质单据导出与打印",
+    "before": "仓储 / 入库管理 / 入库记录（单版 PDF 预览）",
+    "after": "列表行操作与详情页【单据下载】支持 A4 纵向完整版、A5 横向便携版、针式连续纸二等分（241mm×139.5mm）三种模式预览与标准 PDF 导出",
+    "priority": "P0",
+    "deliveryTag": "必交付",
+    "note": "按一级货品汇总平铺（不拆垛位）；货主证件号与电话明文展示；纯黑 1px 实线防断针",
+    "date": "2026-11-12",
+    "sourceDoc": "01-仓储管理-单据导出与打印/出入库单据导出与打印(PDF)增量规格说明.md"
+  },
+  {
+    "id": "64-2",
+    "version": "6.4",
+    "platform": "PC",
+    "type": "新增能力",
+    "title": "出库记录 · 多介质单据导出与打印",
+    "before": "仓储 / 出库管理 / 出库记录（单版 PDF 预览）",
+    "after": "列表行操作与详情页【单据下载】支持 A4/A5/针式连续纸二等分三种模式预览与 PDF 导出，新增提货人明细展示及质押单价/货值脱敏留空",
+    "priority": "P0",
+    "deliveryTag": "必交付",
+    "note": "保留单价与货物价值列头但数值留空脱敏；货主与提货人证件号、电话、车牌号明文展示；预留仓管、司机、门卫、货权方四方签章",
+    "date": "2026-11-12",
+    "sourceDoc": "01-仓储管理-单据导出与打印/出入库单据导出与打印(PDF)增量规格说明.md"
+  },
   {
     "id": "1",
     "version": "6.3",

@@ -8,7 +8,7 @@ export const outboundH5ListAnnotations: PrototypeAnnotation[] = [
     kind: "页面",
     title: "工作台 · 仓储 · 出库管理",
     content:
-      "移动端出库管理生效归档台账（对齐原路径 货物管理～出库）。接口固定过滤已通过 APPROVED 单据，展示出库单号、货主信息、出库类型、出库时间、货物明细摘要及操作项；支持查看详情、单据下载与记录下载；不设状态筛选（O13）。",
+      "移动端出库管理生效归档台账（对齐原路径 货物管理～出库）。接口固定过滤已通过 APPROVED 单据；【单据下载】打开 A4/A5/针式连续纸预览（抬头取当前租户，出库单价货值留空），【下载记录】打开与存货管理一致的导出记录列表；不设状态筛选（O13）。",
     documentRefs: {
       prd: { section: "6.1 出库记录 — 列表页", match: "已生效", element: "text" },
       rules: { section: "【已通过台账专网过滤与不可变快照】(O13)", match: "APPROVED", element: "text" },

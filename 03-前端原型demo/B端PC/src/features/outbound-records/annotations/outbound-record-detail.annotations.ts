@@ -136,4 +136,22 @@ export const outboundRecordDetailAnnotations: PrototypeAnnotation[] = [
       },
     ],
   },
+  {
+    id: "outbound-detail-pdf-export",
+    targetId: "outbound-detail-pdf-export",
+    number: 6,
+    kind: "交互",
+    version: "6.4",
+    title: "详情顶部【单据下载】与三端介质打印预览（6.4 新增 · REQ-6.4-002）",
+    content:
+      "在出库单详情页右上角操作栏提供【单据下载】按钮，点击弹出居中预览弹窗，支持 A4 纵向完整版、A5 横向便携版、针式连续纸二等分版（241×139.5mm）三种模式即时切换；质押出库单价与货物价值列数值留空脱敏，提货人及货主身份信息明文展示。",
+    documentRefs: {
+      prd: {
+        section: "四、 【出库单】三种纸张排版样式规格",
+        match: "出库单 - A4 纵向完整版",
+        element: "heading",
+      },
+    },
+    details: [],
+  },
 ]
