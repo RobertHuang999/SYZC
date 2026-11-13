@@ -19,6 +19,9 @@ export const INBOUND_COLLECT_USER_NAME_HINT =
 export const INBOUND_COLLECT_USER_NAME_LOCKED_HINT =
   "系统核心字段，名称不可修改，只能调整输入提示和备注。"
 
+export const INBOUND_COLLECT_USER_NAME_LOCKED_BY_REF =
+  "该项已被使用，收集项名称已锁定，不能修改。"
+
 /** 未选具体控件时的兜底说明（一般不用，表单侧按控件类型走联动文案） */
 export const INBOUND_COLLECT_USER_CONTROL_HINT =
   "决定仓库现场录单时这一项怎么填；确认保存后如果已经被货品使用，就不能再改。"
@@ -38,8 +41,8 @@ export function inboundCollectControlTypeUserHint(
       return `适合生产日期、检验日期等，现场点选年月日。${CONTROL_TYPE_LOCKED_TAIL}`
     case "数字区间框":
       return `适合温湿度等指标范围，需配置单位，并在输入提示里写清区间示例。${CONTROL_TYPE_LOCKED_TAIL}`
-    case "百分比数值框":
-      return `适合水分、杂质等 0～100 的比率，单位一般为 %。${CONTROL_TYPE_LOCKED_TAIL}`
+    case "数字单位框":
+      return `适合水分、净重等单值指标，一个数字框后面跟固定单位。${CONTROL_TYPE_LOCKED_TAIL}`
     case "省市区三级联动":
       return `适合产地等，现场按省、市、区三级下拉选择，无需配置单位与选项。${CONTROL_TYPE_LOCKED_TAIL}`
     case "周期组合项":
@@ -79,8 +82,8 @@ export function inboundCollectPlaceholderUserHint(
       return "未选日期时的占位文案，如「请选择生产日期」，最多 50 个字。"
     case "数字区间框":
       return "数字区间两个输入框下方补充说明，如「例如：-18 至 -15」；误敲下划线或全角减号会自动纠正为半角「-」。"
-    case "百分比数值框":
-      return "百分比输入框内的灰色引导语，如「请输入实测水分含量」，最多 50 个字。"
+    case "数字单位框":
+      return "数字框内的灰色引导语，如「请输入实测水分含量」，最多 50 个字。"
     case "省市区三级联动":
       return "三级联动使用系统固定「请选择省/市/区」文案，此项一般留空即可。"
     case "周期组合项":
@@ -102,7 +105,7 @@ export function inboundCollectPlaceholderInputPlaceholder(
       return "例如：请选择生产日期"
     case "数字区间框":
       return "例如：-18 至 -15"
-    case "百分比数值框":
+    case "数字单位框":
       return "例如：请输入实测水分含量"
     case "省市区三级联动":
       return "一般留空，使用系统默认文案"
@@ -119,7 +122,7 @@ export function inboundCollectPlaceholderQuickExamples(
   switch (controlType) {
     case "数字区间框":
       return [{ label: "-18 至 -15", value: "例如：-18 至 -15" }]
-    case "百分比数值框":
+    case "数字单位框":
       return [{ label: "12.5%", value: "例如：12.5%" }]
     case "文本输入框":
       return [{ label: "炉号", value: "例如：请输入炉号" }]
@@ -137,7 +140,7 @@ export function inboundCollectShowMinusShortcut(
 ): boolean {
   return (
     controlType === "数字区间框" ||
-    controlType === "百分比数值框" ||
+    controlType === "数字单位框" ||
     controlType === "文本输入框"
   )
 }
@@ -158,7 +161,7 @@ export const INBOUND_COLLECT_SPEC_NAME_NOTE =
   "【收集项名称唯一性校验规则】(R01)：名称 2～30 个字符，录入自动去除首尾空格，同一租户内全局唯一，重名时阻断保存并标红提示。"
 
 export const INBOUND_COLLECT_SPEC_CONTROL_NOTE =
-  "【系统核心收集项保护机制】(R02)：保质期、生产日期、过期时间等核心字段的控件类型永久锁定；自定义项一旦被下游品类或货品引用，控件类型同样锁定只读，防止改坏存量业务。"
+  "【系统核心收集项保护机制】(R02)：保质期、生产日期、过期时间等核心字段的名称与控件类型永久锁定；自定义项一旦被下游货品引用，名称、控件类型与度量单位标签一并灰阶锁定，只允许改输入提示和说明备注。"
 
 export const INBOUND_COLLECT_SPEC_MINUS_NOTE =
   "【负数温度与减号录入防呆规则】(R07)：内置「- 减号」按钮在光标处插入标准半角减号，手动误输入的下划线「_」与全角减号「－」自动静默纠正，不弹红字阻断。"

@@ -31,7 +31,7 @@ export const CONTROL_TYPE_OPTIONS: Array<{
   { value: "下拉选择器", label: "下拉选择器", description: "预设固定枚举选项" },
   { value: "日期选择器", label: "日期选择器", description: "标准年月日日期" },
   { value: "数字区间框", label: "数字区间框", description: "指标数值范围，如温度、湿度" },
-  { value: "百分比数值框", label: "百分比数值框", description: "0~100 比率参数，如含水量" },
+  { value: "数字单位框", label: "数字单位框", description: "单个数字 + 固定单位，如水分 %、净重 kg" },
   { value: "周期组合项", label: "周期组合项", description: "保质期专属：正整数 + 固定单位" },
   { value: "省市区三级联动", label: "省市区三级联动", description: "省 → 市 → 区逐级选择，如产地" },
 ]
@@ -139,7 +139,7 @@ export const COLLECT_CONTROL_TABS = [
   "下拉选择器",
   "日期选择器",
   "数字区间框",
-  "百分比数值框",
+  "数字单位框",
   "省市区三级联动",
   "周期组合项",
 ] as const

@@ -9,6 +9,7 @@ import {
 import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import {
   INBOUND_COLLECT_CONFIG_PATH,
+  inboundCollectDetailPath,
   inboundCollectEditPath,
 } from "../domain/constants"
 import {
@@ -174,7 +175,11 @@ export function InboundCollectDetailPage() {
             <div className="flex shrink-0 flex-wrap items-center gap-2 lg:justify-end">
               <Button
                 variant="outline"
-                onClick={() => navigate(inboundCollectEditPath(field.id))}
+                onClick={() =>
+                  navigate(inboundCollectEditPath(field.id), {
+                    state: { from: inboundCollectDetailPath(field.id) },
+                  })
+                }
                 className="h-9 gap-1.5"
               >
                 <Edit className="h-3.5 w-3.5" />

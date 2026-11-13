@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -37,6 +37,7 @@ import {
   INBOUND_COLLECT_USER_CONTROL_LOCKED_BY_CORE,
   INBOUND_COLLECT_USER_CONTROL_LOCKED_BY_REF,
   INBOUND_COLLECT_USER_NAME_HINT,
+  INBOUND_COLLECT_USER_NAME_LOCKED_BY_REF,
   INBOUND_COLLECT_USER_NAME_LOCKED_HINT,
   INBOUND_COLLECT_USER_OPTIONS_HINT,
   INBOUND_COLLECT_USER_REMARK_HINT,
@@ -49,13 +50,14 @@ import {
   inboundCollectShowMinusShortcut,
 } from "../lib/inbound-collect-ui-labels"
 import { InboundCollectPreviewCard } from "../components/InboundCollectPreviewCard"
+import { LockedReadonlyField } from "../components/LockedReadonlyField"
 import {
   PrototypeAnnotationProvider,
   PrototypeAnnotationTarget,
 } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { inboundCollectFormAnnotations } from "../annotations/inbound-collect.annotations"
 import { inboundCollectDocuments } from "../documents/inbound-collect-documents"
-import { AlertCircle, Lock, Plus, Trash2 } from "lucide-react"
+import { AlertCircle, Plus, Trash2 } from "lucide-react"
 import { IterationPageTag } from "@/shared/components/IterationHighlight"
 
 function initialState(field: InboundCollectFieldConfig | undefined) {
@@ -72,9 +74,17 @@ function initialState(field: InboundCollectFieldConfig | undefined) {
   }
 }
 
+function resolveCollectFormBackPath(from: unknown, id?: string) {
+  if (typeof from !== "string" || !from) return INBOUND_COLLECT_CONFIG_PATH
+  if (from === INBOUND_COLLECT_CONFIG_PATH) return from
+  if (id && from === inboundCollectDetailPath(id)) return from
+  return INBOUND_COLLECT_CONFIG_PATH
+}
+
 export function InboundCollectFormPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const isEdit = Boolean(id)
   const field = findInboundCollectField(id)
@@ -122,9 +132,9 @@ export function InboundCollectFormPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
-  /** 是否展示度量单位标签：数字区间框、百分比数值框才需要 */
+  /** 是否展示度量单位标签：数字区间框、数字单位框才需要 */
   const showUnitField =
-    controlType === "数字区间框" || controlType === "百分比数值框"
+    controlType === "数字区间框" || controlType === "数字单位框"
 
   const isDirty = (() => {
     const origin = originRef.current
@@ -138,7 +148,10 @@ export function InboundCollectFormPage() {
     )
   })()
 
-  const backPath = isEdit && id ? inboundCollectDetailPath(id) : INBOUND_COLLECT_CONFIG_PATH
+  const backPath = resolveCollectFormBackPath(
+    (location.state as { from?: string } | null)?.from,
+    id
+  )
 
   const previewField = useMemo((): InboundCollectFieldConfig => {
     const trimmedOptions = options.map((item) => item.trim()).filter(Boolean)
@@ -175,9 +188,17 @@ export function InboundCollectFormPage() {
   const placeholderExamples = inboundCollectPlaceholderQuickExamples(controlType)
   const showMinusShortcut = inboundCollectShowMinusShortcut(controlType)
 
+  const confirmLeave = () =>
+    !isDirty || window.confirm("当前有未保存的修改，确认离开吗？")
+
   const handleCancel = () => {
-    if (isDirty && !window.confirm("当前有未保存的修改，确认离开吗？")) return
+    if (!confirmLeave()) return
     navigate(backPath)
+  }
+
+  const handleBreadcrumbBack = () => {
+    if (!confirmLeave()) return
+    navigate(INBOUND_COLLECT_CONFIG_PATH)
   }
 
   // R07: 智能静默纠偏下划线与全角减号为标准半角减号
@@ -317,7 +338,7 @@ export function InboundCollectFormPage() {
                 <button
                   type="button"
                   className="hover:text-foreground hover:underline"
-                  onClick={handleCancel}
+                  onClick={handleBreadcrumbBack}
                 >
                   入库收集项配置
                 </button>
@@ -366,22 +387,32 @@ export function InboundCollectFormPage() {
                   <Label htmlFor="field-name" className="text-sm font-medium">
                     <span className="text-destructive mr-1">*</span>收集项名称
                   </Label>
-                  <Input
-                    id="field-name"
-                    placeholder="请输入收集项名称，如：存储温度要求"
-                    value={name}
-                    onChange={(e) => {
-                      setName(e.target.value)
-                      if (errorMessage) setErrorMessage(null)
-                    }}
-                    maxLength={30}
-                    disabled={isCore}
-                  />
-                  <ProductFieldHint>
-                    {isCore
-                      ? INBOUND_COLLECT_USER_NAME_LOCKED_HINT
-                      : INBOUND_COLLECT_USER_NAME_HINT}
-                  </ProductFieldHint>
+                  {isLocked ? (
+                    <LockedReadonlyField
+                      value={name}
+                      hint={
+                        isCore
+                          ? INBOUND_COLLECT_USER_NAME_LOCKED_HINT
+                          : INBOUND_COLLECT_USER_NAME_LOCKED_BY_REF
+                      }
+                    />
+                  ) : (
+                    <>
+                      <Input
+                        id="field-name"
+                        placeholder="请输入收集项名称，如：存储温度要求"
+                        value={name}
+                        onChange={(e) => {
+                          setName(e.target.value)
+                          if (errorMessage) setErrorMessage(null)
+                        }}
+                        maxLength={30}
+                      />
+                      <ProductFieldHint>
+                        {INBOUND_COLLECT_USER_NAME_HINT}
+                      </ProductFieldHint>
+                    </>
+                  )}
                 </div>
 
                 {/* 控件类型 */}
@@ -390,20 +421,14 @@ export function InboundCollectFormPage() {
                     <span className="text-destructive mr-1">*</span>控件类型
                   </Label>
                   {isLocked ? (
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between rounded-md border bg-slate-50 px-3 py-2 text-sm text-slate-600">
-                        <span className="font-medium">{controlType}</span>
-                        <span className="flex items-center gap-1 rounded border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs text-amber-600">
-                          <Lock className="h-3 w-3" />
-                          已锁定
-                        </span>
-                      </div>
-                      <ProductFieldHint className="text-amber-600">
-                        {isCore
+                    <LockedReadonlyField
+                      value={controlType}
+                      hint={
+                        isCore
                           ? INBOUND_COLLECT_USER_CONTROL_LOCKED_BY_CORE
-                          : INBOUND_COLLECT_USER_CONTROL_LOCKED_BY_REF}
-                      </ProductFieldHint>
-                    </div>
+                          : INBOUND_COLLECT_USER_CONTROL_LOCKED_BY_REF
+                      }
+                    />
                   ) : (
                     <div className="space-y-1.5">
                       <Select
@@ -412,7 +437,7 @@ export function InboundCollectFormPage() {
                           const ct = val as InboundCollectControlType
                           setControlType(ct)
                           if (ct === "数字区间框" && !unitLabel) setUnitLabel("℃")
-                          if (ct === "百分比数值框" && !unitLabel) setUnitLabel("%")
+                          if (ct === "数字单位框" && !unitLabel) setUnitLabel("%")
                           if (errorMessage) setErrorMessage(null)
                         }}
                       >
@@ -448,20 +473,20 @@ export function InboundCollectFormPage() {
                     <Label htmlFor="unit-label" className="text-sm font-medium">
                       <span className="text-destructive mr-1">*</span>度量单位标签
                     </Label>
-                    <Input
-                      id="unit-label"
-                      placeholder="例如：℃、%RH、kg"
-                      value={unitLabel}
-                      onChange={(e) => setUnitLabel(e.target.value)}
-                      maxLength={10}
-                      disabled={isUnitLocked}
-                    />
                     {isUnitLocked ? (
-                      <ProductFieldHint className="text-amber-600">
-                        {INBOUND_COLLECT_USER_UNIT_LOCKED_HINT}
-                      </ProductFieldHint>
+                      <LockedReadonlyField
+                        value={unitLabel}
+                        hint={INBOUND_COLLECT_USER_UNIT_LOCKED_HINT}
+                      />
                     ) : (
                       <>
+                        <Input
+                          id="unit-label"
+                          placeholder="例如：℃、%RH、kg"
+                          value={unitLabel}
+                          onChange={(e) => setUnitLabel(e.target.value)}
+                          maxLength={10}
+                        />
                         <div className="flex flex-wrap items-center gap-1">
                           {COMMON_UNIT_SUGGESTIONS.map((unit) => (
                             <button

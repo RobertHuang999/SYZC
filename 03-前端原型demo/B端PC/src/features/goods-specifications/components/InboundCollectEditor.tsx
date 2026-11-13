@@ -96,7 +96,7 @@ function renderInputMock(controlType: InboundCollectControlType, unitLabel?: str
     )
   }
 
-  if (controlType === "百分比数值框") {
+  if (controlType === "数字单位框") {
     return (
       <div className="flex w-full items-center justify-between text-slate-400">
         <span>请输入数值</span>

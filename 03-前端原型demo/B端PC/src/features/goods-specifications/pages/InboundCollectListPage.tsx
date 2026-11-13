@@ -30,6 +30,7 @@ import {
 import {
   CONTROL_TYPE_OPTIONS,
   DEFAULT_INBOUND_COLLECT_FILTER,
+  INBOUND_COLLECT_CONFIG_PATH,
   INBOUND_COLLECT_CREATE_PATH,
   PAGE_SIZE,
   STATUS_OPTIONS,
@@ -176,7 +177,11 @@ export function InboundCollectListPage() {
             <CardContent className="space-y-4 pt-4">
               <WarningFilterHeader
                 addLabel="新增收集项"
-                onAdd={() => navigate(INBOUND_COLLECT_CREATE_PATH)}
+                onAdd={() =>
+                  navigate(INBOUND_COLLECT_CREATE_PATH, {
+                    state: { from: INBOUND_COLLECT_CONFIG_PATH },
+                  })
+                }
                 onReset={handleReset}
                 onSearch={handleSearch}
               />
@@ -385,7 +390,9 @@ export function InboundCollectListPage() {
                             key: "edit",
                             label: "编辑",
                             onClick: () =>
-                              navigate(inboundCollectEditPath(item.id)),
+                              navigate(inboundCollectEditPath(item.id), {
+                                state: { from: INBOUND_COLLECT_CONFIG_PATH },
+                              }),
                           },
                           ...(isShelfLife
                             ? [

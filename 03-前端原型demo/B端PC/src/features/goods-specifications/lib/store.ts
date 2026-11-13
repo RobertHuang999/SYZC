@@ -59,7 +59,7 @@ function mapControlTypeToCatalogKind(
       return "date"
     case "数字区间框":
       return "range"
-    case "百分比数值框":
+    case "数字单位框":
       return "percent"
     case "周期组合项":
       return "period"
@@ -853,7 +853,7 @@ function computeCollectSummary(
     }
     return "—"
   }
-  if (controlType === "数字区间框" || controlType === "百分比数值框") {
+  if (controlType === "数字区间框" || controlType === "数字单位框") {
     return unitLabel?.trim() || "—"
   }
   return "—"
@@ -949,8 +949,9 @@ export function updateInboundCollectField(
     return { success: false, error: "收集项名称不能为空" }
   }
 
-  // R02: 系统核心项只允许改输入提示与备注，名称固定沿用原值
-  const finalName = current.isCore ? current.name : cleanName
+  // R02: 核心项与已被引用项只允许改输入提示与备注，名称固定沿用原值
+  const finalName =
+    current.isCore || current.hasDownstreamRef ? current.name : cleanName
 
   // R01: 排除自身名称唯一性
   const duplicate = inboundCollectFields.some(

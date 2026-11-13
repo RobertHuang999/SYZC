@@ -61,7 +61,7 @@ function renderMock(field: InboundCollectFieldConfig) {
           )}
         </div>
       )
-    case "百分比数值框":
+    case "数字单位框":
       return (
         <div className="flex items-center gap-2">
           <MockBox className="min-w-0 flex-1">
