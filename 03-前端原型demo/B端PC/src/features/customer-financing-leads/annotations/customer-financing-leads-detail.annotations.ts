@@ -32,6 +32,21 @@ export const customerFinancingLeadsDetailAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "详情可做什么",
+        items: [
+          {
+            label: "状态与操作对应图",
+            content: `flowchart TD
+    A["待受理"] -->|基础校验通过并受理| B["已受理"]
+    A -->|驳回| C["申请失败"]
+    B -->|分配跟进（快照分流）| D["处理中"]
+    B -->|主动驳回| C
+    D --> E["下游尽调 / 授信办理"]
+    C --> F["被拒退回池 → 线索被拒"]`,
+          },
+        ],
+      },
     ],
   },
   {
@@ -61,21 +76,38 @@ export const customerFinancingLeadsDetailAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "申请主体字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 展示规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **线索编号** | 只读文本 | 系统生成 | 全局唯一流水号 | 可复制 | — |
+| **外部申请流水号** | 只读文本 | 必填 | 第三方推送流水号 | 单行 | 用于防重 (R02) |
+| **申请人名称** | 只读文本 | 必填 | 企业全称 / 个人姓名 | 单行 | — |
+| **统一社会信用代码 / 身份证号** | 只读文本 | 条件必填 | 18 位，脱敏 | 单行 | 个人脱敏中间 8 位 |
+| **法定代表人 / 经办人** | 只读文本 | 条件展示 | 姓名 | 单行 | 企业货主展示 |
+| **联系电话** | 只读文本 | 必填 | 11 位，脱敏中间 4 位 | 单行 | — |
+| **营业执照** | 缩略图 | 条件展示 | 点击预览大图 | 单行 | 企业货主必备 |
+| **产品名称** | 只读文本 | 必填 | 融资产品名 | 单行 | — |
+| **融资状态** | 状态标签 | 系统维护 | 待受理 / 已受理 / 处理中 / 申请成功 / 申请失败 | 彩色标签 | — |`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "lead-detail-assets",
+    documentRefs: {
+      fields: { section: "二、明细字段", match: "支持多仓单展示，提供 Deep link 点击跳转仓单档案详情", element: "row" },
+    },
     targetId: "lead-detail-assets",
     number: 3,
     kind: "字段",
     title: "抵/质押资产清单与仓单穿透调阅",
     content:
       "详细展示动产质押标的明细。若为仓单质押，展示仓单编号、开单仓库并支持点击 Deep link 穿透至【仓单管理 -> 仓单档案详情】；若为存货抵押，展示货品大类、品类、规格、数量吨位及申报公允货值。",
-    documentRefs: {
-      prd: { section: "5.2 详情交互抽屉/页面", match: "抵质押资产清单", element: "text" },
-      fields: { section: "二、明细字段", match: "存货明细", element: "row" },
-      rules: { section: "一、对象定位与单据层级", match: "核心职责", element: "text" },
-    },
     details: [
       {
         title: "资产穿透",
@@ -90,17 +122,16 @@ export const customerFinancingLeadsDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "lead-detail-timeline",
+    documentRefs: {
+      rules: { section: "2. 路由分流与执行规则" },
+      prd: { section: "修订记录", match: "完善线索接入、受理与路由分流规格", element: "row" },
+    },
     targetId: "lead-detail-timeline",
     number: 4,
     kind: "规则",
     title: "全流程流转时间轴与司法存证 (P03)",
     content:
       "垂直呈现线索从外部接口接入、运营初审核验、路由分流指派到下游任务派发的完整履约轨迹，记录每个节点的处理人员、所属机构、时间戳与操作意见，证据链完整不可篡改。",
-    documentRefs: {
-      prd: { section: "5.2 详情交互抽屉/页面", match: "全流程流转时间轴", element: "text" },
-      fields: { section: "三、系统与审计字段", match: "最新处理时间", element: "row" },
-      rules: { section: "八、权限、风控与安全控制 (P01 ~ P03)", match: "【全路径操作审计日志留痕】(P03)", element: "text" },
-    },
     details: [
       {
         title: "审计要点",
@@ -108,6 +139,35 @@ export const customerFinancingLeadsDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "节点留痕",
             content: "每个节点固化操作快照，包含接入时的意向额度与需要尽调初始标记。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "lead-detail-actions",
+    documentRefs: {
+      prd: { section: "1.1 业务背景" },
+      fields: { section: "一、业务字段", match: "枚举：待受理、处理中、申请成功、申请失败", element: "row" },
+    },
+    targetId: "lead-detail-header",
+    number: 98,
+    kind: "交互",
+    title: "页头操作与业务提示",
+    content:
+      "待受理可受理或驳回；已受理可分配跟进或主动驳回；失败后引导去被拒池。",
+    details: [
+      {
+        title: "操作矩阵",
+        items: [
+          {
+            label: "按钮与提示",
+            content: `| 操作 | 可见状态 | 点击后发生什么 | 提示原话 |
+| :--- | :--- | :--- | :--- |
+| **基础校验通过并受理** | 待受理 | 状态置已受理并记录受理人时间 | — |
+| **分配跟进** | 已受理 | 按需要尽调快照分流派单，状态置处理中 | 未选对象时阻断「请选择跟进对象」 |
+| **驳回** | 待受理 / 已受理 | 必填原因分类与说明后置申请失败并入被拒池 | 「请填写驳回原因（最多 200 字）」 |
+| **前往被拒退回池** | 申请失败 | 跳转被拒池线索标签页 | — |`,
           },
         ],
       },

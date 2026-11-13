@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const severityLevelFormAnnotations: PrototypeAnnotation[] = [
   {
     id: "severity-level-form-header",
+    documentRefs: {
+      prd: { section: "预警等级 主PRD", match: "同步至订单预警：滑动开关，默认关闭；", element: "text" },
+      rules: { section: "【同步至订单预警穿透机制】(R03)", match: "开关独立控制：每个预警等级独立维护一个布尔型「同步至订单预警」开关（syncto", element: "text" },
+    },
     targetId: "severity-level-form-header",
     number: 1,
     kind: "页面",
@@ -33,6 +37,9 @@ export const severityLevelFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "severity-level-form-fields",
+    documentRefs: {
+      fields: { section: "预警等级 字段清单", match: "本文（字段清单）", element: "row" },
+    },
     targetId: "severity-level-form-fields",
     number: 2,
     kind: "字段",
@@ -64,10 +71,31 @@ export const severityLevelFormAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "字段清单对照表",
+        items: [
+          {
+            label: "表单字段字典",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 新增/编辑差异 | 校验与提示 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **等级编码** | 单行文本 | 必填 | 2~16 位半角字符 | 新增可填；编辑只读 | 租户内重复提示「等级编码已存在」 |
+| **显示名称** | 单行文本 | 必填 | 2~20 位中英文字符 | 均可改 | 重复提示「等级名称已存在」 |
+| **标签颜色** | 取色器 + 预设色 | 必填 | 16 进制色值，如 #E60000 | 均可改 | 格式非法时提示「请填写正确的颜色值」 |
+| **严重度排序** | 整数输入 | 必填 | 1~20 整数 | 均可改 | 超出范围阻断；平仓线须大于等于补仓线 |
+| **同步至订单预警** | 开关 | 必填 | 是 / 否 | 均可改 | 高危档建议开启 |
+| **启用状态** | 开关 | 必填 | 启用 / 停用 | 均可改 | 停用后新规则不可选 |
+| **等级说明** | 多行文本 | 选填 | 最长 100 字符 | 均可改 | 超长阻断 |`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "severity-level-form-sync",
+    documentRefs: {
+      rules: { section: "【同步至订单预警穿透机制】(R03)", match: "开关独立控制：每个预警等级独立维护一个布尔型「同步至订单预警」开关（syncto", element: "text" },
+      prd: { section: "1.1 业务背景" },
+    },
     targetId: "severity-level-form-sync",
     number: 3,
     kind: "规则",
@@ -91,6 +119,9 @@ export const severityLevelFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "severity-level-form-actions",
+    documentRefs: {
+      prd: { section: "5.2 动作能力控制矩阵", match: "列表行内点击 Switch 快速翻转 synctoorderwarn，热更新风控", element: "row" },
+    },
     targetId: "severity-level-form-actions",
     number: 4,
     kind: "交互",

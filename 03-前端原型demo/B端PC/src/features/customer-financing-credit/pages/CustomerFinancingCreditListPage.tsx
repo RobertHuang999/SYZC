@@ -126,7 +126,7 @@ export function CustomerFinancingCreditListPage() {
     showToast("已重置所有筛选条件")
   }
 
-  // 1. 标记申请成功确认回调 (R04 / R06)
+  // 1. 标记申请成功确认回调
   const handleConfirmApprove = (
     item: CustomerFinancingCredit,
     creditAmount: number,
@@ -157,7 +157,7 @@ export function CustomerFinancingCreditListPage() {
           operator: "当前资方审核专员",
           organization: item.funderOrgName,
           time: nowStr,
-          detail: `标记申请成功：核准授信金额 ${creditAmount.toFixed(4)} 元，授信期数 ${creditPeriods} 期。已激活下游【线上监管业务办理】(R04/R06)。`,
+          detail: `标记申请成功：核准授信金额 ${creditAmount.toFixed(4)} 元，授信期数 ${creditPeriods} 期。已激活下游【线上监管业务办理】。`,
         },
         ...item.logs,
       ],
@@ -167,7 +167,7 @@ export function CustomerFinancingCreditListPage() {
     showToast(`【${item.applicantName}】授信核准成功，已即刻激活下游线上抵质押办理！`)
   }
 
-  // 2. 标记申请失败确认回调 (R05 / C03)
+  // 2. 标记申请失败确认回调
   const handleConfirmReject = (
     item: CustomerFinancingCredit,
     category: RejectCategory,
@@ -196,7 +196,7 @@ export function CustomerFinancingCreditListPage() {
           operator: "当前资方审核专员",
           organization: item.funderOrgName,
           time: nowStr,
-          detail: `标记申请失败：【${category}】${detail}。已写入被拒退回池 -> 授信失败标签页 (R05)。`,
+          detail: `标记申请失败：【${category}】${detail}。已写入被拒退回池 -> 授信失败标签页。`,
         },
         ...item.logs,
       ],
@@ -206,7 +206,7 @@ export function CustomerFinancingCreditListPage() {
     showToast(`【${item.applicantName}】已标记申请失败，记录已可靠同步至被拒退回池！`)
   }
 
-  // 3. 改标为申请失败回调 (R03 / C01)
+  // 3. 改标为申请失败回调
   const handleConfirmChangeToFailed = (
     item: CustomerFinancingCredit,
     category: RejectCategory,
@@ -249,7 +249,7 @@ export function CustomerFinancingCreditListPage() {
           operator: "当前资方审核专员",
           organization: item.funderOrgName,
           time: nowStr,
-          detail: `资方自纠偏改标：从申请成功改为申请失败，作废授信额度并撤销下游抵质押权限 (R03)。原因：${reason}`,
+          detail: `资方自纠偏改标：从申请成功改为申请失败，作废授信额度并撤销下游抵质押权限。原因：${reason}`,
         },
         ...item.logs,
       ],
@@ -259,7 +259,7 @@ export function CustomerFinancingCreditListPage() {
     showToast(`【${item.applicantName}】已改标为申请失败，并同步写入被拒池！`)
   }
 
-  // 4. 改标为申请成功回调 (R03)
+  // 4. 改标为申请成功回调
   const handleConfirmChangeToSuccess = (
     item: CustomerFinancingCredit,
     creditAmount: number,
@@ -303,7 +303,7 @@ export function CustomerFinancingCreditListPage() {
           operator: "当前资方审核专员",
           organization: item.funderOrgName,
           time: nowStr,
-          detail: `资方重申改标：从申请失败改为申请成功，核准授信额度 ${creditAmount.toFixed(4)} 元，重新激活下游线上监管业务办理 (R03)。原因：${reason}`,
+          detail: `资方重申改标：从申请失败改为申请成功，核准授信额度 ${creditAmount.toFixed(4)} 元，重新激活下游线上监管业务办理。原因：${reason}`,
         },
         ...item.logs,
       ],
@@ -335,7 +335,7 @@ export function CustomerFinancingCreditListPage() {
         <PrototypeAnnotationTarget annotationIds={["credit-page"]}>
           <PageHeader
             title="客户融资授信办理"
-            description="融资监管与融资管理核心台账 · 承接上游锁定合作资方的融资申请，资方机构全员共享审核，录入核准授信额度与期数并激活下游线上抵质押办理，未发起抵质押前支持双向改标自纠偏 (遵循 R01~R06、C01~C03)。"
+            description="融资监管与融资管理核心台账 · 承接上游锁定合作资方的融资申请，资方机构全员共享审核，录入核准授信额度与期数并激活下游线上抵质押办理，未发起抵质押前支持双向改标自纠偏。"
           />
         </PrototypeAnnotationTarget>
 

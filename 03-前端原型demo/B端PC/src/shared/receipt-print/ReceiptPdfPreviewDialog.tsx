@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { Download, FileText, Printer, X } from "lucide-react"
 import {
   Dialog,
@@ -17,11 +17,8 @@ import {
   RECEIPT_PRINT_USER_HINTS,
   type ReceiptPaperSize,
 } from "./receipt-print-ui-labels"
-import {
-  exportReceiptSheetToPdf,
-  type InboundReceiptPrintData,
-  type OutboundReceiptPrintData,
-} from "./receipt-print-utils"
+import { RECEIPT_DOWNLOAD_ASYNC_TOAST } from "@prototype/shared/receipt-print/receipt-print-preview-template"
+import type { InboundReceiptPrintData, OutboundReceiptPrintData } from "./receipt-print-utils"
 import {
   RECEIPT_PAPER_PREVIEW_WIDTH,
   ReceiptPaperSheet,
@@ -49,7 +46,6 @@ export function ReceiptPdfPreviewDialog(props: ReceiptPdfPreviewDialogProps) {
   const [paperSize, setPaperSize] = useState<ReceiptPaperSize>("a4")
   const [specOpen, setSpecOpen] = useState(false)
   const [downloading, setDownloading] = useState(false)
-  const sheetRef = useRef<HTMLDivElement>(null)
 
   if (!data) return null
 
@@ -63,12 +59,9 @@ export function ReceiptPdfPreviewDialog(props: ReceiptPdfPreviewDialogProps) {
 
   const handleDownloadPdf = () => {
     setDownloading(true)
-    exportReceiptSheetToPdf(sheetRef.current, fileName, paperSize)
     window.setTimeout(() => {
       setDownloading(false)
-      onSuccess?.(
-        `已生成并导出【${activeOption.label.split(" ")[0]}】标准矢量凭证：${fileName}`
-      )
+      onSuccess?.(RECEIPT_DOWNLOAD_ASYNC_TOAST)
       onClose()
     }, 350)
   }
@@ -176,17 +169,16 @@ export function ReceiptPdfPreviewDialog(props: ReceiptPdfPreviewDialogProps) {
         <div className="min-h-0 flex-1 overflow-y-auto bg-neutral-200/75 px-5 py-3.5 dark:bg-slate-950/70">
           <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
             <span className="font-medium text-foreground">
-              [单据预览区域 - 当前模式：{activeOption.label.split("（")[0]}]
+              [样式示意图 - 当前模式：{activeOption.label.split("（")[0]}]
             </span>
             <span className="inline-flex items-center gap-1.5 text-[11px]">
               <Printer className="size-3.5" />
-              纯黑实线、线宽 1 像素 · 无灰阶防断针
+              固定示意模板 · 带水印 · 非正式凭证
             </span>
           </div>
 
           <div className="flex justify-center">
             <div
-              ref={sheetRef}
               className={cn(
                 "bg-white text-black shadow-[0_6px_24px_rgba(0,0,0,0.14)] transition-all duration-200",
                 paperSize === "a4" && "w-[760px] p-6",
@@ -199,11 +191,7 @@ export function ReceiptPdfPreviewDialog(props: ReceiptPdfPreviewDialogProps) {
                   '"PingFang SC", -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif',
               }}
             >
-              {kind === "inbound" ? (
-                <ReceiptPaperSheet kind="inbound" paperSize={paperSize} data={data} />
-              ) : (
-                <ReceiptPaperSheet kind="outbound" paperSize={paperSize} data={data} />
-              )}
+              <ReceiptPaperSheet kind={kind} paperSize={paperSize} />
             </div>
           </div>
         </div>
@@ -211,7 +199,7 @@ export function ReceiptPdfPreviewDialog(props: ReceiptPdfPreviewDialogProps) {
         {/* 底部操作按钮区 */}
         <div className="flex shrink-0 items-center justify-between border-t border-border bg-background px-5 py-2.5">
           <span className="text-xs text-muted-foreground">
-            导出文件：{fileName}（支持另存为标准矢量文件或直连打印机输出）
+            预览为样式示意，不实时渲染正式文件。提交后到【下载记录】取正式凭证：{fileName}
           </span>
           <div className="flex items-center gap-2.5">
             <Button type="button" variant="outline" size="sm" onClick={onClose}>

@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const inboundCollectListAnnotations: PrototypeAnnotation[] = [
   {
     id: "collect-page-header",
+    documentRefs: {
+      prd: { section: "入库收集项配置主PRD", match: "【两阶段安全删除拦截】", element: "row" },
+      rules: { section: "入库收集项配置 业务规则规格", match: "配置保质期单位", element: "row" },
+    },
     version: "6.3",
     targetId: "collect-page-header",
     number: 1,
@@ -49,6 +53,10 @@ export const inboundCollectListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "collect-filter",
+    documentRefs: {
+      prd: { section: "2. 功能范围", match: "包含功能 (In Scope)", element: "row" },
+      rules: { section: "【收集项名称唯一性校验规则】(R01)", match: "收集项名称支持 2 至 30 个汉字或字符；", element: "text" },
+    },
     version: "6.3",
     targetId: "collect-filter",
     number: 2,
@@ -71,6 +79,10 @@ export const inboundCollectListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "collect-table",
+    documentRefs: {
+      fields: { section: "6.1 控件类型枚举", match: "控件类型名称", element: "row" },
+      rules: { section: "六、附录：核心控件类型枚举字典", match: "控件类型名称", element: "row" },
+    },
     version: "6.3",
     targetId: "collect-table",
     number: 3,
@@ -103,6 +115,10 @@ export const inboundCollectListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "collect-shelf-life-action",
+    documentRefs: {
+      rules: { section: "【保质期度量单位白名单与基准推荐规则】(R05)", match: "在本菜单操作列点击【配置单位】，可集中维护全平台/租户允许使用的保质期单位范围：", element: "text" },
+      prd: { section: "6.3 保质期专项【配置单位】弹窗交互", match: "提供【推荐基准单位】下拉单选框，选项联动自开启的单位开关；", element: "text" },
+    },
     version: "6.3",
     targetId: "collect-shelf-life-action",
     number: 4,
@@ -130,6 +146,10 @@ export const inboundCollectListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "collect-delete-action",
+    documentRefs: {
+      prd: { section: "3. 架构与引用模型" },
+      rules: { section: "【两阶段安全删除控制规则】(R04)", match: "为什么删除需要分两步检查？", element: "text" },
+    },
     version: "6.3",
     targetId: "collect-delete-action",
     number: 5,
@@ -160,6 +180,10 @@ export const inboundCollectListAnnotations: PrototypeAnnotation[] = [
 export const inboundCollectDetailAnnotations: PrototypeAnnotation[] = [
   {
     id: "detail-header-card",
+    documentRefs: {
+      prd: { section: "5.1 状态定义与流转摘要", match: "启用：收集项正常生效，下游新建品类或货品时可见且可勾选引用；", element: "text" },
+      rules: { section: "【系统核心收集项保护机制】(R02)", match: "为什么需要保护核心字段？", element: "text" },
+    },
     version: "6.3",
     targetId: "detail-header-card",
     number: 1,
@@ -182,6 +206,10 @@ export const inboundCollectDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "detail-section-specs",
+    documentRefs: {
+      fields: { section: "6.1 控件类型枚举", match: "控件类型名称", element: "row" },
+      rules: { section: "入库收集项配置 业务规则规格", match: "控件类型名称", element: "row" },
+    },
     version: "6.3",
     targetId: "detail-section-specs",
     number: 2,
@@ -204,6 +232,10 @@ export const inboundCollectDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "detail-section-shelf-life",
+    documentRefs: {
+      rules: { section: "【保质期度量单位白名单与基准推荐规则】(R05)", match: "提供【推荐基准单位】下拉单选（默认推荐“月”）；", element: "text" },
+      prd: { section: "6.3 保质期专项【配置单位】弹窗交互", match: "提供【推荐基准单位】下拉单选框，选项联动自开启的单位开关；", element: "text" },
+    },
     version: "6.3",
     targetId: "detail-section-shelf-life",
     number: 3,
@@ -226,6 +258,10 @@ export const inboundCollectDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "detail-section-audit",
+    documentRefs: {
+      fields: { section: "八、修订记录", match: "1. 创建时间筛选控件改为「日期范围选择器，按天」；2. 启停确认提示语与「二次", element: "row" },
+      rules: { section: "【多租户数据隔离机制】(P02)", match: "收集项字典池在多租户体系下严格隔离，不同租户的企业只能查看和维护属于自己租户的收", element: "text" },
+    },
     version: "6.3",
     targetId: "detail-section-audit",
     number: 4,
@@ -256,6 +292,10 @@ export const inboundCollectDetailAnnotations: PrototypeAnnotation[] = [
 export const inboundCollectFormAnnotations: PrototypeAnnotation[] = [
   {
     id: "collect-form-header",
+    documentRefs: {
+      prd: { section: "6.2 新增/编辑页交互" },
+      fields: { section: "二、新增/编辑页字段", match: "动态增删列表", element: "row" },
+    },
     version: "6.3",
     targetId: "collect-form-header",
     number: 1,
@@ -283,6 +323,10 @@ export const inboundCollectFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "collect-form-fields",
+    documentRefs: {
+      fields: { section: "6.1 控件类型枚举", match: "控件类型名称", element: "row" },
+      rules: { section: "【收集项名称唯一性校验规则】(R01)", match: "收集项名称支持 2 至 30 个汉字或字符；", element: "text" },
+    },
     version: "6.3",
     targetId: "collect-form-fields",
     number: 2,

@@ -3,16 +3,15 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const partnerStockChangeMapAnnotations: PrototypeAnnotation[] = [
   {
     id: "change-map-scope",
-    targetId: "change-map-header",
+    documentRefs: {
+      prd: { section: "05 · 存量改造与关联业务协同（文档索引）", match: "合作方档案存量改造地图", element: "row" },
+      rules: { section: "6.3 版本范围与里程碑（SSOT）", match: "合作方档案存量改造地图", element: "row" },
+    },
+    targetId: "change-map-scope",
     number: 1,
     kind: "页面",
     title: "合作方档案存量改造地图 · 研发索引",
     content: "6.3 菜单级改造索引；业务 SSOT 仍为 05 协同规格与 08 里程碑。",
-    documentRefs: {
-      prd: { section: "一、文档清单", match: "改造地图" },
-      fields: { section: "五、附录 A", match: "按菜单字段" },
-      rules: { section: "二、菜单与能力范围矩阵", match: "P0" },
-    },
     details: [
       {
         title: "阅读路径",
@@ -36,6 +35,10 @@ export const partnerStockChangeMapAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "change-map-stats",
+    documentRefs: {
+      prd: { section: "三、原型阅读入口（PC Demo）" },
+      rules: { section: "六、文档与原型索引（联调速查）", match: "6.3 原型", element: "row" },
+    },
     targetId: "change-map-stats",
     number: 2,
     kind: "页面",
@@ -59,6 +62,10 @@ export const partnerStockChangeMapAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "change-map-table",
+    documentRefs: {
+      prd: { section: "二、与各菜单 6.3 副本的关系", match: "待 6.3 副本落地时以协同规格为准", element: "row" },
+      fields: { section: "五、附录 A · 按菜单字段与引用改造检查表", match: "6.3 增量字段/改造要点", element: "row" },
+    },
     targetId: "change-map-table",
     number: 3,
     kind: "页面",

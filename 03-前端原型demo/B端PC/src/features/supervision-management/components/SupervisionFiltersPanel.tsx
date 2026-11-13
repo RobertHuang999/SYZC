@@ -23,13 +23,14 @@ interface SupervisionFiltersPanelProps {
   onToggleExpand: () => void
   onChange: (filters: SupervisionOrderFilters) => void
   onSearch: (next?: SupervisionOrderFilters) => void
+  extraActions?: ReactNode
 }
 
-const inputClass = "h-[34px] text-sm"
+const inputClass = "text-sm"
 
 function FilterField({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       <label className="text-xs font-normal text-muted-foreground">{label}</label>
       {children}
     </div>
@@ -44,6 +45,7 @@ export function SupervisionFiltersPanel({
   onToggleExpand,
   onChange,
   onSearch,
+  extraActions,
 }: SupervisionFiltersPanelProps) {
   return (
     <PrototypeAnnotationTarget annotationIds={["supervision-management-filter"]}>
@@ -57,6 +59,7 @@ export function SupervisionFiltersPanel({
               onSearch({ ...DEFAULT_SUPERVISION_FILTERS })
             }}
             onSearch={() => onSearch()}
+            extraActions={extraActions}
           />
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

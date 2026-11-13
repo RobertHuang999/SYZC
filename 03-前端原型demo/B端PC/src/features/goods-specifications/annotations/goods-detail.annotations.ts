@@ -3,16 +3,16 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const goodsDetailAnnotations: PrototypeAnnotation[] = [
   {
     id: "goods-detail-header",
+    documentRefs: {
+      prd: { section: "货品管理主PRD", match: "【设置系统参考单价与修改记录】", element: "row" },
+      rules: { section: "1. 货品设置系统参考单价与修改记录时序" },
+    },
     targetId: "goods-detail-header",
     number: 1,
     kind: "页面",
     title: "货品详情与自身/有效双层状态",
     content:
       "详情页全量只读展示货品主数据、规格、入库收集配置、系统参考单价与操作留痕。",
-    documentRefs: {
-      prd: { section: "5. 状态机与动作能力矩阵", match: "有效启用" },
-      rules: { section: "二、状态定义与有效启用计算模型", match: "K11" },
-    },
     details: [
       {
         title: "状态口径",
@@ -39,20 +39,43 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "货品状态生命周期",
+        items: [
+          {
+            label: "状态流转图",
+            content: `flowchart TD
+    A["新增大类 / 品类 / 货品"] --> B{"自身状态：启用？"}
+    B -->|否| C["自身停用<br/>下游不可选"]
+    B -->|是| D{"品类启用？"}
+    D -->|否| E["有效状态：停用<br/>详情提示上级停用原因"]
+    D -->|是| F{"大类启用？"}
+    F -->|否| E
+    F -->|是| G["有效启用<br/>下游可选"]
+    C -->|重新启用| D
+    G -->|已产生入库单| H["仍可停用，但禁止编辑主档"]`,
+          },
+          {
+            label: "上下游与权限",
+            content:
+              "上游来源：大类管理 → 品类管理 → 货品；下游被入库单、仓单、库存与收集项配置引用；历史单据保留生成时刻的规格快照，不随主档修改回写 (K07)。仅平台管理员可启停与编辑。",
+          },
+        ],
+      },
     ],
   },
   {
     id: "goods-detail-base",
+    documentRefs: {
+      fields: { section: "二、状态与系统字段", match: "内部系统字段", element: "row" },
+      rules: { section: "【系统参考单价维护与双精度展示规则】(SKU-F05)", match: "双单位自由展示：", element: "text" },
+    },
     targetId: "goods-detail-base",
     number: 2,
     kind: "字段",
     title: "基础规格档案与双精度单价",
     content:
       "展示所属大类与品类、计量参数与单位、动态规格取值、系统参考单价（元保留 2~6 位小数，万元保留 10 位小数）及价格趋势入口。",
-    documentRefs: {
-      fields: { section: "一、业务字段", match: "系统参考单价" },
-      rules: { section: "三、核心业务规则", match: "K05" },
-    },
     details: [
       {
         title: "字段说明",
@@ -74,10 +97,35 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "基础规格字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 展示规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **货品名称** | 只读文本 | 必填 | 最多 50 个字符 | 页头 | — |
+| **所属大类** | 只读文本 | 必填 | 继承大类管理 | 单行 | 不在本页修改归属 |
+| **所属品类** | 只读文本 | 必填 | 继承品类管理 | 单行 | 决定规格维度 |
+| **计量参数** | 只读文本 | 必填 | 如重量、数量、体积 | 与单位组合展示 | 与单位分离维护 (K02) |
+| **计量单位** | 只读文本 | 必填 | 吨/公斤/件/包/箱 等 | 与计量参数组合为「参数(单位)」 | — |
+| **规格参数** | 只读键值组 | 必填 | 按品类 1~5 个维度 | 逐项展示 | 历史单据保留快照 |
+| **系统参考单价（元）** | 只读数值 | 选填 | 保留 2~6 位小数，带千分位 | 双口径同屏 | 无价格显示「--」 (K05) |
+| **系统参考单价（万元）** | 只读数值 | 选填 | 严格保留 10 位小数 | 双口径同屏 | — |
+| **价格趋势** | 文字链接 | — | 点击查看近期曲线 | 单价旁 | — |
+| **自身状态** | 状态标签 | 系统维护 | 启用 / 停用 | 页头 | 停用后下游不可选 |
+| **有效状态** | 状态标签 | 系统计算 | 有效启用 / 停用 | 页头 | 三态综合计算 (K11) |`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "goods-detail-inbound",
+    documentRefs: {
+      fields: { section: "1.1 入库收集信息配置：引用 07 元数据 + 货品级参数", match: "选填（保质期专属）", element: "row" },
+      rules: { section: "【入库收集信息配置与保质期固定单位指定规则】(SKU-F03)", match: "收集项从哪来：", element: "text" },
+    },
     version: "6.3",
     targetId: "goods-detail-inbound",
     number: 3,
@@ -85,11 +133,6 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
     title: "6.3 变更 · 入库收集信息配置 (K03 / K04 / K12)",
     content:
       "按配置顺序展示已勾选的 07 收集项、控件类型、是否必填、保质期固定单位与建议默认值，以及下拉选择器勾选的适用候选项。",
-    documentRefs: {
-      prd: { section: "4. 业务场景", match: "SKU-S02" },
-      fields: { section: "1.1 入库收集信息配置", match: "保质期固定单位" },
-      rules: { section: "三、核心业务规则", match: "K12" },
-    },
     details: [
       {
         title: "6.3 版本迭代调整对照（调整前 → 调整后）",
@@ -128,15 +171,16 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "goods-detail-price",
+    documentRefs: {
+      prd: { section: "修订记录", match: "2026-10-26", element: "row" },
+      rules: { section: "1. 货品设置系统参考单价与修改记录时序" },
+    },
     targetId: "goods-detail-price",
     number: 4,
     kind: "交互",
     title: "参考单价修改记录（元 / 万元 10 位精度）",
     content:
       "按时间倒序展示历次设置价格的审计记录，同时呈现元与万元（保留 10 位小数）双口径。",
-    documentRefs: {
-      rules: { section: "三、核心业务规则", match: "K05" },
-    },
     details: [
       {
         title: "展示与留痕",
@@ -157,16 +201,15 @@ export const goodsDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "goods-detail-audit",
+    documentRefs: {
+      rules: { section: "一、模块与单据定位", match: "【第 3 层 - 货品 / SKU 主档】（货品主数据与存货监管体系最小业务交易", element: "row" },
+    },
     targetId: "goods-detail-audit",
     number: 5,
     kind: "规则",
     title: "系统与审计信息（含数据版本号与快照边界）",
     content:
       "详情页底部展示数据版本号（第 N 版）、创建人、创建时间、最近更新人与更新时间，明确主档变更与历史单据不可变快照边界。",
-    documentRefs: {
-      fields: { section: "二、状态与系统字段", match: "数据版本号" },
-      rules: { section: "三、核心业务规则", match: "K10" },
-    },
     details: [
       {
         title: "留痕规则",

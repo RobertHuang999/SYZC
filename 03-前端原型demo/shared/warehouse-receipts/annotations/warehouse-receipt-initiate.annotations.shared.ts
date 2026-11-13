@@ -31,6 +31,32 @@ export const warehouseReceiptInitiateAnnotationsShared: SharedPrototypeAnnotatio
           },
         ],
       },
+      {
+        title: "开立流程与数据落点",
+        items: [
+          {
+            label: "开立流转图",
+            content: `flowchart TD
+    A["业务办理 → 业务发起 → 仓单开立"] --> B["第 1 步 基础信息<br/>货主 + 企业经办人"]
+    B -->|校验通过| C["第 2 步 货品明细<br/>添加货物 · 圈选批次 + 数量"]
+    C -->|点击提交| D["签章面板<br/>人脸活体 → 短信验证码 → 勾选协议"]
+    D -->|三项就绪| E["提交申请"]
+    D -->|任一未通过| D
+    E --> F["生成 CD + 19 位编号<br/>固化防伪哈希与存证"]
+    F --> G["进入仓单管理列表（正常态）"]`,
+          },
+          {
+            label: "上下游",
+            content:
+              "货主来自合作方档案（无档案不可开立）；批次来自库存明细中该货主在该仓库的【存货中】可用库存；开立成功后库存批次状态转为【仓单中】。",
+          },
+          {
+            label: "权限",
+            content:
+              "只有具备仓库操作权限的现场人员可发起；货主档案须为当前租户有效档案。",
+          },
+        ],
+      },
     ],
   },
   {
@@ -64,20 +90,37 @@ export const warehouseReceiptInitiateAnnotationsShared: SharedPrototypeAnnotatio
           },
         ],
       },
+      {
+        title: "基础信息字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 新增/编辑差异 | 校验与提示 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **货主类型** | 单选 | 必填 | 企业 / 个人 | 切换时重置下方主体与证件项 | 未选不可进入下一步 |
+| **货主名称** | 下拉选择（档案） | 必填 | 合作方档案中的有效货主 | 选中后带出标识，不可手改 | 无货主档案时提示「请先在货主信息中建档」 |
+| **货主标识** | 只读文本 | 必填 | 企业 18 位统一社会信用代码；个人脱敏身份证号 | 随货主名称自动带出 | — |
+| **身份证号** | 只读文本 | 个人必填 | 18 位，界面脱敏 | 随货主档案带出 | 档案缺失时阻断并提示补全档案 |
+| **经办人姓名** | 单行文本 | 企业必填 | 最多 30 个字符 | 仅企业货主展示 | 为空时提示「请填写经办人姓名」 |
+| **经办人手机号** | 单行文本 | 企业必填 | 11 位手机号 | 仅企业货主展示 | 格式错误提示「请输入正确的手机号」 |
+| **经办人身份证号** | 单行文本 | 企业必填 | 18 位身份证号 | 仅企业货主展示 | 校验位不通过提示「身份证号有误，请核对后重填」 |`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "receipt-initiate-goods",
+    documentRefs: {
+      prd: { section: "5.1 仓单四态生命周期定义", match: "正常：仓单已合法生效开立，资产权属明晰，底层货物未被冻结或质押占用；", element: "text" },
+      fields: { section: "六、展示、筛选与引用规则", match: "货物无自定义扩展属性时，展示【无: --】。", element: "text" },
+    },
     targetId: "receipt-initiate-goods",
     number: 3,
     kind: "交互",
     title: "在库货物圈选与精确到垛位",
     content:
       "点击「添加货物」后在面板内选择仓库，展示该货主在该仓库内【存货中】且可用数量大于 0 的未占用库存；支持先入先出（FIFO）快捷开立与自定义圈选，单次开立最多 50 组货物。",
-    documentRefs: {
-      fields: { section: "五、操作字段子清单索引", match: "批次开立数量" },
-      rules: { section: "2. 规则详细规格", match: "R02" },
-    },
     details: [
       {
         title: "圈选约束",
@@ -104,20 +147,39 @@ export const warehouseReceiptInitiateAnnotationsShared: SharedPrototypeAnnotatio
           },
         ],
       },
+      {
+        title: "圈选交互与提示",
+        items: [
+          {
+            label: "操作矩阵",
+            content: `| 操作 | 可见角色 | 前置条件 | 点击后发生什么 | 提示原话 |
+| :--- | :--- | :--- | :--- | :--- |
+| **添加货物** | 开单经办人 | 无 | 打开选仓与选货面板 | — |
+| **先入先出开立** | 同上 | 已选货品、录入总量 | 按入库时间从早到晚自动圈选批次 | 总量超过可开立量时提示「开立数量不能超过可开立总量」 |
+| **自定义圈选** | 同上 | 已选货品 | 逐批勾选并录入数量 | 单批超出可用量时提示「不能超过该批次可用数量」 |
+| **全部开立** | 同上 | 已选货品 | 一次性填满可开立总量 | — |
+| **提交** | 同上 | 至少 1 组货物、数量均合法 | 进入签章面板 | 未选货物时提示「请至少添加一组货物」 |`,
+          },
+          {
+            label: "上限",
+            content: "单次开立最多 50 组货物；超出时阻断并提示「单次开立最多 50 组货物，请分批开立」。",
+          },
+        ],
+      },
     ],
   },
   {
     id: "receipt-initiate-confirm",
+    documentRefs: {
+      fields: { section: "仓单管理字段清单", match: "01 仓单开立字段清单", element: "row" },
+      rules: { section: "【仓单注销多重确认与效力终止】(R11)", match: "点击 【继续】 → 跳转下一步进行电子签章；", element: "text" },
+    },
     targetId: "receipt-initiate-confirm",
     number: 4,
     kind: "字段",
     title: "提交确认与协议签署",
     content:
       "货品明细页点击「提交」后在签章面板核对本次开立摘要，并显式勾选已阅读并同意《电子仓单法律协议》。",
-    documentRefs: {
-      fields: { section: "五、操作字段子清单索引", match: "签约方式" },
-      prd: { section: "场景 1【现场实名开具电子仓单】(S01)", match: "签署电子仓单" },
-    },
     details: [
       {
         title: "确认口径",
@@ -138,16 +200,15 @@ export const warehouseReceiptInitiateAnnotationsShared: SharedPrototypeAnnotatio
   },
   {
     id: "receipt-initiate-sign",
+    documentRefs: {
+      rules: { section: "【全量操作可用与人脸绑定】(R03)", match: "仓单开立发起入口：位于移动端 业务办理 → 业务发起 → 仓单开立（biz-in", element: "text" },
+    },
     targetId: "receipt-initiate-sign",
     number: 5,
     kind: "规则",
     title: "电子签章：人脸活体 + 短信验证码（R06）",
     content:
       "先完成活体人脸识别，通过后才激活短信验证码；验证码 6 位、有效期 5 分钟，发送后 60 秒倒计时防刷，错误超过 5 次锁定本次开单 30 分钟。",
-    documentRefs: {
-      rules: { section: "2. 规则详细规格", match: "R06" },
-      prd: { section: "场景 1【现场实名开具电子仓单】(S01)", match: "活体人脸识别" },
-    },
     details: [
       {
         title: "提交前置",

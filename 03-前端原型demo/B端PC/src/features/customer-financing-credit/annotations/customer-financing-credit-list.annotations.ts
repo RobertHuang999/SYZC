@@ -3,18 +3,31 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const customerFinancingCreditListAnnotations: PrototypeAnnotation[] = [
   {
     id: "credit-page",
+    documentRefs: {
+      prd: { section: "客户融资授信办理主PRD", match: "资方核准授信额度与标记申请成功", element: "row" },
+      rules: { section: "【未发起抵质押前双向改标规则】(R03)" },
+    },
     targetId: "credit-page",
     number: 1,
     kind: "页面",
     title: "客户融资授信办理台账定位与资方信贷决策",
     content:
       "本页面为融资监管/融资管理第3节点核心业务台账，承接在上游节点（需求线索免尽调件、尽调办理成功件或被拒退回池重分配件）中已锁定合作资方机构的融资申请单据。由目标资方机构授权审核人员进行全员共享审核，录入核准授信额度与期数并标记申请成功以激活下游线上监管业务办理，或标记申请失败入池归集，并在未发起抵质押前提供可控双向改标能力（遵循R01~R06、C01~C03、P01~P02）。",
-    documentRefs: {
-      prd: { section: "1. 业务背景与核心痛点", match: "模块定位", element: "text" },
-      fields: { section: "一、业务字段", match: "融资状态", element: "row" },
-      rules: { section: "一、对象定位与单据层级", match: "单据层级", element: "text" },
-    },
     details: [
+      {
+        title: "业务流转",
+        items: [
+          {
+            label: "流转图",
+            content: `flowchart TD
+    A["线上抵质押 / 线索免尽调件"] --> B["授信已受理"]
+    A2["尽调受理成功"] --> B
+    B -->|资方审核| C{"审核结果"}
+    C -->|通过| D["申请成功<br/>录入授信金额与期数"]
+    C -->|不通过| E["申请失败"]`,
+          },
+        ],
+      },
       {
         title: "核心业务边界",
         items: [
@@ -92,16 +105,16 @@ export const customerFinancingCreditListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "credit-actions",
+    documentRefs: {
+      rules: { section: "四、动作能力矩阵", match: "标记申请成功", element: "row" },
+      prd: { section: "7.1 功能与操作权限矩阵", match: "标记申请成功与额度核准", element: "row" },
+    },
     targetId: "credit-actions",
     number: 4,
     kind: "规则",
     title: "动态操作能力矩阵与双向改标锁定机制",
     content:
       "根据单据当前状态动态呈现可用操作：【授信已受理】展示【查看】、【标记申请成功】、【标记申请失败】；【申请成功】展示【查看】及未发起抵质押时的【改标为失败】；【申请失败】展示【查看】及未重新调度时的【改标为成功】。一旦下游发起抵质押确认，改标通道即刻永久锁定（遵循R03/C01）。",
-    documentRefs: {
-      prd: { section: "6. 核心业务规则索引与追溯", match: "R03", element: "row" },
-      rules: { section: "四、动作能力矩阵", match: "动作能力矩阵", element: "row" },
-    },
     details: [
       {
         title: "状态机联动规则",
@@ -117,6 +130,40 @@ export const customerFinancingCreditListAnnotations: PrototypeAnnotation[] = [
           {
             label: "未发起抵质押改标 (R03)",
             content: "在借款人或监管员尚未提交线上抵质押前，支持成功/失败互改自纠偏；一旦提交则强制锁定 (C01)。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "cr-list-fields",
+    documentRefs: {
+      fields: { section: "一、业务字段", match: "授信金额（元）", element: "row" },
+      rules: { section: "【授信核准金额与期数合规校验规则】(R04)", match: "授信期数必须为大于等于 1 的正整数；", element: "text" },
+    },
+    targetId: "credit-table",
+    number: 99,
+    kind: "字段",
+    title: "字段字典",
+    content: "展示产品、申请人、抵质押物、意向金额与期数、授信/贷款回写值及授信节点状态。",
+    details: [
+      {
+        title: "字段清单对照表",
+        items: [
+          {
+            label: "字段",
+            content: `| 字段名称 | 控件 | 必填 | 取值范围与格式 | 展示规则 |
+| :--- | :--- | :---: | :--- | :--- |
+| **产品名称** | 文本 | 系统带出 | 继承线索 | 列表 / 详情 |
+| **申请人名称** | 文本 | 系统带出 | 企业全称 / 个人姓名 | 支持综合搜索 |
+| **申请人电话** | 文本 | 系统带出 | 11 位，脱敏中间 4 位 | 详情展示 |
+| **抵/质押物** | 标签 | 系统带出 | 存货 / 仓单 | 仓单可穿透 |
+| **意向融资金额** | 数值 | 系统带出 | 元，保留 4 位小数 | 右对齐 |
+| **意向融资期数** | 数值 | 系统带出 | 正整数 | 单行 |
+| **授信金额 / 期数** | 数值 | 条件回写 | 元，4 位小数；期数 | 未授信显示「—」 |
+| **贷款金额 / 期数** | 数值 | 条件回写 | 元，4 位小数；期数 | 未放款显示「—」 |
+| **融资状态** | 状态标签 | 系统维护 | 授信已受理 / 申请成功 / 申请失败 | 彩色标签 |
+| **附件资料** | 文件组 | 条件必填 | 最多 10 份，图片 / PDF / Word | 详情上传与预览 |`,
           },
         ],
       },

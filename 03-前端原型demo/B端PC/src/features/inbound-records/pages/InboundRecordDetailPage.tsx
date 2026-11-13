@@ -203,8 +203,8 @@ export function InboundRecordDetailPage() {
         <IterationPageTag
           version="6.4"
           changeType="新增"
-          title="详情顶部新增【单据下载】按钮，支持 A4 / A5 / 针式连续纸二等分三种排版预览与 PDF 导出"
-          description="仅对【已通过】状态单据展示，按一级货品汇总平铺，货主证号与电话明文打印。"
+          title="详情顶部新增【单据下载】按钮，预览为固定样式示意图（A4 / A5 / 针式连续纸）"
+          description="仅对【已通过】单据展示。预览带示意水印并演示两页换页；正式文件到【下载记录】下载。"
         />
 
         {/* 顶部标题与操作卡片（对齐 store-apply-info-detail.vue 结构） */}

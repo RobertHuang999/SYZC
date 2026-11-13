@@ -1,5 +1,9 @@
 import type { GoodsLineForm, InboundFormState } from "../domain/form-types"
 import {
+  findOwnerSearchRecordByPartnerId,
+  resolveOwnerSearchRecord,
+} from "../mock/inbound-form.mock"
+import {
   formatSpecSummary,
   getSkuById,
   inferSkuIdFromStagingParts,
@@ -96,6 +100,44 @@ export function calcFormTotals(lines: GoodsLineForm[]) {
     goodsTotal,
     stackedTotal,
     noStackTotal: 0,
+  }
+}
+
+export function maskInboundPhone(phone?: string): string {
+  if (!phone) return ""
+  const digits = phone.replace(/\D/g, "")
+  if (digits.length === 11) {
+    return `${digits.slice(0, 3)}****${digits.slice(-4)}`
+  }
+  return phone
+}
+
+/** 按档案库把已选/已输入货主绑到表单，避免只输入名称却没带出 partnerId */
+export function bindInboundOwnerFromCatalog(
+  form: InboundFormState
+): InboundFormState {
+  const archive = form.partnerId
+    ? findOwnerSearchRecordByPartnerId(form.partnerId) ??
+      resolveOwnerSearchRecord({
+        ownerType: form.ownerType,
+        ownerName: form.ownerName,
+        ownerIdentifier: form.ownerIdentifier,
+      })
+    : resolveOwnerSearchRecord({
+        ownerType: form.ownerType,
+        ownerName: form.ownerName,
+        ownerIdentifier: form.ownerIdentifier,
+      })
+  if (!archive) return form
+  return {
+    ...form,
+    ownerType: archive.ownerType,
+    ownerName: archive.name,
+    ownerIdentifier: form.ownerIdentifier || archive.ownerIdentifier,
+    contactPhone: form.contactPhone || archive.contactPhone || "",
+    idCardNo: form.idCardNo || archive.idCardNo || "",
+    partnerId: form.partnerId || archive.partnerId || "",
+    isNewOwner: false,
   }
 }
 

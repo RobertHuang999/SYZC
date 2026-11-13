@@ -181,7 +181,7 @@ export function OutboundRecordDetailPage() {
         <IterationPageTag
           version="6.4"
           changeType="新增"
-          title="详情顶部新增【单据下载】按钮，支持 A4 / A5 / 针式连续纸二等分三种排版预览与质押单价货值脱敏"
+          title="详情顶部新增【单据下载】：固定样式示意图预览，质押单价货值脱敏"
           description="提货人明细与货主证号电话明文展示，单价与货物价值保留列头、数值留空脱敏。"
         />
 
@@ -275,6 +275,9 @@ export function OutboundRecordDetailPage() {
         </PrototypeAnnotationTarget>
 
         {/* 明细、提货、审核、修改与资料统一按页签展示 */}
+        <PrototypeAnnotationTarget
+          annotationIds={["outbound-detail-goods-tab", "outbound-detail-pickup-record", "outbound-detail-audit-tab"]}
+        >
         <DetailTabShell
           tabs={[
             { key: "goods", label: "货物明细" },
@@ -842,6 +845,7 @@ export function OutboundRecordDetailPage() {
             </>
           )}
         </DetailTabShell>
+        </PrototypeAnnotationTarget>
 
         {/* 图片预览弹窗 */}
         <ImageViewerModal

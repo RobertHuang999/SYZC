@@ -60,7 +60,7 @@ export const customerFinancingLeadsMock: CustomerFinancingLead[] = [
       {
         id: "LOG_01",
         action: "外部融资申请自动接入并生成线索",
-        operator: "系统API网关（遵循R01/R02）",
+        operator: "系统接口网关",
         time: "2026-11-02 09:30:15",
         detail: "通过外部C端推送接口接入，固化需要尽调=是快照，初始状态为待受理。",
       },
@@ -117,7 +117,7 @@ export const customerFinancingLeadsMock: CustomerFinancingLead[] = [
       {
         id: "LOG_02",
         action: "外部融资申请接入生成线索",
-        operator: "系统API网关（遵循R01/R02）",
+        operator: "系统接口网关",
         time: "2026-11-01 14:15:20",
         detail: "免现场尽调标准产品，固化需要尽调=否快照，进入待受理池。",
       },
@@ -184,7 +184,7 @@ export const customerFinancingLeadsMock: CustomerFinancingLead[] = [
       {
         id: "LOG_03",
         action: "外部融资申请接入生成线索",
-        operator: "系统API网关",
+        operator: "系统接口网关",
         time: "2026-10-28 10:20:00",
         detail: "申请要素通过合规校验，落库生成待受理单据。",
       },
@@ -194,7 +194,7 @@ export const customerFinancingLeadsMock: CustomerFinancingLead[] = [
         operator: "王强（森云运营调度员）",
         time: "2026-10-28 11:05:42",
         detail:
-          "依据快照锁定需要尽调=是，一键派发尽调专员【李巡检】，状态更新为处理中（遵循R03/R07）。",
+          "依据快照锁定需要尽调=是，一键派发尽调专员【李巡检】，状态更新为处理中 。",
       },
     ],
   },
@@ -252,7 +252,7 @@ export const customerFinancingLeadsMock: CustomerFinancingLead[] = [
       {
         id: "LOG_05",
         action: "外部融资申请接入生成线索",
-        operator: "系统API网关",
+        operator: "系统接口网关",
         time: "2026-10-25 15:40:10",
         detail: "免尽调白名单产品，自动固化需要尽调=否快照。",
       },
@@ -262,7 +262,7 @@ export const customerFinancingLeadsMock: CustomerFinancingLead[] = [
         operator: "王强（森云运营调度员）",
         time: "2026-10-25 16:18:30",
         detail:
-          "依据快照锁定无需尽调，直派资方【四川享宇科技金融服务部】，状态更新为处理中（遵循R03/R07）。",
+          "依据快照锁定无需尽调，直派资方【四川享宇科技金融服务部】，状态更新为处理中 。",
       },
     ],
   },
@@ -320,7 +320,7 @@ export const customerFinancingLeadsMock: CustomerFinancingLead[] = [
       {
         id: "LOG_07",
         action: "外部融资申请接入生成线索",
-        operator: "系统API网关",
+        operator: "系统接口网关",
         time: "2026-10-20 09:12:00",
         detail: "初始待受理单据接入。",
       },
@@ -330,7 +330,7 @@ export const customerFinancingLeadsMock: CustomerFinancingLead[] = [
         operator: "王强（森云风险部主管）",
         time: "2026-10-20 14:22:18",
         detail:
-          "原因：押品估值不足，货主拒绝补保。状态更新为申请失败，可靠入池沉淀（遵循R04/C03）。",
+          "原因：押品估值不足，货主拒绝补保。状态更新为申请失败，可靠入池沉淀 。",
       },
     ],
   },
@@ -377,7 +377,7 @@ export const customerFinancingLeadsMock: CustomerFinancingLead[] = [
       {
         id: "LOG_09",
         action: "外部个人融资申请接入",
-        operator: "系统API网关",
+        operator: "系统接口网关",
         time: "2026-09-30 16:12:22",
         detail: "个人货主申请接入，固化需要尽调=否快照。",
       },

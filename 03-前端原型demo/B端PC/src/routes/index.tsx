@@ -84,14 +84,21 @@ import { TallyStackingListPage } from "@/features/tally-stacking/pages/TallyStac
 import { InventoryDetailsListPage } from "@/features/inventory-details/pages/InventoryDetailsListPage"
 import { InventoryDetailsDetailPage } from "@/features/inventory-details/pages/InventoryDetailsDetailPage"
 import { InventoryTransactionsListPage } from "@/features/inventory-transactions/pages/InventoryTransactionsListPage"
-import { SupervisionHandlingPartnerRefPage } from "@/features/supervision-handling/pages/SupervisionHandlingPartnerRefPage"
+import { SupervisionHandlingPage } from "@/features/supervision-handling/pages/SupervisionHandlingPage"
 import { SupervisionManagementListPage } from "@/features/supervision-management/pages/SupervisionManagementListPage"
+import { SupervisionOrderDetailPage } from "@/features/supervision-management/pages/SupervisionOrderDetailPage"
 import { CustomerFinancingLeadsListPage } from "@/features/customer-financing-leads/pages/CustomerFinancingLeadsListPage"
 import { CustomerFinancingLeadDetailPage } from "@/features/customer-financing-leads/pages/CustomerFinancingLeadDetailPage"
 import { CustomerFinancingDueDiligenceListPage } from "@/features/customer-financing-due-diligence/pages/CustomerFinancingDueDiligenceListPage"
 import { CustomerFinancingDueDiligenceDetailPage } from "@/features/customer-financing-due-diligence/pages/CustomerFinancingDueDiligenceDetailPage"
 import { CustomerFinancingCreditListPage } from "@/features/customer-financing-credit/pages/CustomerFinancingCreditListPage"
 import { CustomerFinancingCreditDetailPage } from "@/features/customer-financing-credit/pages/CustomerFinancingCreditDetailPage"
+import { RejectPoolListPage } from "@/features/reject-pool/pages/RejectPoolListPage"
+import { RejectPoolDetailPage } from "@/features/reject-pool/pages/RejectPoolDetailPage"
+import { RejectPoolActionPage } from "@/features/reject-pool/pages/RejectPoolActionPage"
+import { OnlinePledgeListPage } from "@/features/online-pledge/pages/OnlinePledgeListPage"
+import { OnlinePledgeDetailPage } from "@/features/online-pledge/pages/OnlinePledgeDetailPage"
+import { OnlinePledgeActionPage } from "@/features/online-pledge/pages/OnlinePledgeActionPage"
 import { InboundStagingPrototypeGate } from "@/features/inbound-staging-reg/components/InboundStagingPrototypeGate"
 import { InboundStagingListPage } from "@/features/inbound-staging-reg/pages/InboundStagingListPage"
 import { InboundStagingFormPage } from "@/features/inbound-staging-reg/pages/InboundStagingFormPage"
@@ -638,16 +645,60 @@ export function AppRoutes() {
           element={<CustomerFinancingCreditDetailPage />}
         />
 
-        {/* 融资监管 · 监管办理（6.3 合作方权人/质权人引用切片） */}
+        {/* 融资监管 · 线上监管业务办理 */}
+        <Route
+          path="融资/监管/融资管理/线上监管业务办理"
+          element={<OnlinePledgeListPage />}
+        />
+        <Route
+          path="融资/监管/融资管理/线上监管业务办理/详情/:id"
+          element={<OnlinePledgeDetailPage />}
+        />
+        <Route
+          path="融资/监管/融资管理/线上监管业务办理/操作/:id"
+          element={<OnlinePledgeActionPage />}
+        />
+
+        {/* 融资监管 · 被拒退回记录池 / 被拒退回池 */}
+        <Route
+          path="融资/监管/融资管理/被拒退回记录池"
+          element={<RejectPoolListPage />}
+        />
+        <Route
+          path="融资/监管/融资管理/被拒退回记录池/详情/:id"
+          element={<RejectPoolDetailPage />}
+        />
+        <Route
+          path="融资/监管/融资管理/被拒退回记录池/操作/:id"
+          element={<RejectPoolActionPage />}
+        />
+        <Route
+          path="融资/监管/融资管理/被拒退回池"
+          element={<RejectPoolListPage />}
+        />
+        <Route
+          path="融资/监管/融资管理/被拒退回池/详情/:id"
+          element={<RejectPoolDetailPage />}
+        />
+        <Route
+          path="融资/监管/融资管理/被拒退回池/操作/:id"
+          element={<RejectPoolActionPage />}
+        />
+
+        {/* 融资监管 · 监管办理（开立表单 + 办理台账闭环） */}
         <Route
           path="融资/监管/监管业务/监管办理"
-          element={<SupervisionHandlingPartnerRefPage />}
+          element={<SupervisionHandlingPage />}
         />
 
         {/* 融资监管 · 监管管理（存续期台账：抵押/质押/监管服务三 Tab） */}
         <Route
           path="融资/监管/监管业务/监管管理"
           element={<SupervisionManagementListPage />}
+        />
+        <Route
+          path="融资/监管/监管业务/监管管理/详情/:id"
+          element={<SupervisionOrderDetailPage />}
         />
 
         {placeholderPaths.map((menuPath) => (

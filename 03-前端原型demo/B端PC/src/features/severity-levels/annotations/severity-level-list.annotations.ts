@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const severityLevelListAnnotations: PrototypeAnnotation[] = [
   {
     id: "severity-level-page",
+    documentRefs: {
+      prd: { section: "预警等级 主PRD", match: "预警等级全模块", element: "row" },
+      rules: { section: "预警等级 业务规则规格", match: "预警配置 → 预警等级", element: "row" },
+    },
     targetId: "severity-level-page",
     number: 1,
     kind: "页面",
@@ -43,6 +47,10 @@ export const severityLevelListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "severity-level-filter",
+    documentRefs: {
+      prd: { section: "预警等级 主PRD", match: "预警等级全模块", element: "row" },
+      rules: { section: "预警等级 业务规则规格", match: "【新增等级】", element: "row" },
+    },
     targetId: "severity-level-filter",
     number: 2,
     kind: "交互",
@@ -66,6 +74,10 @@ export const severityLevelListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "severity-level-table",
+    documentRefs: {
+      fields: { section: "预警等级 字段清单", match: "同步至订单预警", element: "row" },
+      rules: { section: "【同步至订单预警穿透机制】(R03)", match: "开关独立控制：每个预警等级独立维护一个布尔型「同步至订单预警」开关（syncto", element: "text" },
+    },
     targetId: "severity-level-table",
     number: 3,
     kind: "字段",
@@ -94,6 +106,10 @@ export const severityLevelListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "severity-level-row-actions",
+    documentRefs: {
+      rules: { section: "3.2 动作控制与流转规则表", match: "租户内处于「启用」状态的等级数不少于 2 档", element: "row" },
+      prd: { section: "5.2 动作能力控制矩阵", match: "✅ (需校验)", element: "row" },
+    },
     targetId: "severity-level-table",
     number: 4,
     kind: "规则",

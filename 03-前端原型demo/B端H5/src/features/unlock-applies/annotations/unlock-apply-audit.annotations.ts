@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/annotation.types"
 export const unlockApplyAuditH5ListAnnotations: PrototypeAnnotation[] = [
   {
     id: "h5-unlock-audit-list-page",
+    documentRefs: {
+      prd: { section: "开锁申请 主PRD", match: "开锁申请业务规则规格", element: "row" },
+      rules: { section: "开锁申请 业务规则规格", match: "工作中心 → 审批中心 → 业务审批 → 我的申请管理 → 开锁申请", element: "row" },
+    },
     targetId: "h5-unlock-audit-list-page",
     number: 1,
     kind: "页面",
@@ -58,6 +62,10 @@ export const unlockApplyAuditH5ListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "h5-unlock-audit-filter",
+    documentRefs: {
+      prd: { section: "5.1 状态定义", match: "已撤回 (REVOKED)：申请人在审批前主动撤回，终态；", element: "text" },
+      rules: { section: "3.1 状态定义", match: "已撤回 (REVOKED)：申请人在审批前主动撤回，流程终止；", element: "text" },
+    },
     targetId: "h5-unlock-audit-filter",
     number: 2,
     kind: "交互",
@@ -86,6 +94,10 @@ export const unlockApplyAuditH5ListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "h5-unlock-audit-card",
+    documentRefs: {
+      fields: { section: "开锁申请 字段清单", match: "申请人手机号", element: "row" },
+      rules: { section: "3.1 状态定义", match: "待审批 (PENDING)：已提交开锁申请，等待审批人处理，允许申请人主动撤回；", element: "text" },
+    },
     targetId: "h5-unlock-audit-card",
     number: 3,
     kind: "字段",
@@ -117,6 +129,10 @@ export const unlockApplyAuditH5ListAnnotations: PrototypeAnnotation[] = [
 export const unlockApplyAuditH5DetailAnnotations: PrototypeAnnotation[] = [
   {
     id: "h5-unlock-audit-detail-page",
+    documentRefs: {
+      prd: { section: "开锁申请 主PRD", match: "凭证信息专属分区 (仅已通过与无需审核展示)：", element: "text" },
+      rules: { section: "开锁申请 业务规则规格", match: "申请详情「凭证信息」卡片", element: "row" },
+    },
     targetId: "h5-unlock-audit-detail-page",
     number: 1,
     kind: "页面",
@@ -151,6 +167,38 @@ export const unlockApplyAuditH5DetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "审批配置与记录",
             content: "固化提交时的配置编号、版本号、审批方式及各节点审批人处理结论与意见留痕；不展示凭证状态、凭证编号或临时密码。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "h5-unlock-audit-fields",
+    documentRefs: {
+      fields: { section: "开锁申请 字段清单", match: "申请人手机号", element: "row" },
+      rules: { section: "3.1 状态定义", match: "待审批 (PENDING)：已提交开锁申请，等待审批人处理，允许申请人主动撤回；", element: "text" },
+    },
+    targetId: "h5-unlock-audit-card",
+    number: 5,
+    kind: "字段",
+    title: "审批卡片字段字典",
+    content:
+      "卡片展示申请单号、申请人、设备、事由、提交时间、申请状态与待审节点。",
+    details: [
+      {
+        title: "字段清单对照表",
+        items: [
+          {
+            label: "字段",
+            content: `| 字段名称 | 控件 | 必填 | 取值范围与格式 | 展示规则 |
+| :--- | :--- | :---: | :--- | :--- |
+| **申请单号** | 文本 | 系统生成 | UA + 数字串 | 可点进详情 |
+| **申请人** | 文本 | 系统记录 | 姓名(所属机构) | 单行 |
+| **设备名称 / 类型** | 文本 + 图标 | 必填 | 挂锁 / 人脸门禁 | 单行 |
+| **事由** | 标签 | 必填 | 出库 / 入库 / 移库 / 参观 / 其他 | 单行 |
+| **提交时间** | 日期时间 | 系统记录 | YYYY-MM-DD HH:mm:ss | 单行 |
+| **申请状态** | 状态标签 | 系统维护 | 待审批 / 已通过 / 已驳回 / 已撤回 / 已失效 | 彩色标签 |
+| **操作** | 胶囊按钮 | — | 通过 / 驳回 / 详情 | 一行 ≤4 个 |`,
           },
         ],
       },

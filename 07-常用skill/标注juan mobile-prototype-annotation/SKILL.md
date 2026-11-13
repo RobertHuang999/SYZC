@@ -52,6 +52,8 @@ WorkbenchLayout (桌面端工作台大画布)
 
 ### 3.1 需求打点数据结构 (`*.annotations.ts`)
 
+> **内容下限（强制）**：条文真源 [`AGENTS.md`](../../AGENTS.md) **4.2.2**，细则与可复制模板见 [`原型打点内容标准.md`](../../03-前端原型demo/原型打点内容标准.md)。H5 与 PC **同一套正文**，只补 `【H5 端差异】`。
+
 ```ts
 export type AnnotationKind = '页面' | '交互' | '字段' | '规则' | '待确认'
 
@@ -62,6 +64,11 @@ export type PrototypeAnnotation = {
   kind: AnnotationKind    // 分类维度
   title: string           // 打点标题 (如: "预警触发频次与时间轴")
   content: string         // 核心事实需求摘要
+  documentRefs?: Partial<Record<'prd' | 'fields' | 'rules', {
+    section: string
+    match: string
+    element?: 'row' | 'text'
+  }>>                    // 直达三件套对应章节
   details: Array<{        // 结构化细则分组
     title: string
     items: Array<{
@@ -71,6 +78,18 @@ export type PrototypeAnnotation = {
   }>
 }
 ```
+
+**四类打点判据（与 PC 一致，H5 不降级）**
+
+| kind | 必须写到 | H5 形态说明 |
+| :--- | :--- | :--- |
+| 页面 | 一句话定位 + Mermaid 生命周期流转图 + 上下游 + 角色与数据范围 | 图放 `details`，H5 用 Sheet 展开查看 |
+| 字段 | 字段字典表（字段名称/控件/必填/取值范围与格式/新增·编辑差异/校验与提示） | 表格可横向滚动，字段名仍用中文业务名 |
+| 交互 | 操作矩阵（可见角色/可见状态/点击后做什么/二次确认与必填/成功提示原话） | 入口、控件形态用 `【H5 端差异】` 一句说清 |
+| 规则 | `【规则名称】(编号)` + 触发条件 + 拦截提示原话 + 三件套真源位置 | 与 PC 同编号同结论 |
+
+**每页最低条数**：列表 / 详情 / 表单各 **≥4 条**，弹窗/Sheet ≥2 条；「页面」类为强制项。
+
 
 ### 3.2 文档源文件挂载标准 (`*.documents.ts`)
 

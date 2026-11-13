@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const riskDisclosureDetailAnnotations: PrototypeAnnotation[] = [
   {
     id: "risk-disclosure-detail-header",
+    documentRefs: {
+      prd: { section: "风险公示主PRD", match: "取消公示操作", element: "row" },
+      rules: { section: "风险公示 业务规则规格", match: "取消风险公示", element: "row" },
+    },
     targetId: "risk-disclosure-detail-header",
     number: 1,
     kind: "页面",
@@ -36,6 +40,10 @@ export const riskDisclosureDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "risk-disclosure-detail-info",
+    documentRefs: {
+      fields: { section: "二、解除处置快照字段（详情页专属）", match: "字段说明与关联规则", element: "row" },
+      rules: { section: "【首次公示独立存证副本生成规则】(PUB-D01)" },
+    },
     targetId: "risk-disclosure-detail-info",
     number: 2,
     kind: "字段",
@@ -59,10 +67,36 @@ export const riskDisclosureDetailAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 展示规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **公示状态** | 状态标签 | 系统维护 | 待公示 / 已公示 / 已取消 | 页头 | 取消后回显说明 |
+| **公示时间** | 只读时间 | 系统记录 | YYYY-MM-DD HH:mm:ss | 状态区 | — |
+| **操作人** | 只读文本 | 系统记录 | 姓名(所属机构) | 状态区 | — |
+| **取消说明** | 只读多行 | 条件展示 | 1~200 字 | 仅已取消展示 | 合规留痕 |
+| **订单号** | 只读链接 | 必填 | 押品订单号 | 公示信息卡 | 快照只读 |
+| **预警时间 / 类型** | 只读文本 | 必填 | 时间 + 7 大类之一 | 公示信息卡 | — |
+| **位置 / 设备名称** | 只读文本 | 条件展示 | 仓库-库房-分区；设备名 | 公示信息卡 | 物联类必备 |
+| **预警描述** | 只读多行 | 必填 | 标准模板文本 | 公示信息卡 | — |
+| **预警抓拍图** | 图片 | 条件展示 | 缩略图 + 大图 | 公示信息卡 | 私有 OSS 签名访问 |
+| **处理人 / 解除时间** | 只读文本 | 条件展示 | 姓名；时间 | 处置信息卡 | — |
+| **情况说明** | 只读多行 | 必填 | 最多 200 字 | 处置信息卡 | — |
+| **现场照片 / 解除抓拍** | 图片组 | 条件展示 | 最多 10 张 | 处置信息卡 | 解除后不可改 |`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "risk-disclosure-detail-snapshot",
+    documentRefs: {
+      rules: { section: "【首次公示独立存证副本生成规则】(PUB-D01)" },
+      prd: { section: "6.3 取消公示弹窗", match: "点击【取消公示】弹出模态对话框；", element: "text" },
+    },
     targetId: "risk-disclosure-detail-snapshot",
     number: 3,
     kind: "规则",
@@ -86,6 +120,10 @@ export const riskDisclosureDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "risk-disclosure-detail-history",
+    documentRefs: {
+      rules: { section: "九、修订记录", match: "统一取消公示 200 字校验与已公示台账专属展示逻辑", element: "row" },
+      prd: { section: "6.3 取消公示弹窗", match: "点击【取消公示】弹出模态对话框；", element: "text" },
+    },
     targetId: "risk-disclosure-detail-history",
     number: 4,
     kind: "规则",
@@ -105,6 +143,10 @@ export const riskDisclosureDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "risk-disclosure-detail-cancel-dialog",
+    documentRefs: {
+      prd: { section: "6.3 取消公示弹窗", match: "点击【取消公示】弹出模态对话框；", element: "text" },
+      rules: { section: "【取消公示操作入口门控规则】(PUB-C01)" },
+    },
     targetId: "risk-disclosure-detail-header",
     number: 5,
     kind: "交互",

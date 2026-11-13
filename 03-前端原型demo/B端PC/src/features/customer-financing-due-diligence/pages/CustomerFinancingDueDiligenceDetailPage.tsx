@@ -125,7 +125,7 @@ export function CustomerFinancingDueDiligenceDetailPage() {
           operator: d.surveyor,
           time: now,
           detail:
-            "专员核对主体三要素齐全，异步调用智风控 OpenAPI，状态推进至【受理中】",
+            "专员核对主体三要素齐全，异步调用智风控接口，状态推进至【受理中】",
         },
         ...d.logs,
       ],
@@ -150,8 +150,8 @@ export function CustomerFinancingDueDiligenceDetailPage() {
         logs: [
           {
             id: `LOG_${Date.now() + 1}`,
-            action: "智风控网关回调 PASS",
-            operator: "智风控平台API",
+            action: "智风控网关回调：审核通过",
+            operator: "智风控平台",
             time: callbackTime,
             detail:
               "外部大数据模型核验通过，单据自动变更为【受理成功】，移入完成标签页",
@@ -161,7 +161,7 @@ export function CustomerFinancingDueDiligenceDetailPage() {
       }
       updateItemInStorage(successItem)
       showToast(
-        "【异步回调通知】智风控审核通过（PASS），单据已更新为【受理成功】！"
+        "【异步回调通知】智风控审核通过，单据已更新为【受理成功】！"
       )
     }, 3500)
   }
@@ -278,7 +278,7 @@ export function CustomerFinancingDueDiligenceDetailPage() {
           action: "归档盖章尽调报告",
           operator: d.surveyor,
           time: now,
-          detail: `上传《${newReport.name}》，尽调报告门禁核验通过 (R04)`,
+          detail: `上传《${newReport.name}》，尽调报告门禁核验通过`,
         },
         ...d.logs,
       ],
@@ -467,13 +467,13 @@ export function CustomerFinancingDueDiligenceDetailPage() {
                 <table className="w-full text-left text-xs">
                   <thead className="bg-muted/60 font-semibold text-muted-foreground">
                     <tr>
-                      <th className="px-3 py-2.5">货物大类</th>
-                      <th className="px-3 py-2.5">品类细类</th>
-                      <th className="px-3 py-2.5">规格型号</th>
-                      <th className="px-3 py-2.5 text-right">在库数量</th>
-                      <th className="px-3 py-2.5 text-center">计量单位</th>
-                      <th className="px-3 py-2.5">存放库位</th>
-                      <th className="px-3 py-2.5 text-right">申报货值（元）</th>
+                      <th className="whitespace-nowrap px-3 py-2.5">货物大类</th>
+                      <th className="whitespace-nowrap px-3 py-2.5">品类细类</th>
+                      <th className="whitespace-nowrap px-3 py-2.5">规格型号</th>
+                      <th className="whitespace-nowrap px-3 py-2.5 text-right">在库数量</th>
+                      <th className="whitespace-nowrap px-3 py-2.5 text-center">计量单位</th>
+                      <th className="whitespace-nowrap px-3 py-2.5">存放库位</th>
+                      <th className="whitespace-nowrap px-3 py-2.5 text-right">申报货值（元）</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/50">
@@ -528,7 +528,7 @@ export function CustomerFinancingDueDiligenceDetailPage() {
                       }`}
                     >
                       {item.riskConclusion === "PASS"
-                        ? "通过 (PASS)"
+                        ? "通过"
                         : item.riskConclusion === "REJECT"
                         ? "不通过 (REJECT)"
                         : "需人工复核 (REVIEW)"}
@@ -565,8 +565,8 @@ export function CustomerFinancingDueDiligenceDetailPage() {
                 }
               />
               <DetailField
-                label="安全传输签名 (P02)"
-                value="SSO-TOKEN 有效期 15 分钟"
+                label="安全传输签名"
+                value="页面临时访问签名（有效期 15 分钟）"
               />
             </div>
 

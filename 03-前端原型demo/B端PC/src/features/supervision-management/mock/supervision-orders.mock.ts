@@ -56,7 +56,7 @@ function buildLogs(
  * 12. 企业浮动服务有风险
  * 13. 已解监管终态
  */
-export const supervisionOrdersMock: SupervisionOrderItem[] = [
+const supervisionOrdersBase: SupervisionOrderItem[] = [
   // 1. 个人正常在押
   {
     id: "SM-M-001",
@@ -67,20 +67,20 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     ownerIdentity: "133****0001",
     ownerIdentityFull: "13312340001",
     goodsList: [
-      { name: "冻货-牛丸-36个月-0.9999-公斤" },
-      { name: "冻货-牛丸-36个月-0.0001-公斤" },
+      { name: "冻品-牛肉丸-500克/袋" },
+      { name: "冻品-墨鱼丸-500克/袋" },
     ],
     pledgeTime: "2026-10-29 15:13:11",
     status: "抵押中",
     businessMode: "浮动抵押",
     loanAmount: 2,
-    loanPeriods: 23,
+    loanPeriods: 12,
     loanBalance: 1,
-    safetyLine: 2,
-    industryPrice: 0.010023,
-    appraisedValue: 0.010023,
+    safetyLine: 2.5,
+    industryPrice: 3.1,
+    appraisedValue: 3.4,
     processName: "抵质押简单总流程",
-    relatedOrgs: ["卡皮评估", "卡皮银行", "四川享宇科技有限公司", "监管公司2号"],
+    relatedOrgs: ["中联资产评估", "招商银行", "四川享宇科技有限公司", "监管公司2号"],
     hasRisk: false,
     logs: buildLogs("2115703474879283201", "2026-10-29 15:13:11", "张一"),
   },
@@ -108,7 +108,7 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     industryPrice: 1258.4,
     appraisedValue: 1320,
     processName: "抵质押简单总流程",
-    relatedOrgs: ["卡皮评估", "卡皮银行", "四川享宇科技有限公司"],
+    relatedOrgs: ["中联资产评估", "招商银行", "四川享宇科技有限公司"],
     hasRisk: false,
     logs: buildLogs("2101234567890123456", "2026-10-25 10:12:36", "四川果香农业有限公司"),
   },
@@ -135,7 +135,7 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     industryPrice: 910,
     appraisedValue: 950,
     processName: "抵质押简单总流程",
-    relatedOrgs: ["卡皮评估", "卡皮银行", "四川享宇科技有限公司"],
+    relatedOrgs: ["中联资产评估", "招商银行", "四川享宇科技有限公司"],
     hasRisk: true,
     logs: buildLogs("2101234567890123459", "2026-10-15 11:05:44", "云南铝业股份有限公司", [
       {
@@ -156,8 +156,8 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     ownerIdentity: "188****2345",
     ownerIdentityFull: "18812342345",
     goodsList: [
-      { name: "水果-苹果-新疆-特级-5-箱" },
-      { name: "水果-香蕉-海南-0.9900-斤" },
+      { name: "水果-阿克苏苹果-特级-5箱" },
+      { name: "水果-海南香蕉-一级-20千克" },
     ],
     pledgeTime: "2026-09-30 14:48:03",
     status: "抵押中",
@@ -169,7 +169,7 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     industryPrice: 3.080198,
     appraisedValue: 3.080198,
     processName: "抵质押简单总流程",
-    relatedOrgs: ["卡皮评估", "卡皮银行", "四川享宇科技有限公司", "监管公司2号"],
+    relatedOrgs: ["中联资产评估", "招商银行", "四川享宇科技有限公司", "监管公司2号"],
     hasRisk: false,
     lockedTask: "货物移库",
     logs: buildLogs("2105187903456583681", "2026-09-30 14:48:03", "梨花", [
@@ -191,19 +191,19 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     ownerIdentity: "185****7112",
     ownerIdentityFull: "18512347112",
     goodsList: [
-      { name: "干果-水果-苹果干-33-克" },
-      { name: "干果-水果-苹果干-10-克" },
+      { name: "干果-苹果干-散装-5千克" },
+      { name: "干果-苹果干-礼盒装-2千克" },
     ],
     pledgeTime: "2026-10-08 16:18:17",
     status: "抵押中",
     businessMode: "浮动抵押",
-    loanAmount: 1,
-    loanPeriods: 2,
-    loanBalance: 1.9997,
-    safetyLine: 1,
-    appraisedValue: 0.000899,
+    loanAmount: 2,
+    loanPeriods: 6,
+    loanBalance: 1.6,
+    safetyLine: 2.4,
+    appraisedValue: 3.2,
     processName: "抵质押简单总流程",
-    relatedOrgs: ["卡皮评估", "卡皮银行", "四川享宇科技有限公司"],
+    relatedOrgs: ["中联资产评估", "招商银行", "四川享宇科技有限公司"],
     hasRisk: false,
     unpriced: true,
     logs: buildLogs("2108109714795843586", "2026-10-08 16:18:17", "原原李", [
@@ -233,7 +233,7 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     industryPrice: 2050,
     appraisedValue: 2100,
     processName: "抵质押简单总流程",
-    relatedOrgs: ["卡皮评估", "卡皮银行", "四川享宇科技有限公司"],
+    relatedOrgs: ["中联资产评估", "招商银行", "四川享宇科技有限公司"],
     hasRisk: false,
     logs: buildLogs("2101234567890123457", "2026-10-22 09:30:18", "重庆渝铜贸易有限公司"),
   },
@@ -247,12 +247,12 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     ownerName: "张三",
     ownerIdentity: "133****0003",
     ownerIdentityFull: "13312340003",
-    goodsList: [{ name: "干粮-方便面-康师傅-酸菜-1-桶" }],
+    goodsList: [{ name: "粮油-方便面-康师傅红烧牛肉面-1箱" }],
     pledgeTime: "2026-10-28 14:45:27",
     status: "解抵押",
     businessMode: "固定抵押",
-    processName: "Cico总流程最简抵质押",
-    relatedOrgs: ["卡皮银行", "四川享宇科技有限公司"],
+    processName: "解押总流程",
+    relatedOrgs: ["招商银行", "四川享宇科技有限公司"],
     hasRisk: false,
     logs: buildLogs("2115334109961072641", "2026-10-28 14:45:27", "张三", [
       {
@@ -271,7 +271,7 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     ownerName: "梨花",
     ownerIdentity: "188****2345",
     ownerIdentityFull: "18812342345",
-    goodsList: [{ name: "电解铜-阴极铜-Cu-CATH-1-吨" }],
+    goodsList: [{ name: "有色金属-电解铜-阴极铜Cu-CATH-1-吨" }],
     pledgeTime: "2026-10-27 13:21:09",
     status: "质押中",
     businessMode: "静态质押",
@@ -282,7 +282,7 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     industryPrice: 1300,
     appraisedValue: 1350,
     processName: "抵质押简单总流程",
-    relatedOrgs: ["卡皮评估", "卡皮银行", "四川享宇科技有限公司"],
+    relatedOrgs: ["中联资产评估", "招商银行", "四川享宇科技有限公司"],
     hasRisk: false,
     logs: buildLogs("2102222222222222201", "2026-10-27 13:21:09", "梨花"),
   },
@@ -296,8 +296,8 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     ownerName: "四川果香农业有限公司",
     ownerIdentity: "91510100MA6C8F2X3Y",
     goodsList: [
-      { name: "水果-苹果-新疆-特级-5-箱" },
-      { name: "水果-香蕉-海南-0.9900-斤" },
+      { name: "水果-阿克苏苹果-特级-5箱" },
+      { name: "水果-海南香蕉-一级-20千克" },
     ],
     pledgeTime: "2026-10-24 10:08:52",
     status: "质押中",
@@ -309,7 +309,7 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     industryPrice: 260,
     appraisedValue: 280,
     processName: "抵质押简单总流程",
-    relatedOrgs: ["卡皮评估", "卡皮银行", "四川享宇科技有限公司"],
+    relatedOrgs: ["中联资产评估", "招商银行", "四川享宇科技有限公司"],
     hasRisk: true,
     lockedTask: "货物出库",
     logs: buildLogs("2102222222222222202", "2026-10-24 10:08:52", "四川果香农业有限公司", [
@@ -339,7 +339,7 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     status: "解质押",
     businessMode: "静态质押",
     processName: "抵质押简单总流程",
-    relatedOrgs: ["卡皮银行"],
+    relatedOrgs: ["招商银行"],
     hasRisk: false,
     logs: buildLogs("2102222222222222205", "2026-09-20 11:42:18", "王五", [
       { action: "解质押终审通过", detail: "贷款结清，质权注销，设备解绑。" },
@@ -368,7 +368,7 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     industryPrice: 760,
     appraisedValue: 800,
     processName: "监管服务总流程",
-    relatedOrgs: ["森云监管", "卡皮银行", "四川享宇科技有限公司"],
+    relatedOrgs: ["森云监管", "招商银行", "四川享宇科技有限公司"],
     hasRisk: false,
     logs: buildLogs("2103333333333333301", "2026-10-26 10:33:12", "四川果香农业有限公司"),
   },
@@ -392,7 +392,7 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     industryPrice: 360,
     appraisedValue: 380,
     processName: "监管服务总流程",
-    relatedOrgs: ["森云监管", "卡皮银行"],
+    relatedOrgs: ["森云监管", "招商银行"],
     hasRisk: true,
     logs: buildLogs("2103333333333333302", "2026-10-20 16:05:38", "成都橡胶产业集团有限公司", [
       {
@@ -410,15 +410,93 @@ export const supervisionOrdersMock: SupervisionOrderItem[] = [
     ownerType: "企业",
     ownerName: "重庆渝铜贸易有限公司",
     ownerIdentity: "91500000MA5U7X9K2P",
-    goodsList: [{ name: "电解铜-阴极铜-Cu-CATH-1-吨" }],
+    goodsList: [{ name: "有色金属-电解铜-阴极铜Cu-CATH-1-吨" }],
     pledgeTime: "2026-09-08 11:20:06",
     status: "解监管",
     businessMode: "固定服务",
     processName: "监管服务总流程",
-    relatedOrgs: ["森云监管", "卡皮银行"],
+    relatedOrgs: ["森云监管", "招商银行"],
     hasRisk: false,
     logs: buildLogs("2103333333333333304", "2026-09-08 11:20:06", "重庆渝铜贸易有限公司", [
       { action: "解除监管终审通过", detail: "监管服务到期，现场交接完成，IoT 设备解绑。" },
     ]),
   },
 ]
+
+/** 合作方证件号快照（详情页权人三要素） */
+const FUNDER_CERTS: Record<string, string> = {
+  招商银行: "91440300100012345X",
+  四川享宇科技有限公司: "91510100MA6C8F2X3Y",
+  森云监管: "91510100MA6C8F2X3Y",
+}
+
+function goodsUnit(name: string): string {
+  if (name.includes("公斤")) return "公斤"
+  if (name.includes("千克")) return "千克"
+  if (name.includes("箱")) return "箱"
+  if (name.includes("袋")) return "袋"
+  return "吨"
+}
+
+function shiftDate(dateTime: string, days: number): string {
+  const date = new Date(dateTime.replace(" ", "T"))
+  if (Number.isNaN(date.getTime())) return dateTime
+  date.setDate(date.getDate() + days)
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(
+    date.getHours(),
+  )}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+}
+
+/** 按订单货值与货物清单，拆分出可展开的批次货位明细（原型 Mock，数值自洽） */
+function buildGoodsDetails(record: SupervisionOrderItem) {
+  const totalValue = record.appraisedValue ?? 0
+  if (record.goodsList.length === 0 || totalValue <= 0) return []
+
+  const averageValue = Number((totalValue / record.goodsList.length).toFixed(4))
+  return record.goodsList.map((goods, index) => {
+    const unit = goodsUnit(goods.name)
+    const baseQty = unit === "吨" ? 60 : unit === "箱" ? 600 : unit === "袋" ? 800 : 1200
+    const qty = Number((baseQty * (1 + index * 0.4)).toFixed(1))
+    const unitPriceYuan =
+      qty > 0 ? Number(((averageValue * 10000) / qty).toFixed(2)) : 0
+    return {
+      id: `${record.id}-G${index + 1}`,
+      name: goods.name,
+      location: "华东仓储运营中心-一号库房-A区",
+      spot: `A-0${index + 1}-0${index + 3}`,
+      inboundAt: shiftDate(record.pledgeTime, -3 - index),
+      batchInfo: `批次: ${record.orderNo.slice(-6)}-${index + 1} / 车牌: 沪A·${89210 + index}`,
+      barcode: `BC${record.orderNo.slice(-8)}${index + 1}`,
+      qty,
+      unit,
+      unitPriceYuan,
+      totalValueWan: averageValue,
+    }
+  })
+}
+
+/** 补齐详情页所需的发起人、权人、"授信与贷款"等快照字段 */
+function enrich(record: SupervisionOrderItem): SupervisionOrderItem {
+  const funder =
+    record.relatedOrgs.find((org) => org.includes("银行")) ??
+    record.relatedOrgs[0] ??
+    "四川享宇科技有限公司"
+
+  return {
+    ...record,
+    initiator: "李行（森云供应链运营中心）",
+    contractNo: `HT-${record.pledgeTime.slice(0, 4)}-${record.orderNo.slice(-6)}`,
+    holderType: "企业",
+    holderName: funder,
+    holderCertNo: FUNDER_CERTS[funder] ?? "91510100MA6C8F2X3Y",
+    creditAmount:
+      record.creditAmount ??
+      (record.loanAmount ? Number((record.loanAmount * 1.2).toFixed(4)) : undefined),
+    creditPeriods: record.creditPeriods ?? record.loanPeriods,
+    goodsDetails: record.goodsDetails ?? buildGoodsDetails(record),
+  }
+}
+
+export const supervisionOrdersMock: SupervisionOrderItem[] =
+  supervisionOrdersBase.map(enrich)

@@ -3,16 +3,16 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const goodsListAnnotations: PrototypeAnnotation[] = [
   {
     id: "goods-page",
+    documentRefs: {
+      prd: { section: "3. 模块定位与系统链路" },
+      rules: { section: "【入库收集信息配置与保质期固定单位指定规则】(SKU-F03)", match: "为什么要在货品端固定保质期单位：", element: "text" },
+    },
     targetId: "goods-page",
     number: 1,
     kind: "页面",
     title: "6.3 变更 · 货品 SKU 定位与三层架构联动",
     content:
       "货品是存货监管的最小核算单元，承接品类定义的规格维度，并从【07 入库收集项配置】字段池勾选入库采集项、锁定保质期专属固定单位及维护系统参考单价。",
-    documentRefs: {
-      prd: { section: "3. 模块定位与系统链路", match: "入库收集项配置" },
-      rules: { section: "二、状态定义与有效启用计算模型", match: "K11" },
-    },
     details: [
       {
         title: "6.3 版本迭代调整对照（调整前 → 调整后）",
@@ -95,6 +95,10 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "goods-table",
+    documentRefs: {
+      fields: { section: "货品管理字段清单", match: "07 字段池", element: "row" },
+      rules: { section: "2.1 状态定义", match: "自身状态 (status)", element: "row" },
+    },
     version: "6.3",
     targetId: "goods-table",
     number: 3,
@@ -102,10 +106,6 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
     title: "6.3 变更 · 动态规格拆列与收集项联动摘要",
     content:
       "列表按所选品类定义的规格维度动态拆列；「其他收集信息」列直接展示该货品已配置的收集项名称列表（名称实时同步自 07 字段池），鼠标悬停可查看完整项名与必填状态。",
-    documentRefs: {
-      fields: { section: "一、业务字段", match: "入库收集信息配置" },
-      rules: { section: "三、核心业务规则", match: "K01" },
-    },
     details: [
       {
         title: "字段字典",
@@ -139,15 +139,16 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "goods-price",
+    documentRefs: {
+      prd: { section: "3. 模块定位与系统链路" },
+      rules: { section: "1. 货品设置系统参考单价与修改记录时序" },
+    },
     targetId: "goods-price",
     number: 4,
     kind: "交互",
     title: "系统参考单价展示、设价与价格趋势",
     content:
       "单价按元录入并保存 2 位小数，列表支持元（6 位小数）与万元（10 位小数）两种口径切换；点击单价可查看近 7 / 15 / 30 天趋势。",
-    documentRefs: {
-      rules: { section: "三、核心业务规则", match: "K05" },
-    },
     details: [
       {
         title: "展示口径",
@@ -187,15 +188,15 @@ export const goodsListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "goods-row-actions",
+    documentRefs: {
+      rules: { section: "2. 货品两阶段安全删除时序" },
+    },
     targetId: "goods-row-actions",
     number: 5,
     kind: "规则",
     title: "行操作与两阶段安全删除",
     content:
       "货品已产生入库单后禁止编辑和删除；删除必须先停用，再扫描入库单并二次确认。",
-    documentRefs: {
-      rules: { section: "三、核心业务规则", match: "K09" },
-    },
     details: [
       {
         title: "操作规则",

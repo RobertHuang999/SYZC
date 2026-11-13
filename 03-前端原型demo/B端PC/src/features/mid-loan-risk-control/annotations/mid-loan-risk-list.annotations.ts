@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const midLoanRiskListAnnotations: PrototypeAnnotation[] = [
   {
     id: "mid-loan-risk-page",
+    documentRefs: {
+      prd: { section: "贷中风控管理主PRD", match: "模型拒绝自动联动押品告警", element: "row" },
+      rules: { section: "贷中风控管理 业务规则规格", match: "执行资格判定", element: "row" },
+    },
     targetId: "mid-loan-risk-page",
     number: 1,
     kind: "页面",
@@ -49,6 +53,10 @@ export const midLoanRiskListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "mid-loan-risk-filter",
+    documentRefs: {
+      prd: { section: "5.1 执行状态定义", match: "满足执行资格可再次发起执行", element: "row" },
+      rules: { section: "3.1 状态定义", match: "重新发起执行申请", element: "row" },
+    },
     targetId: "mid-loan-risk-filter",
     number: 2,
     kind: "交互",
@@ -76,6 +84,9 @@ export const midLoanRiskListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "mid-loan-risk-table",
+    documentRefs: {
+      fields: { section: "二、风控模型执行历史字段（详情页时间轴）", match: "模型决策结果", element: "row" },
+    },
     targetId: "mid-loan-risk-table",
     number: 3,
     kind: "字段",
@@ -102,10 +113,33 @@ export const midLoanRiskListAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "列表字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 展示规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **订单编号** | 链接 | 必填 | 抵 / 质押订单号 | 可穿透详情 | — |
+| **货主名称** | 文本 | 必填 | 企业全称 | 单行 | 支持信用代码精确搜索 |
+| **订单类型** | 标签 | 必填 | 抵押 / 质押 / 监管服务 | 单行 | — |
+| **押品概况** | 文本 | 必填 | 品类-规格 + 数量 | 单行 | — |
+| **风控模型** | 文本 | 必填 | 绑定的模型产品与版本 | 单行 | 来自订单预警配置 |
+| **执行资格** | 徽标 | 系统计算 | 可执行 / 不可执行 | 单行 | 悬浮查看原因 |
+| **最近执行状态** | 状态标签 | 系统维护 | 未执行 / 提交中 / 处理中 / 待补充 / 未触发 / 触发预警 / 失败 | 彩色标签 | — |
+| **执行 / 预警次数** | 只读文本 | 系统统计 | 次数 | 单行 | 累计统计 |
+| **操作** | 行操作按钮 | — | 执行 / 详情 | 可执行时【执行】高亮 | 防连击 |`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "mid-loan-risk-row-actions",
+    documentRefs: {
+      prd: { section: "5.1 执行状态定义", match: "点击确认执行提交", element: "row" },
+      rules: { section: "【单条执行可执行资格排他校验规则】(MID-E01)" },
+    },
     targetId: "mid-loan-risk-table",
     number: 4,
     kind: "交互",
@@ -129,6 +163,9 @@ export const midLoanRiskListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "mid-loan-risk-pagination",
+    documentRefs: {
+      rules: { section: "【批量执行容量与资格过滤校验规则】(MID-E02)" },
+    },
     targetId: "mid-loan-risk-pagination",
     number: 5,
     kind: "交互",

@@ -27,6 +27,8 @@ import {
 import { relocationRecordDocuments } from "../documents/relocation-record-documents"
 import { relocationRecordAnnotations } from "../annotations/relocation-record.annotations"
 import { FormPageHeader } from "@/shared/components/FormPageHeader"
+import { FormPageStickyFooter } from "@/shared/components/FormPageStickyFooter"
+import { SearchableNameSelect } from "@/shared/components/SearchableNameSelect"
 import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import {
   OWNER_OPTIONS,
@@ -177,7 +179,8 @@ export function RelocationRecordFormPage() {
       documents={relocationRecordDocuments}
       annotations={relocationRecordAnnotations}
     >
-      <div className="space-y-4 p-6 pb-24">
+      <div className="flex min-h-full flex-col">
+      <div className="flex-1 space-y-4 p-6 pb-6">
         <FormPageHeader
           title="新增移库"
           description="同一仓库内更换库房、分区或垛位；质押、抵押移库必须关联对应单据"
@@ -245,25 +248,20 @@ export function RelocationRecordFormPage() {
               </Field>
 
               <Field label="货主" required>
-                <Select
-                  value={ownerId}
-                  onValueChange={(val) => setOwnerId(val ?? "")}
-                >
-                  <SelectTrigger className="h-[34px] text-sm">
-                    <SelectValue>
-                      {() =>
-                        OWNER_OPTIONS.find((item) => item.id === ownerId)?.name ?? "请选择货主"
-                      }
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {OWNER_OPTIONS.filter((item) => item.type === ownerType).map((item) => (
-                      <SelectItem key={item.id} value={item.id}>
-                        {item.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableNameSelect
+                  valueId={ownerId}
+                  valueName={owner?.name ?? ""}
+                  placeholder="请输入主体名称或联系手机搜索"
+                  catalogTitle="系统货主档案库候选"
+                  items={OWNER_OPTIONS.filter((item) => item.type === ownerType).map((item) => ({
+                    id: item.id,
+                    name: item.name,
+                    kind: item.type === "个人" ? "personal" : "enterprise",
+                    description:
+                      item.type === "个人" ? `手机:${item.identifier}` : `税号:${item.identifier}`,
+                  }))}
+                  onPick={(item) => setOwnerId(item.id)}
+                />
               </Field>
 
               <Field label="货主标识">
@@ -518,9 +516,11 @@ export function RelocationRecordFormPage() {
           </div>
         )}
 
-        <div className="fixed bottom-0 left-0 right-0 z-30 border-t bg-card px-6 py-3">
-          <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4">
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+      </div>
+
+        <FormPageStickyFooter
+          left={
+            <div className="flex flex-wrap items-center gap-4">
               <span>
                 货品品类数：<strong className="text-foreground">{categoryCount}</strong>
               </span>
@@ -531,16 +531,15 @@ export function RelocationRecordFormPage() {
                 </strong>
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-9 px-4 text-xs" onClick={handleBack}>
-                取消
-              </Button>
-              <Button size="sm" className="h-9 px-5 text-xs" onClick={handleSubmit}>
-                提交审核
-              </Button>
-            </div>
-          </div>
-        </div>
+          }
+        >
+          <Button variant="outline" size="sm" className="h-9 px-4 text-xs" onClick={handleBack}>
+            取消
+          </Button>
+          <Button size="sm" className="h-9 px-5 text-xs" onClick={handleSubmit}>
+            提交审核
+          </Button>
+        </FormPageStickyFooter>
 
         <Dialog open={leaveOpen} onOpenChange={setLeaveOpen}>
           <DialogContent>

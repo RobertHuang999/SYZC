@@ -37,6 +37,8 @@ PrototypeAnnotationProvider (全局状态上下文)
 
 ### 2.1 需求打点数据结构 (`*.annotations.ts`)
 
+> **内容下限（强制）**：条文真源 [`AGENTS.md`](../../AGENTS.md) **4.2.2**，细则与可复制模板见 [`原型打点内容标准.md`](../../03-前端原型demo/原型打点内容标准.md)。只挂红点不写内容 = 未交付标注。
+
 ```ts
 export type AnnotationKind = '页面' | '交互' | '字段' | '规则' | '待确认'
 
@@ -47,6 +49,11 @@ export type PrototypeAnnotation = {
   kind: AnnotationKind    // 分类维度
   title: string           // 标题
   content: string         // 简明摘要
+  documentRefs?: Partial<Record<'prd' | 'fields' | 'rules', {
+    section: string       // 三件套章节标题原文
+    match: string         // 该章节里独一无二的原文片段
+    element?: 'row' | 'text'
+  }>>                    // 让【查字段】【读PRD】【看规则】直达章节，不是回到文首
   details: Array<{        // 结构化细则分组
     title: string
     items: Array<{
@@ -56,6 +63,18 @@ export type PrototypeAnnotation = {
   }>
 }
 ```
+
+**四类打点各写什么（判据）**
+
+| kind | 必须写到 |
+| :--- | :--- |
+| 页面 | 一句话定位 + **Mermaid 生命周期流转图** + 上下游与快照边界 + 角色与数据范围 |
+| 字段 | **字段字典表**：字段名称（中文业务名）/ 控件 / 必填 / 取值范围与格式 / 新增·编辑差异 / 校验与提示 |
+| 交互 | **操作矩阵**：可见角色 / 可见状态 / 点击后做什么 / 二次确认与必填 / 成功提示原话 |
+| 规则 | `【规则名称】(编号)` + 触发条件 + 拦截提示原话 + 三件套真源位置 |
+
+**每页最低条数**：列表 / 详情 / 表单各 **≥4 条**（页面 1 + 字段 ≥1 + 交互 ≥1 + 规则按需），弹窗/抽屉 ≥2 条；页面类打点为强制项。
+
 
 ### 2.2 原始 PRD / 字段 / 规则源文件挂载标准 (`*.documents.ts`)
 

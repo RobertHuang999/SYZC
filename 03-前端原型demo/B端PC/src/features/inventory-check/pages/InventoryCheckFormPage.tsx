@@ -26,6 +26,7 @@ import {
 } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { inventoryCheckDocuments } from "../documents/inventory-check-documents"
 import { FormPageHeader } from "@/shared/components/FormPageHeader"
+import { FormPageStickyFooter } from "@/shared/components/FormPageStickyFooter"
 import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { inventoryCheckFormAnnotations } from "../annotations/inventory-check-form.annotations"
 import { AddGoodsSummaryDialog } from "../components/AddGoodsSummaryDialog"
@@ -209,7 +210,8 @@ export function InventoryCheckFormPage() {
       documents={inventoryCheckDocuments}
       annotations={inventoryCheckFormAnnotations}
     >
-      <div className="space-y-4 p-6 pb-24 font-['PingFang_SC',-apple-system,BlinkMacSystemFont,sans-serif]">
+      <div className="flex min-h-full flex-col font-['PingFang_SC',-apple-system,BlinkMacSystemFont,sans-serif]">
+      <div className="flex-1 space-y-4 p-6 pb-6">
         {/* 顶部面包屑与操作栏 */}
         <FormPageHeader
           title="新增盘点任务"
@@ -706,32 +708,27 @@ export function InventoryCheckFormPage() {
           </DialogContent>
         </Dialog>
 
-        <div className="fixed bottom-0 left-0 right-0 z-30 border-t bg-card px-6 py-3">
-          <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4">
-            <div className="text-xs text-muted-foreground">
-              提交后生成盘点任务，可在待盘点页录入实盘结果
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-9 px-4 text-xs"
-                onClick={handleBack}
-              >
-                取消
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                className="h-9 px-5 text-xs"
-                onClick={handleSubmit}
-              >
-                提交
-              </Button>
-            </div>
-          </div>
-        </div>
+      </div>
+
+        <FormPageStickyFooter left="提交后生成盘点任务，可在待盘点页录入实盘结果">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-9 px-4 text-xs"
+            onClick={handleBack}
+          >
+            取消
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            className="h-9 px-5 text-xs"
+            onClick={handleSubmit}
+          >
+            提交
+          </Button>
+        </FormPageStickyFooter>
       </div>
     </PrototypeAnnotationProvider>
   )

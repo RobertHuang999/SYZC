@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const unlockApplyAuditListAnnotations: PrototypeAnnotation[] = [
   {
     id: "unlock-apply-audit-page",
+    documentRefs: {
+      prd: { section: "开锁申请 主PRD", match: "协同审核：【开锁审核】台账（菜单：工作中心 → 审批中心 → 其他审批 → 开锁", element: "text" },
+      rules: { section: "开锁申请 业务规则规格", match: "工作中心 → 审批中心 → 业务审批 → 我的申请管理 → 开锁申请", element: "row" },
+    },
     targetId: "unlock-apply-audit-page",
     number: 1,
     kind: "页面",
@@ -61,6 +65,10 @@ export const unlockApplyAuditListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "unlock-apply-audit-filter",
+    documentRefs: {
+      prd: { section: "二、功能范围", match: "包含功能范围 (In Scope)", element: "row" },
+      rules: { section: "3.1 状态定义", match: "待审批 (PENDING)：已提交开锁申请，等待审批人处理，允许申请人主动撤回；", element: "text" },
+    },
     targetId: "unlock-apply-audit-filter",
     number: 2,
     kind: "交互",
@@ -108,6 +116,10 @@ export const unlockApplyAuditListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "unlock-apply-audit-table",
+    documentRefs: {
+      fields: { section: "开锁申请 字段清单", match: "审批处理时间", element: "row" },
+      rules: { section: "3.1 状态定义", match: "待审批 (PENDING)：已提交开锁申请，等待审批人处理，允许申请人主动撤回；", element: "text" },
+    },
     targetId: "unlock-apply-audit-table",
     number: 3,
     kind: "字段",
@@ -161,6 +173,38 @@ export const unlockApplyAuditListAnnotations: PrototypeAnnotation[] = [
             label: "人脸门禁 (R31)",
             content:
               "审批通过后调用人脸终端或平台生成临时开门密码并在页面明文展示；**绝不调用短信服务**（避免费用浪费与终端差异）。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "unlock-apply-audit-self-review",
+    documentRefs: {
+      rules: { section: "开锁申请 业务规则规格", match: "【发起申请】", element: "row" },
+      prd: { section: "开锁申请 主PRD", match: "【常规通用流程审批】：本申请专网专道运行，不进通用待办池。", element: "row" },
+    },
+    targetId: "unlock-apply-audit-table",
+    number: 4,
+    kind: "规则",
+    title: "自审禁止与专网专道 (P06 / R11)",
+    content:
+      "审批人不可审批自己发起的开锁申请；本人申请在审核列表与详情仅展示【详情】，不提供【通过】【驳回】。开锁审批不进通用待办池，只在本菜单流转。",
+    details: [
+      {
+        title: "拦截口径",
+        items: [
+          {
+            label: "自审禁止",
+            content: "申请人 = 当前登录人时，操作列只留【详情】；服务端同样校验，防止绕过前端。",
+          },
+          {
+            label: "专网专道",
+            content: "不写入「待处理 / 已处理」池，避免高频开锁被普通审批淹没。",
+          },
+          {
+            label: "驳回原因",
+            content: "驳回必须填写原因（最多 200 字），提交后状态置【已驳回】并释放防重。",
           },
         ],
       },

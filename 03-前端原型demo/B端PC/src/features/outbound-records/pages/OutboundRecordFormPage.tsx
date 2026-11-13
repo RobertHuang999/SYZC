@@ -24,6 +24,7 @@ import {
 } from "@/features/inbound-records/components/ApprovalFlowSelectDialog"
 import { outboundRecordDocuments } from "../documents/outbound-record-documents"
 import { FormPageHeader } from "@/shared/components/FormPageHeader"
+import { FormPageStickyFooter } from "@/shared/components/FormPageStickyFooter"
 import { outboundRecordFormAnnotations } from "../annotations/outbound-record-form.annotations"
 import { OutboundBasicInfoSection } from "../components/OutboundBasicInfoSection"
 import { OutboundGoodsPickerModal } from "../components/OutboundGoodsPickerModal"
@@ -294,7 +295,7 @@ export function OutboundRecordFormPage() {
       annotations={outboundRecordFormAnnotations}
     >
       <div className="flex min-h-full flex-col bg-muted/10">
-        <div className="flex-1 space-y-4 p-6 pb-24">
+        <div className="flex-1 space-y-4 p-6 pb-6">
           <PrototypeAnnotationTarget annotationIds={["outbound-form-header"]}>
             <FormPageHeader
               title="新增出库"
@@ -343,16 +344,38 @@ export function OutboundRecordFormPage() {
           </PrototypeAnnotationTarget>
         </div>
 
-        <div className="sticky bottom-0 z-20 border-t bg-card/95 px-6 py-3 backdrop-blur shadow-xs">
-          <OutboundFormSummaryBar
-            categoryCount={totals.categoryCount}
-            totalAmount={totals.totalAmount}
-            unit={totals.unit}
-            totalValueWan={totals.totalValueWan}
-            showValue={isRelated}
-            variant="footer"
-          />
-        </div>
+        <FormPageStickyFooter
+          left={
+            <OutboundFormSummaryBar
+              categoryCount={totals.categoryCount}
+              totalAmount={totals.totalAmount}
+              unit={totals.unit}
+              totalValueWan={totals.totalValueWan}
+              showValue={isRelated}
+              variant="footer"
+              className="px-0 py-0"
+            />
+          }
+        >
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-9 px-4 text-xs"
+            onClick={handleCancel}
+          >
+            取消
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            className="h-9 px-5 text-xs"
+            onClick={handleSubmit}
+            disabled={submitLoading}
+          >
+            {submitLoading ? "提交中..." : "提交审核"}
+          </Button>
+        </FormPageStickyFooter>
 
         <OutboundGoodsPickerModal
           open={pickerOpen}
@@ -431,33 +454,6 @@ export function OutboundRecordFormPage() {
           </div>
         ) : null}
 
-        <div className="fixed bottom-0 left-0 right-0 z-30 border-t bg-card px-6 py-3">
-          <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4">
-            <div className="text-xs text-muted-foreground">
-              提交后进入审批中心，审批通过才会扣减库存并生成提货单
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-9 px-4 text-xs"
-                onClick={handleCancel}
-              >
-                取消
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                className="h-9 px-5 text-xs"
-                onClick={handleSubmit}
-                disabled={submitLoading}
-              >
-                {submitLoading ? "提交中..." : "提交审核"}
-              </Button>
-            </div>
-          </div>
-        </div>
       </div>
     </PrototypeAnnotationProvider>
   )

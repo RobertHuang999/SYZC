@@ -3,18 +3,64 @@ import type { SharedPrototypeAnnotation } from "../../annotations/prototype-anno
 /** 仓单动碰流程 · 移动端标注正文（双端共享真源，仅 H5 挂载） */
 export const warehouseReceiptOpsAnnotationsShared: SharedPrototypeAnnotation[] = [
   {
-    id: "receipt-ops-outbound",
-    targetId: "receipt-ops-outbound",
+    id: "receipt-ops-page",
+    targetId: "receipt-ops-page",
     number: 1,
+    kind: "页面",
+    title: "仓单动碰操作总览（移动端）",
+    content:
+      "从「工作台 → 仓单管理」进入仓单详情后发起 6 类动碰操作；全部涉及货权处置，必须在手机端完成活体人脸识别与签署，PC 端只负责发起引导。",
+    documentRefs: {
+      prd: { section: "5.2 操作按钮能力矩阵", match: "移动端人脸识别强绑定" },
+      rules: { section: "2. 规则详细规格", match: "全量操作可用与人脸绑定" },
+    },
+    details: [
+      {
+        title: "六类动碰操作流转图",
+        items: [
+          {
+            label: "操作流转图",
+            content: `flowchart TD
+    A["仓单详情（正常态）"] --> B{"选择操作"}
+    B -->|仓单出库| C["选货（至少留 1 组）→ 提货信息 → 人脸签署"]
+    B -->|仓单移库| D["目标库房/分区/垛位（同仓）→ 人脸签署"]
+    B -->|仓单补货| E["选同仓同货主可用库存 → 人脸签署"]
+    B -->|仓单移除| F["整批/部分解绑，还原【存货中】→ 人脸签署"]
+    B -->|仓单入库| G["入库类型与关联单号锁定 → 录入批次 → 人脸签署"]
+    B -->|注销| H["重要提醒 → 二次确认 → 人脸签署 → 终态注销"]
+    C --> I["审批流"]
+    D --> I
+    E --> I
+    F --> I
+    G --> I
+    H --> I
+    I -->|通过| J["回写仓单数量/批次/状态，写入变更记录"]`,
+          },
+          {
+            label: "单流程互斥 (R04)",
+            content:
+              "补货、出库、移库、注销四类在途仅限 1 个；冲突时阻断并提示「您还有【流程名】正在审批中，暂无法发起新的流程！」。",
+          },
+          {
+            label: "权限与前置",
+            content:
+              "仅可操作当前账号授权仓库内的正常态仓单；冻结、注销、审批中不出现动碰入口。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "receipt-ops-outbound",
+    documentRefs: {
+      rules: { section: "【仓单出库提货保底拦截】(R07)", match: "“仓单提货仅支持部分提取，若您需要提取仓单内所有货物，请发起仓单注销流程！”", element: "text" },
+    },
+    targetId: "receipt-ops-outbound",
+    number: 2,
     kind: "规则",
     title: "仓单出库提货保底拦截（R07）",
     content:
       "出库只允许部分提取，必须至少保留一组货物；勾选全部货物时强阻断并提示「仓单提货仅支持部分提取，若您需要提取仓单内所有货物，请发起仓单注销流程！」。",
-    documentRefs: {
-      fields: { section: "五、操作字段子清单索引", match: "02 仓单出库字段清单" },
-      rules: { section: "2. 规则详细规格", match: "R07" },
-      prd: { section: "场景 2【部分提货与全部提货强拦截】(S02)", match: "全选" },
-    },
     details: [
       {
         title: "两步录入",
@@ -40,7 +86,7 @@ export const warehouseReceiptOpsAnnotationsShared: SharedPrototypeAnnotation[] =
   {
     id: "receipt-ops-relocate",
     targetId: "receipt-ops-relocate",
-    number: 2,
+    number: 3,
     kind: "规则",
     title: "仓单移库同仓物理转移（R08）",
     content:
@@ -72,7 +118,7 @@ export const warehouseReceiptOpsAnnotationsShared: SharedPrototypeAnnotation[] =
   {
     id: "receipt-ops-replenish",
     targetId: "receipt-ops-replenish",
-    number: 3,
+    number: 4,
     kind: "规则",
     title: "仓单补货：追加同仓同货主可用库存（R09）",
     content:
@@ -101,7 +147,7 @@ export const warehouseReceiptOpsAnnotationsShared: SharedPrototypeAnnotation[] =
   {
     id: "receipt-ops-remove",
     targetId: "receipt-ops-remove",
-    number: 4,
+    number: 5,
     kind: "规则",
     title: "仓单移除：解绑还原为普通库存（R09）",
     content:
@@ -128,17 +174,16 @@ export const warehouseReceiptOpsAnnotationsShared: SharedPrototypeAnnotation[] =
   },
   {
     id: "receipt-ops-cancel",
+    documentRefs: {
+      rules: { section: "【仓单注销多重确认与效力终止】(R11)", match: "步骤二（二次确认强弹窗）：", element: "text" },
+      prd: { section: "1.1 业务背景", match: "移动端现场用户在 工作台 → 仓单管理（ws-receipt-mgr）集中查看名", element: "text" },
+    },
     targetId: "receipt-ops-cancel",
-    number: 5,
+    number: 6,
     kind: "规则",
     title: "仓单注销多重确认与效力终止（R11）",
     content:
       "注销按「重要提醒（倒计时阅读）→ 二次确认弹窗 → 电子签章人脸 → 审批流」执行；审批通过后仓单彻底作废，所有业务均不可再选中。",
-    documentRefs: {
-      fields: { section: "五、操作字段子清单索引", match: "07 仓单注销字段清单" },
-      rules: { section: "2. 规则详细规格", match: "R11" },
-      prd: { section: "场景 5【仓单注销签署与不可逆作废】(S05)", match: "重要提醒" },
-    },
     details: [
       {
         title: "二次确认文案",
@@ -164,7 +209,7 @@ export const warehouseReceiptOpsAnnotationsShared: SharedPrototypeAnnotation[] =
   {
     id: "receipt-ops-inbound",
     targetId: "receipt-ops-inbound",
-    number: 6,
+    number: 7,
     kind: "规则",
     title: "仓单入库关联单号自动锁定（R10）",
     content:
@@ -188,6 +233,73 @@ export const warehouseReceiptOpsAnnotationsShared: SharedPrototypeAnnotation[] =
           {
             label: "仓库与货主",
             content: "按仓单带出，不可跨仓入库。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "receipt-ops-fields",
+    targetId: "receipt-ops-fields",
+    number: 8,
+    kind: "字段",
+    title: "六类动碰操作的录入字段",
+    content:
+      "各操作按「选货 → 补录信息 → 签署」组织；出库、移库、补货、移除录入选货与数量，入库录批次与位置，注销只做确认与签章。",
+    documentRefs: {
+      fields: { section: "五、操作字段子清单索引", match: "出库模式" },
+      rules: { section: "2. 规则详细规格", match: "仓单出库提货保底拦截" },
+    },
+    details: [
+      {
+        title: "录入字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 新增/编辑差异 | 校验与提示 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **出库模式** | 单选 | 必填 | 全部出库 / 部分出库（逐批） | 仅仓单出库 | 全部勾选时阻断，提示「仓单提货仅支持部分提取，若您需要提取仓单内所有货物，请发起仓单注销流程！」 |
+| **出库数量** | 数值 | 部分出库必填 | 大于 0 且不超过该批次可用量，最多 4 位小数 | 仅仓单出库 | 超额提示「出库数量不能超过该批次可用数量」 |
+| **提货人类型** | 单选 | 必填 | 个人 / 企业 | 仅仓单出库 | — |
+| **提货人姓名 / 证件号 / 电话** | 单行文本 | 必填 | 姓名 ≤30 字；证件 18 位；手机 11 位 | 仅仓单出库 | 格式错误分别提示「请输入正确的证件号」「请输入正确的手机号」 |
+| **车牌号** | 单行文本 | 选填 | 最多 10 个字符 | 仅仓单出库 | — |
+| **出库日期** | 日期 | 必填 | 不晚于当天 | 仅仓单出库 | 晚于当天时提示「出库日期不能晚于今天」 |
+| **现场照片** | 图片上传 | 必填 | jpg/png，最多 10 张，单张不超过 5MB | 出库、入库 | 未上传时提示「请上传现场照片」 |
+| **目标库房 / 分区 / 具体位置** | 三级级联 | 必填 | 仅当前仓单所在仓库下的启用库房与分区；垛位未划分记「--」 | 仅仓单移库 | 序列不全时提示「请选择完整的移库目标位置」 |
+| **移库 / 移除 / 补货原因** | 多行文本 | 条件必填 | 最多 200 字 | 移库、移除、补货 | 超长阻断；移除必填 |
+| **补货数量** | 数值 | 必填 | 大于 0 且不超过所选批次可用量 | 仅仓单补货 | 超额提示「补货数量不能超过该批次可用数量」 |
+| **移除模式** | 单选 | 必填 | 整批移除 / 部分移除 | 仅仓单移除 | 部分移除时数量必填 |
+| **注销原因** | 多行文本 | 必填 | 最多 200 字 | 仅仓单注销 | 为空时阻断，提示「请填写注销原因」 |`,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "receipt-ops-submit",
+    documentRefs: {
+      prd: { section: "6. 页面交互规格索引", match: "状态大圆章：审批中（金黄）、正常（绿）、冻结（深灰）、注销（深灰）；", element: "text" },
+    },
+    targetId: "receipt-ops-submit",
+    number: 9,
+    kind: "交互",
+    title: "提交与签署的通用交互",
+    content:
+      "六类操作统一遵循「校验 → 二次确认（注销为三重）→ 人脸活体 → 提交成功提示」；失败不关闭页面，可直接修改后重提。",
+    details: [
+      {
+        title: "交互与提示",
+        items: [
+          {
+            label: "操作矩阵",
+            content: `| 操作 | 可见角色 | 命中条件 | 结果 | 提示原话 |
+| :--- | :--- | :--- | :--- | :--- |
+| **提交** | 开单/仓管经办人 | 必填齐全、数量合法 | 进入人脸核验 | 校验失败时定点滚动到问题字段并提示原因 |
+| **注销提交** | 同上 | 已读完重要提醒 | 二次确认弹窗 → 人脸签署 | 「您是否仔细阅读重要提醒，且已知晓仓单注销后果！若您已确认并仍需注销仓单，请点击继续！」 |
+| **人脸核验** | 同上 | 相机权限可用 | 通过后激活短信验证码 | 「人脸识别未通过，请调整光线或端正坐姿后重新核验」 |
+| **短信验证码** | 同上 | 人脸已通过 | 6 位验证码，5 分钟内有效 | 超时提示「验证码已失效，请重新获取」；60 秒后方可重发 |
+| **提交成功** | 同上 | 全部通过 | 生成审批流，返回仓单详情 | 「已提交审批，审批通过后自动生效」 |
+| **取消** | 同上 | 任一环节 | 关闭当前操作，不产生单据 | 已填内容保留，可继续编辑 |`,
           },
         ],
       },

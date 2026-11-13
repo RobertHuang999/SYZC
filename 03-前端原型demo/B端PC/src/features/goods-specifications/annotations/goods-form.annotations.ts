@@ -3,16 +3,16 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const goodsFormAnnotations: PrototypeAnnotation[] = [
   {
     id: "goods-form-page",
+    documentRefs: {
+      prd: { section: "货品管理主PRD", match: "【入库收集信息配置与单位固定】", element: "row" },
+      rules: { section: "【入库收集信息配置与保质期固定单位指定规则】(SKU-F03)", match: "收集项从哪来：", element: "text" },
+    },
     targetId: "goods-form-page",
     number: 1,
     kind: "页面",
     title: "6.3 变更 · 新增与编辑货品独立整页表单",
     content:
       "货品新增和编辑采用独立整页路由，包含「基础信息」与「入库收集信息配置（联动 07 字段池）」两大卡片；保存成功后进入该货品详情页并实时同步至下游仓储入库单目录。",
-    documentRefs: {
-      prd: { section: "4. 业务场景", match: "SKU-S02" },
-      rules: { section: "三、核心业务规则", match: "K08" },
-    },
     details: [
       {
         title: "页面结构与交互约定",
@@ -44,20 +44,44 @@ export const goodsFormAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "建档流程与联动",
+        items: [
+          {
+            label: "建档流转图",
+            content: `flowchart TD
+    A["新增货品"] --> B["选大类 → 选品类"]
+    B --> C["按品类生成规格输入项"]
+    C --> D["填计量参数 + 单位（分离维护 K02）"]
+    D --> E["规格参数逐项填写（全部必填）"]
+    E --> F["入库收集信息配置<br/>勾选 07 收集项 → 设必填 / 保质期单位 / 适用候选项"]
+    F --> G{"保存校验"}
+    G -->|SKU 重复| H["阻断：该货品规格配置已存在，请重新输入 (K01)"]
+    G -->|必填缺失| I["顶部错误横幅，不关闭表单"]
+    G -->|通过| J["写入数据版本号并跳转货品详情"]
+    J --> K["实时同步下游入库单选择目录"]`,
+          },
+          {
+            label: "上下游与权限",
+            content:
+              "大类与品类来自货品规格管理；入库收集项来自 07 入库收集项配置字段池；保存后同步 PC/H5 入库单可选项。仅平台管理员可新增与编辑。",
+          },
+        ],
+      },
     ],
   },
   {
     id: "goods-form-base",
+    documentRefs: {
+      fields: { section: "二、状态与系统字段", match: "内部系统字段", element: "row" },
+      rules: { section: "【计量参数与单位分离维护规则】(SKU-F02)", match: "计量参数（如 重量、数量、体积）与计量单位（如 吨、包、件）在表单中分开独立、均", element: "text" },
+    },
     targetId: "goods-form-base",
     number: 2,
     kind: "字段",
     title: "基础信息与计量参数分离维护（K01 / K02）",
     content:
       "先选大类再选品类；品类确定后，系统按品类定义的规格维度动态生成规格输入项；计量参数与单位均为单行文本输入框独立维护。",
-    documentRefs: {
-      fields: { section: "一、业务字段", match: "计量参数" },
-      rules: { section: "三、核心业务规则", match: "K02" },
-    },
     details: [
       {
         title: "基础字段清单",
@@ -99,6 +123,24 @@ export const goodsFormAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "基础信息字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 新增/编辑差异 | 校验与提示 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **货品大类** | 下拉单选 | 必填 | 仅启用中的大类 | 新增可改；编辑只读 | 未选时提示「请选择货品大类」 |
+| **所属品类** | 下拉单选 | 必填 | 仅所选大类下启用中的品类 | 新增可改；编辑只读 | 切换大类后清空已选品类 |
+| **货品名称** | 单行文本 | 必填 | 最多 50 个字符 | 均可改 | 为空或超长时阻断 |
+| **计量参数** | 单行文本 | 必填 | 如重量、数量、体积，最多 10 个字符 | 均可改 | 与单位分离维护 (K02) |
+| **计量单位** | 单行文本 | 必填 | 吨/公斤/件/包/箱/卷/桶 等 | 均可改 | 列表按「参数(单位)」展示 |
+| **规格参数** | 动态输入组 | 必填 | 按品类定义的 1~5 个维度，逐项必填 | 随品类重新生成 | 切换品类时同名维度保留已填值 |
+| **系统参考单价** | 数值输入 | 选填 | 非负金额，最多 2 位小数 | 也可在详情页单独设价 | 保存后写入修改记录 (K05) |
+| **自身状态** | 开关 | 必填 | 启用 / 停用 | 均可改 | 已产生入库单仍可停用 |`,
+          },
+        ],
+      },
     ],
   },
   {
@@ -132,6 +174,10 @@ export const goodsFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "goods-form-inbound",
+    documentRefs: {
+      rules: { section: "【入库收集信息配置与保质期固定单位指定规则】(SKU-F03)", match: "为什么要在货品端固定保质期单位：", element: "text" },
+      fields: { section: "1.1 入库收集信息配置：引用 07 元数据 + 货品级参数", match: "选填（保质期专属）", element: "row" },
+    },
     version: "6.3",
     targetId: "goods-form-inbound",
     number: 4,
@@ -139,11 +185,6 @@ export const goodsFormAnnotations: PrototypeAnnotation[] = [
     title: "6.3 变更 · 入库收集信息配置与保质期单位锁定 (K03 / K12)",
     content:
       "从【07 入库收集项配置】字段池勾选启用中的收集项（支持按控件类型筛选与按名称搜索）并逐项设必填；保质期从 07 白名单中指定专属固定单位（天/月/年）与选填建议默认数值（1~9999 正整数）；下拉选择器支持从 07 枚举选项池中多选当前货品适用的候选项。",
-    documentRefs: {
-      prd: { section: "1.1 核心痛点与优化目标", match: "支持货品专属单位固定" },
-      fields: { section: "1.1 入库收集信息配置", match: "保质期固定单位" },
-      rules: { section: "三、核心业务规则", match: "K03" },
-    },
     details: [
       {
         title: "6.3 版本迭代调整对照（调整前 → 调整后）",

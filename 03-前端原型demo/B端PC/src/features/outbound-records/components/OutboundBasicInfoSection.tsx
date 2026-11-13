@@ -245,6 +245,7 @@ export function OutboundBasicInfoSection({
                     enableQuickCreate={false}
                     hideEmbeddedHints
                     showFieldLabel={false}
+                    subjectType={form.ownerType === "企业" ? "ENTERPRISE" : "INDIVIDUAL"}
                     value={form.ownerPartnerId || undefined}
                     selection={ownerSelection}
                     onChange={applyOwnerPartner}

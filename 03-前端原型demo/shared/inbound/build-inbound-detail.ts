@@ -459,7 +459,7 @@ export function buildInboundRecordDetail(row: InboundListRowForDetail): InboundR
     goodsLines: buildGoodsLines(row),
     auditTrail,
     modifyLogs:
-      row.orderNo === "2059897000077811713"
+      row.orderNo === "2105200919292059650"
         ? [
             {
               fieldLabel: "堆放位置 · 冻货-牛肉-36个月",

@@ -86,6 +86,19 @@ function createAnnotations(module: ReadonlyRiskModule): PrototypeAnnotation[] {
       title: content.listTitle,
       content: content.listContent,
       details: [
+      {
+        title: "只读视图定位",
+        items: [
+          {
+            label: "流转图",
+            content: `flowchart TD
+    A["贷中风控任务执行"] --> B["只读风险视图（移动端）"]
+    B --> C["列表：评分与预警状态"]
+    C --> D["详情：模型结果与输入项快照"]
+    D --> E["不可在此处置，处置回 PC 端"]`,
+          },
+        ],
+      },
         {
           title: "页面边界",
           items: [

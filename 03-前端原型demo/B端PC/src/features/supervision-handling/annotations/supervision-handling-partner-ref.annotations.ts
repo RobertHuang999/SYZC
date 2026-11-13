@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const supervisionHandlingPartnerRefAnnotations: PrototypeAnnotation[] = [
   {
     id: "supervision-handling-page",
+    documentRefs: {
+      prd: { section: "监管办理 主PRD", match: "菜单路径（6.2）：融资/监管 → 监管业务 → 监管办理", element: "text" },
+      rules: { section: "【监管服务质权人合作方引用规则】(R15)", match: "【界面称谓】：表单 Label 使用 质权人 或 服务方，禁止 使用「资金方」「", element: "text" },
+    },
     targetId: "supervision-handling-page",
     number: 1,
     kind: "页面",
@@ -37,6 +41,10 @@ export const supervisionHandlingPartnerRefAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "supervision-handling-holder-picker",
+    documentRefs: {
+      fields: { section: "一、基础信息区字段 (Basic Information)", match: "6.3 嵌入式选择器绑定主档；见 R14 / R15", element: "row" },
+      rules: { section: "【监管服务质权人合作方引用规则】(R15)", match: "【界面称谓】：表单 Label 使用 质权人 或 服务方，禁止 使用「资金方」「", element: "text" },
+    },
     targetId: "supervision-handling-holder-picker",
     number: 2,
     kind: "字段",

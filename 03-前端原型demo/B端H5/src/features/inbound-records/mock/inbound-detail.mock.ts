@@ -16,18 +16,6 @@ export type MobileInboundDetailExtra = {
 }
 
 const EXTRAS: Record<string, MobileInboundDetailExtra> = {
-  "m-inbound-3": {
-    iotCaptures: [
-      {
-        id: "iot-1",
-        deviceName: "冻库1-卸货枪机",
-        capturedAt: "2026-05-28 15:16:02",
-        status: "成功",
-        label: "货位全景抓拍",
-      },
-    ],
-    modifyLogs: [],
-  },
   "m-inbound-2": {
     iotCaptures: [
       {

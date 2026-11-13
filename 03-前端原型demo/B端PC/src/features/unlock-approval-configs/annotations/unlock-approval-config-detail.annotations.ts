@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const unlockApprovalConfigDetailAnnotations: PrototypeAnnotation[] = [
   {
     id: "unlock-approval-config-detail-header",
+    documentRefs: {
+      prd: { section: "开锁审批配置 主PRD", match: "开锁审批配置字段清单", element: "row" },
+      rules: { section: "三、单据状态机与生命周期流转", match: "### 3.2 状态机流转图", element: "text" },
+    },
     targetId: "unlock-approval-config-detail-header",
     number: 1,
     kind: "页面",
@@ -27,10 +31,30 @@ export const unlockApprovalConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "配置生命周期与匹配",
+        items: [
+          {
+            label: "生命周期流转图",
+            content: `flowchart TD
+    A["新增审批配置"] --> B["启用中"]
+    B -->|停用| C["已停用"]
+    C -->|重新启用| B
+    B -->|软删除| D["已删除（历史申请保留快照）"]
+    B -->|设备获取密码| E{"matchUnlockApprovalConfig"}
+    E -->|命中启用配置| F["走审批：生成待审批申请"]
+    E -->|未命中| G["免审直发"]`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "unlock-approval-config-detail-base",
+    documentRefs: {
+      fields: { section: "一、基础识别与范围字段", match: "适用设备摘要", element: "row" },
+      rules: { section: "开锁审批配置 业务规则规格", match: "关联规则编号", element: "row" },
+    },
     targetId: "unlock-approval-config-detail-base",
     number: 2,
     kind: "字段",
@@ -56,10 +80,31 @@ export const unlockApprovalConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "基础信息字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 展示规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **配置名称** | 只读文本 | 必填 | 最多 50 个字符，租户内唯一 | 单行 | — |
+| **审批方式** | 只读文本 | 必填 | 固定「多节点审批」 | 单行 | 不支持免审配置 |
+| **适用设备** | 只读标签组 | 必填 | 挂锁 / 人脸门禁设备 | 多标签 | 同设备同类型唯一 (R04/R05) |
+| **审批超时** | 只读文本 | 必填 | 小时数 | 单行 | 超时自动失效 (R14) |
+| **状态** | 状态标签 | 系统维护 | 启用中 / 已停用 / 已删除 | 彩色标签 | 停用不影响历史申请 |
+| **创建人 / 时间** | 只读文本 | 系统记录 | 姓名 + YYYY-MM-DD HH:mm:ss | 双行 | — |
+| **更新人 / 时间** | 只读文本 | 系统记录 | 姓名 + 时间 | 双行 | — |`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "unlock-approval-config-detail-strategy",
+    documentRefs: {
+      fields: { section: "二、审批策略与链条字段", match: "审批超时时间", element: "row" },
+      rules: { section: "【审批节点编排与人员合规性】(R02)", match: "人员与角色数据源边界：", element: "text" },
+    },
     targetId: "unlock-approval-config-detail-strategy",
     number: 3,
     kind: "字段",
@@ -106,6 +151,10 @@ export const unlockApprovalConfigDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "unlock-approval-config-detail-audit",
+    documentRefs: {
+      fields: { section: "三、状态、版本与审计字段", match: "仅已停用状态下展示", element: "row" },
+      rules: { section: "三、单据状态机与生命周期流转", match: "浮窗提示：「删除失败：仅允许删除已停用状态的策略」", element: "row" },
+    },
     targetId: "unlock-approval-config-detail-audit",
     number: 4,
     kind: "字段",
@@ -130,6 +179,10 @@ export const unlockApprovalConfigDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "unlock-approval-config-detail-actions",
+    documentRefs: {
+      prd: { section: "5.1 状态定义", match: "已停用 (DISABLED)：非生效状态。新发起开锁行为不再命中本策略，设备释放", element: "text" },
+      rules: { section: "三、单据状态机与生命周期流转", match: "已启用(Version+1)", element: "row" },
+    },
     targetId: "unlock-approval-config-detail-header",
     number: 5,
     kind: "交互",

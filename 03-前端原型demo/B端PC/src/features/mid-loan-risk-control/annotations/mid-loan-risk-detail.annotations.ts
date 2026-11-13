@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const midLoanRiskDetailAnnotations: PrototypeAnnotation[] = [
   {
     id: "mid-loan-risk-detail-header",
+    documentRefs: {
+      prd: { section: "贷中风控管理主PRD", match: "页面路由：/m/risk/mid-loan", element: "text" },
+      rules: { section: "贷中风控管理 业务规则规格", match: "执行资格判定", element: "row" },
+    },
     targetId: "mid-loan-risk-detail-header",
     number: 1,
     kind: "页面",
@@ -31,6 +35,10 @@ export const midLoanRiskDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "mid-loan-risk-detail-order",
+    documentRefs: {
+      fields: { section: "二、风控模型执行历史字段（详情页时间轴）", match: "模型综合评分", element: "row" },
+      rules: { section: "三、单据状态机与生命周期流转", match: "① 写入 midloanriskledger；② 初始执行次数=0，预警次数=0", element: "row" },
+    },
     targetId: "mid-loan-risk-detail-order",
     number: 2,
     kind: "字段",
@@ -50,10 +58,31 @@ export const midLoanRiskDetailAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 展示规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **订单编号** | 链接 | 必填 | 抵 / 质押订单号 | 可跳转订单主数据 | — |
+| **货主主体** | 文本 | 必填 | 企业全称 + 信用代码 | 双行 | — |
+| **押品品类** | 文本 | 必填 | 品类-规格 | 单行 | — |
+| **订单生命周期** | 状态标签 | 系统维护 | 抵/质押中 / 已结清 等 | 彩色标签 | 决定是否可执行 |
+| **风控模型产品** | 文本 | 必填 | 模型名称 + 版本 | 单行 | 来自订单预警配置 |
+| **执行资格** | 徽标 | 系统计算 | 可执行 / 不可执行 | 单行 | 悬浮看原因 |
+| **累计执行 / 预警次数** | 只读文本 | 系统统计 | 次数 | 单行 | — |`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "mid-loan-risk-detail-eligibility",
+    documentRefs: {
+      rules: { section: "【执行次数与预警次数累加统计规则】(MID-E07)" },
+      fields: { section: "二、风控模型执行历史字段（详情页时间轴）", match: "执行状态快照", element: "row" },
+    },
     targetId: "mid-loan-risk-detail-eligibility",
     number: 3,
     kind: "规则",
@@ -77,6 +106,10 @@ export const midLoanRiskDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "mid-loan-risk-detail-latest",
+    documentRefs: {
+      fields: { section: "二、风控模型执行历史字段（详情页时间轴）", match: "申请提交时间", element: "row" },
+      rules: { section: "3.1 状态定义", match: "用户点击确认提交执行", element: "row" },
+    },
     targetId: "mid-loan-risk-detail-latest",
     number: 4,
     kind: "字段",
@@ -100,6 +133,10 @@ export const midLoanRiskDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "mid-loan-risk-detail-history",
+    documentRefs: {
+      rules: { section: "【智风控任务受理与异步跟踪规则】(MID-TC01)" },
+      prd: { section: "5.1 执行状态定义", match: "智风控返回任务受理编号", element: "row" },
+    },
     targetId: "mid-loan-risk-detail-history",
     number: 5,
     kind: "规则",
@@ -127,6 +164,10 @@ export const midLoanRiskDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "mid-loan-risk-detail-actions",
+    documentRefs: {
+      prd: { section: "5.1 执行状态定义", match: "经任务中心联登补齐材料继续计算", element: "row" },
+      rules: { section: "【任务中心联登安全签名与时效规则】(MID-P04)" },
+    },
     targetId: "mid-loan-risk-detail-header",
     number: 6,
     kind: "交互",

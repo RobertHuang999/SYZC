@@ -31,7 +31,7 @@ import {
 import type { CustomerFinancingDueDiligence } from "../domain/types"
 
 // -------------------------------------------------------------
-// 1. 发起尽调模态弹窗 (R01/R06/S02)
+// 1. 发起尽调模态弹窗
 // -------------------------------------------------------------
 interface TriggerModalProps {
   open: boolean
@@ -54,14 +54,14 @@ export function TriggerDueDiligenceModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base font-semibold">
             <Building2Icon className="h-5 w-5 text-primary" />
-            核对主体资质并调用智风控 OpenAPI
+            核对主体资质并调用智风控接口
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2 text-xs">
           <div className="rounded-md border border-primary/20 bg-primary/5 p-3 text-foreground">
             <p className="font-medium text-primary">
-              【尽调责任人独占与主体资质核验规则】(R01)
+              发起前请核对主体资质
             </p>
             <p className="mt-1 leading-relaxed text-muted-foreground">
               系统将核验申请主体工商营业执照、统一社会信用代码及法定代表人资质一致性，确认无误后异步请求第三方智风控引擎开展大数据信用核查。
@@ -114,7 +114,7 @@ export function TriggerDueDiligenceModal({
           </div>
 
           <p className="text-[11px] text-muted-foreground">
-            * 点击【确认发起尽调】后，单据状态将置为【受理中】，系统后台将异步接收智风控网关回调结论（PASS / REJECT / REVIEW）。
+            * 点击【确认发起尽调】后，单据状态将置为【受理中】，系统后台将异步接收智风控网关回调结论（通过 / 不通过 / 需人工复核）。
           </p>
         </div>
 
@@ -136,7 +136,7 @@ export function TriggerDueDiligenceModal({
 }
 
 // -------------------------------------------------------------
-// 2. 同组织任务转交模态表单 (R02/C01/S01)
+// 2. 同组织任务转交模态表单
 // -------------------------------------------------------------
 interface ReassignModalProps {
   open: boolean
@@ -196,7 +196,7 @@ export function ReassignTaskModal({
         <div className="space-y-4 py-2 text-xs">
           <div className="rounded-md border border-blue-200 bg-blue-50/70 p-3 text-blue-800 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300">
             <p className="font-medium">
-              【同机构任务转交与流转审计规则】(R02/C01)
+              转交后由接收专员继续办理
             </p>
             <p className="mt-1 leading-relaxed">
               仅支持将任务转交至同一组织机构下的在职尽调同事；转交后单据责任人即时变更，单据保持【待尽调】状态并全程留痕存证。
@@ -276,7 +276,7 @@ export function ReassignTaskModal({
 }
 
 // -------------------------------------------------------------
-// 3. 手动拒绝模态弹窗 (R03/C02/S04)
+// 3. 手动拒绝模态弹窗
 // -------------------------------------------------------------
 interface ManualRejectModalProps {
   open: boolean
@@ -312,11 +312,11 @@ export function ManualRejectModal({
   const handleSubmit = () => {
     const trimmed = detail.trim()
     if (!trimmed) {
-      setError("详细拒绝说明为必填项，不可为空 (C02)")
+      setError("详细拒绝说明为必填项，不可为空")
       return
     }
     if (trimmed.length > 300) {
-      setError("详细拒绝说明长度不可超过 300 字 (C02)")
+      setError("详细拒绝说明长度不可超过 300 字")
       return
     }
     onConfirm(item, category, trimmed)
@@ -335,7 +335,7 @@ export function ManualRejectModal({
         <div className="space-y-4 py-2 text-xs">
           <div className="rounded-md border border-rose-200 bg-rose-50/80 p-3 text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300">
             <p className="font-medium">
-              【手动拒绝不可逆与原因入池规则】(R03/C02)
+              拒绝后不可撤销，请如实填写原因
             </p>
             <p className="mt-1 leading-relaxed">
               拒绝操作为终态不可逆操作。提交后任务将直接移出【待尽调标签页】，进入【尽调完成标签页】（状态标记为申请失败），并通过系统事务可靠投递至【被拒退回池 → 尽调失败标签页】。
@@ -425,7 +425,7 @@ export function ManualRejectModal({
 }
 
 // -------------------------------------------------------------
-// 4. 分配给合作资方模态表单 (R04/C03/S03)
+// 4. 分配给合作资方模态表单
 // -------------------------------------------------------------
 interface AssignFunderModalProps {
   open: boolean
@@ -460,13 +460,13 @@ export function AssignFunderModal({
 
   if (!item) return null
 
-  // 门禁检查：是否包含尽调报告 (R04/C03)
+  // 门禁检查：是否包含尽调报告
   const hasReport =
     item.attachments?.some((a) => a.isReport || a.name.includes("尽职调查") || a.name.includes("尽调报告")) ?? false
 
   const handleSubmit = () => {
     if (!hasReport) {
-      setError("分配失败：缺少正式盖章尽调报告附件，请先上传尽调报告 (C03)")
+      setError("分配失败：缺少正式盖章尽调报告附件，请先上传尽调报告")
       return
     }
     if (!funderName) {
@@ -493,7 +493,7 @@ export function AssignFunderModal({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 font-semibold">
                   <ShieldAlertIcon className="h-4 w-4 text-rose-600" />
-                  缺少盖章尽调报告附件 (C03 门禁阻断)
+                  缺少盖章尽调报告附件，请先归档后再分配资方
                 </div>
                 <Button
                   size="sm"
@@ -506,7 +506,7 @@ export function AssignFunderModal({
                 </Button>
               </div>
               <p className="mt-1 text-[11px] leading-relaxed">
-                依据【缺少尽调报告分配资方阻断】(C03)，受理成功件必须包含至少 1 份正式线下尽调报告盖章件（PDF/Word），方可分配资方推向下游。
+                依据【缺少尽调报告分配资方阻断】，受理成功件必须包含至少 1 份正式线下尽调报告盖章件（PDF/Word），方可分配资方推向下游。
               </p>
             </div>
           ) : (
@@ -515,7 +515,7 @@ export function AssignFunderModal({
               <div>
                 <span className="font-semibold">尽调报告附件门禁已核验通过</span>
                 <p className="mt-0.5 text-[11px] text-emerald-700 dark:text-emerald-400">
-                  已归档报告附件，符合【尽调报告附件齐备与资方分配规则】(R04)。
+                  已归档报告附件，符合分配资方的材料要求。
                 </p>
               </div>
             </div>
@@ -543,7 +543,7 @@ export function AssignFunderModal({
             <div>
               <span className="text-muted-foreground">智风控评分：</span>
               <span className="font-semibold text-emerald-600">
-                {item.riskScore || 88} 分 (PASS)
+                {item.riskScore || 88} 分（通过）
               </span>
             </div>
           </div>
@@ -601,7 +601,7 @@ export function AssignFunderModal({
 }
 
 // -------------------------------------------------------------
-// 5. 查看/下载尽调报告弹窗 (R04/R05)
+// 5. 查看/下载尽调报告弹窗
 // -------------------------------------------------------------
 interface ViewReportModalProps {
   open: boolean
@@ -654,7 +654,7 @@ export function ViewReportModal({
             <div>
               <span className="text-muted-foreground">智风控结论：</span>
               <span className="font-semibold text-foreground">
-                {item.riskConclusion || "PASS"} ({item.riskScore || 85}分)
+                {item.riskConclusion === "REJECT" ? "不通过" : item.riskConclusion === "REVIEW" ? "需人工复核" : "通过"}（{item.riskScore || 85}分）
               </span>
             </div>
           </div>
@@ -740,7 +740,7 @@ export function CustomerDiligenceRecordsModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-5xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base font-semibold">
             <Building2Icon className="h-5 w-5 text-primary" />
@@ -761,18 +761,18 @@ export function CustomerDiligenceRecordsModal({
             </div>
           </div>
 
-          <div className="max-h-[380px] overflow-y-auto rounded-md border border-border/70">
-            <table className="w-full text-left text-xs">
-              <thead className="sticky top-0 bg-slate-100 font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+          <div className="max-h-[380px] overflow-auto rounded-md border border-border/70">
+            <table className="w-full min-w-[900px] text-left text-xs">
+              <thead className="sticky top-0 z-10 bg-slate-100 font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                 <tr>
-                  <th className="px-3 py-2.5">尽调单号</th>
-                  <th className="px-3 py-2.5">申请主体</th>
-                  <th className="px-3 py-2.5">融资产品</th>
-                  <th className="px-3 py-2.5 text-right">意向金额</th>
-                  <th className="px-3 py-2.5 text-center">状态</th>
-                  <th className="px-3 py-2.5">尽调专员</th>
-                  <th className="px-3 py-2.5">处理时间</th>
-                  <th className="px-3 py-2.5 text-center">操作</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">尽调单号</th>
+                  <th className="min-w-[180px] whitespace-nowrap px-3 py-2.5">申请主体</th>
+                  <th className="min-w-[200px] whitespace-nowrap px-3 py-2.5">融资产品</th>
+                  <th className="whitespace-nowrap px-3 py-2.5 text-right">意向金额（元）</th>
+                  <th className="w-24 whitespace-nowrap px-3 py-2.5 text-center">状态</th>
+                  <th className="w-24 whitespace-nowrap px-3 py-2.5">尽调专员</th>
+                  <th className="min-w-[140px] whitespace-nowrap px-3 py-2.5">处理时间</th>
+                  <th className="w-20 whitespace-nowrap px-3 py-2.5 text-center">操作</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
@@ -781,20 +781,24 @@ export function CustomerDiligenceRecordsModal({
                     key={item.id}
                     className="hover:bg-slate-50 dark:hover:bg-slate-800/50"
                   >
-                    <td className="px-3 py-2 font-medium text-foreground">
+                    <td className="whitespace-nowrap px-3 py-2 font-medium text-foreground">
                       {item.id}
                     </td>
                     <td className="px-3 py-2 font-medium text-foreground">
-                      {item.applicantName}
+                      <div className="max-w-[180px] truncate" title={item.applicantName}>
+                        {item.applicantName}
+                      </div>
                     </td>
                     <td className="px-3 py-2 text-muted-foreground">
-                      {item.productName}
+                      <div className="max-w-[200px] truncate" title={item.productName}>
+                        {item.productName}
+                      </div>
                     </td>
-                    <td className="px-3 py-2 text-right font-medium text-foreground">
-                      ¥{item.intendedAmount.toLocaleString("zh-CN", { minimumFractionDigits: 2 })}
+                    <td className="whitespace-nowrap px-3 py-2 text-right font-medium text-foreground">
+                      ¥{item.intendedAmount.toLocaleString("zh-CN", { minimumFractionDigits: 4 })}
                     </td>
-                    <td className="px-3 py-2 text-center">
-                      <span className="rounded bg-muted px-1.5 py-0.5 text-[11px]">
+                    <td className="whitespace-nowrap px-3 py-2 text-center">
+                      <span className="inline-block whitespace-nowrap rounded bg-muted px-1.5 py-0.5 text-[11px]">
                         {item.status === "PENDING_DILIGENCE"
                           ? "待尽调"
                           : item.status === "IN_PROCESSING"
@@ -806,13 +810,13 @@ export function CustomerDiligenceRecordsModal({
                           : "申请失败"}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-foreground">
+                    <td className="whitespace-nowrap px-3 py-2 text-foreground">
                       {item.surveyor}
                     </td>
-                    <td className="px-3 py-2 text-muted-foreground">
+                    <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                       {item.processedAt}
                     </td>
-                    <td className="px-3 py-2 text-center">
+                    <td className="whitespace-nowrap px-3 py-2 text-center">
                       <Button
                         size="sm"
                         variant="ghost"

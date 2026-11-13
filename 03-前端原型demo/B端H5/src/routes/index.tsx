@@ -22,6 +22,12 @@ import { WorkspacePage } from "@/pages/WorkspacePage"
 import { PrototypeEmptyPage } from "@/pages/PrototypeEmptyPage"
 import { MOBILE_MENU_ITEMS } from "@/data/mobileMenuData"
 import { RiskDisclosureLedgerDetailPage } from "@/features/risk-disclosure/pages/RiskDisclosureLedgerDetailPage"
+import { RejectPoolListPage } from "@/features/reject-pool/pages/RejectPoolListPage"
+import { RejectPoolDetailPage } from "@/features/reject-pool/pages/RejectPoolDetailPage"
+import { RejectPoolActionPage } from "@/features/reject-pool/pages/RejectPoolActionPage"
+import { OnlinePledgeListPage } from "@/features/online-pledge/pages/OnlinePledgeListPage"
+import { OnlinePledgeDetailPage } from "@/features/online-pledge/pages/OnlinePledgeDetailPage"
+import { OnlinePledgeActionPage } from "@/features/online-pledge/pages/OnlinePledgeActionPage"
 import { RiskDisclosureListPage } from "@/features/risk-disclosure/pages/RiskDisclosureListPage"
 import { WarehouseListPage } from "@/features/warehouse-management/pages/WarehouseListPage"
 import { WarehouseFormPage } from "@/features/warehouse-management/pages/WarehouseFormPage"
@@ -72,6 +78,8 @@ import { PartnerArchiveListPage } from "@/features/partner-archives/pages/Partne
 import { PartnerArchiveDetailPage } from "@/features/partner-archives/pages/PartnerArchiveDetailPage"
 import { PartnerArchiveFormPage } from "@/features/partner-archives/pages/PartnerArchiveFormPage"
 import { PartnerArchiveH5LegacyRedirect } from "@/features/partner-archives/components/PartnerArchiveH5LegacyRedirect"
+import { SupervisionInitiatePage } from "@/features/supervision-handling/pages/SupervisionInitiatePage"
+import { SupervisionHandlingListH5Page } from "@/features/supervision-handling/pages/SupervisionHandlingListH5Page"
 import { H5_PARTNER_ARCHIVE_LIST_SLUG } from "@prototype/shared/partner-archives/partner-archive-domain"
 import {
   PARTNER_ARCHIVE_MENU_LABELS,
@@ -242,6 +250,10 @@ export function AppRoutes() {
       />
       <Route path="/m/outbound/initiate" element={<OutboundInitiatePage />} />
       <Route path="/m/outbound/initiate/goods" element={<OutboundInitiateGoodsPage />} />
+
+      {/* 监管办理（业务办理 → 业务发起 → 监管办理） */}
+      <Route path="/m/supervision/initiate" element={<SupervisionInitiatePage />} />
+      <Route path="/m/supervision/records" element={<SupervisionHandlingListH5Page />} />
 
       {/* 移库管理（移库记录台账 + 业务办理发起） */}
       <Route path="/m/workspace/moving-records" element={<MovingRecordListPage />} />
@@ -434,6 +446,24 @@ export function AppRoutes() {
         element={
           <Navigate to="/m/finance/supervision-management" replace />
         }
+      />
+
+      {/* 线上监管业务办理 */}
+      <Route path="/m/finance/online-pledge" element={<OnlinePledgeListPage />} />
+      <Route path="/m/finance/online-pledge/:id" element={<OnlinePledgeDetailPage />} />
+      <Route path="/m/finance/online-pledge/:id/action" element={<OnlinePledgeActionPage />} />
+      <Route
+        path="/m/module/ws-online-pledge-process"
+        element={<Navigate to="/m/finance/online-pledge" replace />}
+      />
+
+      {/* 被拒退回记录池 */}
+      <Route path="/m/finance/reject-pool" element={<RejectPoolListPage />} />
+      <Route path="/m/finance/reject-pool/:id" element={<RejectPoolDetailPage />} />
+      <Route path="/m/finance/reject-pool/:id/action" element={<RejectPoolActionPage />} />
+      <Route
+        path="/m/module/ws-reject-pool"
+        element={<Navigate to="/m/finance/reject-pool" replace />}
       />
 
       <Route path="*" element={<Navigate to="/" replace />} />

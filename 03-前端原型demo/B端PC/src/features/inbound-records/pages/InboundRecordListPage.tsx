@@ -136,7 +136,7 @@ export function InboundRecordListPage() {
           version="6.4"
           changeType="新增"
           title="支持多介质【单据下载】（A4 纵向 / A5 横向 / 针式连续纸二等分 PDF）"
-          description="点击行操作【单据下载】呼出多介质打印预览弹窗，按一级货品汇总平铺、货主证号电话明文展示、纯黑实线防针式断针。"
+          description="【单据下载】预览为固定样式示意图（带水印、两页换页），正式文件后台生成后到【下载记录】下载。"
         />
 
         <IterationPageTag

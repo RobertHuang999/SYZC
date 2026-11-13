@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const riskDisclosureListAnnotations: PrototypeAnnotation[] = [
   {
     id: "risk-disclosure-page",
+    documentRefs: {
+      prd: { section: "风险公示主PRD", match: "页面路由：/m/risk/disclosures", element: "text" },
+      rules: { section: "风险公示 业务规则规格", match: "取消风险公示", element: "row" },
+    },
     targetId: "risk-disclosure-page",
     number: 1,
     kind: "页面",
@@ -39,6 +43,10 @@ export const riskDisclosureListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "risk-disclosure-filter",
+    documentRefs: {
+      prd: { section: "5.1 公示状态定义", match: "PUBLISHED", element: "row" },
+      rules: { section: "【已公示台账专属过滤展示规则】(PUB-ST02)" },
+    },
     targetId: "risk-disclosure-filter",
     number: 2,
     kind: "交互",
@@ -62,6 +70,10 @@ export const riskDisclosureListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "risk-disclosure-table",
+    documentRefs: {
+      fields: { section: "三、取消公示表单字段（取消公示弹窗专属）", match: "取消公示说明", element: "row" },
+      rules: { section: "3.1 状态定义", match: "发起取消公示操作", element: "row" },
+    },
     targetId: "risk-disclosure-table",
     number: 3,
     kind: "字段",
@@ -100,6 +112,9 @@ export const riskDisclosureListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "risk-disclosure-pagination",
+    documentRefs: {
+      rules: { section: "四、动作能力与流转控制矩阵", match: "筛选区【查询】按钮", element: "row" },
+    },
     targetId: "risk-disclosure-pagination",
     number: 4,
     kind: "交互",

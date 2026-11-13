@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
   {
     id: "order-warning-config-detail-header",
+    documentRefs: {
+      prd: { section: "订单预警配置主PRD", match: "严重等级与通知升级", element: "row" },
+      rules: { section: "订单预警配置 业务规则规格", match: "涉及策略子项", element: "row" },
+    },
     targetId: "order-warning-config-detail-header",
     number: 1,
     kind: "页面",
@@ -33,6 +37,10 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "order-warning-config-detail-base",
+    documentRefs: {
+      fields: { section: "一、主规则基本信息字段", match: "关联订单的业务货权管控类型", element: "row" },
+      rules: { section: "订单预警配置 业务规则规格", match: "规则名称租户内唯一", element: "row" },
+    },
     targetId: "order-warning-config-detail-base",
     number: 2,
     kind: "字段",
@@ -52,10 +60,32 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "基本信息字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 展示规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **规则名称** | 只读文本 | 必填 | 最多 50 个字符 | 单行 | 租户内唯一 |
+| **关联订单编号** | 只读链接 | 必填 | 有效抵押 / 质押 / 监管服务订单号 | 可穿透 | 一单一配 (R04) |
+| **订单类型** | 只读文本 | 必填 | 抵押 / 质押 / 监管服务 | 单行 | 旧「监管」不展示 |
+| **借款货主** | 只读文本 | 必填 | 企业全称 + 脱敏信用代码 | 双行 | — |
+| **联系电话** | 只读文本 | 系统带出 | 11 位，脱敏中间 4 位 | 单行 | — |
+| **押品物料明细** | 只读表格 | 必填 | 品名 / 规格 / 吨数 / 初始估值 | 多行 | 辅助价格基线复核 |
+| **规则 Version** | 只读整数 | 系统维护 | 每次保存递增 | 单行 | 风控引擎同步标识 |
+| **状态** | 状态标签 | 系统维护 | 生效中 / 停用 / 已删除 | 单行 | 删除后历史流水置已作废 |`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "order-warning-config-detail-strategies",
+    documentRefs: {
+      rules: { section: "5.2 六大风控子策略专项配置规则", match: "各策略子项勾选短信或邮件外部通知渠道后，展示「预警通知对象（按组织架构选择）」控", element: "text" },
+      prd: { section: "3.3 6 类风控子策略权威配置矩阵", match: "严重等级与通知升级", element: "row" },
+    },
     targetId: "order-warning-config-detail-strategies",
     number: 3,
     kind: "规则",
@@ -100,6 +130,10 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "order-warning-config-detail-actions",
+    documentRefs: {
+      prd: { section: "7. 核心业务规则索引", match: "业务规则规格 「六、」", element: "row" },
+      rules: { section: "订单预警配置 业务规则规格", match: "收口三类订单类型（抵押/质押/监管服务），下线历史“监管”类型。", element: "row" },
+    },
     targetId: "order-warning-config-detail-header",
     number: 4,
     kind: "交互",
@@ -123,6 +157,10 @@ export const orderWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "order-warning-config-detail-audit",
+    documentRefs: {
+      fields: { section: "订单预警配置字段清单", match: "综合预警规则的创建落库时间", element: "row" },
+      rules: { section: "订单预警配置 业务规则规格", match: "规则处于生效中或已失效状态", element: "row" },
+    },
     targetId: "order-warning-config-detail-audit",
     number: 5,
     kind: "字段",

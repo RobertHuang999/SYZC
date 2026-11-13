@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -11,6 +10,7 @@ import { PageHeader } from "@/shared/components/PageHeader"
 import { WarningListPagination } from "@/components/business/WarningListPrimitives"
 import { DueDiligenceFiltersPanel } from "../components/DueDiligenceFiltersPanel"
 import { DueDiligenceTable } from "../components/DueDiligenceTable"
+import { SegmentedTabs } from "@/shared/components/SegmentedTabs"
 import {
   TriggerDueDiligenceModal,
   ReassignTaskModal,
@@ -94,21 +94,6 @@ export function CustomerFinancingDueDiligenceListPage() {
     window.setTimeout(() => setToastMessage(null), 3200)
   }
 
-  // 标签页角标统计
-  const counts = useMemo(() => {
-    const pendingCount = data.filter(
-      (item) =>
-        item.status === "PENDING_DILIGENCE" || item.status === "IN_PROCESSING"
-    ).length
-    const completedCount = data.filter(
-      (item) =>
-        item.status === "DILIGENCE_SUCCESS" ||
-        item.status === "DILIGENCE_FAILED" ||
-        item.status === "MANUAL_REJECTED"
-    ).length
-    return { pendingCount, completedCount }
-  }, [data])
-
   // 切换标签页
   const handleTabChange = (newTab: DiligenceTab) => {
     setActiveTab(newTab)
@@ -121,7 +106,7 @@ export function CustomerFinancingDueDiligenceListPage() {
   // 筛选与匹配
   const filteredData = useMemo(() => {
     return data.filter((item) => {
-      // 1. 标签页范围过滤 (R05)
+      // 1. 标签页范围过滤
       if (activeTab === "PENDING") {
         if (
           item.status !== "PENDING_DILIGENCE" &&
@@ -153,14 +138,26 @@ export function CustomerFinancingDueDiligenceListPage() {
         }
       }
 
-      // 3. 申请类型过滤（全部 / 企业 / 个人）
-      if (appliedFilters.applicantType !== "ALL") {
-        if (!item.applicantType.includes(appliedFilters.applicantType)) {
-          return false
-        }
+      // 3. 尽调人员过滤
+      if (
+        appliedFilters.surveyor &&
+        appliedFilters.surveyor !== "ALL" &&
+        item.surveyor !== appliedFilters.surveyor
+      ) {
+        return false
       }
 
-      // 4. 状态过滤
+      // 4. 尽调分配时间区间过滤
+      if (appliedFilters.assignedFrom) {
+        const assignedDate = item.assignedAt.slice(0, 10)
+        if (assignedDate < appliedFilters.assignedFrom) return false
+      }
+      if (appliedFilters.assignedTo) {
+        const assignedDate = item.assignedAt.slice(0, 10)
+        if (assignedDate > appliedFilters.assignedTo) return false
+      }
+
+      // 5. 状态过滤
       if (appliedFilters.status !== "ALL" && item.status !== appliedFilters.status) {
         return false
       }
@@ -192,7 +189,7 @@ export function CustomerFinancingDueDiligenceListPage() {
   // 核心业务交互 Handlers (闭环状态机)
   // -------------------------------------------------------------
 
-  // 1. 发起尽调 (R01/R06/S02)
+  // 1. 发起尽调
   const handleOpenTriggerModal = (item: CustomerFinancingDueDiligence) => {
     setActiveItem(item)
     setTriggerModalOpen(true)
@@ -214,7 +211,7 @@ export function CustomerFinancingDueDiligenceListPage() {
           operator: item.surveyor,
           time: now,
           detail:
-            "专员核对主体三要素齐全，异步调用智风控 OpenAPI，状态推进至【受理中】",
+            "专员核对主体三要素齐全，异步调用智风控接口，状态推进至【受理中】",
         },
         ...item.logs,
       ],
@@ -241,7 +238,7 @@ export function CustomerFinancingDueDiligenceListPage() {
           {
             id: `LOG_${Date.now() + 1}`,
             action: "智风控网关回调 PASS",
-            operator: "智风控平台API",
+            operator: "智风控平台",
             time: callbackTime,
             detail:
               "外部大数据模型核验通过，单据自动变更为【受理成功】，已移入【尽调完成标签页】",
@@ -257,7 +254,7 @@ export function CustomerFinancingDueDiligenceListPage() {
     }, 3500)
   }
 
-  // 2. 任务转交 (R02/C01/S01)
+  // 2. 任务转交
   const handleOpenReassignModal = (item: CustomerFinancingDueDiligence) => {
     setActiveItem(item)
     setReassignModalOpen(true)
@@ -302,7 +299,7 @@ export function CustomerFinancingDueDiligenceListPage() {
     showToast(`任务已成功转交至【${targetSurveyor}】，保持待尽调状态并留痕`)
   }
 
-  // 3. 手动拒绝并入池 (R03/C02/S04)
+  // 3. 手动拒绝并入池
   const handleOpenRejectModal = (item: CustomerFinancingDueDiligence) => {
     setActiveItem(item)
     setRejectModalOpen(true)
@@ -340,7 +337,7 @@ export function CustomerFinancingDueDiligenceListPage() {
     )
   }
 
-  // 4. 分配给资方 (R04/C03/S03)
+  // 4. 分配给资方
   const handleOpenAssignFunderModal = (item: CustomerFinancingDueDiligence) => {
     setActiveItem(item)
     setAssignModalOpen(true)
@@ -399,7 +396,7 @@ export function CustomerFinancingDueDiligenceListPage() {
           action: "归档盖章尽调报告",
           operator: item.surveyor,
           time: now,
-          detail: `上传《${newReport.name}》，尽调报告门禁核验通过 (R04)`,
+          detail: `上传《${newReport.name}》，尽调报告门禁核验通过`,
         },
         ...item.logs,
       ],
@@ -444,86 +441,50 @@ export function CustomerFinancingDueDiligenceListPage() {
           <PageHeader
             title="客户融资尽调办理"
             description="融资监管/融资管理核心风控执行台账：承接需要尽调的任务单据，推进企业资质核验、同组织任务转交、第三方智风控模型调用、实地尽调报告归档与合作资方机构分流派发。"
-            badge={
-              <Badge variant="outline" className="border-border text-muted-foreground">
-                PRD V1.4 基准
-              </Badge>
-            }
           />
         </PrototypeAnnotationTarget>
 
-        {/* 双标签页切换 (待尽调 / 尽调完成) 与 现网【客户尽调记录】操作按钮 */}
+        {/* 双标签页切换 (待尽调 / 尽调完成) */}
         <PrototypeAnnotationTarget annotationIds={["diligence-tabs"]}>
-          <div className="flex flex-wrap items-center justify-between border-b border-border/70 pb-0.5">
-            <div className="flex">
-              <button
-                onClick={() => handleTabChange("PENDING")}
-                className={`relative flex items-center gap-2 px-5 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "PENDING"
-                    ? "border-b-2 border-primary text-primary font-semibold dark:border-primary dark:text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <ClockIcon className="h-4 w-4" />
-                <span>待尽调</span>
-                {counts.pendingCount > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="h-5 rounded-full bg-primary/10 px-2 text-[11px] text-primary"
-                  >
-                    {counts.pendingCount}
-                  </Badge>
-                )}
-              </button>
+          <SegmentedTabs<DiligenceTab>
+            items={[
+              {
+                key: "PENDING",
+                label: "待尽调",
+                icon: <ClockIcon className="h-3.5 w-3.5" />,
+              },
+              {
+                key: "COMPLETED",
+                label: "尽调完成",
+                icon: <CheckCircle2Icon className="h-3.5 w-3.5" />,
+              },
+            ]}
+            value={activeTab}
+            onChange={handleTabChange}
+          />
+        </PrototypeAnnotationTarget>
 
-              <button
-                onClick={() => handleTabChange("COMPLETED")}
-                className={`relative flex items-center gap-2 px-5 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "COMPLETED"
-                    ? "border-b-2 border-primary text-primary font-semibold dark:border-primary dark:text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <CheckCircle2Icon className="h-4 w-4" />
-                <span>尽调完成</span>
-                <Badge
-                  variant="outline"
-                  className="h-5 rounded-full border-border/80 px-2 text-[11px] text-muted-foreground"
-                >
-                  {counts.completedCount}
-                </Badge>
-              </button>
-            </div>
-
-            {/* 对齐现网按钮：【客户尽调记录】 */}
-            <div className="pr-1 pb-2 sm:pb-0">
+        {/* 筛选区 */}
+        <PrototypeAnnotationTarget annotationIds={["diligence-filters"]}>
+          <DueDiligenceFiltersPanel
+            activeTab={activeTab}
+            filters={draftFilters}
+            onChange={setDraftFilters}
+            onSearch={handleSearch}
+            onReset={handleReset}
+            extraActions={
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setRecordsModalOpen(true)}
-                className="h-8 gap-1.5 text-xs"
+                className="gap-1.5"
               >
-                <FileTextIcon className="h-3.5 w-3.5" />
+                <FileTextIcon className="size-4" />
                 客户尽调记录
               </Button>
-            </div>
-          </div>
+            }
+          />
         </PrototypeAnnotationTarget>
-
-        {/* 筛选区 */}
-        <Card>
-          <CardContent className="space-y-4 pt-4">
-            <PrototypeAnnotationTarget annotationIds={["diligence-filters"]}>
-              <DueDiligenceFiltersPanel
-                activeTab={activeTab}
-                filters={draftFilters}
-                onChange={setDraftFilters}
-                onSearch={handleSearch}
-                onReset={handleReset}
-              />
-            </PrototypeAnnotationTarget>
-          </CardContent>
-        </Card>
 
         {/* 数据表格呈现 */}
         <Card>

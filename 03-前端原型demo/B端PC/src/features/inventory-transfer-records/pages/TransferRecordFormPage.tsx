@@ -35,6 +35,8 @@ import {
 import { transferRecordDocuments } from "../documents/transfer-record-documents"
 import { transferRecordFormAnnotations } from "../annotations/transfer-record-form.annotations"
 import { FormPageHeader } from "@/shared/components/FormPageHeader"
+import { FormPageStickyFooter } from "@/shared/components/FormPageStickyFooter"
+import { SearchableNameSelect } from "@/shared/components/SearchableNameSelect"
 import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { TransferGoodsPickerModal } from "../components/TransferGoodsPickerModal"
 import { TransferOwnerVerifyDialog } from "../components/TransferOwnerVerifyDialog"
@@ -323,7 +325,8 @@ export function TransferRecordFormPage() {
       annotations={transferRecordFormAnnotations}
       documents={transferRecordDocuments}
     >
-      <div className="min-h-screen p-6 space-y-5 pb-24 font-['PingFang_SC',-apple-system,BlinkMacSystemFont,sans-serif]">
+      <div className="flex min-h-full flex-col font-['PingFang_SC',-apple-system,BlinkMacSystemFont,sans-serif]">
+      <div className="flex-1 space-y-5 p-6 pb-6">
         {/* Toast 提示 */}
         {toastMessage && (
           <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 rounded-lg bg-slate-900 px-4 py-2.5 text-xs text-white shadow-lg animate-in fade-in slide-in-from-top-3">
@@ -397,23 +400,26 @@ export function TransferRecordFormPage() {
                   <label className="text-xs font-medium text-foreground">
                     <span className="text-rose-500 mr-1">*</span>转让方名称
                   </label>
-                  <Select
-                    value={formState.sourceOwnerName}
-                    onValueChange={(val) => handleSourceOwnerSelect(val ?? "")}
-                  >
-                    <SelectTrigger className="h-9 text-xs mt-1 w-full">
-                      <SelectValue placeholder="请选择转让方" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SOURCE_OWNERS_MOCK.filter(
-                        (o) => o.type === formState.sourceOwnerType
-                      ).map((o) => (
-                        <SelectItem key={o.id} value={o.name}>
-                          {o.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="mt-1">
+                    <SearchableNameSelect
+                      valueId={formState.sourceOwnerId}
+                      valueName={formState.sourceOwnerName}
+                      placeholder="请输入主体名称或联系手机搜索"
+                      catalogTitle="系统货主档案库候选"
+                      items={SOURCE_OWNERS_MOCK.filter(
+                        (o) => o.type === formState.sourceOwnerType,
+                      ).map((o) => ({
+                        id: o.id,
+                        name: o.name,
+                        kind: o.type === "PERSONAL" ? "personal" : "enterprise",
+                        description:
+                          o.type === "PERSONAL"
+                            ? `手机:${o.identity}`
+                            : `税号:${o.identity}`,
+                      }))}
+                      onPick={(item) => handleSourceOwnerSelect(item.name)}
+                    />
+                  </div>
                 </div>
 
                 {/* 4. 货主标识 */}
@@ -658,12 +664,28 @@ export function TransferRecordFormPage() {
                   <label className="text-xs font-medium text-foreground">
                     <span className="text-rose-500 mr-1">*</span>接收方姓名/全称
                   </label>
-                  <Input
-                    placeholder="输入已有或新货主名称"
-                    value={formState.targetOwner.ownerName}
-                    onChange={(e) => handleTargetNameChange(e.target.value)}
-                    className="h-9 text-xs mt-1"
-                  />
+                  <div className="mt-1">
+                    <SearchableNameSelect
+                      valueName={formState.targetOwner.ownerName}
+                      placeholder="请输入主体名称或联系手机搜索"
+                      catalogTitle="系统货主档案库候选"
+                      allowFreeText
+                      emptyHint="未找到匹配货主，可按输入名称新增"
+                      items={KNOWN_TARGET_OWNERS_MOCK.filter(
+                        (o) => o.type === formState.targetOwner.ownerType,
+                      ).map((o) => ({
+                        id: o.name,
+                        name: o.name,
+                        kind: o.type === "PERSONAL" ? "personal" : "enterprise",
+                        description:
+                          o.type === "PERSONAL"
+                            ? `手机:${o.identity}`
+                            : `税号:${o.identity}`,
+                      }))}
+                      onPick={(item) => handleTargetNameChange(item.name)}
+                      onFreeText={handleTargetNameChange}
+                    />
+                  </div>
                 </div>
 
                 {/* 3. 接收方标识 */}
@@ -712,41 +734,42 @@ export function TransferRecordFormPage() {
           </Card>
         </PrototypeAnnotationTarget>
 
-        {/* 底部固定汇总栏（对齐出库管理标杆 OutboundFormSummaryBar） */}
-        <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-card px-8 py-3.5 shadow-lg dark:border-slate-800 dark:bg-slate-900/95 flex items-center justify-between">
-          <div className="flex items-center gap-6 text-xs text-slate-600 dark:text-slate-300">
-            <div>
-              转让品类数：
-              <strong className="text-sm font-semibold text-slate-900 dark:text-slate-100 ml-1">
-                {totals.typeCount}
-              </strong>
-            </div>
-            <div>
-              转让总数量：
-              <strong className="text-sm font-semibold text-primary ml-1">
-                {totals.totalQty} {totals.unit}
-              </strong>
-            </div>
-          </div>
+      </div>
 
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCancelConfirmOpen(true)}
-              className="h-9 px-5 text-xs"
-            >
-              取消
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSubmitClick}
-              className="h-9 px-6 text-xs font-medium shadow-xs"
-            >
-              提交审核
-            </Button>
-          </div>
-        </div>
+        <FormPageStickyFooter
+          left={
+            <div className="flex flex-wrap items-center gap-6">
+              <span>
+                转让品类数：
+                <strong className="ml-1 text-sm font-semibold text-foreground">
+                  {totals.typeCount}
+                </strong>
+              </span>
+              <span>
+                转让总数量：
+                <strong className="ml-1 text-sm font-semibold text-primary">
+                  {totals.totalQty} {totals.unit}
+                </strong>
+              </span>
+            </div>
+          }
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCancelConfirmOpen(true)}
+            className="h-9 px-5 text-xs"
+          >
+            取消
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleSubmitClick}
+            className="h-9 px-6 text-xs font-medium shadow-xs"
+          >
+            提交审核
+          </Button>
+        </FormPageStickyFooter>
 
         {/* 选货弹窗（单仓强监管阻断 R02） */}
         {pickerOpen && (

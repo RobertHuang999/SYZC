@@ -29,6 +29,7 @@ import { INBOUND_APPLY_LIST_PATH } from "../domain/constants"
 import type { InboundFormState } from "../domain/form-types"
 import { inboundRecordDocuments } from "../documents/inbound-record-documents"
 import { FormPageHeader } from "@/shared/components/FormPageHeader"
+import { FormPageStickyFooter } from "@/shared/components/FormPageStickyFooter"
 import { inboundRecordFormAnnotations } from "../annotations/inbound-record-form.annotations"
 import {
   calcFormTotals,
@@ -446,7 +447,7 @@ export function InboundRecordFormPage() {
       annotations={inboundRecordFormAnnotations}
     >
       <div className="flex min-h-full flex-col bg-muted/10">
-        <div className="flex-1 space-y-4 p-6 pb-24">
+        <div className="flex-1 space-y-4 p-6 pb-6">
           <PrototypeAnnotationTarget annotationIds={["inbound-form-page"]}>
           <FormPageHeader
             title="新增入库"
@@ -539,16 +540,31 @@ export function InboundRecordFormPage() {
           </PrototypeAnnotationTarget>
         </div>
 
-        {/* 底部合计栏（对齐源码 store-apply-info.vue total-tip，仅保留合计信息提示） */}
-        <div className="sticky bottom-0 z-20 border-t bg-card/95 px-6 py-3 backdrop-blur shadow-xs">
-          <InboundFormSummaryBar
-            categoryCount={totals.categoryCount}
-            goodsTotal={totals.goodsTotal}
-            stackedTotal={totals.stackedTotal}
-            noStackTotal={totals.noStackTotal}
-            variant="footer"
-          />
-        </div>
+        <FormPageStickyFooter
+          left={
+            <InboundFormSummaryBar
+              categoryCount={totals.categoryCount}
+              goodsTotal={totals.goodsTotal}
+              stackedTotal={totals.stackedTotal}
+              noStackTotal={totals.noStackTotal}
+              variant="footer"
+              className="px-0 py-0"
+            />
+          }
+        >
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-9 px-4 text-xs"
+            onClick={handleCancel}
+          >
+            取消
+          </Button>
+          <Button type="button" size="sm" className="h-9 px-5 text-xs" onClick={handleStartSubmit}>
+            提交审核
+          </Button>
+        </FormPageStickyFooter>
 
         {/* 步骤 1：货主信息确认弹窗 */}
         <OwnerVerifyDialog
@@ -668,27 +684,6 @@ export function InboundRecordFormPage() {
           </div>
         ) : null}
 
-        <div className="fixed bottom-0 left-0 right-0 z-30 border-t bg-card px-6 py-3">
-          <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4">
-            <div className="text-xs text-muted-foreground">
-              提交后进入审批中心，审批通过才会写入入库记录台账
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-9 px-4 text-xs"
-                onClick={handleCancel}
-              >
-                取消
-              </Button>
-              <Button type="button" size="sm" className="h-9 px-5 text-xs" onClick={handleStartSubmit}>
-                提交审核
-              </Button>
-            </div>
-          </div>
-        </div>
       </div>
     </PrototypeAnnotationProvider>
   )

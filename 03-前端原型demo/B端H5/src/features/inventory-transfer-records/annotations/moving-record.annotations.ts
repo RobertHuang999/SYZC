@@ -22,7 +22,29 @@ export const movingH5ListAnnotations: PrototypeAnnotation[] = [
         element: "text",
       },
     },
-    details: [],
+    details: [
+      {
+        title: "移库链路",
+        items: [
+          {
+            label: "流转图",
+            content: `flowchart TD
+    A["业务办理 · 移库发起（基础信息）"] --> B["第二步：选货与目标库位"]
+    B -->|普通移库| C["同仓内调整库房 / 分区 / 垛位"]
+    B -->|非普通移库| D["必须选择系统有效关联单号"]
+    C --> E["现场照片至少 1 张"]
+    D --> E
+    E --> F["提交审核"]
+    F -->|通过| G["进入移库台账（仅已通过，R07）"]
+    F -->|驳回 / 撤回| H["我的申请"]`,
+          },
+          {
+            label: "移动端形态",
+            content: "台账为卡片流；移库类型、仓库、货品用筛选胶囊，制单人、移库日期、制单日期收进【更多筛选】抽屉。",
+          },
+        ],
+      },
+    ],
   },
 ]
 

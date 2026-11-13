@@ -14,6 +14,7 @@ import {
   RECEIPT_PAPER_PREVIEW_WIDTH,
   ReceiptPaperSheet,
 } from "./receipt-print-sheets"
+import { RECEIPT_DOWNLOAD_ASYNC_TOAST } from "@prototype/shared/receipt-print/receipt-print-preview-template"
 import type { H5ReceiptPrintData } from "./build-mobile-receipt-print"
 
 type Props = {
@@ -197,11 +198,7 @@ export function ReceiptPrintPreviewSheet({ open, data, onClose, onSuccess }: Pro
       </div>
 
       <ReceiptZoomViewport paperWidth={paperWidth} paperClassName={PAPER_PADDING[paperSize]}>
-        {data.kind === "inbound" ? (
-          <ReceiptPaperSheet kind="inbound" paperSize={paperSize} data={data.data} />
-        ) : (
-          <ReceiptPaperSheet kind="outbound" paperSize={paperSize} data={data.data} />
-        )}
+        <ReceiptPaperSheet kind={data.kind} paperSize={paperSize} />
       </ReceiptZoomViewport>
 
       <div className="flex shrink-0 gap-2 border-t border-[#232D39]/10 bg-white px-3 py-2.5 pb-[calc(10px+env(safe-area-inset-bottom))]">
@@ -220,7 +217,7 @@ export function ReceiptPrintPreviewSheet({ open, data, onClose, onSuccess }: Pro
             setDownloading(true)
             window.setTimeout(() => {
               setDownloading(false)
-              onSuccess?.(`已生成并导出标准矢量凭证：${fileName}`)
+              onSuccess?.(RECEIPT_DOWNLOAD_ASYNC_TOAST)
               onClose()
             }, 350)
           }}

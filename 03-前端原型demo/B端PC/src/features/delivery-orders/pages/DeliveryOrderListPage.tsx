@@ -150,23 +150,37 @@ export function DeliveryOrderListPage() {
         </PrototypeAnnotationTarget>
 
         {/* 顶部单行水平筛选区（无重置按钮，符合PRD与ASCII规范） */}
-        <DeliveryOrderFiltersPanel
-          filters={draftFilters}
-          onChange={setDraftFilters}
-          onSearch={handleSearch}
-        />
+        <PrototypeAnnotationTarget annotationIds={["delivery-order-filter"]}>
+          <DeliveryOrderFiltersPanel
+            filters={draftFilters}
+            onChange={setDraftFilters}
+            onSearch={handleSearch}
+          />
+        </PrototypeAnnotationTarget>
 
         {/* 9列标准提货单表格 */}
-        <DeliveryOrderTable
-          rows={pagedList}
-          page={currentPage}
-          pageSize={pageSize}
-          onViewDetail={(item) => navigate(deliveryOrderDetailPath(item.id))}
-          onViewLogs={(item) => setLogTarget(item)}
-          onWriteOff={(item) => setWriteOffTarget(item)}
-          onCancel={(item) => setCancelTarget(item)}
-          onConfirm={(item) => setConfirmTarget(item)}
-        />
+        <PrototypeAnnotationTarget
+          annotationIds={[
+            "delivery-order-table-r02",
+            "delivery-order-pickup-r03",
+            "delivery-order-actions-matrix",
+            "delivery-order-write-off-r04",
+            "delivery-order-confirm-r05",
+            "delivery-order-cancel-r06",
+            "delivery-order-log-r08",
+          ]}
+        >
+          <DeliveryOrderTable
+            rows={pagedList}
+            page={currentPage}
+            pageSize={pageSize}
+            onViewDetail={(item) => navigate(deliveryOrderDetailPath(item.id))}
+            onViewLogs={(item) => setLogTarget(item)}
+            onWriteOff={(item) => setWriteOffTarget(item)}
+            onCancel={(item) => setCancelTarget(item)}
+            onConfirm={(item) => setConfirmTarget(item)}
+          />
+        </PrototypeAnnotationTarget>
 
         {/* 分页 */}
         <WarningListPagination

@@ -101,7 +101,7 @@ export function AssignLeadModal({
             <span>融资线索跟进分配</span>
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            基于建单固化的【需要尽调】快照，执行自动化路由分流派发（遵循R03/R07）。
+            根据建单时冻结的「是否需要尽调」快照，自动分流至尽调专员或合作资方。
           </DialogDescription>
         </DialogHeader>
 

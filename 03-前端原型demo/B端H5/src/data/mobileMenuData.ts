@@ -397,6 +397,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "有融资申请审核权限账号可见；根据具体任务操作权限决定",
     badge: "新拆分",
     iconType: "FileSignature",
+    customRoute: "/m/finance/online-pledge",
   },
   {
     id: "ws-due-diligence-process",
@@ -423,6 +424,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "登录账号数据权限内的数据",
     badge: "优化",
     iconType: "RotateCcw",
+    customRoute: "/m/finance/reject-pool",
   },
 
   // =================== 2. 工作台 - 交易 ===================
@@ -831,6 +833,7 @@ export const MOBILE_MENU_ITEMS: MenuItemData[] = [
     dataPermission: "机构业务权限",
     remark: "优化页面",
     badge: "优化",
+    customRoute: "/m/supervision/initiate",
     iconType: "Lock",
   },
   {

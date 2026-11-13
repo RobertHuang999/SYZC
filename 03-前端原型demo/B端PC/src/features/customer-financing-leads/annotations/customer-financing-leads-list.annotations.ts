@@ -3,17 +3,16 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const customerFinancingLeadsListAnnotations: PrototypeAnnotation[] = [
   {
     id: "leads-page",
+    documentRefs: {
+      prd: { section: "客户融资需求线索主PRD", match: "申请失败：【详情】。", element: "text" },
+      rules: { section: "客户融资需求线索业务规则规格", match: "接入融资申请", element: "row" },
+    },
     targetId: "leads-page",
     number: 1,
     kind: "页面",
     title: "融资需求线索台账定位与首节点职责",
     content:
       "本页面为融资监管/融资管理第1节点核心台账，统一接收外部C端客户提交的动产质押融资申请，生成线索流水记录，支持运营人员直接完成核验派单（分配跟进流转至处理中）或异常驳回入池（申请失败）全生命周期闭环。",
-    documentRefs: {
-      prd: { section: "1. 业务背景与核心痛点", match: "模块定位", element: "text" },
-      fields: { section: "一、业务字段", match: "融资状态", element: "row" },
-      rules: { section: "一、对象定位与单据层级", match: "单据层级", element: "text" },
-    },
     details: [
       {
         title: "核心业务边界",
@@ -29,6 +28,26 @@ export const customerFinancingLeadsListAnnotations: PrototypeAnnotation[] = [
           {
             label: "异常归集",
             content: "不准入单据驳回后可靠沉淀至【被拒退回池 -> 线索被拒标签页】（遵循R04）。",
+          },
+        ],
+      },
+      {
+        title: "线索全生命周期",
+        items: [
+          {
+            label: "流转图",
+            content: `flowchart TD
+    A["C 端门户 / 第三方 API 推送线索"] --> B["待受理"]
+    B -->|基础校验通过| C["已受理"]
+    C -->|分配跟进（按需尽调快照分流）| D["处理中"]
+    D -->|尽调 / 授信通过| E["申请成功"]
+    B -->|驳回（原因必填）| F["申请失败"]
+    C -->|主动驳回| F
+    F -->|进入被拒退回池| G["线索被拒标签页<br/>可救活重派"]`,
+          },
+          {
+            label: "分流依据",
+            content: "需要尽调 = 是 → 派尽调专员；否 → 派合作资方。分流只看建单快照 (R03)，后续改产品规则不影响。",
           },
         ],
       },
@@ -91,6 +110,27 @@ export const customerFinancingLeadsListAnnotations: PrototypeAnnotation[] = [
           {
             label: "Sticky操作列",
             content: "操作列声明不透明实色背景与立体投影，横向滚动时防止文字穿透重叠。",
+          },
+        ],
+      },
+      {
+        title: "列表字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 列名称 | 控件类型 | 必填 | 取值范围与格式 | 展示规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **产品名称** | 文本 | 必填 | 融资产品名 | 单行 | — |
+| **申请人** | 文本 | 必填 | 企业全称或个人姓名 | 单行 | 支持模糊搜索 |
+| **意向融资金额** | 数值 | 必填 | 万元，保留 4 位小数 | 右对齐 | — |
+| **意向融资期数** | 数值 | 必填 | 期数 | 单行 | — |
+| **货物** | 文本 | 条件必填 | 货品大类-品类-规格 | 超长折行 | — |
+| **申请时间** | 日期时间 | 系统记录 | YYYY-MM-DD HH:mm:ss | 单行 | — |
+| **授信金额 / 期数** | 数值 | 条件展示 | 万元，4 位小数；期数 | 未发生下游显示「—」 | 来自授信环节 |
+| **贷款金额 / 期数** | 数值 | 条件展示 | 万元，4 位小数；期数 | 未发生下游显示「—」 | 来自放款环节 |
+| **状态** | 状态标签 | 系统维护 | 待受理 / 处理中 / 申请成功 / 申请失败 | 彩色标签 | 见生命周期图 |
+| **需要尽调** | 徽标 | 系统维护 | 是 / 否 | 状态列之后 | 建单快照，不随产品改动 |
+| **操作** | 行操作按钮 | — | 分配跟进 / 驳回 / 详情 | 待受理才展示前两项 | 右侧冻结 |`,
           },
         ],
       },

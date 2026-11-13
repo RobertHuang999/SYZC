@@ -59,8 +59,8 @@ export function LeadsFiltersPanel({
       {/* 4列栅格筛选条件区 */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* 综合搜索 */}
-        <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">综合搜索</label>
+        <div className="space-y-2">
+          <label className="block text-xs font-normal text-muted-foreground">综合搜索</label>
           <Input
             placeholder="请输入产品名称/申请人"
             value={draftFilters.keyword}
@@ -68,20 +68,21 @@ export function LeadsFiltersPanel({
               onDraftChange({ ...draftFilters, keyword: e.target.value })
             }
             onKeyDown={handleKeyDown}
-            className="h-[34px] w-full text-xs"
+            className="w-full"
           />
         </div>
 
         {/* 需要尽调 */}
-        <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">需要尽调</label>
+        <div className="space-y-2">
+          <label className="block text-xs font-normal text-muted-foreground">需要尽调</label>
           <Select
+            items={SURVEY_OPTIONS}
             value={draftFilters.requiresSurvey}
             onValueChange={(val) =>
               onDraftChange({ ...draftFilters, requiresSurvey: val || "ALL" })
             }
           >
-            <SelectTrigger className="h-[34px] w-full text-xs">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="请选择是否需要尽调" />
             </SelectTrigger>
             <SelectContent>
@@ -95,15 +96,16 @@ export function LeadsFiltersPanel({
         </div>
 
         {/* 融资状态 */}
-        <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">融资状态</label>
+        <div className="space-y-2">
+          <label className="block text-xs font-normal text-muted-foreground">融资状态</label>
           <Select
+            items={STATUS_OPTIONS}
             value={draftFilters.status}
             onValueChange={(val) =>
               onDraftChange({ ...draftFilters, status: val || "ALL" })
             }
           >
-            <SelectTrigger className="h-[34px] w-full text-xs">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="请选择融资状态" />
             </SelectTrigger>
             <SelectContent>
@@ -117,15 +119,16 @@ export function LeadsFiltersPanel({
         </div>
 
         {/* 抵/质押物 */}
-        <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">抵/质押物</label>
+        <div className="space-y-2">
+          <label className="block text-xs font-normal text-muted-foreground">抵/质押物</label>
           <Select
+            items={COLLATERAL_OPTIONS}
             value={draftFilters.collateralType}
             onValueChange={(val) =>
               onDraftChange({ ...draftFilters, collateralType: val || "ALL" })
             }
           >
-            <SelectTrigger className="h-[34px] w-full text-xs">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="请选择抵/质押物类型" />
             </SelectTrigger>
             <SelectContent>

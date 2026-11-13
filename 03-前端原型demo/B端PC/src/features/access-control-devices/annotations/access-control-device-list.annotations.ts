@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
   {
     id: "access-control-device-page",
+    documentRefs: {
+      prd: { section: "门禁设备 主PRD", match: "获取门锁密码", element: "row" },
+      rules: { section: "门禁设备 业务规则规格", match: "物联网IOT管理 → 门禁设备", element: "row" },
+    },
     targetId: "access-control-device-page",
     number: 1,
     kind: "页面",
@@ -50,6 +54,9 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "access-control-device-filter",
+    documentRefs: {
+      prd: { section: "5.1 状态定义", match: "空间绑定状态：已绑定 (BOUND)、未绑定 (UNBOUND)；", element: "text" },
+    },
     targetId: "access-control-device-filter",
     number: 2,
     kind: "交互",
@@ -70,6 +77,10 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "access-control-device-table",
+    documentRefs: {
+      rules: { section: "【设备类型分类与行操作矩阵】(R01)", match: "操作矩阵控制：", element: "text" },
+      fields: { section: "三、行操作与密码凭证字段", match: "临时开锁密码", element: "row" },
+    },
     targetId: "access-control-device-table",
     number: 3,
     kind: "规则",
@@ -152,6 +163,9 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "access-control-device-pagination",
+    documentRefs: {
+      prd: { section: "6.1 PC 端列表页交互规格", match: "菜单路径：物联网IOT管理 → 门禁设备（/iot/access-devices", element: "text" },
+    },
     targetId: "access-control-device-pagination",
     number: 4,
     kind: "交互",
@@ -168,6 +182,39 @@ export const accessControlDeviceListAnnotations: PrototypeAnnotation[] = [
           {
             label: "空态说明",
             content: "未查询到匹配设备时展示空态占位，提示「暂无匹配的门禁设备」。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "access-control-device-fields",
+    documentRefs: {
+      fields: { section: "门禁设备 字段清单", match: "列表展示为更新人/时间复合列", element: "row" },
+      rules: { section: "【设备类型分类与行操作矩阵】(R01)", match: "挂锁门禁：仅展示【获取门锁密码】、【设备数据】、【重命名】、【绑定仓库】、【移除", element: "text" },
+    },
+    targetId: "access-control-device-table",
+    number: 5,
+    kind: "字段",
+    title: "设备列表字段字典",
+    content:
+      "列表展示设备名称、设备编码、设备类型、绑定仓库、在线状态、最新数据时间与更新人；审核配置命中与否决定获取密码走审批还是免审。",
+    details: [
+      {
+        title: "字段清单对照表",
+        items: [
+          {
+            label: "列表字段字典",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 展示规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **设备名称** | 文本 | 必填 | 最多 50 个字符 | 单行 | — |
+| **设备编码** | 文本 | 必填 | 设备唯一编码，如 LK-2024-0082 | 单行完整展示 | 支持复制 |
+| **设备类型** | 标签 | 必填 | 挂锁 / 人脸门禁 / 监控 / 温湿度 / GPS | 单行 | 决定获取密码入口文案 |
+| **绑定仓库** | 文本 | 条件必填 | 仓库-库房-分区 | 单行 | 未绑定显示「未绑定」 |
+| **在线状态** | 状态标签 | 系统维护 | 在线 / 离线 | 彩色标签 | — |
+| **最新数据时间** | 日期时间 | 系统记录 | YYYY-MM-DD HH:mm:ss | 单行 | 离线设备为最后上报时间 |
+| **更新人 / 更新时间** | 双行复合 | 系统记录 | 上行更新人、下行时间 | 两行合并列 | — |
+| **操作** | 行操作按钮 | — | 获取密码 / 重命名 / 仓库绑定 / 人脸配置 / 设备数据 / 移除 | 直出 ≤3 个，其余进【更多】 | 获取密码文案随类型变化 |`,
           },
         ],
       },

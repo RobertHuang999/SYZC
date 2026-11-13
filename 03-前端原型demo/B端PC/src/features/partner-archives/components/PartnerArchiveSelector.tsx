@@ -1,27 +1,26 @@
 import { useMemo } from "react"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
 import { implicitRoleForArchiveMenu } from "@prototype/shared/partner-archives/partner-archive-domain"
 import { partnerArchivesMock } from "../mock/partner-archives.mock"
 import {
-  ROLE_STATUS_LABELS,
-  ROLE_TYPE_LABELS,
+  CONTACT_PHONE_VERIFY_BADGE_CLASS,
+  CONTACT_PHONE_VERIFY_LABELS,
+  resolveContactPhoneVerified,
+} from "../lib/contact-phone-verify"
+import {
   type ContactPhoneVerifyStatus,
   type PartnerSubject,
   type RoleType,
+  type SubjectType,
 } from "../domain/types"
-import { resolveContactPhoneVerified } from "../lib/contact-phone-verify"
 import { PARTNER_ARCHIVE_EMPTY_FILTERS } from "../lib/partner-archive-empty-filters"
 import { filterPartnerArchives } from "../lib/list-utils"
-import { cn } from "@/lib/utils"
 import { PARTNER_SELECTOR_DEFAULT_PLACEHOLDER } from "../lib/partner-archive-ui-labels"
 import { resolvePartnerIdentityDisplay } from "../lib/partner-archive-rules"
+import {
+  SearchableNameSelect,
+  type SearchableNameSelectItem,
+} from "@/shared/components/SearchableNameSelect"
 
 export type PartnerSelectorValue = {
   partnerId: string
@@ -40,6 +39,8 @@ type PartnerArchiveSelectorProps = {
   /** 6.3 档案域硬过滤（G12）；与 roleType 二选一或组合，域优先推导隐式角色 */
   archiveMenu?: PartnerArchiveMenuLabel
   roleType?: RoleType
+  /** 按货主类型过滤企业 / 个人，与入库发起搜索框口径一致 */
+  subjectType?: SubjectType
   value?: string
   onChange: (payload: PartnerSelectorValue | null) => void
   placeholder?: string
@@ -50,10 +51,12 @@ type PartnerArchiveSelectorProps = {
 function toSelectablePartners(
   roleType: RoleType,
   archiveMenu?: PartnerArchiveMenuLabel,
+  subjectType?: SubjectType,
 ): PartnerSubject[] {
   let list = partnerArchivesMock.filter(
     (item) =>
       item.status === "NORMAL" &&
+      (!subjectType || item.subjectType === subjectType) &&
       item.roles.some(
         (role) => role.roleType === roleType && role.roleStatus === "NORMAL",
       ),
@@ -64,13 +67,29 @@ function toSelectablePartners(
   return list
 }
 
+function toPayload(item: PartnerSubject, roleType: RoleType): PartnerSelectorValue {
+  const role = item.roles.find((r) => r.roleType === roleType)!
+  return {
+    partnerId: item.id,
+    partnerNo: item.partnerNo,
+    name: item.name,
+    idNumber: item.idNumber,
+    idNumberMasked: item.idNumberMasked,
+    subjectType: item.subjectType,
+    roleType,
+    roleStatus: role.roleStatus,
+    subjectStatus: item.status,
+    contactPhoneVerified: resolveContactPhoneVerified(item),
+  }
+}
+
 export function PartnerArchiveSelector({
   archiveMenu,
   roleType: roleTypeProp,
+  subjectType,
   value,
   onChange,
   placeholder = PARTNER_SELECTOR_DEFAULT_PLACEHOLDER,
-  className,
 }: PartnerArchiveSelectorProps) {
   const roleType: RoleType =
     roleTypeProp ??
@@ -79,52 +98,51 @@ export function PartnerArchiveSelector({
       : "OWNER")
 
   const options = useMemo(
-    () => toSelectablePartners(roleType, archiveMenu),
-    [roleType, archiveMenu],
+    () => toSelectablePartners(roleType, archiveMenu, subjectType),
+    [roleType, archiveMenu, subjectType],
   )
 
+  const selected = options.find((row) => row.id === value)
+
+  const items = useMemo((): SearchableNameSelectItem[] => {
+    return options.map((item) => {
+      const verified = resolveContactPhoneVerified(item)
+      const identity = resolvePartnerIdentityDisplay(item)
+      const description =
+        item.subjectType === "INDIVIDUAL"
+          ? `手机:${identity}`
+          : `税号:${identity}`
+      return {
+        id: item.id,
+        name: item.name,
+        kind: item.subjectType === "INDIVIDUAL" ? "personal" : "enterprise",
+        description,
+        extraBadges: [
+          {
+            label: CONTACT_PHONE_VERIFY_LABELS[verified],
+            className: CONTACT_PHONE_VERIFY_BADGE_CLASS[verified],
+          },
+        ],
+      }
+    })
+  }, [options])
+
   return (
-    <Select
-      value={value ?? ""}
-      onValueChange={(next) => {
-        if (!next) {
+    <SearchableNameSelect
+      valueId={value}
+      valueName={selected?.name ?? ""}
+      placeholder={placeholder}
+      catalogTitle={archiveMenu ? `系统${archiveMenu}档案库候选` : "系统货主档案库候选"}
+      emptyHint="未找到匹配档案，可点右侧快捷建档"
+      items={items}
+      onPick={(item) => {
+        const row = options.find((opt) => opt.id === item.id)
+        if (!row) {
           onChange(null)
           return
         }
-        const item = options.find((row) => row.id === next)
-        if (!item) {
-          onChange(null)
-          return
-        }
-        const role = item.roles.find((r) => r.roleType === roleType)!
-        onChange({
-          partnerId: item.id,
-          partnerNo: item.partnerNo,
-          name: item.name,
-          idNumber: item.idNumber,
-          idNumberMasked: item.idNumberMasked,
-          subjectType: item.subjectType,
-          roleType,
-          roleStatus: role.roleStatus,
-          subjectStatus: item.status,
-          contactPhoneVerified: resolveContactPhoneVerified(item),
-        })
+        onChange(toPayload(row, roleType))
       }}
-    >
-      <SelectTrigger className={cn("w-full", className)}>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((item) => {
-          const role = item.roles.find((r) => r.roleType === roleType)!
-          return (
-            <SelectItem key={item.id} value={item.id}>
-              {item.name} · {resolvePartnerIdentityDisplay(item)} · {ROLE_TYPE_LABELS[roleType]}·
-              {ROLE_STATUS_LABELS[role.roleStatus]}
-            </SelectItem>
-          )
-        })}
-      </SelectContent>
-    </Select>
+    />
   )
 }

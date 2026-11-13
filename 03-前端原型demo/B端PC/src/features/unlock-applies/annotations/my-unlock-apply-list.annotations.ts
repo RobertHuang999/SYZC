@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
   {
     id: "my-unlock-apply-page",
+    documentRefs: {
+      prd: { section: "开锁申请 主PRD", match: "PC 端菜单路径：工作中心 → 审批中心 → 业务审批 → 我的申请管理（切换至", element: "text" },
+      rules: { section: "开锁申请 业务规则规格", match: "工作中心 → 审批中心 → 业务审批 → 我的申请管理 → 开锁申请", element: "row" },
+    },
     targetId: "my-unlock-apply-page",
     number: 1,
     kind: "页面",
@@ -110,6 +114,10 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "my-unlock-apply-table",
+    documentRefs: {
+      fields: { section: "开锁申请 字段清单", match: "仅驳回状态展示", element: "row" },
+      rules: { section: "3.1 状态定义" },
+    },
     targetId: "my-unlock-apply-table",
     number: 3,
     kind: "字段",
@@ -135,6 +143,25 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
           {
             label: "申请状态 / 凭证状态",
             content: "Tag 着色；凭证状态 **5 态**（待审批时为「未生成」）。「生成失败」=密码服务调用失败，挂锁/人脸统一。",
+          },
+        ],
+      },
+      {
+        title: "列表字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 列名称 | 控件类型 | 必填 | 取值范围与格式 | 展示规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **申请单号** | 链接 | 系统生成 | UA + 数字串 | 可点进详情 | 列表 la 展示，支持搜索 |
+| **设备名称** | 文本 + 图标 | 必填 | 提交时快照 | 单行 | 挂锁 / 人脸图标 |
+| **设备类型** | 文本 | 必填 | 挂锁门禁 / 人脸门禁 | 单行 | — |
+| **绑定仓库** | 文本 | 条件必填 | 仓库-库房-分区 | 单行 | 未绑定显示「未绑定」 |
+| **事由** | 标签 | 必填 | 出库 / 入库 / 移库 / 参观 / 其他 | 单行 | — |
+| **提交时间** | 日期时间 | 系统记录 | YYYY-MM-DD HH:mm:ss | 单行 | — |
+| **申请状态** | 状态标签 | 系统维护 | 待审批 / 已通过 / 已驳回 / 已撤回 / 已失效 | 左固定、着色 | 旧称已统一 |
+| **凭证状态** | 状态标签 | 系统维护 | 未生成 / 已下发 / 生成失败 / 已过期 / 已失效 | 着色 | 待审批时为未生成 |
+| **操作** | 行操作按钮 | — | 详情 / 撤回 | 右固定 | 撤回仅待审批可用 |`,
           },
         ],
       },
@@ -196,6 +223,10 @@ export const myUnlockApplyListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "my-unlock-apply-row-actions",
+    documentRefs: {
+      rules: { section: "3.1 状态定义", match: "已撤回 (REVOKED)：申请人在审批前主动撤回，流程终止；", element: "text" },
+      prd: { section: "5.1 状态定义", match: "已撤回 (REVOKED)：申请人在审批前主动撤回，终态；", element: "text" },
+    },
     targetId: "my-unlock-apply-table",
     number: 4,
     kind: "规则",

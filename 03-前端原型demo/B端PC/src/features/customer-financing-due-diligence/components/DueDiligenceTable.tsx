@@ -1,10 +1,12 @@
-import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { TableDateTimeCell } from "@/shared/components/TableCells"
 import {
-  ExternalLinkIcon,
-  InboxIcon,
-} from "lucide-react"
+  TableRowActionPanel,
+  TABLE_ROW_ACTION_COL_TOTAL_PX,
+  type TableRowActionItem,
+} from "@/shared/components/TableRowActionPanel"
+import { InboxIcon, ExternalLinkIcon } from "lucide-react"
 import { DILIGENCE_STATUS_CONFIG } from "../domain/constants"
 import type { CustomerFinancingDueDiligence } from "../domain/types"
 
@@ -21,9 +23,7 @@ interface DueDiligenceTableProps {
   onResetFilters: () => void
 }
 
-/**
- * 格式化金额为千分位且保留4位小数
- */
+/** 金额按元展示，千分位并保留 4 位小数 */
 function formatAmount4(val: number): string {
   return new Intl.NumberFormat("zh-CN", {
     minimumFractionDigits: 4,
@@ -31,17 +31,8 @@ function formatAmount4(val: number): string {
   }).format(val)
 }
 
-/**
- * 时间拆分为年月日与时分秒两行呈现
- */
-function formatDateTimeTwoLines(val: string) {
-  if (!val) return { date: "--", time: "" }
-  const parts = val.split(" ")
-  if (parts.length === 2) {
-    return { date: parts[0], time: parts[1] }
-  }
-  return { date: val, time: "" }
-}
+const headCell =
+  "whitespace-nowrap px-3 py-3 text-center font-semibold text-foreground"
 
 export function DueDiligenceTable({
   data,
@@ -80,249 +71,251 @@ export function DueDiligenceTable({
   }
 
   return (
-    <div className="relative overflow-x-auto rounded-lg border border-border/70 bg-card shadow-xs">
-      <table className="w-full text-left text-sm">
-        <thead className="bg-slate-100 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-          <tr>
-            <th className="w-14 px-3 py-3 text-center">序号</th>
-            <th className="min-w-[170px] px-3 py-3">产品名称</th>
-            <th className="min-w-[170px] px-3 py-3">申请人</th>
-            <th className="min-w-[140px] px-3 py-3 text-right">
-              意向融资金额
-            </th>
-            <th className="w-24 px-3 py-3 text-center">意向融资期数</th>
-            <th className="min-w-[140px] px-3 py-3">货物</th>
-            <th className="min-w-[120px] px-3 py-3">申请时间</th>
-            <th className="w-24 px-3 py-3 text-center">授信金额</th>
-            <th className="w-20 px-3 py-3 text-center">授信期数</th>
-            <th className="w-24 px-3 py-3 text-center">贷款金额</th>
-            <th className="w-20 px-3 py-3 text-center">贷款期数</th>
-            <th className="w-28 px-3 py-3 text-center">状态</th>
-            <th className="sticky right-0 z-10 min-w-[210px] bg-slate-100 px-3 py-3 text-center shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.06)] dark:bg-slate-800">
-              操作
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border/50">
-          {data.map((item, idx) => {
-            const statusConfig = DILIGENCE_STATUS_CONFIG[item.status]
-            const appliedTime = formatDateTimeTwoLines(item.appliedAt || item.assignedAt)
+    <div className="space-y-3 font-sans">
+      <div className="relative overflow-x-auto rounded-lg border border-border/70 bg-card shadow-xs">
+        <table className="w-full border-collapse text-left text-xs">
+          <thead className="bg-slate-100 text-xs font-semibold text-foreground dark:bg-slate-800">
+            <tr>
+              {/* 1. 序号 */}
+              <th className={`${headCell} w-14`}>序号</th>
 
-            return (
-              <tr
-                key={item.id}
-                className="group h-[72px] transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60"
+              {/* 2. 产品名称 */}
+              <th className={`${headCell} min-w-[190px] max-w-[230px] text-left`}>
+                产品名称
+              </th>
+
+              {/* 3. 申请人 */}
+              <th className={`${headCell} min-w-[190px] max-w-[230px] text-left`}>
+                申请人
+              </th>
+
+              {/* 4. 意向融资金额（元） */}
+              <th className={`${headCell} min-w-[150px] text-right`}>
+                意向融资金额（元）
+              </th>
+
+              {/* 5. 意向融资期数 */}
+              <th className={`${headCell} w-24`}>意向融资期数</th>
+
+              {/* 6. 抵/质押物 */}
+              <th className={`${headCell} min-w-[150px] text-left`}>抵/质押物</th>
+
+              {/* 7. 尽调状态 */}
+              <th className={`${headCell} w-28`}>尽调状态</th>
+
+              {/* 8. 尽调人员 */}
+              <th className={`${headCell} min-w-[100px]`}>尽调人员</th>
+
+              {/* 9. 尽调分配时间 */}
+              <th className={`${headCell} min-w-[130px]`}>尽调分配时间</th>
+
+              {/* 10. 处理时间 */}
+              <th className={`${headCell} min-w-[130px]`}>处理时间</th>
+
+              {/* 11. 操作：列宽按 PC 06 三列满宽预留，4 钮走 2×2 两行 */}
+              <th
+                className="sticky right-0 z-20 border-l border-border/80 bg-slate-100 px-3 py-3 text-center font-semibold text-foreground shadow-[-8px_0_16px_-4px_rgba(0,0,0,0.08)] dark:bg-slate-800"
+                style={{
+                  width: TABLE_ROW_ACTION_COL_TOTAL_PX,
+                  minWidth: TABLE_ROW_ACTION_COL_TOTAL_PX,
+                }}
               >
-                {/* 1. 序号 */}
-                <td className="px-3 py-2 text-center text-xs text-muted-foreground">
-                  {startIndex + idx + 1}
-                </td>
+                操作
+              </th>
+            </tr>
+          </thead>
 
-                {/* 2. 产品名称 */}
-                <td className="px-3 py-2">
-                  <div className="line-clamp-2 text-xs font-medium text-foreground">
-                    {item.productName}
-                  </div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">
-                    单号：{item.id}
-                  </div>
-                </td>
+          <tbody>
+            {data.map((item, idx) => {
+              const statusConfig = DILIGENCE_STATUS_CONFIG[item.status]
+              const receiptNo = item.warehouseReceiptNo
+              const actions: TableRowActionItem[] = [
+                {
+                  key: "detail",
+                  label: "查看",
+                  onClick: () => onViewDetail(item),
+                },
+              ]
+              if (item.status === "PENDING_DILIGENCE") {
+                actions.push(
+                  {
+                    key: "trigger",
+                    label: "发起尽调",
+                    onClick: () => onTriggerDiligence(item),
+                  },
+                  {
+                    key: "reassign",
+                    label: "任务转交",
+                    onClick: () => onReassignTask(item),
+                  },
+                  {
+                    key: "manualReject",
+                    label: "手动拒绝",
+                    tone: "danger",
+                    onClick: () => onManualReject(item),
+                  },
+                )
+              }
+              if (
+                item.status === "IN_PROCESSING" &&
+                item.riskConclusion === "REVIEW" &&
+                onReviewRisk
+              ) {
+                actions.push({
+                  key: "review",
+                  label: "人工复核",
+                  onClick: () => onReviewRisk(item),
+                })
+              }
+              if (item.status === "DILIGENCE_SUCCESS") {
+                actions.push(
+                  {
+                    key: "assignFunder",
+                    label: "分配资方",
+                    onClick: () => onAssignFunder(item),
+                  },
+                  {
+                    key: "report",
+                    label: "下载报告",
+                    onClick: () => onViewReport(item),
+                  },
+                )
+              }
+              if (
+                item.status === "DILIGENCE_FAILED" ||
+                item.status === "MANUAL_REJECTED"
+              ) {
+                actions.push({
+                  key: "report",
+                  label: "下载报告",
+                  onClick: () => onViewReport(item),
+                })
+              }
 
-                {/* 3. 申请人 */}
-                <td className="px-3 py-2">
-                  <div className="line-clamp-2 text-xs font-medium text-foreground">
-                    {item.applicantName}
-                  </div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">
-                    {item.applicantIdentifier}
-                  </div>
-                </td>
+              return (
+                <tr
+                  key={item.id}
+                  className="group h-[72px] border-b border-border/60 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/40"
+                >
+                  {/* 1. 序号 */}
+                  <td className="px-3 py-2 text-center text-xs text-muted-foreground">
+                    {startIndex + idx + 1}
+                  </td>
 
-                {/* 4. 意向融资金额 */}
-                <td className="px-3 py-2 text-right">
-                  <span className="text-xs font-semibold text-foreground">
-                    ¥{formatAmount4(item.intendedAmount)}
-                  </span>
-                </td>
-
-                {/* 5. 意向融资期数 */}
-                <td className="px-3 py-2 text-center text-xs text-foreground">
-                  {item.intendedPeriods}期
-                </td>
-
-                {/* 6. 货物 */}
-                <td className="px-3 py-2">
-                  <div className="line-clamp-2 text-xs text-foreground">
-                    {item.goodsName || item.inventoryDetails?.[0]?.subcategory || "大宗货物"}
-                  </div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">
-                    {item.collateralType === "仓单" ? (
-                      <span
-                        title="点击调阅关联仓单详情"
-                        className="inline-flex cursor-pointer items-center gap-0.5 text-blue-600 hover:underline dark:text-blue-400"
-                        onClick={() => onViewDetail(item)}
-                      >
-                        仓单：{item.warehouseReceiptNo || "已冻结"}
-                        <ExternalLinkIcon className="h-3 w-3" />
-                      </span>
-                    ) : (
-                      <span>形态：在库现货存货</span>
-                    )}
-                  </div>
-                </td>
-
-                {/* 7. 申请时间 */}
-                <td className="px-3 py-2 text-xs text-muted-foreground">
-                  <div>{appliedTime.date}</div>
-                  <div className="text-[11px] text-slate-500">
-                    {appliedTime.time}
-                  </div>
-                </td>
-
-                {/* 8. 授信金额 (对齐现网，未发生时展示 "--") */}
-                <td className="px-3 py-2 text-center text-xs text-muted-foreground">
-                  {item.creditAmount ? `¥${formatAmount4(item.creditAmount)}` : "--"}
-                </td>
-
-                {/* 9. 授信期数 (对齐现网，未发生时展示 "--") */}
-                <td className="px-3 py-2 text-center text-xs text-muted-foreground">
-                  {item.creditPeriods ? `${item.creditPeriods}期` : "--"}
-                </td>
-
-                {/* 10. 贷款金额 (对齐现网，未发生时展示 "--") */}
-                <td className="px-3 py-2 text-center text-xs text-muted-foreground">
-                  {item.loanAmount ? `¥${formatAmount4(item.loanAmount)}` : "--"}
-                </td>
-
-                {/* 11. 贷款期数 (对齐现网，未发生时展示 "--") */}
-                <td className="px-3 py-2 text-center text-xs text-muted-foreground">
-                  {item.loanPeriods ? `${item.loanPeriods}期` : "--"}
-                </td>
-
-                {/* 12. 状态 */}
-                <td className="px-3 py-2 text-center">
-                  <Badge
-                    variant="outline"
-                    className={`gap-1 px-2 py-0.5 text-[11px] font-normal ${statusConfig.badgeClass}`}
-                  >
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${statusConfig.dotClass}`}
-                    />
-                    {statusConfig.label}
-                  </Badge>
-                </td>
-
-                {/* 13. 操作列 (Sticky 不透明实色背景防穿透) */}
-                <td className="sticky right-0 z-10 bg-white px-3 py-2 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.06)] group-hover:bg-slate-50 dark:bg-slate-900 dark:group-hover:bg-slate-800/80">
-                  <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                    {/* 查看详情 */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onViewDetail(item)}
-                      className="h-7 px-2 text-xs text-primary hover:bg-primary/10 hover:text-primary"
+                  {/* 2. 产品名称 */}
+                  <td className="px-3 py-2">
+                    <div
+                      className="max-w-[230px] truncate font-medium text-foreground"
+                      title={item.productName}
                     >
-                      查看
-                    </Button>
+                      {item.productName}
+                    </div>
+                    <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                      单号：{item.id}
+                    </div>
+                  </td>
 
-                    {/* 待尽调状态操作 */}
-                    {item.status === "PENDING_DILIGENCE" && (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onTriggerDiligence(item)}
-                          className="h-7 px-2 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary"
-                        >
-                          发起尽调
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onReassignTask(item)}
-                          className="h-7 px-2 text-xs text-slate-600 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300"
-                        >
-                          任务转交
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onManualReject(item)}
-                          className="h-7 px-2 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400"
-                        >
-                          手动拒绝
-                        </Button>
-                      </>
-                    )}
+                  {/* 3. 申请人 */}
+                  <td className="px-3 py-2">
+                    <div
+                      className="max-w-[230px] truncate font-medium text-foreground"
+                      title={item.applicantName}
+                    >
+                      {item.applicantName}
+                    </div>
+                    <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                      {item.applicantIdentifier}
+                    </div>
+                  </td>
 
-                    {/* 受理中状态操作 */}
-                    {item.status === "IN_PROCESSING" && (
-                      <>
-                        {item.riskConclusion === "REVIEW" && onReviewRisk && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onReviewRisk(item)}
-                            className="h-7 px-2 text-xs font-medium text-purple-600 hover:bg-purple-50 hover:text-purple-700 dark:text-purple-400"
-                          >
-                            人工复核
-                          </Button>
-                        )}
-                        <span className="text-[11px] text-muted-foreground">
-                          智风控核验中
-                        </span>
-                      </>
-                    )}
+                  {/* 4. 意向融资金额（元） */}
+                  <td className="whitespace-nowrap px-3 py-2 text-right font-medium text-primary">
+                    ¥{formatAmount4(item.intendedAmount)}
+                  </td>
 
-                    {/* 受理成功状态操作 */}
-                    {item.status === "DILIGENCE_SUCCESS" && (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onAssignFunder(item)}
-                          className="h-7 px-2 text-xs font-medium text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400"
-                        >
-                          分配给资方
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onViewReport(item)}
-                          className="h-7 px-2 text-xs text-slate-600 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300"
-                        >
-                          下载报告
-                        </Button>
-                      </>
-                    )}
+                  {/* 5. 意向融资期数 */}
+                  <td className="whitespace-nowrap px-3 py-2 text-center text-foreground">
+                    {item.intendedPeriods}期
+                  </td>
 
-                    {/* 受理失败与申请失败操作 */}
-                    {(item.status === "DILIGENCE_FAILED" ||
-                      item.status === "MANUAL_REJECTED") && (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onViewReport(item)}
-                          className="h-7 px-2 text-xs text-slate-600 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300"
+                  {/* 6. 抵/质押物 */}
+                  <td className="px-3 py-2">
+                    <div className="flex items-center gap-1.5 whitespace-nowrap">
+                      <Badge
+                        variant="outline"
+                        className={
+                          item.collateralType === "仓单"
+                            ? "border-sky-300 bg-sky-50 text-sky-800 dark:border-sky-800 dark:bg-sky-950/60 dark:text-sky-300"
+                            : "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                        }
+                      >
+                        {item.collateralType}
+                      </Badge>
+                      {item.collateralType === "仓单" ? (
+                        <button
+                          type="button"
+                          title="点击调阅关联仓单详情"
+                          className="inline-flex max-w-[110px] items-center gap-0.5 truncate text-[11px] text-primary hover:underline"
+                          onClick={() => onViewDetail(item)}
                         >
-                          下载报告
-                        </Button>
+                          <span className="truncate">{receiptNo || "已冻结"}</span>
+                          <ExternalLinkIcon className="h-3 w-3 shrink-0" />
+                        </button>
+                      ) : (
                         <span
-                          title="已可靠归档沉淀至被拒退回池等待人工重调度"
-                          className="inline-flex items-center text-[11px] text-rose-500"
+                          className="max-w-[110px] truncate text-[11px] text-foreground"
+                          title={item.warehouseName || "在库现货存货"}
                         >
-                          已入被拒池
+                          {item.warehouseName || "在库现货存货"}
                         </span>
-                      </>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* 7. 尽调状态 */}
+                  <td className="px-3 py-2 text-center">
+                    <Badge
+                      variant="outline"
+                      className={`inline-flex items-center gap-1 whitespace-nowrap font-medium ${statusConfig.badgeClass}`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${statusConfig.dotClass}`}
+                      />
+                      {statusConfig.label}
+                    </Badge>
+                  </td>
+
+                  {/* 8. 尽调人员 */}
+                  <td className="whitespace-nowrap px-3 py-2 text-center text-foreground">
+                    {item.surveyor || "—"}
+                  </td>
+
+                  {/* 9. 尽调分配时间 */}
+                  <td className="whitespace-nowrap px-3 py-2 text-center text-muted-foreground">
+                    <TableDateTimeCell value={item.assignedAt} stackedPlain />
+                  </td>
+
+                  {/* 10. 处理时间 */}
+                  <td className="whitespace-nowrap px-3 py-2 text-center text-muted-foreground">
+                    <TableDateTimeCell value={item.processedAt} stackedPlain />
+                  </td>
+
+                  {/* 11. 操作：≤3 钮单行；4 钮 2×2 两行（PC 06 §5.6） */}
+                  <td
+                    className="sticky right-0 z-20 border-l border-border/80 bg-white px-2 py-2 text-center shadow-[-8px_0_16px_-4px_rgba(0,0,0,0.08)] transition-colors group-hover:bg-slate-50 dark:bg-slate-900 dark:group-hover:bg-slate-800"
+                    style={{
+                      width: TABLE_ROW_ACTION_COL_TOTAL_PX,
+                      minWidth: TABLE_ROW_ACTION_COL_TOTAL_PX,
+                    }}
+                  >
+                    <TableRowActionPanel actions={actions} />
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

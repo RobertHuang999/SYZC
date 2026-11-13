@@ -6,7 +6,10 @@
     "prepare": "husky",
     "build:prototype:pc": "npm run build --prefix \"03-前端原型demo/B端PC\"",
     "build:prototype:h5": "npm run build --prefix \"03-前端原型demo/B端H5\"",
-    "build:prototype": "npm run build:prototype:pc && npm run build:prototype:h5"
+    "build:prototype": "npm run build:prototype:pc && npm run build:prototype:h5",
+    "check:annotations": "node 03-前端原型demo/tools/check-annotations.mjs",
+    "check:doc-refs": "node 03-前端原型demo/tools/check-doc-refs.mjs",
+    "gen:doc-refs": "node 03-前端原型demo/tools/generate-doc-refs.mjs --write"
   },
   "devDependencies": {
     "husky": "^9.1.7"

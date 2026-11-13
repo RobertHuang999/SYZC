@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { DownloadIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -7,8 +8,8 @@ import {
   PrototypeAnnotationTarget,
 } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { PageHeader } from "@/shared/components/PageHeader"
+import { SegmentedTabs } from "@/shared/components/SegmentedTabs"
 import { WarningListPagination } from "@/components/business/WarningListPrimitives"
-import { cn } from "@/lib/utils"
 import { supervisionManagementListAnnotations } from "../annotations/supervision-management-list.annotations"
 import { supervisionManagementDocuments } from "../documents/supervision-management-documents"
 import { SupervisionLogDialog, SupervisionMaterialsDialog } from "../components/SupervisionDialogs"
@@ -60,16 +61,36 @@ function matchesFilters(item: SupervisionOrderItem, filters: SupervisionOrderFil
 }
 
 export function SupervisionManagementListPage() {
-  const [activeTab, setActiveTab] = useState<SupervisionOrderTabKey>("MORTGAGE")
+  const navigate = useNavigate()
+  // 详情返回时恢复标签页、筛选条件与页码（查看详情操作要求无损返回）
+  const savedView = useMemo(() => {
+    try {
+      const raw = sessionStorage.getItem("syzc_supervision_mgmt_view")
+      return raw ? (JSON.parse(raw) as {
+        activeTab?: SupervisionOrderTabKey
+        draftFilters?: SupervisionOrderFilters
+        appliedFilters?: SupervisionOrderFilters
+        page?: number
+        pageSize?: number
+      }) : null
+    } catch {
+      return null
+    }
+  }, [])
+  const [activeTab, setActiveTab] = useState<SupervisionOrderTabKey>(
+    savedView?.activeTab ?? "MORTGAGE",
+  )
   const [draftFilters, setDraftFilters] = useState<SupervisionOrderFilters>({
     ...DEFAULT_SUPERVISION_FILTERS,
+    ...(savedView?.draftFilters ?? {}),
   })
   const [appliedFilters, setAppliedFilters] = useState<SupervisionOrderFilters>({
     ...DEFAULT_SUPERVISION_FILTERS,
+    ...(savedView?.appliedFilters ?? {}),
   })
   const [filtersExpanded, setFiltersExpanded] = useState(false)
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(PAGE_SIZE)
+  const [page, setPage] = useState(savedView?.page ?? 1)
+  const [pageSize, setPageSize] = useState(savedView?.pageSize ?? PAGE_SIZE)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [logTarget, setLogTarget] = useState<SupervisionOrderItem | null>(null)
   const [materialsTarget, setMaterialsTarget] = useState<SupervisionOrderItem | null>(null)
@@ -149,8 +170,12 @@ export function SupervisionManagementListPage() {
       return
     }
     if (action.key === "detail") {
-      showToast(
-        `正在打开订单【${item.orderNo}】详情：基础信息、资产明细、IoT 设备、风险流水与流程时间轴（详情页后续按三件套交付）。`,
+      sessionStorage.setItem(
+        "syzc_supervision_mgmt_view",
+        JSON.stringify({ activeTab, draftFilters, appliedFilters, page, pageSize }),
+      )
+      navigate(
+        `/融资/监管/监管业务/监管管理/详情/${encodeURIComponent(item.id)}`,
       )
       return
     }
@@ -190,39 +215,18 @@ export function SupervisionManagementListPage() {
           <PageHeader
             title="监管管理"
             description="承接监管办理终审生单后的存续期台账：盯货值、盯抵押率、盯风险，24 项存续期操作在行尾发起。"
-            actions={
-              <PrototypeAnnotationTarget annotationIds={["supervision-management-export"]}>
-                <Button type="button" size="sm" onClick={handleExport}>
-                  <DownloadIcon className="size-4" />
-                  导出为Excel
-                </Button>
-              </PrototypeAnnotationTarget>
-            }
           />
         </PrototypeAnnotationTarget>
 
         <PrototypeAnnotationTarget annotationIds={["supervision-management-tabs"]}>
-          <div className="inline-flex overflow-hidden rounded-lg border border-border bg-card shadow-xs">
-            {SUPERVISION_TABS.map((tab) => {
-              const isActive = tab.key === activeTab
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => handleTabChange(tab.key)}
-                  aria-pressed={isActive}
-                  className={cn(
-                    "h-8 border-r border-border px-5 text-[13px] font-medium transition-colors last:border-r-0",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-card text-muted-foreground hover:bg-muted hover:text-foreground",
-                  )}
-                >
-                  {tab.label}
-                </button>
-              )
-            })}
-          </div>
+          <SegmentedTabs<SupervisionOrderTabKey>
+            items={SUPERVISION_TABS.map((tab) => ({
+              key: tab.key,
+              label: tab.label,
+            }))}
+            value={activeTab}
+            onChange={handleTabChange}
+          />
         </PrototypeAnnotationTarget>
 
         <SupervisionStatsCards
@@ -242,6 +246,19 @@ export function SupervisionManagementListPage() {
           onToggleExpand={() => setFiltersExpanded((prev) => !prev)}
           onChange={setDraftFilters}
           onSearch={handleSearch}
+          extraActions={
+            <PrototypeAnnotationTarget annotationIds={["supervision-management-export"]}>
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleExport}
+                className="gap-1.5"
+              >
+                <DownloadIcon className="size-4" />
+                导出为Excel
+              </Button>
+            </PrototypeAnnotationTarget>
+          }
         />
 
         <Card>

@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/annotation.types"
 export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
   {
     id: "access-control-device-h5-page",
+    documentRefs: {
+      prd: { section: "门禁设备 主PRD", match: "获取门禁密码", element: "row" },
+      rules: { section: "门禁设备 业务规则规格", match: "获取门禁密码", element: "row" },
+    },
     targetId: "access-control-device-h5-page",
     number: 1,
     kind: "页面",
@@ -36,10 +40,34 @@ export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "获取密码链路",
+        items: [
+          {
+            label: "流转图",
+            content: `flowchart TD
+    A["门禁设备卡片 · 获取密码"] --> B{"matchUnlockApprovalConfig"}
+    B -->|命中需审批| C["UnlockApplySubmitSheet 发起申请"]
+    C -->|R07 同设备在途| D["阻断并提示在途单号"]
+    C -->|无在途| E["提交成功 → Deep link 我的开锁申请"]
+    B -->|未命中免审| F{"设备类型"}
+    F -->|挂锁| G["GetLockPasswordSheet（可短信）"]
+    F -->|人脸| H["GetAccessPasswordSheet（仅页面密码，R31）"]`,
+          },
+          {
+            label: "移动端差异",
+            content: "PC 用居中弹窗，H5 统一用底部 Sheet；提交后跳「我的申请记录」详情。",
+          },
+        ],
+      },
     ],
   },
   {
     id: "access-control-device-h5-filter",
+    documentRefs: {
+      prd: { section: "5.1 状态定义", match: "空间绑定状态：已绑定 (BOUND)、未绑定 (UNBOUND)；", element: "text" },
+      rules: { section: "【设备类型分类与行操作矩阵】(R01)", match: "类型强隔离：门禁设备分为「挂锁门禁」与「人脸门禁」。", element: "text" },
+    },
     targetId: "access-control-device-h5-filter",
     number: 2,
     kind: "交互",
@@ -72,6 +100,9 @@ export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "access-control-device-h5-cards",
+    documentRefs: {
+      rules: { section: "【设备类型分类与行操作矩阵】(R01)", match: "类型强隔离：门禁设备分为「挂锁门禁」与「人脸门禁」。", element: "text" },
+    },
     targetId: "access-control-device-h5-cards",
     number: 3,
     kind: "规则",
@@ -120,6 +151,37 @@ export const accessControlDeviceH5ListAnnotations: PrototypeAnnotation[] = [
           {
             label: "文档对齐",
             content: "PC Demo §5.1 · MOCK_DATA V1.7 §2 · 发起申请 §8.0。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "access-control-device-h5-fields",
+    documentRefs: {
+      fields: { section: "四、系统状态与审计字段", match: "设备重命名、仓位变更、密码获取及移除的全量审计", element: "row" },
+      rules: { section: "3.1 运行状态与生命周期", match: "空间绑定状态：已绑定 (BOUND)、未绑定 (UNBOUND)；", element: "text" },
+    },
+    targetId: "access-control-device-h5-cards",
+    number: 4,
+    kind: "字段",
+    title: "设备卡片字段字典",
+    content:
+      "卡片展示设备名称与编码、类型、绑定仓库、在线状态与获取密码入口。",
+    details: [
+      {
+        title: "字段清单对照表",
+        items: [
+          {
+            label: "卡片字段",
+            content: `| 字段名称 | 控件 | 必填 | 取值范围与格式 | 展示规则 |
+| :--- | :--- | :---: | :--- | :--- |
+| **设备名称** | 文本 | 必填 | 最多 50 个字符 | 卡片首行 |
+| **设备编码** | 文本 | 必填 | 如 LK-2024-0082 | 可复制 |
+| **设备类型** | 图标 + 文本 | 必填 | 挂锁 / 人脸门禁 | 决定获取密码入口文案 |
+| **绑定仓库** | 文本 | 条件必填 | 仓库-库房-分区 | 未绑定显示「未绑定」 |
+| **在线状态** | 状态标签 | 系统维护 | 在线 / 离线 | 彩色标签 |
+| **获取密码** | 胶囊按钮 | — | 获取门锁密码 / 获取门禁密码 | 卡片底部 |`,
           },
         ],
       },

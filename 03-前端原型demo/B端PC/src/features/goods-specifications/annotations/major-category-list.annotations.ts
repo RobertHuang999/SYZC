@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const majorCategoryListAnnotations: PrototypeAnnotation[] = [
   {
     id: "major-category-page",
+    documentRefs: {
+      prd: { section: "3. 模块定位与系统链路" },
+      rules: { section: "1. 大类状态级联启停时序" },
+    },
     targetId: "major-category-page",
     number: 1,
     kind: "页面",
@@ -64,6 +68,10 @@ export const majorCategoryListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "major-category-filter",
+    documentRefs: {
+      prd: { section: "大类管理主PRD", match: "筛选查询区：", element: "text" },
+      rules: { section: "1. 大类状态级联启停时序" },
+    },
     targetId: "major-category-filter",
     number: 2,
     kind: "交互",
@@ -104,6 +112,10 @@ export const majorCategoryListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "major-category-table",
+    documentRefs: {
+      fields: { section: "大类管理字段清单", match: "最近更新人标识", element: "row" },
+      rules: { section: "1. 大类状态级联启停时序" },
+    },
     targetId: "major-category-table",
     number: 3,
     kind: "字段",
@@ -133,6 +145,9 @@ export const majorCategoryListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "major-category-row-actions",
+    documentRefs: {
+      rules: { section: "2. 大类两阶段删除控制时序" },
+    },
     targetId: "major-category-row-actions",
     number: 4,
     kind: "规则",
@@ -184,6 +199,9 @@ export const majorCategoryListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "major-category-dialog",
+    documentRefs: {
+      prd: { section: "大类管理主PRD", match: "【新建重名校验测试】", element: "row" },
+    },
     targetId: "major-category-dialog",
     number: 5,
     kind: "交互",

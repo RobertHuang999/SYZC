@@ -3,6 +3,9 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const approvalCenterHubAnnotations: PrototypeAnnotation[] = [
   {
     id: "approval-center-hub-page",
+    documentRefs: {
+      prd: { section: "1.1 业务背景" },
+    },
     targetId: "approval-center-hub-page",
     number: 1,
     kind: "页面",
@@ -55,10 +58,36 @@ export const approvalCenterHubAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "审批入口分流",
+        items: [
+          {
+            label: "流转图",
+            content: `flowchart TD
+    A["门禁设备 · 获取密码"] --> B{"matchUnlockApprovalConfig"}
+    B -->|命中需审批| C["我的开锁申请（待审批）"]
+    B -->|未命中免审| D["免审直发（approval_required=false）"]
+    C --> E["其他审批 → 开锁审核"]
+    E -->|通过| F["生成临时密码凭证"]
+    E -->|驳回（原因必填）| G["已驳回，释放防重"]
+    C -->|申请人撤回 / 审批超时| H["已撤回 / 已失效"]
+    F --> I["详情查密码（人脸仅页面展示，R31）"]`,
+          },
+          {
+            label: "不走通用待办",
+            content:
+              "开锁审批专网专道，不进「待处理/已处理」池；审批人只看「其他审批 → 开锁审核」。",
+          },
+        ],
+      },
     ],
   },
   {
     id: "approval-center-preview-table",
+    documentRefs: {
+      prd: { section: "1.1 业务背景" },
+      rules: { section: "开锁申请 业务规则规格", match: "驱动开锁审核流转与凭证解密", element: "row" },
+    },
     targetId: "approval-center-preview-table",
     number: 2,
     kind: "交互",

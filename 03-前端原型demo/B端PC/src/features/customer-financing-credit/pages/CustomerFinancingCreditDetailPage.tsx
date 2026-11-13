@@ -128,7 +128,7 @@ export function CustomerFinancingCreditDetailPage() {
           operator: "当前资方审核专员",
           organization: target.funderOrgName,
           time: nowStr,
-          detail: `标记申请成功：核准授信金额 ${creditAmount.toFixed(4)} 元，授信期数 ${creditPeriods} 期，已激活下游【线上监管业务办理】(R04/R06)。`,
+          detail: `标记申请成功：核准授信金额 ${creditAmount.toFixed(4)} 元，授信期数 ${creditPeriods} 期，已激活下游【线上监管业务办理】。`,
         },
         ...target.logs,
       ],
@@ -167,7 +167,7 @@ export function CustomerFinancingCreditDetailPage() {
           operator: "当前资方审核专员",
           organization: target.funderOrgName,
           time: nowStr,
-          detail: `标记申请失败：【${category}】${detail}。已写入被拒退回池 -> 授信失败标签页 (R05)。`,
+          detail: `标记申请失败：【${category}】${detail}。已写入被拒退回池 -> 授信失败标签页。`,
         },
         ...target.logs,
       ],
@@ -220,7 +220,7 @@ export function CustomerFinancingCreditDetailPage() {
           operator: "当前资方审核专员",
           organization: target.funderOrgName,
           time: nowStr,
-          detail: `资方自纠偏改标：从申请成功改为申请失败，撤销下游抵质押权限 (R03)。原因：${reason}`,
+          detail: `资方自纠偏改标：从申请成功改为申请失败，撤销下游抵质押权限。原因：${reason}`,
         },
         ...target.logs,
       ],
@@ -274,7 +274,7 @@ export function CustomerFinancingCreditDetailPage() {
           operator: "当前资方审核专员",
           organization: target.funderOrgName,
           time: nowStr,
-          detail: `资方重申改标：从申请失败改为申请成功，核准授信金额 ${creditAmount.toFixed(4)} 元，重新激活下游抵质押 (R03)。原因：${reason}`,
+          detail: `资方重申改标：从申请失败改为申请成功，核准授信金额 ${creditAmount.toFixed(4)} 元，重新激活下游抵质押。原因：${reason}`,
         },
         ...target.logs,
       ],
@@ -360,7 +360,7 @@ export function CustomerFinancingCreditDetailPage() {
                     className="border-amber-300 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40"
                   >
                     <RefreshCwIcon className="mr-1 h-3.5 w-3.5" />
-                    改标为失败 (R03)
+                    改标为失败
                   </Button>
                 )}
 
@@ -371,7 +371,7 @@ export function CustomerFinancingCreditDetailPage() {
                     className="bg-primary text-primary-foreground hover:bg-primary/90"
                   >
                     <RefreshCwIcon className="mr-1 h-3.5 w-3.5" />
-                    改标为成功 (R03)
+                    改标为成功
                   </Button>
                 )}
               </div>
@@ -537,12 +537,12 @@ export function CustomerFinancingCreditDetailPage() {
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 dark:bg-slate-800/80 font-medium text-muted-foreground">
                     <tr>
-                      <th className="px-3 py-2.5">货物大类</th>
-                      <th className="px-3 py-2.5">货物细类</th>
-                      <th className="px-3 py-2.5">规格型号</th>
-                      <th className="px-3 py-2.5 text-right">数量</th>
-                      <th className="px-3 py-2.5">监管库位</th>
-                      <th className="px-3 py-2.5 text-right">申报货值(元)</th>
+                      <th className="whitespace-nowrap px-3 py-2.5">货物大类</th>
+                      <th className="whitespace-nowrap px-3 py-2.5">货物细类</th>
+                      <th className="whitespace-nowrap px-3 py-2.5">规格型号</th>
+                      <th className="whitespace-nowrap px-3 py-2.5 text-right">数量</th>
+                      <th className="whitespace-nowrap px-3 py-2.5">监管库位</th>
+                      <th className="whitespace-nowrap px-3 py-2.5 text-right">申报货值(元)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/60">
@@ -625,7 +625,7 @@ export function CustomerFinancingCreditDetailPage() {
               <div className="mb-4 space-y-2">
                 <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 flex items-center gap-1">
                   <RefreshCwIcon className="h-3.5 w-3.5" />
-                  资方历次改标自纠偏记录 (R03)：
+                  资方历次改标自纠偏记录：
                 </span>
                 <div className="rounded-md border border-amber-200 bg-amber-50/50 p-3 text-xs dark:border-amber-900/60 dark:bg-amber-950/20 space-y-2">
                   {item.changeRecords.map((cr) => (

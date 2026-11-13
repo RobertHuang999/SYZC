@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
   {
     id: "order-warning-config-form-header",
+    documentRefs: {
+      prd: { section: "订单预警配置主PRD", match: "✅ (逐条保存)", element: "row" },
+      rules: { section: "订单预警配置 业务规则规格", match: "逐条策略保存与乐观锁", element: "row" },
+    },
     targetId: "order-warning-config-form-header",
     number: 1,
     kind: "页面",
@@ -34,6 +38,10 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "order-warning-config-form-order",
+    documentRefs: {
+      fields: { section: "订单预警配置字段清单", match: "订单类型枚举", element: "row" },
+      rules: { section: "订单预警配置 业务规则规格", match: "适用订单口径", element: "row" },
+    },
     targetId: "order-warning-config-form-order",
     number: 2,
     kind: "字段",
@@ -61,10 +69,31 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "订单字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 联动规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **关联订单编号** | 下拉选择 | 必填 | 有效抵押 / 质押 / 监管服务订单 | 选中后带出订单类型、货主、电话与物料 | 已配置有效规则的订单置灰 (R04) |
+| **订单类型** | 只读文本 | 系统带出 | 抵押 / 质押 / 监管服务 | 随订单带出 | 决定率展示名 |
+| **货主企业名称** | 只读文本 | 系统带出 | 企业全称 | 随订单带出 | — |
+| **联系电话** | 只读文本 | 系统带出 | 脱敏中间 4 位 | 随订单带出 | — |
+| **质押物料清单** | 只读表格 | 系统带出 | 品名 / 规格 / 吨数 / 初始估值 | 由订单主数据生成 | 不提供手工新增或删除 |
+| **超时行货物批次** | 只读文本 | 条件展示 | 二维码 / 批次 | 按订单逐行生成 | 无批次时不渲染该列 |
+| **超时天数** | 整数输入 | 启用超时策略时必填 | 大于 0 的整数 | 逐行独立填写 | 不能增删批次行 |`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "order-warning-config-form-cards",
+    documentRefs: {
+      rules: { section: "5.2 六大风控子策略专项配置规则", match: "#### 【预警通知对象选填】(ORD-R19)", element: "text" },
+      prd: { section: "3.3 6 类风控子策略权威配置矩阵", match: "严重等级与通知升级", element: "row" },
+    },
     targetId: "order-warning-config-form-cards",
     number: 3,
     kind: "规则",
@@ -112,6 +141,9 @@ export const orderWarningConfigFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "order-warning-config-form-actions",
+    documentRefs: {
+      rules: { section: "7.1 单策略卡片独立保存与版本递增时序" },
+    },
     targetId: "order-warning-config-form-actions",
     number: 4,
     kind: "交互",

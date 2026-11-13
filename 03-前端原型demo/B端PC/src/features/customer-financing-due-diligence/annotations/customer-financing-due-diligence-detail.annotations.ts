@@ -14,6 +14,23 @@ export const customerFinancingDueDiligenceDetailAnnotations: PrototypeAnnotation
       fields: { section: "一、业务字段", match: "尽调状态", element: "row" },
       rules: { section: "六、动作能力矩阵", match: "查看详情", element: "row" },
     },
+    details: [
+      {
+        title: "业务流转",
+        items: [
+          {
+            label: "流转图",
+            content: `flowchart TD
+    A["线索分配跟进（需要尽调 = 是）"] --> B["待尽调"]
+    B -->|受理| C["受理中"]
+    C -->|尽调通过| D["受理成功<br/>转授信办理"]
+    C -->|尽调不通过| E["受理失败"]
+    E --> F["申请失败"]
+    D --> G["授信已受理"]`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "detail-applicant-section",
@@ -84,5 +101,69 @@ export const customerFinancingDueDiligenceDetailAnnotations: PrototypeAnnotation
       fields: { section: "三、系统与审计字段", match: "操作审计日志", element: "row" },
       rules: { section: "九、权限、风控与安全控制", match: "【全链路尽调操作审计日志存证】(P03)", element: "text" },
     },
+  },
+  {
+    id: "dd-detail-fields",
+    documentRefs: {
+      fields: { section: "一、业务字段", match: "意向融资期数", element: "row" },
+      rules: { section: "【金额与期数口径隔离与透传规则】(R07)", match: "尽调阶段严格继承上游线索的意向融资金额与意向融资期数，只读展示，不可由尽调专员修", element: "text" },
+    },
+    targetId: "detail-applicant-section",
+    number: 99,
+    kind: "字段",
+    title: "字段字典",
+    content: "展示产品、申请人、抵质押物、意向金额与期数、授信/贷款回写值及尽调节点状态。",
+    details: [
+      {
+        title: "字段清单对照表",
+        items: [
+          {
+            label: "字段",
+            content: `| 字段名称 | 控件 | 必填 | 取值范围与格式 | 展示规则 |
+| :--- | :--- | :---: | :--- | :--- |
+| **产品名称** | 文本 | 系统带出 | 继承线索 | 列表 / 详情 |
+| **申请人名称** | 文本 | 系统带出 | 企业全称 / 个人姓名 | 支持综合搜索 |
+| **申请人电话** | 文本 | 系统带出 | 11 位，脱敏中间 4 位 | 详情展示 |
+| **抵/质押物** | 标签 | 系统带出 | 存货 / 仓单 | 仓单可穿透 |
+| **意向融资金额** | 数值 | 系统带出 | 元，保留 4 位小数 | 右对齐 |
+| **意向融资期数** | 数值 | 系统带出 | 正整数 | 单行 |
+| **授信金额 / 期数** | 数值 | 条件回写 | 元，4 位小数；期数 | 未授信显示「—」 |
+| **贷款金额 / 期数** | 数值 | 条件回写 | 元，4 位小数；期数 | 未放款显示「—」 |
+| **融资状态** | 状态标签 | 系统维护 | 待尽调 / 受理中 / 受理成功 / 受理失败 / 申请失败 | 彩色标签 |
+| **附件资料** | 文件组 | 条件必填 | 最多 10 份，图片 / PDF / Word | 详情上传与预览 |`,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "dd-detail-actions",
+    documentRefs: {
+      prd: { section: "1.1 业务背景" },
+      rules: { section: "1. 尽调准入与转交规则" },
+    },
+    targetId: "detail-header",
+    number: 98,
+    kind: "交互",
+    title: "页头操作与业务提示",
+    content:
+      "尽调专员按状态推进受理、转交、智风控与结论；驳回须填原因。",
+    details: [
+      {
+        title: "操作矩阵",
+        items: [
+          {
+            label: "按钮与提示",
+            content: `| 操作 | 可见状态 | 点击后发生什么 | 提示原话 |
+| :--- | :--- | :--- | :--- |
+| **受理** | 待尽调 | 状态置受理中，开始尽调 | — |
+| **转交** | 待尽调 / 受理中 | 选择同组织尽调专员后转交 | 「请选择转交对象」 |
+| **智风控核验** | 受理中 | 调用第三方模型并回显结果 | 失败提示「模型调用失败，请稍后重试」 |
+| **受理成功** | 受理中 | 上传尽调报告后置受理成功并转授信 | 未传报告时阻断「请上传尽调报告」 |
+| **受理失败 / 驳回** | 受理中 | 必填原因后置失败/驳回入池 | 「请填写原因（最多 200 字）」 |`,
+          },
+        ],
+      },
+    ],
   },
 ]

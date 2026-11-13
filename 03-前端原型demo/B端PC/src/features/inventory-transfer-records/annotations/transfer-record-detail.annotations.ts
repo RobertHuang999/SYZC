@@ -2,81 +2,136 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 
 export const transferRecordDetailAnnotations: PrototypeAnnotation[] = [
   {
-    id: "transfer-detail-basic-card",
+    id: "transfer-detail-page",
+    documentRefs: {
+      prd: { section: "场景 3【审批终审通过自动生成转让入库】(S03)", match: "情境：老李转让给张总的香蕉转让单经老王在审批中心终审通过。", element: "text" },
+      rules: { section: "1.2 转让单状态机说明", match: "审批流全节点通过，货权变更生效", element: "row" },
+    },
     targetId: "transfer-detail-basic-card",
     number: 1,
+    kind: "页面",
+    title: "转让单详情定位与货权迁移",
+    content:
+      "详情只读呈现已通过的转让单；货权在终审通过瞬间完成转移，页面展示的是固化快照，不因后续主数据变更而回写。",
+    details: [
+      {
+        title: "货权迁移与页面结构",
+        items: [
+          {
+            label: "流转图",
+            content: `flowchart TD
+    A["转让单详情（已通过）"] --> B["基础信息 6 项<br/>制单人 / 制单时间 / 转让人 / 接收人 / 转让时间 / 转让原因"]
+    B --> C["绿色【已通过】大印章"]
+    B --> D["货品明细：一级汇总 → 二级储位"]
+    B --> E["审核流转记录时间轴"]
+    D --> F["条码指针已指向新货主 (R05)"]
+    E --> G["原货主转让出库单 / 受让方转让入库单可穿透"]`,
+          },
+          {
+            label: "上下游与权限",
+            content:
+              "上游为转让申请审批通过；下游联动原货主转让出库与受让方转让入库，条码归属原子变更。详情只读，无撤销入口 (R07)。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "transfer-detail-basic-card",
+    documentRefs: {
+      fields: { section: "转让记录字段清单", match: "转让原因说明", element: "row" },
+      rules: { section: "【详情页纯净无影像展示】(R06)", match: "详情页顶部展示 19 位转让单号、复制图标、【返回】按钮及绿色【已通过】大圆章；", element: "text" },
+    },
+    targetId: "transfer-detail-basic-card",
+    number: 2,
     kind: "字段",
     title: "纯净 6 项基础信息与无影像规范 (R06)",
     content:
       "转让单详情页纯净展示 6 项基础信息：制单人、制单时间、接收人、转让人、转让时间、转让原因（0/500字完整交易背景，R04），右上角盖绿色大印章【已通过】。因货物物理不移动，严格不设现场照片与设备抓拍图（R06）。",
-    documentRefs: {
-      prd: {
-        section: "4. 业务规则索引速查",
-        match: "【详情页纯净无影像展示】(R06)",
-        element: "text",
+    details: [
+      {
+        title: "基础信息字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 展示规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **转让单号** | 只读文本 + 复制 | 系统生成 | 19 位数字串 | 页头 | — |
+| **制单人** | 只读文本 | 系统记录 | 姓名(所属机构全称) | 单行 | — |
+| **制单时间** | 只读时间 | 系统记录 | YYYY-MM-DD HH:mm:ss | 单行 | — |
+| **转让人** | 只读文本 | 必填 | 名称 + 脱敏标识 | 双行 | 原货主 |
+| **接收人** | 只读文本 | 必填 | 名称 + 脱敏标识 | 双行 | 受让新货主 |
+| **转让时间** | 只读时间 | 必填 | YYYY-MM-DD HH:mm:ss | 单行 | 终审通过时间 |
+| **转让原因** | 只读多行 | 必填 | 0~500 字 | 折行展示 | 司法存证 (R04) |
+| **单据状态** | 状态印章 | 系统维护 | 固定「已通过」 | 右上角绿色大印章 | 审批中不进本页 |
+| **现场照片 / 设备抓拍** | — | — | **不展示** | — | 货物物理不移动 (R06) |`,
+          },
+        ],
       },
-      fields: {
-        section: "六、展示、筛选与引用规则汇总",
-        match: "敏感信息脱敏与占位符规范",
-        element: "text",
-      },
-      rules: {
-        section: "三、核心业务规则与逻辑规格",
-        match: "R06",
-        element: "text",
-      },
-    },
+    ],
   },
   {
     id: "transfer-detail-goods-table",
     targetId: "transfer-detail-goods-table",
-    number: 2,
+    number: 3,
     kind: "字段",
     title: "转让货品明细树形折叠 (R01)",
     content:
       "一级主行展示货品规格与转让总数量，二级展开展示具体存放储位、具体位置、入库时间、扩展信息、二维码条码、状态与转让数量。明细为纯只读，条码支持点击大图预览，物权流转后条码指针指向新货主。",
     documentRefs: {
-      prd: {
-        section: "2. 功能范围",
-        match: "树形货品明细",
-        element: "text",
-      },
-      fields: {
-        section: "二、转让货品明细字段",
-        match: "转让货品明细采用树形结构",
-        element: "text",
-      },
-      rules: {
-        section: "三、核心业务规则与逻辑规格",
-        match: "R01",
-        element: "text",
-      },
+      prd: { section: "2. 功能范围", match: "树形货品明细", element: "text" },
+      fields: { section: "二、转让货品明细字段", match: "转让货品明细采用树形结构", element: "text" },
+      rules: { section: "三、核心业务规则与逻辑规格", match: "R01", element: "text" },
     },
+    details: [
+      {
+        title: "货品明细字段字典",
+        items: [
+          {
+            label: "一级 / 二级字段",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 展示规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **货物名称** | 只读文本 | 必填 | 大类-品类-规格 | 一级主行，带展开箭头 | — |
+| **转让总数量** | 只读数值 | 必填 | 数值 + 单位 | 一级主行右对齐 | 二级之和 |
+| **存放储位** | 只读文本 | 必填 | 仓库-库房-分区 | 二级行 | — |
+| **具体位置** | 只读文本 | 条件必填 | 垛位描述；未划分「--」 | 二级行 | — |
+| **入库时间** | 只读时间 | 必填 | YYYY-MM-DD HH:mm:ss | 二级行 | 原入库时间 |
+| **扩展信息** | 只读多行 | 选填 | 收集项键值对 | 二级行 | 为空「无: --」 |
+| **二维码条码** | 图标 | 系统生成 | 点击看大图 | 二级行居中 | 物权流转后指向新货主 |
+| **状态** | 只读标签 | 必填 | 存货中 / 已转让 等 | 二级行 | — |
+| **转让数量** | 只读数值 | 必填 | 数值 + 单位 | 二级行右对齐 | — |`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "transfer-detail-audit-timeline",
+    documentRefs: {
+      prd: { section: "场景 3【审批终审通过自动生成转让入库】(S03)", match: "情境：老李转让给张总的香蕉转让单经老王在审批中心终审通过。", element: "text" },
+      rules: { section: "【跨模块转让入库联动与货权对冲】(R05)", match: "终审通过跨模块原子对冲：", element: "text" },
+    },
     targetId: "transfer-detail-audit-timeline",
-    number: 3,
+    number: 4,
     kind: "交互",
     title: "审核流转记录与跨模块入库闭环 (R05)",
     content:
       "展示全生命周期审批流转履历（提交审核、主管审核、终审通过）。终审通过后原子触发原货主转让出库单生成，并在受让新货主名下自动生成转让入库单（R05）。",
-    documentRefs: {
-      prd: {
-        section: "4. 业务规则索引速查",
-        match: "【跨模块转让入库联动与货权对冲】(R05)",
-        element: "text",
+    details: [
+      {
+        title: "审计与穿透",
+        items: [
+          {
+            label: "操作矩阵",
+            content: `| 区域 | 内容 | 可操作 | 说明 |
+| :--- | :--- | :--- | :--- |
+| **审核记录** | 提交审核、主管审核、终审通过节点 | 只读 | 含审批人、时间、结果、意见 |
+| **关联转让出库单** | 原货主侧出库单号 | 点击穿透 | 终审通过自动生成 |
+| **关联转让入库单** | 受让方侧入库单号 | 点击穿透 | 终审通过自动生成 |
+| **条码归属** | 新货主 | 只读 | 原子变更 (R05) |`,
+          },
+        ],
       },
-      fields: {
-        section: "五、统计汇总、系统与审批审计字段",
-        match: "审核记录",
-        element: "row",
-      },
-      rules: {
-        section: "三、核心业务规则与逻辑规格",
-        match: "R05",
-        element: "text",
-      },
-    },
+    ],
   },
 ]

@@ -2,18 +2,19 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  TableRowActionPanel,
+  type TableRowActionItem,
+} from "@/shared/components/TableRowActionPanel"
 import { STATUS_META, formatCurrency } from "../domain/constants"
 import type { CustomerFinancingCredit } from "../domain/types"
 import {
-  CheckCircleIcon,
-  XCircleIcon,
-  EyeIcon,
-  ExternalLinkIcon,
-  RefreshCwIcon,
   CopyIcon,
   CheckIcon,
-  LockIcon,
   AlertTriangleIcon,
+  ExternalLinkIcon,
+  RefreshCwIcon,
+  LockIcon,
 } from "lucide-react"
 
 interface CreditTableProps {
@@ -94,11 +95,11 @@ export function CreditTable({
               <th className="min-w-[200px] px-3 py-3 whitespace-nowrap">申请人</th>
               <th className="w-24 px-3 py-3 text-center whitespace-nowrap">抵/质押物</th>
               <th className="min-w-[140px] px-3 py-3 text-right whitespace-nowrap">
-                意向融资金额(元)
+                意向融资金额（元）
               </th>
               <th className="w-28 px-3 py-3 text-center whitespace-nowrap">意向融资期数</th>
               <th className="min-w-[140px] px-3 py-3 text-right whitespace-nowrap">
-                授信金额(元)
+                授信金额（元）
               </th>
               <th className="w-24 px-3 py-3 text-center whitespace-nowrap">授信期数</th>
               <th className="w-28 px-3 py-3 text-center whitespace-nowrap">融资状态</th>
@@ -116,6 +117,55 @@ export function CreditTable({
             {data.map((item, index) => {
               const meta = STATUS_META[item.status]
               const seq = (page - 1) * pageSize + index + 1
+              const actions: TableRowActionItem[] = [
+                { key: "detail", label: "查看", onClick: () => onViewDetail(item) },
+              ]
+              if (item.status === "CREDIT_ACCEPTED") {
+                actions.push(
+                  {
+                    key: "approve",
+                    label: "标记成功",
+                    onClick: () => onApproveCredit(item),
+                  },
+                  {
+                    key: "reject",
+                    label: "标记失败",
+                    tone: "danger",
+                    onClick: () => onRejectCredit(item),
+                  },
+                )
+              } else if (item.status === "APPLY_SUCCESS") {
+                actions.push(
+                  item.isDownstreamTriggered
+                    ? {
+                        key: "locked",
+                        label: "已锁定",
+                        disabled: true,
+                        title: "下游已发起线上抵质押确认，改标已永久锁定",
+                      }
+                    : {
+                        key: "toFailed",
+                        label: "改标失败",
+                        tone: "amber",
+                        onClick: () => onChangeToFailed(item),
+                      },
+                )
+              } else if (item.status === "APPLY_FAILED") {
+                actions.push(
+                  item.isRescheduledInPool
+                    ? {
+                        key: "rescheduled",
+                        label: "已重调度",
+                        disabled: true,
+                        title: "单据已被被拒池重新调度流转，不可改标",
+                      }
+                    : {
+                        key: "toSuccess",
+                        label: "改标成功",
+                        onClick: () => onChangeToSuccess(item),
+                      },
+                )
+              }
               return (
                 <tr
                   key={item.id}
@@ -284,98 +334,9 @@ export function CreditTable({
                     </span>
                   </td>
 
-                  {/* 14. 操作列 Sticky */}
-                  <td className="sticky right-0 z-20 w-[190px] min-w-[190px] bg-white px-3 py-2 text-center shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.06)] group-hover:bg-slate-50 dark:bg-slate-900 dark:group-hover:bg-slate-900 whitespace-nowrap">
-                    <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
-                      {/* 【查看】 */}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onViewDetail(item)}
-                        className="h-7 px-2 text-xs text-primary hover:bg-primary/10 whitespace-nowrap"
-                      >
-                        <EyeIcon className="mr-1 h-3.5 w-3.5" />
-                        查看
-                      </Button>
-
-                      {/* 授信已受理 -> 【标记成功】 + 【标记失败】 */}
-                      {item.status === "CREDIT_ACCEPTED" && (
-                        <>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onApproveCredit(item)}
-                            className="h-7 px-2 text-xs text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/40 whitespace-nowrap"
-                          >
-                            <CheckCircleIcon className="mr-1 h-3.5 w-3.5" />
-                            标记成功
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onRejectCredit(item)}
-                            className="h-7 px-2 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/40 whitespace-nowrap"
-                          >
-                            <XCircleIcon className="mr-1 h-3.5 w-3.5" />
-                            标记失败
-                          </Button>
-                        </>
-                      )}
-
-                      {/* 申请成功 -> 若未发起抵质押展示【改标为失败】；若已发起则展示【已锁定】 */}
-                      {item.status === "APPLY_SUCCESS" && (
-                        <>
-                          {!item.isDownstreamTriggered ? (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onChangeToFailed(item)}
-                              className="h-7 px-2 text-xs text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-950/40 whitespace-nowrap"
-                            >
-                              <RefreshCwIcon className="mr-1 h-3.5 w-3.5" />
-                              改标为失败
-                            </Button>
-                          ) : (
-                            <span
-                              className="inline-flex items-center gap-0.5 text-[11px] text-muted-foreground whitespace-nowrap"
-                              title="下游已发起线上抵质押确认，改标已永久锁定 (R03/C01)"
-                            >
-                              <LockIcon className="h-3 w-3 text-muted-foreground" />
-                              已锁定
-                            </span>
-                          )}
-                        </>
-                      )}
-
-                      {/* 申请失败 -> 若未被重新调度展示【改标为成功】 */}
-                      {item.status === "APPLY_FAILED" && (
-                        <>
-                          {!item.isRescheduledInPool ? (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onChangeToSuccess(item)}
-                              className="h-7 px-2 text-xs text-primary hover:bg-primary/10 whitespace-nowrap"
-                            >
-                              <RefreshCwIcon className="mr-1 h-3.5 w-3.5" />
-                              改标为成功
-                            </Button>
-                          ) : (
-                            <span
-                              className="text-[11px] text-muted-foreground whitespace-nowrap"
-                              title="单据已被被拒池重新调度流转，不可改标"
-                            >
-                              已重调度
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </div>
+                  {/* 14. 操作列 Sticky（统一行操作样式，直出不超过 3 个） */}
+                  <td className="sticky right-0 z-20 w-[196px] min-w-[196px] whitespace-nowrap border-l border-border/80 bg-white px-2 py-2 text-center shadow-[-8px_0_16px_-4px_rgba(0,0,0,0.08)] group-hover:bg-slate-50 dark:bg-slate-900 dark:group-hover:bg-slate-900">
+                    <TableRowActionPanel actions={actions} fixedCols={3} maxInline={3} />
                   </td>
                 </tr>
               )

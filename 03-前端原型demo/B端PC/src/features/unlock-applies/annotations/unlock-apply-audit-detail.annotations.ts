@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const unlockApplyAuditDetailAnnotations: PrototypeAnnotation[] = [
   {
     id: "unlock-apply-audit-detail-header",
+    documentRefs: {
+      prd: { section: "开锁申请 主PRD", match: "状态为「待审批」：展示【详情】、【撤回】；", element: "text" },
+      rules: { section: "开锁申请 业务规则规格", match: "开锁申请双轨模式判定", element: "row" },
+    },
     targetId: "unlock-apply-audit-detail-header",
     number: 1,
     kind: "页面",
@@ -27,10 +31,30 @@ export const unlockApplyAuditDetailAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "审批链路",
+        items: [
+          {
+            label: "流转图",
+            content: `flowchart TD
+    A["申请人提交开锁申请"] --> B["待审批（进入开锁审核专网）"]
+    B --> C{"当前用户是否审批人？"}
+    C -->|否| D["只读查看"]
+    C -->|是且非本人| E["展示【去处理】"]
+    E -->|通过| F["生成临时密码凭证"]
+    E -->|驳回（原因必填）| G["已驳回，释放设备防重"]
+    B -->|超时未处理| H["已失效"]
+    F --> I["挂锁：页面 + 短信（R31）；人脸：仅页面"]`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "unlock-apply-audit-detail-device",
+    documentRefs: {
+      fields: { section: "二、门禁设备与位置快照字段", match: "设备物理安装所属监管仓库快照", element: "row" },
+    },
     targetId: "unlock-apply-audit-detail-device",
     number: 2,
     kind: "字段",
@@ -55,10 +79,33 @@ export const unlockApplyAuditDetailAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 展示规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **申请单号** | 只读文本 | 系统生成 | UA + 数字串 | 页头 | — |
+| **设备编码** | 只读文本 | 必填 | 设备唯一编码 | 单行 | 如 LK-2024-0082 |
+| **设备名称** | 只读文本 | 必填 | 业务别名 | 单行 | 如 A库挂锁-01 |
+| **设备类型** | 只读文本 | 必填 | 挂锁门禁 / 人脸门禁 | 单行 | 决定密码下发方式 |
+| **绑定仓库** | 只读文本 | 条件必填 | 仓库-库房-分区 | 单行 | — |
+| **安装位置** | 只读文本 | 选填 | 用户手录位置 | 单行 | — |
+| **申请事由** | 只读文本 | 必填 | 出库 / 入库 / 移库 / 参观 / 其他 | 单行 | — |
+| **有效期** | 只读时间 | 必填 | 起止时间 | 单行 | 最长 24 小时 |
+| **审批结论** | 状态标签 | 系统维护 | 待审批 / 已通过 / 已驳回 / 已失效 | 彩色标签 | — |`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "unlock-apply-audit-detail-content",
+    documentRefs: {
+      fields: { section: "三、开锁申请内容与佐证字段", match: "通行有效起止时间", element: "row" },
+      rules: { section: "开锁申请 业务规则规格", match: "【发起申请】", element: "row" },
+    },
     targetId: "unlock-apply-audit-detail-content",
     number: 3,
     kind: "字段",
@@ -87,6 +134,10 @@ export const unlockApplyAuditDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "unlock-apply-audit-detail-snapshot",
+    documentRefs: {
+      fields: { section: "四、审批配置与责任链快照字段", match: "命中配置编号", element: "row" },
+      rules: { section: "开锁申请 业务规则规格", match: "门禁未命中任何已启用开锁审批配置", element: "row" },
+    },
     targetId: "unlock-apply-audit-detail-snapshot",
     number: 4,
     kind: "字段",
@@ -115,6 +166,9 @@ export const unlockApplyAuditDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "unlock-apply-audit-detail-record",
+    documentRefs: {
+      fields: { section: "六、审批结论与生命周期字段", match: "审批处理时间", element: "row" },
+    },
     targetId: "unlock-apply-audit-detail-record",
     number: 5,
     kind: "字段",
@@ -132,6 +186,34 @@ export const unlockApplyAuditDetailAnnotations: PrototypeAnnotation[] = [
           {
             label: "最终审批结论",
             content: "流程结束后展示最终审批结论；开锁凭证信息由申请人侧在审批通过后查阅。",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "unlock-apply-audit-detail-actions",
+    documentRefs: {
+      prd: { section: "6.1 发起开锁申请弹窗交互规格", match: "通行有效期（仅人脸门禁展示并必填）：日期时间范围选择器，最长不超过 24 小时；", element: "text" },
+    },
+    targetId: "unlock-apply-audit-detail-header",
+    number: 6,
+    kind: "交互",
+    title: "去处理 · 通过 / 驳回交互",
+    content:
+      "具备审批资格且非本人发起的待审批单据，页头展示【去处理】；弹窗内选择通过或驳回，驳回原因必填。",
+    details: [
+      {
+        title: "操作矩阵",
+        items: [
+          {
+            label: "按钮与提示",
+            content: `| 操作 | 可见条件 | 点击后发生什么 | 提示原话 |
+| :--- | :--- | :--- | :--- |
+| **去处理** | 待审批 + 有资格 + 非本人 | 打开审批弹窗 | — |
+| **通过** | 弹窗内 | 生成凭证并回写已通过 | 「审批已通过，临时密码已生成」 |
+| **驳回** | 弹窗内 | 校验原因后回写已驳回 | 未填原因提示「请填写驳回原因」 (R13) |
+| **本人自审** | 申请人 = 当前用户 | 不展示【去处理】，仅只读 | 「申请人本人不得审批自己的开锁申请（P06），仅可查看」 |`,
           },
         ],
       },

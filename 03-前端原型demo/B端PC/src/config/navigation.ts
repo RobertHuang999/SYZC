@@ -5,7 +5,6 @@ import {
 } from "@prototype/shared/inbound/inbound-633-delivery"
 import {
   partnerArchiveListPath,
-  partnerArchiveSidebarItems,
   PARTNER_ARCHIVE_DEFAULT_MENU,
 } from "@prototype/shared/partner-archives/partner-archive-routes"
 
@@ -140,11 +139,6 @@ const sidebarGroupsByModule: Record<string, SidebarGroup[]> = {
   ...generatedSidebarGroupsByModule,
   finance: financeSidebarGroupsWithSupervisionMgmt,
   "user-center": [
-    {
-      id: "partner-archive",
-      label: "合作方档案",
-      items: partnerArchiveSidebarItems,
-    },
     ...(generatedSidebarGroupsByModule["user-center"] ?? []),
     {
       id: "synergy-spec",
@@ -240,10 +234,31 @@ const PAGE_TAB_TITLE_OVERRIDES: Record<string, string> = {
   "/仓储/货物异动/异动记录/新增": "新增异动",
   "/仓储/加工管理/加工记录/新增": "新增加工",
   "/仓储/仓单管理": "仓单管理",
+  "/融资/监管/融资管理/线上监管业务办理": "线上监管业务办理",
+  "/融资/监管/融资管理/被拒退回记录池": "被拒退回记录池",
+  "/融资/监管/融资管理/被拒退回池": "被拒退回记录池",
 }
 
 function inboundDetailTabTitle(pathname: string): string | undefined {
   const decoded = decodeURIComponent(pathname)
+  if (decoded.includes("/融资/监管/融资管理/线上监管业务办理/操作/")) {
+    return "线上监管业务办理操作"
+  }
+  if (decoded.includes("/融资/监管/融资管理/线上监管业务办理/详情/")) {
+    return "线上监管业务详情"
+  }
+  if (
+    decoded.includes("/融资/监管/融资管理/被拒退回记录池/操作/") ||
+    decoded.includes("/融资/监管/融资管理/被拒退回池/操作/")
+  ) {
+    return "被拒退回重调度操作"
+  }
+  if (
+    decoded.includes("/融资/监管/融资管理/被拒退回记录池/详情/") ||
+    decoded.includes("/融资/监管/融资管理/被拒退回池/详情/")
+  ) {
+    return "被拒退回详情"
+  }
   if (
     decoded.includes("/仓储/入库管理/入库记录/详情/") ||
     decoded.includes("/仓储/入库管理/入库申请/详情/")
@@ -339,8 +354,21 @@ export function getActiveSidebarGroup(pathname: string): SidebarGroup {
   )
 }
 
+function normalizeFinanceAliasPath(currentPath: string) {
+  if (
+    currentPath === "/融资/监管/融资管理/被拒退回池" ||
+    currentPath.startsWith("/融资/监管/融资管理/被拒退回池/")
+  ) {
+    return currentPath.replace(
+      "/融资/监管/融资管理/被拒退回池",
+      "/融资/监管/融资管理/被拒退回记录池",
+    )
+  }
+  return currentPath
+}
+
 export function getPageTitle(pathname: string) {
-  const currentPath = decodePath(pathname).replace(/\/$/, "")
+  const currentPath = normalizeFinanceAliasPath(decodePath(pathname).replace(/\/$/, ""))
 
   if (getSystemReferenceTab(pathname) === "iteration") {
     return ITERATION_RECORD_LABEL
@@ -365,7 +393,8 @@ export function getPageTitle(pathname: string) {
 }
 
 export function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
-  const currentPath = decodePath(pathname).replace(/\/$/, "") || "/"
+  const currentPath =
+    normalizeFinanceAliasPath(decodePath(pathname).replace(/\/$/, "")) || "/"
 
   if (getSystemReferenceTab(pathname) === "iteration") {
     return [{ label: "系统参考" }, { label: ITERATION_RECORD_LABEL }]

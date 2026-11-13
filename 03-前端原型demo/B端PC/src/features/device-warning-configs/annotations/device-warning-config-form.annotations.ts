@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
   {
     id: "device-warning-config-form-header",
+    documentRefs: {
+      prd: { section: "设备预警配置主PRD", match: "设备预警配置主 PRD 全文", element: "row" },
+      rules: { section: "设备预警配置 业务规则规格", match: "预警配置 → 设备预警配置", element: "row" },
+    },
     targetId: "device-warning-config-form-header",
     number: 1,
     kind: "页面",
@@ -33,6 +37,10 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-form-base",
+    documentRefs: {
+      fields: { section: "设备预警配置字段清单", match: "处置策略备注：设备GPS预警整类禁配恢复自动结案（附录 A V5.1）。", element: "row" },
+      rules: { section: "【恢复自动结案能力矩阵白名单】(DEV-R15c)" },
+    },
     targetId: "device-warning-config-form-base",
     number: 2,
     kind: "字段",
@@ -59,6 +67,10 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-form-scope",
+    documentRefs: {
+      fields: { section: "设备预警配置字段清单", match: "仅针对新设备", element: "row" },
+      rules: { section: "【设备上线子类型互斥规范】(DEV-R14)", match: "用户勾选「仅针对新设备」时，子类型自动限定为「设备上线」单选（与当前预警类型绑定", element: "text" },
+    },
     targetId: "device-warning-config-form-scope",
     number: 3,
     kind: "字段",
@@ -81,6 +93,10 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-form-threshold",
+    documentRefs: {
+      rules: { section: "【设备上线子类型互斥规范】(DEV-R14)", match: "用户勾选「仅针对新设备」时，子类型自动限定为「设备上线」单选（与当前预警类型绑定", element: "text" },
+      prd: { section: "设备预警配置主PRD", match: "【设备上线子类型互斥】(R14)", element: "row" },
+    },
     targetId: "device-warning-config-form-threshold",
     number: 4,
     kind: "规则",
@@ -103,6 +119,10 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-form-notify",
+    documentRefs: {
+      rules: { section: "5.4 通知渠道与超时升级阶梯", match: "按需展开：通知渠道提供多选复选框（短信、邮件）。未勾选任何渠道时，系统隐藏预警对", element: "text" },
+      prd: { section: "设备预警配置主PRD", match: "通知渠道：复选框组（短信、邮件）；勾选后展开下方配置；", element: "text" },
+    },
     targetId: "device-warning-config-form-notify",
     number: 5,
     kind: "规则",
@@ -128,6 +148,9 @@ export const deviceWarningConfigFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-form-actions",
+    documentRefs: {
+      prd: { section: "5.3 动作能力控制矩阵", match: "核心控制与前置条件", element: "row" },
+    },
     targetId: "device-warning-config-form-actions",
     number: 6,
     kind: "交互",

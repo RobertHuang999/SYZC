@@ -193,6 +193,7 @@ export function OutboundPickupInfoSection({
                         embedLayout="job-embed"
                         showFieldLabel={false}
                         hideEmbeddedHints
+                        subjectType="INDIVIDUAL"
                         quickCreateButtonLabel={OUTBOUND_PICKUP_QUICK_CREATE_BUTTON_LABEL}
                         value={form.pickupAgentPartnerId || undefined}
                         selection={pickupSelection}

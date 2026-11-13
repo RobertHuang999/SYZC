@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const subcategoryListAnnotations: PrototypeAnnotation[] = [
   {
     id: "subcategory-page",
+    documentRefs: {
+      prd: { section: "3. 模块定位与系统链路" },
+      rules: { section: "【动态规格参数维度上限控制规则】(SUB-F02)", match: "品类规格参数维度上限严格限定为 5 个（$1 \\le N \\le 5$）；", element: "text" },
+    },
     targetId: "subcategory-page",
     number: 1,
     kind: "页面",
@@ -48,6 +52,10 @@ export const subcategoryListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "subcategory-filter",
+    documentRefs: {
+      prd: { section: "品类管理主PRD", match: "查看列表 / 组合筛选", element: "row" },
+      rules: { section: "【所属大类从属与品类名称唯一性规则】(SUB-F01)", match: "新建或编辑品类时，所属大类仅能从当前租户处于 ENABLED（启用）状态的大类下", element: "text" },
+    },
     targetId: "subcategory-filter",
     number: 2,
     kind: "交互",
@@ -83,6 +91,10 @@ export const subcategoryListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "subcategory-table",
+    documentRefs: {
+      fields: { section: "品类管理字段清单", match: "货品规格参数维度", element: "row" },
+      rules: { section: "【所属大类从属与品类名称唯一性规则】(SUB-F01)", match: "新建或编辑品类时，所属大类仅能从当前租户处于 ENABLED（启用）状态的大类下", element: "text" },
+    },
     targetId: "subcategory-table",
     number: 3,
     kind: "字段",
@@ -112,6 +124,9 @@ export const subcategoryListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "subcategory-row-actions",
+    documentRefs: {
+      rules: { section: "2. 品类两阶段删除控制时序" },
+    },
     targetId: "subcategory-row-actions",
     number: 4,
     kind: "规则",
@@ -163,6 +178,10 @@ export const subcategoryListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "subcategory-dialog",
+    documentRefs: {
+      prd: { section: "品类管理主PRD", match: "【编辑品类与规格业务拦截】", element: "row" },
+      rules: { section: "【所属大类从属与品类名称唯一性规则】(SUB-F01)", match: "新建或编辑品类时，所属大类仅能从当前租户处于 ENABLED（启用）状态的大类下", element: "text" },
+    },
     targetId: "subcategory-dialog",
     number: 5,
     kind: "交互",

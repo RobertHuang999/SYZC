@@ -182,8 +182,8 @@ export function CustomerFinancingLeadsListPage() {
               time: nowStr,
               detail:
                 targetType === "SURVEYOR"
-                  ? `依据快照需要尽调=是，成功指派尽调专员【${targetName}】，状态变更为处理中，已生成下游待尽调工单（遵循R03/R07）。`
-                  : `依据快照无需尽调，成功分配资方【${targetName}】，状态变更为处理中，已生成授信已受理任务（遵循R03/R07）。`,
+                  ? `依据快照需要尽调=是，成功指派尽调专员【${targetName}】，状态变更为处理中，已生成下游待尽调工单。`
+                  : `依据快照无需尽调，成功分配资方【${targetName}】，状态变更为处理中，已生成授信已受理任务。`,
             },
           ],
         }
@@ -220,7 +220,7 @@ export function CustomerFinancingLeadsListPage() {
               action: "运营审核驳回并写入被拒池",
               operator: "周晓峰（森云风控审查员）",
               time: nowStr,
-              detail: `驳回分类：${reasonCategory}。详细理由：${reasonDetail}。已可靠入池沉淀（遵循R04/C03）。`,
+              detail: `驳回分类：${reasonCategory}。详细理由：${reasonDetail.replace(/[。.]$/, "")}。已归集入被拒退回池。`,
             },
           ],
         }
@@ -247,11 +247,6 @@ export function CustomerFinancingLeadsListPage() {
           <PageHeader
             title="客户融资需求线索"
             description="融资监管与融资管理首节点核心台账：承接外部动产质押意向申请，执行运营核验受理、自动化尽调路由分流派单及异常驳回入池。"
-            badge={
-              <Badge variant="outline" className="border-primary/30 text-primary">
-                PRD V1.4 标杆
-              </Badge>
-            }
           />
         </PrototypeAnnotationTarget>
 

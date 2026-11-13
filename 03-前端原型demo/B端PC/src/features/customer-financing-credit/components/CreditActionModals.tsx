@@ -79,13 +79,13 @@ export function ApproveCreditModal({
 
     // 校验规则 C02: 授信金额未填、<=0 或非数字
     if (isNaN(amount) || amount <= 0) {
-      setErrorMsg("请填写合规的授信金额（必须大于 0 元，保留4位小数）(C02)")
+      setErrorMsg("请填写合规的授信金额（必须大于 0 元，保留4位小数）")
       return
     }
 
     // 校验规则 C02: 授信期数必须为 >= 1 正整数
     if (isNaN(periods) || periods < 1 || !Number.isInteger(periods)) {
-      setErrorMsg("请填写合规的授信期数（必须为不少于 1 的正整数）(C02)")
+      setErrorMsg("请填写合规的授信期数（必须为不少于 1 的正整数）")
       return
     }
 
@@ -106,7 +106,7 @@ export function ApproveCreditModal({
                 核准授信额度（标记申请成功）
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                核准资方正式批复额度与期数，提交后将激活下游【线上监管业务办理】(R04/R06)
+                核准资方正式批复额度与期数，提交后将激活下游【线上监管业务办理】
               </DialogDescription>
             </div>
           </div>
@@ -220,7 +220,7 @@ export function ApproveCreditModal({
 }
 
 // ----------------------------------------------------------------------
-// 2. 标记申请失败模态弹窗 (R05 / C03)
+// 2. 标记申请失败模态弹窗
 // ----------------------------------------------------------------------
 interface RejectCreditModalProps {
   open: boolean
@@ -258,12 +258,12 @@ export function RejectCreditModal({
     setErrorMsg(null)
 
     if (!category) {
-      setErrorMsg("请选择拒绝原因分类 (C03)")
+      setErrorMsg("请选择拒绝原因分类")
       return
     }
 
     if (!detail.trim()) {
-      setErrorMsg("请填写详细拒绝原因说明（缺失阻断 C03）")
+      setErrorMsg("请填写详细拒绝原因说明")
       return
     }
 
@@ -289,7 +289,7 @@ export function RejectCreditModal({
                 标记授信申请失败
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                确认拒绝该笔授信申请？拒绝后将写入被拒记录池 (R05)
+                确认拒绝该笔授信申请？拒绝后将写入被拒记录池
               </DialogDescription>
             </div>
           </div>
@@ -373,7 +373,7 @@ export function RejectCreditModal({
 }
 
 // ----------------------------------------------------------------------
-// 3. 改标为申请失败模态弹窗 (R03 / C01)
+// 3. 改标为申请失败模态弹窗
 // ----------------------------------------------------------------------
 interface ChangeToFailedModalProps {
   open: boolean
@@ -412,7 +412,7 @@ export function ChangeToFailedModal({
 
     // 校验阻断 C01: 下游已发起抵质押
     if (item.isDownstreamTriggered) {
-      setErrorMsg("改标失败：下游已发起线上抵质押，状态已锁定 (C01)")
+      setErrorMsg("改标失败：下游已发起线上抵质押，状态已锁定")
       return
     }
 
@@ -438,7 +438,7 @@ export function ChangeToFailedModal({
                 改标为申请失败（授信自纠偏）
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                未发起线上抵质押前允许改标修正，提交后撤销下游发起权并入被拒池 (R03)
+                未发起线上抵质押前允许改标修正，提交后撤销下游发起权并入被拒池
               </DialogDescription>
             </div>
           </div>
@@ -451,7 +451,7 @@ export function ChangeToFailedModal({
               <div>
                 <p className="font-semibold">改标通道已锁定：</p>
                 <p className="mt-0.5 text-[11px]">
-                  该借款人已在下游提交了线上抵质押信息确认，根据合规风控规则 (C01)，授信批复已生效且不可单方面撤销。
+                  该借款人已在下游提交了线上抵质押信息确认，根据合规风控规则，授信批复已生效且不可单方面撤销。
                 </p>
               </div>
             </div>
@@ -576,12 +576,12 @@ export function ChangeToSuccessModal({
     const periods = parseInt(creditPeriodsStr, 10)
 
     if (isNaN(amount) || amount <= 0) {
-      setErrorMsg("请填写合规的授信金额（必须大于 0 元）(C02)")
+      setErrorMsg("请填写合规的授信金额（必须大于 0 元）")
       return
     }
 
     if (isNaN(periods) || periods < 1 || !Number.isInteger(periods)) {
-      setErrorMsg("请填写合规的授信期数（必须为不少于 1 的正整数）(C02)")
+      setErrorMsg("请填写合规的授信期数（必须为不少于 1 的正整数）")
       return
     }
 
@@ -607,7 +607,7 @@ export function ChangeToSuccessModal({
                 改标为申请成功（资方重申）
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                重新核准授信额度与期数，从被拒池移除并重新激活下游抵质押 (R03)
+                重新核准授信额度与期数，从被拒池移除并重新激活下游抵质押
               </DialogDescription>
             </div>
           </div>

@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
   {
     id: "device-warning-config-detail-header",
+    documentRefs: {
+      prd: { section: "设备预警配置主PRD", match: "只读展示规则完整配置快照；", element: "text" },
+      rules: { section: "设备预警配置 业务规则规格", match: "预警配置 → 设备预警配置", element: "row" },
+    },
     targetId: "device-warning-config-detail-header",
     number: 1,
     kind: "页面",
@@ -32,6 +36,10 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-detail-base",
+    documentRefs: {
+      fields: { section: "五、展示与引用规则", match: "规则名称、预警类型、预警子类型 在编辑页强制置灰只读；", element: "text" },
+      rules: { section: "附录 A：预警子类型权威枚举与处置策略能力矩阵", match: "系统推荐处置策略", element: "row" },
+    },
     targetId: "device-warning-config-detail-base",
     number: 2,
     kind: "字段",
@@ -57,6 +65,10 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-detail-scope",
+    documentRefs: {
+      fields: { section: "五、展示与引用规则", match: "关联设备穿梭框支持动态增删绑定的实体设备资产。", element: "text" },
+      rules: { section: "【关联设备非空校验】(DEV-R08)", match: "当未勾选「仅针对新设备」时，关联设备列表必须选择至少 1 台有效物理设备；", element: "text" },
+    },
     targetId: "device-warning-config-detail-scope",
     number: 3,
     kind: "字段",
@@ -88,6 +100,9 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-detail-threshold",
+    documentRefs: {
+      rules: { section: "5.2 触发条件与指标计算规范", match: "#### 【数值型区间逻辑有效性】(DEV-R09)", element: "text" },
+    },
     targetId: "device-warning-config-detail-threshold",
     number: 4,
     kind: "规则",
@@ -110,6 +125,10 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-detail-notify",
+    documentRefs: {
+      rules: { section: "5.4 通知渠道与超时升级阶梯", match: "#### 【通知渠道与预警对象完整性】(DEV-R11)", element: "text" },
+      fields: { section: "三、通知与超时升级配置字段", match: "升级预警天数", element: "row" },
+    },
     targetId: "device-warning-config-detail-notify",
     number: 5,
     kind: "规则",
@@ -134,6 +153,10 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-detail-audit",
+    documentRefs: {
+      fields: { section: "四、系统与审计字段", match: "操作审计日志", element: "row" },
+      rules: { section: "3.1 状态定义", match: "规则已被软删除，退出策略库，保留底层审计镜像", element: "row" },
+    },
     targetId: "device-warning-config-detail-audit",
     number: 6,
     kind: "字段",
@@ -159,6 +182,10 @@ export const deviceWarningConfigDetailAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-detail-actions",
+    documentRefs: {
+      prd: { section: "5.1 规则状态定义", match: "列表执行删除；历史已触发流水保留原快照", element: "row" },
+      rules: { section: "7.1 规则创建与版本生效时序" },
+    },
     targetId: "device-warning-config-detail-actions",
     number: 7,
     kind: "交互",

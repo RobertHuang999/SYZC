@@ -210,7 +210,7 @@ export const partnerArchiveDetailAnnotationsShared: SharedPrototypeAnnotation[] 
   },
   {
     id: "partner-archive-detail-documents",
-    targetId: "partner-archive-detail-documents",
+    targetId: "partner-archive-detail-tabs",
     number: 7,
     kind: "页面",
     title: "关联业务单据 · 6.3 范围外",

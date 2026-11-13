@@ -124,8 +124,8 @@ export function CustomerFinancingLeadDetailPage() {
           time: nowStr,
           detail:
             targetType === "SURVEYOR"
-              ? `依据快照锁定需要尽调=是，成功指派尽调专员【${targetName}】，单据状态更新为处理中，已生成待尽调工单（遵循R03/R07）。`
-              : `依据快照锁定无需尽调，成功分配资方机构【${targetName}】，单据状态更新为处理中，已生成授信任务（遵循R03/R07）。`,
+              ? `依据快照锁定需要尽调=是，成功指派尽调专员【${targetName}】，单据状态更新为处理中，已生成待尽调工单。`
+              : `依据快照锁定无需尽调，成功分配资方机构【${targetName}】，单据状态更新为处理中，已生成授信任务。`,
         },
       ],
     }
@@ -159,7 +159,7 @@ export function CustomerFinancingLeadDetailPage() {
           action: "运营审核驳回并写入被拒池",
           operator: "周晓峰（森云风控审查员）",
           time: nowStr,
-          detail: `驳回理由：${reasonCategory}。详细说明：${reasonDetail}。已入被拒退回池沉淀（遵循R04/C03）。`,
+          detail: `驳回理由：${reasonCategory}。详细说明：${reasonDetail.replace(/[。.]$/, "")}。已归集入被拒退回池。`,
         },
       ],
     }
@@ -350,7 +350,7 @@ export function CustomerFinancingLeadDetailPage() {
         </PrototypeAnnotationTarget>
 
         {/* 板块 3：融资意向与口径隔离 */}
-        <DetailSection title="融资金额与期数口径隔离 (R05)">
+        <DetailSection title="融资金额与期数口径隔离">
           <div className="grid gap-x-7 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
             <DetailField
               label="意向融资金额 (客户申请)"
@@ -504,7 +504,7 @@ export function CustomerFinancingLeadDetailPage() {
 
         {/* 板块 6：驳回记录 (若状态为 APPLY_FAILED) */}
         {lead.status === "APPLY_FAILED" && (
-          <DetailSection title="异常驳回与被拒入池留痕 (R04)">
+          <DetailSection title="异常驳回与被拒入池留痕">
             <div className="rounded-lg border border-rose-200 bg-rose-50/50 p-4 text-xs text-rose-950 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-200 space-y-2">
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-sm text-destructive">
@@ -521,8 +521,7 @@ export function CustomerFinancingLeadDetailPage() {
                 {lead.rejectReasonDetail || "—"}
               </p>
               <p className="text-[11px] text-muted-foreground pt-1 border-t border-rose-200/60 dark:border-rose-900/40">
-                本记录已根据【异常驳回留痕与被拒入池规则】(R04)
-                写入被拒退回池，永久不可物理删除。
+                本记录已同步写入被拒退回池，永久不可物理删除。
               </p>
             </div>
           </DetailSection>
@@ -530,7 +529,7 @@ export function CustomerFinancingLeadDetailPage() {
 
         {/* 板块 7：流转时间轴 */}
         <PrototypeAnnotationTarget annotationIds={["lead-detail-timeline"]}>
-          <DetailSection title="全流程流转时间轴与操作日志 (P03)">
+          <DetailSection title="全流程流转时间轴与操作日志">
             <div className="relative space-y-4 pl-6 before:absolute before:bottom-2 before:left-2.5 before:top-2 before:w-0.5 before:bg-muted-foreground/20">
               {lead.logs.map((log) => (
                 <div key={log.id} className="relative text-xs">

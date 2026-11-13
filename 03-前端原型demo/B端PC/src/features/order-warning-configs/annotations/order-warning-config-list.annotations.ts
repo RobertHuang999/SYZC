@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const orderWarningConfigListAnnotations: PrototypeAnnotation[] = [
   {
     id: "order-warning-config-page",
+    documentRefs: {
+      prd: { section: "订单预警配置主PRD", match: "【配置策略层】（订单级纯商业与金融风控综合策略包）", element: "row" },
+      rules: { section: "订单预警配置 业务规则规格", match: "### 5.2 六大风控子策略专项配置规则", element: "text" },
+    },
     targetId: "order-warning-config-page",
     number: 1,
     kind: "页面",
@@ -44,6 +48,10 @@ export const orderWarningConfigListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "order-warning-config-filter",
+    documentRefs: {
+      prd: { section: "5.1 规则状态定义", match: "规则正常生效运行，包含的启用子策略持续进行实时风险判定", element: "row" },
+      rules: { section: "3.1 规则状态定义", match: "关联订单已完成解押出库、全额还款或监管服务办结，系统自动失效", element: "row" },
+    },
     targetId: "order-warning-config-filter",
     number: 2,
     kind: "交互",
@@ -67,6 +75,10 @@ export const orderWarningConfigListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "order-warning-config-table",
+    documentRefs: {
+      fields: { section: "订单预警配置字段清单", match: "已启用预警项", element: "row" },
+      rules: { section: "3.1 规则状态定义", match: "规则正常生效运行，包含的启用子策略持续进行实时风险判定", element: "row" },
+    },
     targetId: "order-warning-config-table",
     number: 3,
     kind: "字段",
@@ -95,6 +107,10 @@ export const orderWarningConfigListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "order-warning-config-row-actions",
+    documentRefs: {
+      rules: { section: "【一单一配唯一性约束】(ORD-R04)", match: "业务红线：一笔抵押、质押或监管服务业务订单在租户内严格仅允许绑定 1 条有效综合", element: "text" },
+      prd: { section: "5.3 动作能力控制矩阵", match: "✅ (逐条保存)", element: "row" },
+    },
     targetId: "order-warning-config-table",
     number: 4,
     kind: "规则",

@@ -100,6 +100,8 @@ export interface DueDiligenceFilters {
   applicantType: string // "ALL" | "企业" | "个人"
   status: string // "ALL" 或对应标签页下的具体状态
   surveyor?: string // 尽调专员
+  assignedFrom?: string // 尽调分配时间起（YYYY-MM-DD）
+  assignedTo?: string // 尽调分配时间止（YYYY-MM-DD）
 }
 
 export type DiligenceFilters = DueDiligenceFilters

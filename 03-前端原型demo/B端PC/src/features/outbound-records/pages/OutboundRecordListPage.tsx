@@ -136,7 +136,7 @@ export function OutboundRecordListPage() {
           version="6.4"
           changeType="新增"
           title="支持多介质【单据下载】（A4 纵向 / A5 横向 / 针式连续纸二等分 PDF）与质押单价货值脱敏"
-          description="点击行操作【单据下载】呼出多介质打印预览弹窗，提货人明细与货主证号电话明文展示，单价与货物价值保留列头、数值留空脱敏。"
+          description="【单据下载】预览为固定样式示意图（带水印、两页换页）；单价货值留空脱敏。正式文件到【下载记录】取。"
         />
 
         <IterationPageTag

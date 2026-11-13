@@ -1,5 +1,8 @@
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import {
+  TableRowActionPanel,
+  type TableRowActionItem,
+} from "@/shared/components/TableRowActionPanel"
 import { TableDateTimeCell } from "@/shared/components/TableCells"
 import {
   Table,
@@ -130,6 +133,28 @@ export function LeadsTable({
                   LEAD_STATUS_CONFIG[lead.status] ||
                   LEAD_STATUS_CONFIG.PENDING_ACCEPT
                 const rowIndex = (page - 1) * pageSize + idx + 1
+                const actions: TableRowActionItem[] = [
+                  {
+                    key: "detail",
+                    label: "详情",
+                    onClick: () => onViewDetail(lead),
+                  },
+                ]
+                if (lead.status === "PENDING_ACCEPT") {
+                  actions.push(
+                    {
+                      key: "assign",
+                      label: "分配跟进",
+                      onClick: () => onAssign(lead),
+                    },
+                    {
+                      key: "reject",
+                      label: "驳回",
+                      tone: "danger",
+                      onClick: () => onReject(lead),
+                    },
+                  )
+                }
 
                 return (
                   <TableRow
@@ -261,39 +286,12 @@ export function LeadsTable({
                     </TableCell>
 
                     {/* 14. 操作 (Sticky 右侧固定) */}
-                    <TableCell className="sticky right-0 z-20 w-[170px] min-w-[170px] whitespace-nowrap border-l border-border/80 bg-white text-center shadow-[-8px_0_16px_-4px_rgba(0,0,0,0.08)] transition-colors group-hover:bg-slate-50 dark:bg-slate-900 dark:group-hover:bg-slate-800">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 px-2 text-primary hover:bg-primary/10 hover:text-primary"
-                          onClick={() => onViewDetail(lead)}
-                        >
-                          详情
-                        </Button>
-
-                        {/* 待受理状态：直接露出【分配跟进】和【驳回】（方案 B） */}
-                        {lead.status === "PENDING_ACCEPT" && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 px-2 text-sky-600 hover:bg-sky-50 hover:text-sky-700 dark:text-sky-400"
-                              onClick={() => onAssign(lead)}
-                            >
-                              分配跟进
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 px-2 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400"
-                              onClick={() => onReject(lead)}
-                            >
-                              驳回
-                            </Button>
-                          </>
-                        )}
-                      </div>
+                    <TableCell className="sticky right-0 z-20 w-[196px] min-w-[196px] whitespace-nowrap border-l border-border/80 bg-white px-2 py-2 text-center shadow-[-8px_0_16px_-4px_rgba(0,0,0,0.08)] transition-colors group-hover:bg-slate-50 dark:bg-slate-900 dark:group-hover:bg-slate-800">
+                      <TableRowActionPanel
+                        actions={actions}
+                        fixedCols={3}
+                        maxInline={3}
+                      />
                     </TableCell>
                   </TableRow>
                 )

@@ -31,6 +31,7 @@ export function inboundOwnerTypeDisplay(ownerType: string): string {
 }
 
 export const INBOUND_OWNER_FORM_PLACEHOLDERS = {
+  ownerNameSearch: "请输入主体名称或联系手机搜索",
   ownerNamePersonal: "请输入或选择个人货主姓名",
   ownerNameEnterprise: "请输入或选择货主名称",
   ownerNameFallback: "请输入或选择货主名称",

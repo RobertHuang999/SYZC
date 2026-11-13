@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const unlockApprovalConfigFormAnnotations: PrototypeAnnotation[] = [
   {
     id: "unlock-approval-config-form-header",
+    documentRefs: {
+      prd: { section: "开锁审批配置 主PRD", match: "策略配置区：", element: "text" },
+      rules: { section: "开锁审批配置 业务规则规格", match: "【新增配置】", element: "row" },
+    },
     targetId: "unlock-approval-config-form-header",
     number: 1,
     kind: "页面",
@@ -35,10 +39,30 @@ export const unlockApprovalConfigFormAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "配置提交流转",
+        items: [
+          {
+            label: "流转图",
+            content: `flowchart TD
+    A["填写配置名称 + 适用设备"] --> B["配置审批节点链（至少 1 个）"]
+    B --> C["设置审批超时时间"]
+    C --> D{"保存校验"}
+    D -->|节点为空 / 重复| E["卡片内红框提示"]
+    D -->|设备冲突（同设备同类型已有启用配置）| F["阻断：该设备已有生效配置"]
+    D -->|版本冲突| G["提示：数据已被他人修改，请刷新后重试 (C05)"]
+    D -->|通过| H["二次确认 → 保存生效 (Version+1)"]`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "unlock-approval-config-form-scope",
+    documentRefs: {
+      fields: { section: "一、基础识别与范围字段", match: "租户内唯一性校验", element: "row" },
+      rules: { section: "【核心风控属性编辑锁定】(R04)" },
+    },
     targetId: "unlock-approval-config-form-scope",
     number: 2,
     kind: "字段",
@@ -63,10 +87,28 @@ export const unlockApprovalConfigFormAnnotations: PrototypeAnnotation[] = [
           },
         ],
       },
+      {
+        title: "基础信息字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 字段名称 | 控件类型 | 必填 | 取值范围与格式 | 新增/编辑差异 | 校验与提示 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **配置名称** | 单行文本 | 必填 | 最多 50 个字符，租户内唯一 | 均可改 | 重复提示「配置名称已存在，请换一个」 |
+| **适用设备** | 弹窗多选 | 必填 | 挂锁 / 人脸门禁设备 | 编辑态可增删 | 同设备同类型已有生效配置时阻断 (R04/R05) |
+| **审批方式** | 只读文本 | 必填 | 固定「多节点审批」 | 不可改 | — |
+| **审批节点** | 节点链 | 必填 | 至少 1 个，节点不可重复 | 可增删改 | 为空提示「请至少配置 1 个审批节点」(R27) |
+| **审批超时** | 数值输入 | 必填 | 小时数，大于 0 | 可改 | 超时后申请自动失效 (R14) |`,
+          },
+        ],
+      },
     ],
   },
   {
     id: "unlock-approval-config-form-device",
+    documentRefs: {
+      rules: { section: "【适用设备独占性绑定与冲突阻断】(R01)", match: "管理员在新增配置点击【保存】时执行校验；", element: "text" },
+    },
     targetId: "unlock-approval-config-form-device",
     number: 3,
     kind: "交互",
@@ -112,6 +154,10 @@ export const unlockApprovalConfigFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "unlock-approval-config-form-strategy",
+    documentRefs: {
+      rules: { section: "【审批节点编排与人员合规性】(R02)", match: "人员与角色数据源边界：", element: "text" },
+      prd: { section: "开锁审批配置 主PRD", match: "审批方式：展示「任一人通过（系统默认）」，置灰只读；", element: "text" },
+    },
     targetId: "unlock-approval-config-form-strategy",
     number: 4,
     kind: "规则",
@@ -180,6 +226,9 @@ export const unlockApprovalConfigFormAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "unlock-approval-config-form-actions",
+    documentRefs: {
+      fields: { section: "0. 对象与字段层级说明", match: "【开锁审批配置】策略数据对象按业务管理层级划分为三大字段群：", element: "text" },
+    },
     targetId: "unlock-approval-config-form-actions",
     number: 5,
     kind: "交互",

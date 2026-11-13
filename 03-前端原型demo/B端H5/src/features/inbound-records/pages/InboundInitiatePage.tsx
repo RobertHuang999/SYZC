@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Building2, Camera, CalendarDays, Check, Package, User } from "lucide-react"
+import { Building2, Camera, CalendarDays, Package } from "lucide-react"
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { MobileShell } from "@/components/layout/MobileShell"
 import { NavBar } from "@/components/layout/NavBar"
@@ -9,6 +9,7 @@ import { MobileStoreroomMultiSheet } from "../components/MobileStoreroomMultiShe
 import { NativeFormRow } from "../components/NativeFormRow"
 import { NativeInfoCard } from "../components/NativeInfoCard"
 import { NativeInboundStepBar } from "../components/NativeInboundStepBar"
+import { OwnerNameSearchSelectMobile } from "../components/OwnerNameSearchSelectMobile"
 import { RelatedOrderSheet } from "../components/RelatedOrderSheet"
 import {
   INBOUND_TYPE_OPTIONS,
@@ -24,14 +25,16 @@ import {
 import {
   FORM_WAREHOUSES,
   FORM_STOREROOMS,
-  filterOwnerSearchRecords,
   findOwnerSearchRecord,
   findOwnerSearchRecordByPartnerId,
   getRelatedOrdersByType,
+  resolveOwnerSearchRecord,
 } from "../mock/inbound-form.mock"
 import {
+  bindInboundOwnerFromCatalog,
   createInitialFormState,
   formHasDirtyFields,
+  maskInboundPhone,
 } from "../lib/inbound-form-utils"
 import {
   hasSignificantBasicChange,
@@ -43,10 +46,7 @@ import {
 } from "../lib/inbound-initiate-session"
 import { validateInboundBasicStep } from "../lib/validate-inbound-basic"
 import { INBOUND_FORM_MESSAGES } from "@prototype/shared/inbound/form-messages"
-import {
-  INBOUND_OWNER_FORM_PLACEHOLDERS,
-  inboundOwnerNamePlaceholder,
-} from "@prototype/shared/inbound/owner-ui-labels"
+import { INBOUND_OWNER_FORM_PLACEHOLDERS } from "@prototype/shared/inbound/owner-ui-labels"
 import { getStagingRegByNo } from "@prototype/shared/inbound/inbound-staging.mock"
 import {
   formFromFormalInbound,
@@ -94,7 +94,6 @@ export function InboundInitiatePage() {  const navigate = useNavigate()
   const [storeroomOpen, setStoreroomOpen] = useState(false)
   const [leaveOpen, setLeaveOpen] = useState(false)
   const [ownerVerifyOpen, setOwnerVerifyOpen] = useState(false)
-  const [ownerDropdown, setOwnerDropdown] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [stagingSwitchOpen, setStagingSwitchOpen] = useState(false)
   const [ownerQuickCreateOpen, setOwnerQuickCreateOpen] = useState(false)
@@ -144,11 +143,19 @@ export function InboundInitiatePage() {  const navigate = useNavigate()
     typeCode === "PLEDGE" ||
     typeCode === "SUPERVISION_SERVICE"
 
-  const ownerCandidates = filterOwnerSearchRecords(form.ownerType, form.ownerName)
   const selectedOwnerRecord = form.partnerId
     ? findOwnerSearchRecordByPartnerId(form.partnerId)
-    : findOwnerSearchRecord(form.ownerType, form.ownerName)
+    : resolveOwnerSearchRecord({
+        ownerType: form.ownerType,
+        ownerName: form.ownerName,
+        ownerIdentifier: form.ownerIdentifier,
+      })
   const ownerVerifyStatus = selectedOwnerRecord?.contactPhoneVerified
+  const ownerFieldsLocked = Boolean(
+    (form.partnerId || selectedOwnerRecord) && form.ownerName.trim()
+  )
+  const isPersonal = form.ownerType === "个人货主"
+  const isEnterprise = form.ownerType === "企业货主"
 
   // 货主联系手机核验：复用用户中心合作方档案的验证流程
   const verifyPartner = selectedOwnerRecord?.partnerId
@@ -200,7 +207,6 @@ export function InboundInitiatePage() {  const navigate = useNavigate()
       partnerId: "",
       idCardNo: "",
     })
-    setOwnerDropdown(false)
   }
 
   const toggleStoreroom = (roomIds: string[]) => {
@@ -217,13 +223,15 @@ export function InboundInitiatePage() {  const navigate = useNavigate()
   }
 
   const goNext = () => {
-    const err = validateInboundBasicStep(form)
+    const bound = bindInboundOwnerFromCatalog(form)
+    if (bound !== form) setForm(bound)
+    const err = validateInboundBasicStep(bound)
     if (err) {
       showToast(err)
       return
     }
     const snapshot = loadInboundInitiateSnapshot()
-    let nextForm = { ...form }
+    let nextForm = { ...bound }
     if (hasSignificantBasicChange(form, snapshot)) {
       nextForm = { ...nextForm, goodsLines: [] }
     }
@@ -277,6 +285,7 @@ export function InboundInitiatePage() {  const navigate = useNavigate()
           <NativeInfoCard
             title="货主信息"
             icon={<Building2 className="size-5" />}
+            className="relative z-10 overflow-visible"
           >
             <NativeFormRow label="货主类型" required>
               <div className="flex gap-6">
@@ -341,17 +350,39 @@ export function InboundInitiatePage() {  const navigate = useNavigate()
                   ) : null}
                 </div>
                 <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
-                  <input
-                    className="min-w-0 flex-1 bg-transparent text-right text-sm text-[#232D39] outline-none placeholder:text-[#232D39]/30"
-                    placeholder={inboundOwnerNamePlaceholder(form.ownerType)}
-                    value={form.ownerName}
-                    onChange={(e) => {
-                      patch({ ownerName: e.target.value })
-                      setOwnerDropdown(true)
+                  <OwnerNameSearchSelectMobile
+                    ownerType={form.ownerType}
+                    ownerName={form.ownerName}
+                    onQuickAdd={() => setOwnerQuickCreateOpen(true)}
+                    onSelect={(selection) => {
+                      const ownerName = selection.ownerName.trim()
+                      const targetType =
+                        form.ownerType || selection.ownerType || "企业货主"
+                      const archive =
+                        findOwnerSearchRecord(targetType, ownerName) ??
+                        resolveOwnerSearchRecord({
+                          ownerType: targetType,
+                          ownerName,
+                          ownerIdentifier:
+                            selection.ownerIdentifier ?? form.ownerIdentifier,
+                        })
+                      patch({
+                        ownerName,
+                        ownerType: selection.ownerType || targetType,
+                        ownerIdentifier:
+                          selection.ownerIdentifier ??
+                          archive?.ownerIdentifier ??
+                          "",
+                        contactPhone:
+                          selection.contactPhone ?? archive?.contactPhone ?? "",
+                        idCardNo: selection.idCardNo ?? archive?.idCardNo ?? "",
+                        isNewOwner: archive ? false : Boolean(selection.isNewOwner),
+                        partnerId:
+                          selection.partnerId || archive?.partnerId || "",
+                      })
                     }}
-                    onFocus={() => setOwnerDropdown(true)}
                   />
-                  {form.ownerType === "企业货主" ? (
+                  {(!form.ownerType || isEnterprise) ? (
                     <button
                       type="button"
                       className="shrink-0"
@@ -362,99 +393,6 @@ export function InboundInitiatePage() {  const navigate = useNavigate()
                   ) : null}
                 </div>
               </div>
-              {ownerDropdown && ownerCandidates.length > 0 && form.ownerName ? (
-                <div className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-lg bg-white shadow-lg">
-                  <div className="flex items-center justify-between border-b border-[#232D39]/10 bg-[#232D39]/[0.03] px-3 py-2 text-[11px] text-[#232D39]/60">
-                    <span>
-                      {form.ownerType ? `系统${form.ownerType}档案库候选` : "系统货主档案库候选"}
-                    </span>
-                    <span className="text-[10px]">{ownerCandidates.length} 个匹配</span>
-                  </div>
-                  <div className="max-h-40 overflow-y-auto">
-                    {ownerCandidates.slice(0, 6).map((o) => {
-                      const selected = form.ownerName === o.name
-                      return (
-                        <button
-                          key={o.id}
-                          type="button"
-                          className={`flex w-full items-center justify-between gap-2 border-b border-[#232D39]/10 px-4 py-2.5 text-left last:border-0 ${
-                            selected ? "bg-blue-50/60" : ""
-                          }`}
-                          onClick={() => {
-                            patch({
-                              ownerName: o.name,
-                              ownerIdentifier: o.ownerIdentifier,
-                              contactPhone: o.contactPhone ?? "",
-                              idCardNo: o.idCardNo ?? "",
-                              partnerId: o.partnerId ?? "",
-                              isNewOwner: false,
-                            })
-                            setOwnerDropdown(false)
-                          }}
-                        >
-                          <div className="flex min-w-0 items-center gap-2">
-                            {o.ownerType === "企业货主" ? (
-                              <Building2 className="size-3.5 shrink-0 text-blue-600" />
-                            ) : (
-                              <User className="size-3.5 shrink-0 text-amber-600" />
-                            )}
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <span className="truncate text-sm font-medium text-[#232D39]">
-                                  {o.name}
-                                </span>
-                                <span
-                                  className={`shrink-0 rounded border px-1 py-0.2 text-[10px] font-normal ${
-                                    o.ownerType === "企业货主"
-                                      ? "border-blue-200 bg-blue-50 text-blue-700"
-                                      : "border-amber-200 bg-amber-50 text-amber-700"
-                                  }`}
-                                >
-                                  {o.ownerType === "企业货主" ? "企业" : "个人"}
-                                </span>
-                                {o.contactPhoneVerified ? (
-                                  <span
-                                    className={`shrink-0 rounded border px-1 py-0.5 text-[10px] font-normal ${
-                                      CONTACT_PHONE_VERIFY_BADGE_CLASS[o.contactPhoneVerified]
-                                    }`}
-                                  >
-                                    {CONTACT_PHONE_VERIFY_LABELS[o.contactPhoneVerified]}
-                                  </span>
-                                ) : null}
-                              </div>
-                              <p className="truncate text-[11px] text-[#232D39]/50">
-                                {o.ownerType === "个人货主"
-                                  ? `手机:${o.identifierMasked} · 身份证:${maskIdCardNo(o.idCardNo) || "无"}`
-                                  : `税号:${o.identifierMasked}`}
-                              </p>
-                            </div>
-                          </div>
-                          {selected ? (
-                            <Check className="size-4 shrink-0 text-blue-600" />
-                          ) : null}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              ) : null}
-              {ownerDropdown &&
-              ownerCandidates.length === 0 &&
-              form.ownerName.trim() ? (
-                <div className="mt-2 rounded-lg bg-white px-3 py-2 text-center text-xs text-[#232D39]/60 shadow-sm">
-                  未找到匹配货主
-                  <button
-                    type="button"
-                    className="ml-2 font-medium text-blue-600"
-                    onClick={() => {
-                      setOwnerDropdown(false)
-                      setOwnerQuickCreateOpen(true)
-                    }}
-                  >
-                    + 添加货主
-                  </button>
-                </div>
-              ) : null}
             </div>
 
             <button
@@ -465,45 +403,77 @@ export function InboundInitiatePage() {  const navigate = useNavigate()
               + 快速添加货主
             </button>
 
-            {form.ownerType === "个人货主" ? (
+            {isPersonal ? (
               <>
                 <NativeFormRow label="货主标识" required>
                   <input
                     maxLength={11}
-                    className="w-full bg-transparent text-right text-sm outline-none placeholder:text-[#232D39]/30"
-                    placeholder={INBOUND_OWNER_FORM_PLACEHOLDERS.personalMobile}
-                    value={form.ownerIdentifier}
+                    disabled={ownerFieldsLocked}
+                    className="w-full bg-transparent text-right text-sm outline-none placeholder:text-[#232D39]/30 disabled:text-[#232D39]/50"
+                    placeholder={
+                      ownerFieldsLocked
+                        ? "系统档案反显，不可修改"
+                        : INBOUND_OWNER_FORM_PLACEHOLDERS.personalMobile
+                    }
+                    value={
+                      ownerFieldsLocked
+                        ? maskInboundPhone(form.ownerIdentifier)
+                        : form.ownerIdentifier
+                    }
                     onChange={(e) => patch({ ownerIdentifier: e.target.value })}
                   />
                 </NativeFormRow>
                 <NativeFormRow label="身份证号" required>
-                  <input
-                    maxLength={18}
-                    className="w-full bg-transparent text-right text-sm outline-none placeholder:text-[#232D39]/30"
-                    placeholder={INBOUND_OWNER_FORM_PLACEHOLDERS.personalIdCard}
-                    value={form.idCardNo}
-                    onChange={(e) => patch({ idCardNo: e.target.value })}
-                  />
+                  {ownerFieldsLocked ? (
+                    <span className="text-right text-sm text-[#232D39]/70">
+                      {selectedOwnerRecord?.idCardMasked ||
+                        maskIdCardNo(form.idCardNo || selectedOwnerRecord?.idCardNo) ||
+                        "系统档案暂无身份证号"}
+                    </span>
+                  ) : (
+                    <input
+                      maxLength={18}
+                      className="w-full bg-transparent text-right text-sm outline-none placeholder:text-[#232D39]/30"
+                      placeholder={INBOUND_OWNER_FORM_PLACEHOLDERS.personalIdCard}
+                      value={form.idCardNo}
+                      onChange={(e) => patch({ idCardNo: e.target.value })}
+                    />
+                  )}
                 </NativeFormRow>
               </>
             ) : null}
 
-            {form.ownerType === "企业货主" ? (
+            {isEnterprise ? (
               <>
                 <NativeFormRow label="货主标识" required>
                   <input
-                    className="w-full bg-transparent text-right text-sm outline-none placeholder:text-[#232D39]/30"
-                    placeholder={INBOUND_OWNER_FORM_PLACEHOLDERS.enterpriseCreditCode}
+                    disabled={ownerFieldsLocked}
+                    className="w-full bg-transparent text-right text-sm outline-none placeholder:text-[#232D39]/30 disabled:text-[#232D39]/50"
+                    placeholder={
+                      ownerFieldsLocked
+                        ? "系统档案反显，不可修改"
+                        : INBOUND_OWNER_FORM_PLACEHOLDERS.enterpriseCreditCode
+                    }
                     value={form.ownerIdentifier}
                     onChange={(e) => patch({ ownerIdentifier: e.target.value })}
                   />
                 </NativeFormRow>
                 <NativeFormRow label="联系电话" required>
                   <input
-                    maxLength={11}
-                    className="w-full bg-transparent text-right text-sm outline-none placeholder:text-[#232D39]/30"
-                    placeholder={INBOUND_OWNER_FORM_PLACEHOLDERS.enterpriseContact}
-                    value={form.contactPhone}
+                    disabled={ownerFieldsLocked}
+                    className="w-full bg-transparent text-right text-sm outline-none placeholder:text-[#232D39]/30 disabled:text-[#232D39]/50"
+                    placeholder={
+                      ownerFieldsLocked
+                        ? "系统档案反显，不可修改"
+                        : INBOUND_OWNER_FORM_PLACEHOLDERS.enterpriseContact
+                    }
+                    value={
+                      ownerFieldsLocked
+                        ? maskInboundPhone(
+                            form.contactPhone || selectedOwnerRecord?.contactPhone
+                          )
+                        : form.contactPhone
+                    }
                     onChange={(e) => patch({ contactPhone: e.target.value })}
                   />
                 </NativeFormRow>
@@ -679,12 +649,28 @@ export function InboundInitiatePage() {  const navigate = useNavigate()
         rows={getRelatedOrdersByType(form.inboundType)}
         onClose={() => setRelatedOpen(false)}
         onSelect={(row) => {
+          const archive = resolveOwnerSearchRecord({
+            ownerName: row.ownerName,
+            ownerIdentifier: row.ownerIdentifierMasked,
+          })
+          const warehouseId =
+            FORM_WAREHOUSES.find((w) => w.id === form.warehouseId)?.id ||
+            FORM_WAREHOUSES[0]?.id ||
+            ""
+          const rooms = FORM_STOREROOMS.filter((r) => r.warehouseId === warehouseId)
+          const defaultRoom = rooms.find((r) => r.auditTag === "免审") ?? rooms[0]
           patch({
             relatedOrderNo: row.orderNo,
             relatedOrderLabel: row.orderNo,
-            ownerName: row.ownerName,
-            ownerIdentifier: row.ownerIdentifierMasked,
-            warehouseId: FORM_WAREHOUSES[0]?.id ?? "",
+            ownerName: archive?.name || row.ownerName,
+            ownerType: archive?.ownerType || form.ownerType,
+            ownerIdentifier: archive?.ownerIdentifier || row.ownerIdentifierMasked,
+            contactPhone: archive?.contactPhone || form.contactPhone,
+            idCardNo: archive?.idCardNo || form.idCardNo,
+            partnerId: archive?.partnerId || "",
+            isNewOwner: false,
+            warehouseId,
+            storeroomIds: defaultRoom ? [defaultRoom.id] : form.storeroomIds,
           })
           setRelatedOpen(false)
         }}

@@ -1,7 +1,14 @@
-import { SearchIcon, RotateCcwIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { SearchIcon } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { WarningFilterHeader } from "@/components/business/WarningListPrimitives"
 import {
   APPLICANT_TYPE_OPTIONS,
   CREDIT_STATUS_OPTIONS,
@@ -23,14 +30,16 @@ export function CreditFiltersPanel({
   onReset,
 }: CreditFiltersPanelProps) {
   return (
-    <Card className="border-border/60 bg-card shadow-xs">
-      <CardContent className="p-4">
-        {/* 4 项筛选控件对齐三件套 5.1 与样式规范 */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <Card>
+      <CardContent className="space-y-4 pt-4">
+        <WarningFilterHeader onSearch={onSearch} onReset={onReset} />
+
+        {/* 4 项筛选控件：与入库记录等标杆列表保持同一栅格与控件高度 */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* 1. 综合搜索：产品名称 / 申请人 */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              综合搜索：
+          <div className="space-y-2">
+            <label className="block text-xs font-normal text-muted-foreground">
+              综合搜索
             </label>
             <div className="relative">
               <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -43,96 +52,87 @@ export function CreditFiltersPanel({
                 onKeyDown={(e) => {
                   if (e.key === "Enter") onSearch()
                 }}
-                className="pl-8 text-sm"
+                className="pl-8"
               />
             </div>
           </div>
 
           {/* 2. 融资状态 */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              融资状态：
+          <div className="space-y-2">
+            <label className="block text-xs font-normal text-muted-foreground">
+              融资状态
             </label>
-            <select
+            <Select
+              items={CREDIT_STATUS_OPTIONS}
               value={filters.status}
-              onChange={(e) =>
-                onChange({ ...filters, status: e.target.value })
+              onValueChange={(value) =>
+                onChange({ ...filters, status: value || "ALL" })
               }
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
             >
-              {CREDIT_STATUS_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="全部" />
+              </SelectTrigger>
+              <SelectContent>
+                {CREDIT_STATUS_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* 3. 申请人类型 */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              申请人类型：
+          <div className="space-y-2">
+            <label className="block text-xs font-normal text-muted-foreground">
+              申请人类型
             </label>
-            <select
+            <Select
+              items={APPLICANT_TYPE_OPTIONS}
               value={filters.applicantType}
-              onChange={(e) =>
-                onChange({ ...filters, applicantType: e.target.value })
+              onValueChange={(value) =>
+                onChange({ ...filters, applicantType: value || "ALL" })
               }
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
             >
-              {APPLICANT_TYPE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="全部" />
+              </SelectTrigger>
+              <SelectContent>
+                {APPLICANT_TYPE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* 4. 需要尽调 */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
-              需要尽调：
+          <div className="space-y-2">
+            <label className="block text-xs font-normal text-muted-foreground">
+              需要尽调
             </label>
-            <select
+            <Select
+              items={NEED_DILIGENCE_OPTIONS}
               value={filters.needDiligence}
-              onChange={(e) =>
-                onChange({ ...filters, needDiligence: e.target.value })
+              onValueChange={(value) =>
+                onChange({ ...filters, needDiligence: value || "ALL" })
               }
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
             >
-              {NEED_DILIGENCE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="全部" />
+              </SelectTrigger>
+              <SelectContent>
+                {NEED_DILIGENCE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </div>
-
-        {/* 底部按钮栏 */}
-        <div className="mt-4 flex flex-wrap items-center justify-end gap-2 border-t border-border/40 pt-3">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={onReset}
-            className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-          >
-            <RotateCcwIcon className="h-3.5 w-3.5" />
-            重置
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            onClick={onSearch}
-            className="h-8 gap-1.5 bg-primary text-xs text-primary-foreground shadow-xs hover:bg-primary/90"
-          >
-            <SearchIcon className="h-3.5 w-3.5" />
-            查询
-          </Button>
         </div>
       </CardContent>
     </Card>
   )
 }
-

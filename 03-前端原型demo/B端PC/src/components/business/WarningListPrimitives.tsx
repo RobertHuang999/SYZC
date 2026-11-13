@@ -118,6 +118,10 @@ export function WarningListPagination({
         <div className="flex shrink-0 items-center gap-2 text-sm">
           <span className="text-muted-foreground">每页</span>
           <Select
+            items={pageSizes.map((size) => ({
+              value: String(size),
+              label: `${size} 条/页`,
+            }))}
             value={String(pageSize)}
             onValueChange={(value) => onPageSizeChange(Number(value))}
           >

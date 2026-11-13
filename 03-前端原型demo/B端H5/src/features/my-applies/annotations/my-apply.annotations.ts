@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/annotation.types"
 export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
   {
     id: "my-apply-records-page",
+    documentRefs: {
+      prd: { section: "开锁申请 主PRD", match: "开锁申请业务规则规格", element: "row" },
+      rules: { section: "开锁申请 业务规则规格", match: "工作中心 → 审批中心 → 业务审批 → 我的申请管理 → 开锁申请", element: "row" },
+    },
     targetId: "my-apply-records-page",
     number: 1,
     kind: "页面",
@@ -54,6 +58,10 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "my-apply-records-tabs",
+    documentRefs: {
+      prd: { section: "开锁申请 主PRD", match: "开锁申请字段清单", element: "row" },
+      rules: { section: "开锁申请 业务规则规格", match: "【发起申请】", element: "row" },
+    },
     targetId: "my-apply-records-tabs",
     number: 2,
     kind: "交互",
@@ -79,6 +87,10 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "my-apply-records-filter",
+    documentRefs: {
+      prd: { section: "开锁申请 主PRD", match: "申请状态（全部、待审批、已通过、已驳回、已撤回、已失效、无需审核）；", element: "text" },
+      rules: { section: "开锁申请 业务规则规格", match: "【发起申请】", element: "row" },
+    },
     targetId: "my-apply-records-filter",
     number: 3,
     kind: "交互",
@@ -108,6 +120,10 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "my-apply-records-cards",
+    documentRefs: {
+      fields: { section: "开锁申请 字段清单", match: "仅驳回状态展示", element: "row" },
+      rules: { section: "3.1 状态定义", match: "待审批 (PENDING)：已提交开锁申请，等待审批人处理，允许申请人主动撤回；", element: "text" },
+    },
     targetId: "my-apply-records-cards",
     number: 4,
     kind: "字段",
@@ -177,6 +193,10 @@ export const myApplyRecordsListAnnotations: PrototypeAnnotation[] = [
 export const myUnlockApplyDetailH5Annotations: PrototypeAnnotation[] = [
   {
     id: "my-unlock-apply-detail-h5-page",
+    documentRefs: {
+      prd: { section: "开锁申请 主PRD", match: "状态为「待审批」：展示【详情】、【撤回】；", element: "text" },
+      rules: { section: "开锁申请 业务规则规格", match: "【查看详情】", element: "row" },
+    },
     targetId: "my-unlock-apply-detail-h5-page",
     number: 1,
     kind: "页面",
@@ -205,6 +225,9 @@ export const myUnlockApplyDetailH5Annotations: PrototypeAnnotation[] = [
   },
   {
     id: "my-unlock-apply-detail-h5-credential",
+    documentRefs: {
+      rules: { section: "一、单据与能力定位", match: "业务单据与凭证交付层（Business Document & Credentia", element: "row" },
+    },
     targetId: "my-unlock-apply-detail-h5-credential",
     number: 2,
     kind: "规则",
@@ -237,6 +260,10 @@ export const myUnlockApplyDetailH5Annotations: PrototypeAnnotation[] = [
   },
   {
     id: "my-unlock-apply-detail-h5-withdraw",
+    documentRefs: {
+      rules: { section: "【待审批主动撤回与防并发控制】(R23)", match: "可撤回窗口：仅处于「待审批」状态的申请，允许申请人本人在 PC 端或移动端主动发", element: "text" },
+      prd: { section: "开锁申请 主PRD", match: "✅ (二次确认)", element: "row" },
+    },
     targetId: "my-unlock-apply-detail-h5-withdraw",
     number: 3,
     kind: "规则",

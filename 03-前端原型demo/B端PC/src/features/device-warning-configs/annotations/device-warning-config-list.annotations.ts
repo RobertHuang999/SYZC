@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
   {
     id: "device-warning-config-page",
+    documentRefs: {
+      prd: { section: "设备预警配置主PRD", match: "设备预警配置主 PRD 全文", element: "row" },
+      rules: { section: "设备预警配置 业务规则规格", match: "预警配置 → 设备预警配置", element: "row" },
+    },
     targetId: "device-warning-config-page",
     number: 1,
     kind: "页面",
@@ -42,6 +46,10 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-filter",
+    documentRefs: {
+      prd: { section: "设备预警配置主PRD", match: "右上角操作区：【+ 新增设备预警规则】主按钮、【导出】按钮。", element: "text" },
+      rules: { section: "设备预警配置 业务规则规格", match: "预警配置 → 设备预警配置", element: "row" },
+    },
     targetId: "device-warning-config-filter",
     number: 2,
     kind: "交互",
@@ -77,6 +85,10 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-table",
+    documentRefs: {
+      fields: { section: "设备预警配置字段清单", match: "关联设备范围", element: "row" },
+      rules: { section: "设备预警配置 业务规则规格", match: "关联设备非空校验", element: "row" },
+    },
     targetId: "device-warning-config-table",
     number: 3,
     kind: "字段",
@@ -108,6 +120,10 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-row-actions",
+    documentRefs: {
+      rules: { section: "四、动作能力与流转控制矩阵", match: "列表/详情行操作【停用】", element: "row" },
+      prd: { section: "5.3 动作能力控制矩阵", match: "✅ (保持停用)", element: "row" },
+    },
     targetId: "device-warning-config-table",
     number: 4,
     kind: "规则",
@@ -132,6 +148,9 @@ export const deviceWarningConfigListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "device-warning-config-list-mock-crosswalk",
+    documentRefs: {
+      rules: { section: "【恢复自动结案能力矩阵白名单】(DEV-R15c)" },
+    },
     targetId: "device-warning-config-table",
     number: 5,
     kind: "规则",

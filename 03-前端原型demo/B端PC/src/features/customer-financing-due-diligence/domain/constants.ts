@@ -54,7 +54,7 @@ export const DILIGENCE_STATUS_CONFIG: Record<
     badgeClass:
       "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-300",
     dotClass: "bg-blue-500",
-    description: "已调用智风控 OpenAPI，正在等待大数据模型计算回调或人工复核",
+    description: "已调用智风控接口，正在等待大数据模型计算回调或人工复核",
   },
   DILIGENCE_SUCCESS: {
     label: "受理成功",
@@ -282,7 +282,7 @@ export const INITIAL_DUE_DILIGENCE_MOCK: CustomerFinancingDueDiligence[] = [
     assignedAt: "2026-11-09 11:00:24",
     processedAt: "2026-11-11 10:20:30",
     riskScore: 79,
-    riskDetailSummary: "智风控 OpenAPI 异步计算中，司法涉诉与失信记录扫描正常，正在聚合海关报关与上下游回款流向数据",
+    riskDetailSummary: "智风控接口 异步计算中，司法涉诉与失信记录扫描正常，正在聚合海关报关与上下游回款流向数据",
     inventoryDetails: [
       {
         id: "INV-003",
@@ -324,7 +324,7 @@ export const INITIAL_DUE_DILIGENCE_MOCK: CustomerFinancingDueDiligence[] = [
         action: "发起尽调",
         operator: "李巡检",
         time: "2026-11-11 10:20:30",
-        detail: "专员核对主体三要素齐全，发起第三方智风控 OpenAPI 调用，任务状态推进至【受理中】",
+        detail: "专员核对主体三要素齐全，发起第三方智风控接口 调用，任务状态推进至【受理中】",
       },
     ],
   },
@@ -616,7 +616,7 @@ export const INITIAL_DUE_DILIGENCE_MOCK: CustomerFinancingDueDiligence[] = [
         action: "发起尽调",
         operator: "王核查",
         time: "2026-11-07 14:20:00",
-        detail: "发起智风控 OpenAPI 接口核验",
+        detail: "发起智风控接口 接口核验",
       },
       {
         id: "LOG-013",

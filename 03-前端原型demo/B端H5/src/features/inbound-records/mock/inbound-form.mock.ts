@@ -3,6 +3,8 @@ import { partnerArchivesMock } from "@prototype/B端PC/src/features/partner-arch
 
 import { resolveContactPhoneVerified } from "@prototype/B端PC/src/features/partner-archives/lib/contact-phone-verify"
 import type { ContactPhoneVerifyStatus } from "@prototype/B端PC/src/features/partner-archives/domain/types"
+import { resolvePartnerIdentityDisplay } from "@prototype/B端PC/src/features/partner-archives/lib/partner-archive-rules"
+import { maskLoginPhone } from "@prototype/B端PC/src/features/partner-archives/lib/detail-utils"
 
 export type OwnerSearchRecord = {
   id: string
@@ -12,6 +14,7 @@ export type OwnerSearchRecord = {
   ownerIdentifier: string
   contactPhone?: string
   idCardNo?: string
+  idCardMasked?: string
   partnerId?: string
   contactPhoneVerified?: ContactPhoneVerifyStatus
 }
@@ -31,15 +34,20 @@ function buildPartnerOwnerRecords(): OwnerSearchRecord[] {
         ownerType: isEnterprise ? "企业货主" : "个人货主",
         name: partner.name,
         ownerIdentifier: isEnterprise ? partner.idNumber : partner.contactPhone,
-        identifierMasked: partner.idNumberMasked,
+        identifierMasked: isEnterprise
+          ? resolvePartnerIdentityDisplay(partner)
+          : maskLoginPhone(partner.contactPhone),
         contactPhone: partner.contactPhone,
         idCardNo: isEnterprise ? undefined : partner.idNumber,
+        idCardMasked: isEnterprise
+          ? undefined
+          : resolvePartnerIdentityDisplay(partner),
         contactPhoneVerified: resolveContactPhoneVerified(partner),
       }
     })
 }
 
-function getOwnerSearchCatalog(): OwnerSearchRecord[] {
+export function getOwnerSearchCatalog(): OwnerSearchRecord[] {
   const partnerNames = new Set(buildPartnerOwnerRecords().map((r) => r.name))
   const legacy = OWNER_SEARCH_RECORDS.filter((r) => !partnerNames.has(r.name))
   return [...buildPartnerOwnerRecords(), ...legacy]
@@ -58,7 +66,8 @@ export const OWNER_SEARCH_RECORDS: OwnerSearchRecord[] = [
     identifierMasked: "185****7112",
     ownerIdentifier: "18512347112",
     contactPhone: "18512347112",
-    idCardNo: "420101********3328",
+    idCardNo: "420101199003073328",
+    idCardMasked: "420101****3328",
   },
   {
     id: "owner-zy",
@@ -67,7 +76,8 @@ export const OWNER_SEARCH_RECORDS: OwnerSearchRecord[] = [
     identifierMasked: "133****0001",
     ownerIdentifier: "13308000001",
     contactPhone: "13308000001",
-    idCardNo: "420101****3328",
+    idCardNo: "510104198510123328",
+    idCardMasked: "510104****3328",
   },
   {
     id: "owner-li-ai",
@@ -76,23 +86,50 @@ export const OWNER_SEARCH_RECORDS: OwnerSearchRecord[] = [
     identifierMasked: "133****0027",
     ownerIdentifier: "13308000027",
     contactPhone: "13308000027",
-    idCardNo: "510101********1234",
+    idCardNo: "510101199208151234",
+    idCardMasked: "510101****1234",
+  },
+  {
+    id: "owner-wh",
+    ownerType: "个人货主",
+    name: "王华",
+    identifierMasked: "139****2345",
+    ownerIdentifier: "13910012345",
+    contactPhone: "13910012345",
+    idCardNo: "110101198606201518",
+    idCardMasked: "110101****1518",
+  },
+  {
+    id: "owner-hx",
+    ownerType: "企业货主",
+    name: "四川华西大宗商品供应链管理有限公司",
+    identifierMasked: "915101**********1X",
+    ownerIdentifier: "91510100MA6289B51X",
+    contactPhone: "028-87654321",
   },
   {
     id: "owner-sy",
     ownerType: "企业货主",
     name: "四川享宇科技有限公司",
     identifierMasked: "915100**********1A",
-    ownerIdentifier: "91510000000000001A",
-    contactPhone: "02888888888",
+    ownerIdentifier: "91510000MA6288881A",
+    contactPhone: "028-85118888",
   },
   {
-    id: "owner-li-supervise",
+    id: "owner-dx",
     ownerType: "企业货主",
-    name: "李一监督",
+    name: "阜阳市大象粮油产运有限公司",
+    identifierMasked: "913412**********3F",
+    ownerIdentifier: "91341202MA2U0JHJ3F",
+    contactPhone: "0558-2233445",
+  },
+  {
+    id: "owner-zj",
+    ownerType: "企业货主",
+    name: "上海中建物资贸易有限公司",
     identifierMasked: "913100**********2B",
-    ownerIdentifier: "91310000000000002B",
-    contactPhone: "02166666666",
+    ownerIdentifier: "91310000MA1FL2882B",
+    contactPhone: "021-68886666",
   },
 ]
 
@@ -115,6 +152,29 @@ export function findOwnerSearchRecordByPartnerId(
 ): OwnerSearchRecord | undefined {
   if (!partnerId) return undefined
   return getOwnerSearchCatalog().find((record) => record.partnerId === partnerId)
+}
+
+export function findOwnerSearchRecordByIdentifier(
+  identifier: string
+): OwnerSearchRecord | undefined {
+  const key = identifier.trim()
+  if (!key) return undefined
+  return getOwnerSearchCatalog().find(
+    (record) => record.ownerIdentifier === key || record.contactPhone === key
+  )
+}
+
+export function resolveOwnerSearchRecord(input: {
+  ownerType?: OwnerType | ""
+  ownerName?: string
+  ownerIdentifier?: string
+}): OwnerSearchRecord | undefined {
+  const byName = findOwnerSearchRecord(
+    input.ownerType ?? "",
+    input.ownerName ?? ""
+  )
+  if (byName) return byName
+  return findOwnerSearchRecordByIdentifier(input.ownerIdentifier ?? "")
 }
 
 export function filterOwnerSearchRecords(
@@ -294,9 +354,13 @@ export function getRelatedOrdersByType(
 }
 
 export const EXISTING_OWNERS = new Set([
+  "四川华西大宗商品供应链管理有限公司",
   "四川享宇科技有限公司",
-  "李一监督",
-  "张一",
+  "阜阳市大象粮油产运有限公司",
+  "上海中建物资贸易有限公司",
   "原原李",
+  "张一",
+  "李爱",
+  "王华",
 ])
 

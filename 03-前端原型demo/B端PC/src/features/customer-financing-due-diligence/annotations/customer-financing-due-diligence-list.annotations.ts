@@ -3,18 +3,32 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const customerFinancingDueDiligenceListAnnotations: PrototypeAnnotation[] = [
   {
     id: "diligence-page",
+    documentRefs: {
+      prd: { section: "客户融资尽调办理主PRD", match: "尽调专员本人", element: "row" },
+      rules: { section: "客户融资尽调办理业务规则规格", match: "尽调完成标签页", element: "row" },
+    },
     targetId: "diligence-page",
     number: 1,
     kind: "页面",
     title: "客户融资尽调办理台账定位与风控执行中枢",
     content:
       "本页面为融资监管/融资管理第2节点风控执行处理中枢，承接上游【客户融资需求线索】分流的“需要尽调=是”任务件，解耦提供【待尽调】与【尽调完成】双标签页视图。赋能尽调专员推进主体资质复核、同组织任务转交、第三方智风控模型异步调用、线下实地核验报告归档，以及审批通过后向合作资方机构的派发流转与异常单据驳回入池全闭环（遵循R01~R08）。",
-    documentRefs: {
-      prd: { section: "1. 业务背景与核心痛点", match: "模块定位", element: "text" },
-      fields: { section: "一、业务字段", match: "尽调状态", element: "row" },
-      rules: { section: "一、对象定位与单据层级", match: "单据层级", element: "text" },
-    },
     details: [
+      {
+        title: "业务流转",
+        items: [
+          {
+            label: "流转图",
+            content: `flowchart TD
+    A["线索分配跟进（需要尽调 = 是）"] --> B["待尽调"]
+    B -->|受理| C["受理中"]
+    C -->|尽调通过| D["受理成功<br/>转授信办理"]
+    C -->|尽调不通过| E["受理失败"]
+    E --> F["申请失败"]
+    D --> G["授信已受理"]`,
+          },
+        ],
+      },
       {
         title: "核心业务边界",
         items: [
@@ -41,7 +55,7 @@ export const customerFinancingDueDiligenceListAnnotations: PrototypeAnnotation[]
     kind: "交互",
     title: "双标签页解耦架构与【客户尽调记录】操作",
     content:
-      "解耦划分【待尽调】与【尽调完成】双标签页，待尽调角标实时显示未结案待办数字。对齐现网布局，在标签栏右侧提供【客户尽调记录】操作入口，点击可调阅全量历史归档的客户尽调台账。",
+      "解耦划分【待尽调】与【尽调完成】双标签页，标签页只展示分类名称、不显示待办数字角标。对齐现网布局，在筛选区右上角提供【客户尽调记录】操作入口，点击可调阅全量历史归档的客户尽调台账。",
     documentRefs: {
       prd: { section: "5.1 客户融资尽调办理主列表页（P-RZ-002）", match: "顶部双标签页切换", element: "text" },
       fields: { section: "四、展示规则与关联约束", match: "双标签页筛选状态联动", element: "text" },
@@ -161,5 +175,39 @@ export const customerFinancingDueDiligenceListAnnotations: PrototypeAnnotation[]
       fields: { section: "一、业务字段", match: "尽调报告附件", element: "row" },
       rules: { section: "七、核心业务规则清单", match: "【尽调报告附件齐备与资方分配规则】(R04)", element: "text" },
     },
+  },
+  {
+    id: "dd-list-fields",
+    documentRefs: {
+      fields: { section: "一、业务字段", match: "意向融资期数", element: "row" },
+      rules: { section: "【金额与期数口径隔离与透传规则】(R07)", match: "尽调阶段严格继承上游线索的意向融资金额与意向融资期数，只读展示，不可由尽调专员修", element: "text" },
+    },
+    targetId: "diligence-table",
+    number: 99,
+    kind: "字段",
+    title: "列表字段字典",
+    content: "列表展示产品、申请人、抵质押物、意向金额与期数、授信/贷款回写值、尽调状态与需要尽调标记。",
+    details: [
+      {
+        title: "字段清单对照表",
+        items: [
+          {
+            label: "字段",
+            content: `| 列名称 | 控件 | 必填 | 取值范围与格式 | 展示规则 |
+| :--- | :--- | :---: | :--- | :--- |
+| **产品名称** | 文本 | 系统带出 | 继承线索 | 单行 |
+| **申请人名称** | 文本 | 系统带出 | 企业全称 / 个人姓名 | 综合搜索 |
+| **抵/质押物** | 标签 | 系统带出 | 存货 / 仓单 | 仓单可穿透 |
+| **意向融资金额** | 数值 | 系统带出 | 元，4 位小数 | 右对齐 |
+| **意向融资期数** | 数值 | 系统带出 | 正整数 | 单行 |
+| **授信金额 / 期数** | 数值 | 条件回写 | 元，4 位小数；期数 | 未授信「—」 |
+| **贷款金额 / 期数** | 数值 | 条件回写 | 元，4 位小数；期数 | 未放款「—」 |
+| **融资状态** | 状态标签 | 系统维护 | 待尽调 / 受理中 / 受理成功 / 受理失败 / 申请失败 | 彩色标签 |
+| **需要尽调** | 徽标 | 系统带出 | 固定「是」 | 单行 |
+| **操作** | 行操作按钮 | — | 详情 / 转交 / 智风控 / 通过 / 驳回 | 按状态渲染 |`,
+          },
+        ],
+      },
+    ],
   },
 ]

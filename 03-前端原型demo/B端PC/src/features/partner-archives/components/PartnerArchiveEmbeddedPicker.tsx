@@ -12,6 +12,7 @@ import {
   PartnerArchiveSelector,
   type PartnerSelectorValue,
 } from "./PartnerArchiveSelector"
+import type { SubjectType } from "../domain/types"
 import { PartnerQuickCreateSheet } from "./PartnerQuickCreateSheet"
 import { quickCreateSceneForArchiveMenu } from "../lib/quick-create-scene-for-menu"
 import {
@@ -27,6 +28,8 @@ type PartnerArchiveEmbeddedPickerProps = {
   required?: boolean
   value?: string
   selection?: PartnerSelectorValue | null
+  /** 企业 / 个人过滤，与入库货主搜索框一致 */
+  subjectType?: SubjectType
   onChange: (payload: PartnerSelectorValue | null) => void
   enableQuickCreate?: boolean
   /** 覆盖默认 archiveMenu 说明（如出库货主仅选已有档案） */
@@ -75,6 +78,7 @@ export function PartnerArchiveEmbeddedPicker({
   required,
   value,
   selection,
+  subjectType,
   onChange,
   enableQuickCreate = true,
   userHint,
@@ -116,8 +120,9 @@ export function PartnerArchiveEmbeddedPicker({
         <PartnerArchiveSelector
           archiveMenu={archiveMenu}
           value={value}
+          subjectType={subjectType}
           onChange={onChange}
-          placeholder={`请选择${fieldLabel}`}
+          placeholder="请输入主体名称或联系手机搜索"
         />
       </div>
       {quickCreateButton}

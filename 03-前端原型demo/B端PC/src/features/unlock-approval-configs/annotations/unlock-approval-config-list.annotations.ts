@@ -3,6 +3,10 @@ import type { PrototypeAnnotation } from "@/shared/annotations/PrototypeAnnotati
 export const unlockApprovalConfigListAnnotations: PrototypeAnnotation[] = [
   {
     id: "unlock-approval-config-page",
+    documentRefs: {
+      prd: { section: "开锁审批配置 主PRD", match: "开锁审批配置业务规则规格", element: "row" },
+      rules: { section: "开锁审批配置 业务规则规格", match: "配置管理 → 业务流程管理 → 开锁审批", element: "row" },
+    },
     targetId: "unlock-approval-config-page",
     number: 1,
     kind: "页面",
@@ -69,6 +73,10 @@ export const unlockApprovalConfigListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "unlock-approval-config-filter",
+    documentRefs: {
+      prd: { section: "开锁审批配置 主PRD", match: "配置名称（文本输入，支持模糊检索）；", element: "text" },
+      rules: { section: "3.1 状态定义" },
+    },
     targetId: "unlock-approval-config-filter",
     number: 2,
     kind: "交互",
@@ -110,6 +118,10 @@ export const unlockApprovalConfigListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "unlock-approval-config-table",
+    documentRefs: {
+      fields: { section: "三、状态、版本与审计字段", match: "仅已停用状态下展示", element: "row" },
+      rules: { section: "【配置版本递增与不可变快照】(R03)" },
+    },
     targetId: "unlock-approval-config-table",
     number: 3,
     kind: "字段",
@@ -145,6 +157,24 @@ export const unlockApprovalConfigListAnnotations: PrototypeAnnotation[] = [
         ],
       },
       {
+        title: "列表字段字典",
+        items: [
+          {
+            label: "字段清单对照表",
+            content: `| 列名称 | 控件类型 | 必填 | 取值范围与格式 | 展示规则 | 说明 |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **配置名称** | 链接 | 必填 | 最多 50 个字符 | 可点进详情 | — |
+| **适用设备数** | 只读数值 | 必填 | 整数 | 单行 | 悬停看设备清单摘要 |
+| **审批方式** | 文本 | 必填 | 固定「多节点审批」 | 单行 | — |
+| **审批节点数** | 只读数值 | 必填 | 整数 ≥1 | 单行 | — |
+| **审批超时** | 只读文本 | 必填 | 小时数 | 单行 | — |
+| **状态** | 状态标签 | 系统维护 | 启用中 / 已停用 | 彩色标签 | 已删除不展示 |
+| **更新人 / 更新时间** | 双行复合 | 系统记录 | 姓名 + 时间 | 两行 | — |
+| **操作** | 行操作按钮 | — | 详情 / 编辑 / 启停用 / 删除 | 按状态渲染 | 删除需二次确认 |`,
+          },
+        ],
+      },
+      {
         title: "审批方式固定说明",
         items: [
           {
@@ -158,6 +188,10 @@ export const unlockApprovalConfigListAnnotations: PrototypeAnnotation[] = [
   },
   {
     id: "unlock-approval-config-row-actions",
+    documentRefs: {
+      prd: { section: "5.3 动作能力矩阵", match: "查看列表 / 详情", element: "row" },
+      rules: { section: "三、单据状态机与生命周期流转", match: "### 3.2 状态机流转图", element: "text" },
+    },
     targetId: "unlock-approval-config-table",
     number: 4,
     kind: "交互",

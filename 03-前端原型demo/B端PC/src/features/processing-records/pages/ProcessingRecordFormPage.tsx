@@ -43,6 +43,8 @@ import {
 } from "@/shared/annotations/PrototypeAnnotationLayer"
 import { processingRecordDocuments } from "../documents/processing-record-documents"
 import { FormPageHeader } from "@/shared/components/FormPageHeader"
+import { FormPageStickyFooter } from "@/shared/components/FormPageStickyFooter"
+import { SearchableNameSelect } from "@/shared/components/SearchableNameSelect"
 import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { processingRecordFormAnnotations } from "../annotations/processing-record-form.annotations"
 import { ProcessingGoodsPickerModal } from "../components/ProcessingGoodsPickerModal"
@@ -420,7 +422,8 @@ export function ProcessingRecordFormPage() {
       documents={processingRecordDocuments}
       annotations={processingRecordFormAnnotations}
     >
-      <div className="space-y-4 p-6 pb-24">
+      <div className="flex min-h-full flex-col">
+      <div className="flex-1 space-y-4 p-6 pb-6">
         {/* 顶部操作条 */}
         <PrototypeAnnotationTarget annotationIds={["processing-form-page"]}>
           <FormPageHeader
@@ -508,23 +511,26 @@ export function ProcessingRecordFormPage() {
                     <label className="text-xs font-medium text-foreground">
                       <span className="text-rose-500 mr-0.5">*</span>货主名称
                     </label>
-                    <Select
-                      value={formState.ownerId}
-                      onValueChange={(val) => val && handleOwnerChange(val)}
-                    >
-                      <SelectTrigger className="h-[34px] text-xs">
-                        <SelectValue placeholder="请选择货主" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {KNOWN_OWNERS_MOCK.filter(
-                          (o) => o.type === formState.ownerType
-                        ).map((o) => (
-                          <SelectItem key={o.id} value={o.id}>
-                            {o.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <SearchableNameSelect
+                      valueId={formState.ownerId}
+                      valueName={
+                        KNOWN_OWNERS_MOCK.find((o) => o.id === formState.ownerId)?.name ?? ""
+                      }
+                      placeholder="请输入主体名称或联系手机搜索"
+                      catalogTitle="系统货主档案库候选"
+                      items={KNOWN_OWNERS_MOCK.filter(
+                        (o) => o.type === formState.ownerType,
+                      ).map((o) => ({
+                        id: o.id,
+                        name: o.name,
+                        kind: o.type === "PERSONAL" ? "personal" : "enterprise",
+                        description:
+                          o.type === "PERSONAL"
+                            ? `手机:${o.identity}`
+                            : `税号:${o.identity}`,
+                      }))}
+                      onPick={(item) => handleOwnerChange(item.id)}
+                    />
                   </div>
 
                   {/* 货主标识 (自动带出只读) */}
@@ -1103,31 +1109,26 @@ export function ProcessingRecordFormPage() {
           </DialogContent>
         </Dialog>
 
-        <div className="fixed bottom-0 left-0 right-0 z-30 border-t bg-card px-6 py-3">
-          <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4">
-            <div className="text-xs text-muted-foreground">
-              提交后立即锁定投入库存并进入审批中心
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-9 px-4 text-xs"
-                onClick={handleBack}
-              >
-                取消
-              </Button>
-              <Button
-                size="sm"
-                className="h-9 gap-1.5 px-5 text-xs"
-                onClick={handleSubmit}
-              >
-                <Send className="h-3.5 w-3.5" />
-                提交审核
-              </Button>
-            </div>
-          </div>
-        </div>
+      </div>
+
+        <FormPageStickyFooter left="提交后立即锁定投入库存并进入审批中心">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 px-4 text-xs"
+            onClick={handleBack}
+          >
+            取消
+          </Button>
+          <Button
+            size="sm"
+            className="h-9 gap-1.5 px-5 text-xs"
+            onClick={handleSubmit}
+          >
+            <Send className="h-3.5 w-3.5" />
+            提交审核
+          </Button>
+        </FormPageStickyFooter>
       </div>
     </PrototypeAnnotationProvider>
   )

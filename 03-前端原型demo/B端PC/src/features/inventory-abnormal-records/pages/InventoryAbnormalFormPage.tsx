@@ -30,6 +30,7 @@ import {
 import { DetailSection, DetailField } from "@/shared/components/DetailSection"
 import { abnormalRecordDocuments } from "../documents/abnormal-record-documents"
 import { FormPageHeader } from "@/shared/components/FormPageHeader"
+import { FormPageStickyFooter } from "@/shared/components/FormPageStickyFooter"
 import { PrototypeSpecCallout } from "@/components/form/PrototypeSpecCallout"
 import { abnormalRecordFormAnnotations } from "../annotations/abnormal-record-form.annotations"
 import { AbnormalGoodsPickerModal } from "../components/AbnormalGoodsPickerModal"
@@ -175,7 +176,8 @@ export function InventoryAbnormalFormPage() {
       documents={abnormalRecordDocuments}
       annotations={abnormalRecordFormAnnotations}
     >
-      <div className="min-h-[calc(100vh-64px)] p-6 pb-24 font-sans">
+      <div className="flex min-h-full flex-col font-sans">
+      <div className="flex-1 space-y-6 p-6 pb-6">
         {/* 顶部标题区 */}
         <FormPageHeader
           title="新增异动"
@@ -502,39 +504,49 @@ export function InventoryAbnormalFormPage() {
           </PrototypeAnnotationTarget>
         </div>
 
-        {/* 底部固定操作栏 */}
-        <div className="fixed bottom-0 left-0 right-0 z-30 flex items-center justify-between border-t border-slate-200 bg-white/95 px-8 py-3 shadow-lg backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/95">
-          <div className="flex items-center gap-3 text-xs text-slate-500">
-            <span>当前货位：<strong>{selectedStock.warehouseName}-{selectedStock.storeroomName}</strong></span>
-            <span>•</span>
-            <span>期初数量：{selectedStock.initialQty} {selectedStock.unit}</span>
-            <span>•</span>
-            <span>异动前可用：{selectedStock.availableQty} {selectedStock.unit}</span>
-          </div>
+      </div>
 
-          <div className="flex items-center gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleReset}
-              className="h-8 text-xs cursor-pointer"
-            >
-              <RotateCcw className="mr-1.5 size-3.5" />
-              重置表单
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleSubmitClick}
-              disabled={diffResult.trend === "INVALID" || diffResult.trend === "EQUAL"}
-              className="h-8 text-xs font-semibold px-4 cursor-pointer"
-            >
-              <Send className="mr-1.5 size-3.5" />
-              提交审核
-            </Button>
-          </div>
-        </div>
+        <FormPageStickyFooter
+          left={
+            <div className="flex flex-wrap items-center gap-3">
+              <span>
+                当前货位：
+                <strong className="text-foreground">
+                  {selectedStock.warehouseName}-{selectedStock.storeroomName}
+                </strong>
+              </span>
+              <span>•</span>
+              <span>
+                期初数量：{selectedStock.initialQty} {selectedStock.unit}
+              </span>
+              <span>•</span>
+              <span>
+                异动前可用：{selectedStock.availableQty} {selectedStock.unit}
+              </span>
+            </div>
+          }
+        >
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleReset}
+            className="h-8 text-xs cursor-pointer"
+          >
+            <RotateCcw className="mr-1.5 size-3.5" />
+            重置表单
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleSubmitClick}
+            disabled={diffResult.trend === "INVALID" || diffResult.trend === "EQUAL"}
+            className="h-8 text-xs font-semibold px-4 cursor-pointer"
+          >
+            <Send className="mr-1.5 size-3.5" />
+            提交审核
+          </Button>
+        </FormPageStickyFooter>
 
         {/* 更换存货弹窗 */}
         <AbnormalGoodsPickerModal

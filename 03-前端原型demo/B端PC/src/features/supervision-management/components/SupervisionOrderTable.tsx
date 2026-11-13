@@ -469,8 +469,8 @@ export function SupervisionOrderTable({
                   >
                     <TableRowActionPanel
                       actions={actions}
-                      maxInline={isReleased ? 2 : 6}
-                      fixedCols={isReleased ? 2 : 3}
+                      maxInline={isReleased ? 2 : 3}
+                      fixedCols={3}
                       overflowColumns={2}
                     />
                   </TableCell>

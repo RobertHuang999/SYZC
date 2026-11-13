@@ -83,6 +83,18 @@ import {
   partnerArchiveH5ListAnnotations,
 } from "@/features/partner-archives/annotations/partner-archive-h5.annotations"
 import { getPartnerArchiveDocuments } from "@/features/partner-archives/documents/partner-archive-documents"
+import {
+  rejectPoolH5DetailAnnotations,
+  rejectPoolH5ListAnnotations,
+} from "@/features/reject-pool/annotations/reject-pool-h5.annotations"
+import { rejectPoolH5Documents } from "@/features/reject-pool/documents/reject-pool-h5-documents"
+import {
+  onlinePledgeH5DetailAnnotations,
+  onlinePledgeH5ListAnnotations,
+} from "@/features/online-pledge/annotations/online-pledge-h5.annotations"
+import { onlinePledgeH5Documents } from "@/features/online-pledge/documents/online-pledge-h5-documents"
+import { supervisionHandlingH5Annotations } from "@/features/supervision-handling/annotations/supervision-handling-h5.annotations"
+import { supervisionHandlingH5Documents } from "@/features/supervision-handling/documents/supervision-handling-h5-documents"
 import { parsePartnerArchiveMenuFromH5ListPath } from "@prototype/shared/partner-archives/partner-archive-domain"
 import type { PartnerArchiveMenuLabel } from "@prototype/shared/partner-archives/partner-archive-routes"
 import {
@@ -181,6 +193,36 @@ export function AppAnnotationWrapper({ children }: { children: ReactNode }) {
     pageTitle = "开锁审批 · 移动端交互与 PRD 标注"
     currentAnnotations = unlockApplyAuditH5ListAnnotations
     currentDocuments = unlockApplyAuditH5Documents
+  } else if (
+    location.pathname.startsWith("/m/supervision/initiate") ||
+    location.pathname.startsWith("/m/supervision/records") ||
+    location.pathname === "/m/module/biz-init-pledge-biz"
+  ) {
+    pageTitle = "监管办理 · 移动端交互与 PRD 标注"
+    currentAnnotations = supervisionHandlingH5Annotations
+    currentDocuments = supervisionHandlingH5Documents
+  } else if (location.pathname.startsWith("/m/finance/online-pledge/")) {
+    pageTitle = "线上监管业务详情 · 移动端交互与 PRD 标注"
+    currentAnnotations = onlinePledgeH5DetailAnnotations
+    currentDocuments = onlinePledgeH5Documents
+  } else if (
+    location.pathname === "/m/finance/online-pledge" ||
+    location.pathname === "/m/module/ws-online-pledge-process"
+  ) {
+    pageTitle = "线上监管业务办理 · 移动端交互与 PRD 标注"
+    currentAnnotations = onlinePledgeH5ListAnnotations
+    currentDocuments = onlinePledgeH5Documents
+  } else if (location.pathname.startsWith("/m/finance/reject-pool/")) {
+    pageTitle = "被拒退回详情 · 移动端交互与 PRD 标注"
+    currentAnnotations = rejectPoolH5DetailAnnotations
+    currentDocuments = rejectPoolH5Documents
+  } else if (
+    location.pathname === "/m/finance/reject-pool" ||
+    location.pathname === "/m/module/ws-reject-pool"
+  ) {
+    pageTitle = "被拒退回记录池 · 移动端交互与 PRD 标注"
+    currentAnnotations = rejectPoolH5ListAnnotations
+    currentDocuments = rejectPoolH5Documents
   } else if (
     location.pathname.startsWith("/m/risk/mid-loan") ||
     location.pathname === "/m/module/ws-risk-in-loan"
